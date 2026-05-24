@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="192" height="192">
+  <defs>
+    <linearGradient id="synq-grad-outer" x1="6" y1="6" x2="94" y2="94" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#22d3ee" />
+      <stop offset="50%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#f43f5e" />
+    </linearGradient>
+    <linearGradient id="synq-grad-inner1" x1="32" y1="22" x2="68" y2="78" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#4f46e5" />
+    </linearGradient>
+    <linearGradient id="synq-grad-inner2" x1="68" y1="42" x2="32" y2="78" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#d946ef" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <linearGradient id="synq-grad-core" x1="45" y1="45" x2="55" y2="55" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#a5b4fc" />
+    </linearGradient>
+  </defs>
+
+  <!-- Black background matching the in-app icon container -->
+  <rect width="512" height="512" rx="120" fill="#000000" />
+  
+  <g transform="scale(5.12)">
+    <circle cx="50" cy="50" r="43" stroke="url(#synq-grad-outer)" stroke-width="4" stroke-dasharray="16 8 36 8" stroke-linecap="round" />
+    <path d="M32 36C32 28.2 38.2 22 46 22H54C61.8 22 68 28.2 68 36V44C68 51.8 61.8 58 54 58H32V78" stroke="url(#synq-grad-inner1)" stroke-width="6.5" stroke-linecap="round" />
+    <path d="M68 64C68 71.8 61.8 78 54 78H46C38.2 78 32 71.8 32 64V56C32 48.2 38.2 42 46 42H68" stroke="url(#synq-grad-inner2)" stroke-width="6.5" stroke-linecap="round" />
+    <circle cx="50" cy="50" r="5" fill="url(#synq-grad-core)" />
+  </g>
+</svg>

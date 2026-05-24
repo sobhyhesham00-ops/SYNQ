@@ -1,0 +1,38 @@
+{
+  "entities": {
+    "user": {
+      "title": "User",
+      "description": "User profile with avatar",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "avatarUrl": { "type": "string" },
+        "lastUpdated": { "type": "number" }
+      }
+    },
+    "todo": {
+      "title": "Todo",
+      "description": "Agent personal task",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "agentName": { "type": "string" },
+        "text": { "type": "string" },
+        "isCompleted": { "type": "boolean" },
+        "reminderTimeMs": { "type": "number" },
+        "createdAt": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": { "$ref": "#/entities/user" },
+      "description": "User profile information"
+    },
+    "todos/{todoId}": {
+      "schema": { "$ref": "#/entities/todo" },
+      "description": "Agent to-dos"
+    }
+  }
+}

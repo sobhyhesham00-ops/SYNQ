@@ -1,0 +1,323 @@
+export type Role = 'tl' | 'agent';
+
+export interface User {
+  id: string;
+  name: string;
+  role: Role;
+  password?: string; // Stored in plain text or simple local format as requested
+  avatarUrl?: string;
+}
+
+export interface Shift {
+  id: string;
+  label: string; // e.g. "07:00 - 16:00"
+  display: string; // e.g. "7 AM to 4 PM"
+}
+
+export interface SwapRequest {
+  id: string;
+  agentName: string;
+  type: 'swap';
+  date: string; // Shift date (YYYY-MM-DD)
+  shift: string; // Shift label
+  swapWithAgent: string; // Agent name to swap with
+  swapWithShift: string; // Swap target's shifts
+  status: 'pending_partner' | 'declined_by_partner' | 'pending' | 'approved' | 'declined';
+  partnerActionAt?: string;
+  createdAt: string;
+  notes?: string;
+  actionBy?: string; // TL Name
+  actionAt?: string;
+  ruleViolation?: boolean;
+  violationMessage?: string;
+}
+
+export interface AnnualRequest {
+  id: string;
+  agentName: string;
+  type: 'annual';
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD (exclusive or inclusive, we'll make it inclusive)
+  status: 'pending' | 'approved' | 'declined';
+  createdAt: string;
+  notes?: string;
+  actionBy?: string; // TL Name
+  actionAt?: string;
+  ruleViolation?: boolean;
+  violationMessage?: string;
+}
+
+export type SchedulingRequest = SwapRequest | AnnualRequest;
+
+export interface TodoItem {
+  id: string;
+  agentName: string;
+  text: string;
+  isCompleted: boolean;
+  reminderTimeMs: number | null;
+  createdAt: string;
+  notified?: boolean;
+}
+
+export interface Inquiry {
+  id: string;
+  agentName: string;
+  clinicName: string; // Mandatory dropdown value
+  phoneNumber?: string;
+  text: string;
+  photos: string[]; // Base64 data-urls or image urls
+  links: string[]; // URLs
+  createdAt: string; // ISO timestamp
+  status: 'submitted' | 'sent' | 'answered';
+  sentBy?: string;
+  sentAt?: string;
+  answer?: string;
+  answeredBy?: string;
+  answeredAt?: string;
+  seenByAgent?: boolean; // Tracking if agent acknowledged the notification
+  customerContacted?: 'not_contacted' | 'contacted' | 'attempted'; // Dropdown menu status for customer contact status
+}
+
+export interface TabbyTamaraRequest {
+  id: string;
+  agentName: string;
+  patientName: string;
+  fileNumber: string;
+  isOldCustomer: boolean;
+  idNumber?: string;
+  priceWithoutTax: string;
+  phoneNumber: string;
+  notes?: string;
+  createdAt: string;
+  status: 'not_confirmed' | 'confirmed';
+  customerContacted?: 'not_contacted' | 'contacted';
+  contactedAt?: string;
+  confirmedAt?: string;
+  confirmedBy?: string;
+  platform: 'tabby' | 'tamara' | 'one_time_payment';
+  clinicName: string;
+  paymentLink?: string;
+  agentContactNotes?: string;
+  paymentScreenshot?: string;
+}
+
+export interface TabbyTamaraComplaint {
+  id: string;
+  agentName: string;
+  patientName: string;
+  fileNumber: string;
+  isOldCustomer: boolean;
+  idNumber?: string;
+  imageUrl?: string;
+  phoneNumber: string;
+  complaintDetails: string;
+  createdAt: string;
+  status: 'pending_tl' | 'need_contact' | 'closed';
+  tlComment?: string;
+  tlHandledAt?: string;
+  tlHandledBy?: string;
+  customerContacted?: 'not_contacted' | 'contacted';
+  contactedAt?: string;
+  clinicName: string;
+}
+
+export interface ClientCommunicationRequest {
+  id: string;
+  callCenterAgentName: string;
+  clinicName: string;
+  phoneNumber: string;
+  language: 'Arabic' | 'English';
+  notes: string;
+  createdAt: string;
+  status: 'pending' | 'in_progress' | 'contacted';
+  openedBy?: string;
+  openedAt?: string;
+  handledBy?: string;
+  handledAt?: string;
+  handlingNotes?: string;
+  screenshot?: string; // Base64 screenshot
+}
+
+export interface CaseRecord {
+  id: string;
+  agentName: string;
+  patientName: string;
+  phoneNumber: string;
+  inquiry: string;
+  createdAt: string;
+  leadSource?: string;
+  screenshot?: string; // Base64 screenshot
+}
+
+export interface ScheduledShift {
+  id: string;
+  agentName: string;
+  date: string; // YYYY-MM-DD
+  shiftLabel: string; // e.g. "07:00 - 16:00"
+}
+
+export interface ActivityRecord {
+  id: string;
+  type: 'break' | 'lunch' | 'restroom' | 'meeting' | 'one_on_one' | 'personal' | 'day_off' | 'casual' | 'annual' | 'no_show';
+  startTime: string; // ISO string
+  endTime?: string; // ISO string
+  durationMinutes?: number; // Calculated upon ending
+}
+
+export interface TimeLog {
+  id: string;
+  agentName: string;
+  date: string; // YYYY-MM-DD
+  clockIn?: string; // ISO string
+  clockOut?: string; // ISO string
+  activities: ActivityRecord[];
+  status: 'working' | 'break' | 'lunch' | 'restroom' | 'meeting' | 'one_on_one' | 'personal' | 'clocked_out' | 'day_off' | 'casual' | 'annual' | 'no_show';
+}
+
+export interface AgentDirectoryRow {
+  id: string;
+  agentName: string;
+  data: Record<string, string>;
+}
+
+export const TEAM_LEADERS = [
+  'Hesham Sobhy',
+  'Shymaa Hassan',
+  'Shaymaa Hassan',
+  'Amira Hassan',
+  'AbdelAlem Essam AbdelAlem',
+  'Emad Sayed'
+];
+
+export const INITIAL_AGENTS = [
+  'AbdelRahman Al Sayed',
+  'AbduAllah Salah Fahmy',
+  'Ahmed Eid Abdelbaset Eid',
+  'Alaa Ashraf Farouk Darwish',
+  'Ammar Ismail Helmy',
+  'Amr Mohamed Farouk Mohamed',
+  'Anan Ashraf farouk Darwish',
+  'Asmaa Ahmed Mohamed Morsy',
+  'Bassant Alaa Eldin',
+  'Eslam Samy Ashour Ali',
+  'Fatma Essam Abdelalem',
+  'Hadeer Mohamed',
+  'Hager Nagy',
+  'Hussam Mahmoud Yousef Ahmed',
+  'Hussein Ashraf',
+  'Jodie El Sayed Mohamed Mohamed',
+  'Kenzi Reda Ahmed Ali',
+  'Kholoud Fakhry',
+  'Kotoz Sami Mohamed',
+  'Mahmoud Mohamed Gamal Eldin',
+  'Mai Ashraf Elsayed',
+  'Mariam Nagy Eraky',
+  'Mariam walaa Gamal Mostafa',
+  'Basma Rabea',
+  'Mennatallah Ahmed el sayed Salem',
+  'Moaz Salah Al-Nagar',
+  'Mohamed Alaa',
+  'Mohamed Amer Mohy El Din',
+  'Mostafa Mahmoud Hamed Abd El Ghany',
+  'Nouran Mohamed Saad Eldin Tawfik',
+  'Nouran Sharqawi',
+  'Salma Ahmed Mohamed Kamel',
+  'Yomna Mohamed Ahmed',
+  'Youssef Magdy Hamad Abo Al Ainen',
+  'Zeina Yasser Nessim Selim',
+  'Hana Alaa'
+];
+
+export const AGENT_LOBS: Record<string, string> = {
+  'AbdelRahman Al Sayed': 'Social Media',
+  'AbduAllah Salah Fahmy': 'Call Center',
+  'Ahmed Eid Abdelbaset Eid': 'Social Media',
+  'Alaa Ashraf Farouk Darwish': 'Social Media',
+  'Ammar Ismail Helmy': 'Social Media',
+  'Amr Mohamed Farouk Mohamed': 'Social Media',
+  'Shymaa Hassan': 'TL',
+  'Shaymaa Hassan': 'TL',
+  'Anan Ashraf farouk Darwish': 'Social Media',
+  'Asmaa Ahmed Mohamed Morsy': 'Call Center',
+  'Bassant Alaa Eldin': 'Call Center',
+  'AbdelAlem Essam AbdelAlem': 'TL',
+  'Eslam Samy Ashour Ali': 'Social Media',
+  'Fatma Essam Abdelalem': 'Call Center',
+  'Hadeer Mohamed': 'Call Center',
+  'Hager Nagy': 'Social Media',
+  'Hussam Mahmoud Yousef Ahmed': 'Social Media',
+  'Hussein Ashraf': 'Social Media',
+  'Jodie El Sayed Mohamed Mohamed': 'Call Center',
+  'Kenzi Reda Ahmed Ali': 'Social Media',
+  'Kholoud Fakhry': 'Call Center',
+  'Kotoz Sami Mohamed': 'Call Center',
+  'Mahmoud Mohamed Gamal Eldin': 'Social Media',
+  'Mai Ashraf Elsayed': 'Social Media',
+  'Mariam Nagy Eraky': 'Call Center',
+  'Mariam walaa Gamal Mostafa': 'Call Center',
+  'Basma Rabea': 'Quality',
+  'Mennatallah Ahmed el sayed Salem': 'Social Media',
+  'Moaz Salah Al-Nagar': 'Social Media',
+  'Mohamed Alaa': 'Social Media',
+  'Mohamed Amer Mohy El Din': 'Call Center',
+  'Mostafa Mahmoud Hamed Abd El Ghany': 'Social Media',
+  'Nouran Mohamed Saad Eldin Tawfik': 'Call Center',
+  'Nouran Sharqawi': 'Social Media',
+  'Salma Ahmed Mohamed Kamel': 'Social Media',
+  'Yomna Mohamed Ahmed': 'Social Media',
+  'Youssef Magdy Hamad Abo Al Ainen': 'Social Media',
+  'Zeina Yasser Nessim Selim': 'Social Media',
+  'Emad Sayed': 'TL',
+  'Hana Alaa': 'Social Media',
+  'Hesham Sobhy': 'TL'
+};
+
+export const SHIFTS: Shift[] = [
+  { id: 'morning', label: '07:00 - 16:00', display: '7 AM to 4 PM' },
+  { id: 'afternoon', label: '13:00 - 22:00', display: '1 PM to 10 PM' },
+  { id: 'night', label: '22:00 - 07:00', display: '10 PM to 7 AM' }
+];
+
+export interface SystemNotification {
+  id: string;
+  title: string;
+  message: string;
+  type: 'schedule' | 'compliance' | 'inquiry' | 'general' | 'incident' | 'absence' | 'feedback';
+  targetAgent: string; // specific agent name, or "all", or "tl"
+  createdAt: string; // ISO string
+  seenByUsers?: string[]; // list of names who have seen it
+}
+
+export interface FeedbackReply {
+  id: string;
+  senderName: string;
+  text: string;
+  attachment?: string; // base64 URL or empty
+  attachmentName?: string;
+  createdAt: string;
+}
+
+export interface TlFeedback {
+  id: string;
+  tlName: string; // selected team leader name
+  directorName: string; // "Amira Hassan"
+  notes: string;
+  attachment?: string; // base64 URL
+  attachmentName?: string;
+  createdAt: string;
+  replies: FeedbackReply[];
+  status: 'pending_reply' | 'replied' | 'completed';
+}
+
+export interface ChatMessage {
+  id: string;
+  senderName: string;
+  receiverName: string; // "all", "tl", or specific agent name
+  text: string;
+  attachment?: string; // base64 encoded
+  attachmentName?: string;
+  createdAt: string;
+  seen: boolean;
+  language: 'en' | 'ar';
+}
+

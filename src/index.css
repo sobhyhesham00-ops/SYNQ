@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* iOS Dark Mode Color Palette Overrides */
+  --color-slate-50: #ffffff;
+  --color-slate-100: #ffffff;
+  --color-slate-200: #ebebf5;
+  --color-slate-300: #d1d1d6;
+  --color-slate-400: #aeaeb2;
+  --color-slate-500: #8e8e93;
+  --color-slate-600: #636366;
+  --color-slate-700: #48484a;
+  --color-slate-800: #2c2c2e;
+  --color-slate-900: #1c1c1e;
+  --color-slate-950: #000000;
+
+  --color-indigo-300: #64d2ff;
+  --color-indigo-400: #409cff;
+  --color-indigo-500: #0a84ff;
+  --color-indigo-600: #007aff;
+  --color-indigo-700: #0060d1;
+  --color-indigo-800: #004aa6;
+  --color-indigo-900: rgba(10, 132, 255, 0.15);
+
+  --color-purple-500: #bf5af2;
+  --color-purple-400: #d484f5;
+  --color-purple-900: rgba(191, 90, 242, 0.15);
+
+  --color-emerald-500: #30d158;
+  --color-emerald-400: #32d74b;
+  --color-emerald-900: rgba(48, 209, 88, 0.15);
+
+  --color-rose-500: #ff453a;
+  --color-rose-400: #ff6961;
+  --color-rose-900: rgba(255, 69, 58, 0.15);
+
+  --color-amber-500: #ff9f0a;
+  --color-amber-400: #ffb340;
+  --color-amber-900: rgba(255, 159, 10, 0.15);
+
+  --color-cyan-500: #64d2ff;
+  --color-cyan-400: #87ddff;
+  --color-cyan-900: rgba(100, 210, 255, 0.15);
+
+  --color-pink-500: #ff375f;
+  --color-pink-400: #ff6080;
+  --color-pink-900: rgba(255, 55, 95, 0.15);
+
+  --color-blue-500: #0a84ff;
+  --color-blue-400: #409cff;
+  --color-blue-900: rgba(10, 132, 255, 0.15);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* iOS characteristic softer rounded corners */
+  --radius-xl: 14px;
+  --radius-2xl: 18px;
+  --radius-3xl: 22px;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    background-color: #000000;
+    color: #ffffff;
+    /* Remove the heavy space gradient for clean iOS dark mode background */
+    background-image: none;
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Glassmorphism utility scrollbars (iOS style invisible until scrolling) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* Elegant and colored dropdown menu overrides across all sections */
+select {
+  background-color: #1c1c1e !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0, 0.2) !important;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  appearance: none; /* remove default arrow to let SVG handle or just keep clean */
+}
+
+select:hover {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+select:focus {
+  border-color: #0a84ff !important;
+  box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.3) !important;
+  outline: none;
+}
+
+select option {
+  background-color: #2c2c2e !important;
+  color: #ffffff !important;
+  padding: 8px !important;
+}
+
+select optgroup {
+  background-color: #1c1c1e !important;
+  color: #8e8e93 !important;
+  font-weight: 600;
+}
+
