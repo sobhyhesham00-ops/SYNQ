@@ -111,7 +111,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
   // Firestore listener
   useEffect(() => {
     const messagesRef = collection(db, 'messages');
-    let q = query(messagesRef, orderBy('createdAt', 'desc'), limit(150));
+    let q = query(messagesRef, orderBy('createdAt', 'desc'), limit(1500));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const msgs = snapshot.docs.map(doc => ({
@@ -680,19 +680,19 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
               </div>
             </div>
           ) : (
-            filteredThreadMessages.map((msg, idx) => {
-              const isMine = msg.senderName === currentUser.name;
-              const isAr = msg.language === 'ar' || isArabic(msg.text);
-              const isTeamMsg = msg.receiverName.startsWith('team:');
-              const isTLMsg = msg.receiverName === 'tl';
-              
-              // Formatting dates nicely
-              const timeDisplay = new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-              const dateDisplay = new Date(msg.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' });
-
-              // Stagger consecutive messages from the same sender to look compact and organic
-              const prevMsg = filteredThreadMessages[idx - 1];
-              const isFirstInSequence = !prevMsg || prevMsg.senderName !== msg.senderName;
+                            filteredThreadMessages.map((msg, idx) => {
+                              const isMine = msg.senderName.toLowerCase() === currentUser.name.toLowerCase();
+                              const isAr = msg.language === 'ar' || isArabic(msg.text);
+                              const isTeamMsg = msg.receiverName.startsWith('team:');
+                              const isTLMsg = msg.receiverName === 'tl';
+                              
+                              // Formatting dates nicely
+                              const timeDisplay = new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                              const dateDisplay = new Date(msg.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' });
+                
+                              // Stagger consecutive messages from the same sender to look compact and organic
+                              const prevMsg = filteredThreadMessages[idx - 1];
+                              const isFirstInSequence = !prevMsg || prevMsg.senderName.toLowerCase() !== msg.senderName.toLowerCase();
 
               return (
                 <div key={msg.id} className="space-y-1">

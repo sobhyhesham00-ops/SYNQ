@@ -136,7 +136,11 @@ export const findAgentByUsername = (username: string, referenceList: string[] = 
   ]));
 
   const found = combinedList.find(refName => {
-    return getUsernameFromFullName(refName) === target;
+    const username = getUsernameFromFullName(refName);
+    const compactName = refName.toLowerCase().replace(/\s+/g, '');
+    const normalName = refName.toLowerCase();
+    
+    return username === target || compactName === target.replace(/\s+/g, '') || normalName === target;
   });
   return found || null;
 };

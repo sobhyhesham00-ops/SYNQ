@@ -1712,12 +1712,14 @@ export default function App() {
     const userRole = isQAName(correspondingFullName) ? 'qa' : isTLName(correspondingFullName) ? 'tl' : 'agent';
     const authenticatedUser: User = {
       id: `usr_${Date.now()}`,
-      name: formattedUsername,
+      name: correspondingFullName,
       role: userRole
     };
 
     setCurrentUser(authenticatedUser);
     setStorageItem('sched_current_user', authenticatedUser);
+
+    setDoc(doc(db, "users", correspondingFullName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()), authenticatedUser).catch(console.error);
 
     // If agent is new or not in the cached list, add using corresponding fullName or username
     if (userRole === 'agent' && !agentsList.some(a => a.toLowerCase() === formattedUsername || a.toLowerCase() === correspondingFullName.toLowerCase() || getUsernameFromFullName(a) === formattedUsername)) {
@@ -1735,7 +1737,7 @@ export default function App() {
       if (!active) {
         const newLog: TimeLog = {
           id: `clock_${Date.now()}`,
-          agentName: formattedUsername,
+          agentName: correspondingFullName,
           date: todayStr,
           clockIn: new Date().toISOString(),
           activities: [],
@@ -1787,7 +1789,7 @@ export default function App() {
     const userRole = isQAName(correspondingFullName) ? 'qa' : isTLName(correspondingFullName) ? 'tl' : 'agent';
     const authenticatedUser: User = {
       id: `usr_${Date.now()}`,
-      name: finalName,
+      name: correspondingFullName,
       role: userRole
     };
 
@@ -1795,7 +1797,7 @@ export default function App() {
     setStorageItem('sched_current_user', authenticatedUser);
     
     // Explicitly write user to Firestore for real-time presence across devices
-    setDoc(doc(db, "users", finalName), authenticatedUser).catch(e => console.error("User doc sync error:", e));
+    setDoc(doc(db, "users", correspondingFullName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()), authenticatedUser).catch(e => console.error("User doc sync error:", e));
 
     if (userRole === 'agent' && !agentsList.some(a => a.toLowerCase() === finalName || a.toLowerCase() === correspondingFullName.toLowerCase() || getUsernameFromFullName(a) === finalName)) {
       const updatedList = [...agentsList, correspondingFullName];
@@ -1812,7 +1814,7 @@ export default function App() {
       if (!active) {
         const newLog: TimeLog = {
           id: `clock_${Date.now()}`,
-          agentName: finalName,
+          agentName: correspondingFullName,
           date: todayStr,
           clockIn: new Date().toISOString(),
           activities: [],
@@ -2052,13 +2054,11 @@ export default function App() {
     // Sync to Firestore
     setDoc(doc(db, "scheduling_requests", newRequest.id), newRequest).catch(e => console.error("Request Write Error:", e));
 
-    const assignedTL = getAgentTL(name);
-    const targetNotifUser = assignedTL !== 'Unassigned' ? assignedTL : 'tl';
     addSystemNotification(
       `🔄 New Swap Request: ${formatAgentName(name)}`,
       `${formatAgentName(name)} requested a shift swap with ${formatAgentName(swapTargetAgent)} for ${swapDate}.`,
       'schedule',
-      targetNotifUser
+      'tl'
     );
 
     // Reset form
@@ -2109,13 +2109,11 @@ export default function App() {
     // Sync to Firestore
     setDoc(doc(db, "scheduling_requests", newRequest.id), newRequest).catch(e => console.error("Annual Req Write Error:", e));
 
-    const assignedTL = getAgentTL(name);
-    const targetNotifUser = assignedTL !== 'Unassigned' ? assignedTL : 'tl';
     addSystemNotification(
       `✈️ New Annual Leave: ${formatAgentName(name)}`,
       `${formatAgentName(name)} requested an annual leave from ${annualStart} to ${annualEnd}.`,
       'schedule',
-      targetNotifUser
+      'tl'
     );
 
     // Reset form
@@ -3079,9 +3077,7 @@ export default function App() {
     setTempPhotoUrlInput('');
 
     handleMentionsInText(inquiryText.trim(), 'Agent Inquiry Description', currentUser.name);
-    const assignedTL = getAgentTL(currentUser.name);
-    const targetNotifUser = assignedTL !== 'Unassigned' ? assignedTL : 'tl';
-    addSystemNotification('❓ New Inquiry Submitted', `${currentUser.name} has submitted a new inquiry for clinic: ${inquiryClinicName}.`, 'general', targetNotifUser);
+    addSystemNotification('❓ New Inquiry Submitted', `${currentUser.name} has submitted a new inquiry for clinic: ${inquiryClinicName}.`, 'general', 'tl');
 
     toast.success('Inquiry submitted successfully! Your Team Leaders have been notified.');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3275,9 +3271,7 @@ ${ttNotes}` : autoNote;
     setTtNotes('');
     setActiveScreenshot(null);
 
-    const assignedTL = getAgentTL(currentUser.name);
-    const targetNotifUser = assignedTL !== 'Unassigned' ? assignedTL : 'tl';
-    addSystemNotification(`💳 New ${ttPlatform.toUpperCase()} Request`, `${currentUser.name} submitted a new request for ${ttPatientName} (${ttPhoneNumber})`, 'general', targetNotifUser);
+    addSystemNotification(`💳 New ${ttPlatform.toUpperCase()} Request`, `${currentUser.name} submitted a new request for ${ttPatientName} (${ttPhoneNumber})`, 'general', 'tl');
 
     toast.success(`Your ${ttPlatform === 'tabby' ? 'Tabby' : ttPlatform === 'tamara' ? 'Tamara' : 'One Time Payment'} request has been submitted to the Team Leader for confirmation.`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3296,6 +3290,14 @@ ${ttNotes}` : autoNote;
         };
         // Sync to Firestore
         setDoc(doc(db, "tt_requests", r.id), updatedReq).catch(e => console.error("TT Confirm Error:", e));
+        
+        addSystemNotification(
+          `✅ Payment Link Ready`,
+          `Your ${r.platform} request for ${r.patientName} has been confirmed. Please contact the client now.`,
+          "general",
+          r.agentName
+        );
+
         return updatedReq;
       }
       return r;
@@ -3390,9 +3392,7 @@ ${ttNotes}` : autoNote;
     setTcComplaintDetails('');
     setActiveScreenshot(null);
 
-    const assignedTL = getAgentTL(currentUser.name);
-    const targetNotifUser = assignedTL !== 'Unassigned' ? assignedTL : 'tl';
-    addSystemNotification(`⚠️ New Complaint`, `${currentUser.name} submitted a new complaint for ${tcPatientName} (${tcPhoneNumber})`, 'general', targetNotifUser);
+    addSystemNotification(`⚠️ New Complaint`, `${currentUser.name} submitted a new complaint for ${tcPatientName} (${tcPhoneNumber})`, 'general', 'tl');
 
     toast.success(`Your complaint has been submitted to the Team Leader for handling.`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3830,6 +3830,14 @@ ${ttNotes}` : autoNote;
         };
         // Sync to Firestore
         setDoc(doc(db, "tt_complaints", c.id), updatedComplaint).catch(e => console.error("TT Complaint Comment Error:", e));
+        
+        addSystemNotification(
+          `📝 Complaint Evaluated`,
+          `Your complaint for ${c.patientName} has been evaluated by ${currentUser.name}. Please contact the client now.`,
+          "general",
+          c.agentName
+        );
+
         return updatedComplaint;
       }
       return c;
@@ -13219,96 +13227,119 @@ ${ttNotes}` : autoNote;
                       </div>
                     )}
 
-                    {agentDirectory.length === 0 ? (
-                      <div className="p-12 text-center rounded-3xl border border-dashed border-white/10 bg-slate-800/[0.02] space-y-3 shadow-xl">
-                        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto text-slate-500 shadow-inner">
-                          <UserCheck className="w-8 h-8 text-cyan-500" />
-                        </div>
-                        <h3 className="text-lg font-bold text-slate-100 tracking-wide">No Directory Data Available</h3>
-                        <p className="text-slate-400 text-sm max-w-sm mx-auto">The Headcount roster document has not been compiled or mapped yet. Please upload the data file or connect a Google Sheets link.</p>
-                      </div>
-                    ) : (
-                      <div className="bg-white/5 border border-cyan-500/20 backdrop-blur-xl rounded-3xl p-6 shadow-2xl overflow-x-auto">
-                        <table className="w-full text-left border-collapse min-w-[800px]">
-                          <thead>
-                            <tr className="bg-gradient-to-r from-cyan-950/40 to-slate-900 border-b border-cyan-500/20 text-[10px] font-black uppercase tracking-widest text-cyan-300 font-sans">
-                              <th className="px-5 py-4 rounded-tl-2xl whitespace-nowrap">Agent Name</th>
-                              {directoryHeaders.map((h, i) => (
-                                <th key={`${h}-${i}`} className="px-3 py-4 whitespace-nowrap">{h}</th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-white/10 text-xs text-slate-300 font-sans border-b border-white/10">
-                            {(() => {
-                              const filteredData = agentDirectory.filter(row => {
-                                if (!directorySearchQuery) return true;
-                                const q = directorySearchQuery.toLowerCase();
-                                if (row.agentName.toLowerCase().includes(q)) return true;
-                                return Object.values(row.data).some(val => typeof val === 'string' && val.toLowerCase().includes(q));
-                              });
-
-                              if (filteredData.length === 0) {
-                                return (
-                                  <tr>
-                                    <td colSpan={directoryHeaders.length + 1} className="py-12 text-center text-slate-500 font-sans">
-                                      <Search className="w-6 h-6 mx-auto mb-2 opacity-30" />
-                                      No agents match your search criteria.
-                                    </td>
-                                  </tr>
-                                );
+                    {(() => {
+                      const displayDirectory = [...agentDirectory];
+                      const dirNames = new Set(displayDirectory.map(r => r.agentName.toLowerCase()));
+                      agentsList.forEach(aName => {
+                        if (!dirNames.has(aName.toLowerCase())) {
+                           displayDirectory.push({
+                              id: 'syn_' + Math.random().toString(36),
+                              agentName: aName,
+                              data: {
+                                'Role': globalMeta[aName]?.roleType || '-',
+                                'Team Leader': globalMeta[aName]?.tlName || '-',
                               }
+                           });
+                        }
+                      });
+                      
+                      const displayHeaders = directoryHeaders.length > 0 ? directoryHeaders : ['Role', 'Team Leader'];
 
-                              return filteredData.map(row => (
-                                <tr key={row.id} className="hover:bg-cyan-500/10 transition-colors group">
-                                  <td className="px-5 py-4 whitespace-nowrap flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-cyan-600/30 to-blue-500/30 text-cyan-300 flex items-center justify-center font-black border border-cyan-500/40 shadow-inner">
-                                      {row.agentName.substring(0,2).toUpperCase()}
-                                    </div>
-                                    <span className="font-bold text-slate-100 font-display text-sm relative group-hover:text-cyan-400 transition-colors">
-                                      {row.agentName}
-                                      {globalMeta[row.agentName]?.roleType === 'TL' && (
-                                         <span className="absolute -top-3.5 left-0 px-1.5 py-0.5 rounded text-[8px] bg-amber-500/20 text-amber-400 border border-amber-500/30 font-black uppercase tracking-widest">Team Lead</span>
-                                      )}
-                                    </span>
-                                  </td>
-                                  {directoryHeaders.map((h, i) => {
-                                    const value = row.data[h] || '-';
-                                    const isEmail = h.toLowerCase().includes('email');
-                                    const isPhone = h.toLowerCase().includes('phone') || h.toLowerCase().includes('mobile') || h.toLowerCase().includes('number');
-                                    const isRole = h.toLowerCase().includes('role') || h.toLowerCase().includes('lob');
-                                    const isTL = h.toLowerCase().includes('tl') || h.toLowerCase().includes('leader') || h.toLowerCase().includes('manager');
-                                    
-                                    return (
-                                      <td key={`${h}-${i}`} className="px-3 py-4 text-slate-300 whitespace-nowrap">
-                                        {isEmail && value !== '-' ? (
-                                          <a href={`mailto:${value}`} className="text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1.5 transition-colors text-xs font-mono font-bold bg-cyan-500/10 px-2.5 py-1 rounded-lg w-max border border-cyan-500/20">
-                                            <Mail className="w-3 h-3" /> {value}
-                                          </a>
-                                        ) : isPhone && value !== '-' ? (
-                                          <a href={`tel:${value}`} className="text-emerald-400 hover:text-emerald-300 hover:underline flex items-center gap-1.5 transition-colors text-xs font-mono font-bold bg-emerald-500/10 px-2.5 py-1 rounded-lg w-max border border-emerald-500/20">
-                                            <Phone className="w-3 h-3" /> {value}
-                                          </a>
-                                        ) : isRole && value !== '-' ? (
-                                          <span className="bg-slate-800/80 text-slate-200 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-white/10 shadow-sm">
-                                            {value}
-                                          </span>
-                                        ) : isTL && value !== '-' ? (
-                                          <span className="text-amber-400/90 font-bold text-xs flex items-center gap-1.5">
-                                            <Shield className="w-3 h-3" /> {value}
-                                          </span>
-                                        ) : (
-                                          <span className="text-[13px] font-semibold text-slate-200">{value}</span>
-                                        )}
+                      if (displayDirectory.length === 0) {
+                        return (
+                          <div className="p-12 text-center rounded-3xl border border-dashed border-white/10 bg-slate-800/[0.02] space-y-3 shadow-xl">
+                            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto text-slate-500 shadow-inner">
+                              <UserCheck className="w-8 h-8 text-cyan-500" />
+                            </div>
+                            <h3 className="text-lg font-bold text-slate-100 tracking-wide">No Directory Data Available</h3>
+                            <p className="text-slate-400 text-sm max-w-sm mx-auto">The Headcount roster document has not been compiled or mapped yet.</p>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div className="bg-white/5 border border-cyan-500/20 backdrop-blur-xl rounded-3xl p-6 shadow-2xl overflow-x-auto">
+                          <table className="w-full text-left border-collapse min-w-[800px]">
+                            <thead>
+                              <tr className="bg-gradient-to-r from-cyan-950/40 to-slate-900 border-b border-cyan-500/20 text-[10px] font-black uppercase tracking-widest text-cyan-300 font-sans">
+                                <th className="px-5 py-4 rounded-tl-2xl whitespace-nowrap">Agent Name</th>
+                                {displayHeaders.map((h, i) => (
+                                  <th key={`${h}-${i}`} className="px-3 py-4 whitespace-nowrap">{h}</th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/10 text-xs text-slate-300 font-sans border-b border-white/10">
+                              {(() => {
+                                const filteredData = displayDirectory.filter(row => {
+                                  if (!directorySearchQuery) return true;
+                                  const q = directorySearchQuery.toLowerCase();
+                                  if (row.agentName.toLowerCase().includes(q)) return true;
+                                  return Object.values(row.data).some(val => typeof val === 'string' && val.toLowerCase().includes(q));
+                                });
+
+                                if (filteredData.length === 0) {
+                                  return (
+                                    <tr>
+                                      <td colSpan={displayHeaders.length + 1} className="py-12 text-center text-slate-500 font-sans">
+                                        <Search className="w-6 h-6 mx-auto mb-2 opacity-30" />
+                                        No agents match your search criteria.
                                       </td>
-                                    );
-                                  })}
-                                </tr>
-                              ));
-                            })()}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
+                                    </tr>
+                                  );
+                                }
+
+                                return filteredData.sort((a,b) => a.agentName.localeCompare(b.agentName)).map(row => (
+                                  <tr key={row.id} className="hover:bg-cyan-500/10 transition-colors group">
+                                    <td className="px-5 py-4 whitespace-nowrap flex items-center gap-3">
+                                      <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-cyan-600/30 to-blue-500/30 text-cyan-300 flex items-center justify-center font-black border border-cyan-500/40 shadow-inner">
+                                        {row.agentName.substring(0,2).toUpperCase()}
+                                      </div>
+                                      <span className="font-bold text-slate-100 font-display text-sm relative group-hover:text-cyan-400 transition-colors">
+                                        {row.agentName}
+                                        {globalMeta[row.agentName]?.roleType === 'TL' && (
+                                           <span className="absolute -top-3.5 left-0 px-1.5 py-0.5 rounded text-[8px] bg-amber-500/20 text-amber-400 border border-amber-500/30 font-black uppercase tracking-widest">Team Lead</span>
+                                        )}
+                                      </span>
+                                    </td>
+                                    {displayHeaders.map((h, i) => {
+                                      const value = row.data[h] || '-';
+                                      const isEmail = h.toLowerCase().includes('email');
+                                      const isPhone = h.toLowerCase().includes('phone') || h.toLowerCase().includes('mobile') || h.toLowerCase().includes('number');
+                                      const isRole = h.toLowerCase().includes('role') || h.toLowerCase().includes('lob');
+                                      const isTL = h.toLowerCase().includes('tl') || h.toLowerCase().includes('leader') || h.toLowerCase().includes('manager');
+                                      
+                                      return (
+                                        <td key={`${h}-${i}`} className="px-3 py-4 text-slate-300 whitespace-nowrap">
+                                          {isEmail && value !== '-' ? (
+                                            <a href={`mailto:${value}`} className="text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1.5 transition-colors text-xs font-mono font-bold bg-cyan-500/10 px-2.5 py-1 rounded-lg w-max border border-cyan-500/20">
+                                              <Mail className="w-3 h-3" /> {value}
+                                            </a>
+                                          ) : isPhone && value !== '-' ? (
+                                            <a href={`tel:${value}`} className="text-emerald-400 hover:text-emerald-300 hover:underline flex items-center gap-1.5 transition-colors text-xs font-mono font-bold bg-emerald-500/10 px-2.5 py-1 rounded-lg w-max border border-emerald-500/20">
+                                              <Phone className="w-3 h-3" /> {value}
+                                            </a>
+                                          ) : isRole && value !== '-' ? (
+                                            <span className="bg-slate-800/80 text-slate-200 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-white/10 shadow-sm">
+                                              {value}
+                                            </span>
+                                          ) : isTL && value !== '-' ? (
+                                            <span className="text-amber-400/90 font-bold text-xs flex items-center gap-1.5">
+                                              <Shield className="w-3 h-3" /> {value}
+                                            </span>
+                                          ) : (
+                                            <span className="text-[13px] font-semibold text-slate-200">{value}</span>
+                                          )}
+                                        </td>
+                                      );
+                                    })}
+                                  </tr>
+                                ));
+                              })()}
+                            </tbody>
+                          </table>
+                        </div>
+                      );
+                    })()}
                   </div>
                 );
               })()}
@@ -13396,9 +13427,7 @@ ${ttNotes}` : autoNote;
                             setCaseTicketStatus('Closed');
                             setCasePatientType('New');
                             setCaseTicketType('Inquiry');
-                            const assignedTL = getAgentTL(currentUser.name);
-                            const targetNotifUser = assignedTL !== 'Unassigned' ? assignedTL : 'tl';
-                            addSystemNotification(`📋 New Case Logged`, `${currentUser.name} submitted a new case for ${casePatientName} (${casePhoneNumber})`, 'general', targetNotifUser);
+                            addSystemNotification(`📋 New Case Logged`, `${currentUser.name} submitted a new case for ${casePatientName} (${casePhoneNumber})`, 'general', 'tl');
                             toast.success('Case submitted successfully!');
                           }} className="space-y-4">
                             
