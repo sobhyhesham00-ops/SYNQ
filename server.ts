@@ -1,3 +1,7 @@
+// ============================================================
+// FIXED server.ts — All bugs corrected (see BUGFIX_REPORT.md)
+// ============================================================
+
 import "dotenv/config"; // FIX #1: Load .env variables (was missing — API key was always undefined locally)
 import express from "express";
 import path from "path";
@@ -158,22 +162,6 @@ Structure your response with elegant markdown:
       return res.json({
         reply: `I encountered an issue connecting to the AI: ${err.message}. Your portal functionality remains completely safe and fully standalone! 😊`,
       });
-    }
-  });
-
-  // ─── API: Weather Proxy ────────────────────────────────────────────────────
-  app.get("/api/weather", async (req, res) => {
-    try {
-      const { lat = "30.30", lng = "31.75" } = req.query;
-      const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
-      if (!response.ok) {
-        throw new Error(`Open-Meteo returned ${response.status}`);
-      }
-      const data = await response.json();
-      res.json(data);
-    } catch (err: any) {
-      console.error("Weather Proxy Error:", err);
-      res.status(500).json({ error: "Failed to fetch weather" });
     }
   });
 
