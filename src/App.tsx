@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FormEvent } from 'react';
+import React, { useState, useEffect, FormEvent, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { doc, onSnapshot, collection, setDoc, updateDoc, deleteDoc, query, getDocs, writeBatch } from 'firebase/firestore';
 import { db, initAuth, googleSignIn, getAccessToken, logout } from './firebase';
@@ -64,9 +64,13 @@ import { DataVault } from './components/DataVault';
 import { IntegrationsManager } from './components/IntegrationsManager';
 import { ScreenshotUpload } from './components/ScreenshotUpload';
 import { DashboardSummary } from './components/DashboardSummary';
+import { QAScorecards } from './components/QAScorecards';
+import { PatientSearchHub } from './components/PatientSearchHub';
+import { AnnouncementsTab } from './components/AnnouncementsTab';
 import * as XLSX from 'xlsx';
 import {
   isTLName,
+  isQAName,
   capitalizeName,
   getStorageItem,
   setStorageItem,
@@ -93,7 +97,9 @@ import {
   generateSchedulesCSV,
   getLocalISOString,
   getLocalTimeZone,
-  normalizeName
+  normalizeName,
+  getUsernameFromFullName,
+  findAgentByUsername
 } from './utils';
 import {
   SchedulingRequest,
@@ -115,7 +121,9 @@ import {
   AgentDirectoryRow,
   SystemNotification,
   TlFeedback,
-  FeedbackReply
+  FeedbackReply,
+  QAScore,
+  Announcement
 } from './types';
 
 const parseBoldText = (text: string) => {
@@ -213,11 +221,11 @@ async function fetchGoogleSheetCSV(sheetId: string, gid: string = '0'): Promise<
 const getClinicBadgeColor = (clinic: string) => {
   if (!clinic) return 'bg-white/5 text-slate-300 border-white/10';
   const lp = clinic.toLowerCase();
-  if (lp.includes('vip')) return 'bg-violet-500/10 text-violet-300 border-violet-500/20';
   if (lp.includes('dermadent')) return 'bg-blue-500/10 text-blue-300 border-blue-500/20';
-  if (lp.includes('onetouch')) return 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20';
+  if (lp.includes('onetouch1')) return 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20';
+  if (lp.includes('onetouch2')) return 'bg-violet-500/10 text-violet-300 border-violet-500/20';
   if (lp.includes('welltouch')) return 'bg-rose-500/10 text-rose-300 border-rose-500/20';
-  if (lp.includes('newage')) return 'bg-amber-500/10 text-amber-300 border-amber-500/20';
+  if (lp.includes('newedge')) return 'bg-amber-500/10 text-amber-300 border-amber-500/20';
   return 'bg-white/5 text-slate-300 border-white/10';
 };
 
@@ -310,6 +318,8 @@ const getGreetingAndQuote = (userName: string, currentTime: Date) => {
   
   return { greet, quote };
 };
+
+const CURRENT_APP_VERSION = 2; // Increment this to trigger auto-reload across all clients
 
 export default function App() {
   // Current local time context of the user's PC (synced and showing in the main page)
@@ -416,6 +426,19 @@ export default function App() {
 
   // Standard standalone offline compliant sync listener for multiple tabs and real-time Firestore
   useEffect(() => {
+    // 0. Auto-unlock explicitly incorrect admins to fix legacy locking bugs
+    try {
+      const getCreds = localStorage.getItem('sched_locked_accounts');
+      if (getCreds) {
+        let arr = JSON.parse(getCreds) as string[];
+        const filtered = arr.filter(name => !name.includes('amira.hassan') && !name.includes('hesham.sobhy') && !name.includes('hesso.sobhy'));
+        if (filtered.length !== arr.length) {
+          localStorage.setItem('sched_locked_accounts', JSON.stringify(filtered));
+          setDoc(doc(db, "system", "sched_locked_accounts"), { data: filtered }).catch(e => console.error(e));
+        }
+      }
+    } catch(e) {}
+
     // 1. Local storage event listener (for legacy/offline tab sync)
     const handleStorage = (e: StorageEvent) => {
       if (e.key === 'sched_inquiries' && e.newValue) setInquiries(JSON.parse(e.newValue));
@@ -425,6 +448,7 @@ export default function App() {
       if (e.key === 'sched_time_logs' && e.newValue) setTimeLogs(JSON.parse(e.newValue));
       if (e.key === 'sched_schedules' && e.newValue) setSchedules(JSON.parse(e.newValue));
       if (e.key === 'sched_support_assignments' && e.newValue) setSupportAssignments(JSON.parse(e.newValue));
+      if (e.key === 'sched_announcements' && e.newValue) setAnnouncements(JSON.parse(e.newValue));
     };
     window.addEventListener('storage', handleStorage);
 
@@ -434,6 +458,21 @@ export default function App() {
       arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
       setInquiries(arr);
       localStorage.setItem('sched_inquiries', JSON.stringify(arr));
+    });
+
+    const unsubQa = onSnapshot(collection(db, "qa_scores"), snap => {
+      const arr = snap.docs.map(d => d.data() as QAScore);
+      arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+      setQaScores(arr);
+      localStorage.setItem('sched_qa_scores', JSON.stringify(arr));
+    });
+
+    const unsubQATemplate = onSnapshot(doc(db, "system", "sched_qa_template"), snap => {
+      if (snap.exists()) {
+        const data = snap.data().data;
+        setQaTemplate(data);
+        localStorage.setItem('sched_qa_template', JSON.stringify(data));
+      }
     });
     const unsubTT = onSnapshot(collection(db, "tt_requests"), snap => {
       const arr = snap.docs.map(d => d.data() as TabbyTamaraRequest);
@@ -475,6 +514,58 @@ export default function App() {
       const arr = snap.docs.map(d => d.data() as ScheduledShift);
       setSchedules(arr);
       localStorage.setItem('sched_schedules', JSON.stringify(arr));
+    });
+    let isAnnouncementsInitialized = false;
+    const unsubAnnouncements = onSnapshot(collection(db, "announcements"), snap => {
+      const arr = snap.docs.map(d => d.data() as Announcement);
+      arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+      
+      const latest = arr[0];
+      if (latest && currentUserRef.current) {
+        if (!isAnnouncementsInitialized) {
+          isAnnouncementsInitialized = true;
+          localStorage.setItem('sched_last_notified_announcement_id', latest.id);
+        } else {
+          const lastNotifiedId = localStorage.getItem('sched_last_notified_announcement_id');
+          if (lastNotifiedId !== latest.id) {
+            localStorage.setItem('sched_last_notified_announcement_id', latest.id);
+            toast.custom((t) => (
+              <div className="bg-slate-900/95 border border-amber-500/40 text-white rounded-2xl p-4 shadow-2xl flex flex-col gap-2 max-w-sm border-l-4 border-l-amber-500 backdrop-blur-md animate-fade-in text-left">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-500 shrink-0 border border-amber-500/20">
+                    <Bell className="w-5 h-5 animate-bounce" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-sm text-amber-400">📢 New Broadcast Posted!</h4>
+                    <p className="text-[10px] text-slate-400 font-bold mt-0.5">By {latest.author || "System"}</p>
+                    <p className="text-xs text-slate-300 mt-1 line-clamp-2 leading-relaxed italic">"{latest.message}"</p>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2 mt-2 pt-1 border-t border-white/5">
+                  <button 
+                    onClick={() => {
+                      setActiveTab('tl-announcements');
+                      toast.dismiss(t);
+                    }}
+                    className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 rounded-lg text-xs font-black uppercase tracking-wider cursor-pointer transition-all shrink-0"
+                  >
+                    Read Now
+                  </button>
+                  <button 
+                    onClick={() => toast.dismiss(t)}
+                    className="px-3 py-1.5 bg-white/10 hover:bg-white/15 text-white rounded-lg text-xs font-bold cursor-pointer transition-colors"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            ), { duration: 15000 });
+          }
+        }
+      }
+
+      setAnnouncements(arr);
+      localStorage.setItem('sched_announcements', JSON.stringify(arr));
     });
     const unsubAppStatus = onSnapshot(doc(db, "system", "app_status"), snap => {
       if (snap.exists() && snap.data().isKilled === true) {
@@ -530,9 +621,71 @@ export default function App() {
       }
     });
 
+    const unsubCredentials = onSnapshot(doc(db, "system", "sched_credentials"), snap => {
+      if (snap.exists()) {
+        const data = snap.data().data || {};
+        setCredentials(data);
+        localStorage.setItem('sched_credentials', JSON.stringify(data));
+      }
+    });
+
+    const unsubLockedAccounts = onSnapshot(doc(db, "system", "sched_locked_accounts"), snap => {
+      if (snap.exists()) {
+        const data = snap.data().data || [];
+        setLockedAccounts(data);
+        localStorage.setItem('sched_locked_accounts', JSON.stringify(data));
+      }
+    });
+
+    const unsubFailedAttempts = onSnapshot(doc(db, "system", "sched_failed_attempts"), snap => {
+      if (snap.exists()) {
+        const data = snap.data().data || {};
+        setFailedAttempts(data);
+        localStorage.setItem('sched_failed_attempts', JSON.stringify(data));
+      }
+    });
+
+    let isNotifsInitialized = false;
     const unsubNotifs = onSnapshot(collection(db, "notifications"), snap => {
       const arr = snap.docs.map(d => d.data() as SystemNotification);
       arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+      
+      const latest = arr[0];
+      if (latest) {
+        if (!isNotifsInitialized) {
+          isNotifsInitialized = true;
+          localStorage.setItem('sched_last_notified_notif_id', latest.id);
+        } else if (currentUserRef.current) {
+          const lastNotifiedNotifId = localStorage.getItem('sched_last_notified_notif_id') || '';
+          if (latest.id !== lastNotifiedNotifId) {
+            localStorage.setItem('sched_last_notified_notif_id', latest.id);
+            
+            let isTargeted = latest.targetAgent === 'all' || 
+                               (currentUserRef.current.role === 'tl' && latest.targetAgent === 'tl') ||
+                               latest.targetAgent.toLowerCase() === currentUserRef.current.name.toLowerCase();
+                               
+            if (!isTargeted && latest.targetAgent.toLowerCase().startsWith('team:')) {
+              const teamTLName = latest.targetAgent.split(':')[1]?.toLowerCase() || '';
+              const curUserTL = getAgentTL(currentUserRef.current.name).toLowerCase();
+              const curUserName = currentUserRef.current.name.toLowerCase();
+              isTargeted = (curUserName === teamTLName) || (curUserTL === teamTLName);
+            }
+
+            const isAnnouncementNotification = latest.title.toLowerCase().includes('announcement') || latest.title.toLowerCase().includes('broadcast');
+
+            if (isTargeted && !isAnnouncementNotification) {
+              toast.info(
+                <div className="flex flex-col gap-1 text-left">
+                  <span className="font-bold text-sm text-indigo-400">🔔 {latest.title}</span>
+                  <span className="text-xs text-slate-200 line-clamp-2">{latest.message}</span>
+                </div>,
+                { duration: 8000 }
+              );
+            }
+          }
+        }
+      }
+
       setNotifications(arr);
       localStorage.setItem('sched_notifications', JSON.stringify(arr));
     });
@@ -544,6 +697,26 @@ export default function App() {
       localStorage.setItem('sched_tl_feedbacks', JSON.stringify(arr));
     });
 
+    const unsubAppVersion = onSnapshot(doc(db, "system", "app_version"), (snap) => {
+      if (snap.exists()) {
+        const remoteVersion = snap.data().version || 0;
+        if (CURRENT_APP_VERSION > remoteVersion) {
+            setDoc(doc(db, "system", "app_version"), { version: CURRENT_APP_VERSION }, { merge: true }).catch(console.error);
+        } else if (remoteVersion > CURRENT_APP_VERSION) {
+            toast.loading("A new system update was published! Refreshing to apply...");
+            setTimeout(() => {
+                if ('caches' in window) {
+                   caches.keys().then((names) => {
+                       for (let name of names) caches.delete(name);
+                   });
+                }
+                window.location.reload();
+            }, 3000);
+        }
+      } else {
+        setDoc(doc(db, "system", "app_version"), { version: CURRENT_APP_VERSION }).catch(console.error);
+      }
+    });
 
     const unsubTodos = onSnapshot(collection(db, "todos"), snap => {
       const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -569,15 +742,19 @@ export default function App() {
     return () => {
       unsubTodos();
       unsubUsers();
+      unsubAppVersion();
 
       window.removeEventListener('storage', handleStorage);
       unsubInquiries();
+      unsubQa();
+      unsubQATemplate();
       unsubTT();
       unsubComp();
       unsubComms();
       unsubReq();
       unsubTime();
       unsubSched();
+      unsubAnnouncements();
       unsubAppStatus();
       unsubSupp();
       unsubCases();
@@ -588,6 +765,9 @@ export default function App() {
       unsubRosterPub();
       unsubNotifs();
       unsubFeedbacks();
+      unsubCredentials();
+      unsubLockedAccounts();
+      unsubFailedAttempts();
     };
   }, []);
 
@@ -623,12 +803,53 @@ export default function App() {
   const [googleSheetId, setGoogleSheetId] = useState<string>(() => getStorageItem<string>('sched_google_sheet_id', ''));
   const [googleSheetGid, setGoogleSheetGid] = useState<string>(() => getStorageItem<string>('sched_google_sheet_gid', '0'));
 
-  // Auth States
-  const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    return getStorageItem<User | null>('sched_current_user', null);
+  // Theme support
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    const saved = localStorage.getItem('theme_mode');
+    return saved !== 'light';
   });
 
-  const isMasterAdmin = currentUser ? (currentUser.name.toLowerCase() === 'hesham sobhy' || currentUser.name.toLowerCase() === 'hesso' || currentUser.name.toLowerCase() === 'amira' || currentUser.name.toLowerCase() === 'amira hassan') : false;
+  useEffect(() => {
+    if (isDarkMode) {
+      document.body.classList.remove('theme-light');
+    } else {
+      document.body.classList.add('theme-light');
+    }
+    localStorage.setItem('theme_mode', isDarkMode ? 'dark' : 'light');
+  }, [isDarkMode]);
+
+  // Auth States
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    const saved = getStorageItem<User | null>('sched_current_user', null);
+    if (saved) {
+      // Auto-logout the old full name sessions. New username must contain a dot and no spaces.
+      const isNewFormat = saved.name.includes('.') && !saved.name.includes(' ');
+      if (!isNewFormat) {
+        localStorage.removeItem('sched_current_user');
+        return null;
+      }
+    }
+    return saved;
+  });
+
+  const currentUserRef = React.useRef<User | null>(currentUser);
+  useEffect(() => {
+    currentUserRef.current = currentUser;
+    if (currentUser) {
+      setStorageItem('sched_current_user', currentUser);
+    } else {
+      localStorage.removeItem('sched_current_user');
+    }
+  }, [currentUser]);
+
+  const isMasterAdmin = currentUser ? (
+    currentUser.name.toLowerCase() === 'hesham sobhy' || 
+    currentUser.name.toLowerCase() === 'h.sobhy' || 
+    currentUser.name.toLowerCase() === 'hesso' || 
+    currentUser.name.toLowerCase() === 'amira' || 
+    currentUser.name.toLowerCase() === 'amira hassan' ||
+    currentUser.name.toLowerCase() === 'a.hassan'
+  ) : false;
   const isSheetsAdmin = isMasterAdmin;
   
   const [credentials, setCredentials] = useState<{ [name: string]: string }>(() => {
@@ -659,14 +880,17 @@ export default function App() {
   });
   const [targetSupportAgent, setTargetSupportAgent] = useState('');
 
-  const isTLOreSupport = currentUser ? (currentUser.role === 'tl' || !!supportAssignments[currentUser.name]) : false;
+  const isTLOreSupport = currentUser ? (currentUser.role === 'tl' || currentUser.role === 'qa' || !!supportAssignments[currentUser.name]) : false;
   const isSuperAdmin = currentUser ? (
     currentUser.name.toLowerCase() === 'hesham sobhy' || 
+    currentUser.name.toLowerCase() === 'h.sobhy' || 
     currentUser.name.toLowerCase() === 'hesso' || 
     currentUser.name.toLowerCase() === 'amira' || 
     currentUser.name.toLowerCase() === 'amira hassan' ||
+    currentUser.name.toLowerCase() === 'a.hassan' ||
     currentUser.name.toLowerCase() === 'shymaa hassan' ||
-    currentUser.name.toLowerCase() === 'shaymaa hassan'
+    currentUser.name.toLowerCase() === 'shaymaa hassan' ||
+    currentUser.name.toLowerCase() === 's.hassan'
   ) : false;
 
   // Monitor active activity to automatically pop up when they start a new active break or lunch or when it exceeds
@@ -697,6 +921,11 @@ export default function App() {
   // Known Agent Names (can grow if user adds/registers new custom names)
   const [agentsList, setAgentsList] = useState<string[]>(INITIAL_AGENTS);
   const [registeredUsers, setRegisteredUsers] = useState<any[]>([]);
+
+  // Moved agentDirectory up to fix usage before declaration
+  const [agentDirectory, setAgentDirectory] = useState<AgentDirectoryRow[]>(() => {
+    return getStorageItem<AgentDirectoryRow[]>('sched_agent_directory', []);
+  });
 
   // Sync agentsList whenever registeredUsers or agentDirectory changes
   useEffect(() => {
@@ -986,7 +1215,7 @@ export default function App() {
 
   useEffect(() => {
     if (currentUser) {
-      const derivedRole = isTLName(currentUser.name) ? 'tl' : 'agent';
+      const derivedRole = isQAName(currentUser.name) ? 'qa' : isTLName(currentUser.name) ? 'tl' : 'agent';
       if (currentUser.role !== derivedRole) {
         const updated = { ...currentUser, role: derivedRole };
         setCurrentUser(updated);
@@ -1024,6 +1253,20 @@ export default function App() {
     return getStorageItem<Inquiry[]>('sched_inquiries', []);
   });
 
+  const [qaScores, setQaScores] = useState<QAScore[]>(() => {
+    return getStorageItem<QAScore[]>('sched_qa_scores', []);
+  });
+
+  const [qaTemplate, setQaTemplate] = useState<any[]>(() => {
+    return getStorageItem<any[]>('sched_qa_template', [
+      { id: 'q1', text: 'Greeting & Opening', maxScore: 10 },
+      { id: 'q2', text: 'Empathy & Tone', maxScore: 20 },
+      { id: 'q3', text: 'Accuracy of Information', maxScore: 40 },
+      { id: 'q4', text: 'Resolution & Tool Usage', maxScore: 20 },
+      { id: 'q5', text: 'Closing & Recap', maxScore: 10 }
+    ]);
+  });
+
   // Tabby & Tamara requests database
   const [tabbyTamaraRequests, setTabbyTamaraRequests] = useState<TabbyTamaraRequest[]>(() => {
     return getStorageItem<TabbyTamaraRequest[]>('sched_tabby_tamara', []);
@@ -1041,6 +1284,12 @@ export default function App() {
   const [cases, setCases] = useState<CaseRecord[]>(() => {
     return getStorageItem<CaseRecord[]>('sched_cases', []);
   });
+
+  const [announcements, setAnnouncements] = useState<Announcement[]>(() => {
+    return getStorageItem<Announcement[]>('sched_announcements', []);
+  });
+
+  const latestAnnouncementIdRef = useRef<string | null>(null);
 
   // Tab selection inside Tabby & Tamara Desk
   const [ttSubTab, setTtSubTab] = useState<'requests' | 'complaints'>('requests');
@@ -1099,6 +1348,12 @@ export default function App() {
   const [caseBloggerName, setCaseBloggerName] = useState('');
   const [caseSearchQuery, setCaseSearchQuery] = useState('');
   const [caseStatusFilter, setCaseStatusFilter] = useState('all');
+  const [caseBranch, setCaseBranch] = useState('');
+  const [casePatientType, setCasePatientType] = useState('New');
+  const [caseService, setCaseService] = useState('');
+  const [caseTicketType, setCaseTicketType] = useState('Inquiry');
+  const [caseTicketStatus, setCaseTicketStatus] = useState('Closed');
+  const [caseCallType, setCaseCallType] = useState('');
 
   // TL Complaint handling input
   const [activeComplaintHandlingId, setActiveComplaintHandlingId] = useState<string | null>(null);
@@ -1193,6 +1448,13 @@ export default function App() {
   const [p2pTargetShift, setP2pTargetShift] = useState(SHIFTS[1].label);
   const [p2pNotes, setP2pNotes] = useState('');
 
+  // Manual Roster Submission Form States
+  const [manualRosterAgent, setManualRosterAgent] = useState('');
+  const [manualRosterDate, setManualRosterDate] = useState('');
+  const [manualRosterShift, setManualRosterShift] = useState('07:00 - 16:00');
+  const [manualRosterNotes, setManualRosterNotes] = useState('');
+  const [selectedShiftForActivities, setSelectedShiftForActivities] = useState<ScheduledShift | null>(null);
+
   const [annualStart, setAnnualStart] = useState('');
   const [annualEnd, setAnnualEnd] = useState('');
   const [annualNotes, setAnnualNotes] = useState('');
@@ -1211,9 +1473,6 @@ export default function App() {
   const [tempNewAgents, setTempNewAgents] = useState<string[]>([]);
   const [tempParsedMeta, setTempParsedMeta] = useState<Record<string, { tlName?: string }>>({});
   const [schedulePageOffset, setSchedulePageOffset] = useState<number>(0);
-  const [agentDirectory, setAgentDirectory] = useState<AgentDirectoryRow[]>(() => {
-    return getStorageItem<AgentDirectoryRow[]>('sched_agent_directory', []);
-  });
   const [directoryHeaders, setDirectoryHeaders] = useState<string[]>(() => {
     return getStorageItem<string[]>('sched_agent_directory_headers', []);
   });
@@ -1341,9 +1600,16 @@ export default function App() {
     e.preventDefault();
     setLoginError('');
 
-    const formattedName = normalizeName(loginName, agentsList);
-    if (!formattedName) {
-      setLoginError('Please enter your name.');
+    const trimmedInput = loginName.trim().replace(/\s+/g, '');
+    if (!trimmedInput) {
+      setLoginError('Please enter your username.');
+      return;
+    }
+
+    // New format must contain a dot and no spaces:
+    const isNewFormat = trimmedInput.includes('.') && !trimmedInput.includes(' ');
+    if (!isNewFormat) {
+      setLoginError("Invalid format! Please enter your username in the 'first_letter.last_name' format (e.g., h.sobhy).");
       return;
     }
 
@@ -1352,12 +1618,33 @@ export default function App() {
       return;
     }
 
-    if (lockedAccounts.includes(formattedName)) {
-      setLoginError('This account is locked. Only Hesham Sobhy, Amira Hassan, or Shaymaa Hassan can reset it.');
+    const formattedUsername = trimmedInput.toLowerCase();
+    const matchedFullName = findAgentByUsername(formattedUsername, agentsList);
+    
+    // Check for flexible Admin names to NEVER lock them out
+    const isAdminUser = 
+      formattedUsername === 'h.sobhy' || 
+      formattedUsername === 'hesso' || 
+      formattedUsername === 'a.hassan' || 
+      formattedUsername.includes('amira') ||
+      formattedUsername.includes('hesham') ||
+      (matchedFullName && matchedFullName.toLowerCase() === 'hesham sobhy') || 
+      (matchedFullName && matchedFullName.toLowerCase() === 'amira hassan');
+
+    if (!matchedFullName && !isAdminUser) {
+       setLoginError("User not found in the official system directory. Ensure you use exact format (e.g., a.hassan) or ask your TL to add you.");
+       return;
+    }
+
+    const correspondingFullName = matchedFullName || formattedUsername;
+
+    if (!isAdminUser && (lockedAccounts.includes(formattedUsername) || lockedAccounts.includes(correspondingFullName))) {
+      setLoginError('This account is locked. Only Hesham Sobhy or Amira Hassan can reset it.');
       return;
     }
 
-    const hasStoredPassword = formattedName in credentials;
+    // Checking password - support both formattedUsername and correspondingFullName for backward compatibility
+    const hasStoredPassword = (formattedUsername in credentials) || (correspondingFullName in credentials);
 
     if (!hasStoredPassword) {
       // First-time user registration flow
@@ -1365,18 +1652,32 @@ export default function App() {
       return;
     }
 
-    // Checking password
-    if (credentials[formattedName] !== loginPassword) {
-      const currentAttempts = (failedAttempts[formattedName] || 0) + 1;
-      const updatedAttempts = { ...failedAttempts, [formattedName]: currentAttempts };
+    const correctPassword = credentials[formattedUsername] !== undefined 
+      ? credentials[formattedUsername] 
+      : credentials[correspondingFullName];
+
+    if (correctPassword !== loginPassword) {
+      const currentAttempts = (failedAttempts[formattedUsername] || 0) + 1;
+      const updatedAttempts = { ...failedAttempts, [formattedUsername]: currentAttempts };
       setFailedAttempts(updatedAttempts);
       setStorageItem('sched_failed_attempts', updatedAttempts);
+      setDoc(doc(db, "system", "sched_failed_attempts"), { data: updatedAttempts }).catch(console.error);
 
       if (currentAttempts >= 3) {
-        const updatedLocked = [...lockedAccounts, formattedName];
-        setLockedAccounts(updatedLocked);
-        setStorageItem('sched_locked_accounts', updatedLocked);
-        setLoginError('This account is now locked because of too many wrong password attempts. Please contact Hesham Sobhy, Amira Hassan, or Shaymaa Hassan to reset it.');
+        if (isAdminUser) {
+          // Admins don't get locked out, just reset their failed attempts to 0 or allow infinite retries without locking
+          const resetAttempts = { ...failedAttempts, [formattedUsername]: 0 };
+          setFailedAttempts(resetAttempts);
+          setStorageItem('sched_failed_attempts', resetAttempts);
+          setDoc(doc(db, "system", "sched_failed_attempts"), { data: resetAttempts }).catch(console.error);
+          setLoginError('Incorrect password. Admin accounts are exempt from locking, please try again.');
+        } else {
+          const updatedLocked = [...lockedAccounts, formattedUsername];
+          setLockedAccounts(updatedLocked);
+          setStorageItem('sched_locked_accounts', updatedLocked);
+          setDoc(doc(db, "system", "sched_locked_accounts"), { data: updatedLocked }).catch(console.error);
+          setLoginError('This account is now locked because of too many wrong password attempts. Please contact Hesham Sobhy or Amira Hassan to reset it.');
+        }
       } else {
         setLoginError(`Incorrect password. You have ${3 - currentAttempts} attempts left.`);
       }
@@ -1384,38 +1685,57 @@ export default function App() {
     }
 
     // Success login
-    if (failedAttempts[formattedName]) {
-      const updatedAttempts = { ...failedAttempts };
-      delete updatedAttempts[formattedName];
-      setFailedAttempts(updatedAttempts);
-      setStorageItem('sched_failed_attempts', updatedAttempts);
+    let needsLockUpdate = false;
+    let updatedLocked = [...lockedAccounts];
+    if (updatedLocked.includes(formattedUsername)) {
+      updatedLocked = updatedLocked.filter(a => a !== formattedUsername);
+      needsLockUpdate = true;
+    }
+    if (updatedLocked.includes(correspondingFullName)) {
+      updatedLocked = updatedLocked.filter(a => a !== correspondingFullName);
+      needsLockUpdate = true;
+    }
+    if (needsLockUpdate) {
+      setLockedAccounts(updatedLocked);
+      setStorageItem('sched_locked_accounts', updatedLocked);
+      setDoc(doc(db, "system", "sched_locked_accounts"), { data: updatedLocked }).catch(console.error);
     }
 
-    const userRole = isTLName(formattedName) ? 'tl' : 'agent';
+    if (failedAttempts[formattedUsername]) {
+      const updatedAttempts = { ...failedAttempts };
+      delete updatedAttempts[formattedUsername];
+      setFailedAttempts(updatedAttempts);
+      setStorageItem('sched_failed_attempts', updatedAttempts);
+      setDoc(doc(db, "system", "sched_failed_attempts"), { data: updatedAttempts }).catch(console.error);
+    }
+
+    const userRole = isQAName(correspondingFullName) ? 'qa' : isTLName(correspondingFullName) ? 'tl' : 'agent';
     const authenticatedUser: User = {
       id: `usr_${Date.now()}`,
-      name: formattedName,
+      name: formattedUsername,
       role: userRole
     };
 
     setCurrentUser(authenticatedUser);
     setStorageItem('sched_current_user', authenticatedUser);
 
-    // If agent is new or not in the cached list, it will be added via unsubUsers listener or setDoc
-    // We update local agentsList immediately for UI responsiveness
-    if (userRole === 'agent' && !agentsList.some(a => a.toLowerCase() === formattedName.toLowerCase())) {
-      const updatedList = [...agentsList, formattedName];
+    // If agent is new or not in the cached list, add using corresponding fullName or username
+    if (userRole === 'agent' && !agentsList.some(a => a.toLowerCase() === formattedUsername || a.toLowerCase() === correspondingFullName.toLowerCase() || getUsernameFromFullName(a) === formattedUsername)) {
+      const updatedList = [...agentsList, correspondingFullName];
       setAgentsList(updatedList);
       setStorageItem('sched_agents_list', updatedList);
     }
 
     if (userRole === 'agent') {
       const todayStr = getLocalISOString();
-      const active = timeLogs.find(l => l.agentName.toLowerCase() === formattedName.toLowerCase() && l.date === todayStr && !l.clockOut);
+      const active = timeLogs.find(l => {
+        const ln = l.agentName.toLowerCase();
+        return (ln === formattedUsername || ln === correspondingFullName.toLowerCase()) && l.date === todayStr && !l.clockOut;
+      });
       if (!active) {
         const newLog: TimeLog = {
           id: `clock_${Date.now()}`,
-          agentName: formattedName,
+          agentName: formattedUsername,
           date: todayStr,
           clockIn: new Date().toISOString(),
           activities: [],
@@ -1437,24 +1757,34 @@ export default function App() {
 
   // Complete Password Creation for first usage
   const handleRegisterConfirm = () => {
-    const finalName = normalizeName(loginName, agentsList);
+    const trimmedInput = loginName.trim().toLowerCase().replace(/\s+/g, '');
+    const matchedFullName = findAgentByUsername(trimmedInput, agentsList);
+    const finalName = trimmedInput;
+    const correspondingFullName = matchedFullName || finalName;
+
     if (!finalName || !loginPassword) {
       setLoginError('Mandatory login info missing.');
       return;
     }
 
-    const updatedCreds = { ...credentials, [finalName]: loginPassword };
+    const updatedCreds = { 
+      ...credentials, 
+      [finalName]: loginPassword,
+      [correspondingFullName]: loginPassword
+    };
     setCredentials(updatedCreds);
     setStorageItem('sched_credentials', updatedCreds);
+    setDoc(doc(db, "system", "sched_credentials"), { data: updatedCreds }).catch(console.error);
 
     if (failedAttempts[finalName]) {
       const updatedAttempts = { ...failedAttempts };
       delete updatedAttempts[finalName];
       setFailedAttempts(updatedAttempts);
       setStorageItem('sched_failed_attempts', updatedAttempts);
+      setDoc(doc(db, "system", "sched_failed_attempts"), { data: updatedAttempts }).catch(console.error);
     }
 
-    const userRole = isTLName(finalName) ? 'tl' : 'agent';
+    const userRole = isQAName(correspondingFullName) ? 'qa' : isTLName(correspondingFullName) ? 'tl' : 'agent';
     const authenticatedUser: User = {
       id: `usr_${Date.now()}`,
       name: finalName,
@@ -1467,15 +1797,18 @@ export default function App() {
     // Explicitly write user to Firestore for real-time presence across devices
     setDoc(doc(db, "users", finalName), authenticatedUser).catch(e => console.error("User doc sync error:", e));
 
-    if (userRole === 'agent' && !agentsList.some(a => a.toLowerCase() === finalName.toLowerCase())) {
-      const updatedList = [...agentsList, finalName];
+    if (userRole === 'agent' && !agentsList.some(a => a.toLowerCase() === finalName || a.toLowerCase() === correspondingFullName.toLowerCase() || getUsernameFromFullName(a) === finalName)) {
+      const updatedList = [...agentsList, correspondingFullName];
       setAgentsList(updatedList);
       setStorageItem('sched_agents_list', updatedList);
     }
 
     if (userRole === 'agent') {
       const todayStr = getLocalISOString();
-      const active = timeLogs.find(l => l.agentName.toLowerCase() === finalName.toLowerCase() && l.date === todayStr && !l.clockOut);
+      const active = timeLogs.find(l => {
+        const ln = l.agentName.toLowerCase();
+        return (ln === finalName || ln === correspondingFullName.toLowerCase()) && l.date === todayStr && !l.clockOut;
+      });
       if (!active) {
         const newLog: TimeLog = {
           id: `clock_${Date.now()}`,
@@ -1581,12 +1914,13 @@ export default function App() {
             agent
           );
 
-          // 2. Notify the TLs
+          const assignedTL = getAgentTL(agent);
+          const targetNotifUser = assignedTL !== 'Unassigned' ? assignedTL : 'tl';
           addSystemNotification(
             `🚨 Alert: ${formatAgentName(agent)} overstaying ${readableType}`,
             `Agent ${formatAgentName(agent)} has exceeded the standard ${elapsed.limit} minutes limit for ${readableType}. Current duration: ${Math.floor(elapsed.duration)} minutes.`,
             "compliance",
-            "tl"
+            targetNotifUser
           );
           
           toast.warning(`[Compliance Alert] ${formatAgentName(agent)} exceeded ${readableType} limit!`);
@@ -1634,12 +1968,13 @@ export default function App() {
             setNotifiedAbsences(updated);
             setStorageItem('sched_notified_absences', updated);
 
-            // Notify TLs
+            const assignedTL = getAgentTL(agent);
+            const targetNotifUser = assignedTL !== 'Unassigned' ? assignedTL : 'tl';
             addSystemNotification(
               `❌ Absence Warning: ${formatAgentName(agent)} did not clock in`,
               `Agent ${formatAgentName(agent)} was scheduled for shift ${shiftLabel} today starting at ${startHourStr}, but has failed to clock in within 30 minutes of shift commencement.`,
               "absence",
-              "tl"
+              targetNotifUser
             );
             toast.error(`[Shift Alert] ${formatAgentName(agent)} is absent for today's shift!`);
           }
@@ -1717,12 +2052,13 @@ export default function App() {
     // Sync to Firestore
     setDoc(doc(db, "scheduling_requests", newRequest.id), newRequest).catch(e => console.error("Request Write Error:", e));
 
-    // Notify TLs
+    const assignedTL = getAgentTL(name);
+    const targetNotifUser = assignedTL !== 'Unassigned' ? assignedTL : 'tl';
     addSystemNotification(
       `🔄 New Swap Request: ${formatAgentName(name)}`,
       `${formatAgentName(name)} requested a shift swap with ${formatAgentName(swapTargetAgent)} for ${swapDate}.`,
       'schedule',
-      'tl'
+      targetNotifUser
     );
 
     // Reset form
@@ -1773,12 +2109,13 @@ export default function App() {
     // Sync to Firestore
     setDoc(doc(db, "scheduling_requests", newRequest.id), newRequest).catch(e => console.error("Annual Req Write Error:", e));
 
-    // Notify TLs
+    const assignedTL = getAgentTL(name);
+    const targetNotifUser = assignedTL !== 'Unassigned' ? assignedTL : 'tl';
     addSystemNotification(
       `✈️ New Annual Leave: ${formatAgentName(name)}`,
       `${formatAgentName(name)} requested an annual leave from ${annualStart} to ${annualEnd}.`,
       'schedule',
-      'tl'
+      targetNotifUser
     );
 
     // Reset form
@@ -2241,6 +2578,34 @@ export default function App() {
       setStorageItem('sched_schedules', []);
       toast.success('Schedules cleared.');
     }
+  };
+
+  const handleManualRosterSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (!manualRosterAgent) {
+      toast.error('Please select or specify an agent name.');
+      return;
+    }
+    if (!manualRosterDate) {
+      toast.error('Please specify a roster shift date.');
+      return;
+    }
+    if (!manualRosterShift) {
+      toast.error('Please select an active shift assignment.');
+      return;
+    }
+
+    const newShift: ScheduledShift = {
+      id: `sch_man_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      agentName: manualRosterAgent,
+      date: manualRosterDate,
+      shiftLabel: manualRosterShift,
+      shiftNotes: manualRosterNotes.trim() || undefined,
+    };
+
+    commitSchedulesManual([newShift], [], {});
+    setManualRosterNotes('');
+    toast.success(`Individual shift for ${manualRosterAgent} successfully submitted and synced!`);
   };
 
   // Agent Time Clock & Activity Helpers
@@ -2714,8 +3079,12 @@ export default function App() {
     setTempPhotoUrlInput('');
 
     handleMentionsInText(inquiryText.trim(), 'Agent Inquiry Description', currentUser.name);
+    const assignedTL = getAgentTL(currentUser.name);
+    const targetNotifUser = assignedTL !== 'Unassigned' ? assignedTL : 'tl';
+    addSystemNotification('❓ New Inquiry Submitted', `${currentUser.name} has submitted a new inquiry for clinic: ${inquiryClinicName}.`, 'general', targetNotifUser);
 
     toast.success('Inquiry submitted successfully! Your Team Leaders have been notified.');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSetInquirySent = (inquiryId: string) => {
@@ -2792,11 +3161,14 @@ export default function App() {
 
     const updated = inquiries.map(inq => {
       if (inq.id === inquiryId) {
-        return {
+        const updatedInq = {
           ...inq,
           agentName: newAgentName,
           seenByAgent: false
         };
+        // Sync to Firestore
+        setDoc(doc(db, "inquiries", inq.id), updatedInq).catch(e => console.error("Inquiry Reassign Error:", e));
+        return updatedInq;
       }
       return inq;
     });
@@ -2808,10 +3180,13 @@ export default function App() {
   const handleUpdateContactedStatus = (inquiryId: string, status: 'not_contacted' | 'contacted' | 'attempted') => {
     const updated = inquiries.map(inq => {
       if (inq.id === inquiryId) {
-        return {
+        const updatedInq = {
           ...inq,
           customerContacted: status
         };
+        // Sync to Firestore
+        setDoc(doc(db, "inquiries", inq.id), updatedInq).catch(e => console.error("Inquiry Contacted Status Error:", e));
+        return updatedInq;
       }
       return inq;
     });
@@ -2822,7 +3197,10 @@ export default function App() {
   const handleMarkInquirySeen = (inquiryId: string) => {
     const updated = inquiries.map(inq => {
       if (inq.id === inquiryId) {
-        return { ...inq, seenByAgent: true };
+        const updatedInq = { ...inq, seenByAgent: true };
+        // Sync to Firestore
+        setDoc(doc(db, "inquiries", inq.id), updatedInq).catch(e => console.error("Inquiry Mark Seen Error:", e));
+        return updatedInq;
       }
       return inq;
     });
@@ -2836,6 +3214,8 @@ export default function App() {
     const updated = inquiries.filter(inq => inq.id !== inquiryId);
     setInquiries(updated);
     setStorageItem('sched_inquiries', updated);
+    // Sync to Firestore
+    deleteDoc(doc(db, "inquiries", inquiryId)).catch(e => console.error("Inquiry Delete Error:", e));
   };
 
   const handleSubmitTabbyTamara = (e: FormEvent) => {
@@ -2895,7 +3275,12 @@ ${ttNotes}` : autoNote;
     setTtNotes('');
     setActiveScreenshot(null);
 
+    const assignedTL = getAgentTL(currentUser.name);
+    const targetNotifUser = assignedTL !== 'Unassigned' ? assignedTL : 'tl';
+    addSystemNotification(`💳 New ${ttPlatform.toUpperCase()} Request`, `${currentUser.name} submitted a new request for ${ttPatientName} (${ttPhoneNumber})`, 'general', targetNotifUser);
+
     toast.success(`Your ${ttPlatform === 'tabby' ? 'Tabby' : ttPlatform === 'tamara' ? 'Tamara' : 'One Time Payment'} request has been submitted to the Team Leader for confirmation.`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleConfirmTabbyTamara = (requestId: string, paymentLink: string) => {
@@ -3005,7 +3390,12 @@ ${ttNotes}` : autoNote;
     setTcComplaintDetails('');
     setActiveScreenshot(null);
 
+    const assignedTL = getAgentTL(currentUser.name);
+    const targetNotifUser = assignedTL !== 'Unassigned' ? assignedTL : 'tl';
+    addSystemNotification(`⚠️ New Complaint`, `${currentUser.name} submitted a new complaint for ${tcPatientName} (${tcPhoneNumber})`, 'general', targetNotifUser);
+
     toast.success(`Your complaint has been submitted to the Team Leader for handling.`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSubmitClientComms = (e: FormEvent) => {
@@ -3043,7 +3433,10 @@ ${ttNotes}` : autoNote;
     setCcNotes('');
     setActiveScreenshot(null);
 
+    addSystemNotification(`💬 New Client Comm Request`, `New request submitted for phone: ${ccPhoneNumber}`, 'general', 'all');
+
     toast.success(`Communication request submitted to Chat & Social Media agents successfully!`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleProcessClientComms = (commId: string, notes: string) => {
@@ -3083,12 +3476,15 @@ ${ttNotes}` : autoNote;
     if (!currentUser) return;
     const updated = clientComms.map(c => {
       if (c.id === commId) {
-        return {
+        const updatedComm = {
           ...c,
           status: 'in_progress' as const,
           openedBy: currentUser.name,
           openedAt: new Date().toISOString()
         };
+        // Sync to Firestore
+        setDoc(doc(db, "client_comms", c.id), updatedComm).catch(e => console.error("Client Comm Take Error:", e));
+        return updatedComm;
       }
       return c;
     });
@@ -3412,6 +3808,8 @@ ${ttNotes}` : autoNote;
     const updated = clientComms.filter(c => c.id !== commId);
     setClientComms(updated);
     setStorageItem('sched_client_comms', updated);
+    // Sync to Firestore
+    deleteDoc(doc(db, "client_comms", commId)).catch(e => console.error("Client Comm Delete Error:", e));
   };
 
   const handleTLCommentComplaint = (complaintId: string, comment: string) => {
@@ -3423,13 +3821,16 @@ ${ttNotes}` : autoNote;
 
     const updated = tabbyTamaraComplaints.map(c => {
       if (c.id === complaintId) {
-        return {
+        const updatedComplaint = {
           ...c,
           status: 'need_contact' as const,
           tlComment: comment,
           tlHandledAt: new Date().toISOString(),
           tlHandledBy: currentUser.name
         };
+        // Sync to Firestore
+        setDoc(doc(db, "tt_complaints", c.id), updatedComplaint).catch(e => console.error("TT Complaint Comment Error:", e));
+        return updatedComplaint;
       }
       return c;
     });
@@ -3447,12 +3848,15 @@ ${ttNotes}` : autoNote;
   const handleToggleContactComplaint = (complaintId: string, status: 'not_contacted' | 'contacted') => {
     const updated = tabbyTamaraComplaints.map(c => {
       if (c.id === complaintId) {
-        return {
+        const updatedComplaint = {
           ...c,
           customerContacted: status,
           status: status === 'contacted' ? ('closed' as const) : ('need_contact' as const),
           contactedAt: status === 'contacted' ? new Date().toISOString() : undefined
         };
+        // Sync to Firestore
+        setDoc(doc(db, "tt_complaints", c.id), updatedComplaint).catch(e => console.error("TT Complaint Contact Update Error:", e));
+        return updatedComplaint;
       }
       return c;
     });
@@ -3467,6 +3871,8 @@ ${ttNotes}` : autoNote;
     const updated = tabbyTamaraComplaints.filter(c => c.id !== complaintId);
     setTabbyTamaraComplaints(updated);
     setStorageItem('sched_tt_complaints', updated);
+    // Sync to Firestore
+    deleteDoc(doc(db, "tt_complaints", complaintId)).catch(e => console.error("TT Complaint Delete Error:", e));
   };
 
   const handleCopyCSVReport = () => {
@@ -3564,6 +3970,9 @@ ${ttNotes}` : autoNote;
   };
 
   const visibleAgents = agentsList.filter(agentName => {
+    if (currentUser?.role === 'agent') {
+      return agentName.toLowerCase() === currentUser.name.toLowerCase();
+    }
     return !scheduleFilterAgent || agentName.toLowerCase().includes(scheduleFilterAgent.toLowerCase());
   });
 
@@ -3590,7 +3999,8 @@ ${ttNotes}` : autoNote;
             <button
               onClick={() => {
                 const creds = getStorageItem<Record<string, string>>('sched_credentials', {});
-                if (killSwitchPassword === creds['Hesham Sobhy']) {
+                const correctAdminPass = creds['h.sobhy'] || creds['Hesham Sobhy'] || creds['h.sobhy'.toLowerCase()];
+                if (killSwitchPassword && killSwitchPassword === correctAdminPass) {
                    setDoc(doc(db, "system", "app_status"), { isKilled: false, restoredAt: new Date().toISOString() }, {merge: true});
                    toast.success("System Restored.");
                    setKillSwitchPassword('');
@@ -3646,22 +4056,22 @@ ${ttNotes}` : autoNote;
                 <div className="space-y-6">
                   <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4 text-xs text-blue-200 flex items-start gap-2.5">
                     <Info className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
-                    <div>
+                    <div className="text-left">
                       <p className="font-bold text-slate-100 mb-0.5">First-Time Setup Detected!</p>
-                      Password of your choice will be associated with <span className="font-semibold text-blue-300">"{capitalizeName(loginName)}"</span>. Record this password for future sign-ins.
+                      Password of your choice will be associated with the username <span className="font-semibold text-blue-300">"{loginName.toLowerCase()}"</span>. Record this password for future sign-ins.
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <span className="text-xs uppercase tracking-widest text-slate-400 font-bold block mb-1">Confirming Name</span>
-                    <div className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 font-medium text-sm">
-                      {capitalizeName(loginName)}
+                    <span className="text-xs uppercase tracking-widest text-slate-400 font-bold block mb-1">Confirming Username</span>
+                    <div className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 font-medium text-sm font-mono tracking-wide text-left">
+                      {loginName.toLowerCase()}
                     </div>
                   </div>
 
                   <div className="space-y-1">
                     <span className="text-xs uppercase tracking-widest text-slate-400 font-bold block mb-1">Set Password</span>
-                    <div className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 font-medium text-sm font-mono tracking-widest">
+                    <div className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 font-medium text-sm font-mono tracking-widest text-left">
                       {loginPassword}
                     </div>
                   </div>
@@ -3681,20 +4091,33 @@ ${ttNotes}` : autoNote;
                     }}
                     className="w-full py-2.5 text-slate-400 hover:text-slate-100 text-xs font-semibold transition-colors"
                   >
-                    Go Back / Edit Name
+                    Go Back / Edit Username
                   </button>
                 </div>
               ) : (
                 <form onSubmit={handleLoginSubmit} className="space-y-5">
+                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 text-xs text-amber-200 flex items-start gap-2.5 mb-2">
+                    <Info className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                    <div className="text-left">
+                      <p className="font-bold text-slate-100 mb-0.5">📢 Important Notice: New Login Style!</p>
+                      <p className="mb-1.5 text-slate-300">Sessions were reset for a simpler login structure. Use your new username format:</p>
+                      <div className="bg-black/40 p-2 rounded-xl border border-white/10 mb-1">
+                        <p className="text-[10px] text-slate-400 font-mono">Format: <strong className="text-amber-300">first_letter.last_name</strong></p>
+                        <p className="text-[10px] text-slate-400 font-mono">Example: <strong className="text-cyan-300">h.sobhy</strong> (for Hesham Sobhy)</p>
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-1">Your existing, pre-agreed password continues to work normally.</p>
+                    </div>
+                  </div>
+
                   <div className="space-y-1.5">
-                    <label className="text-xs uppercase tracking-widest text-slate-400 font-bold block" htmlFor="login-name">
-                      Full Name
+                    <label className="text-xs uppercase tracking-widest text-slate-400 font-bold block text-left" htmlFor="login-name">
+                      Username
                     </label>
                     <input
                       id="login-name"
                       type="text"
-                      className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-sm"
-                      placeholder="e.g. Hesham Sobhy or Ahmed Aly"
+                      className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-sm font-mono font-medium"
+                      placeholder="e.g. h.sobhy"
                       value={loginName}
                       onChange={(e) => setLoginName(e.target.value)}
                       required
@@ -3702,7 +4125,7 @@ ${ttNotes}` : autoNote;
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs uppercase tracking-widest text-slate-400 font-bold block" htmlFor="login-password">
+                    <label className="text-xs uppercase tracking-widest text-slate-400 font-bold block text-left" htmlFor="login-password">
                       Password
                     </label>
                     <input
@@ -3714,8 +4137,8 @@ ${ttNotes}` : autoNote;
                       onChange={(e) => setLoginPassword(e.target.value)}
                       required
                     />
-                    <p className="text-[10px] text-slate-400">
-                      * If this is your first time using the app, you will register this password.
+                    <p className="text-[10px] text-slate-400 text-left">
+                      * If this is your first time using the app with your new username, you will set & register this password.
                     </p>
                   </div>
 
@@ -3832,22 +4255,40 @@ ${ttNotes}` : autoNote;
                     </div>
                   </div>
 
-                  {/* Notification Center Trigger */}
-                  <button
-                    onClick={() => setIsNotifDrawerOpen(true)}
-                    className="relative p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-slate-300 hover:text-slate-100 cursor-pointer group"
-                    title="Real-time Alerts Inbox"
-                  >
-                    <Bell className="w-4 h-4" />
-                    {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500 text-[8px] font-black font-sans text-white items-center justify-center">
-                          {unreadCount}
+                  <div className="flex items-center gap-1.5">
+                    {/* Dark/Light mode toggle */}
+                    <button
+                      onClick={() => {
+                        setIsDarkMode(!isDarkMode);
+                        toast.success(`Theme switched to ${!isDarkMode ? 'Dark' : 'Light'} Mode! 🎨`);
+                      }}
+                      className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-slate-300 hover:text-slate-100 cursor-pointer flex items-center justify-center"
+                      title="Toggle Dark/Light Mode"
+                    >
+                      {isDarkMode ? (
+                        <span className="text-xs leading-none">☀️</span>
+                      ) : (
+                        <span className="text-xs leading-none">🌙</span>
+                      )}
+                    </button>
+
+                    {/* Notification Center Trigger */}
+                    <button
+                      onClick={() => setIsNotifDrawerOpen(true)}
+                      className="relative p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-slate-300 hover:text-slate-100 cursor-pointer group flex items-center justify-center"
+                      title="Real-time Alerts Inbox"
+                    >
+                      <Bell className="w-4 h-4" />
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500 text-[8px] font-black font-sans text-white flex items-center justify-center">
+                            {unreadCount}
+                          </span>
                         </span>
-                      </span>
-                    )}
-                  </button>
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
@@ -3860,6 +4301,55 @@ ${ttNotes}` : autoNote;
                       <p className="text-[10px] uppercase tracking-widest font-mono text-indigo-300 font-semibold">
                         {currentUser.role === 'tl' ? '👑 Team Leader' : (supportAssignments[currentUser.name] ? '⚡ Support' : '👤 Agent')}
                       </p>
+                    </div>
+                  </div>
+
+                  {/* Spotlight Profile Window - Bio & Daily Updates with real-time Firebase syncing */}
+                  <div className="mt-3 pt-3 border-t border-white/5 space-y-2.5 font-sans">
+                    <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-slate-500 font-bold">
+                      <span>My Spotlight 🌟</span>
+                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-black tracking-normal uppercase ${
+                        (currentUser.status || 'online') === 'online' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 animate-pulse' :
+                        (currentUser.status || 'online') === 'busy' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/20' :
+                        (currentUser.status || 'online') === 'away' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/20' :
+                        'bg-slate-500/20 text-slate-400 border border-slate-500/25'
+                      }`}>
+                        {(currentUser.status || 'online')}
+                      </span>
+                    </div>
+
+                    {/* Quick Profile Bio */}
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Short Bio:</label>
+                      <textarea
+                        value={currentUser.bio || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const userDocId = currentUser.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                          setCurrentUser(prev => prev ? { ...prev, bio: val } : null);
+                          setDoc(doc(db, "users", userDocId), { bio: val }, { merge: true }).catch(console.error);
+                        }}
+                        placeholder="Tell others about yourself..."
+                        rows={2}
+                        className="w-full bg-slate-900/50 border border-white/5 rounded-lg px-2 py-1 text-[11px] text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/40 transition-all resize-none custom-scrollbar"
+                      />
+                    </div>
+
+                    {/* Daily Updates small window */}
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Daily Updates / Focus: 📝</label>
+                      <textarea
+                        value={currentUser.dailyUpdate || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const userDocId = currentUser.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                          setCurrentUser(prev => prev ? { ...prev, dailyUpdate: val } : null);
+                          setDoc(doc(db, "users", userDocId), { dailyUpdate: val }, { merge: true }).catch(console.error);
+                        }}
+                        placeholder="E.g. working on social media posts..."
+                        rows={2}
+                        className="w-full bg-slate-900/50 border border-white/5 rounded-lg px-2 py-1 text-[11px] text-indigo-300 placeholder:text-slate-500 focus:outline-none focus:border-purple-500/45 transition-all resize-none custom-scrollbar"
+                      />
                     </div>
                   </div>
 
@@ -3941,20 +4431,20 @@ ${ttNotes}` : autoNote;
                   const buildBtn = (id, icon, label, bgColors = '') => {
                     const isActive = activeTab === id;
                     const baseClass = isActive 
-                      ? (`${bgColors} text-slate-100 shadow-sm font-bold border`)
-                      : 'border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-100 border font-medium';
+                      ? (`${bgColors} text-white shadow-lg scale-[1.02] font-bold border`)
+                      : 'border-transparent text-slate-300 hover:bg-slate-700/60 hover:text-white border font-medium hover:scale-[1.01]';
                     
                     return (
                       <button
                         key={id}
                         onClick={() => setActiveTab(id)}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all text-sm ${baseClass}`}
+                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-300 text-sm ${baseClass} group`}
                       >
                         <span className="flex items-center gap-2.5">
                           {icon}
                           {label}
                         </span>
-                        <ChevronRight className={`w-4 h-4 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`} />
+                        <ChevronRight className={`w-4 h-4 transition-all duration-300 ${isActive ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 group-hover:opacity-50 group-hover:translate-x-0'}`} />
                       </button>
                     );
                   };
@@ -3968,52 +4458,59 @@ ${ttNotes}` : autoNote;
                   if (isTLOreSupport) {
                      return (
                       <>
+                        {groupTitle("Operations & Triage", "📋", "text-teal-600")}
+                        {buildBtn("tl-announcements", <Bell className="w-4 h-4 text-yellow-400" />, "TL Announcements", "bg-yellow-500/20 border-yellow-500/30 text-yellow-100")}
+                        {buildBtn("client-search", <Search className="w-4 h-4 text-cyan-400" />, "Patient Search Hub", "bg-cyan-500/20 border-cyan-500/30 text-cyan-100")}
+                        {buildBtn("chat", <MessageCircle className="w-4 h-4 text-pink-500" />, "Live Team Chat", "bg-pink-500/20 border-pink-500/30 text-pink-100")}
+                        {buildBtn("inquiries", <HelpCircle className="w-4 h-4 text-amber-500" />, "General Inquiries", "bg-amber-500/20 border-amber-500/30 text-amber-100")}
+                        {buildBtn("tabby-tamara", <Wallet className="w-4 h-4 text-rose-500" />, "Tabby & Tamara Requests", "bg-rose-500/20 border-rose-500/30 text-rose-100")}
+                        {buildBtn("complaints", <AlertTriangle className="w-4 h-4 text-red-500" />, "Complaints", "bg-red-500/20 border-red-500/30 text-red-100")}
+                        {buildBtn("client-comms", <MessageSquare className="w-4 h-4 text-sky-500" />, "Client Comm Requests", "bg-sky-500/20 border-sky-500/30 text-sky-100")}
+                        {buildBtn("cases", <History className="w-4 h-4 text-orange-500" />, "My Cases", "bg-orange-500/20 border-orange-500/30 text-orange-100")}
+
                         {groupTitle("Core Analytics & RTM", "📊", "text-indigo-600")}
-                        {buildBtn("profile", <UserIcon className="w-4 h-4 text-pink-400" />, "My Profile & Workspace", "bg-slate-800 border-slate-700 hover:border-pink-500/50")}
+                        {buildBtn("profile", <UserIcon className="w-4 h-4 text-pink-400" />, "My Profile & Workspace", "bg-indigo-500/20 border-indigo-500/30 text-indigo-100")}
                         {buildBtn("dashboard", <LayoutDashboard className="w-4 h-4 text-indigo-500" />, "Global Dashboard", "bg-indigo-900 border-indigo-800")}
                         {buildBtn("time-logs", <Activity className="w-4 h-4 text-emerald-500" />, "Live RTM & Agent Logs", "bg-emerald-900 border-emerald-800")}
                         {buildBtn("report", <BarChart2 className="w-4 h-4 text-purple-500" />, "Daily Metrics Reports", "bg-purple-900 border-purple-800")}
 
                         {groupTitle("Workforce Management", "📅", "text-blue-600")}
-                        {buildBtn("schedules", <Calendar className="w-4 h-4" />, "Schedules & Roster", "bg-slate-800 border-slate-700")}
-                        {buildBtn("overview", <UserCheck className="w-4 h-4" />, "Approvals & Leave Console", "bg-slate-800 border-slate-700")}
-
-                        {groupTitle("Operations & Triage", "📋", "text-teal-600")}
-                        {buildBtn("chat", <MessageCircle className="w-4 h-4 text-pink-500" />, "Live Team Chat", "bg-slate-800 border-slate-700")}
-                        {buildBtn("inquiries", <HelpCircle className="w-4 h-4 text-amber-500" />, "General Inquiries", "bg-slate-800 border-slate-700")}
-                        {buildBtn("tabby-tamara", <Wallet className="w-4 h-4 text-rose-500" />, "Tabby & Tamara Requests", "bg-slate-800 border-slate-700")}
-                        {buildBtn("complaints", <AlertTriangle className="w-4 h-4 text-red-500" />, "Complaints", "bg-slate-800 border-slate-700")}
-                        {buildBtn("client-comms", <MessageSquare className="w-4 h-4 text-sky-500" />, "Client Comm Requests", "bg-slate-800 border-slate-700")}
-                        {buildBtn("cases", <History className="w-4 h-4 text-orange-500" />, "My Cases", "bg-slate-800 border-slate-700")}
-
+                        {buildBtn("schedules", <Calendar className="w-4 h-4" />, "Schedules & Roster", "bg-blue-500/20 border-blue-500/30 text-blue-100")}
+                        {buildBtn("overview", <UserCheck className="w-4 h-4" />, "Approvals & Leave Console", "bg-blue-500/20 border-blue-500/30 text-blue-100")}
+                        
                         {groupTitle("System Controls", "⚙️", "text-slate-400")}
                         {buildBtn("integrations", <Sparkles className="w-4 h-4 text-amber-400" />, "Integrations Hub", "bg-indigo-900/30 border-indigo-800")}
-                        {buildBtn("directory", <Users className="w-4 h-4 text-cyan-600" />, "Headcount & Directory", "bg-slate-800 border-slate-700")}
-                        {buildBtn("tl-feedback", <MessageCircle className="w-4 h-4 text-pink-500" />, "Director Hub", "bg-slate-800 border-slate-700")}
+                        {buildBtn("directory", <Users className="w-4 h-4 text-cyan-600" />, "Headcount & Directory", "bg-slate-500/20 border-slate-500/30 text-slate-200")}
+                        {buildBtn("tl-feedback", <MessageCircle className="w-4 h-4 text-pink-500" />, "Director Hub", "bg-pink-500/20 border-pink-500/30 text-pink-100")}
+                        {buildBtn("qa-scorecard", <CheckCircle2 className="w-4 h-4 text-green-500" />, "QA Scorecards", "bg-green-500/20 border-green-500/30 text-green-100")}
                         {isMasterAdmin && buildBtn("admin", <ShieldCheck className="w-4 h-4 text-rose-600" />, "Super Admin Control", "bg-rose-900 border-rose-800")}
                       </>
                      );
                   } else {
                      return (
                       <>
+                        {groupTitle("Operations & Triage", "📋", "text-teal-600")}
+                        {buildBtn("tl-announcements", <Bell className="w-4 h-4 text-yellow-400" />, "Updates & Announcements", "bg-yellow-500/20 border-yellow-500/30 text-yellow-100")}
+                        {buildBtn("client-search", <Search className="w-4 h-4 text-cyan-400" />, "Patient Search Hub", "bg-cyan-500/20 border-cyan-500/30 text-cyan-100")}
+                        {buildBtn("chat", <MessageCircle className="w-4 h-4 text-pink-500" />, "Live Team Chat", "bg-pink-500/20 border-pink-500/30 text-pink-100")}
+                        {buildBtn("inquiries", <HelpCircle className="w-4 h-4 text-amber-500" />, "General Inquiries", "bg-amber-500/20 border-amber-500/30 text-amber-100")}
+                        {buildBtn("tabby-tamara", <Wallet className="w-4 h-4 text-rose-500" />, "Tabby & Tamara Requests", "bg-rose-500/20 border-rose-500/30 text-rose-100")}
+                        {buildBtn("complaints", <AlertTriangle className="w-4 h-4 text-red-500" />, "Complaints", "bg-red-500/20 border-red-500/30 text-red-100")}
+                        {buildBtn("client-comms", <MessageSquare className="w-4 h-4 text-sky-500" />, "Client Comm Requests", "bg-sky-500/20 border-sky-500/30 text-sky-100")}
+                        {buildBtn("cases", <History className="w-4 h-4 text-orange-500" />, "My Cases", "bg-orange-500/20 border-orange-500/30 text-orange-100")}
+                        {buildBtn("qa-scorecard", <CheckCircle2 className="w-4 h-4 text-green-500" />, "My QA Scorecards", "bg-green-500/20 border-green-500/30 text-green-100")}
+
                         {groupTitle("My Core Workspace", "📊", "text-indigo-600")}
-                        {buildBtn("profile", <UserIcon className="w-4 h-4 text-pink-400" />, "My Profile & Workspace", "bg-slate-800 border-slate-700 hover:border-pink-500/50")}
+                        {buildBtn("profile", <UserIcon className="w-4 h-4 text-pink-400" />, "My Profile & Workspace", "bg-indigo-500/20 border-indigo-500/30 text-indigo-100")}
                         {buildBtn("dashboard", <LayoutDashboard className="w-4 h-4 text-indigo-500" />, "Personal Dashboard", "bg-indigo-900 border-indigo-800")}
                         {buildBtn("clocking", <Activity className="w-4 h-4 text-emerald-500" />, "My Time Logs & Status", "bg-emerald-900 border-emerald-800")}
 
                         {groupTitle("My Planning & Leave", "📅", "text-blue-600")}
-                        {buildBtn("schedules", <Calendar className="w-4 h-4" />, "My Schedule", "bg-slate-800 border-slate-700")}
-                        {buildBtn("my-requests", <GitPullRequest className="w-4 h-4" />, "My Swap & Leave Requests", "bg-slate-800 border-slate-700")}
+                        {buildBtn("schedules", <Calendar className="w-4 h-4" />, "My Schedule", "bg-blue-500/20 border-blue-500/30 text-blue-100")}
+                        {buildBtn("apply", <PlusCircle className="w-4 h-4 text-emerald-400" />, "Submit Leave / Swap", "bg-emerald-500/20 border-emerald-500/30 text-emerald-100")}
+                        {buildBtn("my-requests", <GitPullRequest className="w-4 h-4" />, "My Swap & Leave Requests", "bg-blue-500/20 border-blue-500/30 text-blue-100")}
 
-                        {groupTitle("Operations & Triage", "📋", "text-teal-600")}
-                        {buildBtn("chat", <MessageCircle className="w-4 h-4 text-pink-500" />, "Live Team Chat", "bg-slate-800 border-slate-700")}
-                        {buildBtn("inquiries", <HelpCircle className="w-4 h-4 text-amber-500" />, "General Inquiries", "bg-slate-800 border-slate-700")}
-                        {buildBtn("tabby-tamara", <Wallet className="w-4 h-4 text-rose-500" />, "Tabby & Tamara Requests", "bg-slate-800 border-slate-700")}
-                        {buildBtn("complaints", <AlertTriangle className="w-4 h-4 text-red-500" />, "Complaints", "bg-slate-800 border-slate-700")}
-                        {buildBtn("client-comms", <MessageSquare className="w-4 h-4 text-sky-500" />, "Client Comm Requests", "bg-slate-800 border-slate-700")}
-                        {buildBtn("cases", <History className="w-4 h-4 text-orange-500" />, "My Cases", "bg-slate-800 border-slate-700")}
-
-                        {buildBtn("tl-feedback", <MessageCircle className="w-4 h-4 text-pink-500" />, "TL Hub", "bg-slate-800 border-slate-700")}
+                        {buildBtn("tl-feedback", <MessageCircle className="w-4 h-4 text-pink-500" />, "TL Hub", "bg-pink-500/20 border-pink-500/30 text-pink-100")}
                       </>
                      );
                   }
@@ -4068,7 +4565,15 @@ ${ttNotes}` : autoNote;
                         c.agentName.toLowerCase() === currentUser.name.toLowerCase() &&
                         c.createdAt.startsWith(getLocalISOString())
                       ).length}
+                      inquiriesCount={inquiries.filter(i => 
+                        currentUser.role === 'tl' || i.agentName.toLowerCase() === currentUser.name.toLowerCase()
+                      ).length}
+                      ttRequestsCount={tabbyTamaraRequests.filter(i => 
+                        currentUser.role === 'tl' || i.agentName.toLowerCase() === currentUser.name.toLowerCase()
+                      ).length}
+                      qaScores={qaScores}
                       onNavigate={(tab) => setActiveTab(tab)}
+                      announcements={announcements}
                     />
                   )}
               
@@ -4505,22 +5010,115 @@ ${ttNotes}` : autoNote;
 
               {activeTab === 'chat' && currentUser && (
                 <div className="flex-1 overflow-hidden min-h-0 h-full max-w-7xl mx-auto w-full p-0 sm:p-4 animate-fade-in relative z-10">
-                  <MessagingSystem currentUser={currentUser} agentsList={agentsList} />
+                  <MessagingSystem currentUser={currentUser} agentsList={agentsList} registeredUsers={registeredUsers} addSystemNotification={addSystemNotification} />
                 </div>
               )}
 
               {activeTab === 'dashboard' && (
                 <div className="space-y-6">
 
-                {/* DASHBOARD REMOVED FOR DEBUGGING */}
+                {(() => {
+                  const range = {
+                    startTimeMs: new Date(`${selectedDashboardDate}T07:00:00`).getTime(),
+                    endTimeMs: new Date(`${selectedDashboardDate}T07:00:00`).getTime() + 24 * 60 * 60 * 1000 - 1,
+                    startLabel: selectedDashboardDate,
+                    endLabel: new Date(new Date(`${selectedDashboardDate}T07:00:00`).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                  };
+                  const isInOpDay = (ts: string | number) => {
+                    const d = new Date(ts).getTime();
+                    return d >= range.startTimeMs && d <= range.endTimeMs;
+                  };
 
+                  const isAllowedToView = (agentName: string) => {
+                    if (currentUser.role === 'tl' || currentUser.name.toLowerCase() === 'hesham sobhy' || currentUser.name.toLowerCase() === 'amira hassan' || currentUser.name.toLowerCase() === 'shaymaa hassan') return true;
+                    return agentName.toLowerCase() === currentUser.name.toLowerCase();
+                  };
 
+                  const opInquiries = inquiries.filter(i => isInOpDay(i.createdAt) && isAllowedToView(i.agentName));
+                  const answeredInquiries = opInquiries.filter(i => i.status === 'answered');
+                  const avgResTimeMin = opInquiries.length ? Math.round(answeredInquiries.reduce((acc, curr) => acc + ((new Date(curr.answeredAt || Date.now()).getTime() - new Date(curr.createdAt).getTime()) / 60000), 0) / opInquiries.length) : 0;
+                  
+                  const opFintech = tabbyTamaraRequests.filter(r => isInOpDay(r.createdAt) && isAllowedToView(r.agentName));
+                  const confirmedFintech = opFintech.filter(i => i.status === 'confirmed' || i.status === 'rejected');
+                  const fintechRate = opFintech.length ? Math.round((confirmedFintech.length / opFintech.length) * 100) : 100;
+                  
+                  const opComplaints = tabbyTamaraComplaints.filter(c => isInOpDay(c.createdAt) && isAllowedToView(c.agentName));
+                  const closedComplaints = opComplaints.filter(i => i.status === 'resolved' || i.status === 'closed');
+                  
+                  const opComms = clientComms.filter(c => isInOpDay(c.createdAt) && isAllowedToView(c.callCenterAgentName || ''));
+                  const contactedComms = opComms.filter(i => i.status === 'contacted' || i.status === 'resolved' || i.status === 'closed_no_answer');
+                  
+                  const opCases = cases.filter(c => isInOpDay(c.createdAt) && isAllowedToView(c.agentName));
+                  
+                  const opTimeLogs = timeLogs.filter(log => {
+                    const matchesAgent = isAllowedToView(log.agentName);
+                    if (!matchesAgent) return false;
+                    if (log.clockIn) {
+                      const cIn = new Date(log.clockIn).getTime();
+                      return cIn >= range.startTimeMs && cIn <= range.endTimeMs;
+                    }
+                    return log.date === selectedDashboardDate;
+                  });
 
+                  const totalSubmissions = opInquiries.length + opFintech.length + opComplaints.length + opComms.length + opCases.length;
+                  const totalProcessed = answeredInquiries.length + confirmedFintech.length + closedComplaints.length + contactedComms.length + opCases.filter(c => c.status === 'resolved').length;
+                  const resolutionRate = totalSubmissions ? Math.round((totalProcessed / totalSubmissions) * 100) : 100;
+                  const operationsScore = Math.min(100, Math.max(0, resolutionRate + (fintechRate * 0.2) - (avgResTimeMin * 0.1)));
 
+                  const hourlyCounts = Array.from({length: 24}, (_, i) => {
+                    const hr = (i + 7) % 24;
+                    const inq = opInquiries.filter(inq => new Date(inq.createdAt).getHours() === hr).length;
+                    const comm = opComms.filter(c => new Date(c.createdAt).getHours() === hr).length;
+                    const fin = opFintech.filter(f => new Date(f.createdAt).getHours() === hr).length;
+                    const totalLoad = inq + comm + fin;
+                    let hrLabel = hr % 12;
+                    hrLabel = hrLabel ? hrLabel : 12;
+                    return { 
+                      hour: hr,
+                      hourLabel: `${hrLabel}${hr >= 12 ? 'PM' : 'AM'}`,
+                      time: `${hr.toString().padStart(2, '0')}:00`, 
+                      inquiries: inq,  
+                      comms: comm,
+                      fintech: fin,
+                      totalLoad,
+                      presence: 0
+                    };
+                  });
+                  const peakLoad = hourlyCounts.reduce((max, h) => h.totalLoad > max.totalLoad ? h : max, hourlyCounts[0]);
+                  const peakPresence = peakLoad; 
 
-
-
-
+                  return (
+                    <>
+                    {/* NEW LOGIN STYLE REMINDER BANNER */}
+                    <div className="bg-gradient-to-r from-indigo-500/10 to-blue-500/10 border border-indigo-500/20 rounded-3xl p-5 shadow-2xl relative overflow-hidden backdrop-blur-md">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
+                      <div className="flex flex-col sm:flex-row items-start gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
+                          <Info className="w-5 h-5 text-indigo-400" />
+                        </div>
+                        <div className="text-left space-y-1">
+                          <h3 className="text-sm font-bold text-slate-100 flex items-center gap-1.5">
+                            📢 Important Account Notice: New Log In Format!
+                          </h3>
+                          <p className="text-xs text-slate-300 leading-relaxed">
+                            The system now uses a cleaner, simplified username format instead of full names. Everyone was securely logged out.
+                          </p>
+                          <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                            <span className="text-xs uppercase tracking-widest text-slate-400 font-bold">Your Login ID:</span>
+                            <code className="px-2.5 py-1 bg-black/40 border border-white/10 rounded-lg text-xs font-mono text-cyan-300">
+                              first_letter.last_name
+                            </code>
+                            <span className="text-xs text-slate-400 font-semibold">• e.g., Hesham Sobhy enters</span>
+                            <code className="px-2 py-0.5 bg-black/40 border border-white/5 rounded-md text-xs font-mono text-amber-300 font-bold">
+                              h.sobhy
+                            </code>
+                          </div>
+                          <p className="text-[10px] text-slate-400 pt-1">
+                            * Your pre-agreed passwords remain exactly the same.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
 
                     {/* View Mode Switching Tab Toggles */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/5 border border-white/10 p-2.5 rounded-3xl select-none">
@@ -4835,7 +5433,12 @@ ${ttNotes}` : autoNote;
                                 </div>
 
                                 <div className="md:col-span-8 grid grid-cols-2 gap-4">
-                                  <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between">
+                                  <motion.div 
+                                    initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    transition={{ duration: 0.35, ease: "easeOut" }}
+                                    className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between hover:bg-white/10 transition-colors"
+                                  >
                                     <div className="flex justify-between items-center text-indigo-400">
                                       <HelpCircle className="w-4 h-4" />
                                       <span className="text-[9px] font-mono bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded text-indigo-300">Inquiries</span>
@@ -4844,9 +5447,14 @@ ${ttNotes}` : autoNote;
                                       <p className="text-2xl font-mono text-slate-100 font-black">{myDailyInq.length}</p>
                                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Medical Qs Logged</p>
                                     </div>
-                                  </div>
+                                  </motion.div>
 
-                                  <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between">
+                                  <motion.div 
+                                    initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    transition={{ duration: 0.35, ease: "easeOut", delay: 0.05 }}
+                                    className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between hover:bg-white/10 transition-colors"
+                                  >
                                     <div className="flex justify-between items-center text-emerald-400">
                                       <Wallet className="w-4 h-4" />
                                       <span className="text-[9px] font-mono bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded text-emerald-300">Fintech</span>
@@ -4855,9 +5463,14 @@ ${ttNotes}` : autoNote;
                                       <p className="text-2xl font-mono text-slate-100 font-black">{myDailyFin.length}</p>
                                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Tabby & Tamara Link Requests</p>
                                     </div>
-                                  </div>
+                                  </motion.div>
 
-                                  <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between">
+                                  <motion.div 
+                                    initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    transition={{ duration: 0.35, ease: "easeOut", delay: 0.1 }}
+                                    className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between hover:bg-white/10 transition-colors"
+                                  >
                                     <div className="flex justify-between items-center text-pink-400">
                                       <MessageSquare className="w-4 h-4" />
                                       <span className="text-[9px] font-mono bg-pink-500/10 border border-pink-500/20 px-1.5 py-0.5 rounded text-pink-300">Client Comms</span>
@@ -4866,10 +5479,15 @@ ${ttNotes}` : autoNote;
                                       <p className="text-2xl font-mono text-slate-100 font-black">{myDailyCom.length}</p>
                                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Client Dials Handled</p>
                                     </div>
-                                  </div>
+                                  </motion.div>
 
                                   {currentUser.role === 'agent' && (
-                                  <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between">
+                                  <motion.div 
+                                    initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    transition={{ duration: 0.35, ease: "easeOut", delay: 0.15 }}
+                                    className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between hover:bg-white/10 transition-colors"
+                                  >
                                     <div className="flex justify-between items-center text-cyan-400">
                                       <Clock className="w-4 h-4 animate-pulse" />
                                       <span className="text-[9px] font-mono bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded text-cyan-300">Shift</span>
@@ -4878,7 +5496,7 @@ ${ttNotes}` : autoNote;
                                       <p className="text-[14px] font-mono text-slate-100 font-bold truncate">{clockInStr} - {clockOutStr}</p>
                                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Shift Active Stream</p>
                                     </div>
-                                  </div>
+                                  </motion.div>
                                   )}
                                 </div>
                               </div>
@@ -4891,7 +5509,12 @@ ${ttNotes}` : autoNote;
                                 </h3>
 
                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
-                                  <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-between">
+                                  <motion.div 
+                                    initial={{ opacity: 0, scale: 0.97 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-between"
+                                  >
                                     <div>
                                       <p className="text-[10px] text-slate-400 font-black uppercase">Schedule Compliance</p>
                                       <p className={`text-sm font-bold mt-0.5 ${isLate ? 'text-pink-400' : 'text-emerald-400'}`}>
@@ -4899,9 +5522,14 @@ ${ttNotes}` : autoNote;
                                       </p>
                                     </div>
                                     <Calendar className="w-4 h-4 text-slate-500" />
-                                  </div>
+                                  </motion.div>
 
-                                  <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-between">
+                                  <motion.div 
+                                    initial={{ opacity: 0, scale: 0.97 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.3, delay: 0.05 }}
+                                    className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-between"
+                                  >
                                     <div>
                                       <p className="text-[10px] text-slate-400 font-black uppercase">Total Active Work</p>
                                       <p className="text-sm font-bold text-slate-100 mt-0.5 font-mono">
@@ -4909,9 +5537,14 @@ ${ttNotes}` : autoNote;
                                       </p>
                                     </div>
                                     <Clock className="w-4 h-4 text-cyan-400 animate-spin-slow" />
-                                  </div>
+                                  </motion.div>
 
-                                  <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-between">
+                                  <motion.div 
+                                    initial={{ opacity: 0, scale: 0.97 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.3, delay: 0.1 }}
+                                    className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-between"
+                                  >
                                     <div>
                                       <p className="text-[10px] text-slate-400 font-black uppercase">Restroom duration</p>
                                       <p className={`text-sm font-mono font-bold mt-0.5 ${restroomMins > 10 ? 'text-pink-400 animate-pulse' : 'text-slate-300'}`}>
@@ -4919,9 +5552,14 @@ ${ttNotes}` : autoNote;
                                       </p>
                                     </div>
                                     <Coffee className="w-4 h-4 text-slate-400" />
-                                  </div>
+                                  </motion.div>
 
-                                  <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-between">
+                                  <motion.div 
+                                    initial={{ opacity: 0, scale: 0.97 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.3, delay: 0.15 }}
+                                    className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-between"
+                                  >
                                     <div>
                                       <p className="text-[10px] text-slate-400 font-black uppercase">Breaks & Lunch Used</p>
                                       <p className={`text-sm font-mono font-bold mt-0.5 ${breakMins + lunchMins > 45 ? 'text-pink-400' : 'text-slate-300'}`}>
@@ -4929,7 +5567,7 @@ ${ttNotes}` : autoNote;
                                       </p>
                                     </div>
                                     <Sparkles className="w-4 h-4 text-amber-400" />
-                                  </div>
+                                  </motion.div>
                                 </div>
                               </div>
                               )}
@@ -5641,6 +6279,50 @@ ${ttNotes}` : autoNote;
                             </div>
                           </div>
                         </div>
+
+                        {/* 5. QA Performance */}
+                        <div className="p-5 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-md hover:border-green-500/30 transition-all flex flex-col justify-between cursor-pointer" onClick={() => setActiveTab('qa-scorecard')}>
+                          <div>
+                            <div className="flex justify-between items-start">
+                              <span className="p-2 bg-green-500/15 text-green-400 rounded-2xl border border-green-500/20">
+                                <ShieldCheck className="w-5 h-5" />
+                              </span>
+                              <span className="text-right text-[10px] font-black uppercase tracking-widest text-green-300 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">
+                                QA Metrics
+                              </span>
+                            </div>
+                            <h3 className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-4">QA Score</h3>
+                            <div className="flex items-baseline gap-2 mt-1">
+                              {(() => {
+                                const qas = qaScores.filter(q => isInOpDay(q.createdAt));
+                                const avg = qas.length ? Math.round((qas.reduce((a, b) => a + (b.totalScore / b.maxTotalScore), 0) / qas.length) * 100) : null;
+                                return (
+                                  <>
+                                    <span className={`text-3xl font-black font-mono ${avg && avg < 70 ? 'text-red-400' : 'text-slate-100'}`}>
+                                      {avg !== null ? `${avg}%` : 'N/A'}
+                                    </span>
+                                    <span className="text-xs text-slate-400">Average Performance</span>
+                                    {/* We inject the values specifically here so they're in scope */}
+                                    <span className="hidden qa-count">{qas.length}</span>
+                                  </>
+                                )
+                              })()}
+                            </div>
+                          </div>
+                          <div className="border-t border-white/5 mt-4 pt-3 flex justify-between text-xs text-slate-300">
+                            <div>
+                                {(() => {
+                                  const qasLength = qaScores.filter(q => isInOpDay(q.createdAt)).length;
+                                  return (
+                                    <>
+                                      <p className="text-slate-100 font-black font-mono">{qasLength}</p>
+                                      <p className="text-[10px] text-slate-400">Total Evaluations Today</p>
+                                    </>
+                                  )
+                                })()}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -5708,7 +6390,7 @@ ${ttNotes}` : autoNote;
                             const dataPoints = hourlyCounts.map((hc, idx) => {
                               const x = (idx / 23) * 100; // Match 0 to 23 hours nicely
                               let val = hc.totalLoad;
-                              let maxVal = peakLoad;
+                              let maxVal = peakLoad.totalLoad;
                               if (dashboardChartMetric === 'inquiries') {
                                 val = hc.inquiries;
                                 maxVal = Math.max(...hourlyCounts.map(h => h.inquiries), 1);
@@ -5717,7 +6399,7 @@ ${ttNotes}` : autoNote;
                                 maxVal = Math.max(...hourlyCounts.map(h => h.fintech), 1);
                               } else if (dashboardChartMetric === 'presence') {
                                 val = hc.presence;
-                                maxVal = peakPresence;
+                                maxVal = peakPresence.presence || 1;
                               }
                               // Calculate height % from bottom
                               const y = 90 - (val / (maxVal || 1)) * 80;
@@ -5871,7 +6553,8 @@ ${ttNotes}` : autoNote;
                             const scheduledForDay = schedules.filter(s => 
                               s.date === selectedDashboardDate && 
                               s.shiftLabel && 
-                              !['OFF', 'DAY OFF', 'LEAVE', 'VACATION'].includes(s.shiftLabel.toUpperCase())
+                              !['OFF', 'DAY OFF', 'LEAVE', 'VACATION'].includes(s.shiftLabel.toUpperCase()) &&
+                              isAllowedToView(s.agentName)
                             );
 
                             const scheduledAgentNames = new Set(scheduledForDay.map(s => s.agentName.toLowerCase()));
@@ -6077,7 +6760,11 @@ ${ttNotes}` : autoNote;
                     </div>
                   </div>
                 )}
-
+                    </>
+                  );
+                })()}
+              </div>
+            )}
 
               {/* Approvals & Leave Console (Only TL) */}
               {isTLOreSupport && activeTab === 'overview' && (
@@ -7464,6 +8151,29 @@ ${ttNotes}` : autoNote;
               )}
 
               {/* Agent Inquiries Desk */}
+              {activeTab === 'client-search' && (
+                <div className="w-full">
+                  <PatientSearchHub 
+                    inquiries={inquiries}
+                    ttRequests={tabbyTamaraRequests}
+                    ttComplaints={tabbyTamaraComplaints}
+                    clientComms={clientComms}
+                    cases={cases}
+                  />
+                </div>
+              )}
+
+              {/* TL Announcements */}
+              {activeTab === 'tl-announcements' && currentUser && (
+                <div className="w-full">
+                  <AnnouncementsTab 
+                    announcements={announcements} 
+                    currentUser={currentUser} 
+                    addSystemNotification={addSystemNotification}
+                  />
+                </div>
+              )}
+
               {currentUser.role === 'agent' && activeTab === 'inquiries' && (
                 <div id="agent-inquiries-tab" className="space-y-6 animate-fade-in">
                   {/* Page Title */}
@@ -7498,11 +8208,11 @@ ${ttNotes}` : autoNote;
                             required
                           >
                             <option value="" className="bg-slate-800 text-slate-100 ">-- Select Clinic * --</option>
-                            <option value="Dermadent vip" className="bg-slate-800 text-slate-100 ">Dermadent VIP</option>
                             <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
-                            <option value="onetouch" className="bg-slate-800 text-slate-100 ">OneTouch</option>
+                            <option value="onetouch1" className="bg-slate-800 text-slate-100 ">One Touch 1 AlMu'tarid</option>
+                            <option value="onetouch2" className="bg-slate-800 text-slate-100 ">One Touch 2 Markhaniya</option>
                             <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
-                            <option value="newage" className="bg-slate-800 text-slate-100 ">NewAge</option>
+                            <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
                           </select>
                         </div>
 
@@ -8398,11 +9108,11 @@ ${ttNotes}` : autoNote;
 
                       <div className="grid grid-cols-1 md:grid-cols-5 gap-3.5 pt-2">
                         {[
-                          { key: 'Dermadent vip', display: 'Dermadent VIP', color: 'from-violet-500 to-indigo-600', textCol: 'text-indigo-300' },
                           { key: 'dermadent', display: 'Dermadent', color: 'from-blue-400 to-indigo-500', textCol: 'text-blue-300' },
-                          { key: 'onetouch', display: 'OneTouch', color: 'from-teal-400 to-emerald-500', textCol: 'text-emerald-300' },
+                          { key: 'onetouch1', display: 'One Touch 1 AlMu\'tarid', color: 'from-teal-400 to-emerald-500', textCol: 'text-emerald-300' },
+                          { key: 'onetouch2', display: 'One Touch 2 Markhaniya', color: 'from-cyan-400 to-blue-500', textCol: 'text-blue-300' },
                           { key: 'welltouch', display: 'WellTouch', color: 'from-pink-500 to-rose-500', textCol: 'text-rose-300' },
-                          { key: 'newage', display: 'NewAge', color: 'from-amber-400 to-orange-500', textCol: 'text-amber-300' }
+                          { key: 'newedge', display: 'New Edge', color: 'from-amber-400 to-orange-500', textCol: 'text-amber-300' }
                         ].map((clin) => {
                           const count = inquiries.filter(i => (i.clinicName || '').toLowerCase() === clin.key.toLowerCase()).length;
                           const pct = inquiries.length > 0 ? (count / inquiries.length) * 100 : 0;
@@ -8747,6 +9457,10 @@ ${ttNotes}` : autoNote;
                               </div>
                             );
                           })
+                      )}
+                    </div>
+                  </div>
+                </div>
               )}
 
             {/* Team Leader Time Logs Review panel */}
@@ -9520,6 +10234,85 @@ ${ttNotes}` : autoNote;
                     </div>
                   )}
 
+                  {/* Manual Single-Shift Roster Submission Form */}
+                  {isSuperAdmin && (
+                    <div className="bg-gradient-to-br from-indigo-950/45 via-slate-950 to-black/60 border border-indigo-500/20 rounded-3xl p-6 shadow-2xl space-y-5 text-left">
+                      <div>
+                        <h3 className="font-extrabold text-slate-100 text-base font-display flex items-center gap-2">
+                          <PlusCircle className="w-5 h-5 text-indigo-400" />
+                          Individual Shift Assignment Submitter
+                        </h3>
+                        <p className="text-xs text-slate-400 mt-0.5">Manually program, assign, or override individual agent shift allocations with custom Notes</p>
+                      </div>
+
+                      <form onSubmit={handleManualRosterSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <div className="md:col-span-1 space-y-1.5 font-sans">
+                          <label className="text-[10px] text-slate-400 font-extrabold uppercase font-sans">1. Choose Agent</label>
+                          <select
+                            value={manualRosterAgent}
+                            onChange={(e) => setManualRosterAgent(e.target.value)}
+                            className="w-full px-3 py-2.5 bg-black/45 border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer focus:border-indigo-500 font-sans"
+                          >
+                            <option value="">-- Choose Agent --</option>
+                            {agentsList.map(name => (
+                              <option className="bg-slate-800 text-slate-100 " key={name} value={name}>
+                                {name} ({getAgentLOB(name)})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="md:col-span-1 space-y-1.5">
+                          <label className="text-[10px] text-slate-400 font-extrabold uppercase font-sans">2. Coverage Date</label>
+                          <input
+                            type="date"
+                            value={manualRosterDate}
+                            onChange={(e) => setManualRosterDate(e.target.value)}
+                            className="w-full px-3 py-1.5 bg-black/45 border border-white/10 rounded-xl text-xs text-slate-100 outline-none focus:border-indigo-500 h-[42px]"
+                          />
+                        </div>
+
+                        <div className="md:col-span-1 space-y-1.5 font-sans">
+                          <label className="text-[10px] text-slate-400 font-extrabold uppercase font-sans">3. Schedule Shift</label>
+                          <select
+                            value={manualRosterShift}
+                            onChange={(e) => setManualRosterShift(e.target.value)}
+                            className="w-full px-3 py-2.5 bg-black/45 border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer focus:border-indigo-500 font-sans"
+                          >
+                            {SHIFTS.map(s => (
+                              <option className="bg-slate-800 text-slate-100 " key={s.id} value={s.label}>
+                                {s.display} ({s.label})
+                              </option>
+                            ))}
+                            <option className="bg-slate-800 text-slate-100 " value="Off">Rest Day (Off Day)</option>
+                          </select>
+                        </div>
+
+                        <div className="md:col-span-1 block">
+                          <button
+                            type="submit"
+                            className="w-full h-[42px] bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-500/20 cursor-pointer hover:scale-[1.02]"
+                          >
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                            Submit Roster Shift
+                          </button>
+                        </div>
+
+                        {/* Shift Notes Field spanning full width */}
+                        <div className="md:col-span-4 space-y-1.5">
+                          <label className="text-[10px] text-slate-400 font-extrabold uppercase font-sans">4. Roster Shift Notes (Saves to Shift details)</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Approved temporary schedule override / Direct management assignment / Shift Notes..."
+                            value={manualRosterNotes}
+                            onChange={(e) => setManualRosterNotes(e.target.value)}
+                            className="w-full px-4 py-2.5 bg-black/45 border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500"
+                          />
+                        </div>
+                      </form>
+                    </div>
+                  )}
+
                   {/* ✨ AI Schedule & Roster Insights */}
                   {(schedules.length > 0 || tempSchedules.length > 0) && (
                     <div id="ai-schedule-analyzer-card" className="bg-gradient-to-br from-indigo-950/20 via-slate-900/60 to-black/40 border border-indigo-500/20 rounded-3xl p-6 shadow-xl space-y-4">
@@ -9645,7 +10438,7 @@ ${ttNotes}` : autoNote;
                     </div>
                   </div>
 
-                  {(!isRosterPublished && currentUser.role === 'agent') ? (
+                  {false ? (
                     <div className="space-y-6">
                       <div className="p-12 text-center rounded-3xl border border-dashed border-indigo-500/30 bg-slate-800/[0.02] space-y-4 shadow-xl text-left">
                         <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto text-indigo-400 shadow-inner">
@@ -9874,10 +10667,57 @@ ${ttNotes}` : autoNote;
                                       const label = findShift ? findShift.shiftLabel : 'Off';
                                       const style = getShiftBadgeStyle(label);
                                       return (
-                                        <td key={dateStr} className="p-1 border-r border-white/5 hover:bg-slate-700 transition-all">
-                                          <div className={`mx-auto rounded-lg px-2 py-2 text-center border text-[10px] font-bold ${style.bg} transition-all`}>
-                                            {style.display}
+                                        <td 
+                                          key={dateStr} 
+                                          onClick={() => {
+                                            if (isSuperAdmin && findShift) setSelectedShiftForActivities({...findShift});
+                                          }}
+                                          className={`p-1 border-r border-white/5 hover:bg-slate-700/40 transition-all relative group ${isSuperAdmin && findShift ? 'cursor-pointer hover:ring-1 ring-inset ring-indigo-500/50' : 'cursor-help'}`}
+                                        >
+                                          <div className={`mx-auto rounded-lg px-2 py-2 text-center border text-[10px] font-bold ${style.bg} transition-all flex items-center justify-center gap-1 relative overflow-hidden`}>
+                                            <span className="relative z-10">{style.display}</span>
+                                            {findShift?.shiftNotes && (
+                                              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shrink-0 relative z-10" />
+                                            )}
+                                            {findShift?.activities && findShift.activities.length > 0 && (
+                                              <div className="absolute bottom-0 left-0 right-0 h-1 flex bg-slate-900/40">
+                                                {findShift.activities.map((a, i) => (
+                                                  <div key={i} className={`flex-1 h-full ${a.label === 'Break' ? 'bg-amber-400' : a.label === 'Lunch' ? 'bg-orange-500' : typeof a.label === 'string' && a.label.includes('Meeting') ? 'bg-indigo-500' : 'bg-cyan-500'}`} title={a.label} />
+                                                ))}
+                                              </div>
+                                            )}
                                           </div>
+                                          {(findShift?.shiftNotes || (findShift?.activities && findShift.activities.length > 0) || isSuperAdmin) && (
+                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block bg-slate-900 border border-indigo-400/40 text-slate-100 rounded-xl p-3 shadow-2xl z-50 text-[10px] leading-relaxed backdrop-blur-md">
+                                              <p className="font-extrabold text-indigo-300 border-b border-indigo-400/20 pb-0.5 mb-1.5 flex items-center justify-between font-display">
+                                                <span>📌 Details</span>
+                                                <span className="text-slate-400 font-mono scale-75">{dateStr}</span>
+                                              </p>
+                                              
+                                              {findShift?.shiftNotes && (
+                                                <p className="text-slate-300 font-sans break-words mb-2 italic">"{findShift.shiftNotes}"</p>
+                                              )}
+                                              
+                                              {findShift?.activities && findShift.activities.length > 0 && (
+                                                <div className="space-y-1 mb-2">
+                                                  <p className="text-[9px] font-bold uppercase text-slate-500 tracking-wider">Intraday Timeline:</p>
+                                                  {[...findShift.activities].sort((a,b)=>a.startTime.localeCompare(b.startTime)).map((act, i) => (
+                                                    <div key={i} className="flex items-center gap-1.5 justify-between bg-black/40 px-1.5 py-0.5 rounded border border-white/5">
+                                                       <span className="font-mono text-[9px] text-indigo-200">{act.startTime}-{act.endTime}</span>
+                                                       <span className="font-bold text-slate-300 truncate">{act.label}</span>
+                                                    </div>
+                                                  ))}
+                                                </div>
+                                              )}
+                                              
+                                              {isSuperAdmin && findShift && (
+                                                <p className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest text-center mt-2 bg-emerald-500/10 border border-emerald-500/20 py-0.5 rounded">
+                                                  Click to edit intervals
+                                                </p>
+                                              )}
+                                              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-indigo-400/40"></div>
+                                            </div>
+                                          )}
                                         </td>
                                       );
                                     })}
@@ -9911,11 +10751,46 @@ ${ttNotes}` : autoNote;
                                       const style = getShiftBadgeStyle(label);
 
                                       return (
-                                        <div key={dateStr} className="p-2 bg-white/5 border border-white/5 rounded-xl flex flex-col justify-between items-stretch">
+                                        <div 
+                                          key={dateStr} 
+                                          onClick={() => {
+                                            if (isSuperAdmin && findShift) setSelectedShiftForActivities({...findShift});
+                                          }}
+                                          className={`p-2 bg-white/5 border border-white/5 rounded-xl flex flex-col justify-between items-stretch relative ${isSuperAdmin && findShift ? 'cursor-pointer hover:border-indigo-500/50' : ''}`}
+                                        >
                                           <span className="text-[9px] text-slate-400 font-medium mb-1 truncate block">{dayLabel}</span>
-                                          <span className={`px-1.5 py-1 rounded border text-[9px] font-semibold text-center truncate block ${style.bg}`}>
-                                            {style.display}
+                                          <span className={`px-1.5 py-1 rounded border text-[9px] font-semibold text-center truncate block ${style.bg} relative overflow-hidden`}>
+                                            <span className="relative z-10">{style.display}</span>
+                                            {findShift?.activities && findShift.activities.length > 0 && (
+                                              <div className="absolute bottom-0 left-0 right-0 h-1 flex bg-slate-900/40 opacity-70">
+                                                {findShift.activities.map((a, i) => (
+                                                  <div key={i} className={`flex-1 h-full ${a.label === 'Break' ? 'bg-amber-400' : a.label === 'Lunch' ? 'bg-orange-500' : typeof a.label === 'string' && a.label.includes('Meeting') ? 'bg-indigo-500' : 'bg-cyan-500'}`} />
+                                                ))}
+                                              </div>
+                                            )}
                                           </span>
+                                          {findShift?.shiftNotes && (
+                                            <div className="mt-1.5 border-t border-white/5 pt-1 text-[9px] text-indigo-300 font-sans italic break-words flex items-start gap-1 leading-normal text-left">
+                                              <span className="shrink-0 text-[10px]">📝</span>
+                                              <span>{findShift.shiftNotes}</span>
+                                            </div>
+                                          )}
+                                          {findShift?.activities && findShift.activities.length > 0 && (
+                                            <div className="mt-1.5 border-t border-white/5 pt-1 text-[8px] text-slate-400 font-sans flex flex-col gap-0.5">
+                                              {[...findShift.activities].sort((a,b)=>a.startTime.localeCompare(b.startTime)).slice(0, 2).map((act, i) => (
+                                                <div key={i} className="flex justify-between">
+                                                  <span className="font-mono text-slate-500">{act.startTime}</span>
+                                                  <span className="truncate ml-1">{act.label}</span>
+                                                </div>
+                                              ))}
+                                              {findShift.activities.length > 2 && <span className="text-center text-[7px] mt-0.5 bg-white/5 py-0.5 rounded">+{findShift.activities.length - 2} more</span>}
+                                            </div>
+                                          )}
+                                          {isSuperAdmin && findShift && (
+                                            <div className="mt-2 text-center">
+                                              <span className="text-[7px] text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-1 py-[1px] rounded border border-indigo-500/20">Edit Intraday</span>
+                                            </div>
+                                          )}
                                         </div>
                                       );
                                     })}
@@ -10538,11 +11413,11 @@ ${ttNotes}` : autoNote;
                                   required
                                 >
                                   <option value="" className="bg-slate-800 text-slate-100 ">Select a Clinic</option>
-                                  <option value="Dermadent vip" className="bg-slate-800 text-slate-100 ">Dermadent VIP</option>
                                   <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
-                                  <option value="onetouch" className="bg-slate-800 text-slate-100 ">OneTouch</option>
+                                  <option value="onetouch1" className="bg-slate-800 text-slate-100 ">One Touch 1 AlMu'tarid</option>
+                                  <option value="onetouch2" className="bg-slate-800 text-slate-100 ">One Touch 2 Markhaniya</option>
                                   <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
-                                  <option value="newage" className="bg-slate-800 text-slate-100 ">NewAge</option>
+                                  <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
                                 </select>
                               </div>
 
@@ -10668,11 +11543,11 @@ ${ttNotes}` : autoNote;
                                   required
                                 >
                                   <option value="" className="bg-slate-800 text-slate-100 ">Select a Clinic</option>
-                                  <option value="Dermadent vip" className="bg-slate-800 text-slate-100 ">Dermadent VIP</option>
                                   <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
-                                  <option value="onetouch" className="bg-slate-800 text-slate-100 ">OneTouch</option>
+                                  <option value="onetouch1" className="bg-slate-800 text-slate-100 ">One Touch 1 AlMu'tarid</option>
+                                  <option value="onetouch2" className="bg-slate-800 text-slate-100 ">One Touch 2 Markhaniya</option>
                                   <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
-                                  <option value="newage" className="bg-slate-800 text-slate-100 ">NewAge</option>
+                                  <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
                                 </select>
                               </div>
 
@@ -10719,11 +11594,11 @@ ${ttNotes}` : autoNote;
                                     required
                                   >
                                     <option value="" className="bg-slate-800 text-slate-100 ">Select a Clinic</option>
-                                    <option value="Dermadent vip" className="bg-slate-800 text-slate-100 ">Dermadent VIP</option>
                                     <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
-                                    <option value="onetouch" className="bg-slate-800 text-slate-100 ">OneTouch</option>
+                                    <option value="onetouch1" className="bg-slate-800 text-slate-100 ">One Touch 1 AlMu'tarid</option>
+                                    <option value="onetouch2" className="bg-slate-800 text-slate-100 ">One Touch 2 Markhaniya</option>
                                     <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
-                                    <option value="newage" className="bg-slate-800 text-slate-100 ">NewAge</option>
+                                    <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
                                   </select>
                                 </div>
 
@@ -10884,11 +11759,11 @@ ${ttNotes}` : autoNote;
                               className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-2.5 py-1 text-[11px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                             >
                               <option value="all" className="bg-slate-800 text-slate-100 ">All Clinics</option>
-                              <option value="Dermadent vip" className="bg-slate-800 text-slate-100 ">Dermadent VIP</option>
                               <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
-                              <option value="onetouch" className="bg-slate-800 text-slate-100 ">OneTouch</option>
+                              <option value="onetouch1" className="bg-slate-800 text-slate-100 ">One Touch 1 AlMu'tarid</option>
+                              <option value="onetouch2" className="bg-slate-800 text-slate-100 ">One Touch 2 Markhaniya</option>
                               <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
-                              <option value="newage" className="bg-slate-800 text-slate-100 ">NewAge</option>
+                              <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
                             </select>
                           ) : (
                             <select
@@ -12515,7 +13390,16 @@ ${ttNotes}` : autoNote;
                             setCaseLeadSource('');
                             setCaseBloggerName('');
                             setActiveScreenshot(null);
-                            toast.success('Case submitted with Lead Source!');
+                            setCaseBranch('');
+                            setCaseService('');
+                            setCaseCallType('');
+                            setCaseTicketStatus('Closed');
+                            setCasePatientType('New');
+                            setCaseTicketType('Inquiry');
+                            const assignedTL = getAgentTL(currentUser.name);
+                            const targetNotifUser = assignedTL !== 'Unassigned' ? assignedTL : 'tl';
+                            addSystemNotification(`📋 New Case Logged`, `${currentUser.name} submitted a new case for ${casePatientName} (${casePhoneNumber})`, 'general', targetNotifUser);
+                            toast.success('Case submitted successfully!');
                           }} className="space-y-4">
                             
                             <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
@@ -12538,44 +13422,92 @@ ${ttNotes}` : autoNote;
                               </div>
                             </div>
 
-                            <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
-                              <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Lead Source * (Mandatory)</label>
-                              <select
-                                required
-                                value={caseLeadSource}
-                                onChange={e => {
-                                  setCaseLeadSource(e.target.value);
-                                  if (!e.target.value.toLowerCase().includes('blogger') && !e.target.value.toLowerCase().includes('bloger')) {
-                                     setCaseBloggerName('');
-                                  }
-                                }}
-                                className="w-full bg-[#16161c] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 focus:bg-[#1f1f2a] transition-all font-sans"
-                              >
-                                <option value="" className="bg-slate-800 text-slate-100 ">Select Lead Source...</option>
-                                <optgroup label="Call Center" className="bg-[#111115] text-emerald-400 font-bold">
-                                  <option value="Instagram Call Center" className="bg-slate-800 text-slate-100 font-normal">Instagram Call Center</option>
-                                  <option value="WhatsApp Call Center" className="bg-slate-800 text-slate-100 font-normal">WhatsApp Call Center</option>
-                                  <option value="TikTok Call Center" className="bg-slate-800 text-slate-100 font-normal">TikTok Call Center</option>
-                                  <option value="Blogger (Call Center)" className="bg-slate-800 text-slate-100 font-normal">Blogger</option>
-                                  <option value="Blogger Name Call Center" className="bg-slate-800 text-slate-100 font-normal">Blogger Name Call Center</option>
-                                  <option value="Google Map Referral" className="bg-slate-800 text-slate-100 font-normal">Google Map Referral</option>
-                                  <option value="Outdoor" className="bg-slate-800 text-slate-100 font-normal">Outdoor</option>
-                                  <option value="Existing TikTok Leads" className="bg-slate-800 text-slate-100 font-normal">Existing TikTok Leads</option>
-                                  <option value="Snapchat Leads" className="bg-slate-800 text-slate-100 font-normal">Snapchat Leads</option>
-                                  <option value="No Show Leads" className="bg-slate-800 text-slate-100 font-normal">No Show Leads</option>
-                                  <option value="Silent Client Leads" className="bg-slate-800 text-slate-100 font-normal">Silent Client Leads</option>
-                                  <option value="CC Leads" className="bg-slate-800 text-slate-100 font-normal">CC Leads</option>
-                                </optgroup>
-                                <optgroup label="Chat" className="bg-[#111115] text-indigo-400 font-bold">
-                                  <option value="Instagram Ad SM" className="bg-slate-800 text-slate-100 font-normal">Instagram Ad SM</option>
-                                  <option value="WhatsApp Ad SM" className="bg-slate-800 text-slate-100 font-normal">WhatsApp Ad SM</option>
-                                  <option value="Instagram Without Ad" className="bg-slate-800 text-slate-100 font-normal">Instagram Without Ad</option>
-                                  <option value="WhatsApp Without Ad" className="bg-slate-800 text-slate-100 font-normal">WhatsApp Without Ad</option>
-                                  <option value="Facebook SM" className="bg-slate-800 text-slate-100 font-normal">Facebook SM</option>
-                                  <option value="TikTok SM" className="bg-slate-800 text-slate-100 font-normal">TikTok SM</option>
-                                  <option value="Blogger Name (Chat)" className="bg-slate-800 text-slate-100 font-normal">Blogger Name</option>
-                                </optgroup>
-                              </select>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
+                                <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Patient Type *</label>
+                                <select value={casePatientType} onChange={e => setCasePatientType(e.target.value)} className="w-full bg-[#16161c] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
+                                  <option value="New">New</option>
+                                  <option value="Follow up / Existing">Follow up / Existing</option>
+                                </select>
+                              </div>
+                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
+                                <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Service *</label>
+                                <select value={caseService} onChange={e => setCaseService(e.target.value)} className="w-full bg-[#16161c] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer" required>
+                                  <option value="">Select service...</option>
+                                  <option value="Dental">Dental</option>
+                                  <option value="Derma">Derma</option>
+                                  <option value="Facial">Facial</option>
+                                  <option value="Hijama">Hijama</option>
+                                  <option value="Laser">Laser</option>
+                                  <option value="Plastic Surgery">Plastic Surgery</option>
+                                  <option value="Slimming">Slimming</option>
+                                  <option value="Other">Other</option>
+                                </select>
+                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
+                                <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Branch *</label>
+                                <select value={caseBranch} onChange={e => setCaseBranch(e.target.value)} className="w-full bg-[#16161c] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer" required>
+                                  <option value="">Select branch...</option>
+                                  <option value="Dermadent VIP">Dermadent VIP</option>
+                                  <option value="Dermadent">Dermadent</option>
+                                  <option value="One Touch 1 AlMu'tarid">One Touch 1 AlMu'tarid</option>
+                                  <option value="One Touch 2 Markhaniya">One Touch 2 Markhaniya</option>
+                                  <option value="WellTouch">WellTouch</option>
+                                  <option value="New Edge">New Edge</option>
+                                </select>
+                              </div>
+                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
+                                <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Source * (Mandatory)</label>
+                                <select required value={caseLeadSource} onChange={e => { setCaseLeadSource(e.target.value); if (!e.target.value.toLowerCase().includes('blogger')) setCaseBloggerName(''); }} className="w-full bg-[#16161c] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
+                                  <option value="">Select source...</option>
+                                  <option value="Blogger">Blogger</option>
+                                  <option value="Existing">Existing</option>
+                                  <option value="Google map">Google map</option>
+                                  <option value="Instagram">Instagram</option>
+                                  <option value="SMS">SMS</option>
+                                  <option value="Snap Chat">Snap Chat</option>
+                                  <option value="TikTok">TikTok</option>
+                                  <option value="Whats app">Whats app</option>
+                                  <option value="facebook">facebook</option>
+                                  <option value="location">location</option>
+                                  <option value="referral">referral</option>
+                                </select>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
+                                <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Ticket Type *</label>
+                                <select value={caseTicketType} onChange={e => setCaseTicketType(e.target.value)} className="w-full bg-[#16161c] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
+                                  <option value="Inquiry">Inquiry</option>
+                                  <option value="Complaint">Complaint</option>
+                                  <option value="Appointment">Appointment</option>
+                                </select>
+                              </div>
+                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
+                                <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Call Type *</label>
+                                <select value={caseCallType} onChange={e => setCaseCallType(e.target.value)} className="w-full bg-[#16161c] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer" required>
+                                  <option value="">Select call type...</option>
+                                  <option value="Inquiry only">Inquiry only</option>
+                                  <option value="Booked">Booked</option>
+                                  <option value="Call dropped / hang up">Call dropped / hang up</option>
+                                  <option value="Cancel">Cancel</option>
+                                  <option value="Complain">Complain</option>
+                                  <option value="Customer said he will call Back">Customer said he will call Back</option>
+                                  <option value="Customer said that he booked">Customer said that he booked</option>
+                                  <option value="Didnt book / expensive">Didnt book / expensive</option>
+                                  <option value="Job Application">Job Application</option>
+                                  <option value="Long Distance">Long Distance</option>
+                                  <option value="Reschedule">Reschedule</option>
+                                  <option value="Silent Chat">Silent Chat</option>
+                                  <option value="Want to be contacted through What's app">Want to be contacted through What's app</option>
+                                  <option value="Want to be contacted through calls">Want to be contacted through calls</option>
+                                  <option value="Wrong Audience">Wrong Audience</option>
+                                </select>
+                              </div>
                             </div>
 
                             {/* Blogger Name Text Field */}
@@ -12598,6 +13530,15 @@ ${ttNotes}` : autoNote;
                               <div className="relative">
                                 <textarea required rows={4} placeholder="Specific diagnostic or financial inquiry details..." value={caseInquiry} onChange={e => setCaseInquiry(e.target.value)} className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-emerald-500 focus:bg-emerald-500/5 transition-all font-sans" />
                               </div>
+                            </div>
+                            
+                            <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors bg-black/20 p-3 rounded-xl border border-white/5">
+                              <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Ticket Status</label>
+                              <select value={caseTicketStatus} onChange={e => setCaseTicketStatus(e.target.value)} className="w-full bg-[#16161c] border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
+                                <option value="Closed">Closed</option>
+                                <option value="Open">Open</option>
+                              </select>
+                              <p className="text-[10px] opacity-60">Default is closed — open it if still in progress</p>
                             </div>
 
                             <ScreenshotUpload 
@@ -12660,7 +13601,7 @@ ${ttNotes}` : autoNote;
                                       <button
                                         onClick={() => {
                                           const ref = c.id.split('_')[1];
-                                          const details = `Case Ref: #${ref}\nPatient Name: ${c.patientName}\nPhone Number: ${c.phoneNumber}\nLead Source: ${c.leadSource || 'N/A'}\nInquiry:\n${c.inquiry}`;
+                                          const details = `Case Ref: #${ref}\nPatient Name: ${c.patientName}\nPhone Number: ${c.phoneNumber}\nSource: ${c.leadSource || 'N/A'}\nBranch: ${c.branch || 'N/A'}\nService: ${c.service || 'N/A'}\nCall Type: ${c.callType || 'N/A'}\nInquiry:\n${c.inquiry}`;
                                           navigator.clipboard.writeText(details);
                                           toast.success('Case details + Ref copied!');
                                         }}
@@ -12674,6 +13615,7 @@ ${ttNotes}` : autoNote;
                                           onClick={() => {
                                             if (!window.confirm('Are you sure you want to delete this case?')) return;
                                             const updated = cases.filter(item => item.id !== c.id);
+                                             deleteDoc(doc(db, "cases", c.id)).catch(e => console.error("Case Delete Error:", e));
                                             setCases(updated);
                                             setStorageItem('sched_cases', updated);
                                           }}
@@ -12699,6 +13641,38 @@ ${ttNotes}` : autoNote;
                                          <UserIcon className="w-4 h-4 text-emerald-400" />
                                          {c.patientName}
                                        </p>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                      {c.patientType && (
+                                        <span className="text-[10px] font-bold px-2 py-1 bg-white/5 rounded-md text-emerald-400 border border-white/5">
+                                          {c.patientType} Patient
+                                        </span>
+                                      )}
+                                      {c.branch && (
+                                        <span className="text-[10px] font-bold px-2 py-1 bg-white/5 rounded-md text-slate-300 border border-white/5">
+                                          🏥 {c.branch}
+                                        </span>
+                                      )}
+                                      {c.service && (
+                                        <span className="text-[10px] font-bold px-2 py-1 bg-white/5 rounded-md text-slate-300 border border-white/5">
+                                          ✨ {c.service}
+                                        </span>
+                                      )}
+                                      {c.ticketType && (
+                                        <span className="text-[10px] font-bold px-2 py-1 bg-white/5 rounded-md text-slate-300 border border-white/5">
+                                          🎫 {c.ticketType}
+                                        </span>
+                                      )}
+                                      {c.callType && (
+                                        <span className="text-[10px] font-bold px-2 py-1 bg-white/5 rounded-md text-slate-300 border border-white/5">
+                                          📞 {c.callType}
+                                        </span>
+                                      )}
+                                      {c.ticketStatus && (
+                                        <span className={`text-[10px] font-bold px-2 py-1 rounded-md border text-white ${c.ticketStatus === 'Open' ? 'bg-rose-500/20 border-rose-500/30 text-rose-300' : 'bg-slate-500/20 border-slate-500/30 text-slate-300'}`}>
+                                          Status: {c.ticketStatus}
+                                        </span>
+                                      )}
                                     </div>
                                     <div className="space-y-1 bg-white/5 p-2 rounded-lg mt-2 font-mono">
                                       <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold font-sans">Contact Details</p>
@@ -12910,6 +13884,27 @@ ${ttNotes}` : autoNote;
                     </div>
                   );
               })()}
+
+              {activeTab === 'qa-scorecard' && currentUser && (
+                <QAScorecards 
+                  currentUser={currentUser}
+                  qaScores={qaScores}
+                  agentsList={agentsList}
+                  qaTemplate={qaTemplate}
+                  onUpdateQATemplate={(newTemplate) => {
+                    setQaTemplate(newTemplate);
+                    setStorageItem('sched_qa_template', newTemplate);
+                    setDoc(doc(db, "system", "sched_qa_template"), { data: newTemplate }).catch(console.error);
+                  }}
+                  addSystemNotification={addSystemNotification}
+                  onSubmitScore={(score) => {
+                    const newScores = [score, ...qaScores];
+                    setQaScores(newScores);
+                    setStorageItem('sched_qa_scores', newScores);
+                    setDoc(doc(db, "qa_scores", score.id), score).catch(e => console.error("QA Save Error:", e));
+                  }}
+                />
+              )}
 
               {activeTab === 'admin' && isMasterAdmin && (() => {
                 const globalMeta = getAgentMeta();
@@ -13477,133 +14472,197 @@ ${ttNotes}` : autoNote;
                   )}
 
                     <div className="bg-white/5 border border-rose-500/20 backdrop-blur-xl rounded-3xl p-6 shadow-2xl overflow-x-auto">
-                      <table className="w-full text-left border-collapse min-w-[700px]">
-                        <thead>
-                          <tr className="bg-rose-500/10 border-b border-rose-500/20 text-[10px] font-black uppercase tracking-widest text-rose-300 font-sans">
-                            <th className="px-5 py-3 rounded-tl-xl">Agent Name (Total: {agentsList.length})</th>
-                            <th className="px-3 py-3">Account LOB Role</th>
-                            <th className="px-3 py-3">Assigned TL</th>
-                            <th className="px-5 py-3 text-right">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-white/5 text-xs text-slate-300 font-sans">
-                          {agentsList.map(agent => {
-                            const curRole = globalMeta[agent]?.roleType || getAgentLOB(agent);
-                            const curTL = globalMeta[agent]?.tlName || getAgentTL(agent);
-                            return (
-                              <tr key={agent} className="hover:bg-rose-500/5 transition-all">
-                                <td className="px-5 py-4 font-bold text-slate-100 uppercase tracking-wide flex items-center gap-2">
-                                  <span>{agent}</span>
-                                  {lockedAccounts.includes(agent) && (
-                                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-500/10 border border-rose-500/20 text-rose-400 animate-pulse">
-                                      <Lock className="w-3 h-3 text-rose-400" />
-                                      LOCKED
-                                    </span>
-                                  )}
-                                </td>
-                                <td className="px-3 py-4">
-                                  <select
-                                    value={curRole}
-                                    onChange={(e) => {
-                                      const newMeta = { ...getAgentMeta() };
-                                      if (!newMeta[agent]) newMeta[agent] = { roleType: '', tlName: '' };
-                                      newMeta[agent].roleType = e.target.value;
-                                      setStorageItem('sched_agent_meta', newMeta);
-                                      toast.success(`Updated ${agent}'s role to ${e.target.value}`);
-                                      // Force re-render trick!
-                                      setAgentsList([...agentsList]); 
-                                    }}
-                                    className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-xs text-slate-100 px-3 py-1.5 focus:outline-none focus:border-rose-500 cursor-pointer w-full max-w-[150px]"
-                                  >
-                                    <option className="bg-slate-800 text-slate-100 "  value="Call Center">Call Center</option>
-                                    <option className="bg-slate-800 text-slate-100 "  value="Social Media">Social Media</option>
-                                    <option className="bg-slate-800 text-slate-100 "  value="General">General</option>
-                                    <option className="bg-slate-800 text-slate-100 "  value="TL">Team Leader (TL)</option>
-                                    <option className="bg-slate-800 text-slate-100 "  value="Medical">Medical</option>
-                                  </select>
-                                </td>
-                                <td className="px-3 py-4">
-                                  <select
-                                    value={curTL}
-                                    onChange={(e) => {
-                                      const newMeta = { ...getAgentMeta() };
-                                      if (!newMeta[agent]) newMeta[agent] = { roleType: '', tlName: '' };
-                                      newMeta[agent].tlName = e.target.value;
-                                      setStorageItem('sched_agent_meta', newMeta);
-                                      toast.success(`Assigned ${agent} to TL: ${e.target.value}`);
-                                      setAgentsList([...agentsList]);
-                                    }}
-                                    className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-xs text-slate-100 px-3 py-1.5 focus:outline-none focus:border-rose-500 cursor-pointer w-full max-w-[180px]"
-                                  >
-                                    {availableTLs.map(tl => <option className="bg-slate-800 text-slate-100 "  key={tl} value={tl}>{tl}</option>)}
-                                  </select>
-                                </td>
-                                <td className="px-5 py-4 text-right">
-                                  {isMasterAdmin ? (
-                                    <div className="flex items-center justify-end gap-2 text-right">
-                                      {lockedAccounts.includes(agent) && (
-                                        <button
-                                          onClick={() => {
-                                            if (confirm(`Unlock account for ${agent}?`)) {
-                                              const updatedLocked = lockedAccounts.filter(a => a !== agent);
-                                              setLockedAccounts(updatedLocked);
-                                              setStorageItem('sched_locked_accounts', updatedLocked);
+                      {(() => {
+                        // Create a unique set of names/usernames from both agents list and registered users list
+                        const uniqueNamesSet = new Set<string>();
 
-                                              const updatedAttempts = { ...failedAttempts };
-                                              delete updatedAttempts[agent];
-                                              setFailedAttempts(updatedAttempts);
-                                              setStorageItem('sched_failed_attempts', updatedAttempts);
+                        agentsList.forEach(a => {
+                          if (a) uniqueNamesSet.add(capitalizeName(a.trim()));
+                        });
 
-                                              toast.success(`Account for ${agent} has been unlocked!`);
-                                              setAgentsList([...agentsList]);
-                                            }
-                                          }}
-                                          className="px-2.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
-                                        >
-                                          Unlock
-                                        </button>
-                                      )}
-                                      <button
-                                        onClick={() => {
-                                          if (confirm(`Are you sure you want to reset password for ${agent}?`)) {
-                                            const creds = getStorageItem<Record<string, string>>('sched_credentials', {});
-                                            delete creds[agent];
-                                            setStorageItem('sched_credentials', creds);
-                                            setCredentials(creds);
+                        registeredUsers.forEach(u => {
+                          if (u && u.name) {
+                            const resolvedName = findAgentByUsername(u.name, agentsList) || u.name;
+                            uniqueNamesSet.add(capitalizeName(resolvedName.trim()));
+                          }
+                        });
 
-                                            // Also unlock just in case
-                                            const updatedLocked = lockedAccounts.filter(a => a !== agent);
-                                            setLockedAccounts(updatedLocked);
-                                            setStorageItem('sched_locked_accounts', updatedLocked);
+                        const sortedUniqueList = Array.from(uniqueNamesSet).sort((a, b) => a.localeCompare(b));
 
-                                            const updatedAttempts = { ...failedAttempts };
-                                            delete updatedAttempts[agent];
-                                            setFailedAttempts(updatedAttempts);
-                                            setStorageItem('sched_failed_attempts', updatedAttempts);
-
-                                            toast.success(`Password for ${agent} has been wiped and account unlocked!`);
-                                            setAgentsList([...agentsList]);
-                                          }
-                                        }}
-                                        className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded border-rose-500/30 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
-                                      >
-                                        Reset Pass
-                                      </button>
-                                    </div>
-                                  ) : (
-                                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest select-none">
-                                      🔒 Restricted
-                                    </span>
-                                  )}
-                                </td>
+                        return (
+                          <table className="w-full text-left border-collapse min-w-[700px]">
+                            <thead>
+                              <tr className="bg-rose-500/10 border-b border-rose-500/20 text-[10px] font-black uppercase tracking-widest text-rose-300 font-sans">
+                                <th className="px-5 py-3 rounded-tl-xl">Account / Username (Total: {sortedUniqueList.length})</th>
+                                <th className="px-3 py-3">Account LOB Role</th>
+                                <th className="px-3 py-3">Assigned TL</th>
+                                <th className="px-5 py-3 text-right">Actions</th>
                               </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
+                            </thead>
+                            <tbody className="divide-y divide-white/5 text-xs text-slate-300 font-sans">
+                              {sortedUniqueList.map(agent => {
+                                const curRole = globalMeta[agent]?.roleType || getAgentLOB(agent);
+                                const curTL = globalMeta[agent]?.tlName || getAgentTL(agent);
+                                
+                                const username = getUsernameFromFullName(agent) || agent.toLowerCase();
+                                const isLocked = lockedAccounts.includes(username) || 
+                                                 lockedAccounts.includes(username.toLowerCase()) ||
+                                                 lockedAccounts.includes(agent) || 
+                                                 lockedAccounts.includes(agent.toLowerCase());
+
+                                return (
+                                  <tr key={agent} className="hover:bg-rose-500/5 transition-all">
+                                    <td className="px-5 py-4 font-bold text-slate-100 uppercase tracking-wide">
+                                      <div className="flex flex-col gap-1.5 justify-start text-left">
+                                        <div className="flex items-center gap-2">
+                                          <span>{agent}</span>
+                                          {isLocked && (
+                                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-500/10 border border-rose-500/20 text-rose-400 animate-pulse">
+                                              <Lock className="w-3 h-3 text-rose-400" />
+                                              LOCKED
+                                            </span>
+                                          )}
+                                        </div>
+                                        <div className="flex items-center gap-1.5">
+                                          <span className="text-[10px] text-slate-400 font-mono tracking-wide lowercase">
+                                            username: <strong className="text-cyan-400">{username}</strong>
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </td>
+                                    <td className="px-3 py-4">
+                                      <select
+                                        value={curRole}
+                                        onChange={(e) => {
+                                          const newMeta = { ...getAgentMeta() };
+                                          if (!newMeta[agent]) newMeta[agent] = { roleType: '', tlName: '' };
+                                          newMeta[agent].roleType = e.target.value;
+                                          setStorageItem('sched_agent_meta', newMeta);
+                                          setAgentMeta(newMeta);
+                                          setDoc(doc(db, "system", "sched_agent_meta"), { data: newMeta }).catch(console.error);
+                                          toast.success(`Updated ${agent}'s role to ${e.target.value}`);
+                                        }}
+                                        className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-xs text-slate-100 px-3 py-1.5 focus:outline-none focus:border-rose-500 cursor-pointer w-full max-w-[150px]"
+                                      >
+                                        <option className="bg-slate-800 text-slate-100 " value="Call Center">Call Center</option>
+                                        <option className="bg-slate-800 text-slate-100 " value="Social Media">Social Media</option>
+                                        <option className="bg-slate-800 text-slate-100 " value="General">General</option>
+                                        <option className="bg-slate-800 text-slate-100 " value="TL">Team Leader (TL)</option>
+                                        <option className="bg-slate-800 text-slate-100 " value="Medical">Medical</option>
+                                      </select>
+                                    </td>
+                                    <td className="px-3 py-4">
+                                      <select
+                                        value={curTL}
+                                        onChange={(e) => {
+                                          const newMeta = { ...getAgentMeta() };
+                                          if (!newMeta[agent]) newMeta[agent] = { roleType: '', tlName: '' };
+                                          newMeta[agent].tlName = e.target.value;
+                                          setStorageItem('sched_agent_meta', newMeta);
+                                          setAgentMeta(newMeta);
+                                          setDoc(doc(db, "system", "sched_agent_meta"), { data: newMeta }).catch(console.error);
+                                          toast.success(`Assigned ${agent} to TL: ${e.target.value}`);
+                                        }}
+                                        className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-xs text-slate-100 px-3 py-1.5 focus:outline-none focus:border-rose-500 cursor-pointer w-full max-w-[180px]"
+                                      >
+                                        {availableTLs.map(tl => <option className="bg-slate-800 text-slate-100 " key={tl} value={tl}>{tl}</option>)}
+                                      </select>
+                                    </td>
+                                    <td className="px-5 py-4 text-right">
+                                      {isMasterAdmin ? (
+                                        <div className="flex items-center justify-end gap-2 text-right">
+                                          {isLocked && (
+                                            <button
+                                              onClick={() => {
+                                                if (confirm(`Unlock account for ${agent}?`)) {
+                                                  const userKey1 = agent;
+                                                  const userKey2 = agent.toLowerCase();
+                                                  const userKey3 = username;
+                                                  const userKey4 = username.toLowerCase();
+
+                                                  const updatedLocked = lockedAccounts.filter(a => 
+                                                    a !== userKey1 && a !== userKey2 && a !== userKey3 && a !== userKey4
+                                                  );
+                                                  setLockedAccounts(updatedLocked);
+                                                  setStorageItem('sched_locked_accounts', updatedLocked);
+                                                  setDoc(doc(db, "system", "sched_locked_accounts"), { data: updatedLocked }).catch(console.error);
+
+                                                  const updatedAttempts = { ...failedAttempts };
+                                                  delete updatedAttempts[userKey1];
+                                                  delete updatedAttempts[userKey2];
+                                                  delete updatedAttempts[userKey3];
+                                                  delete updatedAttempts[userKey4];
+                                                  setFailedAttempts(updatedAttempts);
+                                                  setStorageItem('sched_failed_attempts', updatedAttempts);
+                                                  setDoc(doc(db, "system", "sched_failed_attempts"), { data: updatedAttempts }).catch(console.error);
+
+                                                  toast.success(`Account for ${agent} has been unlocked!`);
+                                                }
+                                              }}
+                                              className="px-2.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+                                            >
+                                              Unlock
+                                            </button>
+                                          )}
+                                          <button
+                                            onClick={() => {
+                                              if (confirm(`Are you sure you want to reset password for ${agent}?`)) {
+                                                const userKey1 = agent;
+                                                const userKey2 = agent.toLowerCase();
+                                                const userKey3 = username;
+                                                const userKey4 = username.toLowerCase();
+
+                                                const creds = { ...credentials };
+                                                delete creds[userKey1];
+                                                delete creds[userKey2];
+                                                delete creds[userKey3];
+                                                delete creds[userKey4];
+                                                setStorageItem('sched_credentials', creds);
+                                                setCredentials(creds);
+                                                setDoc(doc(db, "system", "sched_credentials"), { data: creds }).catch(console.error);
+
+                                                // Also unlock just in case
+                                                const updatedLocked = lockedAccounts.filter(a => 
+                                                  a !== userKey1 && a !== userKey2 && a !== userKey3 && a !== userKey4
+                                                );
+                                                setLockedAccounts(updatedLocked);
+                                                setStorageItem('sched_locked_accounts', updatedLocked);
+                                                setDoc(doc(db, "system", "sched_locked_accounts"), { data: updatedLocked }).catch(console.error);
+
+                                                const updatedAttempts = { ...failedAttempts };
+                                                delete updatedAttempts[userKey1];
+                                                delete updatedAttempts[userKey2];
+                                                delete updatedAttempts[userKey3];
+                                                delete updatedAttempts[userKey4];
+                                                setFailedAttempts(updatedAttempts);
+                                                setStorageItem('sched_failed_attempts', updatedAttempts);
+                                                setDoc(doc(db, "system", "sched_failed_attempts"), { data: updatedAttempts }).catch(console.error);
+
+                                                toast.success(`Password for ${agent} has been wiped and account unlocked!`);
+                                              }
+                                            }}
+                                            className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded border-rose-500/30 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+                                          >
+                                            Reset Pass
+                                          </button>
+                                        </div>
+                                      ) : (
+                                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest select-none">
+                                          🔒 Restricted
+                                        </span>
+                                      )}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        );
+                      })()}
                     </div>
                   </div>
                 );
+              })()}
 
             {/* Overtime Popup Alerts / Floating warnings */}
             {currentUser && currentUser.role === 'agent' && (() => {
@@ -13729,6 +14788,11 @@ ${ttNotes}` : autoNote;
                   </div>
                 </div>
               );
+            })()}
+            
+            </motion.div>
+          </AnimatePresence>
+        </main>
 
       {/* Dynamic Sliding Notification Drawer */}
       <AnimatePresence>
@@ -13831,16 +14895,154 @@ ${ttNotes}` : autoNote;
           </div>
         )}
       </AnimatePresence>
+          </div>
+        )}
+      {selectedShiftForActivities && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] p-4 flex items-center justify-center">
+          <div className="bg-slate-900 border border-indigo-500/30 rounded-3xl p-6 shadow-2xl space-y-5 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-start border-b border-white/5 pb-4">
+              <div>
+                <h3 className="text-lg font-black text-slate-100 flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-indigo-400" />
+                  Intraday Activity Planner
+                </h3>
+                <p className="text-xs text-slate-400 font-mono mt-1">Agent: {selectedShiftForActivities.agentName} | Date: {selectedShiftForActivities.date}</p>
+                <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-widest mt-1">Base Shift: {selectedShiftForActivities.shiftLabel}</p>
+              </div>
+              <button 
+                onClick={() => setSelectedShiftForActivities(null)}
+                className="text-slate-500 hover:text-slate-300 px-2 py-1 bg-white/5 rounded-lg text-lg font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {(!selectedShiftForActivities.activities || selectedShiftForActivities.activities.length === 0) ? (
+                <div className="text-center py-6 border border-dashed border-white/10 rounded-xl bg-black/20">
+                  <p className="text-xs text-slate-500">No intraday activities configured.</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {[...selectedShiftForActivities.activities].sort((a,b) => a.startTime.localeCompare(b.startTime)).map((act, idx) => (
+                    <div key={act.id} className="flex items-center gap-3 bg-white/5 border border-white/10 p-3 rounded-xl">
+                      <div className="flex-1 grid grid-cols-3 gap-2">
+                        <select 
+                          value={act.label}
+                          onChange={(e) => {
+                            const newActs = [...(selectedShiftForActivities.activities || [])];
+                            newActs[idx].label = e.target.value;
+                            setSelectedShiftForActivities({...selectedShiftForActivities, activities: newActs});
+                          }}
+                          className="bg-black/50 border border-white/10 rounded px-2 py-1 text-xs text-slate-200"
+                        >
+                          <option value="Work">Work</option>
+                          <option value="Break">Break</option>
+                          <option value="Lunch">Lunch</option>
+                          <option value="Meeting">Meeting</option>
+                          <option value="Coaching">Coaching</option>
+                          <option value="Training">Training</option>
+                          <option value="Project">Project</option>
+                        </select>
+                        <input 
+                          type="time" 
+                          value={act.startTime}
+                          onChange={(e) => {
+                            const newActs = [...(selectedShiftForActivities.activities || [])];
+                            newActs[idx].startTime = e.target.value;
+                            setSelectedShiftForActivities({...selectedShiftForActivities, activities: newActs});
+                          }}
+                          className="bg-black/50 border border-white/10 rounded px-2 py-1 text-xs text-slate-200" 
+                        />
+                        <input 
+                          type="time" 
+                          value={act.endTime}
+                          onChange={(e) => {
+                            const newActs = [...(selectedShiftForActivities.activities || [])];
+                            newActs[idx].endTime = e.target.value;
+                            setSelectedShiftForActivities({...selectedShiftForActivities, activities: newActs});
+                          }}
+                          className="bg-black/50 border border-white/10 rounded px-2 py-1 text-xs text-slate-200" 
+                        />
+                      </div>
+                      <button 
+                        onClick={() => {
+                           const newActs = selectedShiftForActivities.activities!.filter(a => a.id !== act.id);
+                           setSelectedShiftForActivities({...selectedShiftForActivities, activities: newActs});
+                        }}
+                        className="text-rose-400 hover:text-rose-300 bg-rose-500/10 p-1.5 rounded"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <button
+                onClick={() => {
+                  const newActs = [...(selectedShiftForActivities.activities || [])];
+                  newActs.push({
+                    id: `act_${Date.now()}_${Math.random().toString(36).substr(2,9)}`,
+                    label: 'Break',
+                    startTime: '12:00',
+                    endTime: '12:30'
+                  });
+                  setSelectedShiftForActivities({...selectedShiftForActivities, activities: newActs});
+                }}
+                className="w-full py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 border-dashed rounded-xl text-xs font-bold transition-all flex justify-center items-center gap-2"
+              >
+                <PlusCircle className="w-4 h-4" /> Add Activity Interval
+              </button>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
+              <button 
+                onClick={() => setSelectedShiftForActivities(null)}
+                className="px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-300 rounded-lg text-xs font-bold"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  const mergedSchedules = [...schedules];
+                  const existingIdx = mergedSchedules.findIndex(s => s.id === selectedShiftForActivities.id);
+                  if (existingIdx !== -1) {
+                    mergedSchedules[existingIdx] = selectedShiftForActivities;
+                  } else {
+                    mergedSchedules.push(selectedShiftForActivities);
+                  }
+                  setSchedules(mergedSchedules);
+                  setStorageItem('sched_schedules', mergedSchedules);
+                  setDoc(doc(db, "schedules", selectedShiftForActivities.id), selectedShiftForActivities).catch(e => console.error("Write Error:", e));
+                  
+                  setSelectedShiftForActivities(null);
+                  toast.success("Intraday Schedule Updated Successfully!");
+                }}
+                className="px-6 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-900 rounded-lg text-xs font-black shadow-lg shadow-emerald-500/20"
+              >
+                Save Timeline
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       </div>
       <footer className="mt-auto border-t border-white/10 bg-black/40 backdrop-blur-md p-4 text-center text-xs text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-2 max-w-7xl mx-auto w-full">
         <div className="flex items-center gap-4">
           <span>📅 standalone local database</span>
           <span>🔒 custom client encryption active</span>
           <span className="flex items-center gap-2">
-            🚀 version 2.1.28
+            🚀 version {CURRENT_APP_VERSION}.0
             <button 
               onClick={() => {
                 toast.loading("Refetching system build...");
+                if ('caches' in window) {
+                   caches.keys().then((names) => {
+                       for (let name of names) caches.delete(name);
+                   });
+                }
                 setTimeout(() => window.location.reload(), 1000);
               }}
               className="ml-2 px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[8px] font-black uppercase tracking-tighter transition-all active:scale-95 cursor-pointer"

@@ -105,10 +105,67 @@ export const normalizeName = (name: string, referenceList: string[]): string => 
   return matched || cap;
 };
 
+// Convert full name (e.g., Hesham Sobhy) to username (e.g., h.sobhy)
+export const getUsernameFromFullName = (fullName: string): string => {
+  if (!fullName) return '';
+  const val = fullName.trim().toLowerCase();
+  if (val.includes('.') && !val.includes(' ')) {
+    return val;
+  }
+  const parts = val.replace(/\s+/g, ' ').split(' ');
+  if (parts.length === 0) return '';
+  const firstLetter = parts[0].charAt(0);
+  const lastName = parts[parts.length - 1];
+  return `${firstLetter}.${lastName}`;
+};
+
+// Find matching human-readable agent name by username (or fallback)
+export const findAgentByUsername = (username: string, referenceList: string[] = []): string | null => {
+  if (!username) return null;
+  const target = username.trim().toLowerCase();
+  
+  const combinedList = Array.from(new Set([
+    ...referenceList,
+    ...INITIAL_AGENTS,
+    ...TEAM_LEADERS,
+    'Hesham Sobhy',
+    'Amira Hassan',
+    'Shymaa Hassan',
+    'Shaymaa Hassan',
+    'Hesso'
+  ]));
+
+  const found = combinedList.find(refName => {
+    return getUsernameFromFullName(refName) === target;
+  });
+  return found || null;
+};
+
+// Check if user is QA
+export const isQAName = (name: string): boolean => {
+  if (!name) return false;
+  const fullName = findAgentByUsername(name) || name;
+  const normalized = capitalizeName(fullName);
+  if (AGENT_LOBS[normalized] === 'Quality') return true;
+  
+  const meta = getAgentMeta();
+  const overrideKey = Object.keys(meta).find(k => k.trim().toLowerCase().replace(/\s+/g, ' ') === normalized.toLowerCase());
+  if (overrideKey && meta[overrideKey].roleType) {
+    const role = meta[overrideKey].roleType.toLowerCase();
+    if (role === 'qa' || role === 'quality') {
+      return true;
+    }
+  }
+  return false;
+};
+
 // Check if user is a Team Leader
 export const isTLName = (name: string): boolean => {
-  const normalized = capitalizeName(name);
+  if (!name) return false;
+  const fullName = findAgentByUsername(name) || name;
+  const normalized = capitalizeName(fullName);
   if (TEAM_LEADERS.some(tl => tl.toLowerCase() === normalized.toLowerCase())) return true;
+  if (normalized.toLowerCase() === 'hesso') return true;
   
   const meta = getAgentMeta();
   const overrideKey = Object.keys(meta).find(k => k.trim().toLowerCase().replace(/\s+/g, ' ') === normalized.toLowerCase());
@@ -123,7 +180,8 @@ export const isTLName = (name: string): boolean => {
 
 export const formatAgentName = (name: string): string => {
   if (!name) return '';
-  const normalized = capitalizeName(name);
+  const fullName = findAgentByUsername(name) || name;
+  const normalized = capitalizeName(fullName);
   if (normalized.toLowerCase() === 'amira hassan') {
     return 'Amira Hassan 👑';
   }
@@ -143,7 +201,8 @@ export const getAgentMeta = (): Record<string, { roleType: string; tlName: strin
 // Retrieve Line of Business (LOB) for an agent or TL
 export const getAgentLOB = (name: string): string => {
   if (!name) return 'General';
-  const cleanName = name.trim().toLowerCase().replace(/\s+/g, ' ');
+  const fullName = findAgentByUsername(name) || name;
+  const cleanName = fullName.trim().toLowerCase().replace(/\s+/g, ' ');
   
   const meta = getAgentMeta();
   const overrideKey = Object.keys(meta).find(k => k.trim().toLowerCase().replace(/\s+/g, ' ') === cleanName);
@@ -160,7 +219,8 @@ export const getAgentLOB = (name: string): string => {
 
 export const getAgentTL = (name: string): string => {
   if (!name) return 'Unassigned';
-  const cleanName = name.trim().toLowerCase().replace(/\s+/g, ' ');
+  const fullName = findAgentByUsername(name) || name;
+  const cleanName = fullName.trim().toLowerCase().replace(/\s+/g, ' ');
   
   const meta = getAgentMeta();
   const overrideKey = Object.keys(meta).find(k => k.trim().toLowerCase().replace(/\s+/g, ' ') === cleanName);
@@ -520,13 +580,13 @@ export const getInitialSchedules = (currentTime: Date, agents: string[]): Schedu
 
 // Generate a sample CSV template for Schedule uploading
 export const generateScheduleTemplateFile = (): string => {
-  const headers = ['Agent Name', 'Date (YYYY-MM-DD)', 'Shift (Morning / Afternoon / Night / or exact hours)'];
+  const headers = ['Agent Name', 'Date (YYYY-MM-DD)', 'Shift (Morning / Afternoon / Night / or exact hours)', 'Shift Notes'];
   const samples = [
-    ['Ahmed Aly', '2026-05-25', 'Morning'],
-    ['Ahmed Aly', '2026-05-26', 'Afternoon'],
-    ['Mostafa Mahmoud', '2026-05-25', '13:00 - 22:00'],
-    ['Fatma Omar', '2026-05-25', 'Night'],
-    ['Nour Selim', '2026-05-27', '22:00 - 07:00']
+    ['Ahmed Aly', '2026-05-25', 'Morning', 'First day back from vacation'],
+    ['Ahmed Aly', '2026-05-26', 'Afternoon', 'Late arrival approved by leadership'],
+    ['Mostafa Mahmoud', '2026-05-25', '13:00 - 22:00', 'On-site premium shift'],
+    ['Fatma Omar', '2026-05-25', 'Night', 'Coverage role'],
+    ['Nour Selim', '2026-05-27', '22:00 - 07:00', 'Regular support hours']
   ];
 
   return [
@@ -890,6 +950,7 @@ export const parseScheduleCSV = (
     let nameIdx = rawHeaders.findIndex(h => h.includes('agent') || h.includes('name') || h === 'who' || h.includes('employee'));
     let dateIdx = rawHeaders.findIndex(h => h.includes('date') || h === 'day');
     let shiftIdx = rawHeaders.findIndex(h => h.includes('shift') || h.includes('hours') || h === 'time');
+    let notesIdx = rawHeaders.findIndex(h => h.includes('note') || h.includes('comment') || h.includes('desc') || h.includes('remark') || h.includes('info'));
 
     if (nameIdx === -1) nameIdx = 0;
     if (dateIdx === -1) dateIdx = 1;
@@ -974,6 +1035,7 @@ export const parseScheduleCSV = (
       }
 
       const shiftLabel = mapShiftLabel(rawShift);
+      const shiftNotes = notesIdx !== -1 ? (row[notesIdx] || '').trim() : '';
 
       if (shiftLabel && shiftLabel !== 'Off') {
         const isExisting = existingAgents.some(a => a.toLowerCase() === agentName.toLowerCase());
@@ -985,7 +1047,8 @@ export const parseScheduleCSV = (
           id: `sch_up_${Date.now()}_vert_${idx}`,
           agentName,
           date: formattedDate,
-          shiftLabel
+          shiftLabel,
+          ...(shiftNotes ? { shiftNotes } : {})
         });
       }
     }

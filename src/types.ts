@@ -1,4 +1,4 @@
-export type Role = 'tl' | 'agent';
+export type Role = 'tl' | 'agent' | 'qa';
 
 export interface User {
   id: string;
@@ -6,6 +6,31 @@ export interface User {
   role: Role;
   password?: string; // Stored in plain text or simple local format as requested
   avatarUrl?: string;
+  status?: string;
+  statusNote?: string;
+  bio?: string;
+  dailyUpdate?: string;
+}
+
+export interface QAQuestion {
+  id: string;
+  text: string;
+  maxScore: number;
+}
+
+export interface QAScore {
+  id: string;
+  qaName: string;
+  agentName: string;
+  tlName?: string;
+  clinicName: string;
+  chatOrCallId: string;
+  notes: string;
+  scores: Record<string, number>; // questionId -> score
+  questionsSnapshot?: QAQuestion[]; // Snapshot of questions at time of evaluation
+  totalScore: number;
+  maxTotalScore: number;
+  createdAt: string;
 }
 
 export interface Shift {
@@ -147,6 +172,19 @@ export interface CaseRecord {
   createdAt: string;
   leadSource?: string;
   screenshot?: string; // Base64 screenshot
+  branch?: string;
+  patientType?: string;
+  service?: string;
+  ticketType?: string;
+  ticketStatus?: string;
+  callType?: string;
+}
+
+export interface DailyActivity {
+  id: string;
+  label: string; // 'Work', 'Break', 'Lunch', 'Meeting', 'Coaching', 'Training', 'Project'
+  startTime: string; // 'HH:MM'
+  endTime: string; // 'HH:MM'
 }
 
 export interface ScheduledShift {
@@ -154,6 +192,8 @@ export interface ScheduledShift {
   agentName: string;
   date: string; // YYYY-MM-DD
   shiftLabel: string; // e.g. "07:00 - 16:00"
+  shiftNotes?: string;
+  activities?: DailyActivity[];
 }
 
 export interface ActivityRecord {
@@ -307,6 +347,17 @@ export interface TlFeedback {
   createdAt: string;
   replies: FeedbackReply[];
   status: 'pending_reply' | 'replied' | 'completed';
+}
+
+export interface Announcement {
+  id: string;
+  author: string;
+  message: string;
+  imageUrl?: string;
+  linkUrl?: string;
+  locationUrl?: string;
+  clinicFilter?: string; // 'all' or specific clinic name
+  createdAt: string;
 }
 
 export interface ChatMessage {
