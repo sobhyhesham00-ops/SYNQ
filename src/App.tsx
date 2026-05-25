@@ -352,7 +352,7 @@ export default function App() {
           }
         }
 
-        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=30.30&longitude=31.75&current_weather=true');
+        const res = await fetch('/api/weather?lat=30.30&lng=31.75');
         const data = await res.json();
         if (data && data.current_weather) {
           const temp = data.current_weather.temperature;
@@ -366,7 +366,7 @@ export default function App() {
           }));
         }
       } catch (e) {
-        console.error("Failed to fetch weather:", e);
+        // Silently fall back to default weather values to prevent console spam
         const hr = new Date().getHours();
         let fallbackTemp = 28;
         if (hr >= 11 && hr <= 16) fallbackTemp = 32;
@@ -3933,7 +3933,7 @@ ${ttNotes}` : autoNote;
   });
 
   // Derived counts for overview cards
-  const pendingRequests = requests.filter(r => r.status === 'pending');
+  const pendingRequests = requests.filter(r => r.status === 'pending' || r.status === 'pending_partner');
   const pendingSwapsCount = pendingRequests.filter(r => r.type === 'swap').length;
   const pendingAnnualsCount = pendingRequests.filter(r => r.type === 'annual').length;
 
