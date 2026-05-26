@@ -1,9 +1,3 @@
-import './patch_console';
-import {StrictMode} from 'react';
-import {createRoot} from 'react-dom/client';
-import App from './App.tsx';
-import './index.css';
-
 const originalConsoleError = console.error;
 console.error = (...args) => {
   const msg = args.map(a => {
@@ -19,6 +13,7 @@ console.error = (...args) => {
   if (msg.includes('Quota exceeded') || msg.includes('resource-exhausted')) return;
   originalConsoleError(...args);
 };
+
 const originalConsoleWarn = console.warn;
 console.warn = (...args) => {
   const msg = args.map(a => {
@@ -34,16 +29,3 @@ console.warn = (...args) => {
   if (msg.includes('Using maximum backoff delay')) return;
   originalConsoleWarn(...args);
 };
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then((registrations) => {
-    for (let registration of registrations) {
-      registration.unregister();
-    }
-  });
-}
-
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);

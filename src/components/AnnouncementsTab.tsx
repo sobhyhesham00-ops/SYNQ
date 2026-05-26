@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Announcement, User } from '../types';
-import { Bell, Image as ImageIcon, Link, CheckCircle2 } from 'lucide-react';
+import { Bell, Image as ImageIcon, Link, CheckCircle2, Download, Paperclip, X } from 'lucide-react';
 import { doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { toast } from 'sonner';
@@ -23,6 +23,18 @@ export function AnnouncementsTab({
   
   const [filterClinic, setFilterClinic] = useState('all');
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setImageUrl(event.target?.result as string);
+        toast.success("Photo attached successfully!");
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handlePost = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
@@ -34,6 +46,7 @@ export function AnnouncementsTab({
       imageUrl,
       linkUrl,
       clinicFilter,
+      reactions: {},
       createdAt: new Date().toISOString()
     };
 
@@ -70,6 +83,59 @@ export function AnnouncementsTab({
     }
   };
 
+  // Predefined interactive emojis
+  const EMOJI_OPTIONS = ['👍', '❤️', '🎉', '👀', '🔥'];
+
+  const handleReactionToggle = async (annId: string, emoji: string) => {
+    const ann = announcements.find(a => a.id === annId);
+    if (!ann) return;
+
+    const currentReactions = ann.reactions || {};
+    const reactors = currentReactions[emoji] || [];
+    const name = currentUser.name;
+
+    let updatedReactors = [...reactors];
+    if (reactors.includes(name)) {
+      updatedReactors = updatedReactors.filter(u => u !== name);
+    } else {
+      updatedReactors.push(name);
+    }
+
+    const updatedAnn = {
+      ...ann,
+      reactions: {
+        ...currentReactions,
+        [emoji]: updatedReactors
+      }
+    };
+
+    try {
+      await setDoc(doc(db, "announcements", annId), updatedAnn);
+    } catch (err) {
+      console.error("Failed to toggle reaction:", err);
+      toast.error("Failed to submit reaction.");
+    }
+  };
+
+  const triggerDownload = (base64OrUrl: string, filename: string) => {
+    try {
+      if (base64OrUrl.startsWith('data:')) {
+        const link = document.createElement('a');
+        link.href = base64OrUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success("Image download triggered successfully!");
+      } else {
+        window.open(base64OrUrl, '_blank');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Unable to execute download directly. Right click to save or use browser open.");
+    }
+  };
+
   const filtered = announcements.filter(a => {
     if (filterClinic !== 'all' && a.clinicFilter !== 'all' && a.clinicFilter !== filterClinic) return false;
     return true;
@@ -83,7 +149,7 @@ export function AnnouncementsTab({
             <Bell className="w-8 h-8 text-yellow-500" />
             {isTL ? 'TL Announcements' : 'Updates & Announcements'}
           </h2>
-          <p className="text-slate-400 text-sm">Real-time updates and important clinic broadcasts.</p>
+          <p className="text-slate-400 text-sm">Real-time updates, clinic broadcasts, and important instructions.</p>
         </div>
       </div>
 
@@ -99,9 +165,28 @@ export function AnnouncementsTab({
           />
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Image URL (Optional)</label>
-              <input type="url" value={imageUrl} onChange={e => setImageUrl(e.target.value)} placeholder="https://..." className="w-full bg-slate-900/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-yellow-500" />
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Attach Photo / Screenshot</label>
+              <div className="flex items-center gap-2">
+                <label className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs cursor-pointer border border-white/10 select-none transition-colors">
+                  <Paperclip className="w-3.5 h-3.5" />
+                  Upload Photo file
+                  <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+                </label>
+                {imageUrl && (
+                  <button type="button" onClick={() => setImageUrl('')} className="p-1 px-2.5 bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 border border-rose-500/30 rounded-lg text-xs transition-colors cursor-pointer">
+                    Clear
+                  </button>
+                )}
+              </div>
+              <input 
+                type="url" 
+                value={imageUrl.startsWith('data:') ? '' : imageUrl} 
+                onChange={e => setImageUrl(e.target.value)} 
+                placeholder="Or paste an Image URL..." 
+                className="w-full bg-slate-900/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-yellow-500 mt-1" 
+                disabled={imageUrl.startsWith('data:')}
+              />
             </div>
             <div>
               <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Reference Link (Optional)</label>
@@ -120,6 +205,16 @@ export function AnnouncementsTab({
               </select>
             </div>
           </div>
+
+          {imageUrl && (
+            <div className="p-3 bg-slate-900/40 border border-white/5 rounded-xl flex items-center gap-4">
+              <img src={imageUrl} alt="Upload preview" className="w-20 h-16 object-cover rounded-lg border border-white/10 shadow-lg shrink-0" />
+              <div className="space-y-1 text-left">
+                <p className="text-[11px] font-bold text-slate-300">Attached Photo Attachment</p>
+                <p className="text-[9px] text-slate-500">{imageUrl.startsWith('data:') ? 'Local Image Base64 Data Binary File' : 'External Web URL Link resource'}</p>
+              </div>
+            </div>
+          )}
           
           <div className="flex justify-end pt-2">
             <button type="submit" className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold px-6 py-2.5 rounded-xl text-sm flex items-center gap-2 cursor-pointer transition-colors shadow-lg shadow-yellow-500/20">
@@ -143,19 +238,19 @@ export function AnnouncementsTab({
           </select>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 text-left">
           {filtered.length === 0 ? (
             <p className="text-slate-400 text-center py-10 font-mono text-sm">No updates found.</p>
           ) : (
             filtered.map(a => (
-              <div key={a.id} className="p-5 border border-white/10 rounded-2xl bg-white/5 relative group">
+              <div key={a.id} className="p-5 border border-white/10 rounded-2xl bg-white/5 relative group space-y-3">
                 {isTL && (
-                  <button onClick={() => handleDelete(a.id)} className="absolute top-4 right-4 text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-rose-400/10 rounded-lg cursor-pointer">
+                  <button onClick={() => handleDelete(a.id)} className="absolute top-4 right-4 text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-rose-400/10 rounded-lg cursor-pointer text-xs font-bold">
                     Delete
                   </button>
                 )}
                 
-                <div className="flex items-center gap-3 mb-3">
+                <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xs text-amber-500 border border-amber-500/20">
                     {(a.author || "System").substring(0,2).toUpperCase()}
                   </div>
@@ -171,20 +266,71 @@ export function AnnouncementsTab({
                   {a.message}
                 </p>
                 
-                {(a.imageUrl || a.linkUrl) && (
-                  <div className="mt-4 flex flex-wrap gap-3">
-                    {a.imageUrl && (
-                      <a href={a.imageUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg text-xs font-bold transition-colors">
-                        <ImageIcon className="w-3.5 h-3.5" /> View Image
-                      </a>
-                    )}
-                    {a.linkUrl && (
-                      <a href={a.linkUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/20 rounded-lg text-xs font-bold transition-colors">
-                        <Link className="w-3.5 h-3.5" /> Open Link
-                      </a>
-                    )}
+                {a.imageUrl && (
+                  <div className="p-2.5 bg-black/40 rounded-xl max-w-lg border border-white/5 space-y-2">
+                    <img src={a.imageUrl} alt="Attached Announcement File" className="w-full max-h-72 object-contain rounded-lg shadow-xl" />
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] text-slate-500 font-mono">Image attached by Management</p>
+                      <button 
+                        type="button" 
+                        onClick={() => triggerDownload(a.imageUrl || '', `announcement_file_${a.id}.png`)}
+                        className="px-2.5 py-1 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/25 text-yellow-300 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Download className="w-3.5 h-3.5" /> Download Image
+                      </button>
+                    </div>
                   </div>
                 )}
+
+                {/* Open Link */}
+                {a.linkUrl && (
+                  <div className="pt-1">
+                    <a href={a.linkUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/20 rounded-lg text-xs font-bold transition-colors">
+                      <Link className="w-3.5 h-3.5" /> Open Attached URL: {new URL(a.linkUrl).hostname}
+                    </a>
+                  </div>
+                )}
+
+                {/* Emojis Section: Cannot post text reply, can only leave emoji */}
+                <div className="pt-3 border-t border-white/5 flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-1.5 bg-slate-900/40 p-1.5 rounded-xl border border-white/5">
+                    <span className="text-[10px] text-slate-400 uppercase font-black tracking-wider px-2 border-r border-white/10 select-none">Reactions Only:</span>
+                    <div className="flex items-center gap-1">
+                      {EMOJI_OPTIONS.map(emoji => {
+                        const reactors = (a.reactions || {})[emoji] || [];
+                        const hasReacted = reactors.includes(currentUser.name);
+                        return (
+                          <button
+                            key={emoji}
+                            onClick={() => handleReactionToggle(a.id, emoji)}
+                            className={`px-2 py-1 rounded-lg text-xs transition-all relative group flex items-center gap-1 cursor-pointer select-none border ${
+                              hasReacted 
+                                ? 'bg-amber-500/15 border-amber-500/35 text-amber-300 scale-105 shadow-inner' 
+                                : 'bg-white/5 border-transparent hover:bg-white/10 text-slate-400'
+                            }`}
+                            title={reactors.length > 0 ? `Reacted: ${reactors.join(', ')}` : "Click to react"}
+                          >
+                            <span>{emoji}</span>
+                            {reactors.length > 0 && (
+                              <span className="text-[10px] font-bold font-mono text-slate-300">{reactors.length}</span>
+                            )}
+
+                            {/* Tooltip containing reactor names */}
+                            {reactors.length > 0 && (
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2 py-1 bg-slate-950 text-[9px] font-mono text-slate-200 rounded border border-white/10 whitespace-nowrap z-30 shadow-2xl">
+                                {reactors.map(name => name.split(' ')[0]).join(', ')}
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <p className="text-[9px] text-slate-500 italic mt-0.5 select-none font-sans">
+                    * Text reply disabled by Team Leader permissions. Emoji reactions active.
+                  </p>
+                </div>
               </div>
             ))
           )}

@@ -55,6 +55,8 @@ export interface SwapRequest {
   actionAt?: string;
   ruleViolation?: boolean;
   violationMessage?: string;
+  screenshot?: string; // Base64 screenshot
+  replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
 }
 
 export interface AnnualRequest {
@@ -70,6 +72,8 @@ export interface AnnualRequest {
   actionAt?: string;
   ruleViolation?: boolean;
   violationMessage?: string;
+  screenshot?: string; // Base64 screenshot
+  replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
 }
 
 export type SchedulingRequest = SwapRequest | AnnualRequest;
@@ -82,6 +86,7 @@ export interface TodoItem {
   reminderTimeMs: number | null;
   createdAt: string;
   notified?: boolean;
+  category?: 'Work' | 'Personal' | 'Urgent';
 }
 
 export interface Inquiry {
@@ -101,6 +106,7 @@ export interface Inquiry {
   answeredAt?: string;
   seenByAgent?: boolean; // Tracking if agent acknowledged the notification
   customerContacted?: 'not_contacted' | 'contacted' | 'attempted'; // Dropdown menu status for customer contact status
+  replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
 }
 
 export interface TabbyTamaraRequest {
@@ -114,7 +120,7 @@ export interface TabbyTamaraRequest {
   phoneNumber: string;
   notes?: string;
   createdAt: string;
-  status: 'not_confirmed' | 'confirmed';
+  status: 'not_confirmed' | 'confirmed' | 'rejected';
   customerContacted?: 'not_contacted' | 'contacted';
   contactedAt?: string;
   confirmedAt?: string;
@@ -124,6 +130,9 @@ export interface TabbyTamaraRequest {
   paymentLink?: string;
   agentContactNotes?: string;
   paymentScreenshot?: string;
+  tlNotes?: string;
+  tlLinks?: string;
+  replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
 }
 
 export interface TabbyTamaraComplaint {
@@ -144,6 +153,8 @@ export interface TabbyTamaraComplaint {
   customerContacted?: 'not_contacted' | 'contacted';
   contactedAt?: string;
   clinicName: string;
+  screenshot?: string; // Optional field for attachment screenshot
+  replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
 }
 
 export interface ClientCommunicationRequest {
@@ -161,6 +172,7 @@ export interface ClientCommunicationRequest {
   handledAt?: string;
   handlingNotes?: string;
   screenshot?: string; // Base64 screenshot
+  replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
 }
 
 export interface CaseRecord {
@@ -178,6 +190,7 @@ export interface CaseRecord {
   ticketType?: string;
   ticketStatus?: string;
   callType?: string;
+  replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
 }
 
 export interface DailyActivity {
@@ -326,6 +339,7 @@ export interface SystemNotification {
   targetAgent: string; // specific agent name, or "all", or "tl"
   createdAt: string; // ISO string
   seenByUsers?: string[]; // list of names who have seen it
+  clearedByUsers?: string[]; // list of names who have cleared/deleted it from their inbox
 }
 
 export interface FeedbackReply {
@@ -358,6 +372,7 @@ export interface Announcement {
   locationUrl?: string;
   clinicFilter?: string; // 'all' or specific clinic name
   createdAt: string;
+  reactions?: Record<string, string[]>; // mapping emoji (e.g., "👍") to names of users who pinned it
 }
 
 export interface ChatMessage {
@@ -371,4 +386,29 @@ export interface ChatMessage {
   seen: boolean;
   language: 'en' | 'ar';
 }
+
+export interface OrderMember {
+  id: string;
+  name: string;
+  itemsName: string;
+  baseAmount: number;
+  finalAmount: number; // after tax, tips, discount splits
+  paid: boolean;
+}
+
+export interface Order {
+  id: string;
+  makerName: string;
+  restaurantName: string;
+  status: 'open' | 'ordered' | 'arrived' | 'cancelled';
+  createdAt: string;
+  orderedAt?: string;
+  arrivedAt?: string;
+  timerMinutes?: number; 
+  members: OrderMember[];
+  deliveryFee: number;
+  tax: number;
+  discount: number;
+}
+
 

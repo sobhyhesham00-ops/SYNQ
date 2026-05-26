@@ -17,11 +17,34 @@ export const AIChatWidget = () => {
     setHistory(prev => [...prev, { role: 'user', text: userMsg }]);
     setIsTyping(true);
 
+    // Dynamic search of knowledge base for relevant snippets
+    let knowledgeContext = '';
+    try {
+      const rawKb = localStorage.getItem('synq_knowledge_base');
+      if (rawKb) {
+        const docs = JSON.parse(rawKb);
+        if (Array.isArray(docs) && docs.length > 0) {
+          const queryLower = (userMsg || '').toLowerCase();
+          const words = queryLower.split(/\W+/).filter(w => w.length > 2);
+          const matched = docs.filter(doc => {
+            const nameMatch = (doc.name || '').toLowerCase().includes(queryLower);
+            const contentMatch = (doc.content || '').toLowerCase().includes(queryLower);
+            if (nameMatch || contentMatch) return true;
+            return words.some(w => (doc.name || '').toLowerCase().includes(w) || (doc.content || '').toLowerCase().includes(w));
+          });
+          const targetDocs = matched.length > 0 ? matched : docs.slice(0, 3);
+          knowledgeContext = targetDocs.map(d => `[Source: ${d.name}]\n${d.content}`).join('\n\n---\n\n');
+        }
+      }
+    } catch (err) {
+      console.error('KB retrieve error for chat:', err);
+    }
+
     try {
       const res = await fetch('/api/ai-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMsg })
+        body: JSON.stringify({ message: userMsg, knowledgeContext })
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);

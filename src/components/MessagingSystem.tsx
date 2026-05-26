@@ -28,7 +28,7 @@ import {
   query, 
   orderBy, 
   limit, 
-  onSnapshot, 
+  onSnapshot as originalOnSnapshot, disableNetwork, 
   addDoc, 
   updateDoc, 
   doc, 
@@ -36,6 +36,28 @@ import {
   setDoc
 } from 'firebase/firestore';
 import { db } from '../firebase';
+
+
+const onSnapshot = (...args: any[]): any => {
+  if (args.length >= 2 && typeof args[1] === 'function') {
+    const errorObserver = typeof args[2] === 'function' ? args[2] : undefined;
+    const newErrorHandler = (err: any) => {
+      if (err.code === 'resource-exhausted' || err.message.includes('Quota exceeded')) {
+        console.warn('[Firestore Interceptor] Quota Exceeded! Disabling network.');
+        disableNetwork(db).catch(console.error);
+      } else if (errorObserver) {
+        errorObserver(err);
+      }
+    };
+    if (typeof args[2] === 'function') {
+        args[2] = newErrorHandler;
+    } else {
+        args.splice(2, 0, newErrorHandler);
+    }
+  }
+  return (originalOnSnapshot as any)(...args);
+};
+
 import { ChatMessage, User as AppUser } from '../types';
 import { getAgentTL } from '../utils';
 import { toast } from 'sonner';
@@ -122,7 +144,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
       const filtered = msgs.filter(m => {
         const rName = (m.receiverName || '').toLowerCase();
         const sName = (m.senderName || '').toLowerCase();
-        const curName = currentUser.name.toLowerCase();
+        const curName = (currentUser.name || '').toLowerCase();
         
         // Global channel
         if (rName === 'all') return true;
@@ -134,7 +156,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
         if (rName.startsWith('team:')) {
           const teamTL = m.receiverName.split(':')[1].toLowerCase();
           if (curName === teamTL) return true;
-          if (userTL.toLowerCase() === teamTL) return true;
+          if ((userTL || '').toLowerCase() === teamTL) return true;
           return false;
         }
 
@@ -152,7 +174,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
         const data = d.data();
         const rName = (data.receiverName || '').toLowerCase();
         const sName = (data.senderName || '').toLowerCase();
-        const curName = currentUser.name.toLowerCase();
+        const curName = (currentUser.name || '').toLowerCase();
         
         if (rName === curName && !data.seen && selectedRecipient.toLowerCase() === sName) {
           updateDoc(doc(db, 'messages', d.id), { seen: true });
@@ -172,11 +194,11 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
     const privateStats: Record<string, { lastText: string; lastTime: string; unreadCount: number }> = {};
     const channelStats: Record<string, { lastText: string; lastTime: string; unreadCount: number }> = {};
 
-    const curName = currentUser.name.toLowerCase();
+    const curName = (currentUser.name || '').toLowerCase();
 
     // 1. Compute Direct Message Stats (Case Insensitive)
     agentsList.forEach(name => {
-      const targetName = name.toLowerCase();
+      const targetName = (name || '').toLowerCase();
       const relativeMsgs = messages.filter(m => {
         const rName = (m.receiverName || '').toLowerCase();
         const sName = (m.senderName || '').toLowerCase();
@@ -206,8 +228,8 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
       
       const lastVisited = localStorage.getItem(`sched_read_time_${ch}`);
       const unreadMsgs = lastVisited
-        ? relativeMsgs.filter(m => m.senderName.toLowerCase() !== curName && new Date(m.createdAt).getTime() > new Date(lastVisited).getTime())
-        : relativeMsgs.filter(m => m.senderName.toLowerCase() !== curName);
+        ? relativeMsgs.filter(m => (m.senderName || '').toLowerCase() !== curName && new Date(m.createdAt).getTime() > new Date(lastVisited).getTime())
+        : relativeMsgs.filter(m => (m.senderName || '').toLowerCase() !== curName);
 
       channelStats[ch] = {
         lastText: last ? `${last.senderName}: ${last.text || "📎 Shared an attachment"}` : "No messages yet",
@@ -303,7 +325,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
 
   // Filter messages in thread
   const filteredThreadMessages = useMemo(() => {
-    const curName = currentUser.name.toLowerCase();
+    const curName = (currentUser.name || '').toLowerCase();
     const selRecName = selectedRecipient.toLowerCase();
 
     // First filter by selected channel/recipient thread
@@ -345,12 +367,12 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
     }
 
     const agentsFiltered = agentsList
-      .filter(name => name.toLowerCase() !== currentUser.name.toLowerCase() && name.toLowerCase().includes(searchQuery.toLowerCase()))
+      .filter(name => (name || '').toLowerCase() !== (currentUser.name || '').toLowerCase() && (name || '').toLowerCase().includes(searchQuery.toLowerCase()))
       .map(name => {
-        const isThisTL = name.toLowerCase().includes('tl') || name === 'Amira Hassan' || name === 'Sobhy Hesham' || name === 'Hesham Sobhy';
+        const isThisTL = (name || '').toLowerCase().includes('tl') || name === 'Amira Hassan' || name === 'Sobhy Hesham' || name === 'Hesham Sobhy';
         
         // Find matching presence and mood status
-        const match = (registeredUsers || []).find(u => u.name.toLowerCase() === name.toLowerCase());
+        const match = (registeredUsers || []).find(u => (u.name || '').toLowerCase() === (name || '').toLowerCase());
         const status = match?.status || 'offline';
         const statusNote = match?.statusNote || '';
         
@@ -549,7 +571,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
               value={currentUser.status || 'online'}
               onChange={async (e) => {
                 const newStatus = e.target.value;
-                const userDocId = currentUser.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const userDocId = (currentUser.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
                 try {
                   await setDoc(doc(db, "users", userDocId), {
                     status: newStatus,
@@ -577,7 +599,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
               value={currentUser.statusNote || ''}
               onChange={async (e) => {
                 const val = e.target.value;
-                const userDocId = currentUser.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const userDocId = (currentUser.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
                 try {
                   await setDoc(doc(db, "users", userDocId), {
                     statusNote: val,
@@ -681,10 +703,10 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
             </div>
           ) : (
                             filteredThreadMessages.map((msg, idx) => {
-                              const isMine = msg.senderName.toLowerCase() === currentUser.name.toLowerCase();
-                              const isAr = msg.language === 'ar' || isArabic(msg.text);
-                              const isTeamMsg = msg.receiverName.startsWith('team:');
-                              const isTLMsg = msg.receiverName === 'tl';
+                              const isMine = (msg.senderName || '').toLowerCase() === (currentUser.name || '').toLowerCase();
+                              const isAr = msg.language === 'ar' || (msg.text ? isArabic(msg.text) : false);
+                              const isTeamMsg = (msg.receiverName || '').startsWith('team:');
+                              const isTLMsg = (msg.receiverName || '') === 'tl';
                               
                               // Formatting dates nicely
                               const timeDisplay = new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -692,7 +714,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
                 
                               // Stagger consecutive messages from the same sender to look compact and organic
                               const prevMsg = filteredThreadMessages[idx - 1];
-                              const isFirstInSequence = !prevMsg || prevMsg.senderName.toLowerCase() !== msg.senderName.toLowerCase();
+                              const isFirstInSequence = !prevMsg || (prevMsg.senderName || '').toLowerCase() !== (msg.senderName || '').toLowerCase();
 
               return (
                 <div key={msg.id} className="space-y-1">
@@ -715,7 +737,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
                       {/* Avatar shown for first message in sender sequence for clean UI */}
                       {isFirstInSequence ? (
                         <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center text-[10px] font-black text-slate-300 shrink-0 select-none">
-                          {msg.senderName[0]}
+                          {(msg.senderName || '?')[0]}
                         </div>
                       ) : (
                         <div className="w-7 shrink-0" /> // spacer to keep bubbles aligned
@@ -731,7 +753,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
                         )}
 
                         {/* Speech Bubble: Pure iOS Blue vs Glossy Slate */}
-                        <div className={`p-3 rounded-2xl text-[12px] font-sans shadow-md group relative ${isMine ? 'bg-gradient-to-b from-[#0084FF] to-[#007AFF] text-white rounded-tr-sm' : 'bg-[#1C1C1E] text-slate-100 rounded-tl-sm'} ${isAr ? 'text-right dir-rtl font-display font-medium leading-relaxed' : 'text-left leading-relaxed'}`}>
+                        <div className={`px-4 py-2.5 rounded-[20px] text-[14px] font-sans shadow-sm group relative ${isMine ? 'bg-[#007AFF] text-white rounded-br-[4px]' : 'bg-[#1C1C1E] text-slate-100 rounded-bl-[4px]'} ${isAr ? 'text-right dir-rtl font-display font-medium leading-relaxed' : 'text-left leading-relaxed'}`}>
                           {msg.text && <p className="whitespace-pre-wrap">{msg.text}</p>}
                           
                           {/* Attachments rendering */}

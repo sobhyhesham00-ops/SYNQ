@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, History, MessageCircle, FileText, CheckCircle2, X } from 'lucide-react';
+import { Search, History, MessageCircle, FileText, CheckCircle2, X, Download } from 'lucide-react';
 import { Inquiry, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, CaseRecord } from '../types';
 
 interface PatientSearchHubProps {
@@ -20,6 +20,19 @@ export function PatientSearchHub({
   const [searchQuery, setSearchQuery] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
   const [viewerImage, setViewerImage] = useState<string | null>(null);
+
+  const downloadFile = (url: string, prefix: string) => {
+    try {
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${prefix}_${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (e) {
+      console.error('Download failed', e);
+    }
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -256,9 +269,18 @@ export function PatientSearchHub({
 
       {viewerImage && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/90 backdrop-blur-sm shadow-2xl p-4" onClick={() => setViewerImage(null)}>
-          <button className="absolute top-4 right-4 p-2 bg-slate-800 rounded-full hover:bg-slate-700 transition" onClick={() => setViewerImage(null)}>
-            <X className="w-5 h-5 text-slate-300" />
-          </button>
+          <div className="absolute top-4 right-4 flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+            <button 
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white rounded-xl flex items-center gap-1.5 transition border border-white/10 shadow-lg"
+              onClick={() => downloadFile(viewerImage, 'patient_document')}
+            >
+              <Download className="w-4 h-4 text-cyan-400" />
+              Download Attachment
+            </button>
+            <button className="p-2 bg-slate-800 rounded-full hover:bg-slate-700 transition border border-white/10" onClick={() => setViewerImage(null)}>
+              <X className="w-5 h-5 text-slate-300" />
+            </button>
+          </div>
           <img src={viewerImage} alt="Fullscreen Attachment" className="max-w-full max-h-[90vh] rounded-2xl border border-slate-800 object-contain" onClick={(e) => e.stopPropagation()} />
         </div>
       )}

@@ -1,4 +1,393 @@
-       endDate: getOffsetDate(28),
+import { SchedulingRequest, SHIFTS, TEAM_LEADERS, INITIAL_AGENTS, SwapRequest, AnnualRequest, ScheduledShift, AGENT_LOBS, Inquiry, TimeLog, AgentDirectoryRow, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, CaseRecord, SystemNotification, Order } from './types';
+
+// Simple client-side storage helpers
+import { db } from './firebase';
+import { doc, setDoc, deleteDoc } from 'firebase/firestore';
+
+export const getStorageItem = <T>(key: string, defaultValue: T): T => {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : defaultValue;
+  } catch (e) {
+    console.error(`Error reading key ${key} from storage`, e);
+    return defaultValue;
+  }
+};
+
+const getCollectionName = (key: string) => {
+    switch(key) {
+        case 'sched_inquiries': return 'inquiries';
+        case 'sched_tabby_tamara': return 'tt_requests';
+        case 'sched_tt_complaints': return 'tt_complaints';
+        case 'sched_client_comms': return 'client_comms';
+        case 'sched_requests': return 'scheduling_requests';
+        case 'sched_time_logs': return 'timelogs';
+        case 'sched_schedules': return 'schedules';
+        case 'sched_cases': return 'cases';
+        case 'sched_notifications': return 'notifications';
+        case 'sched_tl_feedbacks': return 'tl_feedbacks';
+        default: return null;
+    }
+};
+
+export const setStorageItem = <T>(key: string, value: T): void => {
+  try {
+    const oldStr = localStorage.getItem(key);
+    const oldValue = oldStr ? JSON.parse(oldStr) : undefined;
+    
+    localStorage.setItem(key, JSON.stringify(value));
+    
+    // Asynchronous mirror to Firestore (non-blocking, item-level delta sync)
+    if (key.startsWith('sched_')) {
+      const colName = getCollectionName(key);
+      
+      // If this matches a supported collection and is an array of objects
+      if (colName && Array.isArray(value)) {
+        if (value.length > 0 && typeof value[0] === 'object' && 'id' in value[0]) {
+           const oldMap = new Map();
+           if (Array.isArray(oldValue)) {
+               oldValue.forEach(item => { if (item && typeof item === 'object' && item.id) oldMap.set(item.id, item); });
+           }
+           
+           value.forEach(item => {
+               if (item && typeof item === 'object' && item.id) {
+                   const oldItem = oldMap.get(item.id);
+                   if (!oldItem || JSON.stringify(oldItem) !== JSON.stringify(item)) {
+                       const cleanItem = JSON.parse(JSON.stringify(item));
+                       setDoc(doc(db, colName, item.id), cleanItem).catch(err => console.error("Firestore sync error:", err));
+                   }
+                   oldMap.delete(item.id);
+               }
+           });
+           
+           // Any items remaining in the local old array were deleted!
+           oldMap.forEach(item => {
+               deleteDoc(doc(db, colName, item.id)).catch(err => console.error("Firestore delete error:", err));
+           });
+           
+        } else if (value.length === 0 && Array.isArray(oldValue)) {
+           // Array was explicitly cleared (Factory Reset)
+           oldValue.forEach(item => {
+               if (item && typeof item === 'object' && item.id) {
+                   deleteDoc(doc(db, colName, item.id)).catch(err => console.error("Firestore delete error:", err));
+               }
+           });
+        }
+      } else {
+        // Fallback for settings or config (e.g. system/sched_support_assignments)
+        const cleanValue = JSON.parse(JSON.stringify(value));
+        setDoc(doc(db, "system", key), { data: cleanValue }).catch(err => {
+          console.error("Firestore sync error for " + key, err);
+        });
+      }
+    }
+  } catch (e) {
+    console.error(`Error writing key ${key} to storage`, e);
+  }
+};
+
+// Capitalize first letter of every word
+export const capitalizeName = (name: string): string => {
+  if (!name) return '';
+  return name
+    .trim()
+    .replace(/\s+/g, ' ') // Collapse multiple spaces
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
+// Normalize name against a reference list to avoid duplicates with different casing
+export const normalizeName = (name: string, referenceList: string[]): string => {
+  const cap = capitalizeName(name);
+  const matched = referenceList.find(ref => ref?.toLowerCase() === cap?.toLowerCase());
+  return matched || cap;
+};
+
+// Convert full name (e.g., Hesham Sobhy) to username (e.g., h.sobhy)
+export const getUsernameFromFullName = (fullName: string): string => {
+  if (!fullName) return '';
+  const val = (fullName || '').trim().toLowerCase();
+  if (val.includes('.') && !val.includes(' ')) {
+    return val;
+  }
+  const parts = val.replace(/\s+/g, ' ').split(' ');
+  if (parts.length === 0) return '';
+  const firstLetter = parts[0].charAt(0);
+  const lastName = parts[parts.length - 1];
+  return `${firstLetter}.${lastName}`;
+};
+
+// Find matching human-readable agent name by username (or fallback)
+export const findAgentByUsername = (username: string, referenceList: string[] = []): string | null => {
+  if (!username) return null;
+  const target = (username || '').trim().toLowerCase();
+  
+  const combinedList = Array.from(new Set([
+    ...referenceList,
+    ...INITIAL_AGENTS,
+    ...TEAM_LEADERS,
+    'Hesham Sobhy',
+    'Amira Hassan',
+    'Shymaa Hassan',
+    'Shaymaa Hassan',
+    'Hesso'
+  ]));
+
+  const found = combinedList.find(refName => {
+    if (!refName || typeof refName !== 'string') return false;
+    const username = getUsernameFromFullName(refName);
+    const compactName = refName?.toLowerCase().replace(/\s+/g, '');
+    const normalName = refName?.toLowerCase();
+    
+    return username === target || compactName === target.replace(/\s+/g, '') || normalName === target;
+  });
+  return found || null;
+};
+
+// Check if user is QA
+export const isQAName = (name: string): boolean => {
+  if (!name) return false;
+  const fullName = findAgentByUsername(name) || name;
+  const normalized = capitalizeName(fullName);
+  if (AGENT_LOBS[normalized] === 'Quality') return true;
+  
+  const meta = getAgentMeta();
+  const overrideKey = Object.keys(meta).find(k => k.trim().toLowerCase().replace(/\s+/g, ' ') === normalized?.toLowerCase());
+  if (overrideKey && meta[overrideKey].roleType) {
+    const role = meta[overrideKey]?.roleType?.toLowerCase();
+    if (role === 'qa' || role === 'quality') {
+      return true;
+    }
+  }
+  return false;
+};
+
+// Check if user is a Team Leader
+export const isTLName = (name: string): boolean => {
+  if (!name) return false;
+  const fullName = findAgentByUsername(name) || name;
+  const normalized = capitalizeName(fullName);
+  if (TEAM_LEADERS.some(tl => tl?.toLowerCase() === normalized?.toLowerCase())) return true;
+  if (normalized?.toLowerCase() === 'hesso') return true;
+  
+  const meta = getAgentMeta();
+  const overrideKey = Object.keys(meta).find(k => k.trim().toLowerCase().replace(/\s+/g, ' ') === normalized?.toLowerCase());
+  if (overrideKey && meta[overrideKey].roleType) {
+    const role = meta[overrideKey]?.roleType?.toLowerCase();
+    if (role === 'tl' || role === 'team leader' || role.includes('manager')) {
+      return true;
+    }
+  }
+  return false;
+};
+
+export const formatAgentName = (name: string): string => {
+  if (!name) return '';
+  const fullName = findAgentByUsername(name) || name;
+  const normalized = capitalizeName(fullName);
+  if (normalized?.toLowerCase() === 'amira hassan') {
+    return 'Amira Hassan 👑';
+  }
+  return normalized;
+};
+
+// Retrieve Agent Metadata
+export const getAgentMeta = (): Record<string, { roleType: string; tlName: string }> => {
+  try {
+    const raw = localStorage.getItem('sched_agent_meta');
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+};
+
+// Retrieve Line of Business (LOB) for an agent or TL
+export const getAgentLOB = (name: string): string => {
+  if (!name) return 'General';
+  const fullName = findAgentByUsername(name) || name;
+  const cleanName = (fullName || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  
+  const meta = getAgentMeta();
+  const overrideKey = Object.keys(meta).find(k => k.trim().toLowerCase().replace(/\s+/g, ' ') === cleanName);
+  if (overrideKey && meta[overrideKey].roleType) {
+    return meta[overrideKey].roleType;
+  }
+
+  const matchedKey = Object.keys(AGENT_LOBS).find(
+    key => key.trim().toLowerCase().replace(/\s+/g, ' ') === cleanName
+  );
+  
+  return matchedKey ? AGENT_LOBS[matchedKey] : 'General';
+};
+
+export const getAgentTL = (name: string): string => {
+  if (!name) return 'Unassigned';
+  const fullName = findAgentByUsername(name) || name;
+  const cleanName = (fullName || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  
+  const meta = getAgentMeta();
+  const overrideKey = Object.keys(meta).find(k => k.trim().toLowerCase().replace(/\s+/g, ' ') === cleanName);
+  if (overrideKey && meta[overrideKey].tlName) {
+    return meta[overrideKey].tlName;
+  }
+  return 'Unassigned';
+};
+
+// Format Date nicely
+export const formatDateNice = (dateStr: string): string => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return dateStr;
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
+};
+
+// Get current local date in YYYY-MM-DD format
+export const getLocalISOString = (date: Date = new Date()): string => {
+  const offset = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() - (offset * 60 * 1000));
+  return localDate.toISOString().split('T')[0];
+};
+
+// Get device local timezone
+export const getLocalTimeZone = (): string => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  } catch (e) {
+    return 'UTC';
+  }
+};
+
+// Validate a Swap Request (must be 24h before shift)
+export const validateSwapRequest = (
+  shiftDateStr: string,
+  shiftLabel: string,
+  currentTime: Date = new Date()
+): { isValid: boolean; message?: string; hoursDiff?: number } => {
+  if (!shiftDateStr) return { isValid: false, message: 'Please select a shift date.' };
+
+  // Parse shift time
+  // Shift labels are like "07:00 - 16:00", we want the start time.
+  const startHour = parseInt(shiftLabel.split(':')[0], 10) || 0;
+  
+  const shiftDateTime = new Date(shiftDateStr);
+  shiftDateTime.setHours(startHour, 0, 0, 0);
+
+  const diffMs = shiftDateTime.getTime() - currentTime.getTime();
+  const diffHours = diffMs / (1000 * 60 * 60);
+
+  if (diffHours < 24) {
+    return {
+      isValid: false,
+      hoursDiff: parseFloat(diffHours.toFixed(1)),
+      message: `Shift is less than 24 hours away (${parseFloat(diffHours.toFixed(1))}h). Shifts can only be swapped at least 24 hours in advance.`
+    };
+  }
+
+  return { isValid: true, hoursDiff: parseFloat(diffHours.toFixed(1)) };
+};
+
+// Validate an Annual Leave Request (must be >= 14 days in advance)
+export const validateAnnualRequest = (
+  startDateStr: string,
+  currentTime: Date = new Date()
+): { isValid: boolean; message?: string; daysDiff?: number } => {
+  if (!startDateStr) return { isValid: false, message: 'Please select a start date.' };
+
+  const startDateTime = new Date(startDateStr);
+  startDateTime.setHours(0, 0, 0, 0);
+
+  const today = new Date(currentTime);
+  today.setHours(0, 0, 0, 0);
+
+  const diffMs = startDateTime.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 14) {
+    return {
+      isValid: false,
+      daysDiff: diffDays,
+      message: `Start date is only ${diffDays} day(s) away. Annual leave must be requested at least 14 days in advance.`
+    };
+  }
+
+  return { isValid: true, daysDiff: diffDays };
+};
+
+// Helper to generate initial logs/requests when localStorage is empty
+export const getInitialRequests = (currentTime: Date = new Date()): SchedulingRequest[] => {
+  const getOffsetDate = (days: number): string => {
+    const d = new Date(currentTime);
+    d.setDate(d.getDate() + days);
+    return d.toISOString().split('T')[0];
+  };
+
+  const getPastDateStr = (daysAgo: number): string => {
+    const d = new Date(currentTime);
+    d.setDate(d.getDate() - daysAgo);
+    return d.toISOString();
+  };
+
+  return [
+    {
+      id: 'req_1',
+      agentName: 'Ahmed Aly',
+      type: 'swap',
+      date: getOffsetDate(3), // 3 days in future (Valid, >24h)
+      shift: '07:00 - 16:00',
+      swapWithAgent: 'Mostafa Mahmoud',
+      swapWithShift: '13:00 - 22:00',
+      status: 'pending',
+      createdAt: getPastDateStr(2),
+      notes: 'Need to visit doctor in the afternoon'
+    },
+    {
+      id: 'req_2',
+      agentName: 'Fatma Omar',
+      type: 'swap',
+      date: getOffsetDate(5), // 5 days in future (Valid)
+      shift: '13:00 - 22:00',
+      swapWithAgent: 'Farida Khalil',
+      swapWithShift: '07:00 - 16:00',
+      status: 'pending',
+      createdAt: getPastDateStr(1),
+      notes: 'Family gathering'
+    },
+    {
+      id: 'req_3',
+      agentName: 'Nour Selim',
+      type: 'annual',
+      startDate: getOffsetDate(18), // 18 days away (>14 days, valid)
+      endDate: getOffsetDate(25),
+      status: 'pending',
+      createdAt: getPastDateStr(3),
+      notes: 'Summer vacation trip with parents'
+    },
+    {
+      id: 'req_4',
+      agentName: 'Mostafa Mahmoud',
+      type: 'swap',
+      date: getOffsetDate(1), // Tomorrow, check if > 24 hours. Let's make it 30h away
+      shift: '13:00 - 22:00',
+      swapWithAgent: 'Ahmed Aly',
+      swapWithShift: '07:00 - 16:00',
+      status: 'approved',
+      createdAt: getPastDateStr(2),
+      notes: 'Personal errand',
+      actionBy: 'Shymaa Hassan',
+      actionAt: getPastDateStr(1)
+    },
+    {
+      id: 'req_5',
+      agentName: 'Farida Khalil',
+      type: 'annual',
+      startDate: getOffsetDate(21),
+      endDate: getOffsetDate(28),
       status: 'approved',
       createdAt: getPastDateStr(5),
       notes: 'Sibling wedding preparation',
@@ -248,3 +637,651 @@ export const parseAgentDirectoryCSV = (
   const parsedLines = allLines.map(line => parseRow(line));
 
   // Dynamic Header Recognition: look for keywords in the first 20 rows
+  let headerIdx = 0;
+  let nameIdx = -1;
+
+  for (let i = 0; i < Math.min(parsedLines.length, 20); i++) {
+    const row = parsedLines[i];
+    const foundIdx = row.findIndex(h => {
+      const l = h?.toLowerCase().trim();
+      return l === 'agent' || l === 'name' || l === 'employee' || l === 'user' || 
+             l.includes('agent name') || l.includes('employee name') || l.includes('full name') ||
+             l === 'who' || l === 'member' || l.includes('staff');
+    });
+    if (foundIdx !== -1) {
+      headerIdx = i;
+      nameIdx = foundIdx;
+      break;
+    }
+  }
+
+  // Fallback: search for ANY 'name' or 'agent' or 'who'
+  if (nameIdx === -1) {
+      for (let i = 0; i < Math.min(parsedLines.length, 20); i++) {
+        const row = parsedLines[i];
+        const foundIdx = row.findIndex(h => {
+          const l = h?.toLowerCase().trim();
+          return l.includes('name') || l.includes('agent') || l.includes('employee') || l.includes('user') || l.includes('member');
+        });
+        if (foundIdx !== -1) {
+          headerIdx = i;
+          nameIdx = foundIdx;
+          break;
+        }
+      }
+  }
+
+  if (nameIdx === -1) {
+    nameIdx = 0; // Default to first column if everything fails
+    headerIdx = 0;
+  }
+
+  const rawHeaders = parsedLines[headerIdx];
+
+  for (let idx = headerIdx + 1; idx < parsedLines.length; idx++) {
+    const row = parsedLines[idx];
+
+    if (row.length === 0 || row.every(c => !c)) continue;
+
+    const rawName = row[nameIdx] || '';
+    
+    // Filter out common "junk" or "total" rows
+    const nameLower = rawName?.toLowerCase().trim();
+    if (!rawName || 
+        nameLower.includes('total') || 
+        nameLower.includes('count') || 
+        nameLower.includes('summary') ||
+        nameLower.includes('unnamed') ||
+        nameLower.includes('formula') ||
+        nameLower.startsWith('---') ||
+        nameLower.startsWith('=') ||
+        nameLower.length < 2) {
+      continue;
+    }
+
+    // Capture TL and Role/LOB if we can find them in the row to auto-populate metadata
+    const agentName = capitalizeName(rawName.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').replace(/\d+/g, '').trim());
+    
+    if (!agentName || agentName.split(' ').length > 8) continue; // Skip sentence-like rows or extremely long names
+
+    const rowData: Record<string, string> = {};
+    rawHeaders.forEach((h, i) => {
+       const headerName = h || `Column_${i}`;
+       if (i !== nameIdx) {
+          rowData[headerName] = row[i] || '';
+       }
+    });
+
+    directory.push({
+      id: `dir_${Date.now()}_${idx}`,
+      agentName,
+      data: rowData
+    });
+  }
+
+  return {
+    directory,
+    errors,
+    parsedCount: directory.length,
+    headers: rawHeaders.filter((_, i) => i !== nameIdx && rawHeaders[i])
+  };
+};
+
+// Robust CSV Parser for schedules supporting list and matrix formats with intelligent shift/date mappings
+export const parseScheduleCSV = (
+  csvContent: string,
+  existingAgents: string[]
+): { schedules: ScheduledShift[]; errors: string[]; parsedCount: number; newAgents: string[]; parsedMeta: Record<string, { tlName?: string }> } => {
+  const schedules: ScheduledShift[] = [];
+  const errors: string[] = [];
+  const newAgentsSet = new Set<string>();
+  const parsedMeta: Record<string, { tlName?: string }> = {};
+
+  if (!csvContent || !csvContent.trim()) {
+    return { schedules: [], errors: ['CSV content is empty.'], parsedCount: 0, newAgents: [], parsedMeta: {} };
+  }
+
+  // 1. Strip BOM character if present
+  const cleanCSV = csvContent.replace(/^\uFEFF/, '').trim();
+
+  // Helper Row Tokenizer
+  const getCSVRows = (csvText: string): string[][] => {
+    const lines = csvText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+    return lines.map(lineStr => {
+      const row: string[] = [];
+      let curVal = '';
+      let inQuotes = false;
+      for (let i = 0; i < lineStr.length; i++) {
+        const char = lineStr[i];
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          row.push(curVal.trim().replace(/^["']|["']$/g, ''));
+          curVal = '';
+        } else {
+          curVal += char;
+        }
+      }
+      row.push(curVal.trim().replace(/^["']|["']$/g, ''));
+      return row;
+    });
+  };
+
+  const parsedRows = getCSVRows(cleanCSV);
+  if (parsedRows.length === 0) {
+    return { schedules: [], errors: ['No data rows found in CSV.'], parsedCount: 0, newAgents: [], parsedMeta: {} };
+  }
+
+  const parseTargetDate = (dateStr: string): string | null => {
+    const s = dateStr.trim();
+    if (!s) return null;
+
+    const yymmdd = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+    if (yymmdd) {
+      return `${yymmdd[1]}-${yymmdd[2].padStart(2, '0')}-${yymmdd[3].padStart(2, '0')}`;
+    }
+
+    const m = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})$/);
+    if (m) {
+      const v1 = parseInt(m[1], 10);
+      const v2 = parseInt(m[2], 10);
+      const yrMatch = m[3];
+      const yr = yrMatch.length === 2 ? `20${yrMatch}` : yrMatch;
+      if (v1 > 12 && v2 <= 12) {
+        return `${yr}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+      }
+      if (v2 > 12 && v1 <= 12) {
+        return `${yr}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`;
+      }
+      return `${yr}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+    }
+
+    const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+    const short = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+    const lower = s.toLowerCase();
+    
+    for (let i = 0; i < 12; i++) {
+       if (lower.includes(months[i]) || lower.includes(short[i])) {
+          const digits = lower.replace(/[a-z]/gi, '').trim().match(/\b\d{1,2}\b/);
+          if (digits) {
+             let yearConfig = new Date().getFullYear();
+             const yrMatch2 = s.match(/\b(202\d|203\d)\b/);
+             if (yrMatch2) { yearConfig = parseInt(yrMatch2[1], 10); }
+             return `${yearConfig}-${(i+1).toString().padStart(2, '0')}-${parseInt(digits[0], 10).toString().padStart(2, '0')}`;
+          }
+       }
+    }
+
+    const d = new Date(s);
+    if (!isNaN(d.getTime())) {
+      const dUtc = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      return dUtc.toISOString().split('T')[0];
+    }
+    
+    return null;
+  };
+
+  const mapShiftValue = (raw: string): string => {
+    const val = (raw || '').trim().toLowerCase();
+    if (!val) return 'Off Day';
+    if (['off', 'day off', 'leave', 'al', 'sl', 'vacation', 'sick', 'holiday', 'rest'].some(k => val === k)) return 'Off Day';
+    if (['morning', 'am', '07', '08', '07:00'].some(k => val.includes(k))) return 'Morning Shift';
+    if (['afternoon', 'pm', '12', '13', '14', 'afternoon shift'].some(k => val.includes(k))) return 'Afternoon Shift';
+    if (['night', 'evening', '19', '20', 'graveyard', 'night shift'].some(k => val.includes(k))) return 'Night Shift';
+    
+    // eslint-disable-next-line
+    //@ts-ignore
+    const matchedShift = SHIFTS.find(s => s.label?.toLowerCase() === val || s.display?.toLowerCase() === val);
+    if (matchedShift) return matchedShift.label;
+    
+    return 'Off Day';
+  };
+
+  const isAgentHeaderCol = (h: string): boolean => {
+    const s = h.trim().toLowerCase();
+    return ['agent name', 'agent', 'name', 'employee', 'staff', 'employee name', 'no.'].includes(s) || s.includes('employee') || s.includes('agent');
+  };
+  const isDateHeaderCol = (h: string): boolean => {
+    const s = h.trim().toLowerCase();
+    return ['date', 'day', 'week', 'shift date', 'schedule'].includes(s);
+  };
+  const isShiftHeaderCol = (h: string): boolean => {
+    const s = h.trim().toLowerCase();
+    return ['shift', 'schedule', 'type', 'slot', 'time', 'shift time'].includes(s);
+  };
+
+  let headerRowIndex = -1;
+  let nameIdx = -1;
+  let dateIdx = -1;
+  let shiftIdx = -1;
+  let isMatrixFormat = false;
+
+  for (let i = 0; i < parsedRows.length; i++) {
+    const row = parsedRows[i];
+    const cleanRow = row.map(h => h.trim().toLowerCase().replace(/^["']|["']$/g, ''));
+    const tempNameIdx = cleanRow.findIndex(h => h && isAgentHeaderCol(h));
+    
+    if (tempNameIdx !== -1) {
+      headerRowIndex = i;
+      nameIdx = tempNameIdx;
+      dateIdx = cleanRow.findIndex(h => h && isDateHeaderCol(h));
+      shiftIdx = cleanRow.findIndex(h => h && isShiftHeaderCol(h));
+
+      if (dateIdx === -1 && shiftIdx === -1) {
+         let validDateCols = 0;
+         for (let col = nameIdx + 1; col < row.length; col++) {
+             if (parseTargetDate(row[col])) validDateCols++;
+         }
+         if (validDateCols >= 1) {
+             isMatrixFormat = true;
+         }
+      }
+      break; 
+    }
+  }
+
+  if (headerRowIndex === -1) {
+    headerRowIndex = 0; 
+    const firstRow = parsedRows[0].map(h => h.trim().toLowerCase().replace(/^["']|["']$/g, ''));
+    if (firstRow.some(h => parseTargetDate(h))) {
+       isMatrixFormat = true;
+       nameIdx = 0; 
+    } else {
+       errors.push('Column Match Warning: Could not explicitly find Agent Name column. Defaulting to Column 1.'); nameIdx = 0;
+       errors.push('Column Match Warning: Could not explicitly find Date column. Defaulting to Column 2.'); dateIdx = 1;
+       errors.push('Column Match Warning: Could not explicitly find Shift column. Defaulting to Column 3.'); shiftIdx = 2;
+    }
+  }
+
+  const rawHeaders = parsedRows[headerRowIndex];
+
+  for (let idx = headerRowIndex + 1; idx < parsedRows.length; idx++) {
+    const row = parsedRows[idx];
+    if (row.length === 0 || row.every(c => !c)) continue; 
+
+    const lineNum = idx + 1;
+    let rawName = (row[nameIdx] || '').trim();
+
+    if (!rawName) {
+      continue;
+    }
+
+    if (rawName?.toLowerCase().includes('total') || rawName?.toLowerCase().includes('count') || rawName?.toLowerCase().includes('legend')) continue;
+
+    let extractedTL = '';
+    let processedName = rawName;
+    const tlMatch = processedName.match(/((.*?))/);
+    if (tlMatch) {
+      extractedTL = tlMatch[1].trim();
+      processedName = processedName.replace(/((.*?))/g, '').trim();
+    }
+    
+    // eslint-disable-next-line
+    //@ts-ignore
+    const agentName = capitalizeName(processedName);
+    if (extractedTL) {
+      parsedMeta[agentName] = { tlName: extractedTL };
+    }
+
+    const isExisting = existingAgents.some(a => a?.toLowerCase() === agentName?.toLowerCase());
+    if (!isExisting) {
+      newAgentsSet.add(agentName);
+    }
+
+    if (isMatrixFormat) {
+       for (let col = nameIdx + 1; col < row.length; col++) {
+           const dateHeader = rawHeaders[col];
+           if (!dateHeader) continue;
+           const formattedDate = parseTargetDate(dateHeader);
+           if (!formattedDate) continue; 
+           
+           const rawShift = (row[col] || '').trim();
+           if (!rawShift) continue;
+
+           const shiftLabel = mapShiftValue(rawShift);
+           schedules.push({
+             id: `sch_up_${Date.now()}_mat_${idx}_${col}`,
+             agentName,
+             date: formattedDate,
+             shiftLabel
+           });
+       }
+    } else {
+       const rawDate = (row[dateIdx] || '').trim();
+       const rawShift = (row[shiftIdx] || '').trim();
+
+       if (!rawDate && !rawShift) continue; 
+
+       const formattedDate = parseTargetDate(rawDate);
+       if (!formattedDate) {
+         errors.push(`Row ${lineNum} (${rawName}): Date format unrecognized "${rawDate}". Expected formats like YYYY-MM-DD or MM/DD/YYYY.`);
+         continue;
+       }
+
+       const yearCheck = parseInt(formattedDate.split('-')[0], 10);
+       if (yearCheck < 2020 || yearCheck > 2100) {
+         errors.push(`Row ${lineNum} (${rawName}): Date year is out of bounds "${formattedDate}". Allowed bounds are 2020 to 2100.`);
+         continue;
+       }
+
+       const shiftLabel = mapShiftValue(rawShift);
+
+       schedules.push({
+         id: `sch_up_${Date.now()}_vert_${idx}`,
+         agentName,
+         date: formattedDate,
+         shiftLabel
+       });
+    }
+  }
+
+  return {
+    schedules,
+    errors,
+    parsedCount: schedules.length,
+    newAgents: Array.from(newAgentsSet),
+    parsedMeta
+  };
+};
+
+export const generateInquiriesCSV = (inquiries: Inquiry[]): string => {
+  const headers = [
+    'Inquiry ID',
+    'Agent Name',
+    'Clinic Name',
+    'Inquiry Text',
+    'Status',
+    'Attachments Count',
+    'Links Count',
+    'Created At',
+    'Forwarded By',
+    'Forwarded At',
+    'Answer Details',
+    'Answered By',
+    'Answered At'
+  ];
+
+  const rows = inquiries.map(inq => {
+    return [
+      inq.id,
+      `"${(inq.agentName || '').replace(/"/g, '""')}"`,
+      `"${(inq.clinicName || '').replace(/"/g, '""')}"`,
+      `"${(inq.text || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+      inq.status.toUpperCase(),
+      inq.photos ? inq.photos.length : 0,
+      inq.links ? inq.links.length : 0,
+      inq.createdAt || '',
+      inq.sentBy ? `"${inq.sentBy.replace(/"/g, '""')}"` : '',
+      inq.sentAt || '',
+      inq.answer ? `"${inq.answer.replace(/"/g, '""').replace(/\n/g, ' ')}"` : '',
+      inq.answeredBy ? `"${inq.answeredBy.replace(/"/g, '""')}"` : '',
+      inq.answeredAt || ''
+    ];
+  });
+
+  return [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+};
+
+// Generate CSV report for Agent Time Logs / Clockings
+export const generateTimeLogsCSV = (timeLogs: TimeLog[]): string => {
+  const headers = [
+    'Log ID',
+    'Agent Name',
+    'Date',
+    'Clock In At',
+    'Clock Out At',
+    'Current Status',
+    'Breaks Taken Count',
+    'Total Break Mins',
+    'Total Lunch Mins',
+    'Total Restroom Mins',
+    'Has Overtime Violations'
+  ];
+
+  const rows = timeLogs.map(log => {
+    // calculate durations
+    const breakCount = log.activities.filter(a => a.type === 'break').length;
+    
+    let breakMins = 0;
+    let lunchMins = 0;
+    let restroomMins = 0;
+
+    log.activities.forEach(a => {
+      const minutes = a.durationMinutes || 0;
+      if (a.type === 'break') breakMins += minutes;
+      if (a.type === 'lunch') lunchMins += minutes;
+      if (a.type === 'restroom') restroomMins += minutes;
+    });
+
+    let overtime = false;
+    if (log.clockIn && log.clockOut) {
+      const workHrs = (new Date(log.clockOut).getTime() - new Date(log.clockIn).getTime()) / 1000 / 60 / 60;
+      if (workHrs > 9.5) overtime = true; // flagged rule check
+    }
+
+    return [
+      log.id,
+      `"${log.agentName.replace(/"/g, '""')}"`,
+      log.date,
+      log.clockIn || '',
+      log.clockOut || '',
+      log.status.toUpperCase(),
+      breakCount,
+      breakMins.toFixed(1),
+      lunchMins.toFixed(1),
+      restroomMins.toFixed(1),
+      overtime ? 'YES' : 'NO'
+    ];
+  });
+
+  return [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+};
+
+// Generate CSV report for Tabby / Tamara Fintech Transactions
+export const generateFintechRequestsCSV = (requests: TabbyTamaraRequest[]): string => {
+  const headers = [
+    'Request ID',
+    'Agent Name',
+    'Patient Name',
+    'File Number',
+    'Is Old Customer',
+    'ID Number',
+    'Price Without Tax',
+    'Phone Number',
+    'Platform',
+    'Clinic Name',
+    'Status',
+    'Contact Status',
+    'Payment Link',
+    'Notes',
+    'Contact Notes',
+    'Created At',
+    'Contacted At',
+    'Confirmed At',
+    'Confirmed By'
+  ];
+
+  const rows = requests.map(r => [
+    r.id,
+    `"${(r.agentName || '').replace(/"/g, '""')}"`,
+    `"${(r.patientName || '').replace(/"/g, '""')}"`,
+    `"${(r.fileNumber || '').replace(/"/g, '""')}"`,
+    r.isOldCustomer ? 'YES' : 'NO',
+    `"${(r.idNumber || '').replace(/"/g, '""')}"`,
+    `"${(r.priceWithoutTax || '').replace(/"/g, '""')}"`,
+    `"${(r.phoneNumber || '').replace(/"/g, '""')}"`,
+    r.platform.toUpperCase(),
+    `"${(r.clinicName || '').replace(/"/g, '""')}"`,
+    r.status.toUpperCase(),
+    (r.customerContacted || 'not_contacted').toUpperCase(),
+    `"${(r.paymentLink || '').replace(/"/g, '""')}"`,
+    `"${(r.notes || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+    `"${(r.agentContactNotes || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+    r.createdAt || '',
+    r.contactedAt || '',
+    r.confirmedAt || '',
+    r.confirmedBy ? `"${r.confirmedBy.replace(/"/g, '""')}"` : ''
+  ]);
+
+  return [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+};
+
+// Generate CSV report for Tabby / Tamara Fintech Complaints
+export const generateFintechComplaintsCSV = (complaints: TabbyTamaraComplaint[]): string => {
+  const headers = [
+    'Complaint ID',
+    'Agent Name',
+    'Patient Name',
+    'File Number',
+    'Is Old Customer',
+    'ID Number',
+    'Phone Number',
+    'Clinic Name',
+    'Status',
+    'Complaint Details',
+    'TL Comment',
+    'Contact Status',
+    'Created At',
+    'TL Handled At',
+    'TL Handled By',
+    'Contacted At'
+  ];
+
+  const rows = complaints.map(c => [
+    c.id,
+    `"${(c.agentName || '').replace(/"/g, '""')}"`,
+    `"${(c.patientName || '').replace(/"/g, '""')}"`,
+    `"${(c.fileNumber || '').replace(/"/g, '""')}"`,
+    c.isOldCustomer ? 'YES' : 'NO',
+    `"${(c.idNumber || '').replace(/"/g, '""')}"`,
+    `"${(c.phoneNumber || '').replace(/"/g, '""')}"`,
+    `"${(c.clinicName || '').replace(/"/g, '""')}"`,
+    c.status.toUpperCase(),
+    `"${(c.complaintDetails || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+    `"${(c.tlComment || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+    (c.customerContacted || 'not_contacted').toUpperCase(),
+    c.createdAt || '',
+    c.tlHandledAt || '',
+    c.tlHandledBy ? `"${c.tlHandledBy.replace(/"/g, '""')}"` : '',
+    c.contactedAt || ''
+  ]);
+
+  return [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+};
+
+// Generate CSV report for Client Communications
+export const generateClientCommsCSV = (comms: ClientCommunicationRequest[]): string => {
+  const headers = [
+    'Request ID',
+    'Call Center Agent',
+    'Clinic Name',
+    'Phone Number',
+    'Language',
+    'Notes',
+    'Status',
+    'Handled By',
+    'Handled At',
+    'Handling Notes',
+    'Created At'
+  ];
+
+  const rows = comms.map(c => [
+    c.id,
+    `"${(c.callCenterAgentName || '').replace(/"/g, '""')}"`,
+    `"${(c.clinicName || '').replace(/"/g, '""')}"`,
+    `"${(c.phoneNumber || '').replace(/"/g, '""')}"`,
+    c.language.toUpperCase(),
+    `"${(c.notes || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+    c.status.toUpperCase(),
+    c.handledBy ? `"${c.handledBy.replace(/"/g, '""')}"` : '',
+    c.handledAt || '',
+    `"${(c.handlingNotes || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+    c.createdAt || ''
+  ]);
+
+  return [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+};
+
+// Generate CSV report for Direct Patient Case Enquiries
+export const generateCasesCSV = (casesList: CaseRecord[]): string => {
+  const headers = [
+    'Case ID',
+    'Agent Name',
+    'Patient Name',
+    'Phone Number',
+    'Inquiry Description',
+    'Lead Source',
+    'Created At'
+  ];
+
+  const rows = casesList.map(c => [
+    c.id,
+    `"${(c.agentName || '').replace(/"/g, '""')}"`,
+    `"${(c.patientName || '').replace(/"/g, '""')}"`,
+    `"${(c.phoneNumber || '').replace(/"/g, '""')}"`,
+    `"${(c.inquiry || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+    `"${(c.leadSource || '').replace(/"/g, '""')}"`,
+    c.createdAt || ''
+  ]);
+
+  return [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+};
+
+// Generate CSV report for Master Active Schedules (Matrix format)
+export const generateSchedulesCSV = (schedulesList: ScheduledShift[]): string => {
+  const allDates = Array.from(new Set(schedulesList.map(s => s.date))).sort();
+  // Get all unique agents from the schedules, but also try to get their TL if available
+  const allAgents = Array.from(new Set(schedulesList.map(s => s.agentName))).sort();
+  
+  const headers = ['Agent Name', 'Team Leader', 'LOB', ...allDates];
+  
+  const map = new Map<string, Record<string, string>>();
+  schedulesList.forEach(s => {
+    if (!map.has(s.agentName)) {
+      map.set(s.agentName, {});
+    }
+    map.get(s.agentName)![s.date] = s.shiftLabel;
+  });
+
+  const rows = allAgents.map(ag => {
+    const tl = getAgentTL(ag);
+    const lob = getAgentLOB(ag);
+    const rowData = [ 
+      `"${ag.replace(/"/g, '""')}"`,
+      `"${tl.replace(/"/g, '""')}"`,
+      `"${lob.replace(/"/g, '""')}"`
+    ];
+    allDates.forEach(dt => {
+      const shift = map.get(ag)?.[dt] || 'Off';
+      rowData.push(`"${shift.replace(/"/g, '""')}"`);
+    });
+    return rowData;
+  });
+
+  return [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+};
+
+// Safe evaluation of dynamic KPI formula
+export const evaluateKpiFormula = (formula: string, actual: number, target: number): number => {
+  if (!formula || !formula.trim()) return 0;
+  try {
+    // Standardize variables
+    let expr = formula?.toLowerCase()
+      .replace(/actual/g, actual.toString())
+      .replace(/target/g, target.toString());
+      
+    // Remove any unsafe characters (only allow digits, math operators, spaces, parentheses, dots)
+    expr = expr.replace(/[^0-9+\-*/().\s]/g, '');
+    
+    // Evaluate safely
+    const res = new Function(`return (${expr})`)();
+    if (typeof res === 'number' && !isNaN(res)) {
+      return res;
+    }
+  } catch (err) {
+    console.error("Formula eval error:", err);
+  }
+  return 0;
+};
+
+
