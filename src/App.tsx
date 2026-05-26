@@ -1,250 +1,250 @@
-      if (e.key === 'sched_tt_complaints' && e.newValue) setTabbyTamaraComplaints(JSON.parse(e.newValue));
-      if (e.key === 'sched_requests' && e.newValue) setRequests(JSON.parse(e.newValue));
-      if (e.key === 'sched_time_logs' && e.newValue) setTimeLogs(JSON.parse(e.newValue));
-      if (e.key === 'sched_schedules' && e.newValue) setSchedules(JSON.parse(e.newValue));
-      if (e.key === 'sched_support_assignments' && e.newValue) setSupportAssignments(JSON.parse(e.newValue));
-      if (e.key === 'sched_announcements' && e.newValue) setAnnouncements(JSON.parse(e.newValue));
-    };
-    window.addEventListener('storage', handleStorage);
+    getUsernameFromFullName,
+  findAgentByUsername
+} from './utils';
+import {
+  SchedulingRequest,
+  SwapRequest,
+  AnnualRequest,
+  TEAM_LEADERS,
+  INITIAL_AGENTS,
+  SHIFTS,
+  User,
+  ScheduledShift,
+  TimeLog,
+  ActivityRecord,
+  AGENT_LOBS,
+  TodoItem, Inquiry,
+  TabbyTamaraRequest,
+  TabbyTamaraComplaint,
+  ClientCommunicationRequest,
+  CaseRecord,
+  AgentDirectoryRow,
+  SystemNotification,
+  TlFeedback,
+  FeedbackReply,
+  QAScore,
+  Announcement
+} from './types';
 
-    // 2. Real-time Firestore Sync via Collections!
-    const unsubInquiries = onSnapshot(collection(db, "inquiries"), snap => {
-      const arr = snap.docs.map(d => d.data() as Inquiry);
-      arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      setInquiries(arr);
-      localStorage.setItem('sched_inquiries', JSON.stringify(arr));
-    });
+const parseBoldText = (text: string) => {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} className="font-extrabold text-indigo-300">{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+};
 
-    const unsubQa = onSnapshot(collection(db, "qa_scores"), snap => {
-      const arr = snap.docs.map(d => d.data() as QAScore);
-      arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      setQaScores(arr);
-      localStorage.setItem('sched_qa_scores', JSON.stringify(arr));
-    });
+const renderMarkdownText = (text: string) => {
+  if (!text) return null;
+  const lines = text.split('\n');
+  return (
+    <div className="space-y-2 text-left text-sm text-slate-100 leading-relaxed font-sans mt-3">
+      {lines.map((line, idx) => {
+        // Heading 3
+        if (line.startsWith('### ')) {
+          return <h4 key={idx} className="text-sm font-bold text-slate-100 mt-4 border-l-2 border-indigo-500 pl-2">{line.replace('### ', '')}</h4>;
+        }
+        // Heading 2
+        if (line.startsWith('## ')) {
+          return <h3 key={idx} className="text-base font-black text-transparent bg-gradient-to-r from-indigo-300 to-indigo-100 bg-clip-text mt-5">{line.replace('## ', '')}</h3>;
+        }
+        // Heading 1
+        if (line.startsWith('# ')) {
+          return <h2 key={idx} className="text-lg font-black text-slate-100 mt-6">{line.replace('# ', '')}</h2>;
+        }
+        // Bullet points
+        if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
+          const stripped = line.replace(/^\s*[-*]\s+/, '');
+          return (
+            <div key={idx} className="flex items-start gap-2 ml-4 my-1.5" style={{ minWidth: 0 }}>
+              <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full mt-2 shrink-0 animate-pulse" />
+              <p className="text-slate-200 text-xs flex-1">
+                {parseBoldText(stripped)}
+              </p>
+            </div>
+          );
+        }
+        // General text
+        if (line.trim().length > 0) {
+          return <p key={idx} className="text-slate-300 text-xs my-1">{parseBoldText(line)}</p>;
+        }
+        return <div key={idx} className="h-1" />;
+      })}
+    </div>
+  );
+};
 
-    const unsubQATemplate = onSnapshot(doc(db, "system", "sched_qa_template"), snap => {
-      if (snap.exists()) {
-        const data = snap.data().data;
-        setQaTemplate(data);
-        localStorage.setItem('sched_qa_template', JSON.stringify(data));
-      }
-    });
-    const unsubTT = onSnapshot(collection(db, "tt_requests"), snap => {
-      const arr = snap.docs.map(d => d.data() as TabbyTamaraRequest);
-      arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      setTabbyTamaraRequests(arr);
-      localStorage.setItem('sched_tabby_tamara', JSON.stringify(arr));
-    });
-    const unsubComp = onSnapshot(collection(db, "tt_complaints"), snap => {
-      const arr = snap.docs.map(d => d.data() as TabbyTamaraComplaint);
-      arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      setTabbyTamaraComplaints(arr);
-      localStorage.setItem('sched_tt_complaints', JSON.stringify(arr));
-    });
-    const unsubComms = onSnapshot(collection(db, "client_comms"), snap => {
-      const arr = snap.docs.map(d => d.data() as ClientCommunicationRequest);
-      arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      setClientComms(arr);
-      localStorage.setItem('sched_client_comms', JSON.stringify(arr));
-    });
-    const unsubReq = onSnapshot(collection(db, "scheduling_requests"), snap => {
-      const arr = snap.docs.map(d => d.data() as SchedulingRequest);
-      arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      setRequests(arr);
-      localStorage.setItem('sched_requests', JSON.stringify(arr));
-    });
-    const unsubTime = onSnapshot(collection(db, "timelogs"), snap => {
-      const arr = snap.docs.map(d => d.data() as TimeLog);
-      arr.sort((a, b) => {
-        const dateDiff = new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime();
-        if (dateDiff !== 0) return dateDiff;
-        const tsA = parseInt((a.id || '').split('_')[1] || '0', 10);
-        const tsB = parseInt((b.id || '').split('_')[1] || '0', 10);
-        return tsB - tsA;
-      });
-      setTimeLogs(arr);
-      localStorage.setItem('sched_time_logs', JSON.stringify(arr));
-    });
-    const unsubSched = onSnapshot(collection(db, "schedules"), snap => {
-      const arr = snap.docs.map(d => d.data() as ScheduledShift);
-      setSchedules(arr);
-      localStorage.setItem('sched_schedules', JSON.stringify(arr));
-    });
-    let isAnnouncementsInitialized = false;
-    const unsubAnnouncements = onSnapshot(collection(db, "announcements"), snap => {
-      const arr = snap.docs.map(d => d.data() as Announcement);
-      arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      
-      const latest = arr[0];
-      if (latest && currentUserRef.current) {
-        if (!isAnnouncementsInitialized) {
-          isAnnouncementsInitialized = true;
-          localStorage.setItem('sched_last_notified_announcement_id', latest.id);
-        } else {
-          const lastNotifiedId = localStorage.getItem('sched_last_notified_announcement_id');
-          if (lastNotifiedId !== latest.id) {
-            localStorage.setItem('sched_last_notified_announcement_id', latest.id);
-            toast.custom((t) => (
-              <div className="bg-slate-900/95 border border-amber-500/40 text-white rounded-2xl p-4 shadow-2xl flex flex-col gap-2 max-w-sm border-l-4 border-l-amber-500 backdrop-blur-md animate-fade-in text-left">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-500 shrink-0 border border-amber-500/20">
-                    <Bell className="w-5 h-5 animate-bounce" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-sm text-amber-400">📢 New Broadcast Posted!</h4>
-                    <p className="text-[10px] text-slate-400 font-bold mt-0.5">By {latest.author || "System"}</p>
-                    <p className="text-xs text-slate-300 mt-1 line-clamp-2 leading-relaxed italic">"{latest.message}"</p>
-                  </div>
-                </div>
-                <div className="flex justify-end gap-2 mt-2 pt-1 border-t border-white/5">
-                  <button 
-                    onClick={() => {
-                      setActiveTab('tl-announcements');
-                      toast.dismiss(t);
-                    }}
-                    className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 rounded-lg text-xs font-black uppercase tracking-wider cursor-pointer transition-all shrink-0"
-                  >
-                    Read Now
-                  </button>
-                  <button 
-                    onClick={() => toast.dismiss(t)}
-                    className="px-3 py-1.5 bg-white/10 hover:bg-white/15 text-white rounded-lg text-xs font-bold cursor-pointer transition-colors"
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              </div>
-            ), { duration: 15000 });
-          }
+async function fetchGoogleSheetCSV(sheetId: string, gid: string = '0'): Promise<string> {
+  const urlsToTry = [
+    `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`,
+    `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&gid=${gid}`,
+    `https://docs.google.com/spreadsheets/d/${sheetId}/pub?output=csv&gid=${gid}`
+  ];
+  let lastError: Error | null = null;
+
+  // 1. Try directly first
+  for (const url of urlsToTry) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        const text = await res.text();
+        if (text && text.trim().length > 0 && !text.includes('<!DOCTYPE html>')) {
+          return text;
         }
       }
+    } catch (err: any) {
+      lastError = err;
+    }
+  }
 
-      setAnnouncements(arr);
-      localStorage.setItem('sched_announcements', JSON.stringify(arr));
-    });
-    const unsubAppStatus = onSnapshot(doc(db, "system", "app_status"), snap => {
-      if (snap.exists() && snap.data().isKilled === true) {
-        setIsAppKilled(true);
-      } else {
-        setIsAppKilled(false);
-      }
-    });
-
-    const unsubSupp = onSnapshot(doc(db, "system", "sched_support_assignments"), snap => {
-      if (snap.exists()) {
-        const data = snap.data().data;
-        setSupportAssignments(data);
-        localStorage.setItem('sched_support_assignments', JSON.stringify(data));
-      }
-    });
-    const unsubCases = onSnapshot(collection(db, "cases"), snap => {
-      const arr = snap.docs.map(d => d.data() as CaseRecord);
-      arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      setCases(arr);
-      localStorage.setItem('sched_cases', JSON.stringify(arr));
-    });
-    const unsubAgents = onSnapshot(doc(db, "system", "sched_agents_list"), snap => {
-      // Intentionally empty or minimal - we prefer the dynamic list from unsubUsers/directory
-    });
-    const unsubMeta = onSnapshot(doc(db, "system", "sched_agent_meta"), snap => {
-      if (snap.exists()) {
-        const data = snap.data().data as Record<string, { roleType: string; tlName: string }>;
-        setAgentMeta(data);
-        localStorage.setItem('sched_agent_meta', JSON.stringify(data));
-      }
-    });
-    const unsubDir = onSnapshot(doc(db, "system", "sched_agent_directory"), snap => {
-      if (snap.exists()) {
-        const data = snap.data().data as AgentDirectoryRow[];
-        setAgentDirectory(data);
-        localStorage.setItem('sched_agent_directory', JSON.stringify(data));
-      }
-    });
-    const unsubDirHeaders = onSnapshot(doc(db, "system", "sched_agent_directory_headers"), snap => {
-      if (snap.exists()) {
-        const data = snap.data().data as string[];
-        setDirectoryHeaders(data);
-        localStorage.setItem('sched_agent_directory_headers', JSON.stringify(data));
-      }
-    });
-
-    const unsubRosterPub = onSnapshot(doc(db, "system", "sched_roster_published"), snap => {
-      if (snap.exists()) {
-        const data = snap.data().data as boolean;
-        setIsRosterPublished(data);
-        localStorage.setItem('sched_roster_published', JSON.stringify(data));
-      }
-    });
-
-    const unsubLockedAccounts = onSnapshot(doc(db, "system", "sched_locked_accounts"), snap => {
-      if (snap.exists()) {
-        const data = snap.data().data || [];
-        setLockedAccounts(data);
-        localStorage.setItem('sched_locked_accounts', JSON.stringify(data));
-      }
-    });
-
-    const unsubFailedAttempts = onSnapshot(doc(db, "system", "sched_failed_attempts"), snap => {
-      if (snap.exists()) {
-        const data = snap.data().data || {};
-        setFailedAttempts(data);
-        localStorage.setItem('sched_failed_attempts', JSON.stringify(data));
-      }
-    });
-
-    let isNotifsInitialized = false;
-    const unsubNotifs = onSnapshot(collection(db, "notifications"), snap => {
-      const arr = snap.docs.map(d => d.data() as SystemNotification);
-      arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      
-      const latest = arr[0];
-      if (latest) {
-        if (!isNotifsInitialized) {
-          isNotifsInitialized = true;
-          localStorage.setItem('sched_last_notified_notif_id', latest.id);
-        } else if (currentUserRef.current) {
-          const lastNotifiedNotifId = localStorage.getItem('sched_last_notified_notif_id') || '';
-          if (latest.id !== lastNotifiedNotifId) {
-            localStorage.setItem('sched_last_notified_notif_id', latest.id);
-            
-            let isTargeted = latest.targetAgent === 'all' || 
-                               (currentUserRef.current.role === 'tl' && latest.targetAgent === 'tl') ||
-                               latest.targetAgent.toLowerCase() === currentUserRef.current.name.toLowerCase();
-                               
-            if (!isTargeted && latest.targetAgent.toLowerCase().startsWith('team:')) {
-              const teamTLName = latest.targetAgent.split(':')[1]?.toLowerCase() || '';
-              const curUserTL = getAgentTL(currentUserRef.current.name).toLowerCase();
-              const curUserName = currentUserRef.current.name.toLowerCase();
-              isTargeted = (curUserName === teamTLName) || (curUserTL === teamTLName);
-            }
-
-            const isAnnouncementNotification = latest.title.toLowerCase().includes('announcement') || latest.title.toLowerCase().includes('broadcast');
-
-            if (isTargeted && !isAnnouncementNotification) {
-              toast.info(
-                <div className="flex flex-col gap-1 text-left">
-                  <span className="font-bold text-sm text-indigo-400">🔔 {latest.title}</span>
-                  <span className="text-xs text-slate-200 line-clamp-2">{latest.message}</span>
-                </div>,
-                { duration: 8000 }
-              );
-            }
-          }
+  // 2. If direct fetches fail, try via CORS proxy
+  for (const url of urlsToTry) {
+    try {
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+      const res = await fetch(proxyUrl);
+      if (res.ok) {
+        const text = await res.text();
+        if (text && text.trim().length > 0 && !text.includes('<!DOCTYPE html>')) {
+          return text;
         }
       }
+    } catch (err: any) {
+      lastError = err;
+    }
+  }
 
-      setNotifications(arr);
-      localStorage.setItem('sched_notifications', JSON.stringify(arr));
-    });
+  throw lastError || new Error("Failed to fetch Google Sheet. Please verify the spreadsheet ID or make sure 'Anyone with the link can view' is enabled.");
+}
 
-    const unsubFeedbacks = onSnapshot(collection(db, "tl_feedbacks"), snap => {
-      const arr = snap.docs.map(d => d.data() as TlFeedback);
-      arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      setTlFeedbacks(arr);
-      localStorage.setItem('sched_tl_feedbacks', JSON.stringify(arr));
-    });
+const getClinicBadgeColor = (clinic: string) => {
+  if (!clinic) return 'bg-white/5 text-slate-300 border-white/10';
+  const lp = clinic.toLowerCase();
+  if (lp.includes('dermadent')) return 'bg-blue-500/10 text-blue-300 border-blue-500/20';
+  if (lp.includes('onetouch1')) return 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20';
+  if (lp.includes('onetouch2')) return 'bg-violet-500/10 text-violet-300 border-violet-500/20';
+  if (lp.includes('welltouch')) return 'bg-rose-500/10 text-rose-300 border-rose-500/20';
+  if (lp.includes('newedge')) return 'bg-amber-500/10 text-amber-300 border-amber-500/20';
+  return 'bg-white/5 text-slate-300 border-white/10';
+};
 
-    const unsubAppVersion = onSnapshot(doc(db, "system", "app_version"), (snap) => {
-      if (snap.exists()) {
-        const remoteVersion = snap.data().version || 0;
-        if (CURRENT_APP_VERSION > remoteVersion) {
+const CoolLogo = ({ className = "w-8 h-8" }: { className?: string }) => {
+  return (
+    <svg 
+      viewBox="0 0 100 100" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg" 
+      className={`${className}`}
+    >
+      {/* Outer spinning gradient ring with custom dashes */}
+      <circle 
+        cx="50" 
+        cy="50" 
+        r="43" 
+        stroke="url(#synq-grad-outer)" 
+        strokeWidth="4" 
+        strokeDasharray="16 8 36 8" 
+        strokeLinecap="round"
+        className="animate-[spin_25s_linear_infinite]" 
+      />
+      {/* Dynamic interlocking network paths forming S & Q */}
+      <path 
+        d="M32 36C32 28.2 38.2 22 46 22H54C61.8 22 68 28.2 68 36V44C68 51.8 61.8 58 54 58H32V78" 
+        stroke="url(#synq-grad-inner1)" 
+        strokeWidth="6.5" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      />
+      <path 
+        d="M68 64C68 71.8 61.8 78 54 78H46C38.2 78 32 71.8 32 64V56C32 48.2 38.2 42 46 42H68" 
+        stroke="url(#synq-grad-inner2)" 
+        strokeWidth="6.5" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+        className="mix-blend-screen"
+      />
+      {/* Glowing pulsing center node */}
+      <circle 
+        cx="50" 
+        cy="50" 
+        r="5" 
+        fill="url(#synq-grad-core)" 
+        className="animate-pulse"
+      />
+      <defs>
+        <linearGradient id="synq-grad-outer" x1="6" y1="6" x2="94" y2="94" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#22d3ee" />
+          <stop offset="50%" stopColor="#6366f1" />
+          <stop offset="100%" stopColor="#f43f5e" />
+        </linearGradient>
+        <linearGradient id="synq-grad-inner1" x1="32" y1="22" x2="68" y2="78" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#06b6d4" />
+          <stop offset="100%" stopColor="#4f46e5" />
+        </linearGradient>
+        <linearGradient id="synq-grad-inner2" x1="68" y1="42" x2="32" y2="78" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#d946ef" />
+          <stop offset="100%" stopColor="#06b6d4" />
+        </linearGradient>
+        <linearGradient id="synq-grad-core" x1="45" y1="45" x2="55" y2="55" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="100%" stopColor="#a5b4fc" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+};
+
+const MOTIVATIONAL_QUOTES = [
+  "Consistency is the key to unlocking shift efficiency and delivering elite patient care.",
+  "Every inquiry you resolve correctly is a direct step towards seamless clinic synchronization.",
+  "Energy and persistence conquer all things. Let's make today exceptionally productive!",
+  "Your dedication keeps our clinic network running seamlessly. Thank you for your amazing energy!",
+  "Synchronization means working together with precision and empathy. Let's crush today's metrics!",
+  "Great customer service is not a transaction, it's a connection. Synchronize your focus today!",
+  "Make today another masterpiece of collaboration and high compliance!",
+  "The only way to do great work is to love what you do and coordinate beautifully."
+];
+
+const getGreetingAndQuote = (userName: string, currentTime: Date) => {
+  const hr = currentTime.getHours();
+  let greet = "Good Morning";
+  if (hr >= 12 && hr < 17) greet = "Good Afternoon";
+  else if (hr >= 17) greet = "Good Evening";
+  
+  // Pick deterministic quote based on name length + day of month
+  const quoteIndex = (userName.length + currentTime.getDate()) % MOTIVATIONAL_QUOTES.length;
+  const quote = MOTIVATIONAL_QUOTES[quoteIndex];
+  
+  return { greet, quote };
+};
+
+const CURRENT_APP_VERSION = 2; // Increment this to trigger auto-reload across all clients
+
+export default function App() {
+  // Current local time context of the user's PC (synced and showing in the main page)
+  const [systemTime, setSystemTime] = useState<Date>(new Date());
+  const [isAppKilled, setIsAppKilled] = useState<boolean>(false);
+
+  // Live clock state for real-time timers (updates once a second)
+  const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  const [needsGoogleAuth, setNeedsGoogleAuth] = useState(false);
+  const [googleToken, setGoogleToken] = useState<string | null>(null);
+  const [googleUser, setGoogleUser] = useState<any>(null);
+  const [isLoggingInGoogle, setIsLoggingInGoogle] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date();
+      setCurrentTime(now);
+      setSystemTime(now);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        const cached = localStorage.getItem('sched_ramadan_weather_cache');
