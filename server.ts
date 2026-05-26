@@ -97,3 +97,35 @@ async function startServer() {
       url.searchParams.set("latitude", String(lat));
       url.searchParams.set("longitude", String(lng));
       url.searchParams.set("current_weather", "true");
+
+      const weatherResponse = await fetch(url);
+      if (!weatherResponse.ok) {
+        throw new Error(`Weather service responded with ${weatherResponse.status}.`);
+      }
+
+      return res.json(await weatherResponse.json());
+    } catch (err) {
+      console.error("Weather Proxy Error:", err);
+      return res.status(502).json({ error: "Weather service is unavailable." });
+    }
+  });
+
+  if (process.env.NODE_ENV !== "production") {
+    const vite = await createViteServer({ server: { middlewareMode: true }, appType: "spa" });
+    app.use(vite.middlewares);
+  } else {
+    const distPath = __dirname;
+    app.use(express.static(distPath));
+    app.get(/^(?!\/api\/).*/, (req, res) => {
+      res.sendFile(path.join(distPath, "index.html"));
+    });
+  }
+
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`✅ Server on http://0.0.0.0:${PORT}`);
+    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === "MY_GEMINI_API_KEY")
+      console.warn("⚠️  GEMINI_API_KEY not set — AI features disabled.");
+  });
+}
+
+startServer().catch(err => { console.error(err); process.exit(1); });
