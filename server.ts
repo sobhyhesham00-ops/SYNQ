@@ -83,22 +83,17 @@ async function startServer() {
     }
   });
 
-  if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({ server: { middlewareMode: true }, appType: "spa" });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(__dirname, "dist");
-    app.use(express.static(distPath));
-    app.get(/^(?!\/api\/).*/, (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
-    });
-  }
+  app.get("/api/weather", async (req, res) => {
+    try {
+      const lat = Number.parseFloat(typeof req.query.lat === "string" ? req.query.lat : "30.30");
+      const lng = Number.parseFloat(typeof req.query.lng === "string" ? req.query.lng : "31.75");
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`✅ Server on http://0.0.0.0:${PORT}`);
-    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === "MY_GEMINI_API_KEY")
-      console.warn("⚠️  GEMINI_API_KEY not set — AI features disabled.");
-  });
-}
+      if (!Number.isFinite(lat) || lat < -90 || lat > 90 ||
+          !Number.isFinite(lng) || lng < -180 || lng > 180) {
+        return res.status(400).json({ error: "Invalid latitude or longitude." });
+      }
 
-startServer().catch(err => { console.error(err); process.exit(1); });
+      const url = new URL("https://api.open-meteo.com/v1/forecast");
+      url.searchParams.set("latitude", String(lat));
+      url.searchParams.set("longitude", String(lng));
+      url.searchParams.set("current_weather", "true");
