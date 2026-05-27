@@ -1,7 +1,8 @@
 node_modules/
-build/
-coverage/
-.DS_Store
+dist/
+.env.local
 *.log
-.env*
-!.env.example
+/tmp_synq
+/app/workspace
+/logs
+.DS_Store

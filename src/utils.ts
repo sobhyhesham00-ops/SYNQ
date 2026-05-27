@@ -975,6 +975,78 @@ export const parseScheduleCSV = (
     }
   }
 
+  if (schedules.length === 0) {
+    // Advanced Unstructured Fallback Parser: parses free-text files, list of schedules, raw bullet logs, inline schedules
+    const lines = cleanCSV.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+    let activeAgentName = '';
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const lowerLine = line.toLowerCase();
+      
+      // Skip irrelevant headers or system/total lines
+      if (lowerLine.includes('total') || lowerLine.includes('legend') || lowerLine.includes('summary') || lowerLine.includes('readme')) {
+        continue;
+      }
+      
+      // A. Check if line contains a known agent name
+      let foundExistingAgent = '';
+      for (const exAgent of existingAgents) {
+        if (exAgent && exAgent.trim() && lowerLine.includes(exAgent.toLowerCase())) {
+          foundExistingAgent = exAgent;
+          break;
+        }
+      }
+      
+      // B. Look for any date components
+      let foundDate = parseTargetDate(line);
+      if (!foundDate) {
+        // Search inside words/tokens divided by colons, semicolons, tabs, spaces, slashes
+        const tokens = line.split(/[\s,;:|\t]+/).map(t => t.trim()).filter(Boolean);
+        for (const token of tokens) {
+          const d = parseTargetDate(token);
+          if (d) {
+            foundDate = d;
+            break;
+          }
+        }
+      }
+      
+      // C. Match standard Shift labels
+      let shiftLabel = '';
+      if (lowerLine.includes('morning') || lowerLine.includes('am') || lowerLine.includes('07:') || lowerLine.includes('08:')) {
+        shiftLabel = '07:00 - 16:00';
+      } else if (lowerLine.includes('afternoon') || lowerLine.includes('pm') || lowerLine.includes('13:') || lowerLine.includes('14:')) {
+        shiftLabel = '13:00 - 22:00';
+      } else if (lowerLine.includes('night') || lowerLine.includes('evening') || lowerLine.includes('22:') || lowerLine.includes('19:') || lowerLine.includes('20:')) {
+        shiftLabel = '22:00 - 07:00';
+      } else if (lowerLine.includes('off') || lowerLine.includes('leave') || lowerLine.includes('al') || lowerLine.includes('rest') || lowerLine.includes('sl') || lowerLine.includes('vacation')) {
+        shiftLabel = 'Off Day';
+      }
+
+      // Check for structured pairing
+      if (foundExistingAgent && !foundDate) {
+        activeAgentName = foundExistingAgent;
+      } else if (!foundExistingAgent && !foundDate) {
+        // Name check: If a line matches Name formatting like "Hesham Sobhy"
+        if (/^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+$/.test(line)) {
+          activeAgentName = line;
+          newAgentsSet.add(line);
+        }
+      }
+      
+      const agentToUse = foundExistingAgent || activeAgentName;
+      if (agentToUse && foundDate) {
+        schedules.push({
+          id: `sch_up_fb_${Date.now()}_lines_${i}_${Math.floor(Math.random() * 1000)}`,
+          agentName: agentToUse,
+          date: foundDate,
+          shiftLabel: shiftLabel || '07:00 - 16:00'
+        });
+      }
+    }
+  }
+
   return {
     schedules,
     errors,

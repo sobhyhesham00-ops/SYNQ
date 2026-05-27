@@ -412,3 +412,42 @@ export interface Order {
 }
 
 
+
+
+export interface IScheduleItem {
+  date: string;
+  agentName: string;
+  shiftLabel: string;
+}
+
+export interface IAnalyzeRequest {
+  schedules: IScheduleItem[];
+}
+
+export interface IAnalysisResponse {
+  analysis: string;
+}
+
+export interface IAiChatRequest {
+  message: string;
+  knowledgeContext?: string;
+}
+
+export interface IChatResponse {
+  reply: string;
+}
+
+export interface IHealthResponse {
+  status: 'healthy' | 'degraded';
+  timestamp: string;
+  uptime_seconds: number;
+  api_key_configured: boolean;
+  response_time_ms: number;
+}
+
+export interface IStatusResponse {
+  version: string;
+  node_version: string;
+  memory_usage_mb: string;
+  app_uptime_seconds: number;
+}

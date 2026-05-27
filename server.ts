@@ -1,34 +1,147 @@
-import "dotenv/config"; // FIX #1: Load .env variables (was missing — API key was always undefined locally)
 import express from "express";
 import path from "path";
-import { fileURLToPath } from "url";
+import fs from "fs";
 import { GoogleGenAI } from "@google/genai";
 import { createServer as createViteServer } from "vite";
+import helmet from "helmet";
+import cors from "cors";
+import rateLimit from "express-rate-limit";
+import compression from "compression";
 
-// FIX #2: Removed __dirname calculation since it breaks when compiled to CJS. Use process.cwd() when needed.
+// Firebase imports
+import { initializeApp, getApp, getApps } from 'firebase/app';
+import { 
+  getFirestore, 
+  collection, 
+  doc,
+  query, 
+  where, 
+  getDocs,
+  addDoc,
+  setDoc,
+  updateDoc, 
+  Timestamp
+} from 'firebase/firestore';
 
-// FIX #3: Correct Gemini model name. "gemini-3.5-flash" does NOT exist.
-// Valid fast models: "gemini-2.0-flash" or "gemini-1.5-flash"
+// Import our new type-safe validators, loggers & config
+import { validateSchedules, validateMessage } from "./src/lib/validators";
+import { logger } from "./src/lib/logger";
+
 const GEMINI_MODEL = "gemini-2.0-flash";
+const STARTUP_TIME = Date.now();
+
+// Circular Changelog Buffer for Realtime Sync
+const changelog: any[] = [];
+function pushChange(type: 'schedule' | 'profile', action: 'create' | 'update' | 'delete', data: any) {
+  const change = {
+    id: Math.random().toString(36).substring(2, 11) + '-' + Date.now(),
+    type,
+    action,
+    data,
+    timestamp: Date.now()
+  };
+  changelog.push(change);
+  if (changelog.length > 100) {
+    changelog.shift();
+  }
+}
+
+// In-memory schedules fallback if Firebase is not active
+let inMemorySchedules: any[] = [];
+
+// Initialize Firebase if config exists
+let firebaseApp;
+let db: any = null;
+try {
+  let firebaseConfigPath = path.join(process.cwd(), 'config', 'firebase-applet-config.json');
+  if (!fs.existsSync(firebaseConfigPath)) {
+    firebaseConfigPath = path.join(process.cwd(), 'firebase-applet-config.json');
+  }
+
+  if (fs.existsSync(firebaseConfigPath)) {
+    const raw = fs.readFileSync(firebaseConfigPath, 'utf8');
+    const firebaseConfig = JSON.parse(raw);
+    firebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+    db = getFirestore(firebaseApp);
+    logger.info('Firebase', 'Initialized successfully via ' + firebaseConfigPath);
+  } else {
+    logger.warn('Firebase', 'No config file found, continuing in offline/in-memory fallback mode');
+  }
+} catch (err: any) {
+  logger.warn('Firebase', 'Initialization failed, continuing with in-memory store', err);
+}
 
 async function startServer() {
   const app = express();
+  app.set('trust proxy', 1);
   const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
-  // Middleware to parse JSON bodies
+  // STEP 5: Add Security Headers via Helmet
+  app.use(helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  }));
+
+  // STEP 5: Add CORS with strictly bounded origin
+  app.use(cors({ 
+    origin: process.env.APP_URL || 'http://localhost:3000',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }));
+
+  // Add compression (gzip)
+  app.use(compression());
+
+  // JSON Body Parser with explicit size limits
   app.use(express.json({ limit: "15mb" }));
 
-  // FIX #4: Add CORS headers so the Vite dev server (port 5173) can call the API (port 3000)
+  // Request timeout (30 seconds)
+  app.use((req, res, next) => { 
+    req.setTimeout(30000); 
+    next(); 
+  });
+
+  // Request validation middleware for POST/PUT (must be JSON)
   app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type");
-    if (req.method === "OPTIONS") return res.sendStatus(204);
+    if (['POST', 'PUT'].includes(req.method)) {
+      if (!req.is('application/json')) {
+        return res.status(400).json({ error: 'Content-Type must be application/json' });
+      }
+    }
     next();
   });
 
-  // FIX #5: Shared helper — creates a GoogleGenAI instance only when API key exists.
-  // Previously the key was checked AFTER construction in some paths, causing crashes.
+  // Custom Security Headers
+  app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    res.removeHeader('X-Powered-By');
+    next();
+  });
+
+  // Rate Limiting on API routes
+  const limiter = rateLimit({ 
+    windowMs: 60 * 1000, 
+    max: 30, 
+    message: 'Too many requests from this IP', 
+    standardHeaders: true, 
+    legacyHeaders: false,
+    skip: (req) => process.env.NODE_ENV !== 'production' 
+  });
+  app.use('/api/', limiter);
+
+  // Helper to safely extract text from a Gemini response
+  function safeText(response: Awaited<ReturnType<GoogleGenAI["models"]["generateContent"]>>): string {
+    try {
+      return response.text ?? "";
+    } catch {
+      return "";
+    }
+  }
+
   function getAI(): { ai: GoogleGenAI; apiKey: string } | null {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey || apiKey === "MY_GEMINI_API_KEY") return null;
@@ -39,30 +152,50 @@ async function startServer() {
     return { ai, apiKey };
   }
 
-  // FIX #6: Helper to safely extract text from a Gemini response.
-  // In @google/genai v1+, `response.text` is a getter that throws on empty candidates.
-  // Wrapping it prevents unhandled exceptions crashing the server.
-  function safeText(response: Awaited<ReturnType<GoogleGenAI["models"]["generateContent"]>>): string {
-    try {
-      return response.text ?? "";
-    } catch {
-      return "";
-    }
-  }
+  // STEP 6: Health check endpoint (before Vite middleware)
+  app.get('/health', (req, res) => {
+    res.json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      apiKeyConfigured: !!process.env.GEMINI_API_KEY,
+      version: '1.0.0',
+      environment: process.env.NODE_ENV || 'development'
+    });
+  });
+
+  // STEP 6: Status API endpoint
+  app.get('/api/status', (req, res) => {
+    const memory = process.memoryUsage();
+    res.json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      memory: {
+        heapUsed: Math.round(memory.heapUsed / 1024 / 1024) + 'MB',
+        heapTotal: Math.round(memory.heapTotal / 1024 / 1024) + 'MB'
+      },
+      uptime: Math.round(process.uptime()) + 's',
+      node_version: process.version,
+      platform: process.platform
+    });
+  });
 
   // ─── API: AI Schedule Roster Analyzer ────────────────────────────────────────
   app.post("/api/analyze-schedule", async (req, res) => {
+    const startMs = Date.now();
     try {
-      const { schedules } = req.body;
-
-      if (!schedules || !Array.isArray(schedules) || schedules.length === 0) {
-        return res
-          .status(400)
-          .json({ error: "No schedule data provided for analysis." });
+      // Validate input
+      const validation = validateSchedules(req.body.schedules);
+      if (!validation.valid) {
+        return res.status(422).json({ error: 'Validation failed', details: validation.errors });
       }
+
+      const schedules = validation.data || [];
+      logger.info('Schedule', 'Request received', { schedulesCount: schedules.length });
 
       const genai = getAI();
       if (!genai) {
+        logger.warn("AI", "Analyze schedule requested but AI offline");
         return res.json({
           analysis:
             "🧠 **AI Analysis Offline**\n\nThe Gemini API key is not configured. Your scheduling portal is fully operational as a standalone application — review schedules manually for coverage gaps.",
@@ -71,7 +204,7 @@ async function startServer() {
 
       // Format schedule items into compact summary
       const summaryMap: Record<string, string[]> = {};
-      schedules.forEach((s: any) => {
+      schedules.forEach((s) => {
         const d = s.date || "Unknown Date";
         const agent = s.agentName || "Unknown Agent";
         const shift = s.shiftLabel || "Unknown Shift";
@@ -107,34 +240,40 @@ Structure your response with elegant markdown:
 - **💡 Core WFM Recommendations**: Present 3 discrete, actionable, bulleted recommendations to optimize this scheduling cycle, improve restroom/lunch compliance, and support staff members on heavy duty days.
 `;
 
-      // FIX #7: Use the correct model name
+      logger.info('Gemini', 'API call', { model: GEMINI_MODEL });
       const response = await genai.ai.models.generateContent({
         model: GEMINI_MODEL,
         contents: prompt,
       });
 
-      // FIX #8: Use safe text extraction
       const analysis = safeText(response) || "No response generated from the AI.";
+      logger.info('Schedule', 'Analysis complete', { duration: Date.now() - startMs + 'ms' });
       return res.json({ analysis });
     } catch (err: any) {
-      console.error("Schedule Analysis Error:", err);
+      logger.error('Schedule', 'Analysis error', err);
       return res.json({
-        analysis: `🧠 **AI Analysis Currently Unavailable**\n\nThe AI encountered an issue: ${err.message}.\n\nYour portal remains fully operational as a standalone application. Please review schedules manually for coverage gaps.`,
+        analysis: `🧠 **AI Analysis Currently Unavailable**\n\nThe AI encountered an issue: ${err instanceof Error ? err.message : 'Unknown'}.\n\nYour portal remains fully operational as a standalone application. Please review schedules manually for coverage gaps.`,
       });
     }
   });
 
   // ─── API: AI General Assistant Chat ──────────────────────────────────────────
   app.post("/api/ai-chat", async (req, res) => {
+    const startMs = Date.now();
     try {
-      const { message, knowledgeContext } = req.body;
-
-      if (!message || typeof message !== "string") {
-        return res.status(400).json({ error: "Missing or invalid message." });
+      const validation = validateMessage(req.body.message);
+      if (!validation.valid) {
+        return res.status(422).json({ error: 'Validation failed', details: validation.errors });
       }
+
+      const message = validation.data || "";
+      const knowledgeContext = req.body.knowledgeContext;
+
+      logger.info('Chat', 'Message received', { length: message.length });
 
       const genai = getAI();
       if (!genai) {
+        logger.warn("AI", "Chat requested but AI offline");
         return res.json({
           reply:
             "I'm currently offline (API key not configured), but your portal is fully functional as a standalone app! You can manage schedules, requests, and cases without me. 😊",
@@ -145,21 +284,184 @@ Structure your response with elegant markdown:
       if (knowledgeContext && typeof knowledgeContext === "string" && knowledgeContext.trim()) {
         prompt += `\n\nUse the following relevant Knowledge Base context to answer the user's query if it helps:\n${knowledgeContext}\n`;
       }
-      prompt += `\nProvide a short, friendly, concise, and helpful response to this agent's query: "${message.substring(0, 2000)}"`;
+      prompt += `\nProvide a short, friendly, concise, and helpful response to this agent's query: "${message}"`;
 
-      // FIX #7: Use the correct model name
+      logger.info('Gemini', 'Chat API call', { model: GEMINI_MODEL });
       const response = await genai.ai.models.generateContent({
         model: GEMINI_MODEL,
         contents: prompt,
       });
 
-      // FIX #8: Use safe text extraction
+      logger.info('Chat', 'Reply generated', { duration: Date.now() - startMs + 'ms' });
       return res.json({ reply: safeText(response) || "No response generated." });
     } catch (err: any) {
-      console.error("AI Chat Error:", err);
+      logger.error('Chat', 'Error', err);
       return res.json({
-        reply: `I encountered an issue connecting to the AI: ${err.message}. Your portal functionality remains completely safe and fully standalone! 😊`,
+        reply: `I encountered an issue connecting to the AI: ${err instanceof Error ? err.message : 'Unknown'}. Your portal functionality remains completely safe and fully standalone! 😊`,
       });
+    }
+  });
+
+  // ─── PARTIAL SYNC SYSTEM /api/sync ─────────────────────────────────────────
+  app.post("/api/sync", async (req, res) => {
+    const items = req.body.items || [];
+    const results: Record<string, { success: boolean; error?: string }> = {};
+
+    for (const item of items) {
+      try {
+        if (item.type === 'schedule') {
+          if (item.action === 'create') {
+            const dataItem = item.data;
+            if (db) {
+              await addDoc(collection(db, 'schedules'), {
+                ...dataItem,
+                archived: false,
+                createdAt: Timestamp.now(),
+                updatedAt: Timestamp.now()
+              });
+            } else {
+              const newId = 'local-' + Date.now() + Math.random().toString(36).substring(2, 6);
+              inMemorySchedules.push({ id: newId, archived: false, ...dataItem });
+            }
+            pushChange('schedule', 'create', dataItem);
+          } else if (item.action === 'update') {
+            const dataItem = item.data;
+            if (db) {
+              await setDoc(doc(db, 'schedules', dataItem.id), {
+                ...dataItem,
+                updatedAt: Timestamp.now()
+              }, { merge: true });
+            } else {
+              inMemorySchedules = inMemorySchedules.map(s => s.id === dataItem.id ? { ...s, ...dataItem } : s);
+            }
+            pushChange('schedule', 'update', dataItem);
+          } else if (item.action === 'delete') {
+            const id = item.data.id;
+            if (db) {
+              await updateDoc(doc(db, 'schedules', id), {
+                archived: true,
+                deletedAt: Timestamp.now()
+              });
+            } else {
+              inMemorySchedules = inMemorySchedules.map(s => s.id === id ? { ...s, archived: true } : s);
+            }
+            pushChange('schedule', 'delete', { id });
+          }
+        }
+        results[item.id] = { success: true };
+      } catch (err: any) {
+        logger.error('Sync', 'Failed processing sync item ' + item.id, err);
+        results[item.id] = { success: false, error: err.message || 'Processing failed' };
+      }
+    }
+
+    res.json({ results });
+  });
+
+  // ─── API: REAL-TIME CLIENT CHANGES ENDPOINT ────────────────────────────────
+  app.get("/api/changes", (req, res) => {
+    res.json({ changes: changelog });
+  });
+
+  // ─── API: SCHEDULES RESOURCE ENDPOINTS (STEP 9) ───────────────────────────
+  app.post('/api/schedules', async (req, res) => {
+    try {
+      const validation = validateSchedules([req.body]);
+      if (!validation.valid) {
+        return res.status(422).json({ error: 'Validation failed', details: validation.errors });
+      }
+      
+      const valItem = (validation.data || [])[0];
+      const resItem = { ...valItem, archived: false };
+
+      if (db) {
+        const docRef = await addDoc(collection(db, 'schedules'), {
+          ...resItem,
+          createdAt: Timestamp.now(),
+          updatedAt: Timestamp.now()
+        });
+        const saved = { id: docRef.id, ...resItem };
+        pushChange('schedule', 'create', saved);
+        res.json(saved);
+      } else {
+        const localId = 'local-' + Math.random().toString(36).substring(2, 9);
+        const saved = { id: localId, ...resItem };
+        inMemorySchedules.push(saved);
+        pushChange('schedule', 'create', saved);
+        res.json(saved);
+      }
+    } catch (err: any) {
+      logger.error('Schedules', 'Create error', err);
+      res.status(500).json({ error: 'Failed to create' });
+    }
+  });
+
+  app.get('/api/schedules', async (req, res) => {
+    try {
+      if (db) {
+        const q = query(collection(db, 'schedules'), where('archived', '==', false));
+        const querySnapshot = await getDocs(q);
+        const schedules = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        res.json({ schedules });
+      } else {
+        res.json({ schedules: inMemorySchedules.filter(s => !s.archived) });
+      }
+    } catch (err: any) {
+      logger.error('Schedules', 'Fetch error', err);
+      res.status(500).json({ error: 'Failed to fetch' });
+    }
+  });
+
+  app.put('/api/schedules/:id', async (req, res) => {
+    try {
+      const validation = validateSchedules([req.body]);
+      if (!validation.valid) {
+        return res.status(422).json({ error: 'Validation failed', details: validation.errors });
+      }
+      
+      const valItem = (validation.data || [])[0];
+      const id = req.params.id;
+
+      if (db) {
+        const ref = doc(db, 'schedules', id);
+        await setDoc(ref, { 
+          ...valItem, 
+          updatedAt: Timestamp.now() 
+        }, { merge: true });
+        const updated = { id, ...valItem };
+        pushChange('schedule', 'update', updated);
+        res.json(updated);
+      } else {
+        inMemorySchedules = inMemorySchedules.map(s => s.id === id ? { ...s, ...valItem } : s);
+        const updated = { id, ...valItem };
+        pushChange('schedule', 'update', updated);
+        res.json(updated);
+      }
+    } catch (err: any) {
+      logger.error('Schedules', 'Update error', err);
+      res.status(500).json({ error: 'Failed to update' });
+    }
+  });
+
+  app.delete('/api/schedules/:id', async (req, res) => {
+    try {
+      const id = req.params.id;
+      if (db) {
+        const ref = doc(db, 'schedules', id);
+        await updateDoc(ref, { 
+          archived: true, 
+          deletedAt: Timestamp.now() 
+        });
+        pushChange('schedule', 'delete', { id });
+        res.json({ success: true });
+      } else {
+        inMemorySchedules = inMemorySchedules.map(s => s.id === id ? { ...s, archived: true } : s);
+        pushChange('schedule', 'delete', { id });
+        res.json({ success: true });
+      }
+    } catch (err: any) {
+      logger.error('Schedules', 'Delete error', err);
+      res.status(500).json({ error: 'Failed to delete' });
     }
   });
 
@@ -168,7 +470,7 @@ Structure your response with elegant markdown:
     try {
       const { lat = "30.30", lng = "31.75" } = req.query;
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500); // 3.5s timeout
+      const timeoutId = setTimeout(() => controller.abort(), 3500); 
 
       const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`, {
         signal: controller.signal
@@ -181,15 +483,13 @@ Structure your response with elegant markdown:
       const data = await response.json();
       res.json(data);
     } catch (err: any) {
-      // Use 502 to quietly let the frontend use its fallback without spamming server logs
+      logger.warn("API", "Weather proxy used fallback");
       res.status(502).json({ error: "Failed to fetch weather", is_fallback: true });
     }
   });
 
   // ─── Vite dev middleware / production static serving ─────────────────────────
   if (process.env.NODE_ENV !== "production") {
-    // FIX #9: Pass the server instance to Vite so HMR websocket works on the same port.
-    // Without this, Vite runs a separate WS server and HMR can silently fail.
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
@@ -198,22 +498,17 @@ Structure your response with elegant markdown:
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    // FIX #10: Catch-all must not match /api/* routes (was missing API exclusion).
-    // Previously a failed /api/* call in production would return index.html (200) instead of 404.
     app.get(/^(?!\/api\/).*/, (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`✅ Server running on http://0.0.0.0:${PORT}`);
-    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === "MY_GEMINI_API_KEY") {
-      console.warn("⚠️  GEMINI_API_KEY is not set — AI features will be disabled.");
-    }
+    logger.info('Server', `Started on 0.0.0.0:${PORT}`);
   });
 }
 
 startServer().catch((err) => {
-  console.error("Failed to start server:", err);
+  logger.error('STARTUP', "Failed to start server", err);
   process.exit(1);
 });

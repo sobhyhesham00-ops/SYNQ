@@ -1,3 +1,4 @@
+import { MetricsReport } from './components/MetricsReport';
 import * as mammoth from 'mammoth';
 import React, { useState, useEffect, FormEvent, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -97,9 +98,9 @@ import {
   Pencil
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
-import { AIChatWidget } from './AIChatWidget';
-import { ErrorBoundary } from './ErrorBoundary';
-import { MessagingSystem } from './components/MessagingSystem';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { useSync } from './hooks/useSync';
+import { useAppContext } from './hooks/useAppContext';
 import { DataVault } from './components/DataVault';
 import { IntegrationsManager } from './components/IntegrationsManager';
 import { ScreenshotUpload } from './components/ScreenshotUpload';
@@ -108,7 +109,6 @@ import { QAScorecards } from './components/QAScorecards';
 import { PatientSearchHub } from './components/PatientSearchHub';
 import { AnnouncementsTab } from './components/AnnouncementsTab';
 import { OrdersTab } from './components/OrdersTab';
-import { ArticleManager } from './components/ArticleManager';
 import { RequestReplyThread } from './components/RequestReplyThread';
 import * as XLSX from 'xlsx';
 import {
@@ -521,6 +521,20 @@ const ActiveTimer = ({ startTime }: { startTime: string }) => {
 };
 
 export default function App() {
+  const { addSync, syncStatus, isPending: isSyncPending, error: syncError, clearError: clearSyncError, syncEngine } = useSync();
+  const [forceOffline, setForceOffline] = useState<boolean>(() => {
+    return localStorage.getItem('sync_force_offline') === 'true';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('sync_force_offline', String(forceOffline));
+    if (forceOffline) {
+      syncEngine.destroy();
+    } else {
+      syncEngine.processPending();
+    }
+  }, [forceOffline, syncEngine]);
+
   // Current local time context of the user's PC (synced and showing in the main page)
   const [systemTime, setSystemTime] = useState<Date>(new Date());
   const [isAppKilled, setIsAppKilled] = useState<boolean>(false);
@@ -5081,7 +5095,6 @@ export default function App() {
   return (
     <div id="scheduling-root" className="min-h-screen bg-transparent text-slate-100 flex flex-col font-sans relative overflow-x-hidden antialiased">
       <Toaster theme="dark" position="bottom-right" />
-      <AIChatWidget />
       
       {/* Background aesthetic blobs */}
       <div className="fixed top-[-10%] -left-32 w-[600px] h-[600px] bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none"></div>
@@ -5317,10 +5330,17 @@ export default function App() {
                       <h1 className="text-sm font-black tracking-tight text-slate-100 font-display">Synq</h1>
                       <div className="flex items-center gap-1.5">
                         <span className="text-[9px] text-indigo-300 font-extrabold uppercase tracking-wide">Work Portal</span>
-                        <div className="flex items-center gap-1 px-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-[7px] font-black text-emerald-400 uppercase tracking-tighter">
-                          <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                          Offline
-                        </div>
+                        {forceOffline ? (
+                          <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-[7px] font-black text-amber-400 uppercase tracking-tighter cursor-pointer select-none" onClick={() => setForceOffline(false)} title="Click to go Online">
+                            <div className="w-1 h-1 rounded-full bg-amber-500 animate-pulse" />
+                            Forced Offline
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-[7px] font-black text-emerald-400 uppercase tracking-tighter cursor-pointer select-none" onClick={() => setForceOffline(true)} title="Click to force Offline">
+                            <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                            Online Sync
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -5531,7 +5551,6 @@ export default function App() {
                         {groupTitle("Operations & Triage", "📋", "text-teal-600")}
                         {buildBtn("tl-announcements", <Bell className="w-4 h-4 text-yellow-400" />, "TL Announcements", "bg-yellow-500/20 border-yellow-500/30 text-yellow-100")}
                         {buildBtn("client-search", <Search className="w-4 h-4 text-cyan-400" />, "Patient Search Hub", "bg-cyan-500/20 border-cyan-500/30 text-cyan-100")}
-                        {buildBtn("chat", <MessageCircle className="w-4 h-4 text-pink-500" />, "Live Team Chat", "bg-pink-500/20 border-pink-500/30 text-pink-100")}
                         {buildBtn("inquiries", <HelpCircle className="w-4 h-4 text-amber-500" />, "General Inquiries", "bg-amber-500/20 border-amber-500/30 text-amber-100")}
                         {buildBtn("tabby-tamara", <Wallet className="w-4 h-4 text-rose-500" />, "Tabby & Tamara Requests", "bg-rose-500/20 border-rose-500/30 text-rose-100")}
                         {buildBtn("complaints", <AlertTriangle className="w-4 h-4 text-red-500" />, "Complaints", "bg-red-500/20 border-red-500/30 text-red-100")}
@@ -5556,8 +5575,6 @@ export default function App() {
                         {buildBtn("qa-scorecard", <CheckCircle2 className="w-4 h-4 text-green-500" />, "QA Scorecards", "bg-green-500/20 border-green-500/30 text-green-100")}
                         {buildBtn("kpi-calculator", <Calculator className="w-4 h-4 text-purple-400" />, "KPIs Calculator", "bg-purple-500/20 border-purple-500/30 text-purple-100")}
                         {buildBtn("orders", <ShoppingBag className="w-4 h-4 text-fuchsia-400" />, "Team Orders & Food", "bg-fuchsia-500/20 border-fuchsia-500/30 text-fuchsia-100")}
-                        {buildBtn("knowledge", <Book className="w-4 h-4 text-cyan-400" />, "Knowledge Base", "bg-cyan-500/20 border-cyan-500/30 text-cyan-100")}
-                        {buildBtn("offers", <Tag className="w-4 h-4 text-emerald-400" />, "Offers", "bg-emerald-500/20 border-emerald-500/30 text-emerald-100")}
                         {isMasterAdmin && buildBtn("admin", <ShieldCheck className="w-4 h-4 text-rose-600" />, "Super Admin Control", "bg-rose-900 border-rose-800")}
                       </>
                      );
@@ -5567,7 +5584,6 @@ export default function App() {
                         {groupTitle("Operations & Triage", "📋", "text-teal-600")}
                         {buildBtn("tl-announcements", <Bell className="w-4 h-4 text-yellow-400" />, "Updates & Announcements", "bg-yellow-500/20 border-yellow-500/30 text-yellow-100")}
                         {buildBtn("client-search", <Search className="w-4 h-4 text-cyan-400" />, "Patient Search Hub", "bg-cyan-500/20 border-cyan-500/30 text-cyan-100")}
-                        {buildBtn("chat", <MessageCircle className="w-4 h-4 text-pink-500" />, "Live Team Chat", "bg-pink-500/20 border-pink-500/30 text-pink-100")}
                         {buildBtn("inquiries", <HelpCircle className="w-4 h-4 text-amber-500" />, "General Inquiries", "bg-amber-500/20 border-amber-500/30 text-amber-100")}
                         {buildBtn("tabby-tamara", <Wallet className="w-4 h-4 text-rose-500" />, "Tabby & Tamara Requests", "bg-rose-500/20 border-rose-500/30 text-rose-100")}
                         {buildBtn("complaints", <AlertTriangle className="w-4 h-4 text-red-500" />, "Complaints", "bg-red-500/20 border-red-500/30 text-red-100")}
@@ -5579,6 +5595,7 @@ export default function App() {
                         {buildBtn("profile", <UserIcon className="w-4 h-4 text-pink-400" />, "My Profile & Workspace", "bg-indigo-500/20 border-indigo-500/30 text-indigo-100")}
                         {buildBtn("dashboard", <LayoutDashboard className="w-4 h-4 text-indigo-500" />, "Personal Dashboard", "bg-indigo-900 border-indigo-800")}
                         {buildBtn("clocking", <Activity className="w-4 h-4 text-emerald-500" />, "My Time Logs & Status", "bg-emerald-900 border-emerald-800")}
+                        {buildBtn("report", <BarChart2 className="w-4 h-4 text-purple-500" />, "My Daily Performance Matrix", "bg-purple-900 border-purple-800")}
 
                         {groupTitle("My Planning & Leave", "📅", "text-blue-600")}
                         {buildBtn("schedules", <Calendar className="w-4 h-4" />, "My Schedule", "bg-blue-500/20 border-blue-500/30 text-blue-100")}
@@ -5587,8 +5604,6 @@ export default function App() {
 
                         {groupTitle("Shared Goodies", "☕", "text-fuchsia-400")}
                         {buildBtn("orders", <ShoppingBag className="w-4 h-4 text-fuchsia-400" />, "Team Orders & Food", "bg-fuchsia-500/20 border-fuchsia-500/30 text-fuchsia-100")}
-                        {buildBtn("knowledge", <Book className="w-4 h-4 text-cyan-400" />, "Knowledge Base", "bg-cyan-500/20 border-cyan-500/30 text-cyan-100")}
-                        {buildBtn("offers", <Tag className="w-4 h-4 text-emerald-400" />, "Offers", "bg-emerald-500/20 border-emerald-500/30 text-emerald-100")}
 
                         {buildBtn("tl-feedback", <MessageCircle className="w-4 h-4 text-pink-500" />, "TL Hub", "bg-pink-500/20 border-pink-500/30 text-pink-100")}
                       </>
@@ -6152,13 +6167,7 @@ export default function App() {
                 </div>
               )}
 
-              {activeTab === 'chat' && currentUser && (
-                <div className="flex-1 overflow-hidden min-h-0 h-full max-w-7xl mx-auto w-full p-0 sm:p-4 animate-fade-in relative z-10">
-                  <ErrorBoundary>
-                    <MessagingSystem currentUser={currentUser} agentsList={agentsList} registeredUsers={registeredUsers} addSystemNotification={addSystemNotification} />
-                  </ErrorBoundary>
-                </div>
-              )}
+              
 
               {activeTab === 'dashboard' && (
                 <div className="space-y-6">
@@ -8514,450 +8523,19 @@ export default function App() {
               )}
 
               {/* TL Report Section (Only TL) */}
-              {currentUser.role === 'tl' && activeTab === 'report' && (
-                <div className="space-y-6 animate-fade-in">
-                  <div>
-                    <h2 className="text-3xl font-bold text-slate-100 font-display">System Analytics & Report Center</h2>
-                    <p className="text-slate-400 text-sm">Download precise audit logs, timesheets, and run dynamic visual status breakdowns.</p>
-                  </div>
 
-                  {/* SVG Dashboards & Charts Grid */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Visual Chart 1: Real-time Agent Attendance Status (SVG Donut Chart) */}
-                    <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl">
-                      <div className="mb-4">
-                        <span className="text-[10px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-lg font-mono font-bold uppercase">LIVE ATTENDANCE STATUS</span>
-                        <h3 className="text-base font-bold text-slate-100 font-display mt-1.5 flex items-center gap-2">
-                          <Activity className="w-4 h-4 text-emerald-400" />
-                          On-Shift State Ratio
-                        </h3>
-                        <p className="text-xs text-slate-400">Current status composition of clocked agents under your supervision.</p>
-                      </div>
-
-                      <div className="flex flex-col sm:flex-row items-center justify-around gap-6 pt-2">
-                        {/* Custom status donut */}
-                        <div className="relative w-32 h-32 flex items-center justify-center shrink-0">
-                          {(() => {
-                            const working = timeLogs.filter(t => t.status === 'working').length;
-                            const rest = timeLogs.filter(t => t.status === 'break' || t.status === 'restroom').length;
-                            const lunch = timeLogs.filter(t => t.status === 'lunch').length;
-                            const offline = timeLogs.filter(t => t.status === 'clocked_out').length;
-                            const total = working + rest + lunch + offline || 1;
-
-                            const pctWorking = (working / total) * 188.5;
-                            const pctRest = (rest / total) * 188.5;
-                            const pctLunch = (lunch / total) * 188.5;
-                            const pctOffline = (offline / total) * 188.5;
-
-                            return (
-                              <>
-                                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 80 80">
-                                  <circle cx="40" cy="40" r="30" fill="transparent" stroke="rgba(255,255,255,0.03)" strokeWidth="6.5" />
-                                  {/* Working - Indigo */}
-                                  <circle
-                                    cx="40" cy="40" r="30" fill="transparent" stroke="#6366f1" strokeWidth="7.5"
-                                    strokeDasharray="188.5" strokeDashoffset={188.5 - pctWorking}
-                                    className="transition-all duration-1000"
-                                  />
-                                  {/* Rest/Break - Amber */}
-                                  <circle
-                                    cx="40" cy="40" r="30" fill="transparent" stroke="#f59e0b" strokeWidth="7.5"
-                                    strokeDasharray="188.5" strokeDashoffset={188.5 - pctRest}
-                                    style={{ transform: `rotate(${(working/total)*360}deg)`, transformOrigin: 'center' }}
-                                    className="transition-all duration-1000"
-                                  />
-                                  {/* Lunch - Pink */}
-                                  <circle
-                                    cx="40" cy="40" r="30" fill="transparent" stroke="#ec4899" strokeWidth="7.5"
-                                    strokeDasharray="188.5" strokeDashoffset={188.5 - pctLunch}
-                                    style={{ transform: `rotate(${((working+rest)/total)*360}deg)`, transformOrigin: 'center' }}
-                                    className="transition-all duration-1000"
-                                  />
-                                  {/* Offline - Slate */}
-                                  <circle
-                                    cx="40" cy="40" r="30" fill="transparent" stroke="#64748b" strokeWidth="7.5"
-                                    strokeDasharray="188.5" strokeDashoffset={188.5 - pctOffline}
-                                    style={{ transform: `rotate(${((working+rest+lunch)/total)*360}deg)`, transformOrigin: 'center' }}
-                                    className="transition-all duration-1000"
-                                  />
-                                </svg>
-                                <div className="absolute text-center select-none">
-                                  <p className="text-2xl font-black text-slate-100">{total === 1 && working+rest+lunch+offline === 0 ? 0 : (working + rest + lunch + offline)}</p>
-                                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Active Logs</p>
-                                </div>
-                              </>
-                            );
-                          })()}
-                        </div>
-
-                        {/* Status Legend List */}
-                        <div className="space-y-2.5 text-xs font-semibold w-full sm:w-auto">
-                          <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-1.5 min-w-[150px]">
-                            <span className="flex items-center gap-2 text-indigo-400">
-                              <span className="w-2.5 h-2.5 bg-indigo-500 rounded-full"></span>
-                              Active Operating
-                            </span>
-                            <span className="text-slate-100 font-bold">{timeLogs.filter(t => t.status === 'working').length} agents</span>
-                          </div>
-                          <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-1.5">
-                            <span className="flex items-center gap-2 text-amber-400">
-                              <span className="w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
-                              On Breaks / Rest
-                            </span>
-                            <span className="text-slate-100 font-bold">{timeLogs.filter(t => t.status === 'break' || t.status === 'restroom').length} agents</span>
-                          </div>
-                          <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-1.5">
-                            <span className="flex items-center gap-2 text-pink-400">
-                              <span className="w-2.5 h-2.5 bg-pink-500 rounded-full"></span>
-                              On Lunch Duration
-                            </span>
-                            <span className="text-slate-100 font-bold">{timeLogs.filter(t => t.status === 'lunch').length} agents</span>
-                          </div>
-                          <div className="flex items-center justify-between gap-4 pb-0.5">
-                            <span className="flex items-center gap-2 text-slate-400">
-                              <span className="w-2.5 h-2.5 bg-slate-500 rounded-full"></span>
-                              Clocked Out
-                            </span>
-                            <span className="text-slate-100 font-bold">{timeLogs.filter(t => t.status === 'clocked_out').length} agents</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Visual Chart 2: Scheduling Requests & Swaps breakdown (SVG Pie Chart) */}
-                    <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl">
-                      <div className="mb-4">
-                        <span className="text-[10px] bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 px-2.5 py-1 rounded-lg font-mono font-bold uppercase">DECISIONS & LOGS SUMMARY</span>
-                        <h3 className="text-base font-bold text-slate-100 font-display mt-1.5 flex items-center gap-2">
-                          <PieChart className="w-4 h-4 text-indigo-400" />
-                          Roster Modification Ratio
-                        </h3>
-                        <p className="text-xs text-slate-400">Shift swap swaps and annual leave approval summaries.</p>
-                      </div>
-
-                      <div className="flex flex-col sm:flex-row items-center justify-around gap-6 pt-2">
-                        {/* Custom Requests pie */}
-                        <div className="relative w-32 h-32 flex items-center justify-center shrink-0">
-                          {(() => {
-                            const swapsCount = requests.filter(r => r.type === 'swap').length;
-                            const annualsCount = requests.filter(r => r.type === 'annual').length;
-                            const totalRequests = swapsCount + annualsCount || 1;
-
-                            const pctSwaps = (swapsCount / totalRequests) * 188.5;
-                            const pctAnnuals = (annualsCount / totalRequests) * 188.5;
-
-                            return (
-                              <>
-                                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 80 80">
-                                  <circle cx="40" cy="40" r="30" fill="transparent" stroke="rgba(255,255,255,0.03)" strokeWidth="6.5" />
-                                  {/* Swaps - Blue */}
-                                  <circle
-                                    cx="40" cy="40" r="30" fill="transparent" stroke="#3b82f6" strokeWidth="7.5"
-                                    strokeDasharray="188.5" strokeDashoffset={188.5 - pctSwaps}
-                                    className="transition-all duration-1000"
-                                  />
-                                  {/* Annuals - Violet */}
-                                  <circle
-                                    cx="40" cy="40" r="30" fill="transparent" stroke="#8b5cf6" strokeWidth="7.5"
-                                    strokeDasharray="188.5" strokeDashoffset={188.5 - pctAnnuals}
-                                    style={{ transform: `rotate(${(swapsCount/totalRequests)*360}deg)`, transformOrigin: 'center' }}
-                                    className="transition-all duration-1000"
-                                  />
-                                </svg>
-                                <div className="absolute text-center select-none">
-                                  <p className="text-2xl font-black text-slate-100">{requests.length}</p>
-                                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Requests</p>
-                                </div>
-                              </>
-                            );
-                          })()}
-                        </div>
-
-                        {/* Request Legend List */}
-                        <div className="space-y-2.5 text-xs font-semibold w-full sm:w-auto">
-                          <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-1.5 min-w-[150px]">
-                            <span className="flex items-center gap-2 text-blue-400">
-                              <span className="w-2.5 h-2.5 bg-blue-500 rounded-full"></span>
-                              Shift Swaps
-                            </span>
-                            <span className="text-slate-100 font-bold">{requests.filter(r => r.type === 'swap').length} cases</span>
-                          </div>
-                          <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-1.5">
-                            <span className="flex items-center gap-2 text-violet-400">
-                              <span className="w-2.5 h-2.5 bg-violet-500 rounded-full"></span>
-                              Annual Leave
-                            </span>
-                            <span className="text-slate-100 font-bold">{requests.filter(r => r.type === 'annual').length} cases</span>
-                          </div>
-                          <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-1.5">
-                            <span className="flex items-center gap-2 text-emerald-400">
-                              <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
-                              Approved Total
-                            </span>
-                            <span className="text-emerald-400 font-bold">{requests.filter(r => r.status === 'approved').length}</span>
-                          </div>
-                          <div className="flex items-center justify-between gap-4 pb-0.5">
-                            <span className="flex items-center gap-2 text-rose-400">
-                              <span className="w-1.5 h-1.5 bg-rose-400 rounded-full"></span>
-                              Declined / Denied
-                            </span>
-                            <span className="text-rose-400 font-bold">{requests.filter(r => r.status === 'declined' || r.status === 'declined_by_partner').length}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Four-Column Quad Report Actions Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    
-                    {/* Card 1: Custom Audit timeframe summary text download */}
-                    <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
-                      <div className="space-y-2">
-                        <div className="w-10 h-10 bg-indigo-500/15 border border-indigo-500/20 text-indigo-400 rounded-xl flex items-center justify-center">
-                          <FileText className="w-5 h-5" />
-                        </div>
-                        <h4 className="font-bold text-slate-100 text-sm">Text Summary Audit</h4>
-                        <p className="text-[11px] text-slate-400 leading-relaxed">Download high-level counts and detailed audit lists of all modifications formatted in clean plain text.</p>
-                      </div>
-
-                      <div className="space-y-3 pt-4">
-                        <div className="grid grid-cols-4 gap-1.5 bg-black/35 p-0.5 border border-white/5 rounded-lg select-none">
-                          {(['day', 'week', 'month', 'year'] as const).map(p => (
-                            <button
-                              key={p}
-                              onClick={() => setReportPeriod(p)}
-                              className={`py-1 text-[10px] font-bold rounded-md capitalize transition-all cursor-pointer ${
-                                reportPeriod === p ? 'bg-indigo-500 text-white shadow' : 'text-slate-400 hover:text-slate-100'
-                              }`}
-                            >
-                              {p}
-                            </button>
-                          ))}
-                        </div>
-
-                        <button
-                          onClick={() => downloadReportTxt(reportPeriod)}
-                          className="w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all shadow-lg flex items-center justify-center gap-1.5 cursor-pointer mt-2"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                          Get {reportPeriod.toUpperCase()} Text
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Card 2: Master Roster Shift Swaps & Annual Leaves Export */}
-                    <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
-                      <div className="space-y-2">
-                        <div className="w-10 h-10 bg-blue-500/15 border border-blue-500/20 text-blue-400 rounded-xl flex items-center justify-center">
-                          <GitPullRequest className="w-5 h-5" />
-                        </div>
-                        <h4 className="font-bold text-slate-100 text-sm font-sans">Shift swaps & Leave CSV</h4>
-                        <p className="text-[11px] text-slate-400 leading-relaxed">Download complete records databases of all shift trades, partner-agreements, and yearly leave decisions to CSV.</p>
-                      </div>
-
-                      <div className="pt-4 mt-auto space-y-2">
-                        <button
-                          onClick={downloadFullXLSX}
-                          className="w-full py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/35 text-blue-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                        >
-                          <FileSpreadsheet className="w-3.5 h-3.5" />
-                          Excel Export
-                        </button>
-                        <button
-                          onClick={() => {
-                            const data = requests.map(r => ({ ...r }));
-                            const csv = generateCSV(data);
-                            uploadToDrive(`Requests_Export_${getLocalISOString()}.csv`, csv);
-                          }}
-                          disabled={isUploadingToDrive}
-                          className="w-full py-2 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/35 text-indigo-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                        >
-                          <Cloud className="w-3.5 h-3.5" />
-                          Save to Drive
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Card 3: Agent Clock Timesheet Logs Export */}
-                    <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
-                      <div className="space-y-2">
-                        <div className="w-10 h-10 bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center">
-                          <Clock className="w-5 h-5" />
-                        </div>
-                        <h4 className="font-bold text-slate-100 text-sm">Attendance Timesheet CSV</h4>
-                        <p className="text-[11px] text-slate-400 leading-relaxed">Extract raw clocking punches, total break times, lunch duration metrics, and overtime violations per agent.</p>
-                      </div>
-
-                      <div className="pt-4 mt-auto space-y-2">
-                        <button
-                          onClick={downloadTimeLogsXLSX}
-                          className="w-full py-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/35 text-emerald-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                        >
-                          <FileSpreadsheet className="w-3.5 h-3.5" />
-                          Excel Export
-                        </button>
-                        <button
-                          onClick={() => {
-                            const csv = generateTimeLogsCSV(timeLogs);
-                            uploadToDrive(`Attendance_Report_${getLocalISOString()}.csv`, csv);
-                          }}
-                          disabled={isUploadingToDrive}
-                          className="w-full py-2 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/35 text-indigo-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                        >
-                          <Cloud className="w-3.5 h-3.5" />
-                          Save to Drive
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Card 4: Agent Inquiries & Feed Cases Export */}
-                    <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
-                      <div className="space-y-2">
-                        <div className="w-10 h-10 bg-purple-500/15 border border-purple-500/20 text-purple-400 rounded-xl flex items-center justify-center">
-                          <HelpCircle className="w-5 h-5" />
-                        </div>
-                        <h4 className="font-bold text-slate-100 text-sm font-sans">Inquiries & Answers CSV</h4>
-                        <p className="text-[11px] text-slate-400 leading-relaxed">Extract every submitted agent question, corresponding clinic name labels, forwarded timestamps, and answers.</p>
-                      </div>
-
-                      <div className="pt-4 mt-auto">
-                        <button
-                          onClick={handleDownloadInquiriesReport}
-                          className="w-full py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/35 text-purple-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                          Extract Inquiries CSV
-                        </button>
-                      </div>
-                    </div>
-
-                  </div>
-
-                  {/* Section Title for Operational Module Analytics Exports */}
-                  <div className="pt-4">
-                    <h3 className="text-lg font-black text-slate-100 font-display flex items-center gap-2">
-                      <ClipboardList className="w-5 h-5 text-indigo-400" />
-                      More Sections Diagnostics & Analytical Exports
-                    </h3>
-                    <p className="text-slate-400 text-xs text-sans mt-0.5">Run instant reports on operational modules and download clean records for audit matching.</p>
-                  </div>
-
-                  {/* New rows of module exports */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-
-                    {/* Card 5: Tabby & Tamara Fintech Requests */}
-                    <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
-                      <div className="space-y-2">
-                        <div className="w-10 h-10 bg-amber-500/15 border border-amber-500/20 text-amber-400 rounded-xl flex items-center justify-center">
-                          <Wallet className="w-5 h-5" />
-                        </div>
-                        <h4 className="font-bold text-slate-100 text-sm font-sans">Fintech Payments CSV</h4>
-                        <p className="text-[11px] text-slate-400 leading-relaxed">Extract Tabby, Tamara, and payment link applications, including amounts, customer contacts, and confirmation logs.</p>
-                      </div>
-
-                      <div className="pt-4 mt-auto">
-                        <button
-                          onClick={handleDownloadFintechRequestsReport}
-                          className="w-full py-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/35 text-amber-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                          Extract Fintech CSV
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Card 6: General Service & Clinical Complaints */}
-                    <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
-                      <div className="space-y-2">
-                        <div className="w-10 h-10 bg-rose-500/15 border border-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center">
-                          <AlertTriangle className="w-5 h-5" />
-                        </div>
-                        <h4 className="font-bold text-slate-100 text-sm font-sans">Corporate Complaints CSV</h4>
-                        <p className="text-[11px] text-slate-400 leading-relaxed">Extract general service complaints, clinical issue descriptions, management resolution comments, and resolution status logs.</p>
-                      </div>
-
-                      <div className="pt-4 mt-auto">
-                        <button
-                          onClick={handleDownloadFintechComplaintsReport}
-                          className="w-full py-2 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/35 text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                          Extract Complaints CSV
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Card 7: Client Communications */}
-                    <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
-                      <div className="space-y-2">
-                        <div className="w-10 h-10 bg-cyan-500/15 border border-cyan-500/20 text-cyan-400 rounded-xl flex items-center justify-center">
-                          <PhoneCall className="w-5 h-5" />
-                        </div>
-                        <h4 className="font-bold text-slate-100 text-sm font-sans">Client Hotline Comms CSV</h4>
-                        <p className="text-[11px] text-slate-400 leading-relaxed">Extract dialect preferences, clinic assignment paths, call notes, feedback, and dispatch resolution timelines.</p>
-                      </div>
-
-                      <div className="pt-4 mt-auto">
-                        <button
-                          onClick={handleDownloadClientCommsReport}
-                          className="w-full py-2 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/35 text-cyan-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                          Extract Comms CSV
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Card 8: Direct Case Leads */}
-                    <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
-                      <div className="space-y-2">
-                        <div className="w-10 h-10 bg-teal-500/15 border border-teal-500/20 text-teal-400 rounded-xl flex items-center justify-center">
-                          <ClipboardList className="w-5 h-5" />
-                        </div>
-                        <h4 className="font-bold text-slate-100 text-sm font-sans">Patient Case Leads CSV</h4>
-                        <p className="text-[11px] text-slate-400 leading-relaxed">Extract direct patient enquiry clinic streams, active medical helpline histories, and lead source attributes.</p>
-                      </div>
-
-                      <div className="pt-4 mt-auto">
-                        <button
-                          onClick={handleDownloadCasesReport}
-                          className="w-full py-2 bg-teal-500/20 hover:bg-teal-500/30 border border-teal-500/35 text-teal-400 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                          Extract Case Leads CSV
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Card 9: Active Work Schedules */}
-                    <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
-                      <div className="space-y-2">
-                        <div className="w-10 h-10 bg-pink-500/15 border border-pink-500/20 text-pink-400 rounded-xl flex items-center justify-center">
-                          <Calendar className="w-5 h-5" />
-                        </div>
-                        <h4 className="font-bold text-slate-100 text-sm font-sans">Master Work Schedules CSV</h4>
-                        <p className="text-[11px] text-slate-400 leading-relaxed">Extract the complete master roster schedule database specifying agent names, shifts, and date assignments.</p>
-                      </div>
-
-                      <div className="pt-4 mt-auto">
-                        <button
-                          onClick={handleDownloadSchedulesReport}
-                          className="w-full py-2 bg-pink-500/20 hover:bg-pink-500/30 border border-pink-500/35 text-pink-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                          Extract Schedules CSV
-                        </button>
-                      </div>
-                    </div>
-
-                    
-
-                    
-
-                  </div>
-                </div>
+              {activeTab === 'report' && (
+                <MetricsReport
+                  currentUser={currentUser}
+                  inquiries={inquiries}
+                  tabbyTamaraRequests={tabbyTamaraRequests}
+                  tabbyTamaraComplaints={tabbyTamaraComplaints}
+                  clientComms={clientComms}
+                  cases={cases}
+                  timeLogs={timeLogs}
+                />
               )}
+
 
 
               {/* Agent Form: Submit Requests (Only Agent) */}
@@ -9344,332 +8922,6 @@ export default function App() {
                 />
               )}
 
-              {activeTab === 'knowledge' && currentUser && (
-                <div id="knowledge-base-tab" className="space-y-6 animate-fade-in text-left">
-                  {/* Page header */}
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                      <h2 className="text-3xl font-black text-transparent bg-gradient-to-r from-cyan-300 via-indigo-200 to-pink-300 bg-clip-text font-display flex items-center gap-3">
-                        <Book className="w-8 h-8 text-cyan-400" />
-                        Operational Knowledge Base
-                      </h2>
-                      <p className="text-slate-400 text-sm mt-1">
-                        Upload and search SOPs, manuals, policy documents, and training references. All files are automatically indexed for the Synq AI assistant.
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-3 self-stretch md:self-auto justify-end">
-                      <label className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/15">
-                        <Upload className="w-4 h-4" />
-                        Upload Document
-                        <input
-                          type="file"
-                          className="hidden"
-                          onChange={handleKbFileUpload}
-                        />
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Complete structural redesign of the Search Interface & AI Grounding Panel */}
-                  <div className="bg-slate-900/60 backdrop-blur-md border border-white/10 p-5 rounded-3xl space-y-4 shadow-xl">
-                    <p className="text-[11px] font-extrabold uppercase tracking-widest text-cyan-400 font-mono flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                      Grounded search & AI expert Q&A
-                    </p>
-                    
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <div className="relative flex-1">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <input
-                          type="text"
-                          placeholder="Search knowledge documents or type a question..."
-                          value={searchQueryKb}
-                          onChange={(e) => setSearchQueryKb(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleKbAiQuery();
-                          }}
-                          className="w-full bg-black/45 border border-white/10 rounded-2xl py-3.5 pl-11 pr-4 text-sm text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 transition-all font-sans"
-                        />
-                        {searchQueryKb && (
-                          <button
-                            onClick={() => {
-                              setSearchQueryKb('');
-                              setKbAiAnswer('');
-                            }}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500 hover:text-white transition-colors"
-                          >
-                            Clear
-                          </button>
-                        )}
-                      </div>
-                      
-                      <button
-                        onClick={handleKbAiQuery}
-                        disabled={isAnsweringKb || !searchQueryKb.trim()}
-                        className={`px-5 py-3 h-[50px] bg-gradient-to-r from-cyan-400 to-indigo-600 hover:from-cyan-500 hover:to-indigo-700 text-slate-950 font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-500/10 ${
-                          (isAnsweringKb || !searchQueryKb.trim()) ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                      >
-                        {isAnsweringKb ? (
-                          <>
-                            <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
-                            Answering...
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="w-4 h-4 text-slate-950" />
-                            Ask AI Synq Expert
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    {/* AI answer response shown in a clean highlighted box below the search bar */}
-                    {(isAnsweringKb || kbAiAnswer) && (
-                      <div className="p-5 bg-cyan-500/10 border border-cyan-500/20 rounded-2xl text-left shadow-inner space-y-3 animate-fade-in">
-                        <div className="flex items-center justify-between pb-2 border-b border-cyan-500/10">
-                          <div className="flex items-center gap-2">
-                            <Sparkles className="w-4 h-4 text-cyan-400 font-sans" />
-                            <span className="text-xs font-black text-cyan-300 uppercase tracking-widest font-mono">AI Synq Expert Answer</span>
-                          </div>
-                          {kbAiAnswer && (
-                            <button
-                              onClick={() => setKbAiAnswer('')}
-                              className="text-[10px] text-slate-400 hover:text-slate-100 font-bold bg-white/5 hover:bg-white/10 border border-white/5 rounded-lg px-2 py-1 transition-all cursor-pointer"
-                            >
-                              Dismiss Answer
-                            </button>
-                          )}
-                        </div>
-
-                        {isAnsweringKb ? (
-                          <div className="py-4 flex flex-col items-center justify-center gap-2 min-h-[100px]">
-                            <div className="relative w-8 h-8">
-                              <div className="absolute inset-0 rounded-full border-2 border-cyan-500/10" />
-                              <div className="absolute inset-0 rounded-full border-t-2 border-cyan-400 animate-spin" />
-                            </div>
-                            <p className="text-xs text-slate-400 animate-pulse font-mono">Analyzing references and formulating grounded response...</p>
-                          </div>
-                        ) : (
-                          <div className="text-slate-200 text-xs leading-relaxed max-h-[300px] overflow-y-auto pr-1">
-                            {renderMarkdownText(kbAiAnswer)}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                    {/* Document List (Cols 4) */}
-                    <div className="lg:col-span-4 space-y-4">
-                      <div className="bg-slate-900/40 border border-white/10 rounded-3xl p-5 backdrop-blur-xl">
-                        <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-3">
-                          Document Vault ({filteredKbDocs.length})
-                        </h3>
-
-                        {filteredKbDocs.length === 0 ? (
-                          <div className="p-8 text-center text-slate-400 italic text-sm">
-                            {searchQueryKb ? 'No matching documents found.' : 'No documents uploaded yet.'}
-                          </div>
-                        ) : (
-                          <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1 select-none scrollbar-hide">
-                            {filteredKbDocs.map((doc) => {
-                              const isSelected = doc.id === (selectedKbDocId || (filteredKbDocs[0] && filteredKbDocs[0].id));
-                              // Automatically set selected document if null
-                              if (!selectedKbDocId && filteredKbDocs[0]) {
-                                setSelectedKbDocId(filteredKbDocs[0].id);
-                              }
-                              return (
-                                <div
-                                  key={doc.id}
-                                  onClick={() => setSelectedKbDocId(doc.id)}
-                                  className={`p-3.5 rounded-2xl border text-left cursor-pointer transition-all flex items-start gap-3 group relative ${
-                                    isSelected
-                                      ? 'bg-cyan-500/10 border-cyan-500/30 text-white'
-                                      : 'bg-slate-900/40/[0.02] border-white/5 hover:border-white/10 text-slate-300'
-                                  }`}
-                                >
-                                  {/* Rich Doc Type Icon */}
-                                  <div className={`p-2 rounded-xl shrink-0 ${isSelected ? 'bg-cyan-500/20 text-cyan-400' : 'bg-white/5 text-slate-400'}`}>
-                                    {(() => {
-                                      const t = String(doc.type || '').toUpperCase();
-                                      if (['CSV', 'XLS', 'XLSX'].includes(t)) return <FileSpreadsheet className="w-4 h-4" />;
-                                      if (['PNG', 'JPG', 'JPEG', 'GIF', 'WEBP', 'SVG'].includes(t)) return <FileImage className="w-4 h-4" />;
-                                      if (['MP3', 'WAV', 'OGG', 'M4A', 'AAC'].includes(t)) return <FileAudio className="w-4 h-4" />;
-                                      if (['MP4', 'WEBM', 'MOV', 'AVI', 'MKV'].includes(t)) return <FileVideo className="w-4 h-4" />;
-                                      if (['ZIP', 'RAR', '7Z', 'TAR', 'GZ'].includes(t)) return <FileArchive className="w-4 h-4" />;
-                                      if (['PDF'].includes(t)) return <BookOpen className="w-4 h-4" />;
-                                      if (['JSON', 'JS', 'TS', 'HTML', 'CSS', 'XML', 'SH', 'PY', 'YAML', 'YML'].includes(t)) return <FileCode className="w-4 h-4" />;
-                                      return <FileText className="w-4 h-4" />;
-                                    })()}
-                                  </div>
-
-                                  <div className="flex-1 min-w-0 pr-6">
-                                    <h4 className="text-xs font-bold truncate group-hover:text-white transition-colors">
-                                      {doc.name}
-                                    </h4>
-                                    <div className="flex items-center gap-2 mt-1 text-[10px] text-slate-400">
-                                      <span className="uppercase font-mono font-bold text-cyan-400/80">{doc.type}</span>
-                                      <span>•</span>
-                                      <span>{Math.round(doc.size / 1024) || 1} KB</span>
-                                      <span>•</span>
-                                      <span>{new Date(doc.uploadedAt).toLocaleDateString()}</span>
-                                    </div>
-                                  </div>
-
-                                  {/* Delete Doc Button */}
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleDeleteKbDoc(doc.id);
-                                    }}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-500 hover:text-rose-400 bg-slate-900/40/[0.02] hover:bg-rose-500/10 rounded-xl transition-all opacity-0 group-hover:opacity-100 animate-fade-in"
-                                    title="Delete Document"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Document Viewer (Cols 8) */}
-                    <div className="lg:col-span-8">
-                      <div className="bg-gradient-to-br from-slate-900/60 to-slate-950 border border-white/10 rounded-3xl p-6 backdrop-blur-xl min-h-[450px] flex flex-col">
-                        {currentKbDoc ? (
-                          <div className="flex-1 flex flex-col space-y-4">
-                            <div className="flex items-start justify-between border-b border-white/10 pb-4">
-                              <div>
-                                <h3 className="font-extrabold text-slate-100 text-lg flex items-center gap-2">
-                                  {currentKbDoc.name}
-                                </h3>
-                                <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-400 font-sans">
-                                  <span className="bg-cyan-500/10 text-cyan-400 px-2 py-0.5 rounded-lg text-[10px] font-mono font-extrabold uppercase">
-                                    {currentKbDoc.type} File
-                                  </span>
-                                  <span>•</span>
-                                  <span>{Math.round(currentKbDoc.size / 1024) || 1} KB</span>
-                                  <span>•</span>
-                                  <span>Uploaded at {new Date(currentKbDoc.uploadedAt).toLocaleString()}</span>
-                                </div>
-                              </div>
-                              <button
-                                onClick={() => handleDeleteKbDoc(currentKbDoc.id)}
-                                className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-300 hover:text-rose-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
-                              >
-                                <Trash2 className="w-3.5 h-3.5 text-rose-400" />
-                                Delete
-                              </button>
-                            </div>
-
-                            {/* Scrollable text or binary display panel */}
-                            <div className="flex-1 max-h-[500px] overflow-y-auto bg-black/30 rounded-2xl p-5 border border-white/5 scrollbar-hide text-left leading-relaxed">
-                              {currentKbDoc.isBinary ? (
-                                <div className="flex flex-col items-center justify-center py-6 text-center space-y-4 font-sans">
-                                  {/* If it's an image, show beautiful preview */}
-                                  {['PNG', 'JPG', 'JPEG', 'GIF', 'WEBP', 'SVG'].includes(String(currentKbDoc.type).toUpperCase()) ? (
-                                    <div className="max-w-full max-h-80 overflow-hidden border border-white/10 rounded-xl bg-slate-950/60 p-2 relative group flex items-center justify-center">
-                                      <img 
-                                        src={currentKbDoc.content} 
-                                        alt={currentKbDoc.name} 
-                                        referrerPolicy="no-referrer"
-                                        className="max-h-72 object-contain rounded-lg shadow-lg"
-                                      />
-                                    </div>
-                                  ) : ['PDF'].includes(String(currentKbDoc.type).toUpperCase()) ? (
-                                    <div className="w-full flex flex-col items-center p-6 bg-indigo-500/5 border border-white/5 rounded-2xl">
-                                      <BookOpen className="w-16 h-16 text-indigo-400 animate-pulse mb-3" />
-                                      <p className="text-sm font-bold text-slate-200">PDF Document Reference</p>
-                                      <p className="text-xs text-slate-400 mt-1 max-w-sm">This is an indexed PDF document. You can download and view it locally.</p>
-                                    </div>
-                                  ) : (
-                                    <div className="w-full flex flex-col items-center p-6 bg-slate-900/40 border border-white/5 rounded-2xl">
-                                      {(() => {
-                                        const t = String(currentKbDoc.type || '').toUpperCase();
-                                        if (['MP3', 'WAV', 'OGG', 'M4A', 'AAC'].includes(t)) return <FileAudio className="w-16 h-16 text-emerald-400 mb-3" />;
-                                        if (['MP4', 'WEBM', 'MOV', 'AVI', 'MKV'].includes(t)) return <FileVideo className="w-16 h-16 text-rose-400 mb-3" />;
-                                        if (['ZIP', 'RAR', '7Z', 'TAR', 'GZ'].includes(t)) return <FileArchive className="w-16 h-16 text-amber-500 mb-3" />;
-                                        if (['CSV', 'XLS', 'XLSX'].includes(t)) return <FileSpreadsheet className="w-16 h-16 text-teal-400 mb-3" />;
-                                        return <File className="w-16 h-16 text-cyan-400 mb-3" />;
-                                      })()}
-                                      <p className="text-sm font-bold text-slate-200">Binary Document Reference</p>
-                                      <p className="text-xs text-slate-400 mt-1 max-w-sm">This file is stored securely as a binary source reference ({!isNaN(Math.round(currentKbDoc.size / 1024)) ? Math.round(currentKbDoc.size / 1024) : 0} KB).</p>
-                                    </div>
-                                  )}
-
-                                  {/* Action Download / Open Buttons */}
-                                  <div className="flex flex-wrap gap-3 justify-center pt-2">
-                                    <a 
-                                      href={currentKbDoc.content} 
-                                      download={currentKbDoc.name}
-                                      className="px-6 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold rounded-xl text-xs flex items-center gap-2 transition-all shadow-lg shadow-cyan-500/10 cursor-pointer"
-                                    >
-                                      <Download className="w-4 h-4" />
-                                      Download {currentKbDoc.name}
-                                    </a>
-                                    <a 
-                                      href={currentKbDoc.content} 
-                                      target="_blank" 
-                                      rel="noopener noreferrer"
-                                      className="px-6 py-2.5 bg-white/5 hover:bg-white/10 text-slate-300 font-extrabold rounded-xl text-xs flex items-center gap-2 transition-all border border-white/10 cursor-pointer"
-                                    >
-                                      <ExternalLink className="w-4 h-4" />
-                                      Open File in New Tab
-                                    </a>
-                                  </div>
-                                </div>
-                              ) : (
-                                // Traditional code / text file renderer with download button
-                                <div className="space-y-4">
-                                  <div className="flex justify-end pb-2 border-b border-white/5">
-                                    <a 
-                                      href={`data:text/plain;charset=utf-8,${encodeURIComponent(currentKbDoc.content)}`} 
-                                      download={currentKbDoc.name.toLowerCase().endsWith('.pdf') ? `${currentKbDoc.name}.txt` : currentKbDoc.name}
-                                      className="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 text-slate-300 rounded-xl text-[11px] font-bold flex items-center gap-1.5 transition-all border border-white/10 cursor-pointer"
-                                    >
-                                      <Download className="w-3.5 h-3.5" />
-                                      Download Text Source
-                                    </a>
-                                  </div>
-                                  {currentKbDoc.type === 'JSON' ? (
-                                    <pre className="text-xs text-cyan-300 font-mono whitespace-pre-wrap leading-relaxed select-all">
-                                      {(() => {
-                                        try {
-                                          return JSON.stringify(JSON.parse(currentKbDoc.content), null, 2);
-                                        } catch {
-                                          return currentKbDoc.content;
-                                        }
-                                      })()}
-                                    </pre>
-                                  ) : (
-                                    <p className="text-slate-300 text-xs font-sans whitespace-pre-wrap leading-relaxed select-all">
-                                      {currentKbDoc.content}
-                                    </p>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex-1 flex flex-col items-center justify-center text-center p-12 italic text-slate-400">
-                            <Book className="w-12 h-12 text-slate-600 mb-3 opacity-30" />
-                            <p className="text-sm font-sans">No document selected</p>
-                            <p className="text-xs text-slate-500 mt-1">Choose a file from the list to display its indexed contents</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'offers' && currentUser && (
-                <ArticleManager currentUser={currentUser} category="offers" />
-              )}
 
               {/* TL Announcements */}
               {activeTab === 'tl-announcements' && currentUser && (
@@ -12136,7 +11388,7 @@ export default function App() {
 
 
                   {/* Informative coverage card indicators */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                     <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
                       <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Active Scheduled Days</p>
                       <p className="text-2xl font-black text-slate-100">
@@ -12191,6 +11443,77 @@ export default function App() {
                           <p className="text-[10px] text-slate-400 mt-1">Roster upload and override controls enabled</p>
                         </>
                       )}
+                    </div>
+
+                    <div className="p-4 bg-indigo-950/20 border border-indigo-500/20 rounded-2xl backdrop-blur-sm relative overflow-hidden">
+                      <div className="flex justify-between items-center mb-1.5">
+                        <p className="text-[10px] uppercase tracking-widest text-indigo-300 font-bold font-mono">Sync & Queue Engine</p>
+                        {forceOffline ? (
+                          <span className="px-1 py-0.5 rounded bg-amber-500/10 border border-amber-500/25 text-[7px] text-amber-400 font-black">OFFLINE</span>
+                        ) : (
+                          <span className="px-1 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/25 text-[7px] text-emerald-400 font-black tracking-widest">REALTIME</span>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center text-[11px]">
+                          <span className="text-slate-300">Pending Writes:</span>
+                          <span className={`font-mono font-black text-xs ${syncStatus.pending > 0 ? 'text-amber-400 animate-pulse' : 'text-slate-400'}`}>
+                            {syncStatus.pending}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center text-[11px]">
+                          <span className="text-slate-300">Syncs / Fails:</span>
+                          <span className="font-mono text-slate-400 font-bold">
+                            {syncStatus.synced} / <span className="text-red-400">{syncStatus.failed}</span>
+                          </span>
+                        </div>
+
+                        {syncError && (
+                          <p className="text-[8px] text-red-400 font-mono truncate leading-none mt-0.5 pt-0.5 border-t border-red-500/5">
+                            ⚠️ {syncError}
+                          </p>
+                        )}
+
+                        <div className="grid grid-cols-2 gap-1.5 mt-2 pt-1.5 border-t border-white/5">
+                          <button
+                            onClick={() => {
+                              const nextMode = !forceOffline;
+                              setForceOffline(nextMode);
+                              toast.info(nextMode ? "Forced Offline Mode Active 🔌" : "Online Synchronization Active 📡");
+                            }}
+                            className={`py-1 px-1.5 rounded-lg text-[8px] font-black cursor-pointer text-center select-none uppercase transition-all ${
+                              forceOffline 
+                                ? 'bg-amber-600/20 hover:bg-amber-600/35 text-amber-200 border border-amber-500/30' 
+                                : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/5'
+                            }`}
+                          >
+                            {forceOffline ? "Go Online" : "Go Offline"}
+                          </button>
+                          
+                          <button
+                            onClick={async () => {
+                              if (forceOffline) {
+                                toast.error("Cannot sync: offline mode is active. Go online first!");
+                                return;
+                              }
+                              toast.promise(syncEngine.processPending(), {
+                                loading: 'Synchronizing team database...',
+                                success: 'Roster synced successfully!',
+                                error: 'Sync failed: network connection issue'
+                              });
+                            }}
+                            disabled={syncStatus.pending === 0}
+                            className={`py-1 px-1.5 rounded-lg text-[8px] font-black uppercase text-center cursor-pointer transition-all ${
+                              syncStatus.pending > 0 
+                                ? 'bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white shadow-lg shadow-indigo-900/10' 
+                                : 'bg-slate-900 text-slate-600 border border-white/5 cursor-not-allowed'
+                            }`}
+                          >
+                            Sync Queue
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
 

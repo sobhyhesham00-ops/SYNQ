@@ -1,10 +1,10 @@
 import { initializeApp } from "firebase/app";
 import { initializeFirestore, enableMultiTabIndexedDbPersistence } from "firebase/firestore";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
-import firebaseConfig from "../firebase-applet-config.json";
+import firebaseConfig from "../config/firebase-applet-config.json";
 
 const app = initializeApp(firebaseConfig);
-export const db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true }, firebaseConfig.firestoreDatabaseId);
+export const db = initializeFirestore(app, { experimentalForceLongPolling: true }, firebaseConfig.firestoreDatabaseId);
 
 // Enable persistence
 enableMultiTabIndexedDbPersistence(db).catch((err) => {
