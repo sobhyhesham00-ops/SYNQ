@@ -44,16 +44,13 @@ if ('serviceWorker' in navigator) {
 
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AppProvider } from './context/AppContext';
-import { ThemeProvider } from './context/ThemeContext';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider>
-      <AppProvider>
-        <ErrorBoundary>
-          <App />
-        </ErrorBoundary>
-      </AppProvider>
-    </ThemeProvider>
+    <AppProvider>
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </AppProvider>
   </StrictMode>,
 );

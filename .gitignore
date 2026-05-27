@@ -1,10 +1,8 @@
 node_modules/
-
+dist/
 .env.local
 *.log
 /tmp_synq
 /app/workspace
 /logs
 .DS_Store
-tmp.txt
-tmp_synq/

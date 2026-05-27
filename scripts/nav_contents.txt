@@ -1,0 +1,79 @@
+              <nav className="flex-1 flex flex-col gap-1 overflow-y-auto pr-2 pb-4">
+                {(() => {
+                  const buildBtn = (id, icon, label, bgColors = '') => {
+                    const isActive = activeTab === id;
+                    const baseClass = isActive 
+                      ? (\`\${bgColors} text-slate-900 shadow-sm font-bold border\`)
+                      : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900 border font-medium';
+                    
+                    return (
+                      <button
+                        key={id}
+                        onClick={() => setActiveTab(id)}
+                        className={\`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all text-sm \${baseClass}\`}
+                      >
+                        <span className="flex items-center gap-2.5">
+                          {icon}
+                          {label}
+                        </span>
+                        <ChevronRight className={\`w-4 h-4 \${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}\`} />
+                      </button>
+                    );
+                  };
+
+                  const groupTitle = (title, emoji, color) => (
+                    <span className={\`text-[10px] tracking-wider uppercase font-bold \${color} block px-3 mt-4 mb-1.5\`}>
+                      {emoji} {title}
+                    </span>
+                  );
+
+                  if (isTLOreSupport) {
+                     return (
+                      <>
+                        {groupTitle("Core Analytics & RTM", "📊", "text-indigo-600")}
+                        {buildBtn("dashboard", <LayoutDashboard className="w-4 h-4 text-indigo-500" />, "Global Dashboard", "bg-indigo-50 border-indigo-200")}
+                        {buildBtn("time-logs", <Activity className="w-4 h-4 text-emerald-500" />, "Live RTM & Agent Logs", "bg-emerald-50 border-emerald-200")}
+                        {buildBtn("report", <BarChart2 className="w-4 h-4 text-purple-500" />, "Daily Metrics Reports", "bg-purple-50 border-purple-200")}
+
+                        {groupTitle("Workforce Management", "📅", "text-blue-600")}
+                        {buildBtn("schedules", <Calendar className="w-4 h-4" />, "Schedules & Roster", "bg-slate-100 border-slate-300")}
+                        {buildBtn("overview", <UserCheck className="w-4 h-4" />, "Approvals & Leave Console", "bg-slate-100 border-slate-300")}
+
+                        {groupTitle("Operations & Triage", "📋", "text-teal-600")}
+                        {buildBtn("inquiries", <HelpCircle className="w-4 h-4 text-amber-500" />, "General Inquiries", "bg-slate-100 border-slate-300")}
+                        {buildBtn("tabby-tamara", <Wallet className="w-4 h-4 text-rose-500" />, "Tabby & Tamara Requests", "bg-slate-100 border-slate-300")}
+                        {buildBtn("complaints", <AlertTriangle className="w-4 h-4 text-red-500" />, "T&T Complaints", "bg-slate-100 border-slate-300")}
+                        {buildBtn("client-comms", <MessageSquare className="w-4 h-4 text-sky-500" />, "Client Comm Requests", "bg-slate-100 border-slate-300")}
+                        {buildBtn("cases", <History className="w-4 h-4 text-orange-500" />, "Manual Booking Cases", "bg-slate-100 border-slate-300")}
+
+                        {groupTitle("System Controls", "⚙️", "text-slate-600")}
+                        {buildBtn("directory", <Users className="w-4 h-4 text-cyan-600" />, "Headcount & Directory", "bg-slate-100 border-slate-300")}
+                        {buildBtn("tl-feedback", <MessageCircle className="w-4 h-4 text-pink-500" />, "TL Feedback Drawer", "bg-slate-100 border-slate-300")}
+                        {isMasterAdmin && buildBtn("admin", <ShieldCheck className="w-4 h-4 text-rose-600" />, "Super Admin Control", "bg-rose-50 border-rose-200")}
+                      </>
+                     );
+                  } else {
+                     return (
+                      <>
+                        {groupTitle("My Core Workspace", "📊", "text-indigo-600")}
+                        {buildBtn("dashboard", <LayoutDashboard className="w-4 h-4 text-indigo-500" />, "Personal Dashboard", "bg-indigo-50 border-indigo-200")}
+                        {buildBtn("time-logs", <Activity className="w-4 h-4 text-emerald-500" />, "My Time Logs & Status", "bg-emerald-50 border-emerald-200")}
+
+                        {groupTitle("My Planning & Leave", "📅", "text-blue-600")}
+                        {buildBtn("schedules", <Calendar className="w-4 h-4" />, "My Schedule", "bg-slate-100 border-slate-300")}
+                        {buildBtn("my-requests", <GitPullRequest className="w-4 h-4" />, "My Swap & Leave Requests", "bg-slate-100 border-slate-300")}
+
+                        {groupTitle("Operations & Triage", "📋", "text-teal-600")}
+                        {buildBtn("inquiries", <HelpCircle className="w-4 h-4 text-amber-500" />, "General Inquiries", "bg-slate-100 border-slate-300")}
+                        {buildBtn("tabby-tamara", <Wallet className="w-4 h-4 text-rose-500" />, "Tabby & Tamara Requests", "bg-slate-100 border-slate-300")}
+                        {buildBtn("complaints", <AlertTriangle className="w-4 h-4 text-red-500" />, "T&T Complaints", "bg-slate-100 border-slate-300")}
+                        {buildBtn("client-comms", <MessageSquare className="w-4 h-4 text-sky-500" />, "Client Comm Requests", "bg-slate-100 border-slate-300")}
+                        {buildBtn("cases", <History className="w-4 h-4 text-orange-500" />, "Manual Booking Cases", "bg-slate-100 border-slate-300")}
+
+                        {groupTitle("Support", "🌟", "text-slate-600")}
+                        {buildBtn("tl-feedback", <MessageCircle className="w-4 h-4 text-pink-500" />, "TL Feedback Drawer", "bg-slate-100 border-slate-300")}
+                      </>
+                     );
+                  }
+                })()}
+              </nav>

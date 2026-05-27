@@ -2,77 +2,131 @@
 @import "tailwindcss";
 
 :root {
-  color-scheme: light dark;
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8f9fa;
-  --bg-tertiary: #f0f1f3;
-  --text-primary: #1a1a1a;
-  --text-secondary: #4b5563;
-  --text-tertiary: #707070;
-  --border-light: #e5e7eb;
-  --border-medium: #d1d5db;
-  --brand-primary: #4f46e5;
-  --brand-light: #e0e7ff;
+  /* Default (Dark Mode) Colors */
+  --bg-primary: #1a1a1a;      /* Very dark background */
+  --bg-secondary: #2d2d2d;    /* Dark gray for cards */
+  --bg-tertiary: #3d3d3d;     /* Medium gray for hover */
+  --bg-input: #2d2d2d;        /* Dark for inputs */
+
+  --text-primary: #f5f5f5;    /* Almost white for main text */
+  --text-secondary: #d1d5db;  /* Light gray for secondary */
+  --text-tertiary: #9ca3af;   /* Medium gray for tertiary */
+  --text-on-brand: #ffffff;   /* White on brand */
+
+  --border-light: #4b5563;    /* Medium gray border */
+  --border-medium: #6b7280;   /* Lighter gray border */
+  --border-dark: #9ca3af;     /* Light gray border */
+
+  --brand-primary: #818cf8;   /* Light indigo */
+  --brand-hover: #6366f1;     /* Regular indigo */
+  --brand-light: #312e81;     /* Very dark indigo background */
+
+  --status-success: #34d399;
+  --status-error: #f87171;
+  --status-warning: #fbbf24;
+  --status-info: #60a5fa;
+
+  /* Fonts */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Radius overrides representing characteristic iOS softer rounded corners */
+  --radius-xl: 14px;
+  --radius-2xl: 18px;
+  --radius-3xl: 22px;
 }
 
-html.dark {
-    --bg-primary: #1a1a1a;
-    --bg-secondary: #2d2d2d;
-    --bg-tertiary: #3d3d3d;
-    --text-primary: #f5f5f5;
-    --text-secondary: #d1d5db;
-    --text-tertiary: #9ca3af;
-    --border-light: #4b5563;
-    --border-medium: #6b7280;
-    --brand-primary: #818cf8;
-    --brand-light: #312e81;
+body.theme-light {
+  /* Light Mode Color Palette */
+  --bg-primary: #fbfbfe;      /* Very soft warm white background */
+  --bg-secondary: #ffffff;    /* Pure white for cards */
+  --bg-tertiary: #f0f1f5;     /* Soft gray for hover */
+  --bg-input: #ffffff;        /* White for inputs */
+
+  --text-primary: #1a1a1a;    /* Very dark gray for main text (NOT LIGHT) */
+  --text-secondary: #4b5563;  /* Medium gray for secondary text */
+  --text-tertiary: #707070;   /* Light gray for tertiary text */
+  --text-on-brand: #ffffff;   /* White text on brand color */
+
+  --border-light: #e5e7eb;    /* Light border */
+  --border-medium: #d1d5db;   /* Medium border */
+  --border-dark: #9ca3af;     /* Dark border */
+
+  --brand-primary: #6366f1;   /* Indigo */
+  --brand-hover: #4f46e5;     /* Darker indigo */
+  --brand-light: #e0e7ff;     /* Light indigo background */
+
+  --status-success: #10b981;
+  --status-error: #ef4444;
+  --status-warning: #f59e0b;
+  --status-info: #3b82f6;
 }
 
-html.dark {
-  color-scheme: dark;
+@theme {
+  /* Wire up Tailwind classes to use the custom variables dynamically */
+  --color-slate-50: var(--text-primary);
+  --color-slate-100: var(--text-primary);
+  --color-slate-200: var(--text-secondary);
+  --color-slate-300: var(--text-secondary);
+  --color-slate-400: var(--text-tertiary);
+  --color-slate-500: var(--border-dark);
+  --color-slate-600: var(--border-medium);
+  --color-slate-700: var(--border-light);
+  --color-slate-800: var(--bg-tertiary);
+  --color-slate-900: var(--bg-secondary);
+  --color-slate-950: var(--bg-primary);
+
+  --color-gray-50: var(--bg-secondary);
+  --color-gray-100: var(--border-light);
+  --color-gray-200: var(--border-medium);
+  --color-gray-300: var(--border-dark);
+  --color-gray-400: var(--text-tertiary);
+  --color-gray-500: var(--text-tertiary);
+  --color-gray-600: var(--text-secondary);
+  --color-gray-700: var(--text-primary);
+  --color-gray-800: var(--text-primary);
+  --color-gray-900: var(--text-primary);
+  --color-gray-950: var(--text-primary);
+
+  --color-indigo-300: var(--brand-primary);
+  --color-indigo-400: var(--brand-primary);
+  --color-indigo-500: var(--brand-primary);
+  --color-indigo-600: var(--brand-hover);
+  --color-indigo-700: var(--brand-hover);
+  --color-indigo-800: var(--brand-hover);
+  --color-indigo-900: var(--brand-light);
+
+  --color-emerald-400: var(--status-success);
+  --color-emerald-500: var(--status-success);
+  --color-emerald-900: var(--brand-light);
+
+  --color-rose-400: var(--status-error);
+  --color-rose-500: var(--status-error);
+  --color-rose-900: var(--brand-light);
+
+  --color-amber-400: var(--status-warning);
+  --color-amber-500: var(--status-warning);
+  --color-amber-900: var(--brand-light);
+
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius-3xl: var(--radius-3xl);
 }
 
-@custom-variant dark (&:where(.dark, .dark *));
-
-body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
-  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
-
-h1, h2, h3, h4, h5, h6, p, span, label, button, input {
-  color: inherit;
-}
-
-input, textarea, select {
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
-  border-color: var(--border-light);
-}
-
-input::placeholder, textarea::placeholder {
-  color: var(--text-secondary);
-  opacity: 0.8;
-}
-
-.card, [role="card"] {
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
-  border-color: var(--border-light);
-}
-
-button {
-  transition: all 0.2s ease;
-}
-
-a {
-  color: var(--brand-primary);
-}
-
-a:hover {
-  opacity: 0.8;
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.2s ease, color 0.2s ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
 /* Glassmorphism utility scrollbars (iOS style invisible until scrolling) */
@@ -84,15 +138,85 @@ a:hover {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 10px;
 }
-html.dark ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+body.theme-light ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
 }
 ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+body.theme-light ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.3);
 }
-html.dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.4);
+
+/* Premium Select Box Styles */
+select {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-light) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+select:hover {
+  border-color: var(--border-medium) !important;
+}
+
+select:focus {
+  border-color: var(--brand-primary) !important;
+  box-shadow: 0 0 0 2px var(--brand-light) !important;
+  outline: none;
+}
+
+select option {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  padding: 8px !important;
+}
+
+select optgroup {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-tertiary) !important;
+  font-weight: 600;
+}
+
+/* Inputs and textareas */
+input, textarea {
+  background-color: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-light) !important;
+}
+
+input:focus, textarea:focus {
+  border-color: var(--brand-primary) !important;
+  outline: none;
+}
+
+/* Add custom class helpers if needed */
+.bg-theme-primary { background-color: var(--bg-primary) !important; }
+.bg-theme-secondary { background-color: var(--bg-secondary) !important; }
+.bg-theme-tertiary { background-color: var(--bg-tertiary) !important; }
+
+.text-theme-primary { color: var(--text-primary) !important; }
+.text-theme-secondary { color: var(--text-secondary) !important; }
+.text-theme-tertiary { color: var(--text-tertiary) !important; }
+
+.border-theme-light { border-color: var(--border-light) !important; }
+.border-theme-medium { border-color: var(--border-medium) !important; }
+
+@keyframes global-ring-jump {
+  0% { transform: translateY(0); }
+  25% { transform: translateY(-5px) scale(1.1); }
+  50% { transform: translateY(0) scale(1); }
+  75% { transform: translateY(-3px) scale(1.05); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+.global-ring svg {
+  animation: global-ring-jump 0.5s ease-in-out;
+  animation-iteration-count: 3;
 }

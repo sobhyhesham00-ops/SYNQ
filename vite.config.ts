@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
       __BUILD_TIME__: Date.now(),
       'process.env': {}
     },
-    build: { outDir: 'dist', emptyOutDir: true,
+    build: {
       sourcemap: mode !== 'production',
       minify: 'terser',
       chunkSizeWarningLimit: 1000,

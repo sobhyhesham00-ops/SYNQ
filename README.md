@@ -16,7 +16,7 @@ A high-performance Workforce Management (WFM) scheduling portal for modern clini
 - npm 9+
 - Firebase Project configured
 
-## Quick start
+## Installation
 
 1. Clone repo
 2. Run `npm install`
@@ -26,36 +26,55 @@ A high-performance Workforce Management (WFM) scheduling portal for modern clini
 ## Running Locally
 
 To start the local development server (frontend + API):
-```bash
+\`\`\`bash
 npm run dev
-```
+\`\`\`
 The application will be accessible at http://localhost:3000
+
+## Building for Production
+
+To create an optimized production build:
+\`\`\`bash
+npm run build
+npm start
+\`\`\`
 
 ## API Documentation
 
-- `POST /api/analyze-schedule`
-  - Request: `{ schedules: IScheduleItem[] }`
-  - Response: `{ analysis: string }`
-- `POST /api/ai-chat`
-  - Request: `{ message: string, knowledgeContext?: string }`
-  - Response: `{ reply: string }`
-- `GET /health`
-  - Response: `{ status, timestamp, uptime, apiKeyConfigured, version, environment }`
-- `GET /api/status`
-  - Response: `{ status, timestamp, memory, uptime, node_version, platform }`
+- \`POST /api/analyze-schedule\`
+  - Request: \`{ schedules: IScheduleItem[] }\`
+  - Response: \`{ analysis: string }\`
+- \`POST /api/ai-chat\`
+  - Request: \`{ message: string, knowledgeContext?: string }\`
+  - Response: \`{ reply: string }\`
+- \`GET /health\`
+  - Response: \`{ status, timestamp, uptime_seconds, api_key_configured, response_time_ms }\`
+- \`GET /api/status\`
+  - Response: \`{ version, node_version, memory_usage_mb, app_uptime_seconds, active_connections }\`
 
-## Architecture
+## Environment Variables Table
 
-- Frontend: React 18 with Vite, Tailwind CSS for styling.
-- Backend: Express API handling scheduling and AI interactions.
-- State Management: React Context API and customized hooks for centralized, predictable state.
-- Database: Firebase Firestore for real-time document synchronization.
+| Variable | Description | Required | Default |
+| --- | --- | --- | --- |
+| \`GEMINI_API_KEY\` | Google Gemini API Key | Yes | |
+| \`APP_URL\` | Public URL for CORS | No | \`http://localhost:3000\` |
+| \`NODE_ENV\` | Environment Mode | No | \`development\` |
+| \`PORT\` | Server Port | No | \`3000\` |
 
 ## Troubleshooting
 
-- **AI Analysis Offline / API Key not configured**: Make sure `GEMINI_API_KEY` is loaded in `.env.local`.
+- **AI Analysis Offline / API Key not configured**: Make sure \`GEMINI_API_KEY\` is loaded in \`.env.local\`.
 - **Port 3000 already in use**: The system currently hardcodes port 3000 due to platform constraints. Kill the process running on port 3000.
 - **Build failures**: Check Node.js version is at least 18. Ensure there are no TypeScript interface mismatches.
+
+## Project Structure
+
+- \`/src\` - Frontend React components and Backend Express utilities and types
+- \`/config\` - Application and Firebase configuration files
+- \`/scripts\` - Build and utility scripts
+- \`/tests\` - Unit and integration tests
+- \`/dist\` - Compiled production build
+- \`/logs\` - Server logs
 
 ## Security features
 
@@ -64,15 +83,10 @@ The application will be accessible at http://localhost:3000
 - **CORS**: Configured with strict origin policies to prevent unauthorized cross-origin requests.
 - **Input Validation**: Central validation via `validateSchedules` and `validateMessage` to prevent malicious payloads or schema violations.
 
-## Performance metrics
-
-- Efficient batched database writes and queries via Firebase integration.
-- Light-weight bundle sizes optimized by Vite and esbuild.
-
-## Development guide
-
-- Use standard pull request workflows and semantic versioning.
-- Ensure all tests (`npm test`) pass before merging.
+## Contributing guidelines
+- Fork the repository.
+- Create a feature branch.
+- Submit a Pull Request.
 
 ## License
 MIT License.
