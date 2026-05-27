@@ -199,11 +199,11 @@ const renderMarkdownText = (text: string) => {
   if (!text) return null;
   const lines = text.split('\n');
   return (
-    <div className="space-y-2 text-left text-sm text-slate-700 leading-relaxed font-sans mt-3">
+    <div className="space-y-2 text-left text-sm text-slate-300 leading-relaxed font-sans mt-3">
       {lines.map((line, idx) => {
         // Heading 3
         if (line.startsWith('### ')) {
-          return <h4 key={idx} className="text-sm font-bold text-slate-700 mt-4 border-l-2 border-indigo-500 pl-2">{line.replace('### ', '')}</h4>;
+          return <h4 key={idx} className="text-sm font-bold text-slate-300 mt-4 border-l-2 border-indigo-500 pl-2">{line.replace('### ', '')}</h4>;
         }
         // Heading 2
         if (line.startsWith('## ')) {
@@ -211,7 +211,7 @@ const renderMarkdownText = (text: string) => {
         }
         // Heading 1
         if (line.startsWith('# ')) {
-          return <h2 key={idx} className="text-lg font-black text-slate-700 mt-6">{line.replace('# ', '')}</h2>;
+          return <h2 key={idx} className="text-lg font-black text-slate-300 mt-6">{line.replace('# ', '')}</h2>;
         }
         // Bullet points
         if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
@@ -1138,8 +1138,8 @@ export default function App() {
   }, [isDarkMode]);
 
   // Auth States
-  const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    const saved = getStorageItem<User | null>('sched_current_user', null);
+  const [currentUser, setCurrentUser] = useState<UserIcon | null>(() => {
+    const saved = getStorageItem<UserIcon | null>('sched_current_user', null);
     if (saved) {
       // Auto-logout the old full name sessions. New username must contain a dot and no spaces.
       const isNewFormat = saved.name.includes('.') && !saved.name.includes(' ');
@@ -1151,7 +1151,7 @@ export default function App() {
     return saved;
   });
 
-  const currentUserRef = React.useRef<User | null>(currentUser);
+  const currentUserRef = React.useRef<UserIcon | null>(currentUser);
   useEffect(() => {
     currentUserRef.current = currentUser;
     if (currentUser) {
@@ -5008,7 +5008,7 @@ export default function App() {
 
   if (isAppKilled) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-700 flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-950 text-slate-300 flex flex-col items-center justify-center p-4">
         <Toaster theme="dark" position="bottom-right" />
         <div className="max-w-md w-full text-center space-y-6">
           <AlertTriangle className="w-16 h-16 text-rose-500 mx-auto animate-pulse" />
@@ -5093,7 +5093,7 @@ export default function App() {
   }
 
   return (
-    <div id="scheduling-root" className="min-h-screen bg-transparent text-slate-700 flex flex-col font-sans relative overflow-x-hidden antialiased">
+    <div id="scheduling-root" className="min-h-screen bg-transparent text-slate-300 flex flex-col font-sans relative overflow-x-hidden antialiased">
       <Toaster theme="dark" position="bottom-right" />
       
       {/* Background aesthetic blobs */}
@@ -5115,7 +5115,7 @@ export default function App() {
               <div className="flex flex-col items-center mb-8">
                 <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center shadow-lg shadow-black/80 mb-4 border border-slate-700/10 relative group">
                   <div className="absolute inset-0 bg-slate-800/80 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <CoolLogo className="w-10 h-10 text-slate-700" />
+                  <CoolLogo className="w-10 h-10 text-slate-300" />
                 </div>
                 <h1 className="text-3xl font-black bg-gradient-to-r from-blue-300 via-indigo-200 to-pink-300 bg-clip-text text-transparent font-display">
                   Synq
@@ -5130,28 +5130,28 @@ export default function App() {
                   <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4 text-xs text-blue-200 flex items-start gap-2.5">
                     <Info className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
                     <div className="text-left">
-                      <p className="font-bold text-slate-700 mb-0.5">First-Time Setup Detected!</p>
+                      <p className="font-bold text-slate-300 mb-0.5">First-Time Setup Detected!</p>
                       Password of your choice will be associated with the username <span className="font-semibold text-blue-300">"{loginName.toLowerCase()}"</span>. Record this password for future sign-ins.
                     </div>
                   </div>
 
                   <div className="space-y-1">
                     <span className="text-xs uppercase tracking-widest text-slate-400 font-bold block mb-1">Confirming Username</span>
-                    <div className="px-4 py-3 bg-slate-900/50 border border-slate-700/10 rounded-xl text-slate-700 font-medium text-sm font-mono tracking-wide text-left">
+                    <div className="px-4 py-3 bg-slate-900/50 border border-slate-700/10 rounded-xl text-slate-300 font-medium text-sm font-mono tracking-wide text-left">
                       {loginName.toLowerCase()}
                     </div>
                   </div>
 
                   <div className="space-y-1">
                     <span className="text-xs uppercase tracking-widest text-slate-400 font-bold block mb-1">Set Password</span>
-                    <div className="px-4 py-3 bg-slate-900/50 border border-slate-700/10 rounded-xl text-slate-700 font-medium text-sm font-mono tracking-widest text-left">
+                    <div className="px-4 py-3 bg-slate-900/50 border border-slate-700/10 rounded-xl text-slate-300 font-medium text-sm font-mono tracking-widest text-left">
                       {loginPassword}
                     </div>
                   </div>
 
                   <button
                     onClick={handleRegisterConfirm}
-                    className="w-full py-3.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-slate-700 rounded-xl font-bold text-sm tracking-wide shadow-lg shadow-indigo-500/25 transition-all flex items-center justify-center gap-2"
+                    className="w-full py-3.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-slate-300 rounded-xl font-bold text-sm tracking-wide shadow-lg shadow-indigo-500/25 transition-all flex items-center justify-center gap-2"
                   >
                     <UserPlus className="w-4 h-4" />
                     Create Password & Enter Tool
@@ -5162,7 +5162,7 @@ export default function App() {
                       setIsRegistering(false);
                       setLoginPassword('');
                     }}
-                    className="w-full py-2.5 text-slate-400 hover:text-slate-700 text-xs font-semibold transition-colors"
+                    className="w-full py-2.5 text-slate-400 hover:text-slate-300 text-xs font-semibold transition-colors"
                   >
                     Go Back / Edit Username
                   </button>
@@ -5172,7 +5172,7 @@ export default function App() {
                   <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 text-xs text-amber-200 flex items-start gap-2.5 mb-2">
                     <Info className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
                     <div className="text-left">
-                      <p className="font-bold text-slate-700 mb-0.5">📢 Important Notice: New Login Style!</p>
+                      <p className="font-bold text-slate-300 mb-0.5">📢 Important Notice: New Login Style!</p>
                       <p className="mb-1.5 text-slate-300">Sessions were reset for a simpler login structure. Use your new username format:</p>
                       <div className="bg-black/40 p-2 rounded-xl border border-slate-700/10 mb-1">
                         <p className="text-[10px] text-slate-400 font-mono">Format: <strong className="text-amber-300">first_letter.last_name</strong></p>
@@ -5189,7 +5189,7 @@ export default function App() {
                     <input
                       id="login-name"
                       type="text"
-                      className="w-full px-4 py-3.5 bg-slate-900/50 border border-slate-700/10 rounded-xl text-slate-700 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-sm font-mono font-medium"
+                      className="w-full px-4 py-3.5 bg-slate-900/50 border border-slate-700/10 rounded-xl text-slate-300 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-sm font-mono font-medium"
                       placeholder="e.g. h.sobhy"
                       value={loginName}
                       onChange={(e) => setLoginName(e.target.value)}
@@ -5205,7 +5205,7 @@ export default function App() {
                       <input
                         id="login-password"
                         type={showLoginPassword ? 'text' : 'password'}
-                        className="w-full pl-4 pr-12 py-3.5 bg-slate-900/50 border border-slate-700/10 rounded-xl text-slate-700 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-sm font-sans"
+                        className="w-full pl-4 pr-12 py-3.5 bg-slate-900/50 border border-slate-700/10 rounded-xl text-slate-300 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-sm font-sans"
                         placeholder="Enter or set your password"
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
@@ -5235,7 +5235,7 @@ export default function App() {
                   <button
                     id="login-submit-btn"
                     type="submit"
-                    className="w-full py-3.5 bg-slate-800/80 hover:bg-slate-800/15 border border-slate-700/10 hover:border-slate-700/20 text-slate-700 rounded-xl font-bold text-sm tracking-wide transition-all shadow-lg shadow-white/5 mt-4"
+                    className="w-full py-3.5 bg-slate-800/80 hover:bg-slate-800/15 border border-slate-700/10 hover:border-slate-700/20 text-slate-300 rounded-xl font-bold text-sm tracking-wide transition-all shadow-lg shadow-white/5 mt-4"
                   >
                     Sign In / Access
                   </button>
@@ -5290,7 +5290,7 @@ export default function App() {
                 </div>
                 
                 <div className="flex items-baseline justify-between">
-                  <p className="text-xl font-black text-slate-700 font-mono tracking-tight">
+                  <p className="text-xl font-black text-slate-300 font-mono tracking-tight">
                     {currentTime.toLocaleTimeString('en-US', {
                       timeZone: 'Africa/Cairo',
                       hour: '2-digit',
@@ -5324,10 +5324,10 @@ export default function App() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center shadow-lg shadow-black/80 border border-slate-700/10">
-                      <CoolLogo className="w-6 h-6 text-slate-700" />
+                      <CoolLogo className="w-6 h-6 text-slate-300" />
                     </div>
                     <div>
-                      <h1 className="text-sm font-black tracking-tight text-slate-700 font-display">Synq</h1>
+                      <h1 className="text-sm font-black tracking-tight text-slate-300 font-display">Synq</h1>
                       <div className="flex items-center gap-1.5">
                         <span className="text-[9px] text-indigo-300 font-extrabold uppercase tracking-wide">Work Portal</span>
                         {forceOffline ? (
@@ -5352,7 +5352,7 @@ export default function App() {
                         setIsDarkMode(!isDarkMode);
                         toast.success(`Theme switched to ${!isDarkMode ? 'Dark' : 'Light'} Mode! 🎨`);
                       }}
-                      className="p-2.5 rounded-xl bg-slate-900/50 border border-slate-700/10 hover:bg-slate-800/80 hover:border-slate-700/20 transition-all text-slate-300 hover:text-slate-700 cursor-pointer flex items-center justify-center"
+                      className="p-2.5 rounded-xl bg-slate-900/50 border border-slate-700/10 hover:bg-slate-800/80 hover:border-slate-700/20 transition-all text-slate-300 hover:text-slate-300 cursor-pointer flex items-center justify-center"
                       title="Toggle Dark/Light Mode"
                     >
                       {isDarkMode ? (
@@ -5365,7 +5365,7 @@ export default function App() {
                     {/* Notification Center Trigger */}
                     <button
                       onClick={() => setIsNotifDrawerOpen(true)}
-                      className="relative p-2.5 rounded-xl bg-slate-900/50 border border-slate-700/10 hover:bg-slate-800/80 hover:border-slate-700/20 transition-all text-slate-300 hover:text-slate-700 cursor-pointer group flex items-center justify-center"
+                      className="relative p-2.5 rounded-xl bg-slate-900/50 border border-slate-700/10 hover:bg-slate-800/80 hover:border-slate-700/20 transition-all text-slate-300 hover:text-slate-300 cursor-pointer group flex items-center justify-center"
                       title="Real-time Alerts Inbox"
                     >
                       <Bell className="w-4 h-4" />
@@ -5383,11 +5383,11 @@ export default function App() {
 
                 <div className="p-4 rounded-xl bg-slate-900/50 border border-slate-700/10 space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center font-black text-sm text-slate-700">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center font-black text-sm text-slate-300">
                       {currentUser.name.split(' ').map(n => n[0]).join('')}
                     </div>
                     <div className="overflow-hidden">
-                      <p className="text-xs font-bold text-slate-700 truncate">{formatAgentName(currentUser.name)}</p>
+                      <p className="text-xs font-bold text-slate-300 truncate">{formatAgentName(currentUser.name)}</p>
                       <p className="text-[10px] uppercase tracking-widest font-mono text-indigo-300 font-semibold">
                         {currentUser.role === 'tl' ? '👑 Team Leader' : (supportAssignments[currentUser.name] ? '⚡ Support' : '👤 Agent')}
                       </p>
@@ -5446,7 +5446,7 @@ export default function App() {
                   {supportAssignments[currentUser.name] && (
                     <div className="text-[9px] bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 p-2.5 rounded-lg space-y-1 font-sans">
                       <p className="font-extrabold uppercase tracking-widest text-[#a5b4fc] text-[8px]">Support Assigned By</p>
-                      <p className="text-slate-700 font-semibold flex items-center gap-1">👑 {supportAssignments[currentUser.name].assignedBy}</p>
+                      <p className="text-slate-300 font-semibold flex items-center gap-1">👑 {supportAssignments[currentUser.name].assignedBy}</p>
                       <p className="text-[8px] text-slate-400">{new Date(supportAssignments[currentUser.name].assignedAt).toLocaleString()}</p>
                     </div>
                   )}
@@ -5693,7 +5693,7 @@ export default function App() {
                       <div className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full" />
                     </div>
                     <div className="text-left">
-                      <h4 className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                      <h4 className="text-sm font-bold text-slate-300 flex items-center gap-2">
                         Communication Queue Active
                         <span className="bg-rose-500/20 text-rose-300 text-[9px] px-2 py-0.5 rounded-full border border-rose-500/30 font-black">
                           {clientComms.filter(c => c.status === 'pending').length} REQUESTS
@@ -5759,7 +5759,7 @@ export default function App() {
                               </p>
                             ) : (
                               <div className="space-y-1.5">
-                                <p className="text-sm text-slate-700">
+                                <p className="text-sm text-slate-300">
                                   🎉 Your inquiry has been <strong className="text-emerald-400 font-bold uppercase">Answered</strong> by Team Leader <strong>{inq.answeredBy}</strong>!
                                 </p>
                                 <div className="p-3 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-xs text-indigo-200 italic leading-relaxed">
@@ -5802,7 +5802,7 @@ export default function App() {
                               <span className="text-[9px] text-slate-400">{new Date(req.createdAt).toLocaleString()}</span>
                             </div>
                             <p className="text-sm text-slate-200">
-                              Your <strong className="capitalize text-amber-400">{req.platform === 'one_time_payment' ? 'One Time' : req.platform}</strong> request for patient <strong className="text-slate-700 font-bold">{req.patientName}</strong> {req.fileNumber ? <>(File Number: <span className="font-mono font-bold text-slate-700 bg-slate-900/50 px-1.5 py-0.5 rounded">{req.fileNumber}</span>)</> : ''} has been confirmed! Please contact the client now.
+                              Your <strong className="capitalize text-amber-400">{req.platform === 'one_time_payment' ? 'One Time' : req.platform}</strong> request for patient <strong className="text-slate-300 font-bold">{req.patientName}</strong> {req.fileNumber ? <>(File Number: <span className="font-mono font-bold text-slate-300 bg-slate-900/50 px-1.5 py-0.5 rounded">{req.fileNumber}</span>)</> : ''} has been confirmed! Please contact the client now.
                             </p>
                             <div className="flex items-center gap-2.5 text-xs pt-1.5">
                               <span className="text-slate-400 text-[11px] font-medium">Pending Contact Timer:</span>
@@ -5847,7 +5847,7 @@ export default function App() {
                               <span className="text-[9px] text-slate-400">{new Date(comp.createdAt).toLocaleString()}</span>
                             </div>
                             <p className="text-sm text-slate-200">
-                              Your complaint for patient <strong className="text-slate-700 font-bold">{comp.patientName}</strong> has been processed by the TL!
+                              Your complaint for patient <strong className="text-slate-300 font-bold">{comp.patientName}</strong> has been processed by the TL!
                               <br />
                               <span className="text-amber-300 font-semibold block mt-1.5 bg-black/30 p-2.5 rounded-xl border border-slate-700/5">💬 TL Comment: "{comp.tlComment}"</span>
                             </p>
@@ -5882,7 +5882,7 @@ export default function App() {
                       <RefreshCw className="w-5 h-5 text-amber-400 animate-spin" style={{ animationDuration: '6s' }} />
                     </div>
                     <div>
-                      <h4 className="font-bold text-slate-700 text-base font-display">Roster Swaps Awaiting Your Agreement</h4>
+                      <h4 className="font-bold text-slate-300 text-base font-display">Roster Swaps Awaiting Your Agreement</h4>
                       <p className="text-xs text-slate-400">Other agents requested a swap with you. Please review and approve or decline them below.</p>
                     </div>
                   </div>
@@ -5891,11 +5891,11 @@ export default function App() {
                     {partnerPendingSwaps.map(req => (
                       <div key={req.id} className="p-4 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-slate-700/10 transition-all">
                         <div className="space-y-1">
-                          <p className="text-sm font-semibold text-slate-700">
+                          <p className="text-sm font-semibold text-slate-300">
                             Swap requested by <span className="text-indigo-300 font-bold">{req.agentName}</span>
                           </p>
                           <div className="text-xs text-slate-300 space-y-0.5">
-                            <p>For Date: <span className="font-semibold text-slate-700">{formatDateNice(req.date)}</span></p>
+                            <p>For Date: <span className="font-semibold text-slate-300">{formatDateNice(req.date)}</span></p>
                             <p>
                               Your proposed shift: <span className="text-amber-300 font-semibold">{req.swapWithShift}</span> &rarr; Their shift: <span className="text-emerald-300 font-semibold">{req.shift}</span>
                             </p>
@@ -5958,7 +5958,7 @@ export default function App() {
                       </div>
                       <div className="text-center sm:text-left flex-1">
                         <div className="flex flex-col sm:flex-row sm:items-end gap-3 justify-center sm:justify-start">
-                          <h2 className="text-3xl font-display font-black text-slate-700">
+                          <h2 className="text-3xl font-display font-black text-slate-300">
                             {formatAgentName(currentUser.name)} {currentUser.role === 'tl' ? '👑' : '🌟'}
                           </h2>
                           <p className="text-xs font-mono text-white0 uppercase tracking-widest bg-slate-900/50 px-2 py-1 rounded mb-1">
@@ -6016,22 +6016,22 @@ export default function App() {
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       <div className="bg-slate-900/50 border border-slate-700/10 rounded-2xl p-5 relative overflow-hidden group">
-                        <h3 className="text-lg font-bold text-slate-700 mb-4 flex items-center gap-2">📝 My Personal Inbox & Notes</h3>
-                        <textarea className="w-full h-32 bg-slate-900/50 border border-slate-700/10 text-slate-700 p-3 rounded-xl focus:border-indigo-500 outline-none resize-none text-sm font-medium" placeholder="Write anything... scratchpad... thoughts... 💭"></textarea>
+                        <h3 className="text-lg font-bold text-slate-300 mb-4 flex items-center gap-2">📝 My Personal Inbox & Notes</h3>
+                        <textarea className="w-full h-32 bg-slate-900/50 border border-slate-700/10 text-slate-300 p-3 rounded-xl focus:border-indigo-500 outline-none resize-none text-sm font-medium" placeholder="Write anything... scratchpad... thoughts... 💭"></textarea>
                       </div>
 
                       <div className="bg-slate-900/50 border border-slate-700/10 rounded-2xl p-5 relative overflow-hidden shadow-inner flex flex-col h-full">
                         <div className="flex justify-between items-center mb-4">
-                          <h3 className="text-lg font-bold text-slate-700 flex items-center gap-2">⏱️ Smart To-Do List</h3>
+                          <h3 className="text-lg font-bold text-slate-300 flex items-center gap-2">⏱️ Smart To-Do List</h3>
                           <select 
                             value={todoFilter}
                             onChange={e => setTodoFilter(e.target.value as any)}
                             className="bg-black/30 border border-slate-700/10 text-xs font-bold text-slate-300 rounded px-2 py-1 outline-none"
                           >
-                            <option value="All">All Categories</option>
-                            <option value="Work">Work</option>
-                            <option value="Personal">Personal</option>
-                            <option value="Urgent">Urgent</option>
+                            <option className="bg-slate-800 text-slate-100 "  value="All">All Categories</option>
+                            <option className="bg-slate-800 text-slate-100 "  value="Work">Work</option>
+                            <option className="bg-slate-800 text-slate-100 "  value="Personal">Personal</option>
+                            <option className="bg-slate-800 text-slate-100 "  value="Urgent">Urgent</option>
                           </select>
                         </div>
                         <form className="flex flex-col gap-2 mb-4" onSubmit={(e) => {
@@ -6056,13 +6056,13 @@ export default function App() {
                            addSystemNotification('📋 Task Added!', `Added: "${text}" ${minutes ? 'with a reminder set!' : ''} ✅`, 'general', 'personal');
                         }}>
                           <div className="flex gap-2">
-                            <input name="text" type="text" placeholder="I need to..." required className="flex-1 bg-slate-900/50 border border-slate-700/10 text-slate-700 px-3 py-2 text-sm rounded-xl outline-none focus:border-indigo-500" />
-                            <select name="category" className="bg-slate-900/50 border border-slate-700/10 text-slate-700 px-2 text-xs rounded-xl outline-none focus:border-indigo-500">
-                              <option value="Work">Work</option>
-                              <option value="Personal">Personal</option>
-                              <option value="Urgent">Urgent</option>
+                            <input name="text" type="text" placeholder="I need to..." required className="flex-1 bg-slate-900/50 border border-slate-700/10 text-slate-300 px-3 py-2 text-sm rounded-xl outline-none focus:border-indigo-500" />
+                            <select name="category" className="text-slate-100 bg-slate-900/50 border border-slate-700/10  px-2  rounded-xl outline-none focus:border-indigo-500">
+                              <option className="bg-slate-800 text-slate-100 "  value="Work">Work</option>
+                              <option className="bg-slate-800 text-slate-100 "  value="Personal">Personal</option>
+                              <option className="bg-slate-800 text-slate-100 "  value="Urgent">Urgent</option>
                             </select>
-                            <input name="mins" type="number" placeholder="Mins?" title="Remind in X mins" min="1" className="w-20 bg-slate-900/50 border border-slate-700/10 text-slate-700 px-2 py-2 text-sm rounded-xl outline-none focus:border-indigo-500 text-center" />
+                            <input name="mins" type="number" placeholder="Mins?" title="Remind in X mins" min="1" className="w-20 bg-slate-900/50 border border-slate-700/10 text-slate-300 px-2 py-2 text-sm rounded-xl outline-none focus:border-indigo-500 text-center" />
                             <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl transition-colors font-bold shadow-lg shadow-indigo-500/20">+</button>
                           </div>
                         </form>
@@ -6108,7 +6108,7 @@ export default function App() {
                             <Activity className="w-6 h-6" />
                           </div>
                           <div>
-                            <h3 className="text-lg font-bold text-slate-700">Device Status</h3>
+                            <h3 className="text-lg font-bold text-slate-300">Device Status</h3>
                             <p className="text-xs text-slate-400">Current workspace local health & sync</p>
                           </div>
                         </div>
@@ -6252,7 +6252,7 @@ export default function App() {
                           <Info className="w-5 h-5 text-indigo-400" />
                         </div>
                         <div className="text-left space-y-1">
-                          <h3 className="text-sm font-bold text-slate-700 flex items-center gap-1.5">
+                          <h3 className="text-sm font-bold text-slate-300 flex items-center gap-1.5">
                             📢 Important Account Notice: New Log In Format!
                           </h3>
                           <p className="text-xs text-slate-300 leading-relaxed">
@@ -6282,8 +6282,8 @@ export default function App() {
                           onClick={() => setDashboardViewMode('personal')}
                           className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                             dashboardViewMode === 'personal'
-                              ? 'bg-gradient-to-r from-indigo-500/20 to-indigo-500/10 text-slate-700 border border-indigo-500/40 font-bold shadow-md shadow-indigo-500/10'
-                              : 'text-slate-400 hover:text-slate-700 hover:bg-slate-700'
+                              ? 'bg-gradient-to-r from-indigo-500/20 to-indigo-500/10 text-slate-300 border border-indigo-500/40 font-bold shadow-md shadow-indigo-500/10'
+                              : 'text-slate-400 hover:text-slate-300 hover:bg-slate-700'
                           }`}
                         >
                           <UserIcon className="w-3.5 h-3.5 text-cyan-400" />
@@ -6298,8 +6298,8 @@ export default function App() {
                           }}
                           className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                             dashboardViewMode === 'team'
-                              ? 'bg-gradient-to-r from-indigo-500/20 to-indigo-500/10 text-slate-700 border border-indigo-500/40 font-bold shadow-md shadow-indigo-500/10'
-                              : 'text-slate-400 hover:text-slate-700 hover:bg-slate-700'
+                              ? 'bg-gradient-to-r from-indigo-500/20 to-indigo-500/10 text-slate-300 border border-indigo-500/40 font-bold shadow-md shadow-indigo-500/10'
+                              : 'text-slate-400 hover:text-slate-300 hover:bg-slate-700'
                           }`}
                         >
                           <Users className="w-3.5 h-3.5 text-indigo-400" />
@@ -6316,7 +6316,7 @@ export default function App() {
                               className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                                 agentDashboardTab === tab
                                   ? 'bg-indigo-500 text-white shadow font-black'
-                                  : 'text-slate-400 hover:text-slate-700 hover:bg-slate-700'
+                                  : 'text-slate-400 hover:text-slate-300 hover:bg-slate-700'
                               }`}
                             >
                               {tab}
@@ -6362,7 +6362,7 @@ export default function App() {
                                 <div className="space-y-1">
                                   <div className="flex items-center gap-2">
                                     <span className="text-xl">🏆</span>
-                                    <h3 className="font-extrabold text-slate-700 text-base font-display">Agent Prestige & Gamification Room</h3>
+                                    <h3 className="font-extrabold text-slate-300 text-base font-display">Agent Prestige & Gamification Room</h3>
                                   </div>
                                   <p className="text-slate-400 text-xs font-sans">Dynamic level tracking, badges, and operational performance reward indicators</p>
                                 </div>
@@ -6429,7 +6429,7 @@ export default function App() {
                                 <div className="bg-black/30 p-4 rounded-2xl border border-slate-700/5 flex items-center justify-between font-sans">
                                   <div className="space-y-0.5 text-left">
                                     <span className="text-[10px] text-indigo-300 font-bold uppercase tracking-wider font-mono">Operations Badge Rank</span>
-                                    <p className="text-xl font-bold text-slate-700 font-display">
+                                    <p className="text-xl font-bold text-slate-300 font-display">
                                       {agentLevel >= 3 ? '🏆 Platinum Synq Master' : agentLevel >= 2 ? '🎖️ Gold Operator' : '🥉 Elite Core Agent'}
                                     </p>
                                     <p className="text-[9px] text-slate-450">Continuous ranking metric updated in live database cycles</p>
@@ -6525,7 +6525,7 @@ export default function App() {
                             <div className="space-y-6">
                               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/50 border border-slate-700/10 rounded-3xl p-5 backdrop-blur-xl">
                                 <div>
-                                  <h2 className="text-xl font-black text-slate-700 font-display">My Daily Work Dashboard</h2>
+                                  <h2 className="text-xl font-black text-slate-300 font-display">My Daily Work Dashboard</h2>
                                   <p className="text-xs text-slate-400 mt-0.5">
                                     Track, filter and audit your single-shift logs for <strong className="text-indigo-300 font-mono">{range.startLabel}</strong>
                                   </p>
@@ -6537,18 +6537,18 @@ export default function App() {
                                       d.setDate(d.getDate() - 1);
                                       setSelectedDashboardDate(d.toISOString().split('T')[0]);
                                     }}
-                                    className="p-1.5 hover:bg-slate-700 rounded-xl text-slate-300 hover:text-slate-700 transition-all cursor-pointer text-xs"
+                                    className="p-1.5 hover:bg-slate-700 rounded-xl text-slate-300 hover:text-slate-300 transition-all cursor-pointer text-xs"
                                   >
                                     &larr; Prev
                                   </button>
-                                  <span className="text-slate-700 font-bold text-xs font-mono px-3">{formatDateNice(selectedDashboardDate).split(',')[0]}</span>
+                                  <span className="text-slate-300 font-bold text-xs font-mono px-3">{formatDateNice(selectedDashboardDate).split(',')[0]}</span>
                                   <button
                                     onClick={() => {
                                       const d = new Date(selectedDashboardDate);
                                       d.setDate(d.getDate() + 1);
                                       setSelectedDashboardDate(d.toISOString().split('T')[0]);
                                     }}
-                                    className="p-1.5 hover:bg-slate-700 rounded-xl text-slate-300 hover:text-slate-700 transition-all cursor-pointer text-xs"
+                                    className="p-1.5 hover:bg-slate-700 rounded-xl text-slate-300 hover:text-slate-300 transition-all cursor-pointer text-xs"
                                   >
                                     Next &rarr;
                                   </button>
@@ -6578,12 +6578,12 @@ export default function App() {
                                       </defs>
                                     </svg>
                                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                      <span className="text-2xl font-black text-slate-700 font-mono">{!isNaN(Math.round(myDailySuccessRate)) ? Math.round(myDailySuccessRate) : 0}%</span>
+                                      <span className="text-2xl font-black text-slate-300 font-mono">{!isNaN(Math.round(myDailySuccessRate)) ? Math.round(myDailySuccessRate) : 0}%</span>
                                       <span className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Resolved</span>
                                     </div>
                                   </div>
                                   <p className="text-xs text-slate-300 mt-4 font-medium">
-                                    Completed <strong className="text-slate-700 font-mono">{myDailyCompleted}</strong> of <strong className="text-slate-700 font-mono">{myDailyTotal}</strong> assigned operations.
+                                    Completed <strong className="text-slate-300 font-mono">{myDailyCompleted}</strong> of <strong className="text-slate-300 font-mono">{myDailyTotal}</strong> assigned operations.
                                   </p>
                                 </div>
 
@@ -6599,7 +6599,7 @@ export default function App() {
                                       <span className="text-[9px] font-mono bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded text-indigo-300">Inquiries</span>
                                     </div>
                                     <div className="mt-4">
-                                      <p className="text-2xl font-mono text-slate-700 font-black">{myDailyInq.length}</p>
+                                      <p className="text-2xl font-mono text-slate-300 font-black">{myDailyInq.length}</p>
                                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Medical Qs Logged</p>
                                     </div>
                                   </motion.div>
@@ -6615,7 +6615,7 @@ export default function App() {
                                       <span className="text-[9px] font-mono bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded text-emerald-300">Fintech</span>
                                     </div>
                                     <div className="mt-4">
-                                      <p className="text-2xl font-mono text-slate-700 font-black">{myDailyFin.length}</p>
+                                      <p className="text-2xl font-mono text-slate-300 font-black">{myDailyFin.length}</p>
                                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Tabby & Tamara Link Requests</p>
                                     </div>
                                   </motion.div>
@@ -6631,7 +6631,7 @@ export default function App() {
                                       <span className="text-[9px] font-mono bg-pink-500/10 border border-pink-500/20 px-1.5 py-0.5 rounded text-pink-300">Client Comms</span>
                                     </div>
                                     <div className="mt-4">
-                                      <p className="text-2xl font-mono text-slate-700 font-black">{myDailyCom.length}</p>
+                                      <p className="text-2xl font-mono text-slate-300 font-black">{myDailyCom.length}</p>
                                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Client Dials Handled</p>
                                     </div>
                                   </motion.div>
@@ -6648,7 +6648,7 @@ export default function App() {
                                       <span className="text-[9px] font-mono bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded text-cyan-300">Shift</span>
                                     </div>
                                     <div className="mt-4">
-                                      <p className="text-[14px] font-mono text-slate-700 font-bold truncate">{clockInStr} - {clockOutStr}</p>
+                                      <p className="text-[14px] font-mono text-slate-300 font-bold truncate">{clockInStr} - {clockOutStr}</p>
                                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Shift Active Stream</p>
                                     </div>
                                   </motion.div>
@@ -6658,7 +6658,7 @@ export default function App() {
 
                               {currentUser.role === 'agent' && (
                               <div className="bg-slate-900/50 border border-slate-700/10 rounded-3xl p-5 backdrop-blur-md">
-                                <h3 className="text-sm font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-2 mb-4">
+                                <h3 className="text-sm font-extrabold text-slate-300 uppercase tracking-wider flex items-center gap-2 mb-4">
                                   <AlertTriangle className="w-4 h-4 text-pink-400" />
                                   Punctuality & Sub-Session Allowance Logs
                                 </h3>
@@ -6687,7 +6687,7 @@ export default function App() {
                                   >
                                     <div>
                                       <p className="text-[10px] text-slate-400 font-black uppercase">Total Active Work</p>
-                                      <p className="text-sm font-bold text-slate-700 mt-0.5 font-mono">
+                                      <p className="text-sm font-bold text-slate-300 mt-0.5 font-mono">
                                         {totalHoursDecimal > 0 ? `${totalHoursDecimal.toFixed(2)} Hrs` : '0 Hrs'}
                                       </p>
                                     </div>
@@ -6791,7 +6791,7 @@ export default function App() {
                           return (
                             <div className="space-y-6">
                               <div className="bg-slate-900/50 border border-slate-700/10 rounded-3xl p-6 backdrop-blur-xl">
-                                <h3 className="text-xl font-black text-slate-700 font-display">Weekly Work Output & Trends</h3>
+                                <h3 className="text-xl font-black text-slate-300 font-display">Weekly Work Output & Trends</h3>
                                 <p className="text-xs text-slate-400 mt-1">
                                   Your total resolving productivity and tracked clock-in hours for the last 7 calendar days
                                 </p>
@@ -6800,7 +6800,7 @@ export default function App() {
                               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in">
                                 <div className="lg:col-span-8 bg-slate-900/50 border border-slate-700/10 rounded-3xl p-6 flex flex-col justify-between">
                                   <div>
-                                    <h4 className="text-sm font-extrabold text-slate-700 uppercase tracking-wider mb-2">Daily Interactions Handled</h4>
+                                    <h4 className="text-sm font-extrabold text-slate-300 uppercase tracking-wider mb-2">Daily Interactions Handled</h4>
                                     <p className="text-xs text-slate-400 mb-6 font-medium">Visual distribution representing active day outputs</p>
                                   </div>
 
@@ -6809,7 +6809,7 @@ export default function App() {
                                       const barHeightPercent = (dp.total / peakWeeklyDayVolume) * 75;
                                       return (
                                         <div key={idx} className="flex-1 flex flex-col items-center group relative cursor-pointer">
-                                          <div className="absolute -top-12 opacity-0 group-hover:opacity-100 bg-transparent border border-indigo-400 px-2 py-1 rounded text-[10px] text-slate-700 font-mono transition-opacity duration-200 z-10 font-bold whitespace-nowrap shadow-xl">
+                                          <div className="absolute -top-12 opacity-0 group-hover:opacity-100 bg-transparent border border-indigo-400 px-2 py-1 rounded text-[10px] text-slate-300 font-mono transition-opacity duration-200 z-10 font-bold whitespace-nowrap shadow-xl">
                                             {dp.total} tasks | {dp.hours.toFixed(1)} hrs
                                           </div>
 
@@ -6829,13 +6829,13 @@ export default function App() {
 
                                 <div className="lg:col-span-4 bg-slate-900/50 border border-slate-700/10 rounded-3xl p-6 flex flex-col justify-between">
                                   <div>
-                                    <h4 className="text-sm font-extrabold text-slate-700 uppercase tracking-wider mb-4">Weekly Summary Stats</h4>
+                                    <h4 className="text-sm font-extrabold text-slate-300 uppercase tracking-wider mb-4">Weekly Summary Stats</h4>
                                     
                                     <div className="space-y-4">
                                       <div className="p-4 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-2xl">
                                         <span className="text-[10px] text-white0 uppercase tracking-widest font-black">Aggregate Resolved Tasks</span>
                                         <div className="flex items-baseline gap-2 mt-1">
-                                          <span className="text-3xl font-mono text-slate-700 font-black">{totalWeeklyCount}</span>
+                                          <span className="text-3xl font-mono text-slate-300 font-black">{totalWeeklyCount}</span>
                                           <span className="text-xs text-slate-400">Total inputs</span>
                                         </div>
                                       </div>
@@ -6851,7 +6851,7 @@ export default function App() {
                                   </div>
 
                                   <div className="border-t border-slate-700/5 mt-6 pt-4 text-xs text-slate-400 font-medium">
-                                    ✓ Average of <strong className="text-slate-700">{(totalWeeklyCount / 7).toFixed(1)}</strong> complete ticket conversions per shift day this week.
+                                    ✓ Average of <strong className="text-slate-300">{(totalWeeklyCount / 7).toFixed(1)}</strong> complete ticket conversions per shift day this week.
                                   </div>
                                 </div>
                               </div>
@@ -6932,7 +6932,7 @@ export default function App() {
                           return (
                             <div className="space-y-6">
                               <div className="bg-slate-900/50 border border-slate-700/10 rounded-3xl p-6 backdrop-blur-xl">
-                                <h3 className="text-xl font-black text-slate-700 font-display">Monthly Performance & Achievement Desk</h3>
+                                <h3 className="text-xl font-black text-slate-300 font-display">Monthly Performance & Achievement Desk</h3>
                                 <p className="text-xs text-slate-400 mt-1">
                                   Your professional rolling 30-day index of achievements, punctuality indices, and work volumes
                                 </p>
@@ -6962,13 +6962,13 @@ export default function App() {
 
                                 <div className="md:col-span-7 space-y-4">
                                   <div className="p-6 bg-slate-900/50 border border-slate-700/10 rounded-3xl backdrop-blur-md">
-                                    <h4 className="text-sm font-extrabold text-slate-700 uppercase tracking-wider mb-4">30-Day Operation Ratios</h4>
+                                    <h4 className="text-sm font-extrabold text-slate-300 uppercase tracking-wider mb-4">30-Day Operation Ratios</h4>
                                     
                                     <div className="space-y-4">
                                       <div>
                                         <div className="flex justify-between items-center text-xs text-slate-300 mb-1">
                                           <span className="font-bold">Total Operations Logs</span>
-                                          <span className="font-mono font-black text-slate-700">{myMonthlyTotalCount} Files Handled</span>
+                                          <span className="font-mono font-black text-slate-300">{myMonthlyTotalCount} Files Handled</span>
                                         </div>
                                         <div className="w-full h-2.5 bg-slate-900/50 rounded-full overflow-hidden border border-slate-700/5">
                                           <div className="h-full bg-cyan-400 rounded-full" style={{ width: `${Math.min((myMonthlyTotalCount / 120) * 100, 100)}%` }} />
@@ -6992,15 +6992,15 @@ export default function App() {
                                   <div className="grid grid-cols-3 gap-3 font-sans">
                                     <div className="p-4 bg-slate-900/50 border border-slate-700/10 rounded-2xl text-center">
                                       <span className="text-[9px] text-white0 uppercase font-black">Medical Qs</span>
-                                      <p className="text-xl font-mono text-slate-700 font-black mt-1">{monthlyInq.length}</p>
+                                      <p className="text-xl font-mono text-slate-300 font-black mt-1">{monthlyInq.length}</p>
                                     </div>
                                     <div className="p-4 bg-slate-900/50 border border-slate-700/10 rounded-2xl text-center">
                                       <span className="text-[9px] text-[#22d3ee] uppercase font-black">Fintech Cash</span>
-                                      <p className="text-xl font-mono text-slate-700 font-black mt-1">{monthlyFin.length}</p>
+                                      <p className="text-xl font-mono text-slate-300 font-black mt-1">{monthlyFin.length}</p>
                                     </div>
                                     <div className="p-4 bg-slate-900/50 border border-slate-700/10 rounded-2xl text-center">
                                       <span className="text-[9px] text-slate-400 uppercase font-black font-sans">Dials Handled</span>
-                                      <p className="text-xl font-mono text-slate-700 font-black mt-1">{monthlyCom.length}</p>
+                                      <p className="text-xl font-mono text-slate-300 font-black mt-1">{monthlyCom.length}</p>
                                     </div>
                                   </div>
                                 </div>
@@ -7025,7 +7025,7 @@ export default function App() {
                             </span>
                           )}
                         </div>
-                        <h2 className="text-2xl font-black text-slate-700 font-display mt-1">Daily Analytics & Operations</h2>
+                        <h2 className="text-2xl font-black text-slate-300 font-display mt-1">Daily Analytics & Operations</h2>
                         <p className="text-xs text-slate-400 mt-0.5">
                           Aggregating continuous shift cycles from <strong className="text-indigo-300 font-mono">07:00 AM</strong> to <strong className="text-indigo-300 font-mono">06:59 AM</strong> on next calendar day
                         </p>
@@ -7040,7 +7040,7 @@ export default function App() {
                             placeholder="Filter by agent..."
                             value={dashboardSearchTeam}
                             onChange={(e) => setDashboardSearchTeam(e.target.value)}
-                            className="w-full bg-slate-900/50 border border-slate-700/10 text-slate-700 text-xs rounded-2xl pl-9 pr-3 py-2 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-sans"
+                            className="w-full bg-slate-900/50 border border-slate-700/10 text-slate-300 text-xs rounded-2xl pl-9 pr-3 py-2 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-sans"
                             spellCheck="false"
                           />
                         </div>
@@ -7052,7 +7052,7 @@ export default function App() {
                               d.setDate(d.getDate() - 1);
                               setSelectedDashboardDate(d.toISOString().split('T')[0]);
                             }}
-                            className="p-2 hover:bg-slate-700 rounded-xl text-slate-300 hover:text-slate-700 transition-all cursor-pointer"
+                            className="p-2 hover:bg-slate-700 rounded-xl text-slate-300 hover:text-slate-300 transition-all cursor-pointer"
                           >
                             &larr;
                           </button>
@@ -7062,7 +7062,7 @@ export default function App() {
                             onChange={(e) => {
                               if (e.target.value) setSelectedDashboardDate(e.target.value);
                             }}
-                            className="bg-transparent border-0 text-slate-700 font-bold text-xs font-mono outline-none focus:ring-0 cursor-pointer px-2"
+                            className="bg-transparent border-0 text-slate-300 font-bold text-xs font-mono outline-none focus:ring-0 cursor-pointer px-2"
                           />
                           <button
                             onClick={() => {
@@ -7070,7 +7070,7 @@ export default function App() {
                               d.setDate(d.getDate() + 1);
                               setSelectedDashboardDate(d.toISOString().split('T')[0]);
                             }}
-                            className="p-2 hover:bg-slate-700 rounded-xl text-slate-300 hover:text-slate-700 transition-all cursor-pointer"
+                            className="p-2 hover:bg-slate-700 rounded-xl text-slate-300 hover:text-slate-300 transition-all cursor-pointer"
                           >
                             &rarr;
                           </button>
@@ -7117,9 +7117,9 @@ export default function App() {
                       <div className="flex items-center gap-2 text-xs font-semibold">
                         <Calendar className="w-4 h-4 text-cyan-400" />
                         <span>Active Operational Period:</span>
-                        <strong className="text-slate-700 font-mono bg-slate-900/50 px-2 py-0.5 rounded border border-slate-700/10">{range.startLabel}</strong>
+                        <strong className="text-slate-300 font-mono bg-slate-900/50 px-2 py-0.5 rounded border border-slate-700/10">{range.startLabel}</strong>
                         <span>&rarr;</span>
-                        <strong className="text-slate-700 font-mono bg-slate-900/50 px-2 py-0.5 rounded border border-slate-700/10">{range.endLabel}</strong>
+                        <strong className="text-slate-300 font-mono bg-slate-900/50 px-2 py-0.5 rounded border border-slate-700/10">{range.endLabel}</strong>
                       </div>
                       <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 font-mono">
                         TimeZone: Real-time Live Sync
@@ -7127,7 +7127,7 @@ export default function App() {
                     </div>
 
                     {/* Agent Excellence Team Leaderboard */}
-                    <div className="bg-slate-900/50 border border-slate-700/10 rounded-3xl shadow-sm text-slate-700 p-6 shadow-2xl space-y-4 text-left animate-fade-in font-sans">
+                    <div className="bg-slate-900/50 border border-slate-700/10 rounded-3xl shadow-sm text-slate-300 p-6 shadow-2xl space-y-4 text-left animate-fade-in font-sans">
                       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-700/5 pb-3">
                         <div>
                           <h3 className="font-extrabold text-transparent bg-gradient-to-r from-yellow-300 via-indigo-200 to-amber-300 bg-clip-text text-lg font-display flex items-center gap-2">
@@ -7177,7 +7177,7 @@ export default function App() {
                                 {/* 2nd Place */}
                                 {top3[1] && (
                                   <div className="flex flex-col items-center space-y-2">
-                                    <div className="w-10 h-10 rounded-full bg-slate-400/20 border-2 border-slate-700 flex items-center justify-center font-bold text-slate-700 text-sm relative">
+                                    <div className="w-10 h-10 rounded-full bg-slate-400/20 border-2 border-slate-700 flex items-center justify-center font-bold text-slate-300 text-sm relative">
                                       🥈
                                     </div>
                                     <div className="bg-gradient-to-t from-slate-400/10 to-slate-400/20 border border-slate-400/20 rounded-t-xl p-2 w-full text-center space-y-0.5">
@@ -7190,7 +7190,7 @@ export default function App() {
                                 {/* 1st Place */}
                                 {top3[0] && (
                                   <div className="flex flex-col items-center space-y-2">
-                                    <div className="w-12 h-12 rounded-full bg-yellow-400/20 border-2 border-yellow-400 flex items-center justify-center font-bold text-slate-700 text-base relative -top-1 shadow-lg shadow-yellow-500/10">
+                                    <div className="w-12 h-12 rounded-full bg-yellow-400/20 border-2 border-yellow-400 flex items-center justify-center font-bold text-slate-300 text-base relative -top-1 shadow-lg shadow-yellow-500/10">
                                       👑
                                     </div>
                                     <div className="bg-gradient-to-t from-yellow-500/10 to-yellow-500/20 border border-yellow-400/30 rounded-t-2xl p-3 w-full text-center space-y-0.5 scale-105 relative z-10">
@@ -7203,7 +7203,7 @@ export default function App() {
                                 {/* 3rd Place */}
                                 {top3[2] && (
                                   <div className="flex flex-col items-center space-y-2">
-                                    <div className="w-9 h-9 rounded-full bg-amber-600/20 border-2 border-amber-600 flex items-center justify-center font-bold text-slate-700 text-xs relative">
+                                    <div className="w-9 h-9 rounded-full bg-amber-600/20 border-2 border-amber-600 flex items-center justify-center font-bold text-slate-300 text-xs relative">
                                       🥉
                                     </div>
                                     <div className="bg-gradient-to-t from-amber-600/10 to-amber-600/20 border border-amber-600/20 rounded-t-xl p-2 w-full text-center space-y-0.5">
@@ -7253,7 +7253,7 @@ export default function App() {
                                     <div className="flex items-center gap-2.5">
                                       <span className="font-mono text-[10px] w-4 text-center text-white0 font-bold">#{rankIndex + 1}</span>
                                       <div className="text-left font-sans">
-                                        <p className="font-bold text-slate-700 leading-normal">{row.name}</p>
+                                        <p className="font-bold text-slate-300 leading-normal">{row.name}</p>
                                         <p className="text-[8px] text-slate-400 uppercase font-mono tracking-wider">{row.lob}</p>
                                       </div>
                                     </div>
@@ -7298,7 +7298,7 @@ export default function App() {
                             </defs>
                           </svg>
                           <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className="text-3xl font-black text-slate-700 font-mono">{!isNaN(Math.round(operationsScore)) ? Math.round(operationsScore) : 0}%</span>
+                            <span className="text-3xl font-black text-slate-300 font-mono">{!isNaN(Math.round(operationsScore)) ? Math.round(operationsScore) : 0}%</span>
                             <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Completed</span>
                           </div>
                         </div>
@@ -7324,17 +7324,17 @@ export default function App() {
                             </div>
                             <h3 className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-4">Inquiries Desk</h3>
                             <div className="flex items-baseline gap-2 mt-1">
-                              <span className="text-3xl font-black text-slate-700 font-mono">{opInquiries.length}</span>
+                              <span className="text-3xl font-black text-slate-300 font-mono">{opInquiries.length}</span>
                               <span className="text-xs text-slate-400">Total received</span>
                             </div>
                           </div>
                           <div className="border-t border-slate-700/5 mt-4 pt-3 flex justify-between text-xs text-slate-300">
                             <div>
-                              <p className="text-slate-700 font-black font-mono">{answeredInquiries.length}</p>
+                              <p className="text-slate-300 font-black font-mono">{answeredInquiries.length}</p>
                               <p className="text-[10px] text-slate-400">Answered</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-slate-700 font-black font-mono">
+                              <p className="text-slate-300 font-black font-mono">
                                 {avgResTimeMin > 0 ? `${!isNaN(Math.round(avgResTimeMin)) ? Math.round(avgResTimeMin) : 0}m` : '-'}
                               </p>
                               <p className="text-[10px] text-slate-400">Avg Speed of Answer</p>
@@ -7355,17 +7355,17 @@ export default function App() {
                             </div>
                             <h3 className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-4">Fintech Orders</h3>
                             <div className="flex items-baseline gap-2 mt-1">
-                              <span className="text-3xl font-black text-slate-700 font-mono">{opFintech.length}</span>
+                              <span className="text-3xl font-black text-slate-300 font-mono">{opFintech.length}</span>
                               <span className="text-xs text-slate-400">Tabby/Tamara transactions</span>
                             </div>
                           </div>
                           <div className="border-t border-slate-700/5 mt-4 pt-3 flex justify-between text-xs text-slate-300">
                             <div>
-                              <p className="text-slate-700 font-black font-mono">{confirmedFintech.length}</p>
+                              <p className="text-slate-300 font-black font-mono">{confirmedFintech.length}</p>
                               <p className="text-[10px] text-slate-400">Approved</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-slate-700 font-black font-mono">
+                              <p className="text-slate-300 font-black font-mono">
                                 {opFintech.filter(f => f.platform === 'tabby').length}T | {opFintech.filter(f => f.platform === 'tamara').length}M
                               </p>
                               <p className="text-[10px] text-slate-400">Platform Shares</p>
@@ -7386,17 +7386,17 @@ export default function App() {
                             </div>
                             <h3 className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-4">Corporate Complaints</h3>
                             <div className="flex items-baseline gap-2 mt-1">
-                              <span className="text-3xl font-black text-slate-700 font-mono">{opComplaints.length}</span>
+                              <span className="text-3xl font-black text-slate-300 font-mono">{opComplaints.length}</span>
                               <span className="text-xs text-slate-400">Logged complaints</span>
                             </div>
                           </div>
                           <div className="border-t border-slate-700/5 mt-4 pt-3 flex justify-between text-xs text-slate-300">
                             <div>
-                              <p className="text-slate-700 font-black font-mono">{closedComplaints.length}</p>
+                              <p className="text-slate-300 font-black font-mono">{closedComplaints.length}</p>
                               <p className="text-[10px] text-slate-400">Resolved</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-slate-700 font-black font-mono">
+                              <p className="text-slate-300 font-black font-mono">
                                 {opComplaints.filter(c => c.status === 'pending_tl').length}
                               </p>
                               <p className="text-[10px] text-slate-400">Awaiting TL Review</p>
@@ -7417,17 +7417,17 @@ export default function App() {
                             </div>
                             <h3 className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-4">Client Communications</h3>
                             <div className="flex items-baseline gap-2 mt-1">
-                              <span className="text-3xl font-black text-slate-700 font-mono">{opComms.length}</span>
+                              <span className="text-3xl font-black text-slate-300 font-mono">{opComms.length}</span>
                               <span className="text-xs text-slate-400">Total requests logged</span>
                             </div>
                           </div>
                           <div className="border-t border-slate-700/5 mt-4 pt-3 flex justify-between text-xs text-slate-300">
                             <div>
-                              <p className="text-slate-700 font-black font-mono">{contactedComms.length}</p>
+                              <p className="text-slate-300 font-black font-mono">{contactedComms.length}</p>
                               <p className="text-[10px] text-slate-400">Assigned & Dialed</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-slate-700 font-black font-mono">
+                              <p className="text-slate-300 font-black font-mono">
                                 {opComms.filter(c => c.status === 'pending').length}
                               </p>
                               <p className="text-[10px] text-slate-400">Unassigned Backlog</p>
@@ -7453,7 +7453,7 @@ export default function App() {
                                 const avg = qas.length ? Math.round((qas.reduce((a, b) => a + (b.totalScore / b.maxTotalScore), 0) / qas.length) * 100) : null;
                                 return (
                                   <>
-                                    <span className={`text-3xl font-black font-mono ${avg && avg < 70 ? 'text-red-400' : 'text-slate-700'}`}>
+                                    <span className={`text-3xl font-black font-mono ${avg && avg < 70 ? 'text-red-400' : 'text-slate-300'}`}>
                                       {avg !== null ? `${avg}%` : 'N/A'}
                                     </span>
                                     <span className="text-xs text-slate-400">Average Performance</span>
@@ -7470,7 +7470,7 @@ export default function App() {
                                   const qasLength = qaScores.filter(q => isInOpDay(q.createdAt)).length;
                                   return (
                                     <>
-                                      <p className="text-slate-700 font-black font-mono">{qasLength}</p>
+                                      <p className="text-slate-300 font-black font-mono">{qasLength}</p>
                                       <p className="text-[10px] text-slate-400">Total Evaluations Today</p>
                                     </>
                                   )
@@ -7485,7 +7485,7 @@ export default function App() {
                     <div className="bg-slate-900/50 border border-slate-700/10 rounded-3xl p-6 backdrop-blur-xl">
                       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                         <div>
-                          <h3 className="text-lg font-black text-slate-700 font-display">
+                          <h3 className="text-lg font-black text-slate-300 font-display">
                             Hourly Load & Density Distribution
                           </h3>
                           <p className="text-xs text-slate-400 mt-0.5">
@@ -7502,7 +7502,7 @@ export default function App() {
                               className={`px-3 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all cursor-pointer ${
                                 dashboardChartMetric === m
                                   ? 'bg-indigo-500 text-white'
-                                  : 'text-slate-400 hover:bg-slate-700 hover:text-slate-700'
+                                  : 'text-slate-400 hover:bg-slate-700 hover:text-slate-300'
                               }`}
                             >
                               {m === 'all' ? 'All Load' : m === 'inquiries' ? 'Inquiries' : m === 'fintech' ? 'FinTech' : 'On-Duty Attendance'}
@@ -7600,7 +7600,7 @@ export default function App() {
                                       height="24"
                                       className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
                                     >
-                                      <div className="bg-indigo-950/90 border border-indigo-400 text-slate-700 text-[9px] font-bold px-1.5 py-0.5 rounded text-center">
+                                      <div className="bg-indigo-950/90 border border-indigo-400 text-slate-300 text-[9px] font-bold px-1.5 py-0.5 rounded text-center">
                                         Value: {pt.val}
                                       </div>
                                     </foreignObject>
@@ -7633,7 +7633,7 @@ export default function App() {
                       {/* LOB Performance Card */}
                       <div className="lg:col-span-4 bg-slate-900/50 border border-slate-700/10 rounded-3xl p-6 backdrop-blur-xl flex flex-col justify-between">
                         <div>
-                          <h3 className="text-base font-black text-slate-700 font-display flex items-center gap-2">
+                          <h3 className="text-base font-black text-slate-300 font-display flex items-center gap-2">
                             <Activity className="w-4 h-4 text-cyan-400" />
                             Channels & LOB Statistics
                           </h3>
@@ -7664,7 +7664,7 @@ export default function App() {
                                   <div className="space-y-1">
                                     <div className="flex justify-between text-xs">
                                       <span className="font-bold text-slate-300">Social Media Load</span>
-                                      <span className="text-slate-700 font-black font-mono">{socialInq} ({socialPercent}%)</span>
+                                      <span className="text-slate-300 font-black font-mono">{socialInq} ({socialPercent}%)</span>
                                     </div>
                                     <div className="w-full h-1.5 bg-slate-900/50 rounded-full overflow-hidden">
                                       <div className="h-full bg-cyan-400 transition-all duration-1000" style={{ width: `${socialPercent}%` }} />
@@ -7674,7 +7674,7 @@ export default function App() {
                                   <div className="space-y-1">
                                     <div className="flex justify-between text-xs">
                                       <span className="font-bold text-slate-300">Call Center Load</span>
-                                      <span className="text-slate-700 font-black font-mono">{callInq} ({callPercent}%)</span>
+                                      <span className="text-slate-300 font-black font-mono">{callInq} ({callPercent}%)</span>
                                     </div>
                                     <div className="w-full h-1.5 bg-slate-900/50 rounded-full overflow-hidden">
                                       <div className="h-full bg-indigo-400 transition-all duration-1000" style={{ width: `${callPercent}%` }} />
@@ -7684,7 +7684,7 @@ export default function App() {
                                   <div className="space-y-1">
                                     <div className="flex justify-between text-xs">
                                       <span className="font-bold text-slate-300">Direct Case Records</span>
-                                      <span className="text-slate-700 font-black font-mono">{opCases.length}</span>
+                                      <span className="text-slate-300 font-black font-mono">{opCases.length}</span>
                                     </div>
                                     <div className="w-full h-1.5 bg-slate-900/50 rounded-full overflow-hidden">
                                       <div className="h-full bg-pink-400 transition-all duration-1000" style={{ width: `${opCases.length > 0 ? 100 : 0}%` }} />
@@ -7766,7 +7766,7 @@ export default function App() {
                                 <div className="grid grid-cols-2 gap-2.5 pt-1.5">
                                   <div className="p-3 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl">
                                     <span className="text-[10px] uppercase font-black text-white0 tracking-wider">Scheduled</span>
-                                    <p className="text-xl font-mono text-slate-700 font-black mt-0.5">{totalScheduled}</p>
+                                    <p className="text-xl font-mono text-slate-300 font-black mt-0.5">{totalScheduled}</p>
                                   </div>
                                   <div className="p-3 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl">
                                     <span className="text-[10px] uppercase font-black text-white0 tracking-wider">Present</span>
@@ -7813,7 +7813,7 @@ export default function App() {
 
                       {/* Agent roster attendance statistics table with elegant slider timelines */}
                       <div className="lg:col-span-8 bg-slate-900/50 border border-slate-700/10 rounded-3xl p-6 backdrop-blur-xl">
-                        <h3 className="text-base font-black text-slate-700 font-display flex items-center gap-2 mb-2">
+                        <h3 className="text-base font-black text-slate-300 font-display flex items-center gap-2 mb-2">
                           <Users className="w-4 h-4 text-cyan-400 animate-pulse" />
                           On-Duty Roster Timeline ({opTimeLogs.length} active logs)
                         </h3>
@@ -7825,7 +7825,7 @@ export default function App() {
                           <table className="w-full text-left border-collapse">
                             <thead>
                               <tr className="border-b border-slate-700/10 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                                <th className="pb-3 text-slate-700">Agent</th>
+                                <th className="pb-3 text-slate-300">Agent</th>
                                 <th className="pb-3">LOB</th>
                                 <th className="pb-3">Shift Log Interval</th>
                                 <th className="pb-3 text-center">Duration</th>
@@ -7881,14 +7881,14 @@ export default function App() {
 
                                   return (
                                     <tr key={log.id} className="hover:bg-slate-700 transition-colors">
-                                      <td className="py-3 font-bold text-slate-700 whitespace-nowrap">{log.agentName}</td>
+                                      <td className="py-3 font-bold text-slate-300 whitespace-nowrap">{log.agentName}</td>
                                       <td className="py-3 whitespace-nowrap">
                                         <span className="px-2 py-0.5 rounded-full text-[9px] font-bold tracking-tight bg-slate-900/50 text-slate-300">
                                           {agentLOB}
                                         </span>
                                       </td>
                                       <td className="py-3 font-mono text-[11px] whitespace-nowrap">{displayInterval}</td>
-                                      <td className="py-3 text-center font-mono font-bold text-slate-700 whitespace-nowrap">
+                                      <td className="py-3 text-center font-mono font-bold text-slate-300 whitespace-nowrap">
                                         {minutesWorked > 0 ? (
                                           Math.floor(minutesWorked / 60) > 0 
                                             ? Math.floor(minutesWorked % 60) > 0 
@@ -7934,13 +7934,13 @@ export default function App() {
                   {/* Dynamic Header */}
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                      <h2 className="text-3xl font-bold text-slate-700 font-display">Approvals & Leave Console</h2>
+                      <h2 className="text-3xl font-bold text-slate-300 font-display">Approvals & Leave Console</h2>
                       <p className="text-slate-400 text-sm">Reviewing pending requests and compliance logs</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={downloadFullCSV}
-                        className="px-4 py-2.5 bg-slate-900/50 hover:bg-slate-800/80 border border-slate-700/10 hover:border-slate-700/20 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-2"
+                        className="px-4 py-2.5 bg-slate-900/50 hover:bg-slate-800/80 border border-slate-700/10 hover:border-slate-700/20 text-slate-300 rounded-xl text-xs font-bold transition-all flex items-center gap-2"
                       >
                         <FileText className="w-4 h-4 text-indigo-400" />
                         Full CSV backup
@@ -7952,7 +7952,7 @@ export default function App() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="p-4 bg-slate-900/50 border border-slate-700/10 rounded-2xl backdrop-blur-sm shadow-md">
                       <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Pending Swaps</p>
-                      <p className="text-4xl font-black text-slate-700">{pendingSwapsCount}</p>
+                      <p className="text-4xl font-black text-slate-300">{pendingSwapsCount}</p>
                       <div className="w-full h-1 bg-slate-800/80 mt-4 rounded-full overflow-hidden">
                         <div 
                           className="h-full bg-blue-500 transition-all duration-500"
@@ -7963,7 +7963,7 @@ export default function App() {
 
                     <div className="p-4 bg-slate-900/50 border border-slate-700/10 rounded-2xl backdrop-blur-sm shadow-md">
                       <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Annual Leaves</p>
-                      <p className="text-4xl font-black text-slate-700">{pendingAnnualsCount}</p>
+                      <p className="text-4xl font-black text-slate-300">{pendingAnnualsCount}</p>
                       <div className="w-full h-1 bg-slate-800/80 mt-4 rounded-full overflow-hidden">
                         <div 
                           className="h-full bg-emerald-500 transition-all duration-500" 
@@ -7974,7 +7974,7 @@ export default function App() {
 
                     <div className="p-4 bg-slate-900/50 border border-slate-700/10 rounded-2xl backdrop-blur-sm shadow-md">
                       <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Approved Monthly</p>
-                      <p className="text-4xl font-black text-slate-700">{totalApprovedThisMonth}</p>
+                      <p className="text-4xl font-black text-slate-300">{totalApprovedThisMonth}</p>
                       <div className="w-full h-1 bg-slate-800/80 mt-4 rounded-full overflow-hidden">
                         <div 
                           className="h-full bg-purple-500 transition-all duration-500"
@@ -7996,7 +7996,7 @@ export default function App() {
                   </div>
 
                   {/* Operations Live Wallboard & SLA Gauge */}
-                  <div className="bg-slate-900/50 border border-slate-700/10 rounded-3xl shadow-sm text-slate-700 p-6 shadow-2xl space-y-6">
+                  <div className="bg-slate-900/50 border border-slate-700/10 rounded-3xl shadow-sm text-slate-300 p-6 shadow-2xl space-y-6">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-700/5 pb-4">
                       <div>
                         <h3 className="font-extrabold text-transparent bg-gradient-to-r from-blue-300 via-indigo-200 to-cyan-300 bg-clip-text text-lg font-display flex items-center gap-2">
@@ -8034,14 +8034,14 @@ export default function App() {
                             </defs>
                           </svg>
                           <div className="absolute text-center">
-                            <span className="text-2xl font-black text-slate-700 font-mono">96.4%</span>
+                            <span className="text-2xl font-black text-slate-300 font-mono">96.4%</span>
                             <p className="text-[9px] text-indigo-300 font-bold uppercase tracking-wider mt-0.5">Met Goal</p>
                           </div>
                         </div>
 
                         <div className="flex justify-between items-center text-xs bg-black/20 p-2.5 rounded-xl border border-slate-700/5 font-sans">
                           <span className="text-slate-400">Total processed today:</span>
-                          <span className="font-bold text-slate-700 font-mono">{queueStats.processedToday} inquiries</span>
+                          <span className="font-bold text-slate-300 font-mono">{queueStats.processedToday} inquiries</span>
                         </div>
                       </div>
 
@@ -8159,7 +8159,7 @@ export default function App() {
                   <div className="bg-slate-900/50 border border-slate-700/10 rounded-3xl backdrop-blur-xl flex flex-col shadow-2xl overflow-hidden">
                     <div className="p-6 border-b border-slate-700/10 flex flex-col sm:flex-row sm:items-center sm:justify-between bg-slate-900/50 gap-3">
                       <div>
-                        <h3 className="font-bold text-slate-700 text-lg font-display">Recent Approval Queue</h3>
+                        <h3 className="font-bold text-slate-300 text-lg font-display">Recent Approval Queue</h3>
                         <p className="text-xs text-slate-400">Review, flag or action latest roster change requests</p>
                       </div>
                       <div className="flex gap-4 items-center">
@@ -8261,7 +8261,7 @@ export default function App() {
                                       }}
                                     />
                                   </td>
-                                  <td className="px-6 py-4 font-bold text-slate-700">
+                                  <td className="px-6 py-4 font-bold text-slate-300">
                                     {req.agentName}
                                   </td>
                                   <td className="px-6 py-4">
@@ -8278,12 +8278,12 @@ export default function App() {
                                   <td className="px-6 py-4 font-medium text-slate-200">
                                     {isSwap ? (
                                       <div className="space-y-0.5">
-                                        <p className="font-semibold text-slate-700">{formatDateNice((req as SwapRequest).date)}</p>
+                                        <p className="font-semibold text-slate-300">{formatDateNice((req as SwapRequest).date)}</p>
                                         <p className="text-xs text-slate-400 font-mono">Shift: {(req as SwapRequest).shift}</p>
                                       </div>
                                     ) : (
                                       <div className="space-y-0.5">
-                                        <p className="font-semibold text-slate-700">
+                                        <p className="font-semibold text-slate-300">
                                           {formatDateNice((req as AnnualRequest).startDate)}
                                         </p>
                                         <p className="text-xs text-slate-400">
@@ -8296,7 +8296,7 @@ export default function App() {
                                     {isSwap ? (
                                       <div className="space-y-1">
                                         <p className="text-indigo-200">
-                                          Swap Partner: <span className="font-semibold text-slate-700">{(req as SwapRequest).swapWithAgent}</span>
+                                          Swap Partner: <span className="font-semibold text-slate-300">{(req as SwapRequest).swapWithAgent}</span>
                                         </p>
                                         <p className="text-[11px] text-slate-400 italic">"{(req as SwapRequest).notes || 'No comments'}"</p>
                                       </div>
@@ -8332,7 +8332,7 @@ export default function App() {
                                           navigator.clipboard.writeText(details);
                                           toast.success('Approval request details copied!');
                                         }}
-                                        className="p-1.5 hover:bg-slate-800/80 text-slate-300 hover:text-slate-700 rounded-lg transition-all cursor-pointer flex items-center justify-center border border-slate-700/5 hover:border-slate-700/15"
+                                        className="p-1.5 hover:bg-slate-800/80 text-slate-300 hover:text-slate-300 rounded-lg transition-all cursor-pointer flex items-center justify-center border border-slate-700/5 hover:border-slate-700/15"
                                         title="Copy Request details"
                                       >
                                         <Copy className="w-3.5 h-3.5" />
@@ -8367,7 +8367,7 @@ export default function App() {
                 <div className="space-y-6">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                      <h2 className="text-3xl font-bold text-slate-700 font-display">Full Shift Requests Log</h2>
+                      <h2 className="text-3xl font-bold text-slate-300 font-display">Full Shift Requests Log</h2>
                       <p className="text-slate-400 text-sm">Comprehensive list of swaps, annual leaves and decision history</p>
                     </div>
                   </div>
@@ -8378,7 +8378,7 @@ export default function App() {
                       <button
                         onClick={() => setLogFilter('all')}
                         className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all ${
-                          logFilter === 'all' ? 'bg-indigo-500 text-white shadow' : 'text-slate-400 hover:text-slate-700'
+                          logFilter === 'all' ? 'bg-indigo-500 text-white shadow' : 'text-slate-400 hover:text-slate-300'
                         }`}
                       >
                         All Categories
@@ -8386,7 +8386,7 @@ export default function App() {
                       <button
                         onClick={() => setLogFilter('swap')}
                         className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all ${
-                          logFilter === 'swap' ? 'bg-indigo-500 text-white shadow' : 'text-slate-400 hover:text-slate-700'
+                          logFilter === 'swap' ? 'bg-indigo-500 text-white shadow' : 'text-slate-400 hover:text-slate-300'
                         }`}
                       >
                         Shift Swaps
@@ -8394,7 +8394,7 @@ export default function App() {
                       <button
                         onClick={() => setLogFilter('annual')}
                         className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all ${
-                          logFilter === 'annual' ? 'bg-indigo-500 text-white shadow' : 'text-slate-400 hover:text-slate-700'
+                          logFilter === 'annual' ? 'bg-indigo-500 text-white shadow' : 'text-slate-400 hover:text-slate-300'
                         }`}
                       >
                         Annual Leaves
@@ -8404,7 +8404,7 @@ export default function App() {
                     <input
                       type="text"
                       placeholder="🔍 Search by agent name..."
-                      className="flex-1 w-full px-4 py-2.5 bg-slate-900/50 border border-slate-700/10 rounded-xl text-slate-700 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
+                      className="flex-1 w-full px-4 py-2.5 bg-slate-900/50 border border-slate-700/10 rounded-xl text-slate-300 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -8436,7 +8436,7 @@ export default function App() {
                               const isSwap = req.type === 'swap';
                               return (
                                 <tr key={req.id} className="border-b border-slate-700/5 hover:bg-slate-700 transition-colors">
-                                  <td className="px-6 py-4 font-bold text-slate-700">{req.agentName}</td>
+                                  <td className="px-6 py-4 font-bold text-slate-300">{req.agentName}</td>
                                   <td className="px-6 py-4">
                                     {isSwap ? (
                                       <span className="px-2 py-0.5 bg-blue-500/10 text-blue-300 border border-blue-500/20 rounded-md text-[10px] font-bold uppercase">
@@ -8451,13 +8451,13 @@ export default function App() {
                                   <td className="px-6 py-4">
                                     {isSwap ? (
                                       <div className="text-xs">
-                                        <p className="font-semibold text-slate-700">{(req as SwapRequest).date}</p>
+                                        <p className="font-semibold text-slate-300">{(req as SwapRequest).date}</p>
                                         <p className="text-slate-400">Hours: {(req as SwapRequest).shift}</p>
                                         <p className="text-indigo-400">With: {(req as SwapRequest).swapWithAgent}</p>
                                       </div>
                                     ) : (
                                       <div className="text-xs">
-                                        <p className="font-semibold text-slate-700">
+                                        <p className="font-semibold text-slate-300">
                                           {(req as AnnualRequest).startDate} to {(req as AnnualRequest).endDate}
                                         </p>
                                       </div>
@@ -8496,7 +8496,7 @@ export default function App() {
                                   <td className="px-6 py-4 text-xs text-slate-300">
                                     {req.actionBy ? (
                                       <div className="space-y-1">
-                                        <p className="text-slate-700">Resolved by <span className="font-semibold text-indigo-300">{req.actionBy}</span></p>
+                                        <p className="text-slate-300">Resolved by <span className="font-semibold text-indigo-300">{req.actionBy}</span></p>
                                         {req.ruleViolation && (
                                           <p className="text-[10px] text-rose-400 bg-rose-500/10 p-1.5 rounded border border-rose-500/20">
                                             ⚠️ Violation flag: {req.violationMessage}
@@ -8542,7 +8542,7 @@ export default function App() {
               {currentUser.role === 'agent' && activeTab === 'apply' && (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-3xl font-bold text-slate-700 font-display">New Request Form</h2>
+                    <h2 className="text-3xl font-bold text-slate-300 font-display">New Request Form</h2>
                     <p className="text-slate-400 text-sm">Please select the requested change type below</p>
                   </div>
 
@@ -8556,7 +8556,7 @@ export default function App() {
                           <Users className="w-5 h-5 text-blue-400" />
                         </div>
                         <div>
-                          <h4 className="font-bold text-slate-700 font-display text-base">Request Shift Swap</h4>
+                          <h4 className="font-bold text-slate-300 font-display text-base">Request Shift Swap</h4>
                           <p className="text-xs text-slate-400">Must be requested 24 hours in advance.</p>
                         </div>
                       </div>
@@ -8567,7 +8567,7 @@ export default function App() {
                           <input
                             id="swap-date"
                             type="date"
-                            className="w-full px-4 py-2.5 bg-slate-900/50 border border-slate-700/10 rounded-xl text-slate-700 focus:outline-none focus:border-indigo-500 text-sm"
+                            className="w-full px-4 py-2.5 bg-slate-900/50 border border-slate-700/10 rounded-xl text-slate-300 focus:outline-none focus:border-indigo-500 text-sm"
                             value={swapDate}
                             onChange={(e) => setSwapDate(e.target.value)}
                             required
@@ -8579,12 +8579,12 @@ export default function App() {
                             <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block" htmlFor="swap-shift">Your Shift</label>
                             <select
                               id="swap-shift"
-                              className="text-slate-700 w-full px-4 py-2.5 bg-slate-900/50 backdrop-blur-xl border border-slate-700/20 rounded-xl   focus:outline-none focus:border-indigo-500"
+                              className="text-slate-100 w-full px-4 py-2.5 bg-slate-900/50 backdrop-blur-xl border border-slate-700/20 rounded-xl   focus:outline-none focus:border-indigo-500"
                               value={swapShift}
                               onChange={(e) => setSwapShift(e.target.value)}
                             >
                               {SHIFTS.map(s => (
-                                <option key={s.id} value={s.label} className="bg-slate-800 text-slate-700 ">
+                                <option key={s.id} value={s.label} className="bg-slate-800 text-slate-100 ">
                                   {s.display} ({s.label})
                                 </option>
                               ))}
@@ -8595,12 +8595,12 @@ export default function App() {
                             <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block" htmlFor="swap-target-shift">Target Shift</label>
                             <select
                               id="swap-target-shift"
-                              className="text-slate-700 w-full px-4 py-2.5 bg-slate-900/50 backdrop-blur-xl border border-slate-700/20 rounded-xl   focus:outline-none focus:border-indigo-500"
+                              className="text-slate-100 w-full px-4 py-2.5 bg-slate-900/50 backdrop-blur-xl border border-slate-700/20 rounded-xl   focus:outline-none focus:border-indigo-500"
                               value={swapTargetShift}
                               onChange={(e) => setSwapTargetShift(e.target.value)}
                             >
                               {SHIFTS.map(s => (
-                                <option key={s.id} value={s.label} className="bg-slate-800 text-slate-700 ">
+                                <option key={s.id} value={s.label} className="bg-slate-800 text-slate-100 ">
                                   {s.display} ({s.label})
                                 </option>
                               ))}
@@ -8612,16 +8612,16 @@ export default function App() {
                           <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block" htmlFor="swap-partner">Swap with Agent</label>
                           <select
                             id="swap-partner"
-                            className="text-slate-700 w-full px-4 py-2.5 bg-slate-900/50 backdrop-blur-xl border border-slate-700/20 rounded-xl   focus:outline-none focus:border-indigo-500 font-medium"
+                            className="text-slate-100 w-full px-4 py-2.5 bg-slate-900/50 backdrop-blur-xl border border-slate-700/20 rounded-xl   focus:outline-none focus:border-indigo-500 font-medium"
                             value={swapTargetAgent}
                             onChange={(e) => setSwapTargetAgent(e.target.value)}
                             required
                           >
-                            <option value="" className="bg-slate-800 text-slate-700 ">-- Select Partner Agent --</option>
+                            <option value="" className="bg-slate-800 text-slate-100 ">-- Select Partner Agent --</option>
                             {agentsList
                               .filter(name => name !== currentUser?.name)
                               .map(name => (
-                                <option key={name} value={name} className="bg-slate-800 text-slate-700 ">
+                                <option key={name} value={name} className="bg-slate-800 text-slate-100 ">
                                   {name} ({getAgentLOB(name)})
                                 </option>
                               ))}
@@ -8633,7 +8633,7 @@ export default function App() {
                           <textarea
                             id="swap-notes"
                             rows={2}
-                            className="w-full px-4 py-2 bg-slate-900/50 border border-slate-700/10 rounded-xl text-slate-700 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
+                            className="w-full px-4 py-2 bg-slate-900/50 border border-slate-700/10 rounded-xl text-slate-300 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
                             placeholder="State reason (e.g., family errand, doctor appointment)..."
                             value={swapNotes}
                             onChange={(e) => setSwapNotes(e.target.value)}
@@ -8675,7 +8675,7 @@ export default function App() {
                           <Calendar className="w-5 h-5 text-emerald-400" />
                         </div>
                         <div>
-                          <h4 className="font-bold text-slate-700 font-display text-base">Request Annual Leave</h4>
+                          <h4 className="font-bold text-slate-300 font-display text-base">Request Annual Leave</h4>
                           <p className="text-xs text-slate-400">Must be requested 14 days in advance.</p>
                         </div>
                       </div>
@@ -8687,7 +8687,7 @@ export default function App() {
                             <input
                               id="annual-start"
                               type="date"
-                              className="w-full px-4 py-2.5 bg-slate-900/50 border border-slate-700/10 rounded-xl text-slate-700 focus:outline-none focus:border-indigo-500 text-sm"
+                              className="w-full px-4 py-2.5 bg-slate-900/50 border border-slate-700/10 rounded-xl text-slate-300 focus:outline-none focus:border-indigo-500 text-sm"
                               value={annualStart}
                               onChange={(e) => setAnnualStart(e.target.value)}
                               required
@@ -8699,7 +8699,7 @@ export default function App() {
                             <input
                               id="annual-end"
                               type="date"
-                              className="w-full px-4 py-2.5 bg-slate-900/50 border border-slate-700/10 rounded-xl text-slate-700 focus:outline-none focus:border-indigo-500 text-sm"
+                              className="w-full px-4 py-2.5 bg-slate-900/50 border border-slate-700/10 rounded-xl text-slate-300 focus:outline-none focus:border-indigo-500 text-sm"
                               value={annualEnd}
                               onChange={(e) => setAnnualEnd(e.target.value)}
                               required
@@ -8712,7 +8712,7 @@ export default function App() {
                           <textarea
                             id="annual-notes"
                             rows={4}
-                            className="w-full px-4 py-2 bg-slate-900/50 border border-slate-700/10 rounded-xl text-slate-700 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
+                            className="w-full px-4 py-2 bg-slate-900/50 border border-slate-700/10 rounded-xl text-slate-300 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
                             placeholder="State comments..."
                             value={annualNotes}
                             onChange={(e) => setAnnualNotes(e.target.value)}
@@ -8754,13 +8754,13 @@ export default function App() {
               {currentUser.role === 'agent' && activeTab === 'my-requests' && (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-3xl font-bold text-slate-700 font-display">My Submission Logs</h2>
+                    <h2 className="text-3xl font-bold text-slate-300 font-display">My Submission Logs</h2>
                     <p className="text-slate-400 text-sm">Review status, comments and feedback on your submissions</p>
                   </div>
 
                   <div className="bg-slate-900/50 border border-slate-700/10 rounded-3xl backdrop-blur-xl p-6 shadow-xl space-y-4">
                     <div className="flex justify-between items-center pb-2 border-b border-slate-700/10">
-                      <h4 className="font-bold text-slate-700 text-base">Your Requests Logs</h4>
+                      <h4 className="font-bold text-slate-300 text-base">Your Requests Logs</h4>
                       <p className="text-xs text-slate-400 font-mono">Real-time status tracking</p>
                     </div>
 
@@ -8795,18 +8795,18 @@ export default function App() {
 
                                   <div className="space-y-0.5">
                                     {isSwap ? (
-                                      <p className="text-sm font-bold text-slate-700">
+                                      <p className="text-sm font-bold text-slate-300">
                                         Swap shift for <span className="text-indigo-300">{formatDateNice((req as SwapRequest).date)}</span>
                                       </p>
                                     ) : (
-                                      <p className="text-sm font-bold text-slate-700">
+                                      <p className="text-sm font-bold text-slate-300">
                                         Leave duration: <span className="text-emerald-300">{formatDateNice((req as AnnualRequest).startDate)}</span> to <span className="text-emerald-300">{formatDateNice((req as AnnualRequest).endDate)}</span>
                                       </p>
                                     )}
 
                                     {isSwap && (
                                       <p className="text-xs text-slate-300">
-                                        Your Shift: <span className="font-semibold">{(req as SwapRequest).shift}</span> / Swap with Partner: <span className="font-semibold text-slate-700">{(req as SwapRequest).swapWithAgent}</span> &bull; Shift: <span className="font-semibold">{(req as SwapRequest).swapWithShift}</span>
+                                        Your Shift: <span className="font-semibold">{(req as SwapRequest).shift}</span> / Swap with Partner: <span className="font-semibold text-slate-300">{(req as SwapRequest).swapWithAgent}</span> &bull; Shift: <span className="font-semibold">{(req as SwapRequest).swapWithShift}</span>
                                       </p>
                                     )}
 
@@ -8938,14 +8938,14 @@ export default function App() {
                 <div id="agent-inquiries-tab" className="space-y-6 animate-fade-in">
                   {/* Page Title */}
                   <div>
-                    <h2 className="text-3xl font-bold text-slate-700 font-display">Inquiries Helpdesk</h2>
+                    <h2 className="text-3xl font-bold text-slate-300 font-display">Inquiries Helpdesk</h2>
                     <p className="text-slate-400 text-sm font-sans">Submit questions, attach screenshots/links, and track live resolutions from Team Leaders.</p>
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Submit Inquiry Form (Left Side / Col Span 1) */}
                     <div className="lg:col-span-1 bg-slate-900/50 border border-slate-700/10 p-5 rounded-3xl backdrop-blur-xl space-y-5">
-                      <h3 className="text-base font-bold text-slate-700 font-display flex items-center gap-2 border-b border-slate-700/5 pb-3">
+                      <h3 className="text-base font-bold text-slate-300 font-display flex items-center gap-2 border-b border-slate-700/5 pb-3">
                         <HelpCircle className="w-5 h-5 text-indigo-400" />
                         Submit New Inquiry
                       </h3>
@@ -8964,15 +8964,15 @@ export default function App() {
                           <select
                             value={inquiryClinicName}
                             onChange={(e) => setInquiryClinicName(e.target.value)}
-                            className="w-full px-4 py-3 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-slate-700 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
+                            className="w-full px-4 py-3 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-slate-300 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                             required
                           >
-                            <option value="" className="bg-slate-800 text-slate-700 ">-- Select Clinic * --</option>
-                            <option value="dermadent" className="bg-slate-800 text-slate-700 ">Dermadent</option>
-                            <option value="onetouch1" className="bg-slate-800 text-slate-700 ">One Touch 1 AlMu'tarid</option>
-                            <option value="onetouch2" className="bg-slate-800 text-slate-700 ">One Touch 2 Markhaniya</option>
-                            <option value="welltouch" className="bg-slate-800 text-slate-700 ">WellTouch</option>
-                            <option value="newedge" className="bg-slate-800 text-slate-700 ">New Edge</option>
+                            <option value="" className="bg-slate-800 text-slate-100 ">-- Select Clinic * --</option>
+                            <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
+                            <option value="onetouch1" className="bg-slate-800 text-slate-100 ">One Touch 1 AlMu'tarid</option>
+                            <option value="onetouch2" className="bg-slate-800 text-slate-100 ">One Touch 2 Markhaniya</option>
+                            <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
+                            <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
                           </select>
                         </div>
 
@@ -8986,7 +8986,7 @@ export default function App() {
                             placeholder="+966 5x xxx xxxx (Optional)"
                             value={inquiryPhoneNumber}
                             onChange={(e) => setInquiryPhoneNumber(e.target.value)}
-                            className="w-full px-4 py-3 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-slate-700 text-xs focus:outline-none focus:border-indigo-500 transition-all font-mono"
+                            className="w-full px-4 py-3 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-slate-300 text-xs focus:outline-none focus:border-indigo-500 transition-all font-mono"
                           />
                         </div>
 
@@ -9000,7 +9000,7 @@ export default function App() {
                               <button
                                 type="button"
                                 onClick={() => setInquiryLanguageDir('auto')}
-                                className={`px-2 py-0.5 rounded cursor-pointer transition-all ${inquiryLanguageDir === 'auto' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400 hover:text-slate-700'}`}
+                                className={`px-2 py-0.5 rounded cursor-pointer transition-all ${inquiryLanguageDir === 'auto' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400 hover:text-slate-300'}`}
                                 title="Auto Detect Language Direction"
                               >
                                 Auto 🌐
@@ -9008,7 +9008,7 @@ export default function App() {
                               <button
                                 type="button"
                                 onClick={() => setInquiryLanguageDir('ltr')}
-                                className={`px-2 py-0.5 rounded cursor-pointer transition-all ${inquiryLanguageDir === 'ltr' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400 hover:text-slate-700'}`}
+                                className={`px-2 py-0.5 rounded cursor-pointer transition-all ${inquiryLanguageDir === 'ltr' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400 hover:text-slate-300'}`}
                                 title="Force English Mode (LTR)"
                               >
                                 English 🇺🇸
@@ -9016,7 +9016,7 @@ export default function App() {
                               <button
                                 type="button"
                                 onClick={() => setInquiryLanguageDir('rtl')}
-                                className={`px-2 py-0.5 rounded cursor-pointer transition-all ${inquiryLanguageDir === 'rtl' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400 hover:text-slate-700'}`}
+                                className={`px-2 py-0.5 rounded cursor-pointer transition-all ${inquiryLanguageDir === 'rtl' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400 hover:text-slate-300'}`}
                                 title="Force Arabic Mode (RTL)"
                               >
                                 العربية 🇸🇦
@@ -9030,7 +9030,7 @@ export default function App() {
                             placeholder={inquiryLanguageDir === 'rtl' ? "اكتب استفسارك بالتفصيل باللغة العربية هنا..." : "Describe your inquiry or case in detail (Type in English or Arabic)..."}
                             rows={4}
                             dir={inquiryLanguageDir}
-                            className={`w-full px-4 py-3 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-slate-700 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans placeholder-slate-500 resize-none ${inquiryLanguageDir === 'rtl' ? 'text-right' : 'text-left'}`}
+                            className={`w-full px-4 py-3 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-slate-300 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans placeholder-slate-500 resize-none ${inquiryLanguageDir === 'rtl' ? 'text-right' : 'text-left'}`}
                           />
                         </div>
 
@@ -9067,7 +9067,7 @@ export default function App() {
                                 placeholder="Or paste external image URL..."
                                 value={tempPhotoUrlInput}
                                 onChange={(e) => setTempPhotoUrlInput(e.target.value)}
-                                className="w-full pl-9 pr-3 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-lg text-slate-700 text-xs focus:outline-none focus:border-indigo-500 transition-all"
+                                className="w-full pl-9 pr-3 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-lg text-slate-300 text-xs focus:outline-none focus:border-indigo-500 transition-all"
                               />
                             </div>
                             <button
@@ -9088,7 +9088,7 @@ export default function App() {
                                   <button
                                     type="button"
                                     onClick={() => handleRemovePhoto(index)}
-                                    className="absolute inset-0 bg-red-600/80 text-slate-700 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all text-[10px] font-bold"
+                                    className="absolute inset-0 bg-red-600/80 text-slate-300 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all text-[10px] font-bold"
                                   >
                                     Delete
                                   </button>
@@ -9110,7 +9110,7 @@ export default function App() {
                                 placeholder="e.g. ticket link, reference..."
                                 value={tempLinkInput}
                                 onChange={(e) => setTempLinkInput(e.target.value)}
-                                className="w-full pl-9 pr-3 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-lg text-slate-700 text-xs focus:outline-none focus:border-indigo-500 transition-all"
+                                className="w-full pl-9 pr-3 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-lg text-slate-300 text-xs focus:outline-none focus:border-indigo-500 transition-all"
                               />
                             </div>
                             <button
@@ -9167,7 +9167,7 @@ export default function App() {
                       <div className="p-5 bg-slate-900/50 border border-slate-700/10 rounded-3xl backdrop-blur-xl">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-700/5 pb-4 mb-4">
                           <div>
-                            <h3 className="text-base font-bold text-slate-700 font-display">My Submission Timeline</h3>
+                            <h3 className="text-base font-bold text-slate-300 font-display">My Submission Timeline</h3>
                             <p className="text-xs text-slate-400">View states and answers to all inquiries you have submitted.</p>
                           </div>
                           <div className="flex items-center gap-2 text-xs font-mono">
@@ -9336,11 +9336,11 @@ export default function App() {
                                       <select
                                         value={inq.customerContacted || 'not_contacted'}
                                         onChange={(e) => handleUpdateContactedStatus(inq.id, e.target.value as any)}
-                                        className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-lg px-2.5 py-1 text-[11px] text-slate-700 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
+                                        className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-lg px-2.5 py-1 text-[11px] text-slate-300 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                                       >
-                                        <option value="not_contacted" className="bg-slate-800 text-slate-700 backdrop-blur-lg  font-sans">❌ Not Contacted</option>
-                                        <option value="contacted" className="bg-slate-800 text-slate-700 backdrop-blur-lg  font-sans">📞 Contacted</option>
-                                        <option value="attempted" className="bg-slate-800 text-slate-700 backdrop-blur-lg  font-sans">⏳ Contact Attempted</option>
+                                        <option value="not_contacted" className="bg-slate-800 text-slate-100 backdrop-blur-lg  font-sans">❌ Not Contacted</option>
+                                        <option value="contacted" className="bg-slate-800 text-slate-100 backdrop-blur-lg  font-sans">📞 Contacted</option>
+                                        <option value="attempted" className="bg-slate-800 text-slate-100 backdrop-blur-lg  font-sans">⏳ Contact Attempted</option>
                                       </select>
                                     </div>
                                   </div>
@@ -9361,7 +9361,7 @@ export default function App() {
                   {/* Title Header */}
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                      <h2 className="text-3xl font-bold text-slate-700 font-display">Time Card & Clock Desk</h2>
+                      <h2 className="text-3xl font-bold text-slate-300 font-display">Time Card & Clock Desk</h2>
                       <p className="text-slate-400 text-sm font-sans">Clock in your shift, log your break, lunch, or restroom visits in real-time</p>
                     </div>
                     <div className="px-4 py-2 bg-slate-800/80 backdrop-blur-md/80 border border-slate-700/5 rounded-2xl flex items-center gap-2.5">
@@ -9378,7 +9378,7 @@ export default function App() {
                     <div className="lg:col-span-2 space-y-6">
                       
                       {/* Live Desk Console Panel */}
-                      <div className="p-6 sm:p-8 bg-slate-900/50 border border-slate-700/10 rounded-3xl shadow-sm text-slate-700 shadow-2xl relative overflow-hidden flex flex-col items-center text-center space-y-6">
+                      <div className="p-6 sm:p-8 bg-slate-900/50 border border-slate-700/10 rounded-3xl shadow-sm text-slate-300 shadow-2xl relative overflow-hidden flex flex-col items-center text-center space-y-6">
                         
                         {/* Pulse glow background ornament */}
                         <div className="absolute top-10 w-96 h-96 bg-indigo-500/10 blur-[100px] rounded-full -z-10 animate-pulse"></div>
@@ -9386,7 +9386,7 @@ export default function App() {
                         {/* Top live digital clock display */}
                         <div className="space-y-1">
                           <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold font-mono">Current Live Time</p>
-                          <p className="text-5xl font-black text-slate-700 font-mono tracking-tight drop-shadow-md">
+                          <p className="text-5xl font-black text-slate-300 font-mono tracking-tight drop-shadow-md">
                             {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
                           </p>
                           <p className="text-xs text-indigo-300 font-medium font-sans">
@@ -9470,7 +9470,7 @@ export default function App() {
                             <div className="w-full max-w-md p-5 bg-slate-900/50 border border-slate-700/10 rounded-2xl text-left space-y-3 relative overflow-hidden">
                               <div className="flex justify-between items-center font-sans">
                                 <span className="text-xs font-semibold text-slate-300">Elapsed {conf.name} Time:</span>
-                                <span className="text-xs font-bold font-mono text-slate-700">
+                                <span className="text-xs font-bold font-mono text-slate-300">
                                   {mins.toString().padStart(2, '0')}m {secs.toString().padStart(2, '0')}s
                                   {conf.limit > 0 ? ` / ${conf.limit}m` : ''}
                                 </span>
@@ -9510,9 +9510,9 @@ export default function App() {
                               return (
                                 <button
                                   onClick={handleClockIn}
-                                  className="w-full py-5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-700 font-black text-base tracking-widest rounded-2xl shadow-xl shadow-emerald-500/10 hover:shadow-emerald-500/20 active:scale-[0.99] transition-all cursor-pointer font-display flex items-center justify-center gap-3 uppercase animate-pulse"
+                                  className="w-full py-5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-300 font-black text-base tracking-widest rounded-2xl shadow-xl shadow-emerald-500/10 hover:shadow-emerald-500/20 active:scale-[0.99] transition-all cursor-pointer font-display flex items-center justify-center gap-3 uppercase animate-pulse"
                                 >
-                                  <CheckCircle2 className="w-5 h-5 text-slate-700 shrink-0" />
+                                  <CheckCircle2 className="w-5 h-5 text-slate-300 shrink-0" />
                                   Clock In For Shift
                                 </button>
                               );
@@ -9539,7 +9539,7 @@ export default function App() {
                                     onClick={() => handleStartActivity('break')}
                                     className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${
                                       status === 'break'
-                                        ? 'bg-amber-500/25 border-amber-400 text-slate-700 shadow-lg shadow-amber-500/15 scale-[1.03]'
+                                        ? 'bg-amber-500/25 border-amber-400 text-slate-300 shadow-lg shadow-amber-500/15 scale-[1.03]'
                                         : 'bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/20 text-amber-300 hover:scale-[1.03]'
                                     }`}
                                   >
@@ -9551,7 +9551,7 @@ export default function App() {
                                     onClick={() => handleStartActivity('lunch')}
                                     className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${
                                       status === 'lunch'
-                                        ? 'bg-pink-500/25 border-pink-400 text-slate-700 shadow-lg shadow-pink-500/15 scale-[1.03]'
+                                        ? 'bg-pink-500/25 border-pink-400 text-slate-300 shadow-lg shadow-pink-500/15 scale-[1.03]'
                                         : 'bg-pink-500/10 hover:bg-pink-500/20 border-pink-500/20 text-pink-300 hover:scale-[1.03]'
                                     }`}
                                   >
@@ -9575,7 +9575,7 @@ export default function App() {
                                     onClick={() => handleStartActivity('meeting')}
                                     className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${
                                       status === 'meeting'
-                                        ? 'bg-cyan-500/25 border-cyan-400 text-slate-700 shadow-lg shadow-cyan-500/15 scale-[1.03]'
+                                        ? 'bg-cyan-500/25 border-cyan-400 text-slate-300 shadow-lg shadow-cyan-500/15 scale-[1.03]'
                                         : 'bg-cyan-500/10 hover:bg-cyan-500/20 border-cyan-500/20 text-cyan-300 hover:scale-[1.03]'
                                     }`}
                                   >
@@ -9587,7 +9587,7 @@ export default function App() {
                                     onClick={() => handleStartActivity('one_on_one')}
                                     className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${
                                       status === 'one_on_one'
-                                        ? 'bg-violet-500/25 border-violet-400 text-slate-700 shadow-lg shadow-violet-500/15 scale-[1.03]'
+                                        ? 'bg-violet-500/25 border-violet-400 text-slate-300 shadow-lg shadow-violet-500/15 scale-[1.03]'
                                         : 'bg-violet-500/10 hover:bg-violet-500/20 border-violet-500/20 text-violet-300 hover:scale-[1.03]'
                                     }`}
                                   >
@@ -9612,9 +9612,9 @@ export default function App() {
                                   <div className="pt-2 animate-fade-in">
                                     <button
                                       onClick={handleEndActivity}
-                                      className="w-full py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-slate-700 font-black text-xs tracking-wider rounded-xl shadow-xl shadow-indigo-500/10 hover:shadow-indigo-500/20 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 uppercase font-display"
+                                      className="w-full py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-slate-300 font-black text-xs tracking-wider rounded-xl shadow-xl shadow-indigo-500/10 hover:shadow-indigo-500/20 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 uppercase font-display"
                                     >
-                                      <ArrowRight className="w-4 h-4 text-slate-700" />
+                                      <ArrowRight className="w-4 h-4 text-slate-300" />
                                       End AUX & Resume Active Work
                                     </button>
                                   </div>
@@ -9637,7 +9637,7 @@ export default function App() {
 
                       {/* Display basic shift coverage information */}
                       <div className="p-4 bg-slate-900/50 border border-slate-700/10 rounded-2xl text-xs text-slate-400 leading-relaxed font-sans">
-                        <p className="font-semibold text-slate-700 mb-1 flex items-center gap-1.5 font-display"><Info className="w-4 h-4 text-indigo-400 shrink-0" /> Time-Tracking Rules & Compliance Policy</p>
+                        <p className="font-semibold text-slate-300 mb-1 flex items-center gap-1.5 font-display"><Info className="w-4 h-4 text-indigo-400 shrink-0" /> Time-Tracking Rules & Compliance Policy</p>
                         Your shift attendance logs, break duration accuracy, and restroom usage are logged contextually to verify real-time coverage. Overstaying lunch limits (30 min) or break periods (15 min) flags an alarm notification to Team Leaders. Please clock out correctly at the end of every daily session.
                       </div>
                     </div>
@@ -9647,7 +9647,7 @@ export default function App() {
                       
                       {/* Daily aggregates */}
                       <div className="p-5 bg-slate-900/50 border border-slate-700/10 rounded-3xl space-y-4">
-                        <h3 className="font-bold text-slate-700 text-sm font-display border-b border-slate-700/5 pb-2">Shift Aggregates (Today)</h3>
+                        <h3 className="font-bold text-slate-300 text-sm font-display border-b border-slate-700/5 pb-2">Shift Aggregates (Today)</h3>
                         
                         {(() => {
                           const stats = getAgentTodayStats(currentUser.name);
@@ -9659,11 +9659,11 @@ export default function App() {
                             <div className="space-y-3 text-xs leading-normal font-sans">
                               <div className="flex justify-between py-1.5 border-b border-slate-700/5">
                                 <span className="text-slate-400 font-medium">Clock-In Time:</span>
-                                <span className="font-bold text-slate-700 font-mono">{clockInLabel}</span>
+                                <span className="font-bold text-slate-300 font-mono">{clockInLabel}</span>
                               </div>
                               <div className="flex justify-between py-1.5 border-b border-slate-700/5">
                                 <span className="text-slate-400 font-medium">Clock-Out Time:</span>
-                                <span className="font-bold text-slate-700 font-mono">{clockOutLabel}</span>
+                                <span className="font-bold text-slate-300 font-mono">{clockOutLabel}</span>
                               </div>
                               <div className="flex justify-between py-1.5 border-b border-slate-700/5">
                                 <span className="text-slate-400 font-medium">Total Breaks:</span>
@@ -9715,7 +9715,7 @@ export default function App() {
                       {/* Personal historical activities listing */}
                       <div className="p-5 bg-slate-900/50 border border-slate-700/10 rounded-3xl space-y-4 max-h-[400px] overflow-y-auto">
                         <div className="flex justify-between items-center border-b border-slate-700/5 pb-2">
-                          <h3 className="font-bold text-slate-700 text-sm font-display">Time Card Sessions</h3>
+                          <h3 className="font-bold text-slate-300 text-sm font-display">Time Card Sessions</h3>
                           <span className="text-[10px] text-white0 uppercase tracking-widest font-bold">Personal Feed</span>
                         </div>
 
@@ -9737,8 +9737,8 @@ export default function App() {
                                     </span>
                                   </div>
                                   <div className="space-y-1 text-slate-300 leading-normal">
-                                    <p>Shift Clock In: <span className="text-slate-700 font-semibold font-mono">{log.clockIn ? new Date(log.clockIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}</span></p>
-                                    {log.clockOut && <p>Shift Clock Out: <span className="text-slate-700 font-semibold font-mono">{new Date(log.clockOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></p>}
+                                    <p>Shift Clock In: <span className="text-slate-300 font-semibold font-mono">{log.clockIn ? new Date(log.clockIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}</span></p>
+                                    {log.clockOut && <p>Shift Clock Out: <span className="text-slate-300 font-semibold font-mono">{new Date(log.clockOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></p>}
                                     
                                     {log.activities.length > 0 && (
                                       <div className="pt-1.5 space-y-1">
@@ -9772,7 +9772,7 @@ export default function App() {
                   {/* Page Title */}
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-700/5 pb-4">
                     <div>
-                      <h2 className="text-3xl font-bold text-slate-700 font-display">Inquiries Analytics & Command Center</h2>
+                      <h2 className="text-3xl font-bold text-slate-300 font-display">Inquiries Analytics & Command Center</h2>
                       <p className="text-slate-400 text-sm font-sans font-normal">Track live resolution, clinic load distributions, and download historical reports.</p>
                     </div>
 
@@ -9790,7 +9790,7 @@ export default function App() {
                     {/* Panel 1: Status Distribution Donut Chart */}
                     <div className="bg-slate-900/50 border border-slate-700/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
                       <div>
-                        <h3 className="text-sm font-bold text-slate-700 font-display mb-1 flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-slate-300 font-display mb-1 flex items-center gap-2">
                           <PieChart className="w-4 h-4 text-indigo-400" />
                           Inquiries Status Ratio
                         </h3>
@@ -9852,7 +9852,7 @@ export default function App() {
                             />
                           </svg>
                           <div className="absolute text-center select-none">
-                            <p className="text-xl font-black text-slate-700">{inquiries.length}</p>
+                            <p className="text-xl font-black text-slate-300">{inquiries.length}</p>
                             <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">Total</p>
                           </div>
                         </div>
@@ -9878,7 +9878,7 @@ export default function App() {
                     {/* Panel 2: Clinic Volume Breakdown */}
                     <div className="bg-slate-900/50 border border-slate-700/10 p-5 rounded-3xl backdrop-blur-xl lg:col-span-2 flex flex-col justify-between">
                       <div>
-                        <h3 className="text-sm font-bold text-slate-700 font-display mb-1 flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-slate-300 font-display mb-1 flex items-center gap-2">
                           <BarChart2 className="w-4 h-4 text-emerald-400" />
                           Clinic Load Analysis & Distribution Chart
                         </h3>
@@ -9899,7 +9899,7 @@ export default function App() {
                             <div key={clin.key} className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 p-3 rounded-2xl flex flex-col justify-between hover:border-slate-700/10 transition-all select-none">
                               <div>
                                 <p className="text-[10px] text-slate-400 font-bold uppercase truncate">{clin.display}</p>
-                                <p className="text-2xl font-black text-slate-700 mt-1">{count}</p>
+                                <p className="text-2xl font-black text-slate-300 mt-1">{count}</p>
                               </div>
 
                               <div className="mt-4">
@@ -9930,7 +9930,7 @@ export default function App() {
                         placeholder="Search by agent name, LOB, text or answer values..."
                         value={inquirySearchQuery}
                         onChange={(e) => setInquirySearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-2xl text-slate-700 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+                        className="w-full pl-10 pr-4 py-2.5 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-2xl text-slate-300 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                       />
                     </div>
                     <div className="flex gap-1.5 w-full md:w-auto overflow-x-auto select-none py-1 md:py-0">
@@ -9941,7 +9941,7 @@ export default function App() {
                           className={`px-3.5 py-1.5 rounded-xl border text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-all shrink-0 ${
                             (st === 'all' && inquiryStatusFilter === '') || inquiryStatusFilter === st
                               ? 'bg-indigo-600/20 border-indigo-500/30 text-white shadow shadow-indigo-500/5 font-extrabold'
-                              : 'border-slate-700/5 text-slate-400 bg-black/20 hover:text-slate-700'
+                              : 'border-slate-700/5 text-slate-400 bg-black/20 hover:text-slate-300'
                           }`}
                         >
                           {st === 'submitted' ? 'Submitted (Unresolved)' : st}
@@ -9953,7 +9953,7 @@ export default function App() {
                   {/* Inquiries Records display */}
                   <div className="bg-slate-900/50 border border-slate-700/10 p-5 sm:p-6 rounded-3xl backdrop-blur-xl space-y-4">
                     <div className="border-b border-slate-700/5 pb-3">
-                      <h3 className="text-base font-bold text-slate-700 font-display">Inquiry Record Pipeline</h3>
+                      <h3 className="text-base font-bold text-slate-300 font-display">Inquiry Record Pipeline</h3>
                       <p className="text-xs text-slate-400">Total matched cases waiting in queue: {
                         inquiries.filter(i => {
                           const matchesSearch = i.agentName?.toLowerCase().includes(inquirySearchQuery.toLowerCase()) || 
@@ -10013,7 +10013,7 @@ export default function App() {
                                     </div>
                                     <div>
                                       <div className="flex items-center gap-2 flex-wrap">
-                                        <span className="text-xs font-bold text-slate-700 uppercase tracking-wide">{inq.agentName}</span>
+                                        <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">{inq.agentName}</span>
                                         <span className="text-[10px] text-slate-400 lowercase tracking-wide bg-slate-900/50 border border-slate-700/5 px-2 py-0.5 rounded font-sans">{getAgentLOB(inq.agentName)}</span>
                                         {inq.clinicName && (
                                           <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 border border-indigo-500/30 rounded font-sans font-bold flex items-center gap-1">
@@ -10052,7 +10052,7 @@ export default function App() {
                                         navigator.clipboard.writeText(details);
                                         toast.success('Inquiry details copied!');
                                       }}
-                                      className="p-1 hover:bg-slate-800/80 text-slate-300 hover:text-slate-700 rounded-md transition-all shrink-0 flex items-center gap-1 cursor-pointer"
+                                      className="p-1 hover:bg-slate-800/80 text-slate-300 hover:text-slate-300 rounded-md transition-all shrink-0 flex items-center gap-1 cursor-pointer"
                                       title="Copy Inquiry Details"
                                     >
                                       <Copy className="w-3.5 h-3.5" />
@@ -10192,10 +10192,10 @@ export default function App() {
                                     <select
                                       value={inq.agentName}
                                       onChange={(e) => handleReassignInquiry(inq.id, e.target.value)}
-                                      className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-lg px-2.5 py-1 text-[11px] text-slate-700 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
+                                      className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-lg px-2.5 py-1 text-[11px] text-slate-300 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                                     >
                                       {agentsList.map(aName => (
-                                        <option key={aName} value={aName} className="bg-slate-800 text-slate-700 backdrop-blur-lg  font-sans">
+                                        <option key={aName} value={aName} className="bg-slate-800 text-slate-100 backdrop-blur-lg  font-sans">
                                           {aName}
                                         </option>
                                       ))}
@@ -10206,13 +10206,13 @@ export default function App() {
                                   {answeringInquiryId === inq.id && (
                                     <div className="p-4 bg-slate-900/50 backdrop-blur-xl border border-slate-700/20 rounded-xl space-y-3 animate-fade-in text-left">
                                       <div className="flex justify-between items-center pb-1">
-                                        <h4 className="text-xs font-bold text-slate-700 font-display">Feed Back / System Answer Details</h4>
+                                        <h4 className="text-xs font-bold text-slate-300 font-display">Feed Back / System Answer Details</h4>
                                         <button
                                           onClick={() => {
                                             setAnsweringInquiryId(null);
                                             setCurrentAnswerText('');
                                           }}
-                                          className="text-slate-400 text-xs hover:text-slate-700"
+                                          className="text-slate-400 text-xs hover:text-slate-300"
                                         >
                                           Cancel
                                         </button>
@@ -10222,7 +10222,7 @@ export default function App() {
                                         value={currentAnswerText}
                                         onChange={(e) => setCurrentAnswerText(e.target.value)}
                                         rows={3}
-                                        className="w-full px-3 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-lg text-slate-700 text-xs focus:outline-none focus:border-emerald-500 transition-all font-sans resize-none"
+                                        className="w-full px-3 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-lg text-slate-300 text-xs focus:outline-none focus:border-emerald-500 transition-all font-sans resize-none"
                                       />
                                       <button
                                         onClick={() => handleSetInquiryAnswered(inq.id, currentAnswerText)}
@@ -10249,7 +10249,7 @@ export default function App() {
                   {/* Header */}
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-2">
                     <div>
-                      <h2 className="text-3xl font-bold text-slate-700 font-display">Your RTM (Real-Time Monitoring) Command Center</h2>
+                      <h2 className="text-3xl font-bold text-slate-300 font-display">Your RTM (Real-Time Monitoring) Command Center</h2>
                       <p className="text-slate-400 text-sm font-sans">Command center to track shift times, restroom visits, or live-status breaks</p>
                     </div>
 
@@ -10302,7 +10302,7 @@ export default function App() {
                     
                     if (tlIsPrintMode) {
                       return (
-                    <div className="p-8 bg-slate-900/50 backdrop-blur-xl border border-slate-700/20 rounded-3xl space-y-6 animate-fade-in text-slate-700 print:p-0 print:bg-slate-800 print:text-black">
+                    <div className="p-8 bg-slate-900/50 backdrop-blur-xl border border-slate-700/20 rounded-3xl space-y-6 animate-fade-in text-slate-300 print:p-0 print:bg-slate-800 print:text-black">
                       <div className="flex justify-between items-center border-b border-slate-700/10 pb-4 print:border-black">
                         <div>
                           <h3 className="text-xl font-extrabold font-display uppercase tracking-wider">DAILY MASTER ATTENDANCE & TIMECARD REPORT</h3>
@@ -10451,7 +10451,7 @@ export default function App() {
                           { id: 'meeting', label: 'In Meeting', count: 0, agents: [] as string[], bgClass: 'bg-cyan-950/20', borderClass: 'border-cyan-500/20', textClass: 'text-cyan-50', badgeColor: 'bg-cyan-500', headerText: 'text-cyan-300', countText: 'text-cyan-400', cardBg: 'bg-cyan-900/10', cardBorder: 'border-cyan-500/20', cardText: 'text-cyan-100', cardHover: 'hover:bg-cyan-900/30', lobText: 'text-cyan-400' },
                           { id: 'one_on_one', label: '1:1 Session', count: 0, agents: [] as string[], bgClass: 'bg-violet-950/20', borderClass: 'border-violet-500/20', textClass: 'text-violet-50', badgeColor: 'bg-violet-500', headerText: 'text-violet-300', countText: 'text-violet-400', cardBg: 'bg-violet-900/10', cardBorder: 'border-violet-500/20', cardText: 'text-violet-100', cardHover: 'hover:bg-violet-900/30', lobText: 'text-violet-400' },
                           { id: 'personal', label: 'Personal Time', count: 0, agents: [] as string[], bgClass: 'bg-blue-950/20', borderClass: 'border-blue-500/20', textClass: 'text-blue-50', badgeColor: 'bg-blue-500', headerText: 'text-blue-300', countText: 'text-blue-400', cardBg: 'bg-blue-900/10', cardBorder: 'border-blue-500/20', cardText: 'text-blue-100', cardHover: 'hover:bg-blue-900/30', lobText: 'text-blue-400' },
-                          { id: 'offline', label: 'Offline / Clocked Out', count: 0, agents: [] as string[], bgClass: 'bg-slate-900/50', borderClass: 'border-slate-700/5', textClass: 'text-slate-400', badgeColor: 'bg-slate-600', headerText: 'text-white0', countText: 'text-slate-600', cardBg: 'bg-black/30', cardBorder: 'border-slate-700/5', cardText: 'text-white0', cardHover: '', lobText: 'text-white0 opacity-50' }
+                          { id: 'offline', label: 'Offline / Clocked Out', count: 0, agents: [] as string[], bgClass: 'bg-slate-900/50', borderClass: 'border-slate-700/5', textClass: 'text-slate-400', badgeColor: 'bg-slate-600', headerText: 'text-white0', countText: 'text-slate-400', cardBg: 'bg-black/30', cardBorder: 'border-slate-700/5', cardText: 'text-white0', cardHover: '', lobText: 'text-white0 opacity-50' }
                         ];
 
                         filteredAgents.forEach(agent => {
@@ -10483,7 +10483,7 @@ export default function App() {
                                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                   <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                                 </span>
-                                <span className="font-display font-medium text-slate-700">Currently Active: <span className="font-bold text-emerald-400 font-mono">{activeAgentsCount}</span> / {agentsList.length}</span>
+                                <span className="font-display font-medium text-slate-300">Currently Active: <span className="font-bold text-emerald-400 font-mono">{activeAgentsCount}</span> / {agentsList.length}</span>
                               </div>
                               <div className="relative w-full sm:w-72">
                                 <Search className="w-4 h-4 text-white0 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -10491,7 +10491,7 @@ export default function App() {
                                   value={rtmSearch}
                                   onChange={(e) => setRtmSearch(e.target.value)}
                                   placeholder="Search agents by name..." 
-                                  className="w-full pl-9 pr-4 py-2 bg-black/50 border border-slate-700/10 rounded-xl text-sm focus:border-indigo-500 text-slate-200 outline-none transition-all placeholder:text-slate-600 focus:bg-black/70"
+                                  className="w-full pl-9 pr-4 py-2 bg-black/50 border border-slate-700/10 rounded-xl text-sm focus:border-indigo-500 text-slate-200 outline-none transition-all placeholder:text-slate-400 focus:bg-black/70"
                                 />
                               </div>
                             </div>
@@ -10558,14 +10558,14 @@ export default function App() {
                                                 }}
                                                 className="w-full bg-black/50 border border-slate-700/10 rounded text-[10px] text-slate-200 px-1 py-1 flex items-center justify-center focus:outline-none focus:border-indigo-500 font-medium font-sans"
                                               >
-                                                <option value="working" className="bg-slate-800">Online / On Duty</option>
-                                                <option value="break" className="bg-slate-800">On Break</option>
-                                                <option value="lunch" className="bg-slate-800">On Lunch</option>
-                                                <option value="restroom" className="bg-slate-800">Restroom</option>
-                                                <option value="meeting" className="bg-slate-800">In Meeting</option>
-                                                <option value="one_on_one" className="bg-slate-800">1:1 Session</option>
-                                                <option value="personal" className="bg-slate-800">Personal Time</option>
-                                                <option value="clocked_out" className="bg-slate-800 text-rose-300">Force Clock Out</option>
+                                                <option value="working" className="bg-slate-800 text-slate-100 ">Online / On Duty</option>
+                                                <option value="break" className="bg-slate-800 text-slate-100 ">On Break</option>
+                                                <option value="lunch" className="bg-slate-800 text-slate-100 ">On Lunch</option>
+                                                <option value="restroom" className="bg-slate-800 text-slate-100 ">Restroom</option>
+                                                <option value="meeting" className="bg-slate-800 text-slate-100 ">In Meeting</option>
+                                                <option value="one_on_one" className="bg-slate-800 text-slate-100 ">1:1 Session</option>
+                                                <option value="personal" className="bg-slate-800 text-slate-100 ">Personal Time</option>
+                                                <option value="clocked_out" className="bg-slate-800 text-slate-100 ">Force Clock Out</option>
                                               </select>
                                             </div>
                                           )}
@@ -10737,7 +10737,7 @@ export default function App() {
                                     <div className="space-y-2">
                                       <div className="flex justify-between items-start">
                                         <div>
-                                          <p className="text-xs font-black text-slate-700 uppercase tracking-wide font-display">{entry.agentName}</p>
+                                          <p className="text-xs font-black text-slate-300 uppercase tracking-wide font-display">{entry.agentName}</p>
                                           <span className="inline-block text-[8px] font-extrabold uppercase text-rose-300 bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.5 rounded-md mt-1 font-sans">
                                             LOB: {entry.lob}
                                           </span>
@@ -10808,7 +10808,7 @@ export default function App() {
                             value={tlSearchQuery}
                             onChange={(e) => setTlSearchQuery(e.target.value)}
                             placeholder="Filter status table by agent name..."
-                            className="w-full pl-9 pr-4 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-xs text-slate-700 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
+                            className="w-full pl-9 pr-4 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-xs text-slate-300 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
                           />
                         </div>
 
@@ -10819,11 +10819,11 @@ export default function App() {
                             onChange={(e) => setTlStatusFilter(e.target.value as any)}
                             className="w-full px-3 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-xs text-slate-300 focus:outline-none focus:border-indigo-500 cursor-pointer"
                           >
-                            <option value="all" className="bg-slate-800 text-slate-700 ">All Agents</option>
-                            <option value="in" className="bg-slate-800 text-slate-700 ">Clocked In (IN)</option>
-                            <option value="out" className="bg-slate-800 text-slate-700 ">Clocked Out (OUT)</option>
-                            <option value="break_lunch" className="bg-slate-800 text-slate-700 ">On Break / Lunch Activity</option>
-                            <option value="overtime" className="bg-slate-800 text-slate-700 ">Warning / Overtime Limit Exceeded</option>
+                            <option value="all" className="bg-slate-800 text-slate-100 ">All Agents</option>
+                            <option value="in" className="bg-slate-800 text-slate-100 ">Clocked In (IN)</option>
+                            <option value="out" className="bg-slate-800 text-slate-100 ">Clocked Out (OUT)</option>
+                            <option value="break_lunch" className="bg-slate-800 text-slate-100 ">On Break / Lunch Activity</option>
+                            <option value="overtime" className="bg-slate-800 text-slate-100 ">Warning / Overtime Limit Exceeded</option>
                           </select>
                         </div>
                       </div>
@@ -10832,7 +10832,7 @@ export default function App() {
                       <div className="p-6 bg-slate-900/50 border border-slate-700/10 rounded-3xl space-y-4 shadow-xl">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                           <div>
-                            <h3 className="font-bold text-slate-700 text-base font-display">Daily Presence & Break Report Sheet</h3>
+                            <h3 className="font-bold text-slate-300 text-base font-display">Daily Presence & Break Report Sheet</h3>
                             <p className="text-xs text-slate-400 font-sans">Comprehensive view of today’s logs, break, lunch, and restroom statistics per agent</p>
                           </div>
                         </div>
@@ -10928,7 +10928,7 @@ export default function App() {
                                     return (
                                       <tr key={name} className="hover:bg-slate-700 transition-all">
                                         {/* Name */}
-                                        <td className="px-5 py-4 font-bold text-slate-700 font-display uppercase tracking-wide">
+                                        <td className="px-5 py-4 font-bold text-slate-300 font-display uppercase tracking-wide">
                                           <div>{name}</div>
                                           <div className="text-[9px] text-slate-400 font-normal lowercase tracking-wide bg-slate-900/50 border border-slate-700/5 px-2 py-0.5 rounded-lg mt-1 w-max block">{getAgentLOB(name)}</div>
                                         </td>
@@ -10940,17 +10940,17 @@ export default function App() {
                                             <select 
                                               value={activeStatus}
                                               onChange={(e) => handleTLOverrideAgentStatus(name, e.target.value as any)}
-                                              className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-lg text-[10px] text-slate-700 px-2 py-1 focus:outline-none focus:border-indigo-500 font-bold uppercase cursor-pointer max-w-[120px]"
+                                              className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-lg text-[10px] text-slate-300 px-2 py-1 focus:outline-none focus:border-indigo-500 font-bold uppercase cursor-pointer max-w-[120px]"
                                             >
-                                              <option value="working" className="bg-slate-800 text-slate-700 ">On Shift (Working)</option>
-                                              <option value="break" className="bg-slate-800 text-slate-700 ">On Break</option>
-                                              <option value="lunch" className="bg-slate-800 text-slate-700 ">On Lunch</option>
-                                              <option value="restroom" className="bg-slate-800 text-slate-700 ">In Restroom</option>
-                                              <option value="clocked_out" className="bg-slate-800 text-slate-700 ">Clocked Out</option>
-                                              <option value="day_off" className="bg-slate-800 text-slate-700 ">Day Off</option>
-                                              <option value="casual" className="bg-slate-800 text-slate-700 ">Casual Leave</option>
-                                              <option value="annual" className="bg-slate-800 text-slate-700 ">Annual Leave</option>
-                                              <option value="no_show" className="bg-slate-800 text-slate-700 ">No Show</option>
+                                              <option value="working" className="bg-slate-800 text-slate-100 ">On Shift (Working)</option>
+                                              <option value="break" className="bg-slate-800 text-slate-100 ">On Break</option>
+                                              <option value="lunch" className="bg-slate-800 text-slate-100 ">On Lunch</option>
+                                              <option value="restroom" className="bg-slate-800 text-slate-100 ">In Restroom</option>
+                                              <option value="clocked_out" className="bg-slate-800 text-slate-100 ">Clocked Out</option>
+                                              <option value="day_off" className="bg-slate-800 text-slate-100 ">Day Off</option>
+                                              <option value="casual" className="bg-slate-800 text-slate-100 ">Casual Leave</option>
+                                              <option value="annual" className="bg-slate-800 text-slate-100 ">Annual Leave</option>
+                                              <option value="no_show" className="bg-slate-800 text-slate-100 ">No Show</option>
                                             </select>
                                           </div>
                                         </td>
@@ -11069,13 +11069,13 @@ export default function App() {
                         <div className="absolute inset-0 z-50 bg-slate-900/500 backdrop-blur-sm rounded-3xl flex items-center justify-center">
                            <div className="p-4 bg-slate-900/40 shadow-xl rounded-2xl flex items-center gap-3 border border-gray-100">
                              <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                             <span className="text-sm font-bold text-slate-700">Uploading and Processing Roster...</span>
+                             <span className="text-sm font-bold text-slate-300">Uploading and Processing Roster...</span>
                            </div>
                         </div>
                       )}
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 pb-5 gap-4">
                         <div>
-                          <h3 className="font-bold text-slate-700 text-lg flex items-center gap-2">
+                          <h3 className="font-bold text-slate-300 text-lg flex items-center gap-2">
                             <Upload className="w-5 h-5 text-indigo-500" />
                             Schedule Roster Upload
                           </h3>
@@ -11086,7 +11086,7 @@ export default function App() {
                         <div className="flex items-center gap-3">
                           <button
                             onClick={downloadScheduleTemplate}
-                            className="px-4 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2"
+                            className="px-4 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-slate-300 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2"
                           >
                             <Download className="w-4 h-4 text-slate-400" />
                             Download Template
@@ -11118,7 +11118,7 @@ export default function App() {
                           <div className="w-16 h-16 bg-slate-900/40 shadow-sm border border-gray-100 rounded-full flex items-center justify-center mb-4 text-indigo-500 group-hover:scale-105 transition-transform">
                             <Upload className="w-8 h-8" />
                           </div>
-                          <h4 className="text-slate-700 font-bold text-base">Drag & drop your file here</h4>
+                          <h4 className="text-slate-300 font-bold text-base">Drag & drop your file here</h4>
                           <p className="text-slate-400 text-sm mt-1">or click to browse from your computer</p>
                           <p className="text-xs text-gray-400 mt-4 leading-relaxed max-w-xs mx-auto">
                             Requires Agent Name, Date, and Shift columns. Missing agents will be auto-registered.
@@ -11134,7 +11134,7 @@ export default function App() {
                               <path fill="#E8F0FE" d="M36 15.5h6v4h-6v-4zM36 24h6v4h-6v-4zM8 15.5h5v4H8v-4zM8 24h5v4H8v-4z"></path>
                             </svg>
                           </div>
-                          <h4 className="font-bold text-slate-700">Import via Google Sheets</h4>
+                          <h4 className="font-bold text-slate-300">Import via Google Sheets</h4>
                           <p className="text-xs text-slate-400 mt-1 mb-4 max-w-[200px] mx-auto">Automatically sync live roster from Google Workspace.</p>
                           <div className="w-full flex space-x-2 relative group">
                             <input
@@ -11148,7 +11148,7 @@ export default function App() {
                                 setStorageItem('sched_google_sheet_id', val);
                               }}
                               placeholder="Paste Sheets URL..."
-                              className="flex-1 bg-slate-900/40 border border-gray-300 text-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm"
+                              className="flex-1 bg-slate-900/40 border border-gray-300 text-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm"
                             />
                             <button
                               onClick={async () => {
@@ -11194,14 +11194,14 @@ export default function App() {
                         <div className="border border-gray-200 bg-slate-900/40 rounded-2xl shadow-sm overflow-hidden flex flex-col pt-2 mt-8">
                             <div className="px-6 py-4 flex items-center justify-between border-b border-gray-100 bg-gray-50/50">
                                 <div>
-                                    <h4 className="font-bold text-slate-700 flex items-center gap-2">
+                                    <h4 className="font-bold text-slate-300 flex items-center gap-2">
                                         <Calendar className="w-5 h-5 text-indigo-500" /> Upload Preview Summary
                                     </h4>
                                     <p className="text-xs text-slate-400 mt-1">Review validation and any mapping errors before saving.</p>
                                 </div>
                                 {tempSchedules.length > 0 && (
                                    <div className="flex gap-3">
-                                        <button onClick={() => { setTempSchedules([]); setUploadError(null); setUploadSuccess(null); }} className="px-4 py-2 border border-gray-300 text-gray-700 bg-slate-900/40 hover:bg-gray-50 rounded-xl text-sm font-semibold transition-colors">Discard</button>
+                                        <button onClick={() => { setTempSchedules([]); setUploadError(null); setUploadSuccess(null); }} className="px-4 py-2 border border-gray-300 text-slate-300 bg-slate-900/40 hover:bg-gray-50 rounded-xl text-sm font-semibold transition-colors">Discard</button>
                                         <button onClick={commitSchedules} className="px-5 py-2 bg-emerald-600 text-white shadow-md shadow-emerald-500/20 hover:bg-emerald-700 rounded-xl text-sm font-bold flex items-center gap-2 transition-all">
                                             <CheckCircle2 className="w-4 h-4" /> Save Schedule ({tempSchedules.length} items)
                                         </button>
@@ -11211,7 +11211,7 @@ export default function App() {
 
                             {/* Show Error Rows */}
                             {uploadError && (
-                                <div className="bg-red-50 p-4 border-b border-red-100">
+                                <div className="bg-red-900/50 p-4 border-b border-red-100">
                                     <h5 className="text-red-800 font-bold text-sm flex items-center gap-2 mb-2">
                                         <AlertTriangle className="w-4 h-4"/> Parsing Errors
                                     </h5>
@@ -11229,16 +11229,16 @@ export default function App() {
                                     <table className="w-full text-left border-collapse text-sm">
                                         <thead className="bg-slate-900 sticky top-0 border-b border-gray-200">
                                             <tr>
-                                                <th className="p-3 pl-6 font-semibold text-gray-700">Agent</th>
-                                                <th className="p-3 font-semibold text-gray-700">Date</th>
-                                                <th className="p-3 font-semibold text-gray-700">Shift Mapped To</th>
-                                                <th className="p-3 pr-6 font-semibold text-gray-700 text-right">Status</th>
+                                                <th className="p-3 pl-6 font-semibold text-slate-300">Agent</th>
+                                                <th className="p-3 font-semibold text-slate-300">Date</th>
+                                                <th className="p-3 font-semibold text-slate-300">Shift Mapped To</th>
+                                                <th className="p-3 pr-6 font-semibold text-slate-300 text-right">Status</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-100">
                                             {tempSchedules.slice(0, 100).map((row, idx) => (
                                                 <tr key={idx} className="hover:bg-gray-50">
-                                                    <td className="p-3 pl-6 font-medium text-slate-700">{row.agentName}</td>
+                                                    <td className="p-3 pl-6 font-medium text-slate-300">{row.agentName}</td>
                                                     <td className="p-3 text-slate-400 font-mono">{row.date}</td>
                                                     <td className="p-3"><span className="px-2 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-md text-xs">{row.shiftLabel}</span></td>
                                                     <td className="p-3 pr-6 text-right">
@@ -11267,7 +11267,7 @@ export default function App() {
                       <div className="space-y-1 text-left">
                         <div className="flex items-center gap-2">
                           <span className={`w-3 h-3 rounded-full ${isRosterPublished ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
-                          <h3 className="text-sm font-black text-slate-700 uppercase tracking-wider font-display">Schedule Roster Release Status</h3>
+                          <h3 className="text-sm font-black text-slate-300 uppercase tracking-wider font-display">Schedule Roster Release Status</h3>
                         </div>
                         <p className="text-xs text-slate-300">
                           {isRosterPublished 
@@ -11309,9 +11309,9 @@ export default function App() {
 
                   {/* Manual Single-Shift Roster Submission Form */}
                   {isSuperAdmin && (
-                    <div className="bg-slate-900/50 border border-slate-700/10 rounded-3xl shadow-sm text-slate-700 p-6 shadow-2xl space-y-5 text-left">
+                    <div className="bg-slate-900/50 border border-slate-700/10 rounded-3xl shadow-sm text-slate-300 p-6 shadow-2xl space-y-5 text-left">
                       <div>
-                        <h3 className="font-extrabold text-slate-700 text-base font-display flex items-center gap-2">
+                        <h3 className="font-extrabold text-slate-300 text-base font-display flex items-center gap-2">
                           <PlusCircle className="w-5 h-5 text-indigo-400" />
                           Individual Shift Assignment Submitter
                         </h3>
@@ -11324,11 +11324,11 @@ export default function App() {
                           <select
                             value={manualRosterAgent}
                             onChange={(e) => setManualRosterAgent(e.target.value)}
-                            className="w-full px-3 py-2.5 bg-black/45 border border-slate-700/10 rounded-xl text-xs text-slate-700 outline-none cursor-pointer focus:border-indigo-500 font-sans"
+                            className="w-full px-3 py-2.5 bg-black/45 border border-slate-700/10 rounded-xl text-xs text-slate-300 outline-none cursor-pointer focus:border-indigo-500 font-sans"
                           >
-                            <option value="">-- Choose Agent --</option>
+                            <option className="bg-slate-800 text-slate-100 "  value="">-- Choose Agent --</option>
                             {agentsList.map(name => (
-                              <option className="bg-slate-800 text-slate-700 " key={name} value={name}>
+                              <option className="bg-slate-800 text-slate-100 " key={name} value={name}>
                                 {name} ({getAgentLOB(name)})
                               </option>
                             ))}
@@ -11341,7 +11341,7 @@ export default function App() {
                             type="date"
                             value={manualRosterDate}
                             onChange={(e) => setManualRosterDate(e.target.value)}
-                            className="w-full px-3 py-1.5 bg-black/45 border border-slate-700/10 rounded-xl text-xs text-slate-700 outline-none focus:border-indigo-500 h-[42px]"
+                            className="w-full px-3 py-1.5 bg-black/45 border border-slate-700/10 rounded-xl text-xs text-slate-300 outline-none focus:border-indigo-500 h-[42px]"
                           />
                         </div>
 
@@ -11350,14 +11350,14 @@ export default function App() {
                           <select
                             value={manualRosterShift}
                             onChange={(e) => setManualRosterShift(e.target.value)}
-                            className="w-full px-3 py-2.5 bg-black/45 border border-slate-700/10 rounded-xl text-xs text-slate-700 outline-none cursor-pointer focus:border-indigo-500 font-sans"
+                            className="w-full px-3 py-2.5 bg-black/45 border border-slate-700/10 rounded-xl text-xs text-slate-300 outline-none cursor-pointer focus:border-indigo-500 font-sans"
                           >
                             {SHIFTS.map(s => (
-                              <option className="bg-slate-800 text-slate-700 " key={s.id} value={s.label}>
+                              <option className="bg-slate-800 text-slate-100 " key={s.id} value={s.label}>
                                 {s.display} ({s.label})
                               </option>
                             ))}
-                            <option className="bg-slate-800 text-slate-700 " value="Off">Rest Day (Off Day)</option>
+                            <option className="bg-slate-800 text-slate-100 " value="Off">Rest Day (Off Day)</option>
                           </select>
                         </div>
 
@@ -11379,7 +11379,7 @@ export default function App() {
                             placeholder="e.g. Approved temporary schedule override / Direct management assignment / Shift Notes..."
                             value={manualRosterNotes}
                             onChange={(e) => setManualRosterNotes(e.target.value)}
-                            className="w-full px-4 py-2.5 bg-black/45 border border-slate-700/10 rounded-xl text-xs text-slate-700 placeholder-slate-500 outline-none focus:border-indigo-500"
+                            className="w-full px-4 py-2.5 bg-black/45 border border-slate-700/10 rounded-xl text-xs text-slate-300 placeholder-slate-500 outline-none focus:border-indigo-500"
                           />
                         </div>
                       </form>
@@ -11391,7 +11391,7 @@ export default function App() {
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                     <div className="p-4 bg-slate-900/50 border border-slate-700/10 rounded-2xl backdrop-blur-sm">
                       <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Active Scheduled Days</p>
-                      <p className="text-2xl font-black text-slate-700">
+                      <p className="text-2xl font-black text-slate-300">
                         {allScheduleDates.length} Days Covered
                       </p>
                       <p className="text-[10px] text-indigo-300 mt-1">
@@ -11404,7 +11404,7 @@ export default function App() {
 
                     <div className="p-4 bg-slate-900/50 border border-slate-700/10 rounded-2xl backdrop-blur-sm">
                       <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Coverage Scope</p>
-                      <p className="text-2xl font-black text-slate-700">
+                      <p className="text-2xl font-black text-slate-300">
                         {schedules.length} Assigned Shifts
                       </p>
                       <p className="text-[10px] text-emerald-300 mt-1">
@@ -11507,7 +11507,7 @@ export default function App() {
                             className={`py-1 px-1.5 rounded-lg text-[8px] font-black uppercase text-center cursor-pointer transition-all ${
                               syncStatus.pending > 0 
                                 ? 'bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white shadow-lg shadow-indigo-900/10' 
-                                : 'bg-slate-900 text-slate-600 border border-slate-700/5 cursor-not-allowed'
+                                : 'bg-slate-900 text-slate-400 border border-slate-700/5 cursor-not-allowed'
                             }`}
                           >
                             Sync Queue
@@ -11524,7 +11524,7 @@ export default function App() {
                           <Shield className="w-8 h-8" />
                         </div>
                         <div className="space-y-2 text-center">
-                          <h3 className="text-xl font-bold text-slate-700 tracking-wide font-display">Schedule Roster Draft Status</h3>
+                          <h3 className="text-xl font-bold text-slate-300 tracking-wide font-display">Schedule Roster Draft Status</h3>
                           <p className="text-slate-400 text-sm max-w-md mx-auto">
                             The collective team schedule roster is currently under construction and edit by administration. Once released, the complete calendar tracker and trading capabilities will become active.
                           </p>
@@ -11562,7 +11562,7 @@ export default function App() {
                                   <div key={shift.id} className="p-4 bg-slate-800/[0.02] border border-slate-700/5 rounded-2xl flex items-center justify-between shadow">
                                     <div>
                                       <p className="text-[10px] text-slate-400 font-mono font-medium">{formatDateNice(shift.date)}</p>
-                                      <p className="text-xs font-bold text-slate-700 mt-1 uppercase tracking-wide">{shift.agentName}</p>
+                                      <p className="text-xs font-bold text-slate-300 mt-1 uppercase tracking-wide">{shift.agentName}</p>
                                     </div>
                                     <span className={`px-2 py-0.5 text-[10px] font-black rounded border uppercase tracking-wider ${style.bg}`}>
                                       {style.display}
@@ -11586,7 +11586,7 @@ export default function App() {
                         placeholder="Filter by Agent Name..."
                         value={scheduleFilterAgent}
                         onChange={(e) => setScheduleFilterAgent(e.target.value)}
-                        className="px-4 py-2 bg-black/45 hover:bg-slate-700 backdrop-blur-xl border border-slate-700/10 focus:border-indigo-500/85 focus:ring-1 focus:ring-indigo-500 rounded-xl text-xs text-slate-700 placeholder-slate-400 outline-none transition-all w-full sm:w-64"
+                        className="px-4 py-2 bg-black/45 hover:bg-slate-700 backdrop-blur-xl border border-slate-700/10 focus:border-indigo-500/85 focus:ring-1 focus:ring-indigo-500 rounded-xl text-xs text-slate-300 placeholder-slate-400 outline-none transition-all w-full sm:w-64"
                       />
 
                       {/* View Mode */}
@@ -11597,7 +11597,7 @@ export default function App() {
                             setSchedulePageOffset(0);
                           }}
                           className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                            scheduleViewMode === 'week' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-700'
+                            scheduleViewMode === 'week' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-300'
                           }`}
                         >
                           Week
@@ -11608,7 +11608,7 @@ export default function App() {
                             setSchedulePageOffset(0);
                           }}
                           className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                            scheduleViewMode === 'fortnight' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-700'
+                            scheduleViewMode === 'fortnight' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-300'
                           }`}
                         >
                           2-Weeks
@@ -11619,7 +11619,7 @@ export default function App() {
                             setSchedulePageOffset(0);
                           }}
                           className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                            scheduleViewMode === 'month' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-700'
+                            scheduleViewMode === 'month' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-300'
                           }`}
                         >
                           Full Month
@@ -11636,14 +11636,14 @@ export default function App() {
                         <button
                           disabled={safeOffset === 0}
                           onClick={() => setSchedulePageOffset(prev => Math.max(0, prev - displayDaysCount))}
-                          className="px-3 py-1.5 bg-slate-900/50 hover:bg-slate-800/80 border border-slate-700/10 text-slate-700 disabled:opacity-30 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                          className="px-3 py-1.5 bg-slate-900/50 hover:bg-slate-800/80 border border-slate-700/10 text-slate-300 disabled:opacity-30 rounded-lg text-xs font-bold transition-all cursor-pointer"
                         >
                           &larr; Prev
                         </button>
                         <button
                           disabled={safeOffset + displayDaysCount >= baseDatesList.length}
                           onClick={() => setSchedulePageOffset(prev => Math.min(baseDatesList.length - displayDaysCount, prev + displayDaysCount))}
-                          className="px-3 py-1.5 bg-slate-900/50 hover:bg-slate-800/80 border border-slate-700/10 text-slate-700 disabled:opacity-30 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                          className="px-3 py-1.5 bg-slate-900/50 hover:bg-slate-800/80 border border-slate-700/10 text-slate-300 disabled:opacity-30 rounded-lg text-xs font-bold transition-all cursor-pointer"
                         >
                           Next &rarr;
                         </button>
@@ -11682,7 +11682,7 @@ export default function App() {
                   {/* Active Schedule visual Matrix grid */}
                   <div className="bg-slate-900/50 border border-slate-700/10 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
                     <div className="flex justify-between items-center pb-2 border-b border-slate-700/5">
-                      <h3 className="font-bold text-slate-700 text-base font-display"> Roster Coverage Planner</h3>
+                      <h3 className="font-bold text-slate-300 text-base font-display"> Roster Coverage Planner</h3>
                       <span className="text-[10px] text-indigo-300 font-mono flex items-center gap-1.5 font-bold uppercase">
                         <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span> Active Database
                       </span>
@@ -11692,7 +11692,7 @@ export default function App() {
                       <div className="text-center py-16 text-slate-400 space-y-3">
                         <Calendar className="w-12 h-12 mx-auto text-indigo-400 opacity-40 animate-pulse" />
                         <div>
-                          <p className="font-bold text-slate-700 text-base">Active schedule roster is empty</p>
+                          <p className="font-bold text-slate-300 text-base">Active schedule roster is empty</p>
                           <p className="text-xs text-slate-400 max-w-md mx-auto mt-1">
                             {currentUser.role === 'tl'
                               ? 'Please compile and upload a CSV weekly or monthly schedule file using the drag-and-drop panel above.'
@@ -11741,7 +11741,7 @@ export default function App() {
 
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-700/5 pb-3">
                                 <div className="space-y-1">
-                                  <h4 className="text-sm font-black text-slate-700 flex items-center gap-2 font-display">
+                                  <h4 className="text-sm font-black text-slate-300 flex items-center gap-2 font-display">
                                     <span className="flex h-2.5 w-2.5 relative">
                                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                       <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
@@ -11778,11 +11778,11 @@ export default function App() {
                                           setHeatmapMorningTarget(val);
                                           setStorageItem('heatmap_morning_target', val);
                                         }}
-                                        className="w-8 h-8 bg-slate-900/50 hover:bg-slate-800/80 active:scale-95 text-slate-700 font-bold rounded-lg border border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
+                                        className="w-8 h-8 bg-slate-900/50 hover:bg-slate-800/80 active:scale-95 text-slate-300 font-bold rounded-lg border border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
                                       >
                                         -
                                       </button>
-                                      <span className="w-10 text-center font-bold text-slate-700 text-sm font-mono">
+                                      <span className="w-10 text-center font-bold text-slate-300 text-sm font-mono">
                                         {heatmapMorningTarget}
                                       </span>
                                       <button
@@ -11792,7 +11792,7 @@ export default function App() {
                                           setHeatmapMorningTarget(val);
                                           setStorageItem('heatmap_morning_target', val);
                                         }}
-                                        className="w-8 h-8 bg-slate-900/50 hover:bg-slate-800/80 active:scale-95 text-slate-700 font-bold rounded-lg border border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
+                                        className="w-8 h-8 bg-slate-900/50 hover:bg-slate-800/80 active:scale-95 text-slate-300 font-bold rounded-lg border border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
                                       >
                                         +
                                       </button>
@@ -11812,11 +11812,11 @@ export default function App() {
                                           setHeatmapAfternoonTarget(val);
                                           setStorageItem('heatmap_afternoon_target', val);
                                         }}
-                                        className="w-8 h-8 bg-slate-900/50 hover:bg-slate-800/80 active:scale-95 text-slate-700 font-bold rounded-lg border border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
+                                        className="w-8 h-8 bg-slate-900/50 hover:bg-slate-800/80 active:scale-95 text-slate-300 font-bold rounded-lg border border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
                                       >
                                         -
                                       </button>
-                                      <span className="w-10 text-center font-bold text-slate-700 text-sm font-mono">
+                                      <span className="w-10 text-center font-bold text-slate-300 text-sm font-mono">
                                         {heatmapAfternoonTarget}
                                       </span>
                                       <button
@@ -11826,7 +11826,7 @@ export default function App() {
                                           setHeatmapAfternoonTarget(val);
                                           setStorageItem('heatmap_afternoon_target', val);
                                         }}
-                                        className="w-8 h-8 bg-slate-900/50 hover:bg-slate-800/80 active:scale-95 text-slate-700 font-bold rounded-lg border border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
+                                        className="w-8 h-8 bg-slate-900/50 hover:bg-slate-800/80 active:scale-95 text-slate-300 font-bold rounded-lg border border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
                                       >
                                         +
                                       </button>
@@ -11846,11 +11846,11 @@ export default function App() {
                                           setHeatmapNightTarget(val);
                                           setStorageItem('heatmap_night_target', val);
                                         }}
-                                        className="w-8 h-8 bg-slate-900/50 hover:bg-slate-800/80 active:scale-95 text-slate-700 font-bold rounded-lg border border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
+                                        className="w-8 h-8 bg-slate-900/50 hover:bg-slate-800/80 active:scale-95 text-slate-300 font-bold rounded-lg border border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
                                       >
                                         -
                                       </button>
-                                      <span className="w-10 text-center font-bold text-slate-700 text-sm font-mono">
+                                      <span className="w-10 text-center font-bold text-slate-300 text-sm font-mono">
                                         {heatmapNightTarget}
                                       </span>
                                       <button
@@ -11860,7 +11860,7 @@ export default function App() {
                                           setHeatmapNightTarget(val);
                                           setStorageItem('heatmap_night_target', val);
                                         }}
-                                        className="w-8 h-8 bg-slate-900/50 hover:bg-slate-800/80 active:scale-95 text-slate-700 font-bold rounded-lg border border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
+                                        className="w-8 h-8 bg-slate-900/50 hover:bg-slate-800/80 active:scale-95 text-slate-300 font-bold rounded-lg border border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
                                       >
                                         +
                                       </button>
@@ -11941,7 +11941,7 @@ export default function App() {
                                                 <span className="text-[7.5px] uppercase tracking-widest leading-none font-bold opacity-60 mt-0.5">{row.term}</span>
 
                                                 {/* Tooltip listing agents */}
-                                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 hidden group-hover:block bg-slate-950 border border-indigo-500/30 text-slate-700 rounded-xl p-3 shadow-2xl z-50 text-[10px] leading-relaxed backdrop-blur-md">
+                                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 hidden group-hover:block bg-slate-950 border border-indigo-500/30 text-slate-300 rounded-xl p-3 shadow-2xl z-50 text-[10px] leading-relaxed backdrop-blur-md">
                                                   <p className="font-extrabold text-indigo-300 border-b border-indigo-500/20 pb-0.5 mb-1.5 flex items-center justify-between">
                                                     <span>📋 Coverage Details</span>
                                                     <span className="text-[8px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.2 rounded font-mono uppercase tracking-widest">{row.term}</span>
@@ -12043,7 +12043,7 @@ export default function App() {
                                   return (
                                     <th key={dateStr} className="px-3 py-3 text-center border-r border-slate-700/5 min-w-[90px]">
                                       <p className="text-[10px] text-indigo-300 uppercase font-bold tracking-wider">{dayName}</p>
-                                      <p className="text-base font-black text-slate-700">{dayNum}</p>
+                                      <p className="text-base font-black text-slate-300">{dayNum}</p>
                                       <p className="text-[9px] text-slate-400">{monthName}</p>
                                     </th>
                                   );
@@ -12060,7 +12060,7 @@ export default function App() {
                               ) : (
                                 visibleAgents.map(agentName => (
                                   <tr key={agentName} className="border-b border-slate-700/5 hover:bg-slate-700 transition-all">
-                                    <td className="px-5 py-3 text-xs font-bold text-slate-700 font-sans bg-slate-900/40 backdrop-blur-lg border-r border-slate-700/5 shadow-sm sticky left-0 z-10 truncate min-w-[140px]">
+                                    <td className="px-5 py-3 text-xs font-bold text-slate-300 font-sans bg-slate-900/40 backdrop-blur-lg border-r border-slate-700/5 shadow-sm sticky left-0 z-10 truncate min-w-[140px]">
                                       {agentName}
                                       <span className="block text-[8px] text-slate-400 font-normal lowercase tracking-wide font-sans">{getAgentLOB(agentName)}</span>
                                     </td>
@@ -12092,7 +12092,7 @@ export default function App() {
                                             )}
                                           </div>
                                           {(findShift?.shiftNotes || (findShift?.activities && findShift.activities.length > 0) || isSuperAdmin) && (
-                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block bg-slate-900 border border-indigo-400/40 text-slate-700 rounded-xl p-3 shadow-2xl z-50 text-[10px] leading-relaxed backdrop-blur-md">
+                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block bg-slate-900 border border-indigo-400/40 text-slate-300 rounded-xl p-3 shadow-2xl z-50 text-[10px] leading-relaxed backdrop-blur-md">
                                               <p className="font-extrabold text-indigo-300 border-b border-indigo-400/20 pb-0.5 mb-1.5 flex items-center justify-between font-display">
                                                 <span>📌 Details</span>
                                                 <span className="text-slate-400 font-mono scale-75">{dateStr}</span>
@@ -12141,7 +12141,7 @@ export default function App() {
                               const agentShifts = schedules.filter(s => s && s.agentName && s.agentName?.toLowerCase() === (agentName || '').toLowerCase() && activeDisplayDates.includes(s.date));
                               return (
                                 <div key={agentName} className="p-4 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-2xl space-y-2">
-                                  <p className="text-xs font-bold text-slate-700 border-b border-slate-700/5 pb-1 font-display flex justify-between items-center">
+                                  <p className="text-xs font-bold text-slate-300 border-b border-slate-700/5 pb-1 font-display flex justify-between items-center">
                                     <span>{agentName}</span>
                                     <span className="text-[9px] text-slate-400 font-normal lowercase tracking-wide bg-slate-900/50 border border-slate-700/5 px-1.5 py-0.5 rounded-lg">{getAgentLOB(agentName)}</span>
                                   </p>
@@ -12231,7 +12231,7 @@ export default function App() {
                     </div>
 
                     {/* P2P Shift Swap Trade Market & Trade Hub */}
-                    <div className="bg-slate-900/50 border border-slate-700/10 rounded-3xl shadow-sm text-slate-700 p-5 sm:p-6 shadow-2xl space-y-6 mt-6">
+                    <div className="bg-slate-900/50 border border-slate-700/10 rounded-3xl shadow-sm text-slate-300 p-5 sm:p-6 shadow-2xl space-y-6 mt-6">
                       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-700/5 pb-4">
                         <div>
                           <h3 className="font-extrabold text-transparent bg-gradient-to-r from-blue-300 via-indigo-200 to-cyan-300 bg-clip-text text-lg font-display flex items-center gap-2">
@@ -12274,11 +12274,11 @@ export default function App() {
                                   <select
                                     value={p2pSelectedDate}
                                     onChange={(e) => setP2pSelectedDate(e.target.value)}
-                                    className="w-full px-3 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-xs text-slate-700 outline-none cursor-pointer"
+                                    className="w-full px-3 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-xs text-slate-300 outline-none cursor-pointer"
                                   >
-                                    <option className="bg-slate-800 text-slate-700 "  value="">-- Choose Assigned Date --</option>
+                                    <option className="bg-slate-800 text-slate-100 "  value="">-- Choose Assigned Date --</option>
                                     {myShedList.map(s => (
-                                      <option className="bg-slate-800 text-slate-700 "  key={s.id} value={s.date}>
+                                      <option className="bg-slate-800 text-slate-100 "  key={s.id} value={s.date}>
                                         {formatDateNice(s.date)} (Your Duty: {s.shiftLabel})
                                       </option>
                                     ))}
@@ -12293,13 +12293,13 @@ export default function App() {
                               <select
                                 value={p2pTargetAgent}
                                 onChange={(e) => setP2pTargetAgent(e.target.value)}
-                                className="w-full px-3 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-xs text-slate-700 outline-none cursor-pointer"
+                                className="w-full px-3 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-xs text-slate-300 outline-none cursor-pointer"
                               >
-                                <option className="bg-slate-800 text-slate-700 "  value="">-- Let Any Peer in LOB Grab It --</option>
+                                <option className="bg-slate-800 text-slate-100 "  value="">-- Let Any Peer in LOB Grab It --</option>
                                 {agentsList
                                   .filter(a => a?.toLowerCase() !== currentUser?.name?.toLowerCase() && getAgentLOB(a) === getAgentLOB(currentUser.name))
                                   .map(aName => (
-                                    <option className="bg-slate-800 text-slate-700 "  key={aName} value={aName}>
+                                    <option className="bg-slate-800 text-slate-100 "  key={aName} value={aName}>
                                       {aName} ({getAgentLOB(aName)})
                                     </option>
                                   ))}
@@ -12315,14 +12315,14 @@ export default function App() {
                               <select
                                 value={p2pTargetShift}
                                 onChange={(e) => setP2pTargetShift(e.target.value)}
-                                className="w-full px-3 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-xs text-slate-700 outline-none cursor-pointer"
+                                className="w-full px-3 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-xs text-slate-300 outline-none cursor-pointer"
                               >
                                 {SHIFTS.map(s => (
-                                  <option className="bg-slate-800 text-slate-700 "  key={s.id} value={s.label}>
+                                  <option className="bg-slate-800 text-slate-100 "  key={s.id} value={s.label}>
                                     {s.display} ({s.label})
                                   </option>
                                 ))}
-                                <option className="bg-slate-800 text-slate-700 "  value="Off">Rest Day (Off Day)</option>
+                                <option className="bg-slate-800 text-slate-100 "  value="Off">Rest Day (Off Day)</option>
                               </select>
                             </div>
 
@@ -12334,7 +12334,7 @@ export default function App() {
                                 placeholder="I have a doctor appt / Need early shift..."
                                 value={p2pNotes}
                                 onChange={(e) => setP2pNotes(e.target.value)}
-                                className="w-full px-3 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-xs text-slate-700 placeholder-slate-500 outline-none"
+                                className="w-full px-3 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-xs text-slate-300 placeholder-slate-500 outline-none"
                               />
                             </div>
 
@@ -12379,7 +12379,7 @@ export default function App() {
                               }}
                               className="w-full py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white font-extrabold text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer font-sans"
                             >
-                              <PlusCircle className="w-4 h-4 text-slate-700" />
+                              <PlusCircle className="w-4 h-4 text-slate-300" />
                               Publish Trade Offer
                             </button>
                           </div>
@@ -12422,7 +12422,7 @@ export default function App() {
 
                                       return (
                                         <tr key={req.id} className="hover:bg-slate-800/[0.02] transition-colors">
-                                          <td className="px-4 py-3.5 font-bold text-slate-700">
+                                          <td className="px-4 py-3.5 font-bold text-slate-300">
                                             {req.agentName}
                                             <span className="block text-[8px] text-slate-400 font-normal lowercase">{getAgentLOB(req.agentName)}</span>
                                           </td>
@@ -12523,17 +12523,17 @@ export default function App() {
                     <div>
                       {isClientCommsTab ? (
                         <>
-                          <h2 className="text-3xl font-bold text-slate-700 font-display">Client Communication</h2>
+                          <h2 className="text-3xl font-bold text-slate-300 font-display">Client Communication</h2>
                           <p className="text-slate-400 text-sm">Submit and monitor requests for Chat and Social Media agents.</p>
                         </>
                       ) : isComplaintsTab ? (
                         <>
-                          <h2 className="text-3xl font-bold text-slate-700 font-display">Complaints Desk</h2>
+                          <h2 className="text-3xl font-bold text-slate-300 font-display">Complaints Desk</h2>
                           <p className="text-slate-400 text-sm">Register, monitor, and resolve patient complaints.</p>
                         </>
                       ) : (
                         <>
-                          <h2 className="text-3xl font-bold text-slate-700 font-display">Tabby & Tamara Desk</h2>
+                          <h2 className="text-3xl font-bold text-slate-300 font-display">Tabby & Tamara Desk</h2>
                           <p className="text-slate-400 text-sm">Submit installment requests and monitor active contact resolution timers.</p>
                         </>
                       )}
@@ -12548,7 +12548,7 @@ export default function App() {
                       {/* ... existing requests metrics ... */}
                       <div className="p-4 bg-slate-900/50 border border-slate-700/10 rounded-2xl backdrop-blur-sm">
                         <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Total Submissions</p>
-                        <p className="text-2xl font-black text-slate-700">
+                        <p className="text-2xl font-black text-slate-300">
                           {isTLOreSupport 
                             ? tabbyTamaraRequests.length 
                             : tabbyTamaraRequests.filter(r => r.agentName?.toLowerCase() === currentUser?.name?.toLowerCase()).length
@@ -12595,7 +12595,7 @@ export default function App() {
                       {/* ... existing complaints metrics ... */}
                       <div className="p-4 bg-slate-900/50 border border-slate-700/10 rounded-2xl backdrop-blur-sm">
                         <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Total Complaints</p>
-                        <p className="text-2xl font-black text-slate-700">
+                        <p className="text-2xl font-black text-slate-300">
                           {isTLOreSupport
                             ? tabbyTamaraComplaints.length
                             : tabbyTamaraComplaints.filter(c => c.agentName?.toLowerCase() === currentUser?.name?.toLowerCase()).length
@@ -12641,7 +12641,7 @@ export default function App() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
                       <div className="p-4 bg-slate-900/50 border border-slate-700/10 rounded-2xl backdrop-blur-sm">
                         <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Total Requests</p>
-                        <p className="text-2xl font-black text-slate-700">
+                        <p className="text-2xl font-black text-slate-300">
                           {isTLOreSupport
                             ? clientComms.length
                             : clientComms.filter(c => c.callCenterAgentName?.toLowerCase() === currentUser?.name?.toLowerCase() || c.handledBy?.toLowerCase() === currentUser?.name?.toLowerCase()).length
@@ -12671,7 +12671,7 @@ export default function App() {
                       <div className="lg:col-span-4 space-y-4">
                         {localSubTab === 'requests' ? (
                           <div className="p-6 bg-slate-900/50 backdrop-blur-xl border border-slate-700/20 rounded-3xl space-y-4 shadow-2xl">
-                            <h3 className="text-lg font-bold text-slate-700 font-display flex items-center gap-2 text-left">
+                            <h3 className="text-lg font-bold text-slate-300 font-display flex items-center gap-2 text-left">
                               <PlusCircle className="w-5 h-5 text-indigo-400" />
                               New Installment Request
                             </h3>
@@ -12688,7 +12688,7 @@ export default function App() {
                                   placeholder="Enter full patient name"
                                   value={ttPatientName}
                                   onChange={(e) => setTtPatientName(e.target.value)}
-                                  className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-500 font-sans font-medium"
+                                  className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 font-sans font-medium"
                                   required
                                 />
                               </div>
@@ -12701,7 +12701,7 @@ export default function App() {
                                   placeholder="Patient file / folder number"
                                   value={ttFileNumber}
                                   onChange={(e) => setTtFileNumber(e.target.value)}
-                                  className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-500 font-mono"
+                                  className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 font-mono"
                                 />
                               </div>
 
@@ -12728,7 +12728,7 @@ export default function App() {
                                       placeholder="National ID / Iqama Number"
                                       value={ttIdNumber}
                                       onChange={(e) => setTtIdNumber(e.target.value)}
-                                      className="w-full bg-black/45 border border-amber-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-amber-500 font-mono"
+                                      className="w-full bg-black/45 border border-amber-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-amber-500 font-mono"
                                       required={!ttIsOldCustomer}
                                     />
                                   </div>
@@ -12745,7 +12745,7 @@ export default function App() {
                                     placeholder="0.00"
                                     value={ttPriceWithoutTax}
                                     onChange={(e) => setTtPriceWithoutTax(e.target.value)}
-                                    className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl pl-12 pr-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-500 font-mono"
+                                    className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl pl-12 pr-4 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 font-mono"
                                     required
                                   />
                                 </div>
@@ -12764,7 +12764,7 @@ export default function App() {
                                   placeholder="+966 5x xxx xxxx"
                                   value={ttPhoneNumber}
                                   onChange={(e) => setTtPhoneNumber(e.target.value)}
-                                  className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-500 font-mono"
+                                  className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 font-mono"
                                   required
                                 />
                               </div>
@@ -12789,7 +12789,7 @@ export default function App() {
                                     onClick={() => setTtPlatform('tamara')}
                                     className={`py-2 rounded-xl text-[11px] font-black uppercase transition-all tracking-wider flex items-center justify-center gap-1.5 border cursor-pointer ${
                                       ttPlatform === 'tamara'
-                                        ? 'bg-pink-500 border-pink-400 text-slate-700 shadow-md'
+                                        ? 'bg-pink-500 border-pink-400 text-slate-300 shadow-md'
                                         : 'bg-black/25 border-slate-700/5 text-slate-400 hover:bg-slate-700'
                                     }`}
                                   >
@@ -12815,15 +12815,15 @@ export default function App() {
                                   id="tt-clinic"
                                   value={ttClinicName}
                                   onChange={(e) => setTtClinicName(e.target.value)}
-                                  className="w-full px-4 py-3 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-slate-700 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
+                                  className="w-full px-4 py-3 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-slate-300 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                   required
                                 >
-                                  <option value="" className="bg-slate-800 text-slate-700 ">Select a Clinic</option>
-                                  <option value="dermadent" className="bg-slate-800 text-slate-700 ">Dermadent</option>
-                                  <option value="onetouch1" className="bg-slate-800 text-slate-700 ">One Touch 1 AlMu'tarid</option>
-                                  <option value="onetouch2" className="bg-slate-800 text-slate-700 ">One Touch 2 Markhaniya</option>
-                                  <option value="welltouch" className="bg-slate-800 text-slate-700 ">WellTouch</option>
-                                  <option value="newedge" className="bg-slate-800 text-slate-700 ">New Edge</option>
+                                  <option value="" className="bg-slate-800 text-slate-100 ">Select a Clinic</option>
+                                  <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
+                                  <option value="onetouch1" className="bg-slate-800 text-slate-100 ">One Touch 1 AlMu'tarid</option>
+                                  <option value="onetouch2" className="bg-slate-800 text-slate-100 ">One Touch 2 Markhaniya</option>
+                                  <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
+                                  <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
                                 </select>
                               </div>
 
@@ -12834,7 +12834,7 @@ export default function App() {
                                   placeholder="Any special treatment, payment plan terms, etc."
                                   value={ttNotes}
                                   onChange={(e) => setTtNotes(e.target.value)}
-                                  className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-sans min-h-[70px] resize-y"
+                                  className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-300 focus:outline-none focus:border-indigo-500 font-sans min-h-[70px] resize-y"
                                 />
                               </div>
 
@@ -12847,7 +12847,7 @@ export default function App() {
                               <button
                                 type="submit"
                                 disabled={isFormSubmitting}
-                                className={`w-full py-3.5 text-slate-700 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow ${isFormSubmitting ? 'bg-indigo-800 opacity-65 pointer-events-none' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] shadow-indigo-500/10'}`}
+                                className={`w-full py-3.5 text-slate-300 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow ${isFormSubmitting ? 'bg-indigo-800 opacity-65 pointer-events-none' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] shadow-indigo-500/10'}`}
                               >
                                 {isFormSubmitting ? (
                                   <>
@@ -12865,7 +12865,7 @@ export default function App() {
                           </div>
                         ) : localSubTab === 'complaints' ? (
                           <div className="p-6 bg-slate-900/50 backdrop-blur-xl border border-slate-700/20 rounded-3xl space-y-4 shadow-2xl animate-fade-in">
-                            <h3 className="text-lg font-bold text-slate-700 font-display flex items-center gap-2 text-left">
+                            <h3 className="text-lg font-bold text-slate-300 font-display flex items-center gap-2 text-left">
                               <AlertTriangle className="w-5 h-5 text-pink-500" />
                               Log New Complaint
                             </h3>
@@ -12882,7 +12882,7 @@ export default function App() {
                                   placeholder="Enter patient name"
                                   value={tcPatientName}
                                   onChange={(e) => setTcPatientName(e.target.value)}
-                                  className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-pink-500 font-sans font-medium"
+                                  className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-pink-500 font-sans font-medium"
                                   required
                                 />
                               </div>
@@ -12895,7 +12895,7 @@ export default function App() {
                                   placeholder="File / folder reference"
                                   value={tcFileNumber}
                                   onChange={(e) => setTcFileNumber(e.target.value)}
-                                  className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-pink-500 font-mono"
+                                  className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-pink-500 font-mono"
                                 />
                               </div>
 
@@ -12922,7 +12922,7 @@ export default function App() {
                                       placeholder="National ID / Iqama Number"
                                       value={tcIdNumber}
                                       onChange={(e) => setTcIdNumber(e.target.value)}
-                                      className="w-full bg-black/45 border border-amber-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-amber-500 font-mono"
+                                      className="w-full bg-black/45 border border-amber-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-amber-500 font-mono"
                                       required={!tcIsOldCustomer}
                                     />
                                   </div>
@@ -12944,7 +12944,7 @@ export default function App() {
                                   placeholder="+966 5x xxx xxxx"
                                   value={tcPhoneNumber}
                                   onChange={(e) => setTcPhoneNumber(e.target.value)}
-                                  className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-pink-500 font-mono"
+                                  className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-pink-500 font-mono"
                                   required
                                 />
                               </div>
@@ -12955,15 +12955,15 @@ export default function App() {
                                   id="tc-clinic"
                                   value={tcClinicName}
                                   onChange={(e) => setTcClinicName(e.target.value)}
-                                  className="w-full px-4 py-3 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-slate-700 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
+                                  className="w-full px-4 py-3 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-slate-300 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                   required
                                 >
-                                  <option value="" className="bg-slate-800 text-slate-700 ">Select a Clinic</option>
-                                  <option value="dermadent" className="bg-slate-800 text-slate-700 ">Dermadent</option>
-                                  <option value="onetouch1" className="bg-slate-800 text-slate-700 ">One Touch 1 AlMu'tarid</option>
-                                  <option value="onetouch2" className="bg-slate-800 text-slate-700 ">One Touch 2 Markhaniya</option>
-                                  <option value="welltouch" className="bg-slate-800 text-slate-700 ">WellTouch</option>
-                                  <option value="newedge" className="bg-slate-800 text-slate-700 ">New Edge</option>
+                                  <option value="" className="bg-slate-800 text-slate-100 ">Select a Clinic</option>
+                                  <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
+                                  <option value="onetouch1" className="bg-slate-800 text-slate-100 ">One Touch 1 AlMu'tarid</option>
+                                  <option value="onetouch2" className="bg-slate-800 text-slate-100 ">One Touch 2 Markhaniya</option>
+                                  <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
+                                  <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
                                 </select>
                               </div>
 
@@ -12974,7 +12974,7 @@ export default function App() {
                                   placeholder="Patient notes or description of the issue or service failure..."
                                   value={tcComplaintDetails}
                                   onChange={(e) => setTcComplaintDetails(e.target.value)}
-                                  className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-700 focus:outline-none focus:border-pink-500 font-sans min-h-[80px] resize-y font-medium"
+                                  className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-300 focus:outline-none focus:border-pink-500 font-sans min-h-[80px] resize-y font-medium"
                                   required
                                 />
                               </div>
@@ -12982,7 +12982,7 @@ export default function App() {
                               <button
                                 type="submit"
                                 disabled={isFormSubmitting}
-                                className={`w-full py-3.5 text-slate-700 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow ${isFormSubmitting ? 'bg-pink-900 opacity-65 pointer-events-none' : 'bg-gradient-to-r from-pink-500 to-pink-600 hover:brightness-110 active:scale-[0.99] shadow-pink-500/10'}`}
+                                className={`w-full py-3.5 text-slate-300 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow ${isFormSubmitting ? 'bg-pink-900 opacity-65 pointer-events-none' : 'bg-gradient-to-r from-pink-500 to-pink-600 hover:brightness-110 active:scale-[0.99] shadow-pink-500/10'}`}
                               >
                                 {isFormSubmitting ? (
                                   <>
@@ -13001,7 +13001,7 @@ export default function App() {
                         ) : (
                           getAgentLOB(currentUser.name) === 'Call Center' && (
                             <div className="p-6 bg-slate-900/50 backdrop-blur-xl border border-slate-700/20 rounded-3xl space-y-4 shadow-2xl animate-fade-in">
-                              <h3 className="text-lg font-bold text-slate-700 font-display flex items-center gap-2 text-left">
+                              <h3 className="text-lg font-bold text-slate-300 font-display flex items-center gap-2 text-left">
                                 <MessageSquare className="w-5 h-5 text-indigo-400" />
                                 Submit Communication Request
                               </h3>
@@ -13016,15 +13016,15 @@ export default function App() {
                                   <select
                                     value={ccClinicName}
                                     onChange={(e) => setCcClinicName(e.target.value)}
-                                    className="w-full px-4 py-3 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-slate-700 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
+                                    className="w-full px-4 py-3 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-slate-300 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                     required
                                   >
-                                    <option value="" className="bg-slate-800 text-slate-700 ">Select a Clinic</option>
-                                    <option value="dermadent" className="bg-slate-800 text-slate-700 ">Dermadent</option>
-                                    <option value="onetouch1" className="bg-slate-800 text-slate-700 ">One Touch 1 AlMu'tarid</option>
-                                    <option value="onetouch2" className="bg-slate-800 text-slate-700 ">One Touch 2 Markhaniya</option>
-                                    <option value="welltouch" className="bg-slate-800 text-slate-700 ">WellTouch</option>
-                                    <option value="newedge" className="bg-slate-800 text-slate-700 ">New Edge</option>
+                                    <option value="" className="bg-slate-800 text-slate-100 ">Select a Clinic</option>
+                                    <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
+                                    <option value="onetouch1" className="bg-slate-800 text-slate-100 ">One Touch 1 AlMu'tarid</option>
+                                    <option value="onetouch2" className="bg-slate-800 text-slate-100 ">One Touch 2 Markhaniya</option>
+                                    <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
+                                    <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
                                   </select>
                                 </div>
 
@@ -13036,7 +13036,7 @@ export default function App() {
                                     placeholder="+966 5x xxx xxxx"
                                     value={ccPhoneNumber}
                                     onChange={(e) => setCcPhoneNumber(e.target.value)}
-                                    className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-500 font-mono"
+                                    className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 font-mono"
                                     required
                                   />
                                 </div>
@@ -13077,7 +13077,7 @@ export default function App() {
                                     placeholder="Explain the required follow up..."
                                     value={ccNotes}
                                     onChange={(e) => setCcNotes(e.target.value)}
-                                    className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-sans min-h-[80px] resize-y font-medium"
+                                    className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-300 focus:outline-none focus:border-indigo-500 font-sans min-h-[80px] resize-y font-medium"
                                     required
                                   />
                                 </div>
@@ -13090,7 +13090,7 @@ export default function App() {
 
                                 <button
                                   type="submit"
-                                  className="w-full py-3.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] text-slate-700 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow shadow-indigo-500/10"
+                                  className="w-full py-3.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] text-slate-300 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow shadow-indigo-500/10"
                                 >
                                   <Send className="w-3.5 h-3.5" />
                                   {isFormSubmitting ? "Submitting..." : "Submit Request"}
@@ -13108,7 +13108,7 @@ export default function App() {
                         
                         {/* Filters and search Header */}
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-700/5 pb-4">
-                          <h3 className="text-lg font-bold text-slate-700 font-sans flex items-center gap-2">
+                          <h3 className="text-lg font-bold text-slate-300 font-sans flex items-center gap-2">
                             {localSubTab === 'requests' ? (
                               <>
                                 <ClipboardList className="w-5 h-5 text-indigo-400" />
@@ -13137,7 +13137,7 @@ export default function App() {
                               placeholder={localSubTab === 'client-comms' ? "Search clinic, phone..." : "Search patient, phone, file..."}
                               value={ttSearchQuery}
                               onChange={(e) => setTtSearchQuery(e.target.value)}
-                              className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-sans font-medium"
+                              className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-indigo-500 font-sans font-medium"
                             />
                           </div>
                         </div>
@@ -13148,27 +13148,27 @@ export default function App() {
                           <div className="flex items-center gap-1.5 bg-black/35 p-1 rounded-xl border border-slate-700/5">
                             <button
                               onClick={() => setTtFilterStatus('all')}
-                              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === 'all' ? 'bg-indigo-600 text-white font-sans' : 'text-slate-400 hover:text-slate-700 font-sans'}`}
+                              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === 'all' ? 'bg-indigo-600 text-white font-sans' : 'text-slate-400 hover:text-slate-300 font-sans'}`}
                             >
                               <History className="w-3 h-3" />
                               All History
                             </button>
                             <button
                               onClick={() => setTtFilterStatus('not_confirmed')}
-                              className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === 'not_confirmed' ? 'bg-amber-400/20 text-amber-300 border border-amber-500/20 font-sans' : 'text-slate-400 hover:text-slate-700 font-sans'}`}
+                              className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === 'not_confirmed' ? 'bg-amber-400/20 text-amber-300 border border-amber-500/20 font-sans' : 'text-slate-400 hover:text-slate-300 font-sans'}`}
                             >
                               {localSubTab === 'requests' ? '⏳ Pending Confirm' : localSubTab === 'complaints' ? '⏳ Pending TL' : '⏳ Pending Contact'}
                             </button>
                             <button
                               onClick={() => setTtFilterStatus('confirmed')}
-                              className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === 'confirmed' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/20 font-sans' : 'text-slate-400 hover:text-slate-700 font-sans'}`}
+                              className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === 'confirmed' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/20 font-sans' : 'text-slate-400 hover:text-slate-300 font-sans'}`}
                             >
                               {localSubTab === 'requests' ? '📞 Pending Contact' : localSubTab === 'complaints' ? '📞 Pending Contact' : '✅ Contacted'}
                             </button>
                             {localSubTab !== 'client-comms' && (
                               <button
                                 onClick={() => setTtFilterStatus('contacted')}
-                                className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === 'contacted' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 font-sans' : 'text-slate-400 hover:text-slate-700 font-sans'}`}
+                                className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === 'contacted' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 font-sans' : 'text-slate-400 hover:text-slate-300 font-sans'}`}
                               >
                                 {localSubTab === 'requests' ? '✅ Contacted' : '✅ Closed'}
                               </button>
@@ -13182,25 +13182,25 @@ export default function App() {
                             <select
                               value={tcFilterClinic}
                               onChange={(e) => setTcFilterClinic(e.target.value)}
-                              className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-2.5 py-1 text-[11px] text-slate-700 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
+                              className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-2.5 py-1 text-[11px] text-slate-300 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                             >
-                              <option value="all" className="bg-slate-800 text-slate-700 ">All Clinics</option>
-                              <option value="dermadent" className="bg-slate-800 text-slate-700 ">Dermadent</option>
-                              <option value="onetouch1" className="bg-slate-800 text-slate-700 ">One Touch 1 AlMu'tarid</option>
-                              <option value="onetouch2" className="bg-slate-800 text-slate-700 ">One Touch 2 Markhaniya</option>
-                              <option value="welltouch" className="bg-slate-800 text-slate-700 ">WellTouch</option>
-                              <option value="newedge" className="bg-slate-800 text-slate-700 ">New Edge</option>
+                              <option value="all" className="bg-slate-800 text-slate-100 ">All Clinics</option>
+                              <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
+                              <option value="onetouch1" className="bg-slate-800 text-slate-100 ">One Touch 1 AlMu'tarid</option>
+                              <option value="onetouch2" className="bg-slate-800 text-slate-100 ">One Touch 2 Markhaniya</option>
+                              <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
+                              <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
                             </select>
                           ) : (
                             <select
                               value={ttFilterProvider}
                               onChange={(e) => setTtFilterProvider(e.target.value as any)}
-                              className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-2.5 py-1 text-[11px] text-slate-700 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
+                              className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-2.5 py-1 text-[11px] text-slate-300 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                             >
-                              <option value="all" className="bg-slate-800 text-slate-700 ">All Providers</option>
-                              <option value="tabby" className="bg-slate-800 text-slate-700 ">Tabby Only</option>
-                              <option value="tamara" className="bg-slate-800 text-slate-700 ">Tamara Only</option>
-                              <option value="one_time_payment" className="bg-slate-800 text-slate-700 ">One Time Payment</option>
+                              <option value="all" className="bg-slate-800 text-slate-100 ">All Providers</option>
+                              <option value="tabby" className="bg-slate-800 text-slate-100 ">Tabby Only</option>
+                              <option value="tamara" className="bg-slate-800 text-slate-100 ">Tamara Only</option>
+                              <option value="one_time_payment" className="bg-slate-800 text-slate-100 ">One Time Payment</option>
                             </select>
                           )}
                         </div>
@@ -13239,7 +13239,7 @@ export default function App() {
                                   <div className="w-12 h-12 rounded-full bg-slate-900/50 flex items-center justify-center mx-auto text-white0">
                                     <Wallet className="w-6 h-6" />
                                   </div>
-                                  <p className="text-sm font-bold text-slate-700 font-sans">No installment requests matching criteria.</p>
+                                  <p className="text-sm font-bold text-slate-300 font-sans">No installment requests matching criteria.</p>
                                   <p className="text-xs text-slate-400">Requests will be logged here with live status loops and response timers.</p>
                                 </div>
                               ) : (
@@ -13309,7 +13309,7 @@ export default function App() {
                                                   </span>
                                                 )}
                                               </div>
-                                              <h4 className="text-sm font-black text-slate-700 font-sans mt-1">{req.patientName}</h4>
+                                              <h4 className="text-sm font-black text-slate-300 font-sans mt-1">{req.patientName}</h4>
                                             </div>
 
                                             {/* Status Badges */}
@@ -13478,7 +13478,7 @@ export default function App() {
                                                   placeholder="https://..."
                                                   value={tlFintechPaymentLink}
                                                   onChange={(e) => setTlFintechPaymentLink(e.target.value)}
-                                                  className="w-full bg-slate-950 border border-slate-700/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-sans"
+                                                  className="w-full bg-slate-950 border border-slate-700/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-indigo-500 font-sans"
                                                 />
                                               </div>
 
@@ -13488,7 +13488,7 @@ export default function App() {
                                                   placeholder="Add notes, pointers, or remarks..."
                                                   value={tlFintechNotes}
                                                   onChange={(e) => setTlFintechNotes(e.target.value)}
-                                                  className="w-full bg-slate-950 border border-slate-700/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-sans min-h-[60px]"
+                                                  className="w-full bg-slate-950 border border-slate-700/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-indigo-500 font-sans min-h-[60px]"
                                                 />
                                               </div>
 
@@ -13499,7 +13499,7 @@ export default function App() {
                                                   placeholder="https://link1.com, https://link2.com"
                                                   value={tlFintechLinks}
                                                   onChange={(e) => setTlFintechLinks(e.target.value)}
-                                                  className="w-full bg-slate-950 border border-slate-700/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-sans"
+                                                  className="w-full bg-slate-950 border border-slate-700/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-indigo-500 font-sans"
                                                 />
                                               </div>
 
@@ -13597,7 +13597,7 @@ export default function App() {
                                                   navigator.clipboard.writeText(details);
                                                   toast.success('Payment request details copied!');
                                                 }}
-                                                className="px-2.5 py-1.5 bg-slate-900/50 hover:bg-slate-800/80 border border-slate-700/10 rounded-lg text-slate-300 hover:text-slate-700 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                                                className="px-2.5 py-1.5 bg-slate-900/50 hover:bg-slate-800/80 border border-slate-700/10 rounded-lg text-slate-300 hover:text-slate-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                                                 title="Copy Payment details"
                                               >
                                                 <Copy className="w-3.5 h-3.5" />
@@ -13672,7 +13672,7 @@ export default function App() {
                                   <div className="w-12 h-12 rounded-full bg-slate-900/50 flex items-center justify-center mx-auto text-white0">
                                     <AlertTriangle className="w-6 h-6 text-pink-500" />
                                   </div>
-                                  <p className="text-sm font-bold text-slate-700 font-sans">No complaints matching criteria.</p>
+                                  <p className="text-sm font-bold text-slate-300 font-sans">No complaints matching criteria.</p>
                                   <p className="text-xs text-slate-400">Logged complaints, issues and dispute timelines will load here.</p>
                                 </div>
                               ) : (
@@ -13732,7 +13732,7 @@ export default function App() {
                                                   </span>
                                                 )}
                                               </div>
-                                              <h4 className="text-sm font-black text-slate-700 font-sans mt-1">{comp.patientName}</h4>
+                                              <h4 className="text-sm font-black text-slate-300 font-sans mt-1">{comp.patientName}</h4>
                                             </div>
 
                                             {/* Status Badges */}
@@ -13855,7 +13855,7 @@ export default function App() {
                                                 placeholder="Write comment/resolution details to update status to Pending Contact..."
                                                 value={tlComplaintComment}
                                                 onChange={(e) => setTlComplaintComment(e.target.value)}
-                                                className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-lg px-2.5 py-2 text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-sans min-h-[60px]"
+                                                className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-lg px-2.5 py-2 text-xs text-slate-300 focus:outline-none focus:border-indigo-500 font-sans min-h-[60px]"
                                                 required
                                               />
                                               <div className="flex gap-2 justify-end">
@@ -13869,7 +13869,7 @@ export default function App() {
                                                 <button
                                                   type="button"
                                                   onClick={() => handleTLCommentComplaint(comp.id, tlComplaintComment)}
-                                                  className="px-3.5 py-1.5 bg-gradient-to-r from-pink-500 to-pink-600 hover:brightness-110 active:scale-95 text-slate-700 text-[10px] font-bold rounded-lg shadow cursor-pointer transition-all flex items-center gap-1"
+                                                  className="px-3.5 py-1.5 bg-gradient-to-r from-pink-500 to-pink-600 hover:brightness-110 active:scale-95 text-slate-300 text-[10px] font-bold rounded-lg shadow cursor-pointer transition-all flex items-center gap-1"
                                                 >
                                                   Submit Issue Review
                                                 </button>
@@ -13909,7 +13909,7 @@ export default function App() {
                                                   navigator.clipboard.writeText(details);
                                                   toast.success('Complaint details copied!');
                                                 }}
-                                                className="px-2.5 py-1.5 bg-slate-900/50 hover:bg-slate-800/80 border border-slate-700/10 rounded-lg text-slate-300 hover:text-slate-700 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                                                className="px-2.5 py-1.5 bg-slate-900/50 hover:bg-slate-800/80 border border-slate-700/10 rounded-lg text-slate-300 hover:text-slate-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                                                 title="Copy Complaint details"
                                               >
                                                 <Copy className="w-3.5 h-3.5" />
@@ -13995,7 +13995,7 @@ export default function App() {
                                   <div className="w-12 h-12 rounded-full bg-slate-900/50 flex items-center justify-center mx-auto text-white0">
                                     <MessageSquare className="w-6 h-6 text-indigo-400" />
                                   </div>
-                                  <p className="text-sm font-bold text-slate-700 font-sans">No communication requests matching criteria.</p>
+                                  <p className="text-sm font-bold text-slate-300 font-sans">No communication requests matching criteria.</p>
                                   <p className="text-xs text-slate-400">Requests for Chat and Social Media agents will appear here.</p>
                                 </div>
                               ) : (
@@ -14154,7 +14154,7 @@ export default function App() {
                                                 placeholder="What was the outcome of contacting the client?"
                                                 value={ccHandlingNotes}
                                                 onChange={(e) => setCcHandlingNotes(e.target.value)}
-                                                className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-lg px-2.5 py-2 text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-sans min-h-[60px]"
+                                                className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-lg px-2.5 py-2 text-xs text-slate-300 focus:outline-none focus:border-indigo-500 font-sans min-h-[60px]"
                                                 required
                                               />
                                               <div className="flex gap-2 justify-end">
@@ -14207,7 +14207,7 @@ export default function App() {
                                                   navigator.clipboard.writeText(details);
                                                   toast.success('Client communication details copied!');
                                                 }}
-                                                className="px-2.5 py-1.5 bg-slate-900/50 hover:bg-slate-800/80 border border-slate-700/10 rounded-lg text-slate-300 hover:text-slate-700 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                                                className="px-2.5 py-1.5 bg-slate-900/50 hover:bg-slate-800/80 border border-slate-700/10 rounded-lg text-slate-300 hover:text-slate-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                                                 title="Copy Request details"
                                               >
                                                 <Copy className="w-3.5 h-3.5" />
@@ -14230,7 +14230,7 @@ export default function App() {
                                                   setActiveCcHandlingId(req.id);
                                                   setCcHandlingNotes('');
                                                 }}
-                                                className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 text-slate-700 font-sans font-black text-xs rounded-xl shadow-lg cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
+                                                className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 text-slate-300 font-sans font-black text-xs rounded-xl shadow-lg cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
                                               >
                                                 📞 Finalize Handled
                                               </button>
@@ -14323,11 +14323,11 @@ export default function App() {
                           <select
                             value={feedbackFilterTl}
                             onChange={(e) => setFeedbackFilterTl(e.target.value)}
-                            className="bg-slate-900/50 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-amber-400 font-sans w-full sm:w-48"
+                            className="bg-slate-900/50 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-amber-400 font-sans w-full sm:w-48"
                           >
-                            <option value="all" className="bg-slate-800 text-slate-700 ">All Team Leaders</option>
+                            <option value="all" className="bg-slate-800 text-slate-100 ">All Team Leaders</option>
                             {availableTlsForSelect.map(tl => (
-                              <option key={tl} value={tl} className="bg-slate-800 text-slate-700 ">{tl}</option>
+                              <option key={tl} value={tl} className="bg-slate-800 text-slate-100 ">{tl}</option>
                             ))}
                           </select>
                         </div>
@@ -14336,9 +14336,9 @@ export default function App() {
 
                     {/* Amira Hassan Submission Console */}
                     {isAmira && (
-                      <div className="bg-slate-900/50 border text-slate-700 border-slate-700/10 rounded-3xl shadow-sm p-6 space-y-4">
+                      <div className="bg-slate-900/50 border text-slate-300 border-slate-700/10 rounded-3xl shadow-sm p-6 space-y-4">
                         <div className="border-b border-slate-700/5 pb-3">
-                          <h3 className="font-bold text-slate-700 text-base font-display flex items-center gap-2">
+                          <h3 className="font-bold text-slate-300 text-base font-display flex items-center gap-2">
                             <Sparkles className="w-5 h-5 text-amber-400" />
                             Compose Feedback to Team Leader
                           </h3>
@@ -14351,11 +14351,11 @@ export default function App() {
                             <select
                               value={selectedTlForFeedback}
                               onChange={(e) => setSelectedTlForFeedback(e.target.value)}
-                              className="bg-slate-900/50 border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-amber-400 font-sans w-full cursor-pointer"
+                              className="bg-slate-900/50 border border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-amber-400 font-sans w-full cursor-pointer"
                             >
-                              <option value="" className="bg-slate-800 text-slate-700 backdrop-blur-lg">-- Choose TL --</option>
+                              <option value="" className="bg-slate-800 text-slate-100 backdrop-blur-lg">-- Choose TL --</option>
                               {availableTlsForSelect.map(tl => (
-                                <option key={tl} value={tl} className="bg-slate-800 text-slate-700 backdrop-blur-lg">{tl}</option>
+                                <option key={tl} value={tl} className="bg-slate-800 text-slate-100 backdrop-blur-lg">{tl}</option>
                               ))}
                             </select>
                           </div>
@@ -14398,7 +14398,7 @@ export default function App() {
                             onChange={(e) => setFeedbackNotes(e.target.value)}
                             rows={4}
                             placeholder="Type details... Bold text is supported by using **double asterisks**. Tag anyone using @Name, they will get an instant ping notification!"
-                            className="bg-slate-900/50 border border-slate-700/10 rounded-2xl text-sm text-slate-700 px-4 py-3 focus:outline-none focus:border-amber-400 w-full placeholder:text-white0 font-sans leading-relaxed"
+                            className="bg-slate-900/50 border border-slate-700/10 rounded-2xl text-sm text-slate-300 px-4 py-3 focus:outline-none focus:border-amber-400 w-full placeholder:text-white0 font-sans leading-relaxed"
                           />
                         </div>
 
@@ -14423,7 +14423,7 @@ export default function App() {
                       {filteredFeedbacks.length === 0 ? (
                         <div className="py-12 bg-slate-900/50 border border-slate-700/10 rounded-3xl text-center">
                           <MessageSquare className="w-12 h-12 text-white0 opacity-40 mx-auto mb-3" />
-                          <h4 className="font-bold text-slate-700 text-base">No Feedbacks Logged</h4>
+                          <h4 className="font-bold text-slate-300 text-base">No Feedbacks Logged</h4>
                           <p className="text-slate-400 text-xs mt-1">There are no records in the selected Category.</p>
                         </div>
                       ) : (
@@ -14438,7 +14438,7 @@ export default function App() {
                                   </div>
                                   <div>
                                     <div className="flex items-center gap-2">
-                                      <h4 className="font-bold text-slate-700 text-base">{f.tlName}</h4>
+                                      <h4 className="font-bold text-slate-300 text-base">{f.tlName}</h4>
                                       <span className="text-[10px] text-white0 font-medium">Addressed to TL</span>
                                     </div>
                                     <p className="text-xs text-slate-400">Created by Director: {f.directorName} • {new Date(f.createdAt).toLocaleString()}</p>
@@ -14469,7 +14469,7 @@ export default function App() {
                                           return <span key={wIdx} className="bg-indigo-500/20 text-indigo-300 font-bold px-1.5 py-0.5 rounded text-xs">{word}</span>;
                                         }
                                         if (word.startsWith('**') && word.endsWith('**')) {
-                                          return <strong key={wIdx} className="font-extrabold text-slate-700">{word.slice(2, -2)}</strong>;
+                                          return <strong key={wIdx} className="font-extrabold text-slate-300">{word.slice(2, -2)}</strong>;
                                         }
                                         return word;
                                       })}
@@ -14482,7 +14482,7 @@ export default function App() {
                                   <div className="flex items-center gap-3 p-3 bg-slate-900/50 border border-slate-700/10 rounded-xl">
                                     <Paperclip className="w-4 h-4 text-amber-400 shrink-0" />
                                     <div className="flex-1 overflow-hidden">
-                                      <p className="text-xs text-slate-700 font-semibold truncate">{f.attachmentName || 'evaluation_attachment'}</p>
+                                      <p className="text-xs text-slate-300 font-semibold truncate">{f.attachmentName || 'evaluation_attachment'}</p>
                                       <p className="text-[10px] text-white0 font-mono">Attachment Available</p>
                                     </div>
                                     <a
@@ -14559,7 +14559,7 @@ export default function App() {
                                         onChange={(e) => setFeedbackReplies(prev => ({ ...prev, [f.id]: e.target.value }))}
                                         rows={2}
                                         placeholder="Type your reply notes..."
-                                        className="bg-slate-900/50 border border-slate-700/10 rounded-xl text-xs text-slate-700 px-3 py-2 focus:outline-none focus:border-amber-400 w-full placeholder:text-white0 font-sans"
+                                        className="bg-slate-900/50 border border-slate-700/10 rounded-xl text-xs text-slate-300 px-3 py-2 focus:outline-none focus:border-amber-400 w-full placeholder:text-white0 font-sans"
                                       />
                                     </div>
 
@@ -14615,7 +14615,7 @@ export default function App() {
                             placeholder="Search names, phones, emails..."
                             value={directorySearchQuery}
                             onChange={(e) => setDirectorySearchQuery(e.target.value)}
-                            className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-700 focus:outline-none focus:border-cyan-500 font-sans font-medium"
+                            className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-300 focus:outline-none focus:border-cyan-500 font-sans font-medium"
                           />
                         </div>
                       </div>
@@ -14623,10 +14623,10 @@ export default function App() {
 
                     {/* Headcount Upload Console directly under directory tab for Hesham & Amira */}
                     {isSuperAdmin && (
-                      <div className="bg-slate-900/50 border text-slate-700 border-slate-700/10 rounded-3xl shadow-sm p-6 space-y-6">
+                      <div className="bg-slate-900/50 border text-slate-300 border-slate-700/10 rounded-3xl shadow-sm p-6 space-y-6">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-slate-700/5 gap-3">
                           <div className="text-left">
-                            <h3 className="font-bold text-slate-700 text-base font-display flex items-center gap-2">
+                            <h3 className="font-bold text-slate-300 text-base font-display flex items-center gap-2">
                               <Upload className="w-5 h-5 text-cyan-400" />
                               Upload Directory / Headcount File
                             </h3>
@@ -14668,7 +14668,7 @@ export default function App() {
                               <Upload className="w-5 h-5 text-cyan-400" />
                             </div>
                             <div>
-                              <p className="text-sm font-bold text-slate-700">Drag or Browse Headcount File</p>
+                              <p className="text-sm font-bold text-slate-300">Drag or Browse Headcount File</p>
                               <p className="text-xs text-slate-400 mt-1">Accepts .CSV, .XLSX, and .JSON files</p>
                             </div>
                           </div>
@@ -14708,7 +14708,7 @@ export default function App() {
                                       setStorageItem('sched_google_sheet_gid', gid);
                                     }
                                 }}
-                                className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 text-slate-700 placeholder-emerald-500/40 text-xs rounded-xl px-3 py-2 w-full focus:outline-none focus:border-emerald-500 text-center"
+                                className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 text-slate-300 placeholder-emerald-500/40 text-xs rounded-xl px-3 py-2 w-full focus:outline-none focus:border-emerald-500 text-center"
                               />
                               <button
                                 onClick={async () => {
@@ -14819,7 +14819,7 @@ export default function App() {
                             <div className="w-16 h-16 rounded-full bg-slate-900/50 flex items-center justify-center mx-auto text-white0 shadow-inner">
                               <UserCheck className="w-8 h-8 text-cyan-500" />
                             </div>
-                            <h3 className="text-lg font-bold text-slate-700 tracking-wide">No Directory Data Available</h3>
+                            <h3 className="text-lg font-bold text-slate-300 tracking-wide">No Directory Data Available</h3>
                             <p className="text-slate-400 text-sm max-w-sm mx-auto">The Headcount roster document has not been compiled or mapped yet.</p>
                           </div>
                         );
@@ -14862,7 +14862,7 @@ export default function App() {
                                       <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-cyan-600/30 to-blue-500/30 text-cyan-300 flex items-center justify-center font-black border border-cyan-500/40 shadow-inner">
                                         {row.agentName.substring(0,2).toUpperCase()}
                                       </div>
-                                      <span className="font-bold text-slate-700 font-display text-sm relative group-hover:text-cyan-400 transition-colors">
+                                      <span className="font-bold text-slate-300 font-display text-sm relative group-hover:text-cyan-400 transition-colors">
                                         {row.agentName}
                                         {globalMeta[row.agentName]?.roleType === 'TL' && (
                                            <span className="absolute -top-3.5 left-0 px-1.5 py-0.5 rounded text-[8px] bg-amber-500/20 text-amber-400 border border-amber-500/30 font-black uppercase tracking-widest">Team Lead</span>
@@ -14959,7 +14959,7 @@ export default function App() {
                   <div id="cases-desk-root" className="space-y-6 animate-fade-in text-left">
                     <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-slate-700/5 pb-4">
                       <div>
-                        <h2 className="text-3xl font-bold text-slate-700 font-display flex items-center gap-2.5">
+                        <h2 className="text-3xl font-bold text-slate-300 font-display flex items-center gap-2.5">
                           <ClipboardList className="w-8 h-8 text-emerald-400" />
                           {canSeeAllCases ? "Organization Booking Registry" : "My Internal Cases"}
                         </h2>
@@ -15029,9 +15029,9 @@ export default function App() {
                             onChange={(e) => setCaseAgentFilter(e.target.value)}
                             className="bg-slate-900 border border-slate-700/10 rounded-xl py-1.5 px-3 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500/40 font-semibold cursor-pointer font-sans"
                           >
-                            <option value="all">All Agents</option>
+                            <option className="bg-slate-800 text-slate-100 "  value="all">All Agents</option>
                             {uniqueAgentNamesInCases.map(name => (
-                              <option key={name} value={name.toLowerCase()}>{formatAgentName(name)}</option>
+                              <option className="bg-slate-800 text-slate-100 "  key={name} value={name.toLowerCase()}>{formatAgentName(name)}</option>
                             ))}
                           </select>
                         </div>
@@ -15046,7 +15046,7 @@ export default function App() {
                             <span className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl">
                               <Wallet className="w-5 h-5" />
                             </span>
-                            <h3 className="text-xl font-bold text-slate-700 font-display">Submit Case</h3>
+                            <h3 className="text-xl font-bold text-slate-300 font-display">Submit Case</h3>
                           </div>
                           
                           <form onSubmit={async (e) => {
@@ -15131,23 +15131,23 @@ export default function App() {
                             <div className="grid grid-cols-2 gap-4">
                               <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
                                 <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Patient Type *</label>
-                                <select value={casePatientType} onChange={e => setCasePatientType(e.target.value)} className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
-                                  <option value="New">New</option>
-                                  <option value="Follow up / Existing">Follow up / Existing</option>
+                                <select value={casePatientType} onChange={e => setCasePatientType(e.target.value)} className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
+                                  <option className="bg-slate-800 text-slate-100 "  value="New">New</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Follow up / Existing">Follow up / Existing</option>
                                 </select>
                               </div>
                               <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
                                 <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Service *</label>
-                                <select value={caseService} onChange={e => setCaseService(e.target.value)} className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer" required>
-                                  <option value="">Select service...</option>
-                                  <option value="Dental">Dental</option>
-                                  <option value="Derma">Derma</option>
-                                  <option value="Facial">Facial</option>
-                                  <option value="Hijama">Hijama</option>
-                                  <option value="Laser">Laser</option>
-                                  <option value="Plastic Surgery">Plastic Surgery</option>
-                                  <option value="Slimming">Slimming</option>
-                                  <option value="Other">Other</option>
+                                <select value={caseService} onChange={e => setCaseService(e.target.value)} className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer" required>
+                                  <option className="bg-slate-800 text-slate-100 "  value="">Select service...</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Dental">Dental</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Derma">Derma</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Facial">Facial</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Hijama">Hijama</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Laser">Laser</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Plastic Surgery">Plastic Surgery</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Slimming">Slimming</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Other">Other</option>
                                 </select>
                               </div>
                             </div>
@@ -15155,31 +15155,31 @@ export default function App() {
                             <div className="grid grid-cols-2 gap-4">
                               <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
                                 <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Branch *</label>
-                                <select value={caseBranch} onChange={e => setCaseBranch(e.target.value)} className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer" required>
-                                  <option value="">Select branch...</option>
-                                  <option value="Dermadent VIP">Dermadent VIP</option>
-                                  <option value="Dermadent">Dermadent</option>
-                                  <option value="One Touch 1 AlMu'tarid">One Touch 1 AlMu'tarid</option>
-                                  <option value="One Touch 2 Markhaniya">One Touch 2 Markhaniya</option>
-                                  <option value="WellTouch">WellTouch</option>
-                                  <option value="New Edge">New Edge</option>
+                                <select value={caseBranch} onChange={e => setCaseBranch(e.target.value)} className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer" required>
+                                  <option className="bg-slate-800 text-slate-100 "  value="">Select branch...</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Dermadent VIP">Dermadent VIP</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Dermadent">Dermadent</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="One Touch 1 AlMu'tarid">One Touch 1 AlMu'tarid</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="One Touch 2 Markhaniya">One Touch 2 Markhaniya</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="WellTouch">WellTouch</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="New Edge">New Edge</option>
                                 </select>
                               </div>
                               <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
                                 <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Source * (Mandatory)</label>
-                                <select required value={caseLeadSource} onChange={e => { setCaseLeadSource(e.target.value); if (!e.target.value.toLowerCase().includes('blogger')) setCaseBloggerName(''); }} className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
-                                  <option value="">Select source...</option>
-                                  <option value="Blogger">Blogger</option>
-                                  <option value="Existing">Existing</option>
-                                  <option value="Google map">Google map</option>
-                                  <option value="Instagram">Instagram</option>
-                                  <option value="SMS">SMS</option>
-                                  <option value="Snap Chat">Snap Chat</option>
-                                  <option value="TikTok">TikTok</option>
-                                  <option value="Whats app">Whats app</option>
-                                  <option value="facebook">facebook</option>
-                                  <option value="location">location</option>
-                                  <option value="referral">referral</option>
+                                <select required value={caseLeadSource} onChange={e => { setCaseLeadSource(e.target.value); if (!e.target.value.toLowerCase().includes('blogger')) setCaseBloggerName(''); }} className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
+                                  <option className="bg-slate-800 text-slate-100 "  value="">Select source...</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Blogger">Blogger</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Existing">Existing</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Google map">Google map</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Instagram">Instagram</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="SMS">SMS</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Snap Chat">Snap Chat</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="TikTok">TikTok</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Whats app">Whats app</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="facebook">facebook</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="location">location</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="referral">referral</option>
                                 </select>
                               </div>
                             </div>
@@ -15187,31 +15187,31 @@ export default function App() {
                             <div className="grid grid-cols-2 gap-4">
                               <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
                                 <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Ticket Type *</label>
-                                <select value={caseTicketType} onChange={e => setCaseTicketType(e.target.value)} className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
-                                  <option value="Inquiry">Inquiry</option>
-                                  <option value="Complaint">Complaint</option>
-                                  <option value="Appointment">Appointment</option>
+                                <select value={caseTicketType} onChange={e => setCaseTicketType(e.target.value)} className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
+                                  <option className="bg-slate-800 text-slate-100 "  value="Inquiry">Inquiry</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Complaint">Complaint</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Appointment">Appointment</option>
                                 </select>
                               </div>
                               <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
                                 <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Call Type *</label>
-                                <select value={caseCallType} onChange={e => setCaseCallType(e.target.value)} className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer" required>
-                                  <option value="">Select call type...</option>
-                                  <option value="Inquiry only">Inquiry only</option>
-                                  <option value="Booked">Booked</option>
-                                  <option value="Call dropped / hang up">Call dropped / hang up</option>
-                                  <option value="Cancel">Cancel</option>
-                                  <option value="Complain">Complain</option>
-                                  <option value="Customer said he will call Back">Customer said he will call Back</option>
-                                  <option value="Customer said that he booked">Customer said that he booked</option>
-                                  <option value="Didnt book / expensive">Didnt book / expensive</option>
-                                  <option value="Job Application">Job Application</option>
-                                  <option value="Long Distance">Long Distance</option>
-                                  <option value="Reschedule">Reschedule</option>
-                                  <option value="Silent Chat">Silent Chat</option>
-                                  <option value="Want to be contacted through What's app">Want to be contacted through What's app</option>
-                                  <option value="Want to be contacted through calls">Want to be contacted through calls</option>
-                                  <option value="Wrong Audience">Wrong Audience</option>
+                                <select value={caseCallType} onChange={e => setCaseCallType(e.target.value)} className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer" required>
+                                  <option className="bg-slate-800 text-slate-100 "  value="">Select call type...</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Inquiry only">Inquiry only</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Booked">Booked</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Call dropped / hang up">Call dropped / hang up</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Cancel">Cancel</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Complain">Complain</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Customer said he will call Back">Customer said he will call Back</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Customer said that he booked">Customer said that he booked</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Didnt book / expensive">Didnt book / expensive</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Job Application">Job Application</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Long Distance">Long Distance</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Reschedule">Reschedule</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Silent Chat">Silent Chat</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Want to be contacted through What's app">Want to be contacted through What's app</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Want to be contacted through calls">Want to be contacted through calls</option>
+                                  <option className="bg-slate-800 text-slate-100 "  value="Wrong Audience">Wrong Audience</option>
                                 </select>
                               </div>
                             </div>
@@ -15226,7 +15226,7 @@ export default function App() {
                                   placeholder="Type blogger name..."
                                   value={caseBloggerName}
                                   onChange={e => setCaseBloggerName(e.target.value)}
-                                  className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 focus:bg-slate-900/30 transition-all font-sans"
+                                  className="w-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-emerald-500 focus:bg-slate-900/30 transition-all font-sans"
                                 />
                               </div>
                             )}
@@ -15240,9 +15240,9 @@ export default function App() {
                             
                             <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors bg-black/20 p-3 rounded-xl border border-slate-700/5">
                               <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Ticket Status</label>
-                              <select value={caseTicketStatus} onChange={e => setCaseTicketStatus(e.target.value)} className="w-full bg-slate-900 border border-slate-700/10 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
-                                <option value="Closed">Closed</option>
-                                <option value="Open">Open</option>
+                              <select value={caseTicketStatus} onChange={e => setCaseTicketStatus(e.target.value)} className="w-full bg-slate-900 border border-slate-700/10 rounded-lg px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
+                                <option className="bg-slate-800 text-slate-100 "  value="Closed">Closed</option>
+                                <option className="bg-slate-800 text-slate-100 "  value="Open">Open</option>
                               </select>
                               <p className="text-[10px] opacity-60">Default is closed — open it if still in progress</p>
                             </div>
@@ -15266,7 +15266,7 @@ export default function App() {
                         <div className="space-y-3 pt-6 sm:pt-0">
                           {finalFilteredCases.length === 0 ? (
                             <div className="p-12 text-center text-slate-400 border border-slate-700/5 border-dashed rounded-3xl bg-slate-900/40/[0.02] backdrop-blur-xl font-sans space-y-2">
-                              <Search className="w-8 h-8 text-slate-600 mx-auto opacity-40 mb-1" />
+                              <Search className="w-8 h-8 text-slate-400 mx-auto opacity-40 mb-1" />
                               <p className="text-sm font-bold text-slate-300">No matching cases found</p>
                               <p className="text-xs text-white0 max-w-sm mx-auto">
                                 {canSeeAllCases 
@@ -15295,7 +15295,7 @@ export default function App() {
                                           navigator.clipboard.writeText(details);
                                           toast.success('Case details + Ref copied!');
                                         }}
-                                        className="p-1.5 hover:bg-slate-800/80 text-slate-300 hover:text-slate-700 rounded-lg transition-all cursor-pointer"
+                                        className="p-1.5 hover:bg-slate-800/80 text-slate-300 hover:text-slate-300 rounded-lg transition-all cursor-pointer"
                                         title="Copy Case Details"
                                       >
                                         <Copy className="w-4 h-4" />
@@ -15327,7 +15327,7 @@ export default function App() {
                                            </span>
                                          )}
                                        </p>
-                                       <p className="text-lg font-bold text-slate-700 flex items-center gap-2">
+                                       <p className="text-lg font-bold text-slate-300 flex items-center gap-2">
                                          <UserIcon className="w-4 h-4 text-emerald-400" />
                                          {c.patientName}
                                        </p>
@@ -15366,7 +15366,7 @@ export default function App() {
                                     </div>
                                     <div className="space-y-1 bg-slate-900/50 p-2 rounded-lg mt-2 font-mono">
                                       <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold font-sans">Contact Details</p>
-                                      <p className="text-xs text-slate-700 tracking-widest flex items-center gap-2">
+                                      <p className="text-xs text-slate-300 tracking-widest flex items-center gap-2">
                                         <PhoneCall className="w-3.5 h-3.5 text-emerald-400" />
                                         {c.phoneNumber}
                                       </p>
@@ -15502,7 +15502,7 @@ export default function App() {
                     <div id="history-desk-root" className="space-y-6 animate-fade-in text-left">
                       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
-                          <h2 className="text-3xl font-bold text-slate-700 font-display">My History</h2>
+                          <h2 className="text-3xl font-bold text-slate-300 font-display">My History</h2>
                           <p className="text-slate-400 text-sm">Review your submitted requests, inquiries and completed cases.</p>
                         </div>
                         
@@ -15511,15 +15511,15 @@ export default function App() {
                           <select
                             value={historyFilter}
                             onChange={(e) => setHistoryFilter(e.target.value as any)}
-                            className="w-full sm:w-auto bg-transparent border-none text-sm text-slate-700 focus:outline-none font-sans font-medium pl-8 pr-4 py-1.5 appearance-none cursor-pointer"
+                            className="w-full sm:w-auto bg-transparent border-none text-sm text-slate-300 focus:outline-none font-sans font-medium pl-8 pr-4 py-1.5 appearance-none cursor-pointer"
                           >
-                            <option value="all" className="bg-slate-800 text-slate-700 backdrop-blur-lg">All History ({allHistoryItems.length})</option>
-                            <option value="scheduling" className="bg-slate-800 text-slate-700 backdrop-blur-lg">Scheduling Requests</option>
-                            <option value="inquiries" className="bg-slate-800 text-slate-700 backdrop-blur-lg">Inquiries / Ask TL</option>
-                            <option value="tabby" className="bg-slate-800 text-slate-700 backdrop-blur-lg">Tabby & Tamara Requests</option>
-                            <option value="complaints" className="bg-slate-800 text-slate-700 backdrop-blur-lg">Complaints Desk</option>
-                            <option value="comms" className="bg-slate-800 text-slate-700 backdrop-blur-lg">Client Comms</option>
-                            <option value="cases" className="bg-slate-800 text-slate-700 backdrop-blur-lg">Internal Cases</option>
+                            <option value="all" className="bg-slate-800 text-slate-100 backdrop-blur-lg">All History ({allHistoryItems.length})</option>
+                            <option value="scheduling" className="bg-slate-800 text-slate-100 backdrop-blur-lg">Scheduling Requests</option>
+                            <option value="inquiries" className="bg-slate-800 text-slate-100 backdrop-blur-lg">Inquiries / Ask TL</option>
+                            <option value="tabby" className="bg-slate-800 text-slate-100 backdrop-blur-lg">Tabby & Tamara Requests</option>
+                            <option value="complaints" className="bg-slate-800 text-slate-100 backdrop-blur-lg">Complaints Desk</option>
+                            <option value="comms" className="bg-slate-800 text-slate-100 backdrop-blur-lg">Client Comms</option>
+                            <option value="cases" className="bg-slate-800 text-slate-100 backdrop-blur-lg">Internal Cases</option>
                           </select>
                           <ChevronRight className="w-4 h-4 text-slate-400 absolute right-3 top-3 rotate-90" />
                         </div>
@@ -15545,7 +15545,7 @@ export default function App() {
                                     </div>
                                     <div className="space-y-0.5">
                                       <div className="flex items-center gap-2">
-                                        <p className="font-bold text-slate-700 text-sm">{item.type}</p>
+                                        <p className="font-bold text-slate-300 text-sm">{item.type}</p>
                                         <span className="text-[10px] text-white0 font-mono tracking-wider">{new Date(item.date).toLocaleString()}</span>
                                       </div>
                                       <p className="text-xs text-slate-400 line-clamp-2 md:line-clamp-1">{item.summary}</p>
@@ -15636,7 +15636,7 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="bg-slate-900/50 border text-slate-700 border-slate-700/10 rounded-3xl shadow-sm p-6 space-y-6">
+                    <div className="bg-slate-900/50 border text-slate-300 border-slate-700/10 rounded-3xl shadow-sm p-6 space-y-6">
                        
                        <div className="flex flex-col md:flex-row gap-4 mb-6">
                          <div className="flex-1 space-y-1">
@@ -15644,10 +15644,10 @@ export default function App() {
                            <select
                               value={kpiAgentTarget}
                               onChange={(e) => setKpiAgentTarget(e.target.value)}
-                              className="w-full bg-black/40 border border-slate-700/10 rounded-xl px-4 py-2 text-sm text-slate-700 outline-none focus:border-purple-500"
+                              className="w-full bg-black/40 border border-slate-700/10 rounded-xl px-4 py-2 text-sm text-slate-300 outline-none focus:border-purple-500"
                            >
-                             <option value="">Select an Agent...</option>
-                             {agentsList.map(a => <option key={a} value={a}>{a}</option>)}
+                             <option className="bg-slate-800 text-slate-100 "  value="">Select an Agent...</option>
+                             {agentsList.map(a => <option className="bg-slate-800 text-slate-100 "  key={a} value={a}>{a}</option>)}
                            </select>
                          </div>
                          <div className="flex-1 space-y-1">
@@ -15656,7 +15656,7 @@ export default function App() {
                               type="number"
                               value={kpiMaxBonus}
                               onChange={(e) => setKpiMaxBonus(Number(e.target.value))}
-                              className="w-full bg-black/40 border border-slate-700/10 rounded-xl px-4 py-2 text-sm text-slate-700 outline-none focus:border-purple-500"
+                              className="w-full bg-black/40 border border-slate-700/10 rounded-xl px-4 py-2 text-sm text-slate-300 outline-none focus:border-purple-500"
                               placeholder="e.g. 3000"
                            />
                          </div>
@@ -15689,7 +15689,7 @@ export default function App() {
                                           newM[i].name = e.target.value;
                                           setKpiMetrics(newM);
                                         }}
-                                        className="bg-black/20 border border-slate-700/5 rounded px-2 py-1 w-full text-slate-700"
+                                        className="bg-black/20 border border-slate-700/5 rounded px-2 py-1 w-full text-slate-300"
                                       />
                                    </td>
                                    <td className="py-3 px-4">
@@ -15701,7 +15701,7 @@ export default function App() {
                                           newM[i].target = Number(e.target.value);
                                           setKpiMetrics(newM);
                                         }}
-                                        className="bg-black/20 border border-slate-700/5 rounded px-2 py-1 w-24 text-slate-700"
+                                        className="bg-black/20 border border-slate-700/5 rounded px-2 py-1 w-24 text-slate-300"
                                       />
                                    </td>
                                    <td className="py-3 px-4">
@@ -15713,7 +15713,7 @@ export default function App() {
                                           newM[i].actual = Number(e.target.value);
                                           setKpiMetrics(newM);
                                         }}
-                                        className="bg-black/20 border border-slate-700/5 rounded px-2 py-1 w-24 text-slate-700"
+                                        className="bg-black/20 border border-slate-700/5 rounded px-2 py-1 w-24 text-slate-300"
                                       />
                                    </td>
                                    <td className="py-3 px-4">
@@ -15725,7 +15725,7 @@ export default function App() {
                                           newM[i].weight = Number(e.target.value);
                                           setKpiMetrics(newM);
                                         }}
-                                        className="bg-black/20 border border-slate-700/5 rounded px-2 py-1 w-20 text-slate-700"
+                                        className="bg-black/20 border border-slate-700/5 rounded px-2 py-1 w-20 text-slate-300"
                                       />
                                    </td>
                                    <td className="py-3 px-4">
@@ -15736,10 +15736,10 @@ export default function App() {
                                           newM[i].type = e.target.value as any;
                                           setKpiMetrics(newM);
                                         }}
-                                        className="bg-black/20 border border-slate-700/5 rounded px-2 py-1 text-slate-700"
+                                        className="bg-black/20 border border-slate-700/5 rounded px-2 py-1 text-slate-300"
                                       >
-                                        <option value="higher">Higher = Better</option>
-                                        <option value="lower">Lower = Better</option>
+                                        <option className="bg-slate-800 text-slate-100 "  value="higher">Higher = Better</option>
+                                        <option className="bg-slate-800 text-slate-100 "  value="lower">Lower = Better</option>
                                       </select>
                                    </td>
                                    <td className="py-3 px-4">
@@ -15752,7 +15752,7 @@ export default function App() {
                                           setKpiMetrics(newM);
                                         }}
                                         placeholder="e.g. (actual / target) * 100"
-                                        className="bg-black/20 border border-slate-700/5 rounded px-2 py-1 w-44 text-slate-700 font-mono text-xs"
+                                        className="bg-black/20 border border-slate-700/5 rounded px-2 py-1 w-44 text-slate-300 font-mono text-xs"
                                       />
                                    </td>
                                    <td className="py-3 px-4 text-right font-mono font-bold text-emerald-400">
@@ -15886,7 +15886,7 @@ export default function App() {
                 return (
                   <div className="space-y-6 animate-fade-in text-left">
                     <div>
-                      <h2 className="text-3xl font-bold text-slate-700 font-display flex items-center gap-3">
+                      <h2 className="text-3xl font-bold text-slate-300 font-display flex items-center gap-3">
                         <ClipboardList className="w-8 h-8 text-purple-400" />
                         Agent Submissions Log
                       </h2>
@@ -15926,7 +15926,7 @@ export default function App() {
                           value={logSearchQuery}
                           onChange={e => setLogSearchQuery(e.target.value)}
                           placeholder="Search patient, clinic, agency, keyword..."
-                          className="w-full bg-black/40 border border-slate-700/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-slate-700 placeholder-slate-500 font-sans outline-none focus:border-purple-500"
+                          className="w-full bg-black/40 border border-slate-700/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-slate-300 placeholder-slate-500 font-sans outline-none focus:border-purple-500"
                         />
                       </div>
                       <div className="w-full md:w-48">
@@ -15935,12 +15935,12 @@ export default function App() {
                           onChange={e => setLogTypeFilter(e.target.value)}
                           className="w-full bg-black/40 border border-slate-700/10 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500 font-bold"
                         >
-                          <option value="all">All Category Types</option>
-                          <option value="inquiry">Inquiries</option>
-                          <option value="tt request">TT Requests</option>
-                          <option value="complaint">Complaints</option>
-                          <option value="client comm">Client Comms</option>
-                          <option value="pending">Pending Queue (All items)</option>
+                          <option className="bg-slate-800 text-slate-100 "  value="all">All Category Types</option>
+                          <option className="bg-slate-800 text-slate-100 "  value="inquiry">Inquiries</option>
+                          <option className="bg-slate-800 text-slate-100 "  value="tt request">TT Requests</option>
+                          <option className="bg-slate-800 text-slate-100 "  value="complaint">Complaints</option>
+                          <option className="bg-slate-800 text-slate-100 "  value="client comm">Client Comms</option>
+                          <option className="bg-slate-800 text-slate-100 "  value="pending">Pending Queue (All items)</option>
                         </select>
                       </div>
                       <div className="w-full md:w-48">
@@ -15949,9 +15949,9 @@ export default function App() {
                           onChange={e => setLogAgentFilter(e.target.value)}
                           className="w-full bg-black/40 border border-slate-700/10 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500 font-bold"
                         >
-                          <option value="all">All Agents</option>
+                          <option className="bg-slate-800 text-slate-100 "  value="all">All Agents</option>
                           {agentsList.map(name => (
-                            <option key={name} value={name}>{name}</option>
+                            <option className="bg-slate-800 text-slate-100 "  key={name} value={name}>{name}</option>
                           ))}
                         </select>
                       </div>
@@ -16031,7 +16031,7 @@ export default function App() {
 
                     {/* Add Agent Manually */}
                     <div className="bg-slate-900/50 border border-slate-700/10 backdrop-blur-xl rounded-3xl p-6 shadow-xl">
-                      <h3 className="font-bold text-slate-700 text-base mb-4 flex items-center gap-2">
+                      <h3 className="font-bold text-slate-300 text-base mb-4 flex items-center gap-2">
                         <UserPlus className="w-5 h-5 text-emerald-400" />
                         Add User Manually
                       </h3>
@@ -16042,19 +16042,19 @@ export default function App() {
                             type="text" 
                             id="manual-agent-name"
                             placeholder="e.g. John Doe"
-                            className="bg-slate-900/50 border border-slate-700/10 rounded-lg text-sm text-slate-700 px-3 py-2 focus:outline-none focus:border-emerald-500 w-full"
+                            className="bg-slate-900/50 border border-slate-700/10 rounded-lg text-sm text-slate-300 px-3 py-2 focus:outline-none focus:border-emerald-500 w-full"
                           />
                         </div>
                         <div className="w-full sm:w-48">
                           <label className="text-xs text-slate-400 mb-1 block">Role</label>
                           <select 
                             id="manual-agent-role"
-                            className="text-slate-700 bg-slate-900/50 border border-slate-700/10 rounded-lg   px-3 py-2 focus:outline-none focus:border-emerald-500 w-full"
+                            className="text-slate-100 bg-slate-900/50 border border-slate-700/10 rounded-lg   px-3 py-2 focus:outline-none focus:border-emerald-500 w-full"
                           >
-                            <option className="bg-slate-800 text-slate-700 "  value="Call Center">Call Center</option>
-                            <option className="bg-slate-800 text-slate-700 "  value="Social Media">Social Media</option>
-                            <option className="bg-slate-800 text-slate-700 "  value="TL">Team Leader (TL)</option>
-                            <option className="bg-slate-800 text-slate-700 "  value="Director">Director</option>
+                            <option className="bg-slate-800 text-slate-100 "  value="Call Center">Call Center</option>
+                            <option className="bg-slate-800 text-slate-100 "  value="Social Media">Social Media</option>
+                            <option className="bg-slate-800 text-slate-100 "  value="TL">Team Leader (TL)</option>
+                            <option className="bg-slate-800 text-slate-100 "  value="Director">Director</option>
                           </select>
                         </div>
                         <button 
@@ -16088,152 +16088,12 @@ export default function App() {
                     </div>
 
 
-                    {/* Admin Headcount Upload Control */}
-                    {isMasterAdmin && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="bg-indigo-500/10 border border-indigo-500/20 p-5 rounded-2xl flex flex-col gap-4">
-                             <div className="flex items-center gap-3">
-                               <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
-                                 <CheckCircle2 className="w-5 h-5 text-indigo-400" />
-                               </div>
-                               <div>
-                                 <h3 className="text-slate-700 font-bold text-sm">Upload CSV File</h3>
-                                 <p className="text-xs text-indigo-300/70">Upload the raw exported CSV</p>
-                               </div>
-                             </div>
-                             <label className="w-full text-center px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-indigo-500/20 transition-all block">
-                                Upload CSV File
-                                <input
-                                  type="file"
-                                  accept=".csv,.xlsx,.json,.xls"
-                                  className="hidden"
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (!file) return;
-                                    handleDirectoryFile(file);
-                                  }}
-                                />
-                             </label>
-                          </div>
-                          
-                          <div className="bg-emerald-500/10 border border-emerald-500/20 p-5 rounded-2xl flex flex-col gap-4">
-                             <div className="flex items-center gap-3">
-                               <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                                 <svg className="w-5 h-5 bg-slate-800 rounded-full p-0.5" viewBox="0 0 48 48">
-                                   <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                                   <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                                   <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                                   <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
-                                 </svg>
-                               </div>
-                               <div>
-                                 <h3 className="text-slate-700 font-bold text-sm">Import via Google Sheets Link</h3>
-                                 <p className="text-xs text-emerald-300/70">Requires permission to read the Sheet</p>
-                               </div>
-                             </div>
-                             <input
-                               type="text"
-                               placeholder="Paste Google Sheets Link..."
-                               value={googleSheetId}
-                               onChange={(e) => {
-                                  let val = e.target.value;
-                                  const match = val.match(/\/d\/([a-zA-Z0-9-_]+)/);
-                                  if (match) val = match[1];
-                                  setGoogleSheetId(val);
-                                  setStorageItem('sched_google_sheet_id', val);
-                               }}
-                               className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 text-slate-700 placeholder-slate-500 text-xs rounded-lg px-3 py-2.5 w-full focus:outline-none focus:border-emerald-500"
-                             />
-                             <button
-                               onClick={async () => {
-                                 if (!googleSheetId) return toast.error("Please provide a Google Sheets Link.");
-                                 
-                                 setIsSyncingSheets(true);
-                                 try {
-                                   const csvText = await fetchGoogleSheetCSV(googleSheetId, googleSheetGid);
-                                   
-                                   if (!csvText || csvText.trim().length === 0) {
-                                      throw new Error("No data found in the sheet.");
-                                   }
-                                   
-                                   const result = parseAgentDirectoryCSV(csvText);
-                                   if (result.errors.length > 0) {
-                                      toast.error(`Warnings: ${result.errors.slice(0, 3).join(', ')}`);
-                                   }
-                                   if (result.directory.length > 0) {
-                                      setAgentDirectory(result.directory);
-                                      setDirectoryHeaders(result.headers);
-                                      setStorageItem('sched_agent_directory', result.directory);
-                                      setStorageItem('sched_agent_directory_headers', result.headers);
-                                      
-                                      // Make sure any newly found agents are implicitly registered for future login!
-                                      const allKnown = new Set(agentsList);
-                                      result.directory.forEach(a => allKnown.add(a.agentName));
-                                      const updatedList = Array.from(allKnown);
-                                      setAgentsList(updatedList);
-                                      setStorageItem('sched_agents_list', updatedList);
-  
-                                      // Check for TL and Role columns
-                                      const newMeta = { ...getAgentMeta() };
-                                      let hasMetaUpdate = false;
-                                      const tlHeader = result.headers.find(h => {
-                                          const lh = h.toLowerCase().trim();
-                                          return lh === 'tl' || lh === 'team leader' || lh.includes('manager');
-                                      });
-                                      const roleHeader = result.headers.find(h => {
-                                          const lh = h.toLowerCase().trim();
-                                          return lh === 'role' || lh === 'lob' || lh.includes('account');
-                                      });
-                                      
-                                      if (tlHeader || roleHeader) {
-                                          result.directory.forEach(a => {
-                                              let updated = false;
-                                              if (!newMeta[a.agentName]) newMeta[a.agentName] = { roleType: '', tlName: '' };
-                                              
-                                              if (tlHeader && a.data[tlHeader]) {
-                                                  const val = a.data[tlHeader].trim();
-                                                  if (val) {
-                                                      newMeta[a.agentName].tlName = val;
-                                                      updated = true;
-                                                  }
-                                              }
-                                              if (roleHeader && a.data[roleHeader]) {
-                                                  const val = a.data[roleHeader].trim();
-                                                  if (val) {
-                                                      newMeta[a.agentName].roleType = val;
-                                                      updated = true;
-                                                  }
-                                              }
-                                              if (updated) hasMetaUpdate = true;
-                                          });
-                                          if (hasMetaUpdate) {
-                                              setStorageItem('sched_agent_meta', newMeta);
-                                          }
-                                      }
-  
-                                      toast.success(`Successfully extracted ${result.directory.length} agents from Google Sheet!`);
-                                   } else {
-                                      toast.error('No agent data could be extracted.');
-                                   }
-                                 } catch (err: any) {
-                                   toast.error("Extraction failed: " + err.message);
-                                 } finally {
-                                   setIsSyncingSheets(false);
-                                 }
-                               }}
-                               disabled={isSyncingSheets}
-                               className={`w-full py-2.5 text-center ${isSyncingSheets ? 'bg-emerald-500/50' : 'bg-emerald-500 hover:bg-emerald-600'} text-slate-700 rounded-xl font-bold text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-all`}
-                             >
-                               {isSyncingSheets ? 'Extracting Data...' : 'Extract From Sheet'}
-                             </button>
-                          </div>
-                        </div>
-                    )}
+
 
 
                     {/* Add Agent Manually */}
                     <div className="bg-slate-900/50 border border-slate-700/10 backdrop-blur-xl rounded-3xl p-6 shadow-xl">
-                      <h3 className="font-bold text-slate-700 text-base mb-4 flex items-center gap-2">
+                      <h3 className="font-bold text-slate-300 text-base mb-4 flex items-center gap-2">
                         <UserPlus className="w-5 h-5 text-emerald-400" />
                         Add User Manually
                       </h3>
@@ -16244,19 +16104,19 @@ export default function App() {
                             type="text" 
                             id="manual-agent-name"
                             placeholder="e.g. John Doe"
-                            className="bg-slate-900/50 border border-slate-700/10 rounded-lg text-sm text-slate-700 px-3 py-2 focus:outline-none focus:border-emerald-500 w-full"
+                            className="bg-slate-900/50 border border-slate-700/10 rounded-lg text-sm text-slate-300 px-3 py-2 focus:outline-none focus:border-emerald-500 w-full"
                           />
                         </div>
                         <div className="w-full sm:w-48">
                           <label className="text-xs text-slate-400 mb-1 block">Role</label>
                           <select 
                             id="manual-agent-role"
-                            className="text-slate-700 bg-slate-900/50 border border-slate-700/10 rounded-lg   px-3 py-2 focus:outline-none focus:border-emerald-500 w-full"
+                            className="text-slate-100 bg-slate-900/50 border border-slate-700/10 rounded-lg   px-3 py-2 focus:outline-none focus:border-emerald-500 w-full"
                           >
-                            <option className="bg-slate-800 text-slate-700 "  value="Call Center">Call Center</option>
-                            <option className="bg-slate-800 text-slate-700 "  value="Social Media">Social Media</option>
-                            <option className="bg-slate-800 text-slate-700 "  value="TL">Team Leader (TL)</option>
-                            <option className="bg-slate-800 text-slate-700 "  value="Director">Director</option>
+                            <option className="bg-slate-800 text-slate-100 "  value="Call Center">Call Center</option>
+                            <option className="bg-slate-800 text-slate-100 "  value="Social Media">Social Media</option>
+                            <option className="bg-slate-800 text-slate-100 "  value="TL">Team Leader (TL)</option>
+                            <option className="bg-slate-800 text-slate-100 "  value="Director">Director</option>
                           </select>
                         </div>
                         <button 
@@ -16291,10 +16151,10 @@ export default function App() {
 
                   {/* Admin Upload Console */}
                   {isMasterAdmin && (
-                    <div className="bg-slate-900/50 border text-slate-700 border-slate-700/10 rounded-3xl shadow-sm p-6 space-y-6">
+                    <div className="bg-slate-900/50 border text-slate-300 border-slate-700/10 rounded-3xl shadow-sm p-6 space-y-6">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-slate-700/5 gap-3">
                         <div>
-                          <h3 className="font-bold text-slate-700 text-base font-display flex items-center gap-2">
+                          <h3 className="font-bold text-slate-300 text-base font-display flex items-center gap-2">
                             <Upload className="w-5 h-5 text-indigo-400" />
                             Upload Schedule Roster File
                           </h3>
@@ -16333,7 +16193,7 @@ export default function App() {
                           <Upload className="w-6 h-6 text-indigo-400" />
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-slate-700">Drag and drop your schedule roster file here</p>
+                          <p className="text-sm font-semibold text-slate-300">Drag and drop your schedule roster file here</p>
                           <p className="text-xs text-slate-400 mt-1">Supports Excel (.xlsx, .xls), CSV, JSON, and text plans</p>
                         </div>
                         <span className="px-3 py-1 bg-slate-900/50 border border-slate-700/10 text-slate-300 rounded-full text-[10px] font-mono">
@@ -16350,7 +16210,7 @@ export default function App() {
                           </svg>
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-slate-700">Import via Google Sheets Link</p>
+                          <p className="text-sm font-semibold text-slate-300">Import via Google Sheets Link</p>
                           <p className="text-xs text-emerald-300 mt-1">Extract schedules directly from a linked Google Sheet</p>
                         </div>
                         <div className="w-full mt-2 space-y-2">
@@ -16365,7 +16225,7 @@ export default function App() {
                                 setGoogleSheetId(val);
                                 setStorageItem('sched_google_sheet_id', val);
                              }}
-                             className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 text-slate-700 placeholder-emerald-500/50 text-xs rounded-lg px-3 py-2.5 w-full focus:outline-none focus:border-emerald-500 text-center"
+                             className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 text-slate-300 placeholder-emerald-500/50 text-xs rounded-lg px-3 py-2.5 w-full focus:outline-none focus:border-emerald-500 text-center"
                            />
                            <button
                              onClick={async () => {
@@ -16409,7 +16269,7 @@ export default function App() {
                                }
                              }}
                              disabled={isSyncingSheets}
-                             className={`w-full py-2 text-center ${isSyncingSheets ? 'bg-emerald-500/50' : 'bg-emerald-500 hover:bg-emerald-600'} text-slate-700 rounded-lg font-bold text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-all`}
+                             className={`w-full py-2 text-center ${isSyncingSheets ? 'bg-emerald-500/50' : 'bg-emerald-500 hover:bg-emerald-600'} text-slate-300 rounded-lg font-bold text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-all`}
                            >
                              {isSyncingSheets ? 'Extracting...' : 'Extract From Sheet'}
                            </button>
@@ -16486,7 +16346,7 @@ export default function App() {
                           <AlertTriangle className="w-5 h-5 text-rose-400" />
                         </div>
                         <div>
-                          <h3 className="text-slate-700 font-bold text-sm">System Kill Switch</h3>
+                          <h3 className="text-slate-300 font-bold text-sm">System Kill Switch</h3>
                           <p className="text-xs text-rose-300">Danger zone: Shut down the entire application</p>
                         </div>
                       </div>
@@ -16575,7 +16435,7 @@ export default function App() {
 
                                 return (
                                   <tr key={agent} className="hover:bg-rose-500/5 transition-all">
-                                    <td className="px-5 py-4 font-bold text-slate-700 uppercase tracking-wide">
+                                    <td className="px-5 py-4 font-bold text-slate-300 uppercase tracking-wide">
                                       <div className="flex flex-col gap-1.5 justify-start text-left">
                                         <div className="flex items-center gap-2">
                                           <span>{agent}</span>
@@ -16605,13 +16465,13 @@ export default function App() {
                                           setDoc(doc(db, "system", "sched_agent_meta"), { data: newMeta }).catch(console.error);
                                           toast.success(`Updated ${agent}'s role to ${e.target.value}`);
                                         }}
-                                        className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-lg text-xs text-slate-700 px-3 py-1.5 focus:outline-none focus:border-rose-500 cursor-pointer w-full max-w-[150px]"
+                                        className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-lg text-xs text-slate-300 px-3 py-1.5 focus:outline-none focus:border-rose-500 cursor-pointer w-full max-w-[150px]"
                                       >
-                                        <option className="bg-slate-800 text-slate-700 " value="Call Center">Call Center</option>
-                                        <option className="bg-slate-800 text-slate-700 " value="Social Media">Social Media</option>
-                                        <option className="bg-slate-800 text-slate-700 " value="General">General</option>
-                                        <option className="bg-slate-800 text-slate-700 " value="TL">Team Leader (TL)</option>
-                                        <option className="bg-slate-800 text-slate-700 " value="Medical">Medical</option>
+                                        <option className="bg-slate-800 text-slate-100 " value="Call Center">Call Center</option>
+                                        <option className="bg-slate-800 text-slate-100 " value="Social Media">Social Media</option>
+                                        <option className="bg-slate-800 text-slate-100 " value="General">General</option>
+                                        <option className="bg-slate-800 text-slate-100 " value="TL">Team Leader (TL)</option>
+                                        <option className="bg-slate-800 text-slate-100 " value="Medical">Medical</option>
                                       </select>
                                     </td>
                                     <td className="px-3 py-4">
@@ -16626,9 +16486,9 @@ export default function App() {
                                           setDoc(doc(db, "system", "sched_agent_meta"), { data: newMeta }).catch(console.error);
                                           toast.success(`Assigned ${agent} to TL: ${e.target.value}`);
                                         }}
-                                        className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-lg text-xs text-slate-700 px-3 py-1.5 focus:outline-none focus:border-rose-500 cursor-pointer w-full max-w-[180px]"
+                                        className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-lg text-xs text-slate-300 px-3 py-1.5 focus:outline-none focus:border-rose-500 cursor-pointer w-full max-w-[180px]"
                                       >
-                                        {availableTLs.map(tl => <option className="bg-slate-800 text-slate-700 " key={tl} value={tl}>{tl}</option>)}
+                                        {availableTLs.map(tl => <option className="bg-slate-800 text-slate-100 " key={tl} value={tl}>{tl}</option>)}
                                       </select>
                                     </td>
                                     <td className="px-5 py-4 text-right">
@@ -16738,7 +16598,7 @@ export default function App() {
                 // Compact Floating Badge at Bottom-Right
                 return (
                   <div className="fixed bottom-6 right-6 z-50 animate-bounce cursor-pointer scale-100 hover:scale-[1.03] active:scale-[0.98] transition-all" onClick={() => setIsOvertimeAlertMinimized(false)}>
-                    <div className="bg-rose-600 hover:bg-rose-700 text-slate-700 font-bold p-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-rose-400/40 select-none">
+                    <div className="bg-rose-600 hover:bg-rose-700 text-slate-300 font-bold p-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-rose-400/40 select-none">
                       <span className="w-2.5 h-2.5 rounded-full bg-slate-800 animate-ping"></span>
                       <span className="text-xs font-mono">
                         🚨 OVERTIME: {elapsed.type.toUpperCase()} +{elapsed.exceededBy.toFixed(1)}m
@@ -16761,11 +16621,11 @@ export default function App() {
                     </div>
 
                     <div className="space-y-2">
-                      <h3 className="text-2xl font-black text-slate-700 font-display tracking-wide uppercase">
+                      <h3 className="text-2xl font-black text-slate-300 font-display tracking-wide uppercase">
                         ⚠️ Overtime Limit Notice!
                       </h3>
                       <p className="text-sm text-slate-300 font-sans px-2 leading-relaxed">
-                        You have exceeded your allocated <span className="font-bold underline text-slate-700 capitalize">{elapsed.type}</span> limit of <span className="text-rose-300 font-bold font-mono">{elapsed.limit}</span> minutes.
+                        You have exceeded your allocated <span className="font-bold underline text-slate-300 capitalize">{elapsed.type}</span> limit of <span className="text-rose-300 font-bold font-mono">{elapsed.limit}</span> minutes.
                       </p>
                     </div>
 
@@ -16775,7 +16635,7 @@ export default function App() {
                       <p className="text-3xl font-black text-rose-400 font-mono">
                         {elapsed.duration.toFixed(2)}m
                       </p>
-                      <p className="text-[11px] font-bold text-slate-700 font-sans animate-pulse">
+                      <p className="text-[11px] font-bold text-slate-300 font-sans animate-pulse">
                         Exceeding limit by: <span className="font-mono text-xs underline">+{elapsed.exceededBy.toFixed(1)} minutes</span>
                       </p>
                     </div>
@@ -16836,14 +16696,14 @@ export default function App() {
                     <div className="flex flex-col gap-2 pt-2">
                       <button
                         onClick={() => handleEndActivity()}
-                        className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-700 font-black text-xs tracking-wider rounded-xl shadow-lg shadow-emerald-500/10 cursor-pointer flex items-center justify-center gap-2 uppercase font-sans border border-emerald-400/20 active:scale-[0.99] transition-all"
+                        className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-300 font-black text-xs tracking-wider rounded-xl shadow-lg shadow-emerald-500/10 cursor-pointer flex items-center justify-center gap-2 uppercase font-sans border border-emerald-400/20 active:scale-[0.99] transition-all"
                       >
-                        <ArrowRight className="w-4 h-4 text-slate-700" />
+                        <ArrowRight className="w-4 h-4 text-slate-300" />
                         End Activity & Continue Shift
                       </button>
                       <button
                         onClick={() => setIsOvertimeAlertMinimized(true)}
-                        className="w-full py-2.5 bg-slate-900/40 backdrop-blur-lg hover:bg-slate-700 backdrop-blur-xl border border-slate-700/20 text-slate-300 hover:text-slate-700 rounded-xl text-xs font-semibold cursor-pointer active:scale-[0.99] transition-all"
+                        className="w-full py-2.5 bg-slate-900/40 backdrop-blur-lg hover:bg-slate-700 backdrop-blur-xl border border-slate-700/20 text-slate-300 hover:text-slate-300 rounded-xl text-xs font-semibold cursor-pointer active:scale-[0.99] transition-all"
                       >
                         Minimize Alert Temporarily
                       </button>
@@ -16881,11 +16741,11 @@ export default function App() {
               <div className="flex items-center justify-between pb-4 border-b border-slate-700/10">
                 <div className="flex items-center gap-2">
                   <Bell className="w-5 h-5 text-indigo-400" />
-                  <h2 className="text-lg font-bold text-slate-700 font-display">Real-time Sync Inbox</h2>
+                  <h2 className="text-lg font-bold text-slate-300 font-display">Real-time Sync Inbox</h2>
                 </div>
                 <button
                   onClick={() => setIsNotifDrawerOpen(false)}
-                  className="p-1 px-3 text-xs bg-slate-900/50 border border-slate-700/10 hover:bg-slate-800/80 text-slate-300 hover:text-slate-700 rounded-lg transition-colors cursor-pointer"
+                  className="p-1 px-3 text-xs bg-slate-900/50 border border-slate-700/10 hover:bg-slate-800/80 text-slate-300 hover:text-slate-300 rounded-lg transition-colors cursor-pointer"
                 >
                   Close
                 </button>
@@ -16917,7 +16777,7 @@ export default function App() {
                         <p className="text-[9px] font-bold uppercase tracking-widest text-indigo-300 font-mono mb-1">
                           {notif.type}
                         </p>
-                        <p className="text-xs font-bold text-slate-700 mb-1">{notif.title}</p>
+                        <p className="text-xs font-bold text-slate-300 mb-1">{notif.title}</p>
                         <p className="text-slate-300 text-[11px] leading-relaxed mb-2">{notif.message}</p>
                         <p className="text-[9px] text-white0">{new Date(notif.createdAt).toLocaleTimeString()} - {new Date(notif.createdAt).toLocaleDateString()}</p>
                       </div>
@@ -16930,7 +16790,7 @@ export default function App() {
                 <div className="pt-4 border-t border-slate-700/10 flex flex-col gap-2">
                   <button
                     onClick={handleMarkAllNotifsAsRead}
-                    className="w-full py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-slate-700 rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/10"
+                    className="w-full py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-slate-300 rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/10"
                   >
                     Mark All as Read
                   </button>
@@ -16954,7 +16814,7 @@ export default function App() {
                         toast.success("Inbox cleared.");
                       }
                     }}
-                    className="w-full py-2.5 bg-slate-900/50 border border-slate-700/10 hover:bg-slate-800/80 text-slate-300 hover:text-slate-700 rounded-xl text-xs font-semibold transition-colors"
+                    className="w-full py-2.5 bg-slate-900/50 border border-slate-700/10 hover:bg-slate-800/80 text-slate-300 hover:text-slate-300 rounded-xl text-xs font-semibold transition-colors"
                   >
                     Clear My Inbox
                   </button>
@@ -16971,7 +16831,7 @@ export default function App() {
           <div className="bg-slate-900 border border-indigo-500/30 rounded-3xl p-6 shadow-2xl space-y-5 max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-start border-b border-slate-700/5 pb-4">
               <div>
-                <h3 className="text-lg font-black text-slate-700 flex items-center gap-2">
+                <h3 className="text-lg font-black text-slate-300 flex items-center gap-2">
                   <Activity className="w-5 h-5 text-indigo-400" />
                   Intraday Activity Planner
                 </h3>
@@ -17005,13 +16865,13 @@ export default function App() {
                           }}
                           className="bg-black/50 border border-slate-700/10 rounded px-2 py-1 text-xs text-slate-200"
                         >
-                          <option value="Work">Work</option>
-                          <option value="Break">Break</option>
-                          <option value="Lunch">Lunch</option>
-                          <option value="Meeting">Meeting</option>
-                          <option value="Coaching">Coaching</option>
-                          <option value="Training">Training</option>
-                          <option value="Project">Project</option>
+                          <option className="bg-slate-800 text-slate-100 "  value="Work">Work</option>
+                          <option className="bg-slate-800 text-slate-100 "  value="Break">Break</option>
+                          <option className="bg-slate-800 text-slate-100 "  value="Lunch">Lunch</option>
+                          <option className="bg-slate-800 text-slate-100 "  value="Meeting">Meeting</option>
+                          <option className="bg-slate-800 text-slate-100 "  value="Coaching">Coaching</option>
+                          <option className="bg-slate-800 text-slate-100 "  value="Training">Training</option>
+                          <option className="bg-slate-800 text-slate-100 "  value="Project">Project</option>
                         </select>
                         <input 
                           type="time" 
@@ -17088,7 +16948,7 @@ export default function App() {
                   setSelectedShiftForActivities(null);
                   toast.success("Intraday Schedule Updated Successfully!");
                 }}
-                className="px-6 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-900 rounded-lg text-xs font-black shadow-lg shadow-emerald-500/20"
+                className="px-6 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-100 rounded-lg text-xs font-black shadow-lg shadow-emerald-500/20"
               >
                 Save Timeline
               </button>
@@ -17102,7 +16962,7 @@ export default function App() {
           <div className="bg-slate-900 border border-emerald-500/30 rounded-3xl p-6 shadow-2xl space-y-5 max-w-lg w-full max-h-[90vh] overflow-y-auto text-left relative">
             <div className="flex justify-between items-start border-b border-slate-700/5 pb-4">
               <div>
-                <h3 className="text-lg font-black text-slate-700 flex items-center gap-2">
+                <h3 className="text-lg font-black text-slate-300 flex items-center gap-2">
                   <Pencil className="w-5 h-5 text-emerald-400" />
                   Edit {editingItem.type === 'inquiry' ? 'Inquiry' : 
                         editingItem.type === 'scheduling_request' ? 'Scheduling Request' :
@@ -17135,7 +16995,7 @@ export default function App() {
                         ...editingItem,
                         data: { ...editingItem.data, patientName: e.target.value }
                       })}
-                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                       required
                     />
                   </div>
@@ -17148,7 +17008,7 @@ export default function App() {
                         ...editingItem,
                         data: { ...editingItem.data, phoneNumber: e.target.value }
                       })}
-                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                       required
                     />
                   </div>
@@ -17160,7 +17020,7 @@ export default function App() {
                         ...editingItem,
                         data: { ...editingItem.data, inquiry: e.target.value }
                       })}
-                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 min-h-[100px]"
+                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500 min-h-[100px]"
                       required
                     />
                   </div>
@@ -17180,7 +17040,7 @@ export default function App() {
                             ...editingItem,
                             data: { ...editingItem.data, date: e.target.value }
                           })}
-                          className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                          className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                           required
                         />
                       </div>
@@ -17193,7 +17053,7 @@ export default function App() {
                             ...editingItem,
                             data: { ...editingItem.data, shift: e.target.value }
                           })}
-                          className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                          className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                           required
                         />
                       </div>
@@ -17206,7 +17066,7 @@ export default function App() {
                             ...editingItem,
                             data: { ...editingItem.data, swapWithAgent: e.target.value }
                           })}
-                          className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                          className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                           required
                         />
                       </div>
@@ -17219,7 +17079,7 @@ export default function App() {
                             ...editingItem,
                             data: { ...editingItem.data, swapWithShift: e.target.value }
                           })}
-                          className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                          className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                           required
                         />
                       </div>
@@ -17235,7 +17095,7 @@ export default function App() {
                             ...editingItem,
                             data: { ...editingItem.data, startDate: e.target.value }
                           })}
-                          className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                          className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                           required
                         />
                       </div>
@@ -17248,7 +17108,7 @@ export default function App() {
                             ...editingItem,
                             data: { ...editingItem.data, endDate: e.target.value }
                           })}
-                          className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                          className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                           required
                         />
                       </div>
@@ -17262,7 +17122,7 @@ export default function App() {
                         ...editingItem,
                         data: { ...editingItem.data, notes: e.target.value }
                       })}
-                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 min-h-[80px]"
+                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500 min-h-[80px]"
                     />
                   </div>
                 </>
@@ -17279,11 +17139,11 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, platform: e.target.value }
                         })}
-                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3- py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3- py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                       >
-                        <option value="tabby">Tabby</option>
-                        <option value="tamara">Tamara</option>
-                        <option value="one_time_payment">One-Time Payment</option>
+                        <option className="bg-slate-800 text-slate-100 "  value="tabby">Tabby</option>
+                        <option className="bg-slate-800 text-slate-100 "  value="tamara">Tamara</option>
+                        <option className="bg-slate-800 text-slate-100 "  value="one_time_payment">One-Time Payment</option>
                       </select>
                     </div>
                     <div className="space-y-1.5">
@@ -17295,7 +17155,7 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, clinicName: e.target.value }
                         })}
-                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                   </div>
@@ -17309,7 +17169,7 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, patientName: e.target.value }
                         })}
-                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                         required
                       />
                     </div>
@@ -17322,7 +17182,7 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, fileNumber: e.target.value }
                         })}
-                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                         required
                       />
                     </div>
@@ -17337,7 +17197,7 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, phoneNumber: e.target.value }
                         })}
-                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                         required
                       />
                     </div>
@@ -17350,7 +17210,7 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, idNumber: e.target.value }
                         })}
-                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                   </div>
@@ -17363,7 +17223,7 @@ export default function App() {
                         ...editingItem,
                         data: { ...editingItem.data, priceWithoutTax: e.target.value }
                       })}
-                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                       required
                     />
                   </div>
@@ -17375,7 +17235,7 @@ export default function App() {
                         ...editingItem,
                         data: { ...editingItem.data, notes: e.target.value }
                       })}
-                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 min-h-[60px]"
+                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500 min-h-[60px]"
                     />
                   </div>
                 </>
@@ -17393,7 +17253,7 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, patientName: e.target.value }
                         })}
-                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                         required
                       />
                     </div>
@@ -17406,7 +17266,7 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, fileNumber: e.target.value }
                         })}
-                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                         required
                       />
                     </div>
@@ -17421,7 +17281,7 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, phoneNumber: e.target.value }
                         })}
-                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                         required
                       />
                     </div>
@@ -17434,7 +17294,7 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, clinicName: e.target.value }
                         })}
-                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                   </div>
@@ -17446,7 +17306,7 @@ export default function App() {
                         ...editingItem,
                         data: { ...editingItem.data, complaintDetails: e.target.value }
                       })}
-                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 min-h-[100px]"
+                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500 min-h-[100px]"
                       required
                     />
                   </div>
@@ -17465,7 +17325,7 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, phoneNumber: e.target.value }
                         })}
-                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                         required
                       />
                     </div>
@@ -17477,10 +17337,10 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, language: e.target.value }
                         })}
-                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                       >
-                        <option value="Arabic">Arabic Only</option>
-                        <option value="English">English / Bilingual</option>
+                        <option className="bg-slate-800 text-slate-100 "  value="Arabic">Arabic Only</option>
+                        <option className="bg-slate-800 text-slate-100 "  value="English">English / Bilingual</option>
                       </select>
                     </div>
                   </div>
@@ -17493,7 +17353,7 @@ export default function App() {
                         ...editingItem,
                         data: { ...editingItem.data, clinicName: e.target.value }
                       })}
-                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                       required
                     />
                   </div>
@@ -17505,7 +17365,7 @@ export default function App() {
                         ...editingItem,
                         data: { ...editingItem.data, notes: e.target.value }
                       })}
-                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 min-h-[100px]"
+                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500 min-h-[100px]"
                       required
                     />
                   </div>
@@ -17524,7 +17384,7 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, patientName: e.target.value }
                         })}
-                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                         required
                       />
                     </div>
@@ -17537,7 +17397,7 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, phoneNumber: e.target.value }
                         })}
-                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                         required
                       />
                     </div>
@@ -17552,7 +17412,7 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, leadSource: e.target.value }
                         })}
-                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -17564,7 +17424,7 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, branch: e.target.value }
                         })}
-                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                   </div>
@@ -17578,7 +17438,7 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, service: e.target.value }
                         })}
-                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -17590,7 +17450,7 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, callType: e.target.value }
                         })}
-                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                   </div>
@@ -17604,7 +17464,7 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, ticketType: e.target.value }
                         })}
-                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -17615,10 +17475,10 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, ticketStatus: e.target.value }
                         })}
-                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                       >
-                        <option value="Open">Open</option>
-                        <option value="Closed">Closed</option>
+                        <option className="bg-slate-800 text-slate-100 "  value="Open">Open</option>
+                        <option className="bg-slate-800 text-slate-100 "  value="Closed">Closed</option>
                       </select>
                     </div>
                   </div>
@@ -17630,10 +17490,10 @@ export default function App() {
                         ...editingItem,
                         data: { ...editingItem.data, patientType: e.target.value }
                       })}
-                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500"
                     >
-                      <option value="New">New Patient</option>
-                      <option value="Old">Old Patient</option>
+                      <option className="bg-slate-800 text-slate-100 "  value="New">New Patient</option>
+                      <option className="bg-slate-800 text-slate-100 "  value="Old">Old Patient</option>
                     </select>
                   </div>
                   <div className="space-y-1.5">
@@ -17644,7 +17504,7 @@ export default function App() {
                         ...editingItem,
                         data: { ...editingItem.data, inquiry: e.target.value }
                       })}
-                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 min-h-[80px]"
+                      className="w-full bg-slate-900 border border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500 min-h-[80px]"
                       required
                     />
                   </div>
@@ -17661,7 +17521,7 @@ export default function App() {
                 </button>
                 <button 
                   type="submit"
-                  className="px-6 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-900 rounded-xl text-[11px] font-black tracking-wide shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+                  className="px-6 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-100 rounded-xl text-[11px] font-black tracking-wide shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
                 >
                   Save Edited Changes
                 </button>
