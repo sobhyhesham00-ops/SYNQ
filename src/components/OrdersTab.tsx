@@ -309,7 +309,7 @@ export function OrdersTab({
                     <div className="bg-black/40 border border-white/10 p-3 rounded-xl flex items-center justify-between">
                        <span className="text-[10px] text-slate-400 font-bold uppercase">Delivery</span>
                        {activeOrder.status === 'open' && activeOrder.makerName === currentUser.name ? (
-                         <input type="number" value={activeOrder.deliveryFee} onChange={e=>handleUpdateFees('deliveryFee', Number(e.target.value))} className="w-16 bg-slate-800 text-right text-sm px-2 py-1 rounded text-slate-200 outline-none" min={0}/>
+                         <input type="number" value={isNaN(activeOrder.deliveryFee) ? '' : activeOrder.deliveryFee} onChange={e=>handleUpdateFees('deliveryFee', isNaN(Number(e.target.value)) ? 0 : Number(e.target.value))} className="w-16 bg-slate-800 text-right text-sm px-2 py-1 rounded text-slate-200 outline-none" min={0}/>
                        ) : (
                          <span className="text-sm text-slate-200 font-mono">{activeOrder.deliveryFee}</span>
                        )}
@@ -317,7 +317,7 @@ export function OrdersTab({
                     <div className="bg-black/40 border border-white/10 p-3 rounded-xl flex items-center justify-between">
                        <span className="text-[10px] text-slate-400 font-bold uppercase">Tax</span>
                        {activeOrder.status === 'open' && activeOrder.makerName === currentUser.name ? (
-                         <input type="number" value={activeOrder.tax} onChange={e=>handleUpdateFees('tax', Number(e.target.value))} className="w-16 bg-slate-800 text-right text-sm px-2 py-1 rounded text-slate-200 outline-none" min={0}/>
+                         <input type="number" value={isNaN(activeOrder.tax) ? '' : activeOrder.tax} onChange={e=>handleUpdateFees('tax', isNaN(Number(e.target.value)) ? 0 : Number(e.target.value))} className="w-16 bg-slate-800 text-right text-sm px-2 py-1 rounded text-slate-200 outline-none" min={0}/>
                        ) : (
                          <span className="text-sm text-slate-200 font-mono">{activeOrder.tax}</span>
                        )}
@@ -325,7 +325,7 @@ export function OrdersTab({
                     <div className="bg-black/40 border border-white/10 p-3 rounded-xl flex items-center justify-between">
                        <span className="text-[10px] text-fuchsia-400 font-bold uppercase">Discount</span>
                        {activeOrder.status === 'open' && activeOrder.makerName === currentUser.name ? (
-                         <input type="number" value={activeOrder.discount} onChange={e=>handleUpdateFees('discount', Number(e.target.value))} className="w-16 bg-slate-800 text-right text-sm px-2 py-1 rounded text-fuchsia-300 outline-none" min={0}/>
+                         <input type="number" value={isNaN(activeOrder.discount) ? '' : activeOrder.discount} onChange={e=>handleUpdateFees('discount', isNaN(Number(e.target.value)) ? 0 : Number(e.target.value))} className="w-16 bg-slate-800 text-right text-sm px-2 py-1 rounded text-fuchsia-300 outline-none" min={0}/>
                        ) : (
                          <span className="text-sm text-fuchsia-300 font-mono">{activeOrder.discount}</span>
                        )}
@@ -348,7 +348,7 @@ export function OrdersTab({
                       </div>
                       <div className="w-24">
                         <label className="text-[10px] text-slate-400 font-bold uppercase block mb-1">Cost</label>
-                        <input type="number" value={newItemAmount} onChange={e=>setNewItemAmount(Number(e.target.value))} placeholder="0.00" className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-200 outline-none" />
+                        <input type="number" value={isNaN(newItemAmount) ? '' : newItemAmount} onChange={e=>setNewItemAmount(isNaN(Number(e.target.value)) ? 0 : Number(e.target.value))} placeholder="0.00" className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-200 outline-none" />
                       </div>
                       <button onClick={handleAddItem} className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center justify-center h-[34px]">
                         Add

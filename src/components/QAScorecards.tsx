@@ -39,7 +39,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
 
   const handleUpdateQuestion = (idx: number, field: 'text' | 'maxScore', val: any) => {
     const updated = [...localQuestions];
-    updated[idx] = { ...updated[idx], [field]: field === 'maxScore' ? Number(val) : val };
+    updated[idx] = { ...updated[idx], [field]: field === 'maxScore' ? (isNaN(Number(val)) ? 0 : Number(val)) : val };
     setLocalQuestions(updated);
   };
 
@@ -58,7 +58,8 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
   const isEditor = currentUser.role === 'qa' || currentUser.name.toLowerCase() === 'hesham sobhy';
 
   const handleScoreChange = (qId: string, val: string) => {
-    setScores(prev => ({ ...prev, [qId]: Number(val) }));
+    const v = Number(val);
+    setScores(prev => ({ ...prev, [qId]: isNaN(v) ? 0 : v }));
   };
 
   const calculateTotal = (): number => {
@@ -178,7 +179,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                   <input
                     type="number"
                     min={1}
-                    value={q.maxScore}
+                    value={isNaN(q.maxScore) ? '' : q.maxScore}
                     onChange={(e) => handleUpdateQuestion(idx, 'maxScore', e.target.value)}
                     className="w-20 text-center bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-green-400 font-bold outline-none focus:border-green-500"
                   />
@@ -333,7 +334,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                       type="number"
                       min={0}
                       max={q.maxScore}
-                      value={scores[q.id] ?? ''}
+                      value={scores[q.id] === undefined || isNaN(scores[q.id]) ? '' : scores[q.id]}
                       onChange={(e) => handleScoreChange(q.id, e.target.value)}
                       required
                       placeholder="0"

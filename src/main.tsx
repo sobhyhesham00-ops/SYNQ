@@ -1,3 +1,4 @@
+import './main.css';
 import './patch_console';
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
@@ -44,13 +45,16 @@ if ('serviceWorker' in navigator) {
 
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AppProvider } from './context/AppContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AppProvider>
-      <ErrorBoundary>
-        <App />
-      </ErrorBoundary>
-    </AppProvider>
+    <ThemeProvider>
+      <AppProvider>
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>
+      </AppProvider>
+    </ThemeProvider>
   </StrictMode>,
 );

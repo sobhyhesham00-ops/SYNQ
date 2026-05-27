@@ -1,4 +1,5 @@
 import { MetricsReport } from './components/MetricsReport';
+import { ThemeToggle } from './components/ThemeToggle';
 import * as mammoth from 'mammoth';
 import React, { useState, useEffect, FormEvent, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -1122,24 +1123,9 @@ export default function App() {
   const [googleSheetId, setGoogleSheetId] = useState<string>(() => getStorageItem<string>('sched_google_sheet_id', ''));
   const [googleSheetGid, setGoogleSheetGid] = useState<string>(() => getStorageItem<string>('sched_google_sheet_gid', '0'));
 
-  // Theme support
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    const saved = localStorage.getItem('theme_mode');
-    return saved !== 'light';
-  });
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.body.classList.remove('theme-light');
-    } else {
-      document.body.classList.add('theme-light');
-    }
-    localStorage.setItem('theme_mode', isDarkMode ? 'dark' : 'light');
-  }, [isDarkMode]);
-
   // Auth States
-  const [currentUser, setCurrentUser] = useState<UserIcon | null>(() => {
-    const saved = getStorageItem<UserIcon | null>('sched_current_user', null);
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    const saved = getStorageItem<User | null>('sched_current_user', null);
     if (saved) {
       // Auto-logout the old full name sessions. New username must contain a dot and no spaces.
       const isNewFormat = saved.name.includes('.') && !saved.name.includes(' ');
@@ -1151,7 +1137,7 @@ export default function App() {
     return saved;
   });
 
-  const currentUserRef = React.useRef<UserIcon | null>(currentUser);
+  const currentUserRef = React.useRef<User | null>(currentUser);
   useEffect(() => {
     currentUserRef.current = currentUser;
     if (currentUser) {
@@ -2578,12 +2564,12 @@ export default function App() {
   }, [currentUser, lastUserInteraction]);
 
   // Real-time compliance overstay alerts background checks (break, lunch, restroom > 10m) & absent alerts
-  const [notifiedOverstays, setNotifiedOverstays] = useState<Record<string, boolean>>(() => {
-    return getStorageItem<Record<string, boolean>>('sched_notified_overstays', {});
-  });
-  const [notifiedAbsences, setNotifiedAbsences] = useState<Record<string, boolean>>(() => {
-    return getStorageItem<Record<string, boolean>>('sched_notified_absences', {});
-  });
+  const notifiedOverstaysRef = useRef<Record<string, boolean>>(
+    getStorageItem<Record<string, boolean>>('sched_notified_overstays', {})
+  );
+  const notifiedAbsencesRef = useRef<Record<string, boolean>>(
+    getStorageItem<Record<string, boolean>>('sched_notified_absences', {})
+  );
 
   useEffect(() => {
     if (!currentUser) return;
@@ -2593,13 +2579,10 @@ export default function App() {
       const elapsed = getActiveActivityElapsed(agent);
       if (elapsed && elapsed.exceeded) {
         const notifKey = `${elapsed.id}_${elapsed.type}`;
-        if (!notifiedOverstays[notifKey]) {
+        if (!notifiedOverstaysRef.current[notifKey]) {
           // Register as notified
-          setNotifiedOverstays(prev => {
-            const next = { ...prev, [notifKey]: true };
-            setStorageItem('sched_notified_overstays', next);
-            return next;
-          });
+          notifiedOverstaysRef.current[notifKey] = true;
+          setStorageItem('sched_notified_overstays', notifiedOverstaysRef.current);
 
           const labelMap: Record<string, string> = {
             break: 'Break',
@@ -2644,7 +2627,7 @@ export default function App() {
       const shiftLabel = sched.shiftLabel; // e.g., "07:00 - 16:00" or "22:00 - 07:00"
       
       const notifKey = `${todayStr}_${agent}_${shiftLabel}`;
-      if (!notifiedAbsences[notifKey]) {
+      if (!notifiedAbsencesRef.current[notifKey]) {
         // Extract start hour
         const startHourStr = shiftLabel.split('-')[0].trim(); // "07:00"
         const parts = startHourStr.split(':');
@@ -2671,11 +2654,8 @@ export default function App() {
 
           if (!hasClockInToday) {
             // Register as notified
-            setNotifiedAbsences(prev => {
-              const next = { ...prev, [notifKey]: true };
-              setStorageItem('sched_notified_absences', next);
-              return next;
-            });
+            notifiedAbsencesRef.current[notifKey] = true;
+            setStorageItem('sched_notified_absences', notifiedAbsencesRef.current);
 
             const assignedTL = getAgentTL(agent);
             const targetNotifUser = assignedTL !== 'Unassigned' ? assignedTL : 'tl';
@@ -2692,7 +2672,7 @@ export default function App() {
       }
     });
 
-  }, [currentTime, timeLogs, schedules, agentsList, currentUser, notifiedOverstays, notifiedAbsences]);
+  }, [currentTime, timeLogs, schedules, agentsList, currentUser]);
 
   const handleAssignSupport = () => {
     if (!targetSupportAgent || !currentUser) return;
@@ -5347,20 +5327,7 @@ export default function App() {
 
                   <div className="flex items-center gap-1.5">
                     {/* Dark/Light mode toggle */}
-                    <button
-                      onClick={() => {
-                        setIsDarkMode(!isDarkMode);
-                        toast.success(`Theme switched to ${!isDarkMode ? 'Dark' : 'Light'} Mode! 🎨`);
-                      }}
-                      className="p-2.5 rounded-xl bg-slate-900/50 border border-slate-700/10 hover:bg-slate-800/80 hover:border-slate-700/20 transition-all text-slate-300 hover:text-slate-300 cursor-pointer flex items-center justify-center"
-                      title="Toggle Dark/Light Mode"
-                    >
-                      {isDarkMode ? (
-                        <span className="text-xs leading-none">☀️</span>
-                      ) : (
-                        <span className="text-xs leading-none">🌙</span>
-                      )}
-                    </button>
+                    <ThemeToggle />
 
                     {/* Notification Center Trigger */}
                     <button
@@ -6191,7 +6158,12 @@ export default function App() {
 
                   const opInquiries = inquiries.filter(i => isInOpDay(i.createdAt) && isAllowedToView(i.agentName));
                   const answeredInquiries = opInquiries.filter(i => i.status === 'answered');
-                  const avgResTimeMin = opInquiries.length ? Math.round(answeredInquiries.reduce((acc, curr) => acc + ((new Date(curr.answeredAt || Date.now()).getTime() - new Date(curr.createdAt).getTime()) / 60000), 0) / opInquiries.length) : 0;
+                  const avgResTimeMin = opInquiries.length ? Math.round(answeredInquiries.reduce((acc, curr) => {
+                    const d1 = new Date(curr.createdAt).getTime();
+                    const d2 = curr.answeredAt ? new Date(curr.answeredAt).getTime() : Date.now();
+                    const diff = isNaN(d2) || isNaN(d1) ? 0 : (d2 - d1);
+                    return acc + (diff / 60000);
+                  }, 0) / opInquiries.length) : 0;
                   
                   const opFintech = tabbyTamaraRequests.filter(r => isInOpDay(r.createdAt) && isAllowedToView(r.agentName));
                   const confirmedFintech = opFintech.filter(i => i.status === 'confirmed' || i.status === 'rejected');
@@ -6513,12 +6485,13 @@ export default function App() {
                               totalHoursDecimal = (cOutMs - cInMs) / (3600 * 1000);
                             }
 
-                            myDailyLog.activities.forEach(a => {
-                              const dur = a.durationMinutes || (a.endTime ? 0 : Math.max(0, (Date.now() - new Date(a.startTime).getTime()) / 60000));
-                              if (a.type === 'break') breakMins += dur;
-                              else if (a.type === 'lunch') lunchMins += dur;
-                              else if (a.type === 'restroom') restroomMins += dur;
-                            });
+                             myDailyLog.activities.forEach(a => {
+                               const rawDur = a.durationMinutes || (a.endTime ? 0 : Math.max(0, (Date.now() - new Date(a.startTime).getTime()) / 60000));
+                               const dur = isNaN(rawDur) ? 0 : rawDur;
+                               if (a.type === 'break') breakMins += dur;
+                               else if (a.type === 'lunch') lunchMins += dur;
+                               else if (a.type === 'restroom') restroomMins += dur;
+                             });
                           }
 
                           return (
@@ -7450,7 +7423,7 @@ export default function App() {
                             <div className="flex items-baseline gap-2 mt-1">
                               {(() => {
                                 const qas = qaScores.filter(q => isInOpDay(q.createdAt));
-                                const avg = qas.length ? Math.round((qas.reduce((a, b) => a + (b.totalScore / b.maxTotalScore), 0) / qas.length) * 100) : null;
+                                const avg = qas.length ? Math.round((qas.reduce((a, b) => a + (b.maxTotalScore > 0 ? (b.totalScore / b.maxTotalScore) : 0), 0) / qas.length) * 100) : null;
                                 return (
                                   <>
                                     <span className={`text-3xl font-black font-mono ${avg && avg < 70 ? 'text-red-400' : 'text-slate-300'}`}>
@@ -15602,14 +15575,18 @@ export default function App() {
               {activeTab === 'kpi-calculator' && (isTLOreSupport || isMasterAdmin) && (() => {
                 
                 const calculateAchievement = (metric: typeof kpiMetrics[0]) => {
+                  if (isNaN(metric.actual) || isNaN(metric.target)) return 0;
                   if (metric.formula && metric.formula.trim()) {
                     return evaluateKpiFormula(metric.formula, metric.actual, metric.target);
                   }
                   if (metric.target === 0) return 0;
                   if (metric.type === 'higher') {
-                    return Math.min(100, Math.max(0, (metric.actual / metric.target) * 100));
+                    const val = (metric.actual / metric.target) * 100;
+                    return isNaN(val) ? 0 : Math.min(100, Math.max(0, val));
                   } else {
-                    return Math.min(100, Math.max(0, (metric.target / metric.actual) * 100)); // simple inverse
+                    if (metric.actual === 0) return 100;
+                    const val = (metric.target / metric.actual) * 100;
+                    return isNaN(val) ? 0 : Math.min(100, Math.max(0, val)); // simple inverse
                   }
                 };
 
@@ -15654,8 +15631,8 @@ export default function App() {
                            <label className="text-xs uppercase tracking-widest text-slate-400 font-bold">Max Bonus Target (EGP)</label>
                            <input
                               type="number"
-                              value={kpiMaxBonus}
-                              onChange={(e) => setKpiMaxBonus(Number(e.target.value))}
+                              value={isNaN(kpiMaxBonus) ? '' : kpiMaxBonus}
+                              onChange={(e) => setKpiMaxBonus(isNaN(Number(e.target.value)) ? 0 : Number(e.target.value))}
                               className="w-full bg-black/40 border border-slate-700/10 rounded-xl px-4 py-2 text-sm text-slate-300 outline-none focus:border-purple-500"
                               placeholder="e.g. 3000"
                            />
@@ -15695,10 +15672,10 @@ export default function App() {
                                    <td className="py-3 px-4">
                                       <input 
                                         type="number"
-                                        value={metric.target}
+                                        value={isNaN(metric.target) ? '' : metric.target}
                                         onChange={e => {
                                           const newM = [...kpiMetrics];
-                                          newM[i].target = Number(e.target.value);
+                                          newM[i].target = isNaN(Number(e.target.value)) ? 0 : Number(e.target.value);
                                           setKpiMetrics(newM);
                                         }}
                                         className="bg-black/20 border border-slate-700/5 rounded px-2 py-1 w-24 text-slate-300"
@@ -15707,10 +15684,10 @@ export default function App() {
                                    <td className="py-3 px-4">
                                       <input 
                                         type="number"
-                                        value={metric.actual}
+                                        value={isNaN(metric.actual) ? '' : metric.actual}
                                         onChange={e => {
                                           const newM = [...kpiMetrics];
-                                          newM[i].actual = Number(e.target.value);
+                                          newM[i].actual = isNaN(Number(e.target.value)) ? 0 : Number(e.target.value);
                                           setKpiMetrics(newM);
                                         }}
                                         className="bg-black/20 border border-slate-700/5 rounded px-2 py-1 w-24 text-slate-300"
@@ -15719,10 +15696,10 @@ export default function App() {
                                    <td className="py-3 px-4">
                                       <input 
                                         type="number"
-                                        value={metric.weight}
+                                        value={isNaN(metric.weight) ? '' : metric.weight}
                                         onChange={e => {
                                           const newM = [...kpiMetrics];
-                                          newM[i].weight = Number(e.target.value);
+                                          newM[i].weight = isNaN(Number(e.target.value)) ? 0 : Number(e.target.value);
                                           setKpiMetrics(newM);
                                         }}
                                         className="bg-black/20 border border-slate-700/5 rounded px-2 py-1 w-20 text-slate-300"
