@@ -526,7 +526,7 @@ export default function App() {
 
 
   // --- RECOVERED STATE ---
-  const proxyHandler: any = { get: (target: any, prop: any) => { if (prop === Symbol.toPrimitive || prop === 'toString' || prop === 'valueOf') return () => ''; if (prop === Symbol.iterator) return function*() {}; if (prop === 'length') return 0; if (prop === 'map' || prop === 'filter' || prop === 'slice' || prop === 'join' || prop === 'includes' || prop === 'reduce' || prop === 'some' || prop === 'every' || prop === 'forEach') return () => []; if (typeof prop === 'string' && prop.startsWith('is')) return false; if (prop === 'then') return undefined; if (prop === '$$typeof') return Symbol.for('react.transitional.element'); if (prop === 'type') return () => null; if (prop === 'props') return {}; if (prop === 'key' || prop === 'ref') return null; if (prop === '_owner' || prop === '_store') return null; return new Proxy({}, proxyHandler); } }; const dummyProxy = new Proxy({}, proxyHandler);
+  const proxyHandler: any = { get: (target: any, prop: any) => { if (prop === Symbol.toPrimitive || prop === 'toString' || prop === 'valueOf') return () => ''; if (prop === Symbol.iterator) return function*() {}; if (prop === 'length') return 0; if (prop === 'map' || prop === 'filter' || prop === 'slice' || prop === 'join' || prop === 'includes' || prop === 'reduce' || prop === 'some' || prop === 'every' || prop === 'forEach' || prop === 'split' || prop === 'match') return () => []; if (typeof prop === 'string' && (prop.startsWith('is') || prop === 'toLowerCase' || prop === 'toUpperCase' || prop === 'substring' || prop === 'replace' || prop === 'trim' || prop === 'padStart' || prop === 'padEnd' || prop === 'charAt' || prop === 'concat')) return () => ''; if (prop === 'indexOf' || prop === 'search' || prop === 'lastIndexOf') return () => -1; if (prop === 'then') return undefined; if (prop === '16641typeof') return Symbol.for('react.transitional.element'); if (prop === 'type') return () => null; if (prop === 'props') return {}; if (prop === 'key' || prop === 'ref') return null; if (prop === '_owner' || prop === '_store') return null; return new Proxy({}, proxyHandler); } }; const dummyProxy = new Proxy({}, proxyHandler);
   const currentUserRef = dummyProxy as any;
   const unsubUsers = dummyProxy as any;
   const unsubLogs = dummyProxy as any;
@@ -1167,7 +1167,7 @@ export default function App() {
                 <div className="p-4 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 space-y-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center font-black text-sm text-slate-700">
-                      {currentUser.name.split(' ').map(n => n[0]).join('')}
+                      {typeof currentUser?.name === 'string' ? currentUser.name.split(' ').map(n => n[0]).join('') : ''}
                     </div>
                     <div className="overflow-hidden">
                       <p className="text-xs font-bold text-slate-700 truncate">{formatAgentName(currentUser.name)}</p>
@@ -5792,7 +5792,7 @@ export default function App() {
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-700/5 pb-2.5">
                                   <div className="flex items-center gap-3">
                                     <div className="w-8.5 h-8.5 bg-indigo-500 rounded-full flex items-center justify-center font-bold text-white text-xs shadow">
-                                      {inq.agentName.split(' ').map(n => n[0]).join('')}
+                                      {typeof inq?.agentName === 'string' ? inq.agentName.split(' ').map((n: string) => n[0]).join('') : ''}
                                     </div>
                                     <div>
                                       <div className="flex items-center gap-2 flex-wrap">
