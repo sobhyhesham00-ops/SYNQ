@@ -3,8 +3,12 @@ import path from 'path';
 
 // Create logs directory synchronously if it doesn't exist
 const logsDir = path.join(process.cwd(), 'logs');
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir, { recursive: true });
+try {
+  if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir, { recursive: true });
+  }
+} catch (e) {
+  console.warn("Failed to create log directory (might be a read-only filesystem)", e);
 }
 
 // Generate today's log file
