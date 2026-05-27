@@ -526,7 +526,7 @@ export default function App() {
 
 
   // --- RECOVERED STATE ---
-  const dummyProxy = new Proxy({}, { get: (target, prop) => { if (prop === "length") return 0; if (prop === "map" || prop === "filter" || prop === "slice" || prop === "join" || prop === "includes" || prop === "reduce" || prop === "some" || prop === "every") return () => []; if (typeof prop === "string" && prop.startsWith("is")) return false; return "dummy"; } });
+  const proxyHandler: any = { get: (target: any, prop: any) => { if (prop === Symbol.toPrimitive || prop === 'toString' || prop === 'valueOf') return () => ''; if (prop === Symbol.iterator) return function*() {}; if (prop === 'length') return 0; if (prop === 'map' || prop === 'filter' || prop === 'slice' || prop === 'join' || prop === 'includes' || prop === 'reduce' || prop === 'some' || prop === 'every' || prop === 'forEach') return () => []; if (typeof prop === 'string' && prop.startsWith('is')) return false; if (prop === 'then') return undefined; if (prop === '$$typeof') return Symbol.for('react.transitional.element'); if (prop === 'type') return () => null; if (prop === 'props') return {}; if (prop === 'key' || prop === 'ref') return null; if (prop === '_owner' || prop === '_store') return null; return new Proxy({}, proxyHandler); } }; const dummyProxy = new Proxy({}, proxyHandler);
   const currentUserRef = dummyProxy as any;
   const unsubUsers = dummyProxy as any;
   const unsubLogs = dummyProxy as any;
