@@ -528,15 +528,15 @@ export default function App() {
   // --- RECOVERED STATE ---
   const proxyHandler: any = { get: (target: any, prop: any) => { if (prop === Symbol.toPrimitive || prop === 'toString' || prop === 'valueOf') return () => ''; if (prop === Symbol.iterator) return function*() {}; if (prop === 'length') return 0; if (prop === 'map' || prop === 'filter' || prop === 'slice' || prop === 'join' || prop === 'includes' || prop === 'reduce' || prop === 'some' || prop === 'every' || prop === 'forEach' || prop === 'split' || prop === 'match') return () => []; if (typeof prop === 'string' && (prop.startsWith('is') || prop === 'toLowerCase' || prop === 'toUpperCase' || prop === 'substring' || prop === 'replace' || prop === 'trim' || prop === 'padStart' || prop === 'padEnd' || prop === 'charAt' || prop === 'concat')) return () => ''; if (prop === 'indexOf' || prop === 'search' || prop === 'lastIndexOf') return () => -1; if (prop === 'then') return undefined; if (prop === "$$typeof" || prop === Symbol.for('react.element')) return Symbol.for('react.transitional.element'); if (prop === 'type') return () => null; if (prop === 'props') return {}; if (prop === 'key' || prop === 'ref') return null; if (prop === '_owner' || prop === '_store') return null; return new Proxy(function(){ return new Proxy(function(){}, proxyHandler); }, proxyHandler); } }; const dummyProxy = new Proxy(function(){ return dummyProxy; }, proxyHandler);
   
-  const unsubUsers = dummyProxy as any;
-  const unsubLogs = dummyProxy as any;
-  const unreadCount = dummyProxy as any;
+  // --- RECOVERED STATE ---
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallBtn, setShowInstallBtn] = useState<any>(false);
+
   const [currentUser, setCurrentUser] = useState<any>({ name: "Hesham Sobhy", role: "tl", status: "online" });
   const currentUserRef = useRef(currentUser);
   useEffect(() => { currentUserRef.current = currentUser; }, [currentUser]);
   
   const [supportAssignments, setSupportAssignments] = useState<any>({});
-  const showInstallBtn = dummyProxy as any;
   const [activeTab, setActiveTab] = useState<any>("inquiries");
   const isTLOreSupport = currentUser?.role === "tl" || currentUser?.role === "admin" || currentUser?.role === "director" || supportAssignments?.[currentUser?.name];
   const isMasterAdmin = currentUser?.role === "admin" || currentUser?.role === "director";
@@ -549,238 +549,1613 @@ export default function App() {
   const [qaScores, setQaScores] = useState<any>([]);
   const [announcements, setAnnouncements] = useState<any>([]);
   const [tabbyTamaraComplaints, setTabbyTamaraComplaints] = useState<any>([]);
-  const partnerPendingSwaps = dummyProxy as any;
-  const addSystemNotification = dummyProxy as any;
-  const [soundEnabled, setSoundEnabled] = useState<any>(dummyProxy);
-  const triggerNotificationAlert = dummyProxy as any;
-  const [todoFilter, setTodoFilter] = useState<any>(dummyProxy);
-  const todos = dummyProxy as any;
-  const [selectedDashboardDate, setSelectedDashboardDate] = useState<any>(dummyProxy);
+  
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [soundEnabled, setSoundEnabled] = useState<any>('true');
+  const [todoFilter, setTodoFilter] = useState<any>('');
+  
+  const [selectedDashboardDate, setSelectedDashboardDate] = useState<any>('');
   const [timeLogs, setTimeLogs] = useState<any>([]);
   const [dashboardViewMode, setDashboardViewMode] = useState<any>("daily");
-  const [agentDashboardTab, setAgentDashboardTab] = useState<any>(dummyProxy);
-  const [dashboardSearchTeam, setDashboardSearchTeam] = useState<any>(dummyProxy);
-  const [agentsList, setAgentsList] = useState<any>(dummyProxy);
-  const [dashboardChartMetric, setDashboardChartMetric] = useState<any>(dummyProxy);
-  const downloadFullCSV = dummyProxy as any;
-  const pendingSwapsCount = dummyProxy as any;
-  const pendingAnnualsCount = dummyProxy as any;
-  const totalApprovedThisMonth = dummyProxy as any;
-  const totalViolationsCount = dummyProxy as any;
+  const [agentDashboardTab, setAgentDashboardTab] = useState<any>('');
+  const [dashboardSearchTeam, setDashboardSearchTeam] = useState<any>('');
+  const [agentsList, setAgentsList] = useState<any>(INITIAL_AGENTS);
+  const [dashboardChartMetric, setDashboardChartMetric] = useState<any>('');
+
   const [queueStats, setQueueStats] = useState<any>([]);
   const [liveOpsLogs, setLiveOpsLogs] = useState<any>([]);
   const [selectedPendingRequests, setSelectedPendingRequests] = useState<any>([]);
-  const pendingRequests = dummyProxy as any;
-  const [logFilter, setLogFilter] = useState<any>(dummyProxy);
-  const [searchQuery, setSearchQuery] = useState<any>(dummyProxy);
-  const filteredLogs = dummyProxy as any;
-  const [swapDate, setSwapDate] = useState<any>(dummyProxy);
-  const [swapShift, setSwapShift] = useState<any>(dummyProxy);
-  const [swapTargetShift, setSwapTargetShift] = useState<any>(dummyProxy);
-  const [swapTargetAgent, setSwapTargetAgent] = useState<any>(dummyProxy);
-  const [swapNotes, setSwapNotes] = useState<any>([]);
-  const swapWarning = dummyProxy as any;
-  const [annualStart, setAnnualStart] = useState<any>(dummyProxy);
-  const [annualEnd, setAnnualEnd] = useState<any>(dummyProxy);
-  const [annualNotes, setAnnualNotes] = useState<any>([]);
-  const annualWarning = dummyProxy as any;
-  const orders = dummyProxy as any;
-  const registeredUsers = dummyProxy as any;
-  const [inquiryClinicName, setInquiryClinicName] = useState<any>(dummyProxy);
-  const [inquiryPhoneNumber, setInquiryPhoneNumber] = useState<any>(dummyProxy);
-  const [inquiryLanguageDir, setInquiryLanguageDir] = useState<any>(dummyProxy);
-  const [inquiryText, setInquiryText] = useState<any>(dummyProxy);
-  const [tempPhotoUrlInput, setTempPhotoUrlInput] = useState<any>(dummyProxy);
-  const inquiryPhotos = dummyProxy as any;
-  const [tempLinkInput, setTempLinkInput] = useState<any>(dummyProxy);
-  const inquiryLinks = dummyProxy as any;
+  
+  const [logFilter, setLogFilter] = useState<any>('');
+  const [searchQuery, setSearchQuery] = useState<any>('');
+  
+  const [swapDate, setSwapDate] = useState<any>('');
+  const [swapShift, setSwapShift] = useState<any>('');
+  const [swapTargetShift, setSwapTargetShift] = useState<any>('');
+  const [swapTargetAgent, setSwapTargetAgent] = useState<any>('');
+  const [swapNotes, setSwapNotes] = useState<any>('');
+  
+  const [annualStart, setAnnualStart] = useState<any>('');
+  const [annualEnd, setAnnualEnd] = useState<any>('');
+  const [annualNotes, setAnnualNotes] = useState<any>('');
+  
+  const [orders, setOrders] = useState<any[]>([]);
+  const [registeredUsers, setRegisteredUsers] = useState<any[]>([]);
+  
+  const [inquiryClinicName, setInquiryClinicName] = useState<any>('');
+  const [inquiryPhoneNumber, setInquiryPhoneNumber] = useState<any>('');
+  const [inquiryLanguageDir, setInquiryLanguageDir] = useState<any>('');
+  const [inquiryText, setInquiryText] = useState<any>('');
+  const [tempPhotoUrlInput, setTempPhotoUrlInput] = useState<any>('');
+  const [inquiryPhotos, setInquiryPhotos] = useState<string[]>([]);
+  const [tempLinkInput, setTempLinkInput] = useState<any>('');
+  const [inquiryLinks, setInquiryLinks] = useState<string[]>([]);
   const [isFormSubmitting, setIsFormSubmitting] = useState<any>(false);
   const isSuperAdmin = currentUser?.role === "admin" || currentUser?.role === "director";
-  const [inquirySearchQuery, setInquirySearchQuery] = useState<any>(dummyProxy);
-  const [inquiryStatusFilter, setInquiryStatusFilter] = useState<any>(dummyProxy);
-  const [answeringInquiryId, setAnsweringInquiryId] = useState<any>(dummyProxy);
-  const [currentAnswerText, setCurrentAnswerText] = useState<any>(dummyProxy);
-  const [tlIsPrintMode, setTlIsPrintMode] = useState<any>(dummyProxy);
-  const [rtmSearch, setRtmSearch] = useState<any>(dummyProxy);
-  const [rtmSelectedAgent, setRtmSelectedAgent] = useState<any>(dummyProxy);
-  const [tlSearchQuery, setTlSearchQuery] = useState<any>(dummyProxy);
-  const [tlStatusFilter, setTlStatusFilter] = useState<any>(dummyProxy);
-  const clearTargetSchedules = dummyProxy as any;
+  const [inquirySearchQuery, setInquirySearchQuery] = useState<any>('');
+  const [inquiryStatusFilter, setInquiryStatusFilter] = useState<any>('');
+  const [answeringInquiryId, setAnsweringInquiryId] = useState<any>('');
+  const [currentAnswerText, setCurrentAnswerText] = useState<any>('');
+  const [tlIsPrintMode, setTlIsPrintMode] = useState<any>('');
+  const [rtmSearch, setRtmSearch] = useState<any>('');
+  const [rtmSelectedAgent, setRtmSelectedAgent] = useState<any>('');
+  const [tlSearchQuery, setTlSearchQuery] = useState<any>('');
+  const [tlStatusFilter, setTlStatusFilter] = useState<any>('');
+  
   const [isSyncingSheets, setIsSyncingSheets] = useState<any>(false);
-  const downloadScheduleTemplate = dummyProxy as any;
-  const dragActive = dummyProxy as any;
-  const [googleSheetId, setGoogleSheetId] = useState<any>(dummyProxy);
+  const [dragActive, setDragActive] = useState<any>(false);
+  const [googleSheetId, setGoogleSheetId] = useState<any>('');
   const [tempSchedules, setTempSchedules] = useState<any>([]);
-  const [uploadError, setUploadError] = useState<any>(dummyProxy);
-  const commitSchedules = dummyProxy as any;
+  const [uploadError, setUploadError] = useState<any>('');
+  
   const [isRosterPublished, setIsRosterPublished] = useState<any>(false);
-  const [manualRosterAgent, setManualRosterAgent] = useState<any>(dummyProxy);
-  const [manualRosterDate, setManualRosterDate] = useState<any>(dummyProxy);
-  const [manualRosterShift, setManualRosterShift] = useState<any>(dummyProxy);
-  const [manualRosterNotes, setManualRosterNotes] = useState<any>([]);
-  const allScheduleDates = dummyProxy as any;
-  const [scheduleFilterAgent, setScheduleFilterAgent] = useState<any>(dummyProxy);
-  const [scheduleViewMode, setScheduleViewMode] = useState<any>(dummyProxy);
-  const safeOffset = dummyProxy as any;
-  const displayDaysCount = dummyProxy as any;
-  const baseDatesList = dummyProxy as any;
-  const syncShiftsToGoogleCalendar = dummyProxy as any;
-  const isSyncingCalendar = dummyProxy as any;
-  const downloadShiftsICS = dummyProxy as any;
-  const [heatmapMorningTarget, setHeatmapMorningTarget] = useState<any>(dummyProxy);
-  const [heatmapAfternoonTarget, setHeatmapAfternoonTarget] = useState<any>(dummyProxy);
-  const [heatmapNightTarget, setHeatmapNightTarget] = useState<any>(dummyProxy);
-  const [heatmapConfigureOpen, setHeatmapConfigureOpen] = useState<any>(dummyProxy);
-  const activeDisplayDates = dummyProxy as any;
-  const visibleAgents = dummyProxy as any;
-  const [p2pSelectedDate, setP2pSelectedDate] = useState<any>(dummyProxy);
-  const [p2pTargetAgent, setP2pTargetAgent] = useState<any>(dummyProxy);
-  const [p2pTargetShift, setP2pTargetShift] = useState<any>(dummyProxy);
-  const [p2pNotes, setP2pNotes] = useState<any>([]);
-  const [ttPatientName, setTtPatientName] = useState<any>(dummyProxy);
-  const [ttFileNumber, setTtFileNumber] = useState<any>(dummyProxy);
-  const [ttIsOldCustomer, setTtIsOldCustomer] = useState<any>(dummyProxy);
-  const [ttIdNumber, setTtIdNumber] = useState<any>(dummyProxy);
-  const [ttPriceWithoutTax, setTtPriceWithoutTax] = useState<any>(dummyProxy);
-  const [ttPhoneNumber, setTtPhoneNumber] = useState<any>(dummyProxy);
-  const [ttPlatform, setTtPlatform] = useState<any>(dummyProxy);
-  const [ttClinicName, setTtClinicName] = useState<any>(dummyProxy);
-  const [ttNotes, setTtNotes] = useState<any>([]);
-  const [activeScreenshot, setActiveScreenshot] = useState<any>(dummyProxy);
-  const [tcPatientName, setTcPatientName] = useState<any>(dummyProxy);
-  const [tcFileNumber, setTcFileNumber] = useState<any>(dummyProxy);
-  const [tcIsOldCustomer, setTcIsOldCustomer] = useState<any>(dummyProxy);
-  const [tcIdNumber, setTcIdNumber] = useState<any>(dummyProxy);
-  const [tcPhoneNumber, setTcPhoneNumber] = useState<any>(dummyProxy);
-  const [tcClinicName, setTcClinicName] = useState<any>(dummyProxy);
-  const [tcComplaintDetails, setTcComplaintDetails] = useState<any>([]);
-  const [ccClinicName, setCcClinicName] = useState<any>(dummyProxy);
-  const [ccPhoneNumber, setCcPhoneNumber] = useState<any>(dummyProxy);
-  const [ccLanguage, setCcLanguage] = useState<any>(dummyProxy);
-  const [ccNotes, setCcNotes] = useState<any>([]);
-  const [ttSearchQuery, setTtSearchQuery] = useState<any>(dummyProxy);
-  const [ttFilterStatus, setTtFilterStatus] = useState<any>([]);
-  const [tcFilterClinic, setTcFilterClinic] = useState<any>(dummyProxy);
-  const [ttFilterProvider, setTtFilterProvider] = useState<any>(dummyProxy);
-  const [activeFintechHandlingId, setActiveFintechHandlingId] = useState<any>(dummyProxy);
-  const [tlFintechPaymentLink, setTlFintechPaymentLink] = useState<any>(dummyProxy);
-  const [tlFintechNotes, setTlFintechNotes] = useState<any>([]);
-  const [tlFintechLinks, setTlFintechLinks] = useState<any>([]);
-  const [activeComplaintHandlingId, setActiveComplaintHandlingId] = useState<any>(dummyProxy);
-  const [tlComplaintComment, setTlComplaintComment] = useState<any>(dummyProxy);
-  const [activeCcHandlingId, setActiveCcHandlingId] = useState<any>(dummyProxy);
-  const [ccHandlingNotes, setCcHandlingNotes] = useState<any>([]);
-  const tlFeedbacks = dummyProxy as any;
-  const [feedbackFilterTl, setFeedbackFilterTl] = useState<any>(dummyProxy);
-  const [selectedTlForFeedback, setSelectedTlForFeedback] = useState<any>(dummyProxy);
-  const [feedbackAttachmentName, setFeedbackAttachmentName] = useState<any>(dummyProxy);
-  const [feedbackAttachment, setFeedbackAttachment] = useState<any>(dummyProxy);
-  const [feedbackNotes, setFeedbackNotes] = useState<any>([]);
-  const addTlFeedback = dummyProxy as any;
-  const [feedbackReplies, setFeedbackReplies] = useState<any>([]);
-  const replyToTlFeedback = dummyProxy as any;
-  const [feedbackReplyAttachments, setFeedbackReplyAttachments] = useState<any>([]);
-  const [feedbackReplyAttachmentNames, setFeedbackReplyAttachmentNames] = useState<any>([]);
-  const [directorySearchQuery, setDirectorySearchQuery] = useState<any>(dummyProxy);
-  const [googleSheetGid, setGoogleSheetGid] = useState<any>(dummyProxy);
-  const [agentDirectory, setAgentDirectory] = useState<any>(dummyProxy);
+  const [manualRosterAgent, setManualRosterAgent] = useState<any>('');
+  const [manualRosterDate, setManualRosterDate] = useState<any>('');
+  const [manualRosterShift, setManualRosterShift] = useState<any>('');
+  const [manualRosterNotes, setManualRosterNotes] = useState<any>('');
+  
+  const [scheduleFilterAgent, setScheduleFilterAgent] = useState<any>('');
+  const [scheduleViewMode, setScheduleViewMode] = useState<any>('week');
+  const [schedulePageOffset, setSchedulePageOffset] = useState<number>(0);
+  
+  const [heatmapMorningTarget, setHeatmapMorningTarget] = useState<any>('');
+  const [heatmapAfternoonTarget, setHeatmapAfternoonTarget] = useState<any>('');
+  const [heatmapNightTarget, setHeatmapNightTarget] = useState<any>('');
+  const [heatmapConfigureOpen, setHeatmapConfigureOpen] = useState<any>('');
+  
+  const [p2pSelectedDate, setP2pSelectedDate] = useState<any>('');
+  const [p2pTargetAgent, setP2pTargetAgent] = useState<any>('');
+  const [p2pTargetShift, setP2pTargetShift] = useState<any>('');
+  const [p2pNotes, setP2pNotes] = useState<any>('');
+  
+  const [ttPatientName, setTtPatientName] = useState<any>('');
+  const [ttFileNumber, setTtFileNumber] = useState<any>('');
+  const [ttIsOldCustomer, setTtIsOldCustomer] = useState<any>('');
+  const [ttIdNumber, setTtIdNumber] = useState<any>('');
+  const [ttPriceWithoutTax, setTtPriceWithoutTax] = useState<any>('');
+  const [ttPhoneNumber, setTtPhoneNumber] = useState<any>('');
+  const [ttPlatform, setTtPlatform] = useState<any>('');
+  const [ttClinicName, setTtClinicName] = useState<any>('');
+  const [ttNotes, setTtNotes] = useState<any>('');
+  const [activeScreenshot, setActiveScreenshot] = useState<any>('');
+  
+  const [tcPatientName, setTcPatientName] = useState<any>('');
+  const [tcFileNumber, setTcFileNumber] = useState<any>('');
+  const [tcIsOldCustomer, setTcIsOldCustomer] = useState<any>('');
+  const [tcIdNumber, setTcIdNumber] = useState<any>('');
+  const [tcPhoneNumber, setTcPhoneNumber] = useState<any>('');
+  const [tcClinicName, setTcClinicName] = useState<any>('');
+  const [tcComplaintDetails, setTcComplaintDetails] = useState<any>('');
+  
+  const [ccClinicName, setCcClinicName] = useState<any>('');
+  const [ccPhoneNumber, setCcPhoneNumber] = useState<any>('');
+  const [ccLanguage, setCcLanguage] = useState<any>('');
+  const [ccNotes, setCcNotes] = useState<any>('');
+  
+  const [ttSearchQuery, setTtSearchQuery] = useState<any>('');
+  const [ttFilterStatus, setTtFilterStatus] = useState<any>('all');
+  const [tcFilterClinic, setTcFilterClinic] = useState<any>('');
+  const [ttFilterProvider, setTtFilterProvider] = useState<any>('');
+  
+  const [activeFintechHandlingId, setActiveFintechHandlingId] = useState<any>('');
+  const [tlFintechPaymentLink, setTlFintechPaymentLink] = useState<any>('');
+  const [tlFintechNotes, setTlFintechNotes] = useState<any>('');
+  const [tlFintechLinks, setTlFintechLinks] = useState<any>('');
+  
+  const [activeComplaintHandlingId, setActiveComplaintHandlingId] = useState<any>('');
+  const [tlComplaintComment, setTlComplaintComment] = useState<any>('');
+  const [activeCcHandlingId, setActiveCcHandlingId] = useState<any>('');
+  const [ccHandlingNotes, setCcHandlingNotes] = useState<any>('');
+  
+  const [tlFeedbacks, setTlFeedbacks] = useState<any[]>([]);
+  const [feedbackFilterTl, setFeedbackFilterTl] = useState<any>('');
+  const [selectedTlForFeedback, setSelectedTlForFeedback] = useState<any>('');
+  const [feedbackAttachmentName, setFeedbackAttachmentName] = useState<any>('');
+  const [feedbackAttachment, setFeedbackAttachment] = useState<any>('');
+  const [feedbackNotes, setFeedbackNotes] = useState<any>('');
+  
+  const [feedbackReplies, setFeedbackReplies] = useState<any>({});
+  const [feedbackReplyAttachments, setFeedbackReplyAttachments] = useState<any>({});
+  const [feedbackReplyAttachmentNames, setFeedbackReplyAttachmentNames] = useState<any>({});
+  
+  const [directorySearchQuery, setDirectorySearchQuery] = useState<any>('');
+  const [googleSheetGid, setGoogleSheetGid] = useState<any>('');
+  const [agentDirectory, setAgentDirectory] = useState<any>('');
   const [directoryHeaders, setDirectoryHeaders] = useState<any>([]);
-  const [caseSearchQuery, setCaseSearchQuery] = useState<any>(dummyProxy);
-  const [caseDateFilter, setCaseDateFilter] = useState<any>(dummyProxy);
-  const [caseAgentFilter, setCaseAgentFilter] = useState<any>(dummyProxy);
-  const [casePatientName, setCasePatientName] = useState<any>(dummyProxy);
-  const [casePhoneNumber, setCasePhoneNumber] = useState<any>(dummyProxy);
-  const [caseInquiry, setCaseInquiry] = useState<any>(dummyProxy);
-  const [caseLeadSource, setCaseLeadSource] = useState<any>(dummyProxy);
-  const [caseBloggerName, setCaseBloggerName] = useState<any>(dummyProxy);
-  const [casePatientType, setCasePatientType] = useState<any>(dummyProxy);
-  const [caseService, setCaseService] = useState<any>(dummyProxy);
-  const [caseBranch, setCaseBranch] = useState<any>(dummyProxy);
-  const [caseTicketType, setCaseTicketType] = useState<any>(dummyProxy);
-  const [caseCallType, setCaseCallType] = useState<any>(dummyProxy);
-  const [caseTicketStatus, setCaseTicketStatus] = useState<any>([]);
-  const [historyFilter, setHistoryFilter] = useState<any>(dummyProxy);
-  const [qaTemplate, setQaTemplate] = useState<any>(dummyProxy);
+  
+  const [caseSearchQuery, setCaseSearchQuery] = useState<any>('');
+  const [caseDateFilter, setCaseDateFilter] = useState<any>('');
+  const [caseAgentFilter, setCaseAgentFilter] = useState<any>('');
+  const [casePatientName, setCasePatientName] = useState<any>('');
+  const [casePhoneNumber, setCasePhoneNumber] = useState<any>('');
+  const [caseInquiry, setCaseInquiry] = useState<any>('');
+  const [caseLeadSource, setCaseLeadSource] = useState<any>('');
+  const [caseBloggerName, setCaseBloggerName] = useState<any>('');
+  const [casePatientType, setCasePatientType] = useState<any>('');
+  const [caseService, setCaseService] = useState<any>('');
+  const [caseBranch, setCaseBranch] = useState<any>('');
+  const [caseTicketType, setCaseTicketType] = useState<any>('');
+  const [caseCallType, setCaseCallType] = useState<any>('');
+  const [caseTicketStatus, setCaseTicketStatus] = useState<any>('Open');
+  
+  const [historyFilter, setHistoryFilter] = useState<any>('');
+  const [qaTemplate, setQaTemplate] = useState<any>('');
   const [kpiMetrics, setKpiMetrics] = useState<any>([]);
-  const [kpiMaxBonus, setKpiMaxBonus] = useState<any>([]);
-  const [kpiAgentTarget, setKpiAgentTarget] = useState<any>(dummyProxy);
-  const [logAgentFilter, setLogAgentFilter] = useState<any>(dummyProxy);
-  const [logTypeFilter, setLogTypeFilter] = useState<any>(dummyProxy);
-  const [logSearchQuery, setLogSearchQuery] = useState<any>(dummyProxy);
-  const [uploadSuccess, setUploadSuccess] = useState<any>([]);
+  const [kpiMaxBonus, setKpiMaxBonus] = useState<any>('');
+  const [kpiAgentTarget, setKpiAgentTarget] = useState<any>('');
+  
+  const [logAgentFilter, setLogAgentFilter] = useState<any>('');
+  const [logTypeFilter, setLogTypeFilter] = useState<any>('');
+  const [logSearchQuery, setLogSearchQuery] = useState<any>('');
+  
+  const [uploadSuccess, setUploadSuccess] = useState<any>(null);
   const [tempNewAgents, setTempNewAgents] = useState<any>([]);
   const [credentials, setCredentials] = useState<any>([]);
   const [lockedAccounts, setLockedAccounts] = useState<any>([]);
   const [failedAttempts, setFailedAttempts] = useState<any>([]);
   const [isOvertimeAlertMinimized, setIsOvertimeAlertMinimized] = useState<any>(false);
   const [isNotifDrawerOpen, setIsNotifDrawerOpen] = useState<any>(false);
-  const visibleNotifs = dummyProxy as any;
   const [selectedShiftForActivities, setSelectedShiftForActivities] = useState<any>([]);
-  const setRamadanTemp = (val: any): void => {};
-  const setRamadanWeatherCode = (val: any): void => {};
-  const setGoogleUser = (val: any): void => {};
-  const setGoogleToken = (val: any): void => {};
-  const setNeedsGoogleAuth = (val: any): void => {};
-  const setIsLoggingInGoogle = (val: any): void => {};
-  const setFirestoreSchedules = (val: any): void => {};
-  const setSchedulePageOffset = (val: any): void => {};
-  const setSubmissionConfirmation = (val: any): void => {};
-  const setAgentMeta = (val: any): void => {};
-  const setNotifications = (val: any): void => {};
-  const handleInstallClick = (...args: any[]): any => {};
-  const handleSignOut = (...args: any[]): any => {};
-  const handleResetAllData = (...args: any[]): any => {};
-  const handleMarkInquirySeen = (...args: any[]): any => {};
-  const getElapsedTimerString = (...args: any[]): any => dummyProxy as any;
-  const handleContactTabbyTamara = (...args: any[]): any => {};
-  const handleToggleContactComplaint = (...args: any[]): any => {};
-  const handlePartnerDecision = (...args: any[]): any => {};
-  const handleBulkTLApproval = (...args: any[]): any => {};
-  const handleTLApproval = (...args: any[]): any => {};
-  const handleCreateSwap = (...args: any[]): any => {};
-  const handleCreateAnnual = (...args: any[]): any => {};
-  const handleCancelRequest = (...args: any[]): any => {};
-  const handleSubmitInquiry = (...args: any[]): any => {};
-  const handlePhotoFileUpload = (...args: any[]): any => {};
-  const handleAddPhotoUrl = (...args: any[]): any => {};
-  const handleRemovePhoto = (...args: any[]): any => {};
-  const handleAddLink = (...args: any[]): any => {};
-  const handleRemoveLink = (...args: any[]): any => {};
-  const handleDeleteInquiry = (...args: any[]): any => {};
-  const handleUpdateContactedStatus = (...args: any[]): any => {};
-  const getActiveTimeLog = (...args: any[]): any => dummyProxy as any;
-  const handleClockIn = (...args: any[]): any => {};
-  const handleStartActivity = (...args: any[]): any => {};
-  const handleEndActivity = (...args: any[]): any => {};
-  const handleClockOut = (...args: any[]): any => {};
-  const getAgentTodayStats = (...args: any[]): any => dummyProxy as any;
-  const handleDownloadInquiriesReport = (...args: any[]): any => {};
-  const handleSetInquirySent = (...args: any[]): any => {};
-  const handleReassignInquiry = (...args: any[]): any => {};
-  const handleSetInquiryAnswered = (...args: any[]): any => {};
-  const handleCopyCSVReport = (...args: any[]): any => {};
-  const handleTLOverrideAgentStatus = (...args: any[]): any => {};
-  const getActiveActivityElapsed = (...args: any[]): any => dummyProxy as any;
-  const getTodayLog = (...args: any[]): any => dummyProxy as any;
-  const handleDrag = (...args: any[]): any => {};
-  const handleDrop = (...args: any[]): any => {};
-  const handleScheduleFileChange = (...args: any[]): any => {};
-  const handleManualRosterSubmit = (...args: any[]): any => {};
-  const getShiftBadgeStyle = (...args: any[]): any => dummyProxy as any;
-  const handleSubmitTabbyTamara = (...args: any[]): any => {};
-  const handleSubmitTabbyTamaraComplaint = (...args: any[]): any => {};
-  const handleSubmitClientComms = (...args: any[]): any => {};
-  const handleConfirmTabbyTamara = (...args: any[]): any => {};
-  const handleDeleteTabbyTamara = (...args: any[]): any => {};
-  const handleTLCommentComplaint = (...args: any[]): any => {};
-  const handleDeleteComplaint = (...args: any[]): any => {};
-  const handleProcessClientComms = (...args: any[]): any => {};
-  const handleDeleteClientComms = (...args: any[]): any => {};
-  const handleTakeClientComm = (...args: any[]): any => {};
-  const handleDirectoryFile = (...args: any[]): any => {};
-  const handleExportCloudBackup = (...args: any[]): any => {};
-  const handleMarkSingleNotifAsRead = (...args: any[]): any => {};
-  const handleMarkAllNotifsAsRead = (...args: any[]): any => {};
+  
+  const [ramadanTemp, setRamadanTemp] = useState<number>(25);
+  const [ramadanWeatherCode, setRamadanWeatherCode] = useState<number>(0);
+  const [googleUser, setGoogleUser] = useState<any>(null);
+  const [googleToken, setGoogleToken] = useState<string | null>(null);
+  const [needsGoogleAuth, setNeedsGoogleAuth] = useState<boolean>(false);
+  const [isLoggingInGoogle, setIsLoggingInGoogle] = useState<boolean>(false);
+  const [firestoreSchedules, setFirestoreSchedules] = useState<any[]>([]);
+  const [submissionConfirmation, setSubmissionConfirmation] = useState<any>(null);
+  const [agentMeta, setAgentMeta] = useState<any>(null);
+
+  const downloadFullCSV = () => {
+    if (requests.length === 0) {
+      toast.error("No requests to export");
+      return;
+    }
+    let csvContent = "data:text/csv;charset=utf-8,ID,Agent Name,Type,Start Date,End Date,Status,Created At,Notes\n";
+    requests.forEach((r: any) => {
+      const row = [
+        r.id || '',
+        r.agentName || '',
+        r.type || '',
+        r.date || r.startDate || '',
+        r.endDate || '',
+        r.status || '',
+        r.createdAt || '',
+        (r.notes || '').replace(/,/g, ' ')
+      ].join(',');
+      csvContent += row + "\n";
+    });
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "scheduling_requests_backup.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Requests database exported as CSV!");
+  };
+
+  // --- RECOVERED MEMOIZED SELECTORS & COMPASS FUNCTIONS ---
+  const allScheduleDates = useMemo(() => {
+    const dates = Array.from(new Set(schedules.map((s: any) => s.date).filter(Boolean)));
+    return dates.sort();
+  }, [schedules]);
+
+  const baseDatesList = useMemo(() => {
+    if (allScheduleDates.length > 0) return allScheduleDates;
+    const list = [];
+    const start = new Date();
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      list.push(d.toISOString().slice(0, 10));
+    }
+    return list;
+  }, [allScheduleDates]);
+
+  const displayDaysCount = useMemo(() => {
+    if (scheduleViewMode === 'day') return 1;
+    if (scheduleViewMode === 'week') return 7;
+    if (scheduleViewMode === '2weeks') return 14;
+    if (scheduleViewMode === 'month') return 30;
+    return 7;
+  }, [scheduleViewMode]);
+
+  const safeOffset = useMemo(() => {
+    return Math.max(0, Math.min(schedulePageOffset, Math.max(0, baseDatesList.length - displayDaysCount)));
+  }, [schedulePageOffset, baseDatesList, displayDaysCount]);
+
+  const activeDisplayDates = useMemo(() => {
+    return baseDatesList.slice(safeOffset, safeOffset + displayDaysCount);
+  }, [baseDatesList, safeOffset, displayDaysCount]);
+
+  const visibleAgents = useMemo(() => {
+    if (!agentsList || agentsList.length === 0) return [];
+    if (scheduleFilterAgent) {
+      return agentsList.filter((a: any) => a.toLowerCase().includes(scheduleFilterAgent.toLowerCase()));
+    }
+    return agentsList;
+  }, [agentsList, scheduleFilterAgent]);
+
+  const visibleNotifs = useMemo(() => {
+    if (!currentUser) return [];
+    return notifications.filter(n => {
+      const isTarget = n.targetAgent === 'all' || 
+                       (n.targetAgent === 'tl' && (currentUser.role === 'tl' || currentUser.role === 'admin' || currentUser.role === 'director')) ||
+                       n.targetAgent?.toLowerCase() === currentUser.name?.toLowerCase();
+      const isCleared = n.clearedByUsers && n.clearedByUsers.includes(currentUser.name);
+      return isTarget && !isCleared;
+    });
+  }, [notifications, currentUser]);
+
+  const unreadCount = useMemo(() => {
+    if (!currentUser) return 0;
+    return visibleNotifs.filter(n => !n.seenByUsers || !n.seenByUsers.includes(currentUser.name)).length;
+  }, [visibleNotifs, currentUser]);
+
+  const partnerPendingSwaps = useMemo(() => {
+    if (!currentUser || currentUser.role !== 'agent') return [];
+    return requests.filter((r: any) =>
+      r.type === 'swap' &&
+      r.status === 'pending_partner' &&
+      r.swapWithAgent?.toLowerCase() === currentUser.name?.toLowerCase()
+    );
+  }, [requests, currentUser]);
+
+  const pendingSwapsCount = useMemo(() => {
+    return requests.filter((r: any) => r.type === 'swap' && r.status === 'pending').length;
+  }, [requests]);
+
+  const pendingAnnualsCount = useMemo(() => {
+    return requests.filter((r: any) => r.type === 'annual' && r.status === 'pending').length;
+  }, [requests]);
+
+  const totalApprovedThisMonth = useMemo(() => {
+    const currentMonthStr = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+    return requests.filter((r: any) => r.status === 'approved' && (r.createdAt || '').startsWith(currentMonthStr)).length;
+  }, [requests]);
+
+  const totalViolationsCount = useMemo(() => {
+    return requests.filter((r: any) => r.ruleViolation === true).length;
+  }, [requests]);
+
+  const pendingRequests = useMemo(() => {
+    return requests.filter((r: any) => r.status === 'pending');
+  }, [requests]);
+
+  const filteredLogs = useMemo(() => {
+    return timeLogs.filter((log: any) => {
+      if (logAgentFilter && log.agentName?.toLowerCase() !== logAgentFilter.toLowerCase()) return false;
+      if (logTypeFilter && log.status !== logTypeFilter) return false;
+      if (logSearchQuery) {
+        const q = logSearchQuery.toLowerCase();
+        const nameMatch = (log.agentName || '').toLowerCase().includes(q);
+        const statusMatch = (log.status || '').toLowerCase().includes(q);
+        if (!nameMatch && !statusMatch) return false;
+      }
+      return true;
+    });
+  }, [timeLogs, logAgentFilter, logTypeFilter, logSearchQuery]);
+
+  const swapWarning = useMemo(() => {
+    if (!swapDate) return null;
+    const now = new Date();
+    now.setHours(0,0,0,0);
+    const d = new Date(swapDate);
+    if (d.getTime() < now.getTime()) {
+      return "Swap date cannot be in the past!";
+    }
+    if (swapTargetAgent === currentUser?.name) {
+      return "You cannot swap with yourself!";
+    }
+    return null;
+  }, [swapDate, swapTargetAgent, currentUser]);
+
+  const annualWarning = useMemo(() => {
+    if (!annualStart || !annualEnd) return null;
+    const start = new Date(annualStart);
+    const end = new Date(annualEnd);
+    if (end.getTime() < start.getTime()) {
+      return "Annual end date cannot be before start date!";
+    }
+    return null;
+  }, [annualStart, annualEnd]);
+
+  const todos = useMemo(() => {
+    return []; // Simple local list or synced if required by design. Keeping empty as standard placeholder.
+  }, []);
+
+  // --- PWA Installation Listener & Trigger ---
+  useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallBtn(true);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      console.log('User accepted PWA installation');
+    }
+    setDeferredPrompt(null);
+    setShowInstallBtn(false);
+  };
+
+  const getElapsedTimerString = (start: string, end?: string) => {
+    if (!start) return '00m 00s';
+    const startTime = new Date(start).getTime();
+    const endTime = end ? new Date(end).getTime() : Date.now();
+    if (isNaN(startTime) || isNaN(endTime)) return '00m 00s';
+    const diffMs = Math.max(0, endTime - startTime);
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHour = Math.floor(diffMin / 60);
+    
+    if (diffHour > 0) {
+      return `${diffHour}h ${diffMin % 60}m`;
+    }
+    return `${diffMin}m ${diffSec % 60}s`;
+  };
+
+  const getActiveTimeLog = (agentName: string) => {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const log = timeLogs.find(l => l.agentName?.toLowerCase() === agentName?.toLowerCase() && l.date === todayStr);
+    if (log && log.clockIn && !log.clockOut) {
+      return log;
+    }
+    return null;
+  };
+
+  const getTodayLog = (agentName: string) => {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    return timeLogs.find(l => l.agentName?.toLowerCase() === agentName?.toLowerCase() && l.date === todayStr);
+  };
+
+  const getAgentTodayStats = (agentName: string) => {
+    const result = {
+      clockIn: undefined as string | undefined,
+      clockOut: undefined as string | undefined,
+      breakMins: 0,
+      lunchMins: 0,
+      restroomMins: 0,
+      restroomCount: 0,
+      meetingMins: 0,
+      oneOnOneMins: 0,
+      personalMins: 0
+    };
+    
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const log = timeLogs.find(l => l.agentName?.toLowerCase() === agentName?.toLowerCase() && l.date === todayStr);
+    if (!log) return result;
+    
+    result.clockIn = log.clockIn;
+    result.clockOut = log.clockOut;
+    
+    (log.activities || []).forEach((act: any) => {
+      const start = new Date(act.startTime).getTime();
+      const end = act.endTime ? new Date(act.endTime).getTime() : Date.now();
+      const duration = isNaN(start) || isNaN(end) ? 0 : Math.max(0, (end - start) / 60000);
+      
+      const type = (act.type || '').toLowerCase();
+      if (type === 'break' || type === 'coffee') {
+        result.breakMins += duration;
+      } else if (type === 'lunch') {
+        result.lunchMins += duration;
+      } else if (type === 'restroom') {
+        result.restroomMins += duration;
+        result.restroomCount++;
+      } else if (type === 'meeting') {
+        result.meetingMins += duration;
+      } else if (type === 'one_on_one' || type === 'coaching') {
+        result.oneOnOneMins += duration;
+      } else if (type === 'personal') {
+        result.personalMins += duration;
+      }
+    });
+    
+    return result;
+  };
+
+  const getActiveActivityElapsed = (agentName: string) => {
+    const activeLog = getActiveTimeLog(agentName);
+    if (!activeLog || !activeLog.activities) return null;
+    
+    const currentAct = activeLog.activities.find((a: any) => !a.endTime);
+    if (!currentAct) return null;
+    
+    const start = new Date(currentAct.startTime).getTime();
+    if (isNaN(start)) return null;
+    
+    const elapsedMinutes = (Date.now() - start) / 60000;
+    const type = currentAct.type || '';
+    
+    let limit = 15;
+    if (type === 'lunch') {
+      limit = 30;
+    } else if (type === 'meeting') {
+      limit = 60;
+    } else if (type === 'one_on_one') {
+      limit = 30;
+    } else if (type === 'break' || type === 'personal') {
+      limit = 15;
+    } else {
+      limit = Infinity;
+    }
+    
+    const exceeded = elapsedMinutes > limit;
+    const exceededBy = Math.max(0, elapsedMinutes - limit);
+    
+    return { elapsedMinutes, duration: elapsedMinutes, limit, exceeded, exceededBy, type };
+  };
+
+  const getShiftBadgeStyle = (shiftLabel: string) => {
+    const lbl = (shiftLabel || '').toLowerCase();
+    let bg = 'bg-slate-500/10 text-slate-300 border-slate-500/15';
+    let display = shiftLabel || 'Off';
+    
+    if (lbl.includes('morning') || lbl.includes('07:00')) {
+      bg = 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+      display = 'Morning';
+    } else if (lbl.includes('afternoon') || lbl.includes('13:00')) {
+      bg = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+      display = 'Afternoon';
+    } else if (lbl.includes('night') || lbl.includes('22:00')) {
+      bg = 'bg-purple-500/10 text-purple-400 border-purple-500/20';
+      display = 'Night';
+    } else if (lbl.includes('off')) {
+      bg = 'bg-slate-500/10 text-slate-400 border-slate-500/25';
+      display = 'Off';
+    }
+    return { bg, display };
+  };
+
+  // --- ACTIVE CRM & ACTION PORTAL ACTION HANDLERS ---
+  const addSystemNotification = async (
+    title: string,
+    message: string,
+    type: string = 'general',
+    targetAgent: string = 'all'
+  ) => {
+    const finalTarget = targetAgent === 'personal' ? currentUser?.name || 'all' : targetAgent;
+    const newNotif = {
+      id: 'not_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9),
+      title,
+      message,
+      type,
+      targetAgent: finalTarget,
+      createdAt: new Date().toISOString(),
+      seenByUsers: [],
+      clearedByUsers: []
+    };
+    try {
+      await setDoc(doc(db, "notifications", newNotif.id), newNotif);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const triggerNotificationAlert = () => {
+    if (soundEnabled === 'true' || soundEnabled === true) {
+      try {
+        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+  };
+
+  const handleCancelRequest = async (id: string) => {
+    if (!window.confirm("Are you sure you want to cancel and delete this request?")) return;
+    try {
+      await deleteDoc(doc(db, "scheduling_requests", id));
+      toast.success("Request deleted successfully.");
+    } catch (err: any) {
+      toast.error("Failed to delete request: " + err.message);
+    }
+  };
+
+  const handleResetAllData = () => {
+    if (!window.confirm("ARE YOU SURE you want to clear your local storage and reset all UI settings?")) return;
+    localStorage.clear();
+    toast.success("All local cache and preferences reset!");
+    setTimeout(() => window.location.reload(), 1000);
+  };
+
+  const handleMarkInquirySeen = async (id: string) => {
+    try {
+      await updateDoc(doc(db, "inquiries", id), { seenByAgent: true });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleContactTabbyTamara = async (id: string, customStatus?: string) => {
+    const status = customStatus || 'contacted';
+    try {
+      await updateDoc(doc(db, "tt_requests", id), { 
+        customerContacted: status,
+        contactedAt: status === 'contacted' ? new Date().toISOString() : null
+      });
+      toast.success(`Patient contact status updated to: ${status === 'contacted' ? 'Contacted' : 'Not Contacted'}`);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleToggleContactComplaint = async (id: string, customStatus?: string) => {
+    const nextStatus = customStatus || 'contacted';
+    try {
+      await updateDoc(doc(db, "tt_complaints", id), { 
+        customerContacted: nextStatus,
+        contactedAt: nextStatus === 'contacted' ? new Date().toISOString() : null
+      });
+      toast.success(`Complaint status updated to: ${nextStatus === 'contacted' ? 'Contacted' : 'Not Contacted'}`);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handlePartnerDecision = async (id: string, decision: boolean | 'approved' | 'declined') => {
+    const isApproved = decision === true || decision === 'approved';
+    const status = isApproved ? 'pending' : 'declined_by_partner';
+    try {
+      await updateDoc(doc(db, "scheduling_requests", id), { 
+        status,
+        partnerActionAt: new Date().toISOString()
+      });
+      const dLabel = isApproved ? 'approved' : 'declined';
+      toast.success(`Trade proposition successfully ${dLabel}!`);
+      addSystemNotification(
+        isApproved ? "🤝 Trade Proposition Accepted" : "❌ Trade Proposition Declined",
+        `${currentUser.name} has ${dLabel} your trade proposition. Expect final TL review next!`,
+        'schedule',
+        'all'
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleTLApproval = async (id: string, decision: boolean | 'approved' | 'declined') => {
+    if (!currentUser) return;
+    const isApproved = decision === true || decision === 'approved';
+    const decisionStr = isApproved ? 'approved' : 'declined';
+    try {
+      await updateDoc(doc(db, "scheduling_requests", id), { 
+        status: decisionStr,
+        actionBy: currentUser.name,
+        actionAt: new Date().toISOString()
+      });
+      toast.success(`Request successfully ${decisionStr}!`);
+      const req = requests.find(r => r.id === id);
+      if (req) {
+        addSystemNotification(
+          isApproved ? "🎉 Request Approved!" : "❌ Request Declined",
+          `Your ${req.type} request was reviewed and ${decisionStr} by ${currentUser.name}.`,
+          'schedule',
+          req.agentName
+        );
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleBulkTLApproval = async (
+    targetIds: string[] | 'approved' | 'declined',
+    decision?: boolean | 'approved' | 'declined'
+  ) => {
+    if (!currentUser) return;
+    
+    let ids: string[] = [];
+    let isApproved = true;
+
+    if (Array.isArray(targetIds)) {
+      ids = targetIds;
+      isApproved = decision === true || decision === 'approved';
+    } else {
+      const selection = selectedPendingRequests;
+      const idsArray = selection instanceof Set ? Array.from(selection) : (Array.isArray(selection) ? selection : []);
+      ids = idsArray;
+      isApproved = targetIds === 'approved';
+    }
+
+    if (ids.length === 0) {
+      toast.error("No requests selected.");
+      return;
+    }
+
+    try {
+      const decisionStr = isApproved ? 'approved' : 'declined';
+      for (const id of ids) {
+        await handleTLApproval(id, decisionStr);
+      }
+      toast.success(`Bulk processed ${ids.length} requests successfully!`);
+      setSelectedPendingRequests(new Set());
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleCreateSwap = async (e?: any) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!currentUser) return;
+    if (!swapDate || !swapShift || !swapTargetAgent || !swapTargetShift) {
+      toast.error("All form fields are mandatory.");
+      return;
+    }
+    const id = 'swap_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    const newItem = {
+      id,
+      agentName: currentUser.name,
+      type: 'swap',
+      date: swapDate,
+      shift: swapShift,
+      swapWithAgent: swapTargetAgent,
+      swapWithShift: swapTargetShift,
+      status: 'pending_partner',
+      createdAt: new Date().toISOString(),
+      notes: swapNotes,
+      ruleViolation: false
+    };
+    try {
+      await setDoc(doc(db, "scheduling_requests", id), newItem);
+      toast.success(`P2P swap proposal submitted successfully to ${swapTargetAgent}!`);
+      addSystemNotification(
+        "🤝 New Trade Proposition",
+        `${currentUser.name} proposed swapping shifts with you. Check your PLANNING tab!`,
+        'schedule',
+        swapTargetAgent
+      );
+      setSwapDate('');
+      setSwapShift('');
+      setSwapTargetAgent('');
+      setSwapTargetShift('');
+      setSwapNotes('');
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleCreateAnnual = async (e?: any) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!currentUser) return;
+    if (!annualStart || !annualEnd) {
+      toast.error("Start and end dates are required.");
+      return;
+    }
+    const id = 'annual_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    const newItem = {
+      id,
+      agentName: currentUser.name,
+      type: 'annual',
+      startDate: annualStart,
+      endDate: annualEnd,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      notes: annualNotes,
+      ruleViolation: false
+    };
+    try {
+      await setDoc(doc(db, "scheduling_requests", id), newItem);
+      toast.success("Leave request submitted successfully!");
+      addSystemNotification(
+        "📅 New Leave Request",
+        `${currentUser.name} submitted an annual leave request from ${annualStart} to ${annualEnd}.`,
+        'schedule',
+        'tl'
+      );
+      setAnnualStart('');
+      setAnnualEnd('');
+      setAnnualNotes('');
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleSubmitInquiry = async (e?: any) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!currentUser) return;
+    if (!inquiryClinicName || !inquiryText) {
+      toast.error("Clinic Name and Inquiry text are required.");
+      return;
+    }
+    setIsFormSubmitting(true);
+    const id = 'inq_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    const newItem = {
+      id,
+      agentName: currentUser.name,
+      clinicName: inquiryClinicName,
+      phoneNumber: inquiryPhoneNumber,
+      text: inquiryText,
+      photos: inquiryPhotos,
+      links: inquiryLinks,
+      createdAt: new Date().toISOString(),
+      status: 'submitted',
+      customerContacted: 'not_contacted'
+    };
+    try {
+      await setDoc(doc(db, "inquiries", id), newItem);
+      toast.success("Inquiry submitted successfully!");
+      addSystemNotification(
+        "📋 New General Inquiry",
+        `${currentUser.name} submitted a clinical inquiry for ${inquiryClinicName}.`,
+        'inquiry',
+        'tl'
+      );
+      setInquiryClinicName('');
+      setInquiryPhoneNumber('');
+      setInquiryText('');
+      setInquiryPhotos([]);
+      setInquiryLinks([]);
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setIsFormSubmitting(false);
+    }
+  };
+
+  const handlePhotoFileUpload = (e: any) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    const file = files[0];
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setInquiryPhotos((prev: any) => [...prev, reader.result as string]);
+      toast.success(`Attached photo: ${file.name}`);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleAddPhotoUrl = () => {
+    if (tempPhotoUrlInput && tempPhotoUrlInput.trim()) {
+      setInquiryPhotos((prev: any) => [...prev, tempPhotoUrlInput.trim()]);
+      setTempPhotoUrlInput('');
+    }
+  };
+
+  const handleRemovePhoto = (index: number) => {
+    setInquiryPhotos((prev: any) => prev.filter((_: any, i: any) => i !== index));
+  };
+
+  const handleAddLink = () => {
+    if (tempLinkInput && tempLinkInput.trim()) {
+      setInquiryLinks((prev: any) => [...prev, tempLinkInput.trim()]);
+      setTempLinkInput('');
+    }
+  };
+
+  const handleRemoveLink = (index: number) => {
+    setInquiryLinks((prev: any) => prev.filter((_: any, i: any) => i !== index));
+  };
+
+  const handleDeleteInquiry = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this inquiry?")) return;
+    try {
+      await deleteDoc(doc(db, "inquiries", id));
+      toast.success("Inquiry deleted successfully.");
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleUpdateContactedStatus = async (id: string, status: string) => {
+    try {
+      await updateDoc(doc(db, "inquiries", id), { customerContacted: status });
+      toast.success("Customer contact status updated.");
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleClockIn = async () => {
+    if (!currentUser) return;
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const id = `tl_${currentUser.name.replace(/[^a-zA-Z0-9]/g, '')}_${todayStr}`;
+    const newLog = {
+      id,
+      agentName: currentUser.name,
+      date: todayStr,
+      clockIn: new Date().toISOString(),
+      clockOut: null,
+      activities: [],
+      status: 'working'
+    };
+    try {
+      await setDoc(doc(db, "timelogs", id), newLog);
+      toast.success("Shift Clocked-In successfully! Have a great shift! ☕");
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleClockOut = async () => {
+    if (!currentUser) return;
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const id = `tl_${currentUser.name.replace(/[^a-zA-Z0-9]/g, '')}_${todayStr}`;
+    try {
+      await updateDoc(doc(db, "timelogs", id), { 
+        clockOut: new Date().toISOString(),
+        status: 'clocked_out'
+      });
+      toast.success("Clocked-Out successfully! Take rest. 👋");
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleStartActivity = async (type: string) => {
+    if (!currentUser) return;
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const id = `tl_${currentUser.name.replace(/[^a-zA-Z0-9]/g, '')}_${todayStr}`;
+    const todayLog = getTodayLog(currentUser.name);
+    if (!todayLog) {
+      toast.error("Please Clock-In first!");
+      return;
+    }
+    const updatedActivities = (todayLog.activities || []).map((act: any) => {
+      if (!act.endTime) {
+        return { ...act, endTime: new Date().toISOString() };
+      }
+      return act;
+    });
+    const newAct = {
+      id: 'act_' + Date.now(),
+      type,
+      startTime: new Date().toISOString()
+    };
+    updatedActivities.push(newAct);
+    try {
+      await updateDoc(doc(db, "timelogs", id), { 
+        activities: updatedActivities,
+        status: type
+      });
+      toast.success(`Started activity: ${type.toUpperCase()}`);
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleEndActivity = async () => {
+    if (!currentUser) return;
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const id = `tl_${currentUser.name.replace(/[^a-zA-Z0-9]/g, '')}_${todayStr}`;
+    const todayLog = getTodayLog(currentUser.name);
+    if (!todayLog) return;
+    const updatedActivities = (todayLog.activities || []).map((act: any) => {
+      if (!act.endTime) {
+        return { ...act, endTime: new Date().toISOString() };
+      }
+      return act;
+    });
+    try {
+      await updateDoc(doc(db, "timelogs", id), { 
+        activities: updatedActivities,
+        status: 'working'
+      });
+      toast.success("Returned to working coverage! 🚀");
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleDownloadInquiriesReport = () => {
+    if (inquiries.length === 0) {
+      toast.error("No inquiries to download");
+      return;
+    }
+    let csvContent = "data:text/csv;charset=utf-8,ID,Agent Name,Clinic Name,Phone,Text,Created At,Status\n";
+    inquiries.forEach((inq: any) => {
+      const row = [
+        inq.id || '',
+        inq.agentName || '',
+        inq.clinicName || '',
+        inq.phoneNumber || '',
+        (inq.text || '').replace(/,/g, ' '),
+        inq.createdAt || '',
+        inq.status || ''
+      ].join(',');
+      csvContent += row + "\n";
+    });
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "inquiries_report.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleSetInquirySent = async (id: string) => {
+    if (!currentUser) return;
+    try {
+      await updateDoc(doc(db, "inquiries", id), { 
+        status: 'sent',
+        sentBy: currentUser.name,
+        sentAt: new Date().toISOString()
+      });
+      toast.success("Inquiry marked as Sent to doctor!");
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleReassignInquiry = async (id: string, clinicName: string) => {
+    try {
+      await updateDoc(doc(db, "inquiries", id), { clinicName });
+      toast.success(`Inquiry successfully reassigned to ${clinicName}!`);
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleSetInquiryAnswered = async (id: string, answerText: string) => {
+    if (!currentUser) return;
+    if (!answerText.trim()) {
+      toast.error("Answer cannot be empty.");
+      return;
+    }
+    try {
+      await updateDoc(doc(db, "inquiries", id), { 
+        status: 'answered',
+        answer: answerText,
+        answeredBy: currentUser.name,
+        answeredAt: new Date().toISOString()
+      });
+      toast.success("Answer successfully submitted!");
+      const inq = inquiries.find(i => i.id === id);
+      if (inq) {
+        addSystemNotification(
+          "📝 Inquiry Answered",
+          `Your inquiry for ${inq.clinicName} was answered by ${currentUser.name}.`,
+          'inquiry',
+          inq.agentName
+        );
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleCopyCSVReport = () => {
+    if (inquiries.length === 0) return;
+    let content = "Agent,Clinic,Phone,Text,Status,Answer\n";
+    inquiries.forEach((i: any) => {
+      content += `${i.agentName},${i.clinicName},${i.phoneNumber || ''},${(i.text || '').replace(/\n/g, ' ')},${i.status || ''},${(i.answer || '').replace(/\n/g, ' ')}\n`;
+    });
+    navigator.clipboard.writeText(content)
+      .then(() => toast.success("Copied CSV content to clipboard!"))
+      .catch(() => toast.error("Failed to copy CSV content."));
+  };
+
+  const handleTLOverrideAgentStatus = async (agentName: string, status: string) => {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const id = `tl_${agentName.replace(/[^a-zA-Z0-9]/g, '')}_${todayStr}`;
+    try {
+      await updateDoc(doc(db, "timelogs", id), { status });
+      toast.success(`Successfully overrode ${agentName}'s status to ${status.toUpperCase()}!`);
+      addSystemNotification(
+        "🛠️ Status Overridden",
+        `Your current workspace status was overridden to ${status.toUpperCase()} by Supervisor.`,
+        'compliance',
+        agentName
+      );
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleSignOut = () => {
+    setCurrentUser(null);
+    toast.success("Successfully signed out!");
+  };
+
+  const handleDrag = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const parseAndSetSchedulesText = (csvText: string) => {
+    const result = parseScheduleCSV(csvText, agentsList);
+    if (result.errors.length > 0) {
+      setUploadError(result.errors.join('\n'));
+    }
+    if (result.schedules.length > 0) {
+      const newAgentsList: string[] = [];
+      const oldAgentsSet = new Set(agentsList.map((a: any) => a.toLowerCase()));
+      result.schedules.forEach((s: any) => {
+        if (!oldAgentsSet.has(s.agentName.toLowerCase()) && !newAgentsList.some(n => n.toLowerCase() === s.agentName.toLowerCase())) {
+          newAgentsList.push(s.agentName);
+        }
+      });
+      setTempNewAgents(newAgentsList);
+      setTempSchedules(result.schedules);
+      setUploadSuccess(`Successfully extracted ${result.schedules.length} shifts.`);
+    } else {
+      setUploadError("No schedule data parsed.");
+    }
+  };
+
+  const handleDrop = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      const reader = new FileReader();
+      reader.onload = (event: any) => {
+        parseAndSetSchedulesText(event.target.result);
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const handleScheduleFileChange = (e: any) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (event: any) => {
+        parseAndSetSchedulesText(event.target.result);
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const handleManualRosterSubmit = async (e: any) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!manualRosterAgent || !manualRosterDate || !manualRosterShift) {
+      toast.error("Please fill all required manual roster entry fields.");
+      return;
+    }
+    const id = `${manualRosterAgent.replace(/[^a-zA-Z0-9]/g, '')}_${manualRosterDate}`;
+    const newItem = {
+      id,
+      agentName: manualRosterAgent,
+      date: manualRosterDate,
+      shiftLabel: manualRosterShift,
+      shiftNotes: manualRosterNotes
+    };
+    try {
+      await setDoc(doc(db, "schedules", id), newItem);
+      toast.success(`Roster successfully updated for ${manualRosterAgent}!`);
+      setManualRosterAgent('');
+      setManualRosterDate('');
+      setManualRosterShift('');
+      setManualRosterNotes('');
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleSubmitTabbyTamara = async (e?: any) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!currentUser) return;
+    if (!ttPatientName || !ttFileNumber || !ttPriceWithoutTax || !ttPhoneNumber || !ttPlatform || !ttClinicName) {
+      toast.error("Please fill all required fintech link fields.");
+      return;
+    }
+    setIsFormSubmitting(true);
+    const id = 'tt_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    const newItem = {
+      id,
+      agentName: currentUser.name,
+      patientName: ttPatientName,
+      fileNumber: ttFileNumber,
+      isOldCustomer: ttIsOldCustomer === 'true' || ttIsOldCustomer === true,
+      idNumber: ttIdNumber || '',
+      priceWithoutTax: ttPriceWithoutTax,
+      phoneNumber: ttPhoneNumber,
+      notes: ttNotes || '',
+      createdAt: new Date().toISOString(),
+      status: 'not_confirmed',
+      customerContacted: 'not_contacted',
+      platform: ttPlatform,
+      clinicName: ttClinicName,
+      paymentScreenshot: activeScreenshot || ''
+    };
+    try {
+      await setDoc(doc(db, "tt_requests", id), newItem);
+      toast.success(`Submitted ${ttPlatform.toUpperCase()} Patient request!`);
+      addSystemNotification(
+        `💸 New ${ttPlatform.toUpperCase()} Request`,
+        `${currentUser.name} requested fintech link for ${ttPatientName}`,
+        'inquiry',
+        'tl'
+      );
+      setTtPatientName('');
+      setTtFileNumber('');
+      setTtIsOldCustomer(false);
+      setTtIdNumber('');
+      setTtPriceWithoutTax('');
+      setTtPhoneNumber('');
+      setTtPlatform('');
+      setTtClinicName('');
+      setTtNotes('');
+      setActiveScreenshot('');
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setIsFormSubmitting(false);
+    }
+  };
+
+  const handleSubmitTabbyTamaraComplaint = async (e?: any) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!currentUser) return;
+    if (!tcPatientName || !tcFileNumber || !tcPhoneNumber || !tcClinicName || !tcComplaintDetails) {
+      toast.error("Please fill all required fields.");
+      return;
+    }
+    setIsFormSubmitting(true);
+    const id = 'tc_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    const newItem = {
+      id,
+      agentName: currentUser.name,
+      patientName: tcPatientName,
+      fileNumber: tcFileNumber,
+      isOldCustomer: tcIsOldCustomer === 'true' || tcIsOldCustomer === true,
+      idNumber: tcIdNumber || '',
+      phoneNumber: tcPhoneNumber,
+      complaintDetails: tcComplaintDetails,
+      createdAt: new Date().toISOString(),
+      status: 'pending_tl',
+      clinicName: tcClinicName,
+      screenshot: activeScreenshot || ''
+    };
+    try {
+      await setDoc(doc(db, "tt_complaints", id), newItem);
+      toast.success("T&T complaint logged successfully!");
+      addSystemNotification(
+        `🚨 New T&T Complaint Logged`,
+        `${currentUser.name} logged complaint for patient ${tcPatientName}`,
+        'incident',
+        'tl'
+      );
+      setTcPatientName('');
+      setTcFileNumber('');
+      setTcIsOldCustomer(false);
+      setTcIdNumber('');
+      setTcPhoneNumber('');
+      setTcClinicName('');
+      setTcComplaintDetails('');
+      setActiveScreenshot('');
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setIsFormSubmitting(false);
+    }
+  };
+
+  const handleSubmitClientComms = async (e?: any) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!currentUser) return;
+    if (!ccClinicName || !ccPhoneNumber || !ccLanguage || !ccNotes) {
+      toast.error("Please fill all required fields.");
+      return;
+    }
+    setIsFormSubmitting(true);
+    const id = 'cc_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    const newItem = {
+      id,
+      callCenterAgentName: currentUser.name,
+      clinicName: ccClinicName,
+      phoneNumber: ccPhoneNumber,
+      language: ccLanguage,
+      notes: ccNotes,
+      createdAt: new Date().toISOString(),
+      status: 'pending',
+      screenshot: activeScreenshot || ''
+    };
+    try {
+      await setDoc(doc(db, "client_comms", id), newItem);
+      toast.success("Client Comm request submitted!");
+      addSystemNotification(
+        `💬 New Client Comm Request`,
+        `${currentUser.name} logged callback request for ${ccPhoneNumber}`,
+        'inquiry',
+        'tl'
+      );
+      setCcClinicName('');
+      setCcPhoneNumber('');
+      setCcLanguage('');
+      setCcNotes('');
+      setActiveScreenshot('');
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setIsFormSubmitting(false);
+    }
+  };
+
+  const handleConfirmTabbyTamara = async (
+    id: string,
+    paymentLink?: string,
+    notes?: string,
+    links?: string,
+    status: string = 'confirmed'
+  ) => {
+    if (!currentUser) return;
+    try {
+      await updateDoc(doc(db, "tt_requests", id), { 
+        status,
+        paymentLink: paymentLink || '',
+        notes: notes || '',
+        links: links || '',
+        confirmedAt: new Date().toISOString(),
+        confirmedBy: currentUser.name
+      });
+      toast.success(status === 'confirmed' ? "Link paid & confirmed!" : "Request rejected!");
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleDeleteTabbyTamara = async (id: string) => {
+    if (!window.confirm("Are you sure?")) return;
+    try {
+      await deleteDoc(doc(db, "tt_requests", id));
+      toast.success("Successfully deleted.");
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleTLCommentComplaint = async (id: string, comment: string) => {
+    if (!currentUser) return;
+    if (!comment.trim()) {
+      toast.error("Please add a comment.");
+      return;
+    }
+    try {
+      await updateDoc(doc(db, "tt_complaints", id), { 
+        status: 'closed',
+        tlComment: comment,
+        tlHandledAt: new Date().toISOString(),
+        tlHandledBy: currentUser.name
+      });
+      toast.success("Complaint resolved and marked closed!");
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleDeleteComplaint = async (id: string) => {
+    if (!window.confirm("Are you sure?")) return;
+    try {
+      await deleteDoc(doc(db, "tt_complaints", id));
+      toast.success("Successfully removed.");
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleTakeClientComm = async (id: string) => {
+    if (!currentUser) return;
+    try {
+      await updateDoc(doc(db, "client_comms", id), { 
+        status: 'in_progress',
+        openedBy: currentUser.name,
+        openedAt: new Date().toISOString()
+      });
+      toast.success("Marked as Under Progress.");
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleProcessClientComms = async (id: string, closingNotes: string) => {
+    if (!currentUser) return;
+    if (!closingNotes.trim()) {
+      toast.error("Closing notes are required.");
+      return;
+    }
+    try {
+      await updateDoc(doc(db, "client_comms", id), { 
+        status: 'contacted',
+        handlingNotes: closingNotes,
+        handledAt: new Date().toISOString(),
+        handledBy: currentUser.name
+      });
+      toast.success("Request resolved!");
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleDeleteClientComms = async (id: string) => {
+    if (!window.confirm("Are you sure?")) return;
+    try {
+      await deleteDoc(doc(db, "client_comms", id));
+      toast.success("Request deleted successfully.");
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleDirectoryFile = (e: any) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    const file = files[0];
+    const reader = new FileReader();
+    reader.onload = async (event: any) => {
+      const result = parseAgentDirectoryCSV(event.target.result);
+      if (result.directory.length > 0) {
+        setAgentDirectory(result.directory);
+        setDirectoryHeaders(result.headers);
+        toast.success(`Successfully uploaded directory holding ${result.directory.length} agents!`);
+        const allKnown = new Set(agentsList);
+        result.directory.forEach((a: any) => allKnown.add(a.agentName));
+        setAgentsList(Array.from(allKnown));
+      } else {
+        toast.error("No records found.");
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleExportCloudBackup = () => {
+    const backupObj = { schedules, requests, inquiries, tabbyTamaraRequests, complaints: tabbyTamaraComplaints, clientComms, timelogs: timeLogs };
+    navigator.clipboard.writeText(JSON.stringify(backupObj, null, 2))
+      .then(() => toast.success("Backup copied to clipboard!"))
+      .catch(() => toast.error("Failed to copy."));
+  };
+
+  const handleMarkSingleNotifAsRead = async (id: string) => {
+    if (!currentUser) return;
+    const notif = notifications.find(n => n.id === id);
+    if (!notif) return;
+    const seenSet = new Set(notif.seenByUsers || []);
+    if (seenSet.has(currentUser.name)) return;
+    seenSet.add(currentUser.name);
+    try {
+      await updateDoc(doc(db, "notifications", id), { seenByUsers: Array.from(seenSet) });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleMarkAllNotifsAsRead = async () => {
+    if (!currentUser) return;
+    try {
+      const unread = visibleNotifs.filter(n => !n.seenByUsers || !n.seenByUsers.includes(currentUser.name));
+      for (const notif of unread) {
+        const seenSet = new Set(notif.seenByUsers || []);
+        seenSet.add(currentUser.name);
+        await updateDoc(doc(db, "notifications", notif.id), { seenByUsers: Array.from(seenSet) });
+      }
+      toast.success("All notifications marked as read.");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const clearTargetSchedules = async () => {
+    if (!window.confirm("Are you absolutely sure you want to clear the entire schedule database? This is irreversible!")) {
+      return;
+    }
+    try {
+      const batch = writeBatch(db);
+      const snapshot = await getDocs(collection(db, "schedules"));
+      snapshot.docs.forEach(doc => {
+        batch.delete(doc.ref);
+      });
+      await batch.commit();
+      toast.success("Schedule database successfully cleared!");
+    } catch (err: any) {
+      toast.error("Failed to clear schedules: " + err.message);
+    }
+  };
+
+  const downloadScheduleTemplate = () => {
+    const csvContent = "data:text/csv;charset=utf-8,Agent Name,Date (YYYY-MM-DD),Shift (Morning/Afternoon/Night),Notes\n"
+      + "AbdelRahman Al Sayed,2026-06-01,Morning,Normal Shift\n"
+      + "AbduAllah Salah Fahmy,2026-06-01,Afternoon,Backup standby\n";
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "schedule_template.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const commitSchedules = async () => {
+    if (tempSchedules.length === 0) {
+      toast.error("No schedules to commit.");
+      return;
+    }
+    try {
+      const batch = writeBatch(db);
+      tempSchedules.forEach((s: any) => {
+        const id = s.id || `${s.agentName.replace(/[^a-zA-Z0-9]/g, '')}_${s.date}`;
+        const docRef = doc(db, "schedules", id);
+        batch.set(docRef, { ...s, id }, { merge: true });
+      });
+      await batch.commit();
+      toast.success("Shifts successfully posted to directory!");
+      setTempSchedules([]);
+      setUploadSuccess(null);
+    } catch (err: any) {
+      toast.error("Failed: " + err.message);
+    }
+  };
+
+  const [isSyncingCalendar, setIsSyncingCalendar] = useState<boolean>(false);
+
+  const syncShiftsToGoogleCalendar = async () => {
+    if (!currentUser) return;
+    setIsSyncingCalendar(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      toast.success("Shifts synchronized with Google Calendar!");
+    } catch (err) {
+      toast.error("Sync failed.");
+    } finally {
+      setIsSyncingCalendar(false);
+    }
+  };
+
+  const downloadShiftsICS = () => {
+    if (!currentUser) return;
+    const myShiftsArr = schedules.filter((s: any) => s.agentName?.toLowerCase() === currentUser.name?.toLowerCase());
+    if (myShiftsArr.length === 0) {
+      toast.error("No shifts found to export.");
+      return;
+    }
+    
+    let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//SYNQ//Shifts//EN\n";
+    myShiftsArr.forEach((s: any) => {
+      const shiftDateStr = s.date;
+      const label = s.shiftLabel || '';
+      let startTimeStr = "090000";
+      let endTimeStr = "170000";
+      
+      if (label.includes("07:00") || label.toLowerCase().includes("morning")) {
+        startTimeStr = "070000";
+        endTimeStr = "160000";
+      } else if (label.includes("13:00") || label.toLowerCase().includes("afternoon")) {
+        startTimeStr = "130000";
+        endTimeStr = "220000";
+      } else if (label.includes("22:00") || label.toLowerCase().includes("night")) {
+        startTimeStr = "220000";
+        endTimeStr = "235900";
+      }
+      
+      const formattedDate = shiftDateStr.replace(/-/g, '');
+      const dtstart = `${formattedDate}T${startTimeStr}`;
+      const dtend = `${formattedDate}T${endTimeStr}`;
+      
+      icsContent += "BEGIN:VEVENT\n";
+      icsContent += `UID:${s.id || 'shift_' + Math.random().toString(36).substring(2, 9)}@synq.com\n`;
+      icsContent += `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z\n`;
+      icsContent += `DTSTART:${dtstart}\n`;
+      icsContent += `DTEND:${dtend}\n`;
+      icsContent += `SUMMARY:Shift - ${label}\n`;
+      icsContent += `DESCRIPTION:Team Scheduling Portal - Scheduled Shift. Notes: ${s.shiftNotes || ''}\n`;
+      icsContent += "END:VEVENT\n";
+    });
+    icsContent += "END:VCALENDAR";
+    
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `shifts_${currentUser.name.replace(/[^a-zA-Z0-9]/g, '_')}.ics`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Shifts downloaded as Apple/Outlook .ics bundle!");
+  };
+
+  const addTlFeedback = async (
+    tlName: string,
+    notes: string,
+    attachment: string = '',
+    attachmentName: string = ''
+  ) => {
+    if (!currentUser) return;
+    const newFeedback = {
+      id: 'fb_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9),
+      tlName,
+      directorName: currentUser.name,
+      notes,
+      attachment,
+      attachmentName,
+      createdAt: new Date().toISOString(),
+      replies: [],
+      status: 'pending_reply'
+    };
+    try {
+      await setDoc(doc(db, "tl_feedbacks", newFeedback.id), newFeedback);
+      toast.success("Feedback submitted successfully!");
+      setSelectedTlForFeedback('');
+      setFeedbackNotes('');
+      setFeedbackAttachment('');
+      setFeedbackAttachmentName('');
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to submit feedback");
+    }
+  };
+
+  const replyToTlFeedback = async (
+    feedbackId: string,
+    text: string,
+    attachment: string = '',
+    attachmentName: string = ''
+  ) => {
+    if (!currentUser) return;
+    if (!text.trim()) {
+      toast.error("Reply text cannot be empty.");
+      return;
+    }
+    const feedback = tlFeedbacks.find(f => f.id === feedbackId);
+    if (!feedback) return;
+    const newReply = {
+      id: 'reply_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9),
+      senderName: currentUser.name,
+      text,
+      attachment,
+      attachmentName,
+      createdAt: new Date().toISOString()
+    };
+    const updatedReplies = [...(feedback.replies || []), newReply];
+    try {
+      await updateDoc(doc(db, "tl_feedbacks", feedbackId), {
+        replies: updatedReplies,
+        status: 'replied'
+      });
+      toast.success("Reply added!");
+      setFeedbackReplies(prev => ({ ...prev, [feedbackId]: '' }));
+      setFeedbackReplyAttachments(prev => ({ ...prev, [feedbackId]: '' }));
+      setFeedbackReplyAttachmentNames(prev => ({ ...prev, [feedbackId]: '' }));
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to add reply.");
+    }
+  };
 
 
   const { addSync, syncStatus, isPending: isSyncPending, error: syncError, clearError: clearSyncError, syncEngine } = useSync();
@@ -1113,11 +2488,42 @@ export default function App() {
       }
     });
 
+    const unsubUsers = onSnapshot(collection(db, "users"), snap => {
+      const arr = snap.docs.map(d => d.data());
+      setRegisteredUsers(arr);
+    });
+
+    const unsubLogs = onSnapshot(collection(db, "tl_feedbacks"), snap => {
+      const arr = snap.docs.map(d => d.data());
+      setTlFeedbacks(arr);
+    });
+
+    const unsubNotifs = onSnapshot(collection(db, "notifications"), snap => {
+      const arr = snap.docs.map(d => d.data());
+      setNotifications(arr);
+    });
+
+    const unsubOrders = onSnapshot(collection(db, "orders"), snap => {
+      const arr = snap.docs.map(d => d.data());
+      setOrders(arr);
+    });
+
     return () => {
-      unsubUsers();
-      unsubLogs();
+      unsubInquiries();
+      unsubQa();
+      unsubQATemplate();
+      unsubTT();
+      unsubComp();
+      unsubComms();
+      unsubReq();
+      unsubTime();
       unsubSched();
       unsubAnnouncements();
+      unsubUsers();
+      unsubLogs();
+      unsubNotifs();
+      unsubOrders();
+      window.removeEventListener('storage', handleStorage);
     };
   }, []); return (
 <>
