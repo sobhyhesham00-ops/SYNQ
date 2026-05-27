@@ -62,7 +62,7 @@ try {
     const raw = fs.readFileSync(firebaseConfigPath, 'utf8');
     const firebaseConfig = JSON.parse(raw);
     firebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-    db = getFirestore(firebaseApp);
+    db = getFirestore(firebaseApp, firebaseConfig.firestoreDatabaseId);
     logger.info('Firebase', 'Initialized successfully via ' + firebaseConfigPath);
   } else {
     logger.warn('Firebase', 'No config file found, continuing in offline/in-memory fallback mode');

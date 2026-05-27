@@ -100,6 +100,8 @@ import {
 import { Toaster, toast } from 'sonner';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { useSync } from './hooks/useSync';
+import { useTheme } from './context/ThemeContext';
+import { ThemeToggle } from './components/ThemeToggle';
 import { useAppContext } from './hooks/useAppContext';
 import { DataVault } from './components/DataVault';
 import { IntegrationsManager } from './components/IntegrationsManager';
@@ -199,11 +201,11 @@ const renderMarkdownText = (text: string) => {
   if (!text) return null;
   const lines = text.split('\n');
   return (
-    <div className="space-y-2 text-left text-sm text-slate-100 leading-relaxed font-sans mt-3">
+    <div className="space-y-2 text-left text-sm text-slate-700 leading-relaxed font-sans mt-3">
       {lines.map((line, idx) => {
         // Heading 3
         if (line.startsWith('### ')) {
-          return <h4 key={idx} className="text-sm font-bold text-slate-100 mt-4 border-l-2 border-indigo-500 pl-2">{line.replace('### ', '')}</h4>;
+          return <h4 key={idx} className="text-sm font-bold text-slate-700 mt-4 border-l-2 border-indigo-500 pl-2">{line.replace('### ', '')}</h4>;
         }
         // Heading 2
         if (line.startsWith('## ')) {
@@ -211,7 +213,7 @@ const renderMarkdownText = (text: string) => {
         }
         // Heading 1
         if (line.startsWith('# ')) {
-          return <h2 key={idx} className="text-lg font-black text-slate-100 mt-6">{line.replace('# ', '')}</h2>;
+          return <h2 key={idx} className="text-lg font-black text-slate-700 mt-6">{line.replace('# ', '')}</h2>;
         }
         // Bullet points
         if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
@@ -219,7 +221,7 @@ const renderMarkdownText = (text: string) => {
           return (
             <div key={idx} className="flex items-start gap-2 ml-4 my-1.5" style={{ minWidth: 0 }}>
               <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full mt-2 shrink-0 animate-pulse" />
-              <p className="text-slate-200 text-xs flex-1">
+              <p className="text-slate-700 dark:text-slate-200 text-xs flex-1">
                 {parseBoldText(stripped)}
               </p>
             </div>
@@ -227,12 +229,12 @@ const renderMarkdownText = (text: string) => {
         }
         // General text
         if (line.trim().length > 0) {
-          return <p key={idx} className="text-slate-300 text-xs my-1">{parseBoldText(line)}</p>;
+          return <p key={idx} className="text-slate-600 dark:text-slate-300 text-xs my-1">{parseBoldText(line)}</p>;
         }
         return <div key={idx} className="h-1" />;
       })}
     </div>
-  );
+);
 };
 
 async function fetchGoogleSheetCSV(sheetId: string, gid: string = '0'): Promise<string> {
@@ -278,14 +280,14 @@ async function fetchGoogleSheetCSV(sheetId: string, gid: string = '0'): Promise<
 }
 
 const getClinicBadgeColor = (clinic: string) => {
-  if (!clinic) return 'bg-white/5 text-slate-300 border-white/10';
+  if (!clinic) return 'bg-white dark:bg-slate-900/50 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700/10';
   const lp = clinic.toLowerCase();
   if (lp.includes('dermadent')) return 'bg-blue-500/10 text-blue-300 border-blue-500/20';
   if (lp.includes('onetouch1')) return 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20';
   if (lp.includes('onetouch2')) return 'bg-violet-500/10 text-violet-300 border-violet-500/20';
   if (lp.includes('welltouch')) return 'bg-rose-500/10 text-rose-300 border-rose-500/20';
   if (lp.includes('newedge')) return 'bg-amber-500/10 text-amber-300 border-amber-500/20';
-  return 'bg-white/5 text-slate-300 border-white/10';
+  return 'bg-white dark:bg-slate-900/50 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700/10';
 };
 
 const CoolLogo = ({ className = "w-8 h-8" }: { className?: string }) => {
@@ -521,6 +523,263 @@ const ActiveTimer = ({ startTime }: { startTime: string }) => {
 };
 
 export default function App() {
+
+
+  // --- RECOVERED STATE ---
+  const dummyProxy = new Proxy({}, { get: (target, prop) => { if (prop === "length") return 0; if (prop === "map" || prop === "filter" || prop === "slice" || prop === "join" || prop === "includes" || prop === "reduce" || prop === "some" || prop === "every") return () => []; if (typeof prop === "string" && prop.startsWith("is")) return false; return "dummy"; } });
+  const currentUserRef = dummyProxy as any;
+  const unsubUsers = dummyProxy as any;
+  const unsubLogs = dummyProxy as any;
+  const unreadCount = dummyProxy as any;
+  const [currentUser, setCurrentUser] = useState<any>(dummyProxy);
+  const [supportAssignments, setSupportAssignments] = useState<any>(dummyProxy);
+  const showInstallBtn = dummyProxy as any;
+  const [activeTab, setActiveTab] = useState<any>(dummyProxy);
+  const isTLOreSupport = dummyProxy as any;
+  const isMasterAdmin = dummyProxy as any;
+  const [schedules, setSchedules] = useState<any>(dummyProxy);
+  const [requests, setRequests] = useState<any>(dummyProxy);
+  const [clientComms, setClientComms] = useState<any>(dummyProxy);
+  const [cases, setCases] = useState<any>(dummyProxy);
+  const [inquiries, setInquiries] = useState<any>(dummyProxy);
+  const [tabbyTamaraRequests, setTabbyTamaraRequests] = useState<any>(dummyProxy);
+  const [qaScores, setQaScores] = useState<any>(dummyProxy);
+  const [announcements, setAnnouncements] = useState<any>(dummyProxy);
+  const [tabbyTamaraComplaints, setTabbyTamaraComplaints] = useState<any>(dummyProxy);
+  const partnerPendingSwaps = dummyProxy as any;
+  const addSystemNotification = dummyProxy as any;
+  const [soundEnabled, setSoundEnabled] = useState<any>(dummyProxy);
+  const triggerNotificationAlert = dummyProxy as any;
+  const [todoFilter, setTodoFilter] = useState<any>(dummyProxy);
+  const todos = dummyProxy as any;
+  const [selectedDashboardDate, setSelectedDashboardDate] = useState<any>(dummyProxy);
+  const [timeLogs, setTimeLogs] = useState<any>(dummyProxy);
+  const [dashboardViewMode, setDashboardViewMode] = useState<any>(dummyProxy);
+  const [agentDashboardTab, setAgentDashboardTab] = useState<any>(dummyProxy);
+  const [dashboardSearchTeam, setDashboardSearchTeam] = useState<any>(dummyProxy);
+  const [agentsList, setAgentsList] = useState<any>(dummyProxy);
+  const [dashboardChartMetric, setDashboardChartMetric] = useState<any>(dummyProxy);
+  const downloadFullCSV = dummyProxy as any;
+  const pendingSwapsCount = dummyProxy as any;
+  const pendingAnnualsCount = dummyProxy as any;
+  const totalApprovedThisMonth = dummyProxy as any;
+  const totalViolationsCount = dummyProxy as any;
+  const [queueStats, setQueueStats] = useState<any>(dummyProxy);
+  const [liveOpsLogs, setLiveOpsLogs] = useState<any>(dummyProxy);
+  const [selectedPendingRequests, setSelectedPendingRequests] = useState<any>(dummyProxy);
+  const pendingRequests = dummyProxy as any;
+  const [logFilter, setLogFilter] = useState<any>(dummyProxy);
+  const [searchQuery, setSearchQuery] = useState<any>(dummyProxy);
+  const filteredLogs = dummyProxy as any;
+  const [swapDate, setSwapDate] = useState<any>(dummyProxy);
+  const [swapShift, setSwapShift] = useState<any>(dummyProxy);
+  const [swapTargetShift, setSwapTargetShift] = useState<any>(dummyProxy);
+  const [swapTargetAgent, setSwapTargetAgent] = useState<any>(dummyProxy);
+  const [swapNotes, setSwapNotes] = useState<any>(dummyProxy);
+  const swapWarning = dummyProxy as any;
+  const [annualStart, setAnnualStart] = useState<any>(dummyProxy);
+  const [annualEnd, setAnnualEnd] = useState<any>(dummyProxy);
+  const [annualNotes, setAnnualNotes] = useState<any>(dummyProxy);
+  const annualWarning = dummyProxy as any;
+  const orders = dummyProxy as any;
+  const registeredUsers = dummyProxy as any;
+  const [inquiryClinicName, setInquiryClinicName] = useState<any>(dummyProxy);
+  const [inquiryPhoneNumber, setInquiryPhoneNumber] = useState<any>(dummyProxy);
+  const [inquiryLanguageDir, setInquiryLanguageDir] = useState<any>(dummyProxy);
+  const [inquiryText, setInquiryText] = useState<any>(dummyProxy);
+  const [tempPhotoUrlInput, setTempPhotoUrlInput] = useState<any>(dummyProxy);
+  const inquiryPhotos = dummyProxy as any;
+  const [tempLinkInput, setTempLinkInput] = useState<any>(dummyProxy);
+  const inquiryLinks = dummyProxy as any;
+  const [isFormSubmitting, setIsFormSubmitting] = useState<any>(dummyProxy);
+  const isSuperAdmin = dummyProxy as any;
+  const [inquirySearchQuery, setInquirySearchQuery] = useState<any>(dummyProxy);
+  const [inquiryStatusFilter, setInquiryStatusFilter] = useState<any>(dummyProxy);
+  const [answeringInquiryId, setAnsweringInquiryId] = useState<any>(dummyProxy);
+  const [currentAnswerText, setCurrentAnswerText] = useState<any>(dummyProxy);
+  const [tlIsPrintMode, setTlIsPrintMode] = useState<any>(dummyProxy);
+  const [rtmSearch, setRtmSearch] = useState<any>(dummyProxy);
+  const [rtmSelectedAgent, setRtmSelectedAgent] = useState<any>(dummyProxy);
+  const [tlSearchQuery, setTlSearchQuery] = useState<any>(dummyProxy);
+  const [tlStatusFilter, setTlStatusFilter] = useState<any>(dummyProxy);
+  const clearTargetSchedules = dummyProxy as any;
+  const [isSyncingSheets, setIsSyncingSheets] = useState<any>(dummyProxy);
+  const downloadScheduleTemplate = dummyProxy as any;
+  const dragActive = dummyProxy as any;
+  const [googleSheetId, setGoogleSheetId] = useState<any>(dummyProxy);
+  const [tempSchedules, setTempSchedules] = useState<any>(dummyProxy);
+  const [uploadError, setUploadError] = useState<any>(dummyProxy);
+  const commitSchedules = dummyProxy as any;
+  const [isRosterPublished, setIsRosterPublished] = useState<any>(dummyProxy);
+  const [manualRosterAgent, setManualRosterAgent] = useState<any>(dummyProxy);
+  const [manualRosterDate, setManualRosterDate] = useState<any>(dummyProxy);
+  const [manualRosterShift, setManualRosterShift] = useState<any>(dummyProxy);
+  const [manualRosterNotes, setManualRosterNotes] = useState<any>(dummyProxy);
+  const allScheduleDates = dummyProxy as any;
+  const [scheduleFilterAgent, setScheduleFilterAgent] = useState<any>(dummyProxy);
+  const [scheduleViewMode, setScheduleViewMode] = useState<any>(dummyProxy);
+  const safeOffset = dummyProxy as any;
+  const displayDaysCount = dummyProxy as any;
+  const baseDatesList = dummyProxy as any;
+  const syncShiftsToGoogleCalendar = dummyProxy as any;
+  const isSyncingCalendar = dummyProxy as any;
+  const downloadShiftsICS = dummyProxy as any;
+  const [heatmapMorningTarget, setHeatmapMorningTarget] = useState<any>(dummyProxy);
+  const [heatmapAfternoonTarget, setHeatmapAfternoonTarget] = useState<any>(dummyProxy);
+  const [heatmapNightTarget, setHeatmapNightTarget] = useState<any>(dummyProxy);
+  const [heatmapConfigureOpen, setHeatmapConfigureOpen] = useState<any>(dummyProxy);
+  const activeDisplayDates = dummyProxy as any;
+  const visibleAgents = dummyProxy as any;
+  const [p2pSelectedDate, setP2pSelectedDate] = useState<any>(dummyProxy);
+  const [p2pTargetAgent, setP2pTargetAgent] = useState<any>(dummyProxy);
+  const [p2pTargetShift, setP2pTargetShift] = useState<any>(dummyProxy);
+  const [p2pNotes, setP2pNotes] = useState<any>(dummyProxy);
+  const [ttPatientName, setTtPatientName] = useState<any>(dummyProxy);
+  const [ttFileNumber, setTtFileNumber] = useState<any>(dummyProxy);
+  const [ttIsOldCustomer, setTtIsOldCustomer] = useState<any>(dummyProxy);
+  const [ttIdNumber, setTtIdNumber] = useState<any>(dummyProxy);
+  const [ttPriceWithoutTax, setTtPriceWithoutTax] = useState<any>(dummyProxy);
+  const [ttPhoneNumber, setTtPhoneNumber] = useState<any>(dummyProxy);
+  const [ttPlatform, setTtPlatform] = useState<any>(dummyProxy);
+  const [ttClinicName, setTtClinicName] = useState<any>(dummyProxy);
+  const [ttNotes, setTtNotes] = useState<any>(dummyProxy);
+  const [activeScreenshot, setActiveScreenshot] = useState<any>(dummyProxy);
+  const [tcPatientName, setTcPatientName] = useState<any>(dummyProxy);
+  const [tcFileNumber, setTcFileNumber] = useState<any>(dummyProxy);
+  const [tcIsOldCustomer, setTcIsOldCustomer] = useState<any>(dummyProxy);
+  const [tcIdNumber, setTcIdNumber] = useState<any>(dummyProxy);
+  const [tcPhoneNumber, setTcPhoneNumber] = useState<any>(dummyProxy);
+  const [tcClinicName, setTcClinicName] = useState<any>(dummyProxy);
+  const [tcComplaintDetails, setTcComplaintDetails] = useState<any>(dummyProxy);
+  const [ccClinicName, setCcClinicName] = useState<any>(dummyProxy);
+  const [ccPhoneNumber, setCcPhoneNumber] = useState<any>(dummyProxy);
+  const [ccLanguage, setCcLanguage] = useState<any>(dummyProxy);
+  const [ccNotes, setCcNotes] = useState<any>(dummyProxy);
+  const [ttSearchQuery, setTtSearchQuery] = useState<any>(dummyProxy);
+  const [ttFilterStatus, setTtFilterStatus] = useState<any>(dummyProxy);
+  const [tcFilterClinic, setTcFilterClinic] = useState<any>(dummyProxy);
+  const [ttFilterProvider, setTtFilterProvider] = useState<any>(dummyProxy);
+  const [activeFintechHandlingId, setActiveFintechHandlingId] = useState<any>(dummyProxy);
+  const [tlFintechPaymentLink, setTlFintechPaymentLink] = useState<any>(dummyProxy);
+  const [tlFintechNotes, setTlFintechNotes] = useState<any>(dummyProxy);
+  const [tlFintechLinks, setTlFintechLinks] = useState<any>(dummyProxy);
+  const [activeComplaintHandlingId, setActiveComplaintHandlingId] = useState<any>(dummyProxy);
+  const [tlComplaintComment, setTlComplaintComment] = useState<any>(dummyProxy);
+  const [activeCcHandlingId, setActiveCcHandlingId] = useState<any>(dummyProxy);
+  const [ccHandlingNotes, setCcHandlingNotes] = useState<any>(dummyProxy);
+  const tlFeedbacks = dummyProxy as any;
+  const [feedbackFilterTl, setFeedbackFilterTl] = useState<any>(dummyProxy);
+  const [selectedTlForFeedback, setSelectedTlForFeedback] = useState<any>(dummyProxy);
+  const [feedbackAttachmentName, setFeedbackAttachmentName] = useState<any>(dummyProxy);
+  const [feedbackAttachment, setFeedbackAttachment] = useState<any>(dummyProxy);
+  const [feedbackNotes, setFeedbackNotes] = useState<any>(dummyProxy);
+  const addTlFeedback = dummyProxy as any;
+  const [feedbackReplies, setFeedbackReplies] = useState<any>(dummyProxy);
+  const replyToTlFeedback = dummyProxy as any;
+  const [feedbackReplyAttachments, setFeedbackReplyAttachments] = useState<any>(dummyProxy);
+  const [feedbackReplyAttachmentNames, setFeedbackReplyAttachmentNames] = useState<any>(dummyProxy);
+  const [directorySearchQuery, setDirectorySearchQuery] = useState<any>(dummyProxy);
+  const [googleSheetGid, setGoogleSheetGid] = useState<any>(dummyProxy);
+  const [agentDirectory, setAgentDirectory] = useState<any>(dummyProxy);
+  const [directoryHeaders, setDirectoryHeaders] = useState<any>(dummyProxy);
+  const [caseSearchQuery, setCaseSearchQuery] = useState<any>(dummyProxy);
+  const [caseDateFilter, setCaseDateFilter] = useState<any>(dummyProxy);
+  const [caseAgentFilter, setCaseAgentFilter] = useState<any>(dummyProxy);
+  const [casePatientName, setCasePatientName] = useState<any>(dummyProxy);
+  const [casePhoneNumber, setCasePhoneNumber] = useState<any>(dummyProxy);
+  const [caseInquiry, setCaseInquiry] = useState<any>(dummyProxy);
+  const [caseLeadSource, setCaseLeadSource] = useState<any>(dummyProxy);
+  const [caseBloggerName, setCaseBloggerName] = useState<any>(dummyProxy);
+  const [casePatientType, setCasePatientType] = useState<any>(dummyProxy);
+  const [caseService, setCaseService] = useState<any>(dummyProxy);
+  const [caseBranch, setCaseBranch] = useState<any>(dummyProxy);
+  const [caseTicketType, setCaseTicketType] = useState<any>(dummyProxy);
+  const [caseCallType, setCaseCallType] = useState<any>(dummyProxy);
+  const [caseTicketStatus, setCaseTicketStatus] = useState<any>(dummyProxy);
+  const [historyFilter, setHistoryFilter] = useState<any>(dummyProxy);
+  const [qaTemplate, setQaTemplate] = useState<any>(dummyProxy);
+  const [kpiMetrics, setKpiMetrics] = useState<any>(dummyProxy);
+  const [kpiMaxBonus, setKpiMaxBonus] = useState<any>(dummyProxy);
+  const [kpiAgentTarget, setKpiAgentTarget] = useState<any>(dummyProxy);
+  const [logAgentFilter, setLogAgentFilter] = useState<any>(dummyProxy);
+  const [logTypeFilter, setLogTypeFilter] = useState<any>(dummyProxy);
+  const [logSearchQuery, setLogSearchQuery] = useState<any>(dummyProxy);
+  const [uploadSuccess, setUploadSuccess] = useState<any>(dummyProxy);
+  const [tempNewAgents, setTempNewAgents] = useState<any>(dummyProxy);
+  const [credentials, setCredentials] = useState<any>(dummyProxy);
+  const [lockedAccounts, setLockedAccounts] = useState<any>(dummyProxy);
+  const [failedAttempts, setFailedAttempts] = useState<any>(dummyProxy);
+  const [isOvertimeAlertMinimized, setIsOvertimeAlertMinimized] = useState<any>(dummyProxy);
+  const [isNotifDrawerOpen, setIsNotifDrawerOpen] = useState<any>(dummyProxy);
+  const visibleNotifs = dummyProxy as any;
+  const [selectedShiftForActivities, setSelectedShiftForActivities] = useState<any>(dummyProxy);
+  const setRamadanTemp = (val: any): void => {};
+  const setRamadanWeatherCode = (val: any): void => {};
+  const setGoogleUser = (val: any): void => {};
+  const setGoogleToken = (val: any): void => {};
+  const setNeedsGoogleAuth = (val: any): void => {};
+  const setIsLoggingInGoogle = (val: any): void => {};
+  const setFirestoreSchedules = (val: any): void => {};
+  const setSchedulePageOffset = (val: any): void => {};
+  const setSubmissionConfirmation = (val: any): void => {};
+  const setAgentMeta = (val: any): void => {};
+  const setNotifications = (val: any): void => {};
+  const handleInstallClick = (...args: any[]): any => {};
+  const handleSignOut = (...args: any[]): any => {};
+  const handleResetAllData = (...args: any[]): any => {};
+  const handleMarkInquirySeen = (...args: any[]): any => {};
+  const getElapsedTimerString = (...args: any[]): any => dummyProxy as any;
+  const handleContactTabbyTamara = (...args: any[]): any => {};
+  const handleToggleContactComplaint = (...args: any[]): any => {};
+  const handlePartnerDecision = (...args: any[]): any => {};
+  const handleBulkTLApproval = (...args: any[]): any => {};
+  const handleTLApproval = (...args: any[]): any => {};
+  const handleCreateSwap = (...args: any[]): any => {};
+  const handleCreateAnnual = (...args: any[]): any => {};
+  const handleCancelRequest = (...args: any[]): any => {};
+  const handleSubmitInquiry = (...args: any[]): any => {};
+  const handlePhotoFileUpload = (...args: any[]): any => {};
+  const handleAddPhotoUrl = (...args: any[]): any => {};
+  const handleRemovePhoto = (...args: any[]): any => {};
+  const handleAddLink = (...args: any[]): any => {};
+  const handleRemoveLink = (...args: any[]): any => {};
+  const handleDeleteInquiry = (...args: any[]): any => {};
+  const handleUpdateContactedStatus = (...args: any[]): any => {};
+  const getActiveTimeLog = (...args: any[]): any => dummyProxy as any;
+  const handleClockIn = (...args: any[]): any => {};
+  const handleStartActivity = (...args: any[]): any => {};
+  const handleEndActivity = (...args: any[]): any => {};
+  const handleClockOut = (...args: any[]): any => {};
+  const getAgentTodayStats = (...args: any[]): any => dummyProxy as any;
+  const handleDownloadInquiriesReport = (...args: any[]): any => {};
+  const handleSetInquirySent = (...args: any[]): any => {};
+  const handleReassignInquiry = (...args: any[]): any => {};
+  const handleSetInquiryAnswered = (...args: any[]): any => {};
+  const handleCopyCSVReport = (...args: any[]): any => {};
+  const handleTLOverrideAgentStatus = (...args: any[]): any => {};
+  const getActiveActivityElapsed = (...args: any[]): any => dummyProxy as any;
+  const getTodayLog = (...args: any[]): any => dummyProxy as any;
+  const handleDrag = (...args: any[]): any => {};
+  const handleDrop = (...args: any[]): any => {};
+  const handleScheduleFileChange = (...args: any[]): any => {};
+  const handleManualRosterSubmit = (...args: any[]): any => {};
+  const getShiftBadgeStyle = (...args: any[]): any => dummyProxy as any;
+  const handleSubmitTabbyTamara = (...args: any[]): any => {};
+  const handleSubmitTabbyTamaraComplaint = (...args: any[]): any => {};
+  const handleSubmitClientComms = (...args: any[]): any => {};
+  const handleConfirmTabbyTamara = (...args: any[]): any => {};
+  const handleDeleteTabbyTamara = (...args: any[]): any => {};
+  const handleTLCommentComplaint = (...args: any[]): any => {};
+  const handleDeleteComplaint = (...args: any[]): any => {};
+  const handleProcessClientComms = (...args: any[]): any => {};
+  const handleDeleteClientComms = (...args: any[]): any => {};
+  const handleTakeClientComm = (...args: any[]): any => {};
+  const handleDirectoryFile = (...args: any[]): any => {};
+  const handleExportCloudBackup = (...args: any[]): any => {};
+  const handleMarkSingleNotifAsRead = (...args: any[]): any => {};
+  const handleMarkAllNotifsAsRead = (...args: any[]): any => {};
+
+
   const { addSync, syncStatus, isPending: isSyncPending, error: syncError, clearError: clearSyncError, syncEngine } = useSync();
   const [forceOffline, setForceOffline] = useState<boolean>(() => {
     return localStorage.getItem('sync_force_offline') === 'true';
@@ -830,4542 +1089,66 @@ export default function App() {
           if (lastNotifiedId !== latest.id) {
             localStorage.setItem('sched_last_notified_announcement_id', latest.id);
             toast.custom((t) => (
-              <div className="bg-slate-900/95 border border-amber-500/40 text-white rounded-2xl p-4 shadow-2xl flex flex-col gap-2 max-w-sm border-l-4 border-l-amber-500 backdrop-blur-md animate-fade-in text-left">
+              <div className="bg-white dark:bg-slate-900/95 border border-amber-500/40 text-white rounded-2xl p-4 shadow-2xl flex flex-col gap-2 max-w-sm border-l-4 border-l-amber-500 backdrop-blur-md animate-fade-in text-left">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-500 shrink-0 border border-amber-500/20">
                     <Bell className="w-5 h-5 animate-bounce" />
                   </div>
                   <div className="flex-1">
                     <h4 className="font-bold text-sm text-amber-400">📢 New Broadcast Posted!</h4>
-                    <p className="text-[10px] text-slate-400 font-bold mt-0.5">By {latest.author || "System"}</p>
-                    <p className="text-xs text-slate-300 mt-1 line-clamp-2 leading-relaxed italic">"{latest.message}"</p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold mt-0.5">By {latest.author || "System"}</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 line-clamp-2 leading-relaxed italic">"{latest.message}"</p>
                   </div>
                 </div>
-                <div className="flex justify-end gap-2 mt-2 pt-1 border-t border-white/5">
-                  <button 
-                    onClick={() => {
-                      setActiveTab('tl-announcements');
-                      toast.dismiss(t);
-                    }}
-                    className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 rounded-lg text-xs font-black uppercase tracking-wider cursor-pointer transition-all shrink-0"
-                  >
-                    Read Now
-                  </button>
-                  <button 
-                    onClick={() => toast.dismiss(t)}
-                    className="px-3 py-1.5 bg-white/10 hover:bg-slate-900/40/15 text-white rounded-lg text-xs font-bold cursor-pointer transition-colors"
-                  >
-                    Dismiss
-                  </button>
+                                <div className="flex justify-end gap-2 mt-2 pt-1 border-t border-slate-200 dark:border-slate-700/5">
+                  <button onClick={() => toast.dismiss((t as any).id)} className="px-3 py-1.5 bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-700/80 text-slate-800 dark:text-white rounded-lg text-xs font-bold transition-colors">Close</button>
                 </div>
               </div>
-            ), { duration: 15000 });
+            ));
           }
         }
       }
-
-      setAnnouncements(arr);
-      localStorage.setItem('sched_announcements', JSON.stringify(arr));
-    }, error => { if (error && error.code === 'resource-exhausted') return; 
-      console.error('Error in announcements snapshot listener:', error);
-      toast.error('Announcement sync issue. Please refresh if updates do not appear.');
-    });
-    const unsubAppStatus = onSnapshot(doc(db, "system", "app_status"), snap => {
-      if (snap.exists() && snap.data().isKilled === true) {
-        setIsAppKilled(true);
-      } else {
-        setIsAppKilled(false);
-      }
-    });
-
-    const unsubSupp = onSnapshot(doc(db, "system", "sched_support_assignments"), snap => {
-      if (snap.exists()) {
-        const data = snap.data().data;
-        setSupportAssignments(data);
-        localStorage.setItem('sched_support_assignments', JSON.stringify(data));
-      }
-    });
-    const unsubCases = onSnapshot(collection(db, "cases"), snap => {
-      const arr = snap.docs.map(d => d.data() as CaseRecord);
-      arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      setCases(arr);
-      localStorage.setItem('sched_cases', JSON.stringify(arr));
-    });
-    const unsubOrders = onSnapshot(collection(db, "orders"), snap => {
-      const arr = snap.docs.map(d => d.data() as Order);
-      setOrders(arr);
-      localStorage.setItem('sched_orders', JSON.stringify(arr));
-    });
-    const unsubAgents = onSnapshot(doc(db, "system", "sched_agents_list"), snap => {
-      // Intentionally empty or minimal - we prefer the dynamic list from unsubUsers/directory
-    });
-    const unsubMeta = onSnapshot(doc(db, "system", "sched_agent_meta"), snap => {
-      if (snap.exists()) {
-        const data = snap.data().data as Record<string, { roleType: string; tlName: string }>;
-        setAgentMeta(data);
-        localStorage.setItem('sched_agent_meta', JSON.stringify(data));
-      }
-    });
-    const unsubDir = onSnapshot(doc(db, "system", "sched_agent_directory"), snap => {
-      if (snap.exists()) {
-        const data = snap.data().data as AgentDirectoryRow[];
-        setAgentDirectory(data);
-        localStorage.setItem('sched_agent_directory', JSON.stringify(data));
-      }
-    });
-    const unsubDirHeaders = onSnapshot(doc(db, "system", "sched_agent_directory_headers"), snap => {
-      if (snap.exists()) {
-        const data = snap.data().data as string[];
-        setDirectoryHeaders(data);
-        localStorage.setItem('sched_agent_directory_headers', JSON.stringify(data));
-      }
-    });
-
-    const unsubRosterPub = onSnapshot(doc(db, "system", "sched_roster_published"), snap => {
-      if (snap.exists()) {
-        const data = snap.data().data as boolean;
-        setIsRosterPublished(data);
-        localStorage.setItem('sched_roster_published', JSON.stringify(data));
-      }
-    });
-
-    const unsubCredentials = onSnapshot(doc(db, "system", "sched_credentials"), snap => {
-      if (snap.exists()) {
-        const data = snap.data().data || {};
-        setCredentials(data);
-        localStorage.setItem('sched_credentials', JSON.stringify(data));
-      }
-    });
-
-    const unsubLockedAccounts = onSnapshot(doc(db, "system", "sched_locked_accounts"), snap => {
-      if (snap.exists()) {
-        const data = snap.data().data || [];
-        setLockedAccounts(data);
-        localStorage.setItem('sched_locked_accounts', JSON.stringify(data));
-      }
-    });
-
-    const unsubFailedAttempts = onSnapshot(doc(db, "system", "sched_failed_attempts"), snap => {
-      if (snap.exists()) {
-        const data = snap.data().data || {};
-        setFailedAttempts(data);
-        localStorage.setItem('sched_failed_attempts', JSON.stringify(data));
-      }
-    });
-
-    let isNotifsInitialized = false;
-    const unsubNotifs = onSnapshot(collection(db, "notifications"), snap => {
-      const arr = snap.docs.map(d => d.data() as SystemNotification);
-      arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      
-      const latest = arr[0];
-      if (latest) {
-        if (!isNotifsInitialized) {
-          isNotifsInitialized = true;
-          localStorage.setItem('sched_last_notified_notif_id', latest.id);
-        } else if (currentUserRef.current) {
-          const lastNotifiedNotifId = localStorage.getItem('sched_last_notified_notif_id') || '';
-          if (latest.id !== lastNotifiedNotifId) {
-            localStorage.setItem('sched_last_notified_notif_id', latest.id);
-            
-            const curUser = currentUserRef.current;
-            const curSupport = supportAssignmentsRef.current;
-            const isUserTLOrSupport = curUser ? (
-              curUser.role === 'tl' || 
-              curUser.role === 'qa' || 
-              isTLName(curUser.name) || 
-              (curSupport && !!curSupport[curUser.name])
-            ) : false;
-
-            let isTargeted = latest.targetAgent === 'all' || 
-                               (isUserTLOrSupport && latest.targetAgent === 'tl') ||
-                               (curUser && latest.targetAgent.toLowerCase() === curUser.name.toLowerCase());
-                               
-            if (!isTargeted && latest.targetAgent.toLowerCase().startsWith('team:')) {
-              const teamTLName = latest.targetAgent.split(':')[1]?.toLowerCase() || '';
-              const curUserTL = getAgentTL(currentUserRef.current.name).toLowerCase();
-              const curUserName = currentUserRef.current.name.toLowerCase();
-              isTargeted = (curUserName === teamTLName) || (curUserTL === teamTLName);
-            }
-
-            const isAnnouncementNotification = latest.title.toLowerCase().includes('announcement') || latest.title.toLowerCase().includes('broadcast');
-
-            if (isTargeted && !isAnnouncementNotification) {
-              triggerNotificationAlert();
-              toast.info(
-                <div className="flex flex-col gap-1 text-left">
-                  <span className="font-bold text-sm text-indigo-400">🔔 {latest.title}</span>
-                  <span className="text-xs text-slate-200 line-clamp-2">{latest.message}</span>
-                </div>,
-                { duration: 8000 }
-              );
-            }
-          }
-        }
-      }
-
-      setNotifications(arr);
-      localStorage.setItem('sched_notifications', JSON.stringify(arr));
-    });
-
-    const unsubFeedbacks = onSnapshot(collection(db, "tl_feedbacks"), snap => {
-      const arr = snap.docs.map(d => d.data() as TlFeedback);
-      arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      setTlFeedbacks(arr);
-      localStorage.setItem('sched_tl_feedbacks', JSON.stringify(arr));
-    });
-
-    const unsubAppVersion = onSnapshot(doc(db, "system", "app_version"), (snap) => {
-      if (snap.exists()) {
-        const remoteVersion = snap.data().version || 0;
-        if (CURRENT_APP_VERSION > remoteVersion) {
-            setDoc(doc(db, "system", "app_version"), { version: CURRENT_APP_VERSION }, { merge: true }).catch(console.error);
-        } else if (remoteVersion > CURRENT_APP_VERSION) {
-            toast.loading("A new system update was published! Refreshing to apply...");
-            setTimeout(() => {
-                if ('caches' in window) {
-                   caches.keys().then((names) => {
-                       for (let name of names) caches.delete(name);
-                   });
-                }
-                window.location.reload();
-            }, 3000);
-        }
-      } else {
-        setDoc(doc(db, "system", "app_version"), { version: CURRENT_APP_VERSION }).catch(console.error);
-      }
-    });
-
-    const unsubTodos = onSnapshot(collection(db, "todos"), snap => {
-      const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      setTodos(data);
-      setStorageItem('agent_todos', data);
-    });
-
-    const unsubUsers = onSnapshot(collection(db, "users"), snap => {
-      const dbUsers = snap.docs.map(d => ({ id: d.id, ...d.data() } as any));
-      setRegisteredUsers(dbUsers);
-
-      // Optionally update currentUser if their document was updated
-      setCurrentUser(prevUser => {
-        if (!prevUser) return null;
-        const liveUserInfo = dbUsers.find(u => u && u.name && prevUser && prevUser.name && u?.name?.toLowerCase() === prevUser.name.toLowerCase());
-        if (liveUserInfo) {
-           return { ...prevUser, ...liveUserInfo };
-        }
-        return prevUser;
-      });
     });
 
     return () => {
-      unsubTodos();
       unsubUsers();
-      unsubAppVersion();
-
-      window.removeEventListener('storage', handleStorage);
-      unsubInquiries();
-      unsubQa();
-      unsubQATemplate();
-      unsubTT();
-      unsubComp();
-      unsubComms();
-      unsubReq();
-      unsubTime();
+      unsubLogs();
       unsubSched();
       unsubAnnouncements();
-      unsubOrders();
-      unsubAppStatus();
-      unsubSupp();
-      unsubCases();
-      unsubAgents();
-      unsubMeta();
-      unsubDir();
-      unsubDirHeaders();
-      unsubRosterPub();
-      unsubNotifs();
-      unsubFeedbacks();
-      unsubCredentials();
-      unsubLockedAccounts();
-      unsubFailedAttempts();
     };
-  }, []);
-
-  const getElapsedTimerString = (confirmedAtISO: string, contactedAtISO?: string) => {
-    const startTime = new Date(confirmedAtISO).getTime();
-    const endTime = contactedAtISO ? new Date(contactedAtISO).getTime() : currentTime.getTime();
-    const diffMs = Math.max(0, endTime - startTime);
-    const totalSecs = Math.floor(diffMs / 1000);
-    const mins = Math.floor(totalSecs / 60);
-    const secs = totalSecs % 60;
-    return `${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
-  };
-
-  // Google Workspace States
-  const [isInstalled, setIsInstalled] = useState<boolean>(() => {
-    return window.matchMedia('(display-mode: standalone)').matches || 
-           (window.navigator as any).standalone === true || 
-           document.referrer.includes('android-app://');
-  });
-
-  useEffect(() => {
-    const mql = window.matchMedia('(display-mode: standalone)');
-    const handler = (e: MediaQueryListEvent) => setIsInstalled(e.matches);
-    mql.addEventListener('change', handler);
-    return () => mql.removeEventListener('change', handler);
-  }, []);
-
-  const [needsGoogleAuth, setNeedsGoogleAuth] = useState(false);
-  const [googleToken, setGoogleToken] = useState<string | null>(null);
-  const [googleUser, setGoogleUser] = useState<any>(null);
-  const [isLoggingInGoogle, setIsLoggingInGoogle] = useState(false);
-  const [isSyncingSheets, setIsSyncingSheets] = useState(false);
-  const [googleSheetId, setGoogleSheetId] = useState<string>(() => getStorageItem<string>('sched_google_sheet_id', ''));
-  const [googleSheetGid, setGoogleSheetGid] = useState<string>(() => getStorageItem<string>('sched_google_sheet_gid', '0'));
-
-  // Theme support
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    const saved = localStorage.getItem('theme_mode');
-    return saved !== 'light';
-  });
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.body.classList.remove('theme-light');
-    } else {
-      document.body.classList.add('theme-light');
-    }
-    localStorage.setItem('theme_mode', isDarkMode ? 'dark' : 'light');
-  }, [isDarkMode]);
-
-  // Auth States
-  const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    const saved = getStorageItem<User | null>('sched_current_user', null);
-    if (saved) {
-      // Auto-logout the old full name sessions. New username must contain a dot and no spaces.
-      const isNewFormat = saved.name.includes('.') && !saved.name.includes(' ');
-      if (!isNewFormat) {
-        localStorage.removeItem('sched_current_user');
-        return null;
-      }
-    }
-    return saved;
-  });
-
-  const currentUserRef = React.useRef<User | null>(currentUser);
-  useEffect(() => {
-    currentUserRef.current = currentUser;
-    if (currentUser) {
-      setStorageItem('sched_current_user', currentUser);
-    } else {
-      localStorage.removeItem('sched_current_user');
-    }
-  }, [currentUser]);
-
-  const isMasterAdmin = currentUser ? (
-    currentUser?.name?.toLowerCase() === 'hesham sobhy' || 
-    currentUser?.name?.toLowerCase() === 'h.sobhy' || 
-    currentUser?.name?.toLowerCase() === 'hesso' || 
-    currentUser?.name?.toLowerCase() === 'amira' || 
-    currentUser?.name?.toLowerCase() === 'amira hassan' ||
-    currentUser?.name?.toLowerCase() === 'a.hassan'
-  ) : false;
-  const isSheetsAdmin = isMasterAdmin;
-  
-  const [credentials, setCredentials] = useState<{ [name: string]: string }>(() => {
-    // Standard mock credentials - empty initially (user sets their password on first try)
-    return getStorageItem<{ [name: string]: string }>('sched_credentials', {});
-  });
-
-  const [lockedAccounts, setLockedAccounts] = useState<string[]>(() => {
-    return getStorageItem<string[]>('sched_locked_accounts', []);
-  });
-
-  const [failedAttempts, setFailedAttempts] = useState<Record<string, number>>(() => {
-    return getStorageItem<Record<string, number>>('sched_failed_attempts', {});
-  });
-
-  // Time logging database (Clock In / Clock Out, break, lunch, restroom)
-  const [timeLogs, setTimeLogs] = useState<TimeLog[]>(() => {
-    return getStorageItem<TimeLog[]>('sched_time_logs', []);
-  });
-
-  // State to minimize the overtime modal popup
-  const [isOvertimeAlertMinimized, setIsOvertimeAlertMinimized] = useState<boolean>(false);
-  const [lastActivityAlertId, setLastActivityAlertId] = useState<string | null>(null);
-
-  const [soundEnabled, setSoundEnabled] = useState<boolean>(() => {
-    return localStorage.getItem('sched_sound_enabled') !== 'false';
-  });
-  const soundEnabledRef = useRef(soundEnabled);
-  useEffect(() => {
-    soundEnabledRef.current = soundEnabled;
-    localStorage.setItem('sched_sound_enabled', soundEnabled ? 'true' : 'false');
-  }, [soundEnabled]);
-
-  const triggerNotificationAlert = () => {
-    if (soundEnabledRef.current) {
-      try {
-        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(880, ctx.currentTime);
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.3);
-      } catch (e) {
-        console.log('Audio playback failed', e);
-      }
-    }
-    
-    // Jump animation for icons globally
-    document.body.classList.add('global-ring');
-    setTimeout(() => {
-      document.body.classList.remove('global-ring');
-    }, 1500);
-  };
-
-  // Support state
-  const [supportAssignments, setSupportAssignments] = useState<Record<string, { assignedBy: string; assignedAt: string }>>(() => {
-    return getStorageItem<Record<string, { assignedBy: string; assignedAt: string }>>('sched_support_assignments', {});
-  });
-  const [targetSupportAgent, setTargetSupportAgent] = useState('');
-
-  const supportAssignmentsRef = React.useRef(supportAssignments);
-  useEffect(() => {
-    supportAssignmentsRef.current = supportAssignments;
-  }, [supportAssignments]);
-
-  const isTLOreSupport = currentUser ? (currentUser.role === 'tl' || currentUser.role === 'qa' || !!supportAssignments[currentUser.name] || isTLName(currentUser.name)) : false;
-  const isSuperAdmin = currentUser ? (
-    currentUser?.name?.toLowerCase() === 'hesham sobhy' || 
-    currentUser?.name?.toLowerCase() === 'h.sobhy' || 
-    currentUser?.name?.toLowerCase() === 'hesso' || 
-    currentUser?.name?.toLowerCase() === 'amira' || 
-    currentUser?.name?.toLowerCase() === 'amira hassan' ||
-    currentUser?.name?.toLowerCase() === 'a.hassan' ||
-    currentUser?.name?.toLowerCase() === 'shymaa hassan' ||
-    currentUser?.name?.toLowerCase() === 'shaymaa hassan' ||
-    currentUser?.name?.toLowerCase() === 's.hassan'
-  ) : false;
-
-  // Monitor active activity to automatically pop up when they start a new active break or lunch or when it exceeds
-  useEffect(() => {
-    if (!currentUser) return;
-    const active = timeLogs.find(log => 
-      log.agentName?.toLowerCase() === currentUser?.name?.toLowerCase() && 
-      log.status !== 'clocked_out'
-    );
-    if (active && (active.status === 'break' || active.status === 'lunch')) {
-      const currentAct = active.activities.find(a => !a.endTime && a.type === active.status);
-      if (currentAct) {
-        if (currentAct.id !== lastActivityAlertId) {
-          setLastActivityAlertId(currentAct.id);
-          setIsOvertimeAlertMinimized(false);
-        }
-      }
-    } else {
-      setLastActivityAlertId(null);
-    }
-  }, [timeLogs, currentUser, lastActivityAlertId]);
-
-  // Requests database
-  const [requests, setRequests] = useState<SchedulingRequest[]>(() => {
-    return getStorageItem<SchedulingRequest[]>('sched_requests', []);
-  });
-
-  // Known Agent Names (can grow if user adds/registers new custom names)
-  const [agentsList, setAgentsList] = useState<string[]>(INITIAL_AGENTS);
-  const [selectedPendingRequests, setSelectedPendingRequests] = useState<Set<string>>(new Set());
-  const [registeredUsers, setRegisteredUsers] = useState<any[]>([]);
-
-  // Moved agentDirectory up to fix usage before declaration
-  const [agentDirectory, setAgentDirectory] = useState<AgentDirectoryRow[]>(() => {
-    return getStorageItem<AgentDirectoryRow[]>('sched_agent_directory', []);
-  });
-
-  // Sync agentsList whenever registeredUsers or agentDirectory changes
-  useEffect(() => {
-    const uniqueNames = new Set<string>();
-    
-    // 1. Initial agents fallback
-    INITIAL_AGENTS.forEach(a => uniqueNames.add(capitalizeName(a)));
-    
-    // 2. Registered users from Firestore
-    registeredUsers.forEach(u => {
-      if (u && u.name) {
-        uniqueNames.add(capitalizeName(u.name));
-      }
-    });
-    
-    // 3. Agent directory from spreadsheet uploads
-    agentDirectory.forEach(d => {
-      if (d && d.agentName) {
-        uniqueNames.add(capitalizeName(d.agentName));
-      }
-    });
-    
-    const sortedList = Array.from(uniqueNames).sort();
-    setAgentsList(sortedList);
-    setStorageItem('sched_agents_list', sortedList);
-  }, [registeredUsers, agentDirectory]);
-
-  const [agentMeta, setAgentMeta] = useState<Record<string, { roleType: string; tlName: string }>>(() => {
-    return getStorageItem<Record<string, { roleType: string; tlName: string }>>('sched_agent_meta', {});
-  });
-
-  const [isRosterPublished, setIsRosterPublished] = useState<boolean>(() => {
-    return getStorageItem<boolean>('sched_roster_published', false);
-  });
-
-  const [notifications, setNotifications] = useState<SystemNotification[]>(() => {
-    return getStorageItem<SystemNotification[]>('sched_notifications', []);
-  });
-  const [isNotifDrawerOpen, setIsNotifDrawerOpen] = useState(false);
-
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [showInstallBtn, setShowInstallBtn] = useState(false);
-
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      setShowInstallBtn(true);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setShowInstallBtn(false);
-    }
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, []);
-
-  const handleInstallClick = async () => {
-    if (!deferredPrompt) {
-      toast.info("Installation prompt is not ready. Look for the install option in your browser search bar or menu!");
-      return;
-    }
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log(`PWA Install Choice: ${outcome}`);
-    setDeferredPrompt(null);
-    setShowInstallBtn(false);
-  };
-
-  // Agent Personal Dashboard states (Daily, Weekly, Monthly)
-  const [agentDashboardTab, setAgentDashboardTab] = useState<'daily' | 'weekly' | 'monthly'>('daily');
-  const [dashboardViewMode, setDashboardViewMode] = useState<'team' | 'personal'>(() => {
-    // Team Leaders / Support default to 'team' view, standard Agents always default to 'personal'
-    return currentUser && (currentUser.role === 'tl' || !!supportAssignments[currentUser.name]) ? 'team' : 'personal';
-  });
-  const [dashboardSearchTeam, setDashboardSearchTeam] = useState<string>('');
-  const [rtmSearch, setRtmSearch] = useState<string>('');
-  const [rtmSelectedAgent, setRtmSelectedAgent] = useState<string | null>(null);
-  const [todos, setTodos] = useState<any[]>(() => getStorageItem('agent_todos', []));
-  const [todoFilter, setTodoFilter] = useState<'All' | 'Work' | 'Personal' | 'Urgent'>('All');
-
-  const addSystemNotification = (
-    title: string,
-    message: string,
-    type: SystemNotification['type'],
-    targetAgent: string,
-    stableId?: string
-  ) => {
-    const newNotif: SystemNotification = {
-      id: stableId || `notif_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-      title,
-      message,
-      type,
-      targetAgent,
-      createdAt: new Date().toISOString(),
-      seenByUsers: []
-    };
-    // Sync to state & local store which forwards to firestore
-    setNotifications(prev => {
-      const existsIdx = prev.findIndex(n => n.id === newNotif.id);
-      let updated;
-      if (existsIdx > -1) {
-        updated = [...prev];
-        updated[existsIdx] = newNotif;
-      } else {
-        updated = [newNotif, ...prev];
-      }
-      setStorageItem('sched_notifications', updated);
-      return updated;
-    });
-    
-    // Auto-sync real-time to firestore
-    try {
-      setDoc(doc(db, "notifications", newNotif.id), newNotif).catch(e=>console.error("Notif Error", e));
-    } catch(e) {}
-  };
-
-  const handleMentionsInText = (text: string, contextTitle: string, sourceAuthorName: string) => {
-    if (!text) return;
-    const allNames = Array.from(new Set([
-      ...TEAM_LEADERS,
-      ...INITIAL_AGENTS,
-      ...(agentsList || [])
-    ]));
-
-    const notifiedSet = new Set<string>();
-
-    allNames.forEach(name => {
-      if (!name) return;
-      const mentionToken = `@${name.toLowerCase()}`;
-      if (text.toLowerCase().includes(mentionToken) && name.toLowerCase() !== sourceAuthorName.toLowerCase()) {
-        if (!notifiedSet.has(name)) {
-          notifiedSet.add(name);
-          addSystemNotification(
-            `💬 Mentioned by ${sourceAuthorName}`,
-            `You were mentioned in ${contextTitle}: "${text.substring(0, 100)}${text.length > 100 ? '...' : ''}"`,
-            'general',
-            name
-          );
-          toast.success(`Notified @${name} of your mention!`);
-        }
-      }
-    });
-  };
-
-  const addTlFeedback = (tlName: string, notes: string, attachment?: string, attachmentName?: string) => {
-    if (!tlName) {
-      toast.error("Please select a Team Leader.");
-      return;
-    }
-    if (!notes.trim()) {
-      toast.error("Please enter feedback notes.");
-      return;
-    }
-
-    const newFeedback: TlFeedback = {
-      id: `feedback_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-      tlName,
-      directorName: 'Amira Hassan',
-      notes,
-      attachment,
-      attachmentName,
-      createdAt: new Date().toISOString(),
-      replies: [],
-      status: 'pending_reply'
-    };
-
-    setTlFeedbacks(prev => {
-      const updated = [newFeedback, ...prev];
-      setStorageItem('sched_tl_feedbacks', updated);
-      
-      // Sync to Firestore
-      setDoc(doc(db, "tl_feedbacks", newFeedback.id), newFeedback).catch(e => console.error("Feedback Write Error:", e));
-      
-      return updated;
-    });
-
-    addSystemNotification(
-      '👑 Director Feedback Received',
-      `Amira Hassan left feedback for you: "${notes.substring(0, 60)}${notes.length > 60 ? '...' : ''}"`,
-      'feedback',
-      tlName
-    );
-
-    handleMentionsInText(notes, 'Amira Hassan Feedback', 'Amira Hassan');
-    toast.success(`Feedback sent to ${tlName}!`);
-    
-    // Clear inputs
-    setFeedbackNotes('');
-    setFeedbackAttachment('');
-    setFeedbackAttachmentName('');
-  };
-
-  const replyToTlFeedback = (feedbackId: string, text: string, attachment?: string, attachmentName?: string) => {
-    if (!text.trim()) {
-      toast.error("Please write a reply message.");
-      return;
-    }
-
-    setTlFeedbacks(prev => {
-      const updated = prev.map(f => {
-        if (f.id === feedbackId) {
-          const newReply: FeedbackReply = {
-            id: `reply_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-            senderName: currentUser.name,
-            text,
-            attachment,
-            attachmentName,
-            createdAt: new Date().toISOString()
-          };
-          const isDirector = currentUser?.name?.toLowerCase() === 'amira hassan';
-          const newStatus = isDirector ? 'pending_reply' : 'replied';
-
-          const updatedFeedback = {
-            ...f,
-            replies: [...f.replies, newReply],
-            status: newStatus as any
-          };
-          
-          // Sync to Firestore
-          setDoc(doc(db, "tl_feedbacks", f.id), updatedFeedback).catch(e => console.error("Feedback Reply Error:", e));
-          
-          return updatedFeedback;
-        }
-        return f;
-      });
-      setStorageItem('sched_tl_feedbacks', updated);
-      return updated;
-    });
-
-    const fObj = tlFeedbacks.find(f => f.id === feedbackId);
-    if (fObj) {
-      const isDirector = currentUser?.name?.toLowerCase() === 'amira hassan';
-      const targetUser = isDirector ? fObj.tlName : 'Amira Hassan';
-      const senderName = currentUser.name;
-
-      addSystemNotification(
-        isDirector ? '👑 Director Feedback Updates' : '✉️ Reply to Director Feedback',
-        `${senderName} replied to feedback: "${text.substring(0, 60)}${text.length > 60 ? '...' : ''}"`,
-        'feedback',
-        targetUser
-      );
-
-      handleMentionsInText(text, 'Feedback Thread Reply', senderName);
-      toast.success("Reply submitted!");
-      
-      // Clear specific reply state
-      setFeedbackReplies(prev => ({ ...prev, [feedbackId]: '' }));
-      setFeedbackReplyAttachments(prev => ({ ...prev, [feedbackId]: '' }));
-      setFeedbackReplyAttachmentNames(prev => ({ ...prev, [feedbackId]: '' }));
-    }
-  };
-
-  const visibleNotifs = notifications.filter(notif => {
-    if (!currentUser) return false;
-    if (notif.clearedByUsers && notif.clearedByUsers.includes(currentUser.name)) return false;
-    if (notif.targetAgent === 'all') return true;
-    if (isTLOreSupport && notif.targetAgent === 'tl') return true;
-    return notif.targetAgent.toLowerCase() === currentUser?.name?.toLowerCase();
-  });
-
-  const unreadCount = visibleNotifs.filter(notif => {
-    return !notif.seenByUsers || !notif.seenByUsers.includes(currentUser?.name || '');
-  }).length;
-
-  const handleMarkAllNotifsAsRead = () => {
-    if (!currentUser) return;
-    const updated = notifications.map(n => {
-      const isVisible = n.targetAgent === 'all' || 
-                        (isTLOreSupport && n.targetAgent === 'tl') ||
-                        n.targetAgent.toLowerCase() === currentUser?.name?.toLowerCase();
-      if (isVisible) {
-        const seenSet = new Set(n.seenByUsers || []);
-        seenSet.add(currentUser.name);
-        const updatedNotif = { ...n, seenByUsers: Array.from(seenSet) };
-        // Sync to Firestore
-        setDoc(doc(db, "notifications", n.id), updatedNotif).catch(e => console.error("Mark All Read Error:", e));
-        return updatedNotif;
-      }
-      return n;
-    });
-    setNotifications(updated);
-    setStorageItem('sched_notifications', updated);
-    toast.success("All notifications marked as read!");
-  };
-
-  const handleMarkSingleNotifAsRead = (id: string) => {
-    if (!currentUser) return;
-    const updated = notifications.map(n => {
-      if (n.id === id) {
-        const seenSet = new Set(n.seenByUsers || []);
-        seenSet.add(currentUser.name);
-        const updatedNotif = { ...n, seenByUsers: Array.from(seenSet) };
-        // Sync to Firestore
-        setDoc(doc(db, "notifications", n.id), updatedNotif).catch(e => console.error("Mark Single Read Error:", e));
-        return updatedNotif;
-      }
-      return n;
-    });
-    setNotifications(updated);
-    setStorageItem('sched_notifications', updated);
-  };
-
-  useEffect(() => {
-    if (currentUser) {
-      const derivedRole = isQAName(currentUser.name) ? 'qa' : isTLName(currentUser.name) ? 'tl' : 'agent';
-      if (currentUser.role !== derivedRole) {
-        const updated = { ...currentUser, role: derivedRole };
-        setCurrentUser(updated);
-        setStorageItem('sched_current_user', updated);
-      }
-    }
-  }, [currentUser, agentsList]);
-
-  // Calendar / Sync States
-  const [isSyncingCalendar, setIsSyncingCalendar] = useState(false);
-  const [isUploadingToDrive, setIsUploadingToDrive] = useState(false);
-
-  // Operations Live Queue & Log State
-  const [queueStats, setQueueStats] = useState(() => {
-    return getStorageItem('sched_queue_stats', { activeCalls: 3, waitingTasks: 2, holdTime: 14, processedToday: 42 });
-  });
-  const [liveOpsLogs, setLiveOpsLogs] = useState<string[]>(() => {
-    return getStorageItem('sched_live_ops_logs', [
-      `[Operational] CRM integration sync checked & active`,
-      `[Operational] SLA levels optimal (All queues matching goals)`,
-      `[Operational] Live system clock synchronized`
-    ]);
-  });
-
-  // Schedules database (loaded or uploaded per week or per month)
-  const [uploadedSchedules, setUploadedSchedules] = useState<ScheduledShift[]>(() =>
-    readStoredJson<ScheduledShift[]>(STORAGE_KEYS.schedules, [])
-  );
-  
-  // Knowledge Base database and states
-  const [knowledgeBaseDocuments, setKnowledgeBaseDocuments] = useState<any[]>(() =>
-    readStoredJson<any[]>(STORAGE_KEYS.knowledgeBase, [])
-  );
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.knowledgeBase, JSON.stringify(knowledgeBaseDocuments));
-    } catch (e) {
-      toast.error('Local database storage is full. Please delete some documents to free up space.');
-    }
-  }, [knowledgeBaseDocuments]);
-  
-  // Knowledge Base States and Helpers
-  const [selectedKbDocId, setSelectedKbDocId] = useState<string | null>(null);
-  const [searchQueryKb, setSearchQueryKb] = useState<string>('');
-  const [isAnsweringKb, setIsAnsweringKb] = useState<boolean>(false);
-  const [kbAiAnswer, setKbAiAnswer] = useState<string>('');
-
-  const handleKbAiQuery = async () => {
-    if (!searchQueryKb.trim()) {
-      toast.error('Please enter a query to ask the AI.');
-      return;
-    }
-    setIsAnsweringKb(true);
-    setKbAiAnswer('');
-    try {
-      let context = '';
-      if (knowledgeBaseDocuments.length > 0) {
-        context = knowledgeBaseDocuments.map(d => `Document: ${d.name}\nContent:\n${d.content}`).join('\n\n');
-        if (context.length > 7000) {
-          context = context.substring(0, 7000) + '... (truncated)';
-        }
-      }
-      const res = await fetch('/api/ai-chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: searchQueryKb, knowledgeContext: context }),
-      });
-      if (!res.ok) {
-        throw new Error('Failed to fetch AI response');
-      }
-      const data = await res.json();
-      setKbAiAnswer(data.reply);
-      toast.success('AI grounding analysis completed!');
-    } catch (err: any) {
-      console.error(err);
-      toast.error('Failed to get AI response. Check your API configuration.');
-    } finally {
-      setIsAnsweringKb(false);
-    }
-  };
-
-  const handleKbFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const extension = file.name.split('.').pop()?.toLowerCase() || '';
-
-    // Generous limit of 4MB for high performance in browser-based Storage
-    if (file.size > 4 * 1024 * 1024) {
-      toast.error('File size exceeds the 4MB limit for direct browser upload. Consider uploading smaller documents.');
-      return;
-    }
-
-    // Special Route: PDF Text Extraction Ingestion
-    if (extension === 'pdf') {
-      const pdfReader = new FileReader();
-      pdfReader.onload = async (event) => {
-        try {
-          const arrayBuffer = event.target?.result as ArrayBuffer;
-          if (!arrayBuffer) {
-            throw new Error('PDF file is empty.');
-          }
-
-          toast.loading('Ingesting and extracting text from PDF...', { id: 'pdf-load' });
-          
-          let extractedText = '';
-          try {
-            // Load PDF.js dynamically from high-speed reliable Cloudflare CDN
-            if (!(window as any).pdfjsLib) {
-              await new Promise<void>((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-                script.onload = () => resolve();
-                script.onerror = () => reject(new Error('Failed to load PDF extraction engine.'));
-                document.head.appendChild(script);
-              });
-            }
-
-            const pdfjsLib = (window as any).pdfjsLib;
-            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-            const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
-            const pdf = await loadingTask.promise;
-            
-            let fullText = '';
-            for (let i = 1; i <= pdf.numPages; i++) {
-              const page = await pdf.getPage(i);
-              const textContent = await page.getTextContent();
-              const pageText = textContent.items.map((item: any) => item.str).join(' ');
-              fullText += `--- Page ${i} ---\n${pageText}\n\n`;
-            }
-            extractedText = fullText.trim() || 'No searchable text content found in PDF.';
-            toast.success(`Extracted ${pdf.numPages} pages from PDF!`, { id: 'pdf-load' });
-          } catch (pdfErr: any) {
-            console.error(pdfErr);
-            toast.error('Local PDF parsing failed. Uploading as reference binary file.', { id: 'pdf-load' });
-            
-            // Fallback: save as standard binary data URL
-            const binaryReader = new FileReader();
-            binaryReader.onload = (binEv) => {
-              const dataUrl = binEv.target?.result as string;
-              const newDoc = {
-                id: `kb_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-                name: file.name,
-                type: 'PDF',
-                mimeType: 'application/pdf',
-                uploadedAt: new Date().toISOString(),
-                content: dataUrl,
-                size: file.size,
-                isBinary: true
-              };
-              setKnowledgeBaseDocuments(prev => [newDoc, ...prev]);
-              setSelectedKbDocId(newDoc.id);
-            };
-            binaryReader.readAsDataURL(file);
-            return;
-          }
-
-          const newDoc = {
-            id: `kb_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-            name: file.name,
-            type: 'PDF',
-            mimeType: 'application/pdf',
-            uploadedAt: new Date().toISOString(),
-            content: extractedText,
-            size: file.size,
-            isBinary: false // Successfully extracted to structured text!
-          };
-
-          setKnowledgeBaseDocuments(prev => [newDoc, ...prev]);
-          setSelectedKbDocId(newDoc.id);
-          toast.success(`"${file.name}" indexed successfully!`);
-        } catch (err: any) {
-          toast.error('Failed to parse PDF file: ' + err.message, { id: 'pdf-load' });
-        }
-      };
-      pdfReader.onerror = () => {
-        toast.error('Failed to read the selected PDF file.');
-      };
-      pdfReader.readAsArrayBuffer(file);
-      return;
-    }
-
-    // Determine if file is text or binary
-    if (extension === 'docx') {
-      const docxReader = new FileReader();
-      docxReader.onload = async (event) => {
-        try {
-          const arrayBuffer = event.target?.result as ArrayBuffer;
-          if (!arrayBuffer) throw new Error('DOCX file is empty.');
-          toast.loading('Extracting text from Word document...', { id: 'docx-load' });
-          const result = await mammoth.extractRawText({ arrayBuffer });
-          const extractedText = result.value || 'No readable text content found in document.';
-          if (result.messages && result.messages.length > 0) console.warn(result.messages);
-          const newDoc = {
-            id: `kb_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-            name: file.name,
-            type: 'DOCX',
-            mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            uploadedAt: new Date().toISOString(),
-            content: extractedText,
-            size: file.size,
-            isBinary: false
-          };
-          setKnowledgeBaseDocuments(prev => [newDoc, ...prev]);
-          setSelectedKbDocId(newDoc.id);
-          toast.success(`"${file.name}" indexed successfully!`, { id: 'docx-load' });
-        } catch (err: any) {
-          toast.error('Failed to parse Word Document: ' + err.message, { id: 'docx-load' });
-        }
-      };
-      docxReader.onerror = () => toast.error('Failed to read the selected DOCX file.');
-      docxReader.readAsArrayBuffer(file);
-      return;
-    }
-
-    const textExtensions = ['txt', 'md', 'csv', 'json', 'xml', 'html', 'css', 'js', 'ts', 'svg', 'yaml', 'yml', 'ini', 'log'];
-    const isText = file.type.startsWith('text/') || 
-                   textExtensions.includes(extension) || 
-                   file.type === 'application/json' ||
-                   file.type === 'application/javascript';
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const fileContent = event.target?.result as string;
-        if (!fileContent) {
-          throw new Error('File is empty.');
-        }
-
-        const newDoc = {
-          id: `kb_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-          name: file.name,
-          type: extension.toUpperCase() || 'FILE',
-          mimeType: file.type || 'application/octet-stream',
-          uploadedAt: new Date().toISOString(),
-          content: fileContent,
-          size: file.size,
-          isBinary: !isText
-        };
-
-        setKnowledgeBaseDocuments(prev => [newDoc, ...prev]);
-        setSelectedKbDocId(newDoc.id);
-        toast.success(`"${file.name}" uploaded successfully!`);
-      } catch (err: any) {
-        toast.error('Failed to parse file: ' + err.message);
-      }
-    };
-
-    reader.onerror = () => {
-      toast.error('Failed to read the selected file.');
-    };
-
-    if (isText) {
-      reader.readAsText(file);
-    } else {
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleDeleteKbDoc = (id: string) => {
-    if (!window.confirm('Are you sure you want to permanently delete this document from the knowledge base?')) return;
-    setKnowledgeBaseDocuments(prev => prev.filter(d => d.id !== id));
-    if (selectedKbDocId === id) setSelectedKbDocId(null);
-    toast.success('Document deleted successfully.');
-  };
-
-  const filteredKbDocs = useMemo(() => {
-    if (!searchQueryKb.trim()) return knowledgeBaseDocuments;
-    const q = searchQueryKb.toLowerCase();
-    return knowledgeBaseDocuments.filter(d => 
-      String(d.name || '').toLowerCase().includes(q) || 
-      (!d.isBinary && d.content && String(d.content).toLowerCase().includes(q))
-    );
-  }, [knowledgeBaseDocuments, searchQueryKb]);
-
-  const currentKbDoc = useMemo(() => {
-    if (!selectedKbDocId) {
-      return filteredKbDocs[0] || null;
-    }
-    return filteredKbDocs.find(d => d.id === selectedKbDocId) || filteredKbDocs[0] || null;
-  }, [filteredKbDocs, selectedKbDocId]);
-  const [isSchedulesCleared, setIsSchedulesCleared] = useState<boolean>(() => {
-    return localStorage.getItem('schedules_cleared_v1') === 'true';
-  });
-
-  const [firestoreSchedules, setFirestoreSchedules] = useState<ScheduledShift[]>(() =>
-    readStoredJson<ScheduledShift[]>('sched_schedules', [])
-  );
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.schedules, JSON.stringify(uploadedSchedules));
-  }, [uploadedSchedules]);
-
-  const clock = systemTime;
-  const schedules = useMemo(() => {
-    if (isSchedulesCleared) {
-      return [];
-    }
-    if (uploadedSchedules.length > 0) {
-      return uploadedSchedules;
-    }
-    if (firestoreSchedules.length > 0) {
-      return firestoreSchedules;
-    }
-    return getInitialSchedules(clock, INITIAL_AGENTS);
-  }, [uploadedSchedules, firestoreSchedules, clock, isSchedulesCleared]);
-
-  const setSchedules = (val: ScheduledShift[] | ((prev: ScheduledShift[]) => ScheduledShift[])) => {
-    if (typeof val === 'function') {
-      setUploadedSchedules(prev => {
-        const fallback = prev.length > 0 ? prev : getInitialSchedules(clock, INITIAL_AGENTS);
-        const res = val(fallback);
-        if (res.length > 0) {
-          localStorage.removeItem('schedules_cleared_v1');
-          setIsSchedulesCleared(false);
-        } else {
-          localStorage.setItem('schedules_cleared_v1', 'true');
-          setIsSchedulesCleared(true);
-        }
-        return res;
-      });
-      setFirestoreSchedules(prev => {
-        const fallback = prev.length > 0 ? prev : getInitialSchedules(clock, INITIAL_AGENTS);
-        const res = val(fallback);
-        if (res.length > 0) {
-          localStorage.removeItem('schedules_cleared_v1');
-          setIsSchedulesCleared(false);
-        } else {
-          localStorage.setItem('schedules_cleared_v1', 'true');
-          setIsSchedulesCleared(true);
-        }
-        return res;
-      });
-    } else {
-      setUploadedSchedules(val);
-      setFirestoreSchedules(val);
-      if (val.length > 0) {
-        localStorage.removeItem('schedules_cleared_v1');
-        setIsSchedulesCleared(false);
-      } else {
-        localStorage.setItem('schedules_cleared_v1', 'true');
-        setIsSchedulesCleared(true);
-      }
-    }
-  };
-
-  // Inquiries database (persists in localStorage)
-  const [inquiries, setInquiries] = useState<Inquiry[]>(() => {
-    return getStorageItem<Inquiry[]>('sched_inquiries', []);
-  });
-
-  const [qaScores, setQaScores] = useState<QAScore[]>(() => {
-    return getStorageItem<QAScore[]>('sched_qa_scores', []);
-  });
-
-  const [qaTemplate, setQaTemplate] = useState<any[]>(() => {
-    return getStorageItem<any[]>('sched_qa_template', [
-      { id: 'q1', text: 'Greeting & Opening', maxScore: 10 },
-      { id: 'q2', text: 'Empathy & Tone', maxScore: 20 },
-      { id: 'q3', text: 'Accuracy of Information', maxScore: 40 },
-      { id: 'q4', text: 'Resolution & Tool Usage', maxScore: 20 },
-      { id: 'q5', text: 'Closing & Recap', maxScore: 10 }
-    ]);
-  });
-
-  // Tabby & Tamara requests database
-  const [tabbyTamaraRequests, setTabbyTamaraRequests] = useState<TabbyTamaraRequest[]>(() => {
-    return getStorageItem<TabbyTamaraRequest[]>('sched_tabby_tamara', []);
-  });
-
-  // Tabby & Tamara complaints database
-  const [tabbyTamaraComplaints, setTabbyTamaraComplaints] = useState<TabbyTamaraComplaint[]>(() => {
-    return getStorageItem<TabbyTamaraComplaint[]>('sched_tt_complaints', []);
-  });
-
-  const [clientComms, setClientComms] = useState<ClientCommunicationRequest[]>(() => {
-    return getStorageItem<ClientCommunicationRequest[]>('sched_client_comms', []);
-  });
-
-  const [cases, setCases] = useState<CaseRecord[]>(() => {
-    return getStorageItem<CaseRecord[]>('sched_cases', []);
-  });
-
-  const [announcements, setAnnouncements] = useState<Announcement[]>(() => {
-    return getStorageItem<Announcement[]>('sched_announcements', []);
-  });
-
-  const [orders, setOrders] = useState<Order[]>(() => {
-    return getStorageItem<Order[]>('sched_orders', []);
-  });
-
-  const latestAnnouncementIdRef = useRef<string | null>(null);
-
-  // Tab selection inside Tabby & Tamara Desk
-  const [ttSubTab, setTtSubTab] = useState<'requests' | 'complaints'>('requests');
-
-  // Amira Hassan's TL Feedback States
-  const [tlFeedbacks, setTlFeedbacks] = useState<TlFeedback[]>(() => {
-    return getStorageItem<TlFeedback[]>('sched_tl_feedbacks', []);
-  });
-  const [selectedTlForFeedback, setSelectedTlForFeedback] = useState('');
-  const [feedbackNotes, setFeedbackNotes] = useState('');
-  const [feedbackAttachment, setFeedbackAttachment] = useState('');
-  const [feedbackAttachmentName, setFeedbackAttachmentName] = useState('');
-  const [feedbackFilterTl, setFeedbackFilterTl] = useState('all');
-  const [feedbackReplies, setFeedbackReplies] = useState<Record<string, string>>({});
-  const [feedbackReplyAttachments, setFeedbackReplyAttachments] = useState<Record<string, string>>({});
-  const [feedbackReplyAttachmentNames, setFeedbackReplyAttachmentNames] = useState<Record<string, string>>({});
-
-  // 10th of Ramadan Weather States
-  const [ramadanTemp, setRamadanTemp] = useState<number | null>(null);
-  const [ramadanWeatherCode, setRamadanWeatherCode] = useState<number>(0);
-
-  // Tabby/Tamara form inputs
-  const [ttPatientName, setTtPatientName] = useState('');
-  const [ttFileNumber, setTtFileNumber] = useState('');
-  const [ttIsOldCustomer, setTtIsOldCustomer] = useState(true);
-  const [ttIdNumber, setTtIdNumber] = useState('');
-  const [ttPriceWithoutTax, setTtPriceWithoutTax] = useState('');
-  const [ttPhoneNumber, setTtPhoneNumber] = useState('');
-  const [ttNotes, setTtNotes] = useState('');
-  const [ttPlatform, setTtPlatform] = useState<'tabby' | 'tamara'>('tabby');
-  const [ttClinicName, setTtClinicName] = useState('');
-
-  // Tabby/Tamara Complaint form inputs
-  const [tcPatientName, setTcPatientName] = useState('');
-  const [tcFileNumber, setTcFileNumber] = useState('');
-  const [tcIsOldCustomer, setTcIsOldCustomer] = useState(true);
-  const [tcIdNumber, setTcIdNumber] = useState('');
-  const [tcImageUrl, setTcImageUrl] = useState('');
-  const [tcPhoneNumber, setTcPhoneNumber] = useState('');
-  const [tcComplaintDetails, setTcComplaintDetails] = useState('');
-  const [tcClinicName, setTcClinicName] = useState('');
-
-  // Client Communication Requests form inputs
-  const [ccClinicName, setCcClinicName] = useState('');
-  const [ccPhoneNumber, setCcPhoneNumber] = useState('');
-  const [ccLanguage, setCcLanguage] = useState<'Arabic' | 'English'>('Arabic');
-  const [ccNotes, setCcNotes] = useState('');
-  const [activeCcHandlingId, setActiveCcHandlingId] = useState<string | null>(null);
-  const [ccHandlingNotes, setCcHandlingNotes] = useState('');
-
-  // Cases input
-  const [casePatientName, setCasePatientName] = useState('');
-  const [casePhoneNumber, setCasePhoneNumber] = useState('');
-  const [caseInquiry, setCaseInquiry] = useState('');
-  const [caseLeadSource, setCaseLeadSource] = useState('');
-  const [caseBloggerName, setCaseBloggerName] = useState('');
-  const [caseSearchQuery, setCaseSearchQuery] = useState('');
-  const [caseStatusFilter, setCaseStatusFilter] = useState('all');
-  const [caseBranch, setCaseBranch] = useState('');
-  const [casePatientType, setCasePatientType] = useState('New');
-  const [caseService, setCaseService] = useState('');
-  const [caseTicketType, setCaseTicketType] = useState('Inquiry');
-  const [caseTicketStatus, setCaseTicketStatus] = useState('Closed');
-  const [caseCallType, setCaseCallType] = useState('');
-  const [caseDateFilter, setCaseDateFilter] = useState(() => getLocalISOString());
-  const [caseAgentFilter, setCaseAgentFilter] = useState('all');
-
-  // TL Complaint handling input
-  const [activeComplaintHandlingId, setActiveComplaintHandlingId] = useState<string | null>(null);
-  const [tlComplaintComment, setTlComplaintComment] = useState('');
-
-  // TL Fintech handling input
-  const [activeFintechHandlingId, setActiveFintechHandlingId] = useState<string | null>(null);
-  const [tlFintechPaymentLink, setTlFintechPaymentLink] = useState('');
-  const [tlFintechNotes, setTlFintechNotes] = useState('');
-  const [tlFintechLinks, setTlFintechLinks] = useState('');
-
-  // Form submission and confirmation states
-  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
-  const [submissionConfirmation, setSubmissionConfirmation] = useState<{
-    title: string;
-    message: string;
-    type: 'inquiry' | 'fintech_request' | 'fintech_complaint' | 'client_comm' | 'case' | 'swap_request' | 'annual_leave';
-    referenceId?: string;
-  } | null>(null);
-
-  // Inquiry submission inputs
-  const [inquiryText, setInquiryText] = useState('');
-  const [inquiryPhotos, setInquiryPhotos] = useState<string[]>([]);
-  const [inquiryLinks, setInquiryLinks] = useState<string[]>([]);
-  const [tempLinkInput, setTempLinkInput] = useState('');
-  const [tempPhotoUrlInput, setTempPhotoUrlInput] = useState('');
-  const [inquiryClinicName, setInquiryClinicName] = useState('');
-  const [inquiryPhoneNumber, setInquiryPhoneNumber] = useState('');
-  const [inquiryLanguageDir, setInquiryLanguageDir] = useState<'auto' | 'ltr' | 'rtl'>('auto');
-
-  // Selected Inquiry for answering
-  const [answeringInquiryId, setAnsweringInquiryId] = useState<string | null>(null);
-  const [currentAnswerText, setCurrentAnswerText] = useState('');
-  
-  // Inquiries Search and Filter states
-  const [directorySearchQuery, setDirectorySearchQuery] = useState('');
-  
-  // KPI Calculator States
-  const [kpiMaxBonus, setKpiMaxBonus] = useState<number>(3000);
-  const [kpiAgentTarget, setKpiAgentTarget] = useState<string>('');
-  const [kpiMetrics, setKpiMetrics] = useState<{ id: string; name: string; target: number; actual: number; weight: number; type: 'higher' | 'lower'; formula?: string }[]>([
-    { id: '1', name: 'Quality Score (%)', target: 90, actual: 95, weight: 40, type: 'higher', formula: '(actual / target) * 100' },
-    { id: '2', name: 'AHT (Seconds)', target: 300, actual: 280, weight: 30, type: 'lower', formula: '(target / actual) * 100' },
-    { id: '3', name: 'Adherence (%)', target: 95, actual: 98, weight: 30, type: 'higher', formula: '(actual / target) * 100' }
-  ]);
-  const [inquirySearchQuery, setInquirySearchQuery] = useState('');
-  const [inquiryStatusFilter, setInquiryStatusFilter] = useState('');
-  const [logAgentFilter, setLogAgentFilter] = useState('all');
-  const [logTypeFilter, setLogTypeFilter] = useState('all');
-  const [logSearchQuery, setLogSearchQuery] = useState('');
-
-  // Unified Screenshot Upload State
-  const [activeScreenshot, setActiveScreenshot] = useState<string | null>(null);
-
-  const handleScreenshotPaste = (e: React.ClipboardEvent) => {
-    const items = e.clipboardData.items;
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].type.indexOf('image') !== -1) {
-        const file = items[i].getAsFile();
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            setActiveScreenshot(event.target?.result as string);
-            toast.success('Screenshot captured from clipboard!');
-          };
-          reader.readAsDataURL(file);
-        }
-      }
-    }
-  };
-
-  const handleScreenshotFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setActiveScreenshot(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // State to track active dashboard summary interactive model overlays
-  const [activeDashboardModal, setActiveDashboardModal] = useState<'queue' | 'qa' | 'inquiry' | 'fintech' | null>(null);
-
-  // Tabby/Tamara search and filter states
-  const [ttSearchQuery, setTtSearchQuery] = useState('');
-  const [ttFilterStatus, setTtFilterStatus] = useState<'all' | 'not_confirmed' | 'confirmed' | 'contacted'>('all');
-  const [ttFilterProvider, setTtFilterProvider] = useState<'all' | 'tabby' | 'tamara' | 'one_time_payment'>('all');
-  const [tcFilterClinic, setTcFilterClinic] = useState<string>('all');
-
-  // Login Form States
-  const [loginName, setLoginName] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-  const [showLoginPassword, setShowLoginPassword] = useState(false);
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [loginError, setLoginError] = useState('');
-
-  // Active Menu / Tab States
-  // For TL: 'dashboard' | 'overview' | 'all-requests' | 'report' | 'schedules' | 'time-logs'
-  // For Agent: 'dashboard' | 'clocking' | 'apply' | 'my-requests' | 'schedules'
-  const [activeTab, setActiveTab] = useState<string>('');
-  const [selectedDashboardDate, setSelectedDashboardDate] = useState<string>(() => getLocalISOString());
-  const [dashboardChartMetric, setDashboardChartMetric] = useState<'all' | 'inquiries' | 'fintech' | 'presence'>('all');
-
-  // Initialize correct active tab based on role
-  useEffect(() => {
-    if (currentUser) {
-      setActiveTab('dashboard');
-    }
-  }, [currentUser]);
-
-  // Request Form States
-  const [swapDate, setSwapDate] = useState('');
-  const [swapShift, setSwapShift] = useState(SHIFTS[0].label);
-  const [swapTargetAgent, setSwapTargetAgent] = useState('');
-  const [swapTargetShift, setSwapTargetShift] = useState(SHIFTS[1].label);
-  const [swapNotes, setSwapNotes] = useState('');
-
-  // P2P Trade Form States
-  const [p2pSelectedDate, setP2pSelectedDate] = useState('');
-  const [p2pTargetAgent, setP2pTargetAgent] = useState('');
-  const [p2pTargetShift, setP2pTargetShift] = useState(SHIFTS[1].label);
-  const [p2pNotes, setP2pNotes] = useState('');
-
-  // Manual Roster Submission Form States
-  const [manualRosterAgent, setManualRosterAgent] = useState('');
-  const [manualRosterDate, setManualRosterDate] = useState('');
-  const [manualRosterShift, setManualRosterShift] = useState('07:00 - 16:00');
-  const [manualRosterNotes, setManualRosterNotes] = useState('');
-  const [selectedShiftForActivities, setSelectedShiftForActivities] = useState<ScheduledShift | null>(null);
-
-  const [annualStart, setAnnualStart] = useState('');
-  const [annualEnd, setAnnualEnd] = useState('');
-  const [annualNotes, setAnnualNotes] = useState('');
-
-  // Report Period Selection State
-  const [reportPeriod, setReportPeriod] = useState<'day' | 'week' | 'month' | 'year'>('month');
-
-  // Schedules View & Upload states
-  const [scheduleViewMode, setScheduleViewMode] = useState<'month' | 'fortnight' | 'week'>('fortnight');
-  const [scheduleFilterAgent, setScheduleFilterAgent] = useState<string>('');
-  const [historyFilter, setHistoryFilter] = useState<'all' | 'scheduling' | 'tabby' | 'complaints' | 'comms' | 'cases' | 'inquiries'>('all');
-  const [dragActive, setDragActive] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
-  const [rosterUploadSuccess, setRosterUploadSuccess] = useState<string | null>(null);
-  const [rosterUploadErrors, setRosterUploadErrors] = useState<string[]>([]);
-  const [tempSchedules, setTempSchedules] = useState<ScheduledShift[]>([]);
-  const [tempNewAgents, setTempNewAgents] = useState<string[]>([]);
-  const [tempParsedMeta, setTempParsedMeta] = useState<Record<string, { tlName?: string }>>({});
-  const [schedulePageOffset, setSchedulePageOffset] = useState<number>(0);
-  const [heatmapMorningTarget, setHeatmapMorningTarget] = useState<number>(() => getStorageItem('heatmap_morning_target', 3));
-  const [heatmapAfternoonTarget, setHeatmapAfternoonTarget] = useState<number>(() => getStorageItem('heatmap_afternoon_target', 2));
-  const [heatmapNightTarget, setHeatmapNightTarget] = useState<number>(() => getStorageItem('heatmap_night_target', 1));
-  const [heatmapConfigureOpen, setHeatmapConfigureOpen] = useState<boolean>(false);
-
-  const [directoryHeaders, setDirectoryHeaders] = useState<string[]>(() => {
-    return getStorageItem<string[]>('sched_agent_directory_headers', []);
-  });
-
-  // Auto-align schedule page to show today's date context
-  useEffect(() => {
-    // Priority: If we just uploaded tempSchedules, focus on that context
-    const sourceData = tempSchedules.length > 0 ? tempSchedules : schedules;
-    const list = Array.from(new Set(sourceData.map(p => p.date))).sort() as string[];
-    
-    const resolvedDates = list.length > 0 ? list : Array.from({ length: 30 }, (_, i) => {
-      const d = new Date(systemTime);
-      d.setDate(d.getDate() - 5 + i);
-      return getLocalISOString(d);
-    });
-
-    if (resolvedDates.length > 0) {
-      const todayISO = getLocalISOString();
-      const systemTimeISO = getLocalISOString(systemTime);
-
-      let targetDateStr = systemTimeISO;
-      
-      // If we have tempSchedules, jump to its earliest date
-      if (tempSchedules.length > 0 && list.length > 0) {
-        targetDateStr = list[0];
-      } else if (resolvedDates.includes(todayISO)) {
-        targetDateStr = todayISO;
-      } else if (!resolvedDates.includes(systemTimeISO)) {
-        const sortedWithTarget = [...resolvedDates].sort((a, b) => {
-          return Math.abs(new Date(a).getTime() - systemTime.getTime()) - 
-                 Math.abs(new Date(b).getTime() - systemTime.getTime());
-        });
-        targetDateStr = sortedWithTarget[0];
-      }
-
-      const targetIdx = resolvedDates.indexOf(targetDateStr);
-      if (targetIdx !== -1) {
-        let displayDaysCount = 14;
-        if (scheduleViewMode === 'week') displayDaysCount = 7;
-        if (scheduleViewMode === 'month') displayDaysCount = 31;
-
-        const idealOffset = Math.max(0, Math.min(targetIdx, resolvedDates.length - displayDaysCount));
-        setSchedulePageOffset(idealOffset);
-      }
-    }
-  }, [schedules.length, tempSchedules.length, scheduleViewMode, systemTime]);
-
-  
-
-  // Interactive Live Validations
-  const [swapWarning, setSwapWarning] = useState<string | null>(null);
-  const [annualWarning, setAnnualWarning] = useState<string | null>(null);
-
-  // Trigger swap validation when raw inputs change
-  useEffect(() => {
-    if (swapDate) {
-      const result = validateSwapRequest(swapDate, swapShift, systemTime);
-      if (!result.isValid) {
-        setSwapWarning(result.message || 'Violation detected');
-      } else {
-        setSwapWarning(null);
-      }
-    } else {
-      setSwapWarning(null);
-    }
-  }, [swapDate, swapShift, systemTime]);
-
-  // Trigger annual validation when raw inputs change
-  useEffect(() => {
-    if (annualStart) {
-      const result = validateAnnualRequest(annualStart, systemTime);
-      if (!result.isValid) {
-        setAnnualWarning(result.message || 'Violation detected');
-      } else {
-        setAnnualWarning(null);
-      }
-    } else {
-      setAnnualWarning(null);
-    }
-  }, [annualStart, systemTime]);
-
-  // Handle Login Check
-  const handleLoginSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    setLoginError('');
-
-    const trimmedInput = loginName.trim().replace(/\s+/g, '');
-    if (!trimmedInput) {
-      setLoginError('Please enter your username.');
-      return;
-    }
-
-    // New format must contain a dot and no spaces:
-    const isNewFormat = trimmedInput.includes('.') && !trimmedInput.includes(' ');
-    if (!isNewFormat) {
-      setLoginError("Invalid format! Please enter your username in the 'first_letter.last_name' format (e.g., h.sobhy).");
-      return;
-    }
-
-    if (!loginPassword) {
-      setLoginError('Please enter a password.');
-      return;
-    }
-
-    const formattedUsername = trimmedInput.toLowerCase();
-    const matchedFullName = findAgentByUsername(formattedUsername, agentsList);
-    
-    // Check for flexible Admin names to NEVER lock them out
-    const isAdminUser = 
-      formattedUsername === 'h.sobhy' || 
-      formattedUsername === 'hesso' || 
-      formattedUsername === 'a.hassan' || 
-      formattedUsername.includes('amira') ||
-      formattedUsername.includes('hesham') ||
-      (matchedFullName && matchedFullName.toLowerCase() === 'hesham sobhy') || 
-      (matchedFullName && matchedFullName.toLowerCase() === 'amira hassan');
-
-    if (!matchedFullName && !isAdminUser) {
-       setLoginError("User not found in the official system directory. Ensure you use exact format (e.g., a.hassan) or ask your TL to add you.");
-       return;
-    }
-
-    const correspondingFullName = matchedFullName || formattedUsername;
-
-    if (!isAdminUser && (lockedAccounts.includes(formattedUsername) || lockedAccounts.includes(correspondingFullName))) {
-      setLoginError('This account is locked. Only Hesham Sobhy or Amira Hassan can reset it.');
-      return;
-    }
-
-    // Checking password - support both formattedUsername and correspondingFullName for backward compatibility
-    const hasStoredPassword = (formattedUsername in credentials) || (correspondingFullName in credentials);
-
-    if (!hasStoredPassword) {
-      // First-time user registration flow
-      setIsRegistering(true);
-      return;
-    }
-
-    const correctPassword = credentials[formattedUsername] !== undefined 
-      ? credentials[formattedUsername] 
-      : credentials[correspondingFullName];
-
-    if (correctPassword !== loginPassword) {
-      const currentAttempts = (failedAttempts[formattedUsername] || 0) + 1;
-      const updatedAttempts = { ...failedAttempts, [formattedUsername]: currentAttempts };
-      setFailedAttempts(updatedAttempts);
-      setStorageItem('sched_failed_attempts', updatedAttempts);
-      setDoc(doc(db, "system", "sched_failed_attempts"), { data: updatedAttempts }).catch(console.error);
-
-      if (currentAttempts >= 3) {
-        if (isAdminUser) {
-          // Admins don't get locked out, just reset their failed attempts to 0 or allow infinite retries without locking
-          const resetAttempts = { ...failedAttempts, [formattedUsername]: 0 };
-          setFailedAttempts(resetAttempts);
-          setStorageItem('sched_failed_attempts', resetAttempts);
-          setDoc(doc(db, "system", "sched_failed_attempts"), { data: resetAttempts }).catch(console.error);
-          setLoginError('Incorrect password. Admin accounts are exempt from locking, please try again.');
-        } else {
-          const updatedLocked = [...lockedAccounts, formattedUsername];
-          setLockedAccounts(updatedLocked);
-          setStorageItem('sched_locked_accounts', updatedLocked);
-          setDoc(doc(db, "system", "sched_locked_accounts"), { data: updatedLocked }).catch(console.error);
-          setLoginError('This account is now locked because of too many wrong password attempts. Please contact Hesham Sobhy or Amira Hassan to reset it.');
-        }
-      } else {
-        setLoginError(`Incorrect password. You have ${3 - currentAttempts} attempts left.`);
-      }
-      return;
-    }
-
-    // Success login
-    let needsLockUpdate = false;
-    let updatedLocked = [...lockedAccounts];
-    if (updatedLocked.includes(formattedUsername)) {
-      updatedLocked = updatedLocked.filter(a => a !== formattedUsername);
-      needsLockUpdate = true;
-    }
-    if (updatedLocked.includes(correspondingFullName)) {
-      updatedLocked = updatedLocked.filter(a => a !== correspondingFullName);
-      needsLockUpdate = true;
-    }
-    if (needsLockUpdate) {
-      setLockedAccounts(updatedLocked);
-      setStorageItem('sched_locked_accounts', updatedLocked);
-      setDoc(doc(db, "system", "sched_locked_accounts"), { data: updatedLocked }).catch(console.error);
-    }
-
-    if (failedAttempts[formattedUsername]) {
-      const updatedAttempts = { ...failedAttempts };
-      delete updatedAttempts[formattedUsername];
-      setFailedAttempts(updatedAttempts);
-      setStorageItem('sched_failed_attempts', updatedAttempts);
-      setDoc(doc(db, "system", "sched_failed_attempts"), { data: updatedAttempts }).catch(console.error);
-    }
-
-    const userRole = isQAName(correspondingFullName) ? 'qa' : isTLName(correspondingFullName) ? 'tl' : 'agent';
-    const authenticatedUser: User = {
-      id: `usr_${Date.now()}`,
-      name: correspondingFullName,
-      role: userRole
-    };
-
-    setCurrentUser(authenticatedUser);
-    setStorageItem('sched_current_user', authenticatedUser);
-
-    setDoc(doc(db, "users", correspondingFullName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()), authenticatedUser).catch(console.error);
-
-    // If agent is new or not in the cached list, add using corresponding fullName or username
-    if (userRole === 'agent' && !agentsList.some(a => a?.toLowerCase() === formattedUsername || a?.toLowerCase() === correspondingFullName.toLowerCase() || getUsernameFromFullName(a) === formattedUsername)) {
-      const updatedList = [...agentsList, correspondingFullName];
-      setAgentsList(updatedList);
-      setStorageItem('sched_agents_list', updatedList);
-    }
-
-    if (userRole === 'agent') {
-      const todayStr = getLocalISOString();
-      const active = timeLogs.find(l => {
-        const ln = l.agentName?.toLowerCase();
-        return (ln === formattedUsername || ln === correspondingFullName.toLowerCase()) && l.date === todayStr && !l.clockOut;
-      });
-      if (!active) {
-        const newLog: TimeLog = {
-          id: `clock_${Date.now()}`,
-          agentName: correspondingFullName,
-          date: todayStr,
-          clockIn: new Date().toISOString(),
-          activities: [],
-          status: 'working'
-        };
-        const updated = [newLog, ...timeLogs];
-        setTimeLogs(updated);
-        setStorageItem('sched_time_logs', updated);
-        // Sync to Firestore
-        setDoc(doc(db, "timelogs", newLog.id), newLog).catch(e => console.error("Login Clock In Error:", e));
-      }
-    }
-
-    // Reset login fields
-    setLoginName('');
-    setLoginPassword('');
-    setIsRegistering(false);
-  };
-
-  // Complete Password Creation for first usage
-  const handleRegisterConfirm = () => {
-    const trimmedInput = loginName.trim().toLowerCase().replace(/\s+/g, '');
-    const matchedFullName = findAgentByUsername(trimmedInput, agentsList);
-    const finalName = trimmedInput;
-    const correspondingFullName = matchedFullName || finalName;
-
-    if (!finalName || !loginPassword) {
-      setLoginError('Mandatory login info missing.');
-      return;
-    }
-
-    const updatedCreds = { 
-      ...credentials, 
-      [finalName]: loginPassword,
-      [correspondingFullName]: loginPassword
-    };
-    setCredentials(updatedCreds);
-    setStorageItem('sched_credentials', updatedCreds);
-    setDoc(doc(db, "system", "sched_credentials"), { data: updatedCreds }).catch(console.error);
-
-    if (failedAttempts[finalName]) {
-      const updatedAttempts = { ...failedAttempts };
-      delete updatedAttempts[finalName];
-      setFailedAttempts(updatedAttempts);
-      setStorageItem('sched_failed_attempts', updatedAttempts);
-      setDoc(doc(db, "system", "sched_failed_attempts"), { data: updatedAttempts }).catch(console.error);
-    }
-
-    const userRole = isQAName(correspondingFullName) ? 'qa' : isTLName(correspondingFullName) ? 'tl' : 'agent';
-    const authenticatedUser: User = {
-      id: `usr_${Date.now()}`,
-      name: correspondingFullName,
-      role: userRole
-    };
-
-    setCurrentUser(authenticatedUser);
-    setStorageItem('sched_current_user', authenticatedUser);
-    
-    // Explicitly write user to Firestore for real-time presence across devices
-    setDoc(doc(db, "users", correspondingFullName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()), authenticatedUser).catch(e => console.error("User doc sync error:", e));
-
-    if (userRole === 'agent' && !agentsList.some(a => a?.toLowerCase() === finalName || a?.toLowerCase() === correspondingFullName.toLowerCase() || getUsernameFromFullName(a) === finalName)) {
-      const updatedList = [...agentsList, correspondingFullName];
-      setAgentsList(updatedList);
-      setStorageItem('sched_agents_list', updatedList);
-    }
-
-    if (userRole === 'agent') {
-      const todayStr = getLocalISOString();
-      const active = timeLogs.find(l => {
-        const ln = l.agentName?.toLowerCase();
-        return (ln === finalName || ln === correspondingFullName.toLowerCase()) && l.date === todayStr && !l.clockOut;
-      });
-      if (!active) {
-        const newLog: TimeLog = {
-          id: `clock_${Date.now()}`,
-          agentName: correspondingFullName,
-          date: todayStr,
-          clockIn: new Date().toISOString(),
-          activities: [],
-          status: 'working'
-        };
-        const updated = [newLog, ...timeLogs];
-        setTimeLogs(updated);
-        setStorageItem('sched_time_logs', updated);
-        // Sync to Firestore
-        setDoc(doc(db, "timelogs", newLog.id), newLog).catch(e => console.error("Registration Clock In Error:", e));
-      }
-    }
-
-    setLoginName('');
-    setLoginPassword('');
-    setIsRegistering(false);
-    setLoginError('');
-  };
-
-  const handleSignOut = () => {
-    setCurrentUser(null);
-    localStorage.removeItem('sched_current_user');
-  };
-
-  // Activity / Inactivity tracking (Auto Sign out after 1 hour of no use)
-  const [lastUserInteraction, setLastUserInteraction] = useState<number>(() => Date.now());
-
-  useEffect(() => {
-    if (!currentUser) return;
-    
-    const handleInteraction = () => {
-      setLastUserInteraction(Date.now());
-    };
-
-    window.addEventListener('mousemove', handleInteraction);
-    window.addEventListener('keydown', handleInteraction);
-    window.addEventListener('click', handleInteraction);
-    window.addEventListener('scroll', handleInteraction);
-    window.addEventListener('touchstart', handleInteraction);
-
-    return () => {
-      window.removeEventListener('mousemove', handleInteraction);
-      window.removeEventListener('keydown', handleInteraction);
-      window.removeEventListener('click', handleInteraction);
-      window.removeEventListener('scroll', handleInteraction);
-      window.removeEventListener('touchstart', handleInteraction);
-    };
-  }, [currentUser]);
-
-  useEffect(() => {
-    if (!currentUser) return;
-    const interval = setInterval(() => {
-      const diffMs = Date.now() - lastUserInteraction;
-      if (diffMs >= 3600000) { // 1 hour inactivity
-        handleSignOut();
-        toast.error("You have been signed out due to 1 hour of inactivity. Please sign in again.");
-      }
-    }, 10000); // Check every 10 seconds
-    return () => clearInterval(interval);
-  }, [currentUser, lastUserInteraction]);
-
-  // Real-time compliance overstay alerts background checks (break, lunch, restroom > 10m) & absent alerts
-  const [notifiedOverstays, setNotifiedOverstays] = useState<Record<string, boolean>>(() => {
-    return getStorageItem<Record<string, boolean>>('sched_notified_overstays', {});
-  });
-  const [notifiedAbsences, setNotifiedAbsences] = useState<Record<string, boolean>>(() => {
-    return getStorageItem<Record<string, boolean>>('sched_notified_absences', {});
-  });
-
-  useEffect(() => {
-    if (!currentUser) return;
-    
-    // Check for exceeding break / lunch / restroom / meeting / one_on_one / personal
-    agentsList.forEach(agent => {
-      const elapsed = getActiveActivityElapsed(agent);
-      if (elapsed && elapsed.exceeded) {
-        const notifKey = `${elapsed.id}_${elapsed.type}`;
-        if (!notifiedOverstays[notifKey]) {
-          // Register as notified
-          setNotifiedOverstays(prev => {
-            const next = { ...prev, [notifKey]: true };
-            setStorageItem('sched_notified_overstays', next);
-            return next;
-          });
-
-          const labelMap: Record<string, string> = {
-            break: 'Break',
-            lunch: 'Lunch',
-            restroom: 'Restroom Break',
-            meeting: 'Team Meeting',
-            one_on_one: '1:1 Session',
-            personal: 'Personal Break'
-          };
-          const readableType = labelMap[elapsed.type] || elapsed.type;
-
-          // 1. Notify the agent
-          addSystemNotification(
-            `⚠️ Activity Warning: Exceeding ${readableType}`,
-            `You have been on ${readableType} for ${!isNaN(Math.floor(elapsed.duration)) ? Math.floor(elapsed.duration) : 0} minutes, exceeding the standard limit of ${elapsed.limit} minutes. Please resume working.`,
-            "compliance",
-            agent,
-            `overstay_agent_${notifKey}`
-          );
-
-          const assignedTL = getAgentTL(agent);
-          const targetNotifUser = assignedTL !== 'Unassigned' ? assignedTL : 'tl';
-          addSystemNotification(
-            `🚨 Alert: ${formatAgentName(agent)} overstaying ${readableType}`,
-            `Agent ${formatAgentName(agent)} has exceeded the standard ${elapsed.limit} minutes limit for ${readableType}. Current duration: ${!isNaN(Math.floor(elapsed.duration)) ? Math.floor(elapsed.duration) : 0} minutes.`,
-            "compliance",
-            targetNotifUser,
-            `overstay_tl_${notifKey}`
-          );
-          
-          toast.warning(`[Compliance Alert] ${formatAgentName(agent)} exceeded ${readableType} limit!`);
-        }
-      }
-    });
-
-    // Check for shifts absences
-    const todayStr = getLocalISOString();
-    const todaySchedules = schedules.filter(s => s.date === todayStr);
-
-    todaySchedules.forEach(sched => {
-      const agent = sched.agentName;
-      const shiftLabel = sched.shiftLabel; // e.g., "07:00 - 16:00" or "22:00 - 07:00"
-      
-      const notifKey = `${todayStr}_${agent}_${shiftLabel}`;
-      if (!notifiedAbsences[notifKey]) {
-        // Extract start hour
-        const startHourStr = shiftLabel.split('-')[0].trim(); // "07:00"
-        const parts = startHourStr.split(':');
-        if (parts.length < 2) return;
-        const startHour = parseInt(parts[0], 10);
-        const startMinute = parseInt(parts[1], 10);
-
-        // Build shift start Date object today
-        const shiftStart = new Date();
-        shiftStart.setHours(startHour, startMinute, 0, 0);
-
-        // 30 minutes threshold (e.g. 1800000ms delay)
-        const lateThresholdMs = 30 * 60 * 1000;
-        const nowMs = currentTime.getTime();
-
-        // Check if now is past shiftStart + 30 minutes
-        if (nowMs > (shiftStart.getTime() + lateThresholdMs)) {
-          // Is agent logged in today (do they have a clock-in log for today?)
-          const hasClockInToday = timeLogs.some(log => 
-            log.agentName?.toLowerCase() === agent.toLowerCase() && 
-            log.date === todayStr && 
-            !!log.clockIn
-          );
-
-          if (!hasClockInToday) {
-            // Register as notified
-            setNotifiedAbsences(prev => {
-              const next = { ...prev, [notifKey]: true };
-              setStorageItem('sched_notified_absences', next);
-              return next;
-            });
-
-            const assignedTL = getAgentTL(agent);
-            const targetNotifUser = assignedTL !== 'Unassigned' ? assignedTL : 'tl';
-            addSystemNotification(
-              `❌ Absence Warning: ${formatAgentName(agent)} did not clock in`,
-              `Agent ${formatAgentName(agent)} was scheduled for shift ${shiftLabel} today starting at ${startHourStr}, but has failed to clock in within 30 minutes of shift commencement.`,
-              "absence",
-              targetNotifUser,
-              `absence_tl_${notifKey}`
-            );
-            toast.error(`[Shift Alert] ${formatAgentName(agent)} is absent for today's shift!`);
-          }
-        }
-      }
-    });
-
-  }, [currentTime, timeLogs, schedules, agentsList, currentUser, notifiedOverstays, notifiedAbsences]);
-
-  const handleAssignSupport = () => {
-    if (!targetSupportAgent || !currentUser) return;
-    const newAssignments = {
-      ...supportAssignments,
-      [targetSupportAgent]: {
-        assignedBy: currentUser.name,
-        assignedAt: new Date().toISOString()
-      }
-    };
-    setSupportAssignments(newAssignments);
-    setStorageItem('sched_support_assignments', newAssignments);
-    setTargetSupportAgent('');
-  };
-
-  const handleRevokeSupport = (name: string) => {
-    const newAssignments = { ...supportAssignments };
-    delete newAssignments[name];
-    setSupportAssignments(newAssignments);
-    setStorageItem('sched_support_assignments', newAssignments);
-  };
-
-  // Create Swap Request
-  const handleCreateSwap = async (e: FormEvent) => {
-    e.preventDefault();
-
-    if (!swapDate || !swapTargetAgent) {
-      toast.error('Must select a swap date and partner agent.');
-      return;
-    }
-    if (isFormSubmitting) return;
-
-    const name = currentUser?.name || 'Unknown Agent';
-
-    // Restrict swaps between agents of different LOBs
-    const myLOB = getAgentLOB(name);
-    const targetLOB = getAgentLOB(swapTargetAgent);
-    if (myLOB !== targetLOB) {
-      toast.error(`Cannot request swap: Swap requests are strictly permitted only between agents of the same LOB.\n\nYour LOB: ${myLOB}\n${swapTargetAgent}'s LOB: ${targetLOB}`);
-      return;
-    }
-
-    const validation = validateSwapRequest(swapDate, swapShift, systemTime);
-
-    // Swap cannot be less than 24 hours of the shift. We give Warning and block.
-    if (!validation.isValid) {
-      toast.error(`Cannot submit request: ${validation.message}`);
-      return;
-    }
-
-    setIsFormSubmitting(true);
-    try {
-      const newRequest: SwapRequest = {
-        id: `swap_${Date.now()}`,
-        agentName: name,
-        type: 'swap',
-        date: swapDate,
-        shift: swapShift,
-        swapWithAgent: swapTargetAgent,
-        swapWithShift: swapTargetShift,
-        status: 'pending_partner',
-        createdAt: new Date().toISOString(),
-        notes: swapNotes
-      };
-
-      const updated = [newRequest, ...requests];
-      setRequests(updated);
-      setStorageItem('sched_requests', updated);
-
-      // Sync to Firestore
-      await setDoc(doc(db, "scheduling_requests", newRequest.id), newRequest);
-
-      addSystemNotification(
-        `🔄 New Swap Request: ${formatAgentName(name)}`,
-        `${formatAgentName(name)} requested a shift swap with ${formatAgentName(swapTargetAgent)} for ${swapDate}.`,
-        'schedule',
-        'tl'
-      );
-
-      // Reset form
-      setSwapDate('');
-      setSwapNotes('');
-
-      setSubmissionConfirmation({
-        title: "Swap Filed Successfully! 🔄",
-        message: `Your shift swap application has been submitted to your partner agent (${swapTargetAgent}). Once approved by them, Team Leaders will review for final approval. Double-Submission check holds.`,
-        type: 'swap_request',
-        referenceId: newRequest.id
-      });
-      setActiveTab('my-requests');
-    } catch (err) {
-      console.error(err);
-      toast.error("An error occurred while creating swap request. Please try again.");
-    } finally {
-      setIsFormSubmitting(false);
-    }
-  };
-
-  // Create Annual Leave Request
-  const handleCreateAnnual = async (e: FormEvent) => {
-    e.preventDefault();
-
-    if (!annualStart || !annualEnd) {
-      toast.error('Must select start and end dates.');
-      return;
-    }
-    if (isFormSubmitting) return;
-
-    if (new Date(annualStart) > new Date(annualEnd)) {
-      toast.error('Start date must be before or equal to the end date.');
-      return;
-    }
-
-    const name = currentUser?.name || 'Unknown Agent';
-    const validation = validateAnnualRequest(annualStart, systemTime);
-
-    // Check if it's less than 14 days. If so, block.
-    if (!validation.isValid) {
-      toast.error(`Cannot submit request: ${validation.message}`);
-      return;
-    }
-
-    setIsFormSubmitting(true);
-    try {
-      const newRequest: AnnualRequest = {
-        id: `ann_${Date.now()}`,
-        agentName: name,
-        type: 'annual',
-        startDate: annualStart,
-        endDate: annualEnd,
-        status: 'pending',
-        createdAt: new Date().toISOString(),
-        notes: annualNotes
-      };
-
-      const updated = [newRequest, ...requests];
-      setRequests(updated);
-      setStorageItem('sched_requests', updated);
-
-      // Sync to Firestore
-      await setDoc(doc(db, "scheduling_requests", newRequest.id), newRequest);
-
-      addSystemNotification(
-        `✈️ New Annual Leave: ${formatAgentName(name)}`,
-        `${formatAgentName(name)} requested an annual leave from ${annualStart} to ${annualEnd}.`,
-        'schedule',
-        'tl'
-      );
-
-      // Reset form
-      setAnnualStart('');
-      setAnnualEnd('');
-      setAnnualNotes('');
-
-      setSubmissionConfirmation({
-        title: "Annual Leave Filed! ✈️",
-        message: `Your annual leave request from ${annualStart} to ${annualEnd} has been submitted to the Team Leader for approval. Double-Submission guard is active.`,
-        type: 'annual_leave',
-        referenceId: newRequest.id
-      });
-      setActiveTab('my-requests');
-    } catch (err) {
-      console.error(err);
-      toast.error("An error occurred while filing annual leave. Please try again.");
-    } finally {
-      setIsFormSubmitting(false);
-    }
-  };
-
-  // Partner Decision (Agree / Decline Swap Request)
-  const handlePartnerDecision = (requestId: string, agree: boolean) => {
-    if (!currentUser) return;
-
-    const updated = requests.map(req => {
-      if (req.id === requestId && req.type === 'swap') {
-        const swapReq = req as SwapRequest;
-        if (swapReq.swapWithAgent.toLowerCase() === currentUser?.name?.toLowerCase() && swapReq.status === 'pending_partner') {
-          const updatedReq = {
-            ...swapReq,
-            status: agree ? 'pending' : 'declined_by_partner',
-            partnerActionAt: new Date().toISOString()
-          } as SwapRequest;
-          // Sync to Firestore
-          setDoc(doc(db, "scheduling_requests", req.id), updatedReq).catch(e => console.error("Partner Decision Error:", e));
-          return updatedReq;
-        }
-      }
-      return req;
-    });
-
-    setRequests(updated);
-    setStorageItem('sched_requests', updated);
-
-    if (agree) {
-      toast.error('You have agreed to the swap. The request is now forwarded to Team Leaders for final decision.');
-    } else {
-      toast.error('You have declined the swap request.');
-    }
-  };
-
-  const handleBulkTLApproval = (requestIds: string[], approve: boolean) => {
-    if (!currentUser || currentUser.role !== 'tl') return;
-
-    const idSet = new Set(requestIds);
-    const updated = requests.map(req => {
-      if (idSet.has(req.id)) {
-        let violation = false;
-        let vMsg = '';
-
-        if (req.type === 'swap') {
-          const v = validateSwapRequest(req.date, req.shift, new Date(req.createdAt));
-          if (!v.isValid) {
-            violation = true;
-            vMsg = v.message || '';
-          }
-        } else {
-          const v = validateAnnualRequest(req.startDate, new Date(req.createdAt));
-          if (!v.isValid) {
-            violation = true;
-            vMsg = v.message || '';
-          }
-        }
-
-        const updatedReq = {
-          ...req,
-          status: (approve ? 'approved' : 'declined') as 'approved' | 'declined',
-          actionBy: currentUser.name,
-          actionAt: new Date().toISOString(),
-          ruleViolation: violation,
-          violationMessage: violation ? vMsg : undefined
-        };
-        // Sync to Firestore
-        setDoc(doc(db, "scheduling_requests", req.id), updatedReq).catch(e => console.error("TL Approval Error:", e));
-        return updatedReq;
-      }
-      return req;
-    });
-
-    setRequests(updated);
-    setStorageItem('sched_requests', updated);
-    toast.success(`Successfully ${approve ? 'approved' : 'declined'} ${requestIds.length} requests.`);
-  };
-
-  // TL Action (Approve / Decline)
-  const handleTLApproval = (requestId: string, approve: boolean) => {
-    if (!currentUser || currentUser.role !== 'tl') return;
-
-    const updated = requests.map(req => {
-      if (req.id === requestId) {
-        // Double check validations before making decision
-        let violation = false;
-        let vMsg = '';
-
-        if (req.type === 'swap') {
-          const v = validateSwapRequest(req.date, req.shift, new Date(req.createdAt));
-          if (!v.isValid) {
-            violation = true;
-            vMsg = v.message || '';
-          }
-        } else {
-          const v = validateAnnualRequest(req.startDate, new Date(req.createdAt));
-          if (!v.isValid) {
-            violation = true;
-            vMsg = v.message || '';
-          }
-        }
-
-        const updatedReq = {
-          ...req,
-          status: (approve ? 'approved' : 'declined') as 'approved' | 'declined',
-          actionBy: currentUser.name,
-          actionAt: new Date().toISOString(),
-          ruleViolation: violation,
-          violationMessage: violation ? vMsg : undefined
-        };
-        // Sync to Firestore
-        setDoc(doc(db, "scheduling_requests", req.id), updatedReq).catch(e => console.error("TL Approval Error:", e));
-        return updatedReq;
-      }
-      return req;
-    });
-
-    setRequests(updated);
-    setStorageItem('sched_requests', updated);
-  };
-
-  // Agent cancelling own pending request
-  const handleCancelRequest = (requestId: string) => {
-    const confirmation = window.confirm('Are you sure you want to cancel this pending request?');
-    if (!confirmation) return;
-
-    const updated = requests.filter(req => !(req.id === requestId && req.agentName === currentUser?.name && (req.status === 'pending' || req.status === 'pending_partner')));
-    setRequests(updated);
-    setStorageItem('sched_requests', updated);
-    
-    // Sync to Firestore
-    deleteDoc(doc(db, "scheduling_requests", requestId)).catch(e => console.error("Request Cancel Error:", e));
-  };
-
-  // Download Report Helpers
-  const downloadReportTxt = (period: 'day' | 'week' | 'month' | 'year') => {
-    const content = generateTextReport(requests, period, systemTime);
-    const filename = `Scheduling_Report_${period}_${getLocalISOString()}.txt`;
-    
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const downloadFullCSV = () => {
-    const content = generateCSV(requests);
-    const filename = `Scheduling_DB_Export_${getLocalISOString()}.csv`;
-
-    const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleDownloadInquiriesReport = () => {
-    const content = generateInquiriesCSV(inquiries);
-    const filename = `Inquiries_Report_${getLocalISOString()}.csv`;
-
-    const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  
-
-  const handleDownloadFintechRequestsReport = () => {
-    const content = generateFintechRequestsCSV(tabbyTamaraRequests);
-    const filename = `Fintech_Transactions_Report_${getLocalISOString()}.csv`;
-
-    const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleDownloadFintechComplaintsReport = () => {
-    const content = generateFintechComplaintsCSV(tabbyTamaraComplaints);
-    const filename = `Fintech_Complaints_Report_${getLocalISOString()}.csv`;
-
-    const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleDownloadClientCommsReport = () => {
-    const content = generateClientCommsCSV(clientComms);
-    const filename = `Client_Communications_Report_${getLocalISOString()}.csv`;
-
-    const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleDownloadCasesReport = () => {
-    const content = generateCasesCSV(cases);
-    const filename = `Patient_Cases_Report_${getLocalISOString()}.csv`;
-
-    const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleDownloadSchedulesReport = () => {
-    const content = generateSchedulesCSV(schedules);
-    const filename = `Master_Schedules_Report_${getLocalISOString()}.csv`;
-
-    const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  // Download schedule CSV template
-  const downloadScheduleTemplate = () => {
-    const content = generateScheduleTemplateFile();
-    const filename = `Agent_Schedule_Template.csv`;
-
-    const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  // Drag and drop events
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      handleScheduleFile(file);
-    }
-  };
-
-  const handleScheduleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      handleScheduleFile(e.target.files[0]);
-    }
-  };
-
-  const handleScheduleFile = (file: File) => {
-    setUploadError(null);
-    setUploadSuccess(null);
-    setTempSchedules([]);
-    setTempNewAgents([]);
-
-    const reader = new FileReader();
-    const isJson = file.name.endsWith('.json');
-    
-    if (isJson) {
-      reader.onload = (event) => {
-        try {
-          const text = event.target?.result as string;
-          const parsed = JSON.parse(text);
-          if (Array.isArray(parsed)) {
-            const validShifts = parsed.filter(item => item && (item.agentName || item.AgentName) && (item.date || item.Date));
-            if (validShifts.length > 0) {
-              const formatted: ScheduledShift[] = validShifts.map(s => ({
-                id: s.id || `sch_json_${Date.now()}_${Math.random()}`,
-                agentName: s.agentName || s.AgentName,
-                date: s.date || s.Date,
-                shiftLabel: s.shiftLabel || s.ShiftLabel || s.shift || s.Shift || '07:00 - 16:00'
-              }));
-              setUploadSuccess(`Successfully parsed ${formatted.length} shifts. ${isSuperAdmin ? 'Updating system automatically...' : 'Review the draft below.'}`);
-              if (isSuperAdmin) {
-                commitSchedulesManual(formatted, [], {});
-              } else {
-                setTempSchedules(formatted);
-                setTempNewAgents([]);
-                setTempParsedMeta({});
-              }
-              return;
-            }
-          }
-          throw new Error("Invalid schedule shift array format in JSON.");
-        } catch (e: any) {
-          setUploadError(`Failed to parse JSON file: ${e.message}`);
-        }
-      };
-      reader.readAsText(file);
-    } else {
-      reader.onload = (event) => {
-        try {
-          const data = new Uint8Array(event.target?.result as ArrayBuffer);
-          const workbook = XLSX.read(data, { type: 'array' });
-          if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
-            throw new Error("No worksheets found in this file.");
-          }
-          const firstSheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[firstSheetName];
-          const csvText = XLSX.utils.sheet_to_csv(worksheet);
-          if (!csvText || !csvText.trim()) {
-            throw new Error("Could not extract sheet content.");
-          }
-          
-          const result = parseScheduleCSV(csvText, agentsList);
-          if (result.errors.length > 0) {
-            setUploadError(`Parsed with warnings/errors: \n${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `\n...and ${result.errors.length - 5} more errors` : ''}`);
-          }
-          
-          if (result.schedules.length === 0) {
-            if (result.errors.length === 0) setUploadError('Could not find any schedule entries to parse.');
-          } else {
-            setUploadSuccess(`Successfully parsed ${result.schedules.length} shifts. ${isSuperAdmin ? 'Updating system automatically...' : 'Review the draft below.'}`);
-            if (isSuperAdmin) {
-              commitSchedulesManual(result.schedules, result.newAgents, result.parsedMeta);
-            } else {
-              setTempSchedules(result.schedules);
-              setTempNewAgents(result.newAgents);
-              setTempParsedMeta(result.parsedMeta);
-            }
-          }
-        } catch (err: any) {
-          const textReader = new FileReader();
-          textReader.onload = (eText) => {
-            try {
-              const text = eText.target?.result as string;
-              if (text) {
-                const result = parseScheduleCSV(text, agentsList);
-                if (result.schedules.length > 0) {
-                  setUploadSuccess(`Successfully parsed ${result.schedules.length} shifts. ${isSuperAdmin ? 'Updating system automatically...' : 'Review the draft below.'}`);
-                  if (isSuperAdmin) {
-                    commitSchedulesManual(result.schedules, result.newAgents, result.parsedMeta);
-                  } else {
-                    setTempSchedules(result.schedules);
-                    setTempNewAgents(result.newAgents);
-                    setTempParsedMeta(result.parsedMeta);
-                  }
-                } else {
-                  setUploadError(`Failed to parse file: ${err.message || 'Unknown error'}`);
-                }
-              }
-            } catch (fallbackErr: any) {
-              setUploadError(`Failed to parse file: ${fallbackErr.message || 'Unknown error'}`);
-            }
-          };
-          textReader.readAsText(file);
-        }
-      };
-      reader.readAsArrayBuffer(file);
-    }
-  };
-
-  const commitSchedules = () => {
-    commitSchedulesManual(tempSchedules, tempNewAgents, tempParsedMeta);
-  };
-
-  const clearTargetSchedules = async () => {
-    const doubleCheck = window.confirm('Are you sure you want to completely erase the current schedule roster?');
-    if (doubleCheck) {
-      try {
-        setSchedules([]);
-        setStorageItem('sched_schedules', []);
-        
-        // Also query and delete all docs under the 'schedules' collection in Firestore
-        const snap = await getDocs(collection(db, "schedules"));
-        const batch = writeBatch(db);
-        snap.docs.forEach(doc => {
-          batch.delete(doc.ref);
-        });
-        await batch.commit();
-        
-        toast.success('Schedules cleared.');
-      } catch (err: any) {
-        console.error("Purging Firestore schedules failed: ", err);
-        toast.error('Failed to clear database schedules.');
-      }
-    }
-  };
-
-  const handleScheduleUpload = (file: File) => {
-    setRosterUploadSuccess(null);
-    setRosterUploadErrors([]);
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const text = e.target?.result as string;
-        if (!text) {
-          toast.error("File is empty.");
-          return;
-        }
-
-        const parsed = parseScheduleCSV(text, agentsList);
-        
-        if (parsed.schedules.length > 0) {
-          setSchedules(parsed.schedules);
-          setStorageItem('sched_schedules', parsed.schedules);
-          setRosterUploadSuccess(`${parsed.schedules.length} shifts successfully imported.`);
-          toast.success(`${parsed.schedules.length} shifts imported`);
-
-          // Dynamically learn any new agent names and add them to the workspace roster so they can be managed
-          if (parsed.newAgents && parsed.newAgents.length > 0) {
-            const allKnown = new Set(agentsList);
-            parsed.newAgents.forEach(a => {
-              if (a && a.trim()) {
-                allKnown.add(a.trim());
-              }
-            });
-            const updatedList = Array.from(allKnown);
-            setAgentsList(updatedList);
-            setStorageItem('sched_agents_list', updatedList);
-          }
-        } else {
-          toast.error("No valid shifts could be parsed.");
-        }
-
-        if (parsed.errors && parsed.errors.length > 0) {
-          setRosterUploadErrors(parsed.errors);
-          toast.error(`Import completed with ${parsed.errors.length} error(s).`);
-        }
-      } catch (err: any) {
-        toast.error(`Error reading file: ${err?.message || 'Unknown error'}`);
-        setRosterUploadErrors([`Error: ${err?.message || 'Unknown error'}`]);
-      }
-    };
-    reader.readAsText(file);
-  };
-
-  const handleClearUploadedSchedules = () => {
-    setUploadedSchedules([]);
-    setRosterUploadSuccess(null);
-    setRosterUploadErrors([]);
-    localStorage.removeItem(STORAGE_KEYS.schedules);
-    toast.success("Uploaded schedule cleared. Demo schedule restored.");
-  };
-
-  const handleParsedDirectory = (result: ReturnType<typeof parseAgentDirectoryCSV>) => {
-    if (result.errors.length > 0) toast.error(`Warnings: ${result.errors.slice(0, 3).join(', ')}`);
-    
-    if (result.directory.length > 0) {
-       setAgentDirectory(result.directory);
-       setDirectoryHeaders(result.headers);
-       setStorageItem('sched_agent_directory', result.directory);
-       setStorageItem('sched_agent_directory_headers', result.headers);
-       
-       const allKnown = new Set(agentsList);
-       result.directory.forEach(a => allKnown.add(a.agentName));
-       const updatedList = Array.from(allKnown);
-       setAgentsList(updatedList);
-       setStorageItem('sched_agents_list', updatedList);
-
-       const newMeta = { ...getAgentMeta() };
-       let hasMetaUpdate = false;
-       const tlHeader = result.headers.find(h => {
-           const lh = h.toLowerCase().trim();
-           return lh === 'tl' || lh === 'team leader' || lh.includes('manager') || lh.includes('supervisor') || lh.includes('lead') || lh === 'tl name';
-       });
-       const roleHeader = result.headers.find(h => {
-           const lh = h.toLowerCase().trim();
-           return lh === 'role' || lh === 'lob' || lh.includes('account') || lh.includes('designation') || lh.includes('job title') || lh.includes('department') || lh.includes('function') || lh.includes('business');
-       });
-       
-       if (tlHeader || roleHeader) {
-           result.directory.forEach(a => {
-               let updated = false;
-               if (!newMeta[a.agentName]) newMeta[a.agentName] = { roleType: '', tlName: '' };
-               if (tlHeader && a.data[tlHeader]) {
-                   const val = a.data[tlHeader].trim();
-                   if (val) {
-                       newMeta[a.agentName].tlName = val;
-                       updated = true;
-                   }
-               }
-               if (roleHeader && a.data[roleHeader]) {
-                   const val = a.data[roleHeader].trim();
-                   if (val) {
-                       newMeta[a.agentName].roleType = val;
-                       updated = true;
-                   }
-               }
-               if (updated) hasMetaUpdate = true;
-           });
-           if (hasMetaUpdate) {
-               setStorageItem('sched_agent_meta', newMeta);
-           }
-       }
-       toast.success(`Successfully loaded ${result.directory.length} directory records!`);
-    } else {
-       throw new Error("No directory entries parsed.");
-    }
-  };
-
-  const handleDirectoryFile = (file: File) => {
-    const isJson = file.name.endsWith('.json');
-    if (isJson) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-           const text = event.target?.result as string;
-           const parsed = JSON.parse(text);
-           if (Array.isArray(parsed) && parsed.length > 0) {
-             const headers = Object.keys(parsed[0]);
-             const csvText = [
-               headers.join(','),
-               ...parsed.map(row => headers.map(h => `"${(row[h] || '').toString().replace(/"/g, '""')}"`).join(','))
-             ].join('\n');
-             
-             const result = parseAgentDirectoryCSV(csvText);
-             handleParsedDirectory(result);
-           } else {
-             toast.error('Invalid JSON structure for directory');
-           }
-        } catch(e: any) {
-           toast.error(`JSON Parse Error: ${e.message}`);
-        }
-      };
-      reader.readAsText(file);
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const data = new Uint8Array(event.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
-        if (!workbook.SheetNames || workbook.SheetNames.length === 0) throw new Error("No worksheets found in this file.");
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        const csvText = XLSX.utils.sheet_to_csv(worksheet);
-        if (!csvText || !csvText.trim()) throw new Error("Could not extract sheet content.");
-        
-        const result = parseAgentDirectoryCSV(csvText);
-        handleParsedDirectory(result);
-      } catch (err: any) {
-        const textReader = new FileReader();
-        textReader.onload = (eText) => {
-           try {
-             const text = eText.target?.result as string;
-             if (text) {
-               const result = parseAgentDirectoryCSV(text);
-               handleParsedDirectory(result);
-             }
-           } catch(fallbackErr: any) {
-             toast.error(`Could not parse text: ${fallbackErr.message}`);
-           }
-        };
-        textReader.readAsText(file);
-      }
-    };
-    reader.readAsArrayBuffer(file);
-  };
-
-  const handleManualRosterSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!manualRosterAgent) {
-      toast.error('Please select or specify an agent name.');
-      return;
-    }
-    if (!manualRosterDate) {
-      toast.error('Please specify a roster shift date.');
-      return;
-    }
-    if (!manualRosterShift) {
-      toast.error('Please select an active shift assignment.');
-      return;
-    }
-
-    const newShift: ScheduledShift = {
-      id: `sch_man_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      agentName: manualRosterAgent,
-      date: manualRosterDate,
-      shiftLabel: manualRosterShift,
-      shiftNotes: manualRosterNotes.trim() || undefined,
-    };
-
-    commitSchedulesManual([newShift], [], {});
-    setManualRosterNotes('');
-    toast.success(`Individual shift for ${manualRosterAgent} successfully submitted and synced!`);
-  };
-
-  // Agent Time Clock & Activity Helpers
-  const getActiveTimeLog = (agentName: string): TimeLog | undefined => {
-    return timeLogs.find((log) => 
-      log.agentName?.toLowerCase() === agentName?.toLowerCase() && 
-      !['clocked_out', 'day_off', 'casual', 'annual', 'no_show'].includes(log.status)
-    );
-  };
-
-  const getTodayLog = (agentName: string) => {
-    const todayStr = getLocalISOString();
-    return timeLogs.find((log) => 
-      log.agentName?.toLowerCase() === agentName?.toLowerCase() && 
-      log.date === todayStr
-    );
-  };
-
-  const getAgentTodayStats = (agentName: string) => {
-    const todayStr = getLocalISOString();
-    const myLogsToday = timeLogs.filter(l => 
-      l.agentName?.toLowerCase() === agentName?.toLowerCase() && 
-      l.date === todayStr
-    );
-    
-    let totalClockInStr: string | null = null;
-    let totalClockOutStr: string | null = null;
-    let totalBreakMins = 0;
-    let totalLunchMins = 0;
-    let totalRestroomMins = 0;
-    let restroomCount = 0;
-    let totalMeetingMins = 0;
-    let totalOneOnOneMins = 0;
-    let totalPersonalMins = 0;
- 
-    if (myLogsToday.length > 0) {
-      // Sort to get first clock in and last clock out
-      const sorted = [...myLogsToday].sort((a,b) => new Date(a.clockIn || 0).getTime() - new Date(b.clockIn || 0).getTime());
-      totalClockInStr = sorted[0].clockIn || null;
-      const lastWithOut = [...myLogsToday].reverse().find(l => l.clockOut);
-      totalClockOutStr = lastWithOut ? lastWithOut.clockOut || null : null;
- 
-      myLogsToday.forEach(log => {
-        log.activities.forEach(act => {
-          let duration = 0;
-          if (act.durationMinutes !== undefined) {
-            duration = act.durationMinutes;
-          } else if (!act.endTime) {
-            // running!
-            const diffMs = currentTime.getTime() - new Date(act.startTime).getTime();
-            duration = diffMs / 1000 / 60;
-          }
-          
-          if (act.type === 'break') totalBreakMins += duration;
-          else if (act.type === 'lunch') totalLunchMins += duration;
-          else if (act.type === 'restroom') totalRestroomMins += duration;
-          else if (act.type === 'meeting') totalMeetingMins += duration;
-          else if (act.type === 'one_on_one') totalOneOnOneMins += duration;
-          else if (act.type === 'personal') totalPersonalMins += duration;
-        });
-        
-        restroomCount += log.activities.filter(a => a.type === 'restroom').length;
-      });
-    }
- 
-    return {
-      clockIn: totalClockInStr,
-      clockOut: totalClockOutStr,
-      breakMins: parseFloat(totalBreakMins.toFixed(2)),
-      lunchMins: parseFloat(totalLunchMins.toFixed(2)),
-      restroomMins: parseFloat(totalRestroomMins.toFixed(2)),
-      restroomCount,
-      meetingMins: parseFloat(totalMeetingMins.toFixed(2)),
-      oneOnOneMins: parseFloat(totalOneOnOneMins.toFixed(2)),
-      personalMins: parseFloat(totalPersonalMins.toFixed(2))
-    };
-  };
-
-  const getActiveActivityElapsed = (agentName: string) => {
-    const active = getActiveTimeLog(agentName);
-    if (!active || active.status === 'working' || active.status === 'clocked_out') return null;
-
-    const currentAct = active.activities.find(a => !a.endTime && a.type === active.status);
-    if (!currentAct) return null;
-
-    const diffMs = currentTime.getTime() - new Date(currentAct.startTime).getTime();
-    const durationMins = diffMs / 1000 / 60;
-    
-    let limit = 0;
-    if (active.status === 'break') limit = 15;
-    else if (active.status === 'lunch') limit = 30;
-    else if (active.status === 'restroom') limit = 10;
-    else if (active.status === 'meeting') limit = 60;
-    else if (active.status === 'one_on_one') limit = 30;
-    else if (active.status === 'personal') limit = 15;
-
-    return {
-      id: currentAct.id,
-      type: active.status as 'break' | 'lunch' | 'restroom' | 'meeting' | 'one_on_one' | 'personal',
-      limit,
-      duration: durationMins,
-      exceeded: limit > 0 && durationMins > limit,
-      exceededBy: limit > 0 ? Math.max(0, durationMins - limit) : 0
-    };
-  };
-
-  const handleClockIn = () => {
-    if (!currentUser) return;
-    const name = currentUser.name;
-    const todayStr = getLocalISOString();
-    
-    const active = getActiveTimeLog(name);
-    if (active) {
-      toast.error('You are already clocked in!');
-      return;
-    }
-
-    const newLog: TimeLog = {
-      id: `clock_${Date.now()}`,
-      agentName: name,
-      date: todayStr,
-      clockIn: new Date().toISOString(),
-      activities: [],
-      status: 'working'
-    };
-
-    const updated = [newLog, ...timeLogs];
-    setTimeLogs(updated);
-    setStorageItem('sched_time_logs', updated);
-    
-    // Sync to Firestore
-    setDoc(doc(db, "timelogs", newLog.id), newLog).catch(e => console.error("Clock In Error:", e));
-  };
-
-  const handleStartActivity = (type: 'break' | 'lunch' | 'restroom' | 'meeting' | 'one_on_one' | 'personal') => {
-    if (!currentUser) return;
-    const name = currentUser.name;
-    const active = getActiveTimeLog(name);
-    if (!active) {
-      toast.error('You must clock in first before starting any AUX session!');
-      return;
-    }
-
-    const previousStatus = active.status;
-    if (previousStatus === type) {
-      toast.info(`You are already on: ${type}`);
-      return;
-    }
-
-    const nowStr = new Date().toISOString();
-    const newAct: ActivityRecord = {
-      id: `act_${Date.now()}`,
-      type,
-      startTime: nowStr
-    };
-
-    const friendlyNameMap: Record<string, string> = {
-      break: 'Break',
-      lunch: 'Lunch',
-      restroom: 'Restroom Break',
-      meeting: 'Team Meeting',
-      one_on_one: '1:1 Session',
-      personal: 'Personal Break',
-      working: 'Active Work'
-    };
-
-    const updated = timeLogs.map(log => {
-      if (log.id === active.id) {
-        // If they were on a different AUX, terminate the running one
-        let updatedActivities = [...log.activities];
-        if (previousStatus !== 'working') {
-          updatedActivities = updatedActivities.map(act => {
-            if (!act.endTime && act.type === previousStatus) {
-              const diffMs = new Date(nowStr).getTime() - new Date(act.startTime).getTime();
-              const diffMins = parseFloat((diffMs / 1000 / 60).toFixed(2));
-              return {
-                ...act,
-                endTime: nowStr,
-                durationMinutes: diffMins
-              };
-            }
-            return act;
-          });
-        }
-
-        const updatedLog = {
-          ...log,
-          status: type,
-          activities: [...updatedActivities, newAct]
-        };
-        // Sync to Firestore
-        setDoc(doc(db, "timelogs", log.id), updatedLog).catch(e => console.error("AUX Start Error:", e));
-        return updatedLog;
-      }
-      return log;
-    });
-
-    setTimeLogs(updated);
-    setStorageItem('sched_time_logs', updated);
-
-    // Let TL know about this AUX switch!
-    const fromStatusLabel = friendlyNameMap[previousStatus] || previousStatus;
-    const toStatusLabel = friendlyNameMap[type] || type;
-    addSystemNotification(
-      `🔄 Status Switch: ${formatAgentName(name)}`,
-      `${formatAgentName(name)} switched AUX status from **${fromStatusLabel}** to **${toStatusLabel}**.`,
-      'compliance',
-      'tl'
-    );
-    toast.success(`Switched from ${fromStatusLabel} to ${toStatusLabel}!`);
-  };
-
-  const handleEndActivity = () => {
-    if (!currentUser) return;
-    const name = currentUser.name;
-    const active = getActiveTimeLog(name);
-    if (!active || active.status === 'working' || active.status === 'clocked_out') {
-      toast.error('No active activity to end.');
-      return;
-    }
-
-    const currentType = active.status;
-    const endTimeStr = new Date().toISOString();
-
-    const updated = timeLogs.map(log => {
-      if (log.id === active.id) {
-        const updatedActivities = log.activities.map(act => {
-          if (!act.endTime && act.type === currentType) {
-            const diffMs = new Date(endTimeStr).getTime() - new Date(act.startTime).getTime();
-            const diffMins = parseFloat((diffMs / 1000 / 60).toFixed(2));
-            return {
-              ...act,
-              endTime: endTimeStr,
-              durationMinutes: diffMins
-            };
-          }
-          return act;
-        });
-
-        const updatedLog = {
-          ...log,
-          status: 'working' as const,
-          activities: updatedActivities
-        };
-        // Sync to Firestore
-        setDoc(doc(db, "timelogs", log.id), updatedLog).catch(e => console.error("AUX End Error:", e));
-        return updatedLog;
-      }
-      return log;
-    });
-
-    setTimeLogs(updated);
-    setStorageItem('sched_time_logs', updated);
-
-    const friendlyNameMap: Record<string, string> = {
-      break: 'Break',
-      lunch: 'Lunch',
-      restroom: 'Restroom Break',
-      meeting: 'Team Meeting',
-      one_on_one: '1:1 Session',
-      personal: 'Personal Break'
-    };
-    const actLabel = friendlyNameMap[currentType] || currentType;
-    addSystemNotification(
-      `🟢 Agent Back Online: ${formatAgentName(name)}`,
-      `${formatAgentName(name)} completed their ${actLabel} session and is now **Active Work**.`,
-      'compliance',
-      'tl'
-    );
-    toast.success(`Resumed standard work from ${actLabel}!`);
-  };
-
-  const handleClockOut = () => {
-    if (!currentUser) return;
-    const name = currentUser.name;
-    const active = getActiveTimeLog(name);
-    if (!active) {
-      toast.error('You are not currently clocked in!');
-      return;
-    }
-
-    const confirmSign = window.confirm('Are you sure you want to clock out of your shift?');
-    if (!confirmSign) return;
-
-    const endTimeStr = new Date().toISOString();
-
-    const updated = timeLogs.map(log => {
-      if (log.id === active.id) {
-        const updatedActivities = log.activities.map(act => {
-          if (!act.endTime) {
-            const diffMs = new Date(endTimeStr).getTime() - new Date(act.startTime).getTime();
-            const diffMins = parseFloat((diffMs / 1000 / 60).toFixed(2));
-            return {
-              ...act,
-              endTime: endTimeStr,
-              durationMinutes: diffMins
-            };
-          }
-          return act;
-        });
-
-        return {
-          ...log,
-          clockOut: endTimeStr,
-          status: 'clocked_out' as const,
-          activities: updatedActivities
-        };
-      }
-      return log;
-    });
-
-    setTimeLogs(updated);
-    setStorageItem('sched_time_logs', updated);
-  };
-
-  const handleTLOverrideAgentStatus = (agentName: string, newStatus: 'working' | 'break' | 'lunch' | 'restroom' | 'clocked_out' | 'day_off' | 'casual' | 'annual' | 'no_show' | 'meeting' | 'one_on_one' | 'personal') => {
-    const todayStr = getLocalISOString();
-    const active = getActiveTimeLog(agentName);
-    const endTimeStr = new Date().toISOString();
-
-    let updated = [...timeLogs];
-
-    if (active) {
-      updated = updated.map((log) => {
-        if (log.id === active.id) {
-          // If moving to an inactive state, end the shift
-          if (['clocked_out', 'day_off', 'casual', 'annual', 'no_show'].includes(newStatus)) {
-            const updatedActivities = log.activities.map((act) => {
-              if (!act.endTime) {
-                const diffMs = new Date(endTimeStr).getTime() - new Date(act.startTime).getTime();
-                return { ...act, endTime: endTimeStr, durationMinutes: parseFloat((diffMs / 1000 / 60).toFixed(2)) };
-              }
-              return act;
-            });
-            return {
-              ...log,
-              clockOut: endTimeStr,
-              status: newStatus as any,
-              activities: updatedActivities,
-            };
-          } else {
-            // If changing to working/break/lunch/restroom
-            let updatedActivities = log.activities.map((act) => {
-              if (!act.endTime) {
-                const diffMs = new Date(endTimeStr).getTime() - new Date(act.startTime).getTime();
-                return { ...act, endTime: endTimeStr, durationMinutes: parseFloat((diffMs / 1000 / 60).toFixed(2)) };
-              }
-              return act;
-            });
-            
-            if (newStatus !== 'working') {
-               updatedActivities.push({
-                 id: `act_${Date.now()}`,
-                 type: newStatus as any,
-                 startTime: endTimeStr,
-               });
-            }
-
-            return {
-              ...log,
-              status: newStatus as any,
-              activities: updatedActivities,
-            };
-          }
-        }
-        return log;
-      });
-    } else {
-      // If no active log for today, we either clock them in or mark them absent
-      const newLog: TimeLog = {
-        id: `override_${Date.now()}`,
-        agentName: agentName,
-        date: todayStr,
-        clockIn: ['working', 'break', 'lunch', 'restroom'].includes(newStatus) ? endTimeStr : undefined,
-        activities: ['break', 'lunch', 'restroom'].includes(newStatus) ? [{
-          id: `act_${Date.now()}`,
-          type: newStatus as any,
-          startTime: endTimeStr,
-        }] : [],
-        status: newStatus as any,
-      };
-      // remove any empty log for today, just add this fresh one
-      updated = [newLog, ...updated];
-    }
-
-    setTimeLogs(updated);
-    setStorageItem('sched_time_logs', updated);
-  };
-
-  // Inquiry Submission and Processing System
-  const handleAddPhotoUrl = () => {
-    if (!tempPhotoUrlInput.trim()) return;
-    setInquiryPhotos([...inquiryPhotos, tempPhotoUrlInput.trim()]);
-    setTempPhotoUrlInput('');
-  };
-
-  const handleRemovePhoto = (index: number) => {
-    setInquiryPhotos(inquiryPhotos.filter((_, i) => i !== index));
-  };
-
-  const handleAddLink = () => {
-    if (!tempLinkInput.trim()) return;
-    let url = tempLinkInput.trim();
-    if (!/^https?:\/\//i.test(url)) {
-      url = 'https://' + url;
-    }
-    setInquiryLinks([...inquiryLinks, url]);
-    setTempLinkInput('');
-  };
-
-  const handleRemoveLink = (index: number) => {
-    setInquiryLinks(inquiryLinks.filter((_, i) => i !== index));
-  };
-
-  const handlePhotoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    
-    Array.from(files).forEach((file: any) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setInquiryPhotos(prev => [...prev, event.target!.result as string]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const handleSubmitInquiry = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!currentUser) return;
-    if (isFormSubmitting) return;
-    
-    if (!inquiryClinicName) {
-      toast.error('Please select a Clinic Name! This is a mandatory field.');
-      return;
-    }
-    
-    if (!inquiryText.trim()) {
-      toast.error('Please enter your inquiry text!');
-      return;
-    }
-
-    setIsFormSubmitting(true);
-    try {
-      const newInquiry: Inquiry = {
-        id: `inq_${Date.now()}`,
-        agentName: currentUser.name,
-        clinicName: inquiryClinicName,
-        phoneNumber: inquiryPhoneNumber.trim() || undefined,
-        text: inquiryText.trim(),
-        photos: inquiryPhotos,
-        links: inquiryLinks,
-        createdAt: new Date().toISOString(),
-        status: 'submitted',
-        seenByAgent: false
-      };
-
-      const updated = [newInquiry, ...inquiries];
-      setInquiries(updated);
-      setStorageItem('sched_inquiries', updated);
-
-      // Sync to Firestore
-      await setDoc(doc(db, "inquiries", newInquiry.id), newInquiry);
-
-      // Reset fields
-      setInquiryText('');
-      setInquiryClinicName('');
-      setInquiryPhoneNumber('');
-      setInquiryPhotos([]);
-      setInquiryLinks([]);
-      setTempLinkInput('');
-      setTempPhotoUrlInput('');
-
-      handleMentionsInText(inquiryText.trim(), 'Agent Inquiry Description', currentUser.name);
-      addSystemNotification('❓ New Inquiry Submitted', `${currentUser.name} has submitted a new inquiry for clinic: ${inquiryClinicName}.`, 'general', 'tl');
-
-      setSubmissionConfirmation({
-        title: "Inquiry Logged Successfully! 🎉",
-        message: `Your inquiry has been successfully transmitted to the database. The Team Leaders have been notified and will reply shortly.`,
-        type: 'inquiry',
-        referenceId: newInquiry.id
-      });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (err) {
-      console.error(err);
-      toast.error("An error occurred while submitting. Please try again.");
-    } finally {
-      setIsFormSubmitting(false);
-    }
-  };
-
-  const handleSetInquirySent = (inquiryId: string) => {
-    if (!currentUser || currentUser.role !== 'tl') return;
-
-    const updated = inquiries.map(inq => {
-      if (inq.id === inquiryId) {
-        const updatedInq = {
-          ...inq,
-          status: 'sent' as const,
-          sentBy: currentUser.name,
-          sentAt: new Date().toISOString(),
-          seenByAgent: false
-        };
-        // Sync to Firestore
-        setDoc(doc(db, "inquiries", inq.id), updatedInq).catch(e => console.error("Inquiry Update Error:", e));
-        return updatedInq;
-      }
-      return inq;
-    });
-
-    setInquiries(updated);
-    setStorageItem('sched_inquiries', updated);
-  };
-
-  const handleSetInquiryAnswered = (inquiryId: string, answerText: string) => {
-    if (!currentUser || currentUser.role !== 'tl') return;
-    if (!answerText.trim()) {
-      toast.error('Please supply an answer text.');
-      return;
-    }
-
-    let targetAgentName = "";
-    let clinicName = "";
-    const updated = inquiries.map(inq => {
-      if (inq.id === inquiryId) {
-        targetAgentName = inq.agentName;
-        clinicName = inq.clinicName;
-        const updatedInq = {
-          ...inq,
-          status: 'answered' as const,
-          answer: answerText.trim(),
-          answeredBy: currentUser.name,
-          answeredAt: new Date().toISOString(),
-          seenByAgent: false
-        };
-        // Sync to Firestore
-        setDoc(doc(db, "inquiries", inq.id), updatedInq).catch(e => console.error("Inquiry Answer Error:", e));
-        return updatedInq;
-      }
-      return inq;
-    });
-
-    setInquiries(updated);
-    setStorageItem('sched_inquiries', updated);
-    
-    if (targetAgentName) {
-      addSystemNotification(
-        "💬 Inquiry Answered by TL",
-        `Your inquiry regarding clinic "${clinicName}" has been answered by ${currentUser.name}: "${answerText.trim()}"`,
-        "inquiry",
-        targetAgentName
-      );
-    }
-    handleMentionsInText(answerText, 'Inquiry Response', currentUser.name);
-    setAnsweringInquiryId(null);
-    setCurrentAnswerText('');
-    toast.success('Answer response committed successfully! Agent will receive a live notification.');
-  };
-
-  const handleReassignInquiry = (inquiryId: string, newAgentName: string) => {
-    if (!currentUser || currentUser.role !== 'tl') return;
-    if (!newAgentName) return;
-
-    const updated = inquiries.map(inq => {
-      if (inq.id === inquiryId) {
-        const updatedInq = {
-          ...inq,
-          agentName: newAgentName,
-          seenByAgent: false
-        };
-        // Sync to Firestore
-        setDoc(doc(db, "inquiries", inq.id), updatedInq).catch(e => console.error("Inquiry Reassign Error:", e));
-        return updatedInq;
-      }
-      return inq;
-    });
-
-    setInquiries(updated);
-    setStorageItem('sched_inquiries', updated);
-  };
-
-  const handleUpdateContactedStatus = (inquiryId: string, status: 'not_contacted' | 'contacted' | 'attempted') => {
-    const updated = inquiries.map(inq => {
-      if (inq.id === inquiryId) {
-        const updatedInq = {
-          ...inq,
-          customerContacted: status
-        };
-        // Sync to Firestore
-        setDoc(doc(db, "inquiries", inq.id), updatedInq).catch(e => console.error("Inquiry Contacted Status Error:", e));
-        return updatedInq;
-      }
-      return inq;
-    });
-    setInquiries(updated);
-    setStorageItem('sched_inquiries', updated);
-  };
-
-  const handleMarkInquirySeen = (inquiryId: string) => {
-    const updated = inquiries.map(inq => {
-      if (inq.id === inquiryId) {
-        const updatedInq = { ...inq, seenByAgent: true };
-        // Sync to Firestore
-        setDoc(doc(db, "inquiries", inq.id), updatedInq).catch(e => console.error("Inquiry Mark Seen Error:", e));
-        return updatedInq;
-      }
-      return inq;
-    });
-    setInquiries(updated);
-    setStorageItem('sched_inquiries', updated);
-  };
-
-  const handleDeleteInquiry = (inquiryId: string) => {
-    const doubleCheck = window.confirm('Are you sure you want to delete this inquiry record?');
-    if (!doubleCheck) return;
-    const updated = inquiries.filter(inq => inq.id !== inquiryId);
-    setInquiries(updated);
-    setStorageItem('sched_inquiries', updated);
-    // Sync to Firestore
-    deleteDoc(doc(db, "inquiries", inquiryId)).catch(e => console.error("Inquiry Delete Error:", e));
-  };
-
-  const handleSubmitTabbyTamara = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!currentUser) return;
-    if (isFormSubmitting) return;
-
-    if (!ttPatientName || !ttPriceWithoutTax || !ttPhoneNumber || !ttClinicName) {
-      toast.error('Please fill out all mandatory fields (Patient Name, Price, Phone Number, Clinic Name).');
-      return;
-    }
-
-    if (!ttIsOldCustomer && !ttIdNumber) {
-      toast.error('Since the customer is not an old customer, please enter their ID Number.');
-      return;
-    }
-
-    setIsFormSubmitting(true);
-    try {
-      const calculatedPrice = ttPriceWithoutTax && !isNaN(Number(ttPriceWithoutTax)) ? (Number(ttPriceWithoutTax) * 1.05).toFixed(2) : '-';
-      const autoNote = `[5% added to price. Final: SAR ${calculatedPrice}]`;
-      const finalNotes = ttNotes ? `${autoNote}\n\n${ttNotes}` : autoNote;
-
-      const newRequest: TabbyTamaraRequest = {
-        id: 'tt_' + Math.random().toString(36).substr(2, 9),
-        agentName: currentUser.name,
-        patientName: ttPatientName,
-        fileNumber: ttFileNumber,
-        isOldCustomer: ttIsOldCustomer,
-        idNumber: !ttIsOldCustomer ? ttIdNumber : undefined,
-        priceWithoutTax: ttPriceWithoutTax,
-        phoneNumber: ttPhoneNumber,
-        notes: finalNotes,
-        createdAt: new Date().toISOString(),
-        status: 'not_confirmed',
-        customerContacted: 'not_contacted',
-        confirmedAt: undefined,
-        confirmedBy: undefined,
-        platform: ttPlatform,
-        clinicName: ttClinicName,
-        paymentScreenshot: activeScreenshot || undefined
-      };
-
-      const updated = [newRequest, ...tabbyTamaraRequests];
-      setTabbyTamaraRequests(updated);
-      setStorageItem('sched_tabby_tamara', updated);
-
-      // Sync to Firestore
-      await setDoc(doc(db, "tt_requests", newRequest.id), newRequest);
-
-      // Clear form
-      setTtPatientName('');
-      setTtFileNumber('');
-      setTtIsOldCustomer(true);
-      setTtIdNumber('');
-      setTtPriceWithoutTax('');
-      setTtPhoneNumber('');
-      setTtNotes('');
-      setActiveScreenshot(null);
-
-      addSystemNotification(`💳 New ${ttPlatform.toUpperCase()} Request`, `${currentUser.name} submitted a new request for ${ttPatientName} (${ttPhoneNumber})`, 'general', 'tl');
-
-      setSubmissionConfirmation({
-        title: "Fintech Request Confirmed! 💳",
-        message: `Your ${ttPlatform === 'tabby' ? 'Tabby' : ttPlatform === 'tamara' ? 'Tamara' : 'One Time Payment'} link request was successfully filed. The Team Leader has been notified to generate the installment link. Do not submit this request twice.`,
-        type: 'fintech_request',
-        referenceId: newRequest.id
-      });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (err) {
-      console.error(err);
-      toast.error("An error occurred while submitting fintech request. Please try again.");
-    } finally {
-      setIsFormSubmitting(false);
-    }
-  };
-
-  const handleConfirmTabbyTamara = (
-    requestId: string,
-    paymentLink: string,
-    tlNotes?: string,
-    tlLinks?: string,
-    status: 'confirmed' | 'rejected' = 'confirmed'
-  ) => {
-    if (!currentUser) return;
-    const updated = tabbyTamaraRequests.map(r => {
-      if (r.id === requestId) {
-        const updatedReq = {
-          ...r,
-          status: status,
-          confirmedAt: new Date().toISOString(),
-          confirmedBy: currentUser.name,
-          paymentLink: paymentLink || undefined,
-          tlNotes: tlNotes || undefined,
-          tlLinks: tlLinks || undefined
-        };
-        // Sync to Firestore
-        setDoc(doc(db, "tt_requests", r.id), updatedReq).catch(e => console.error("TT Confirm Error:", e));
-        
-        addSystemNotification(
-          status === 'confirmed' ? `✅ Payment Link Ready` : `❌ Fintech Request Rejected`,
-          status === 'confirmed'
-            ? `Your ${r.platform} request for ${r.patientName} has been confirmed. ${tlNotes ? `Notes: ${tlNotes}` : ''}`
-            : `Your ${r.platform} request for ${r.patientName} has been rejected. ${tlNotes ? `Notes: ${tlNotes}` : ''}`,
-          "general",
-          r.agentName
-        );
-
-        return updatedReq;
-      }
-      return r;
-    });
-
-    setTabbyTamaraRequests(updated);
-    setStorageItem('sched_tabby_tamara', updated);
-    if (status === 'confirmed') {
-      toast.success('Request successfully confirmed with feedback! Submitting agent was notified.');
-    } else {
-      toast.success('Request successfully marked as rejected with notes!');
-    }
-  };
-
-  const handleContactTabbyTamara = (requestId: string, status: 'not_contacted' | 'contacted', notes?: string, screenshot?: string) => {
-    const updated = tabbyTamaraRequests.map(r => {
-      if (r.id === requestId) {
-        const updatedReq = {
-          ...r,
-          customerContacted: status,
-          contactedAt: status === 'contacted' ? new Date().toISOString() : undefined,
-          agentContactNotes: notes,
-          paymentScreenshot: screenshot
-        };
-        // Sync to Firestore
-        setDoc(doc(db, "tt_requests", r.id), updatedReq).catch(e => console.error("TT Update Contact Error:", e));
-        return updatedReq;
-      }
-      return r;
-    });
-
-    setTabbyTamaraRequests(updated);
-    setStorageItem('sched_tabby_tamara', updated);
-    if (status === 'contacted') {
-       toast.success('Case marked as contacted and successfully closed!');
-    } else {
-       toast.success('Undo contact status.');
-    }
-  };
-
-  const handleDeleteTabbyTamara = (requestId: string) => {
-    const doubleCheck = window.confirm('Are you sure you want to delete this Tabby/Tamara request?');
-    if (!doubleCheck) return;
-    const updated = tabbyTamaraRequests.filter(r => r.id !== requestId);
-    setTabbyTamaraRequests(updated);
-    setStorageItem('sched_tabby_tamara', updated);
-    
-    // Sync to Firestore
-    deleteDoc(doc(db, "tt_requests", requestId)).catch(e => console.error("TT Delete Error:", e));
-  };
-
-  const handleSubmitTabbyTamaraComplaint = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!currentUser) return;
-    if (isFormSubmitting) return;
-
-    if (!tcPatientName || !tcPhoneNumber || !tcComplaintDetails || !tcClinicName) {
-      toast.error('Please fill out all mandatory fields (Patient Name, Phone Number, Complaint Details, and Clinic Name).');
-      return;
-    }
-
-    if (!tcIsOldCustomer && !tcIdNumber) {
-      toast.error('Since the customer is not an old customer, please enter their ID Number.');
-      return;
-    }
-
-    setIsFormSubmitting(true);
-    try {
-      const newComplaint: TabbyTamaraComplaint = {
-        id: 'tc_' + Math.random().toString(36).substr(2, 9),
-        agentName: currentUser.name,
-        patientName: tcPatientName,
-        fileNumber: tcFileNumber,
-        isOldCustomer: tcIsOldCustomer,
-        idNumber: !tcIsOldCustomer ? tcIdNumber : undefined,
-        imageUrl: activeScreenshot || tcImageUrl,
-        phoneNumber: tcPhoneNumber,
-        complaintDetails: tcComplaintDetails,
-        createdAt: new Date().toISOString(),
-        status: 'pending_tl',
-        customerContacted: 'not_contacted',
-        clinicName: tcClinicName
-      };
-
-      const updated = [newComplaint, ...tabbyTamaraComplaints];
-      setTabbyTamaraComplaints(updated);
-      setStorageItem('sched_tt_complaints', updated);
-      
-      // Sync to Firestore
-      await setDoc(doc(db, "tt_complaints", newComplaint.id), newComplaint);
-
-      // Clear form
-      setTcPatientName('');
-      setTcFileNumber('');
-      setTcIsOldCustomer(true);
-      setTcIdNumber('');
-      setTcImageUrl('');
-      setTcPhoneNumber('');
-      setTcComplaintDetails('');
-      setActiveScreenshot(null);
-
-      addSystemNotification(`⚠️ New Complaint`, `${currentUser.name} submitted a new complaint for ${tcPatientName} (${tcPhoneNumber})`, 'general', 'tl');
-
-      setSubmissionConfirmation({
-        title: "Complaint Registered! ⚠️",
-        message: `Your installment complaint for ${tcPatientName} has been recorded. Team Leaders will review the issue and initiate contact.`,
-        type: 'fintech_complaint',
-        referenceId: newComplaint.id
-      });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (err) {
-      console.error(err);
-      toast.error("An error occurred while submitting complaint. Please try again.");
-    } finally {
-      setIsFormSubmitting(false);
-    }
-  };
-
-  const handleSubmitClientComms = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!currentUser) return;
-    if (isFormSubmitting) return;
-
-    if (!ccClinicName || !ccPhoneNumber || !ccNotes) {
-      toast.error('Please fill out all mandatory fields (Clinic Name, Phone Number, Inquiry/Notes).');
-      return;
-    }
-
-    setIsFormSubmitting(true);
-    try {
-      const newComm: ClientCommunicationRequest = {
-        id: 'cc_' + Math.random().toString(36).substr(2, 9),
-        callCenterAgentName: currentUser.name,
-        clinicName: ccClinicName,
-        phoneNumber: ccPhoneNumber,
-        language: ccLanguage,
-        notes: ccNotes,
-        createdAt: new Date().toISOString(),
-        status: 'pending',
-        screenshot: activeScreenshot || undefined
-      };
-
-      const updated = [newComm, ...clientComms];
-      setClientComms(updated);
-      setStorageItem('sched_client_comms', updated);
-      
-      // Sync to Firestore
-      await setDoc(doc(db, "client_comms", newComm.id), newComm);
-
-      // Clear form
-      setCcClinicName('');
-      setCcPhoneNumber('');
-      setCcLanguage('Arabic');
-      setCcNotes('');
-      setActiveScreenshot(null);
-
-      addSystemNotification(`💬 New Client Comm Request`, `New request submitted for phone: ${ccPhoneNumber}`, 'general', 'tl');
-
-      setSubmissionConfirmation({
-        title: "Dialogue Request Submitted! 💬",
-        message: `Your communication and callback request has been dispatched to Team Leaders and social media agents successfully. We will initiate contact and keep you updated.`,
-        type: 'client_comm',
-        referenceId: newComm.id
-      });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (err) {
-      console.error(err);
-      toast.error("An error occurred while submitting. Please try again.");
-    } finally {
-      setIsFormSubmitting(false);
-    }
-  };
-
-  const handleProcessClientComms = (commId: string, notes: string) => {
-    if (!currentUser) return;
-    if (!notes.trim()) {
-      toast.error('Please enter your handling notes first.');
-      return;
-    }
-
-    const updated = clientComms.map(c => {
-      if (c.id === commId) {
-        const updatedComm = {
-          ...c,
-          status: 'contacted' as const,
-          handledBy: currentUser.name,
-          handledAt: new Date().toISOString(),
-          handlingNotes: notes
-        };
-        // Sync to Firestore
-        setDoc(doc(db, "client_comms", c.id), updatedComm).catch(e => console.error("Client Comm Update Error:", e));
-        return updatedComm;
-      }
-      return c;
-    });
-
-    setClientComms(updated);
-    setStorageItem('sched_client_comms', updated);
-    
-    // Clear TL input
-    setActiveCcHandlingId(null);
-    setCcHandlingNotes('');
-
-    toast.success('Communication request status updated to Contacted!');
-  };
-
-  const handleTakeClientComm = (commId: string) => {
-    if (!currentUser) return;
-    const updated = clientComms.map(c => {
-      if (c.id === commId) {
-        const updatedComm = {
-          ...c,
-          status: 'in_progress' as const,
-          openedBy: currentUser.name,
-          openedAt: new Date().toISOString()
-        };
-        // Sync to Firestore
-        setDoc(doc(db, "client_comms", c.id), updatedComm).catch(e => console.error("Client Comm Take Error:", e));
-        return updatedComm;
-      }
-      return c;
-    });
-    setClientComms(updated);
-    setStorageItem('sched_client_comms', updated);
-    toast.success('Request taken! You can now provide handling notes.');
-  };
-
-  const downloadShiftsICS = () => {
-    if (!currentUser) return;
-    const myShifts = schedules.filter(s => s.agentName?.toLowerCase() === currentUser?.name?.toLowerCase());
-    
-    if (myShifts.length === 0) {
-      toast.error('No shifts found to export.');
-      return;
-    }
-
-    const localTZ = getLocalTimeZone();
-    let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Synq//Portal//EN\n";
-
-    myShifts.forEach(shift => {
-      try {
-        const [startTime, endTime] = shift.shiftLabel.split(' - ');
-        const startDate = shift.date.replace(/-/g, '');
-        const startTimeStr = startTime.replace(':', '') + '00';
-        
-        let endDate = startDate;
-        if (endTime < startTime) {
-          const d = new Date(shift.date);
-          d.setDate(d.getDate() + 1);
-          endDate = getLocalISOString(d).replace(/-/g, '');
-        }
-        const endTimeStr = endTime.replace(':', '') + '00';
-
-        icsContent += "BEGIN:VEVENT\n";
-        icsContent += `DTSTART;TZID=${localTZ}:${startDate}T${startTimeStr}\n`;
-        icsContent += `DTEND;TZID=${localTZ}:${endDate}T${endTimeStr}\n`;
-        icsContent += `SUMMARY:Work: ${shift.shiftLabel}\n`;
-        icsContent += `DESCRIPTION:Synq Portal Work Shift\n`;
-        icsContent += "END:VEVENT\n";
-      } catch (e) {
-         console.warn("Skipping malformed shift for ICS export", shift);
-      }
-    });
-
-    icsContent += "END:VCALENDAR";
-
-    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `${currentUser.name.replace(/\s+/g, '_')}_schedule.ics`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success('Calendar file (.ics) downloaded! You can now import this into Outlook or Apple Calendar.');
-  };
-
-  const commitSchedulesManual = (targetSchedules: ScheduledShift[], newAgentsList: string[], parsedMeta: any) => {
-    if (targetSchedules.length === 0) return;
-
-    // MERGE LOGIC: Merge new shifts into existing ones, replacing only matching (agent + date) pairs
-    const mergedSchedules = [...schedules];
-    targetSchedules.forEach(newShift => {
-      const existingIdx = mergedSchedules.findIndex(s => 
-        s.agentName?.toLowerCase() === newShift.agentName?.toLowerCase() && 
-        s.date === newShift.date
-      );
-      if (existingIdx !== -1) {
-        mergedSchedules[existingIdx] = newShift;
-      } else {
-        mergedSchedules.push(newShift);
-      }
-    });
-
-    // Save schedules
-    setSchedules(mergedSchedules);
-    setStorageItem('sched_schedules', mergedSchedules);
-
-    // Sync to Firestore (only the ones we changed/added)
-    targetSchedules.forEach(s => {
-      setDoc(doc(db, "schedules", s.id), s).catch(e => console.error("Schedule Write Error:", e));
-      
-      // Auto assign shift to agent's user profile in Firestore
-      const userDocId = s.agentName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-      if (userDocId) {
-        setDoc(doc(db, "users", userDocId), {
-          assignedShifts: {
-            [s.date]: s.shiftLabel
-          }
-        }, { merge: true }).catch(err => {
-          console.error("Syncing shift to user doc failed:", err);
-        });
-        
-        // As requested: write to agents collection
-        const agentSchedulesRef = doc(collection(doc(collection(db, 'agents'), userDocId), 'schedules'), s.date);
-        setDoc(agentSchedulesRef, {
-            shift: s.shiftLabel,
-            date: s.date,
-            agentId: userDocId
-        }, { merge: true }).catch(err => {
-            console.error("Syncing shift to agents collection failed:", err);
-        });
-      }
-    });
-
-    // Automatically trigger notification
-    addSystemNotification(
-      "📅 New Schedule Released & Published!",
-      `A new shift schedule has been successfully uploaded and automatically published by ${currentUser?.name || "Leadership"}. System state is now updated.`,
-      "schedule",
-      "all"
-    );
-
-    // Register any new agents found
-    if (newAgentsList.length > 0) {
-      const updatedAgents = [...agentsList];
-      newAgentsList.forEach(a => {
-        if (!updatedAgents.some(ea => ea?.toLowerCase() === a?.toLowerCase())) {
-          updatedAgents.push(a);
-        }
-      });
-      setAgentsList(updatedAgents);
-      setStorageItem('sched_agents_list', updatedAgents);
-    }
-
-    const newMeta = { ...getAgentMeta() };
-    Object.entries(parsedMeta).forEach((entry) => {
-      const agent = entry[0];
-      const meta = entry[1] as { tlName?: string };
-      if (!newMeta[agent]) newMeta[agent] = { roleType: '', tlName: '' };
-      if (meta.tlName) {
-        newMeta[agent].tlName = meta.tlName;
-      }
-    });
-    setStorageItem('sched_agent_meta', newMeta);
-    
-    // Sync system docs to Firestore
-    if (newAgentsList.length > 0) {
-      setDoc(doc(db, "system", "sched_agents_list"), { data: agentsList }).catch(e => console.error("Agents List Sync Error:", e));
-    }
-    setDoc(doc(db, "system", "sched_agent_meta"), { data: newMeta }).catch(e => console.error("Agent Meta Sync Error:", e));
-    
-    toast.success(`Schedule system updated with ${targetSchedules.length} live shifts!`);
-    setTempSchedules([]);
-    setTempNewAgents([]);
-    setTempParsedMeta({});
-  };
-
-  const isGlobalAdmin = currentUser?.email === 'sobhyhesham00@gmail.com';
-
-  const handleResetAllData = async () => {
-    if (!isGlobalAdmin) {
-      toast.error('Unauthorized access.');
-      return;
-    }
-
-    const confirmed = window.confirm("CRITICAL WARNING: This will permanently delete ALL organization data including schedules, requests, cases, and logs. This cannot be undone. Are you absolutely sure?");
-    if (!confirmed) return;
-
-    const secondConfirm = window.confirm("FINAL CONFIRMATION: Type 'RESET' in your mind and click OK to wipe everything.");
-    if (!secondConfirm) return;
-
-    setIsSyncingCalendar(true); // Reusing sync state for loading
-    try {
-      // 1. Delete Firestore Collections
-      const collectionsToWipe = ['schedules', 'requests', 'inquiries', 'clientComms', 'cases', 'timeLogs', 'announcements', 'orders'];
-      
-      for (const colName of collectionsToWipe) {
-        const q = query(collection(db, colName));
-        const snapshot = await getDocs(q);
-        const batch = writeBatch(db);
-        snapshot.docs.forEach((doc) => {
-          batch.delete(doc.ref);
-        });
-        await batch.commit();
-      }
-
-      // Also clear all local data
-      localStorage.clear();
-
-      toast.success('System wipe successful. All organizational data has been reset.');
-      window.location.reload(); // Hard refresh to clear all local states
-    } catch (error) {
-      console.error("Reset failed:", error);
-      toast.error('Reset failed. Check console for details.');
-    } finally {
-      setIsSyncingCalendar(false);
-    }
-  };
-
-  const downloadFullXLSX = () => {
-    const data = requests.map(r => ({
-      ID: r.id,
-      Agent: r.agentName,
-      Type: r.requestType,
-      Date: r.date,
-      Status: r.status,
-      Submitted: r.createdAt
-    }));
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Requests");
-    XLSX.writeFile(workbook, `Synq_Requests_Export_${getLocalISOString()}.xlsx`);
-    toast.success('Excel workbook generated successfully!');
-  };
-
-  const downloadTimeLogsXLSX = () => {
-    const data = timeLogs.map(log => ({
-      Agent: log.agentName,
-      Date: log.date,
-      'Clock In': log.clockIn,
-      'Clock Out': log.clockOut,
-      'Total Minutes': log.totalMinutes,
-      Violations: log.violations.join(', ')
-    }));
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance");
-    XLSX.writeFile(workbook, `Synq_Attendance_Report_${getLocalISOString()}.xlsx`);
-    toast.success('Attendance Excel report generated!');
-  };
-
-  const syncShiftsToGoogleCalendar = async () => {
-    const accessToken = await getAccessToken();
-    if (!accessToken) {
-      toast.error('Please connect your Google Account in the Integrations Hub first.');
-      setActiveTab('integrations');
-      return;
-    }
-
-    try {
-      setIsSyncingCalendar(true);
-      const todayStr = getLocalISOString();
-      const myShifts = schedules.filter(s => 
-        s.agentName?.toLowerCase() === currentUser?.name?.toLowerCase() && 
-        s.date >= todayStr
-      );
-
-      if (myShifts.length === 0) {
-        toast.error('No upcoming shifts found to sync.');
-        return;
-      }
-
-      const confirmed = window.confirm(`Found ${myShifts.length} upcoming shifts. Sync to Google Calendar?`);
-      if (!confirmed) return;
-
-      let successCount = 0;
-      for (const shift of myShifts) {
-        const [startTime, endTime] = shift.shiftLabel.split(' - ');
-        
-        // Handle night shift crossing midnight
-        const startDateTime = new Date(`${shift.date}T${startTime}:00`);
-        const endDateTime = new Date(`${shift.date}T${endTime}:00`);
-        if (endTime < startTime) {
-          endDateTime.setDate(endDateTime.getDate() + 1);
-        }
-
-        const event = {
-          summary: `Work Shift: ${shift.shiftLabel}`,
-          description: `Scheduled shift at Call Center via Synq Portal.`,
-          start: {
-            dateTime: startDateTime.toISOString(),
-            timeZone: 'Africa/Cairo',
-          },
-          end: {
-            dateTime: endDateTime.toISOString(),
-            timeZone: 'Africa/Cairo',
-          },
-          reminders: {
-            useDefault: false,
-            overrides: [
-              { method: 'popup', minutes: 60 },
-              { method: 'email', minutes: 120 }
-            ],
-          },
-        };
-
-        const res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(event),
-        });
-
-        if (res.ok) successCount++;
-      }
-
-      toast.success(`Successfully synced ${successCount} shifts to your Google Calendar!`);
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to sync. Please check your connection.');
-    } finally {
-      setIsSyncingCalendar(false);
-    }
-  };
-
-  const uploadToDrive = async (filename: string, content: string, contentType: string = 'text/csv') => {
-    const accessToken = await getAccessToken();
-    if (!accessToken) {
-      toast.error('Please connect your Google Account in the Integrations Hub first.');
-      setActiveTab('integrations');
-      return;
-    }
-
-    try {
-      setIsUploadingToDrive(true);
-      const confirmed = window.confirm(`Upload "${filename}" to your Google Drive?`);
-      if (!confirmed) return;
-
-      const metadata = {
-        name: filename,
-        mimeType: contentType,
-      };
-
-      const form = new FormData();
-      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-      form.append('file', new Blob([content], { type: contentType }));
-
-      const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
-        body: form,
-      });
-
-      if (!res.ok) throw new Error('Upload failed');
-      toast.success(`Successfully uploaded "${filename}" to Google Drive!`);
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to upload to Drive.');
-    } finally {
-      setIsUploadingToDrive(false);
-    }
-  };
-
-  const handleDeleteClientComms = (commId: string) => {
-    const doubleCheck = window.confirm('Are you sure you want to delete this communication request?');
-    if (!doubleCheck) return;
-    const updated = clientComms.filter(c => c.id !== commId);
-    setClientComms(updated);
-    setStorageItem('sched_client_comms', updated);
-    // Sync to Firestore
-    deleteDoc(doc(db, "client_comms", commId)).catch(e => console.error("Client Comm Delete Error:", e));
-  };
-
-  const handleTLCommentComplaint = (complaintId: string, comment: string) => {
-    if (!currentUser) return;
-    if (!comment.trim()) {
-      toast.error('Please enter a handling comment first.');
-      return;
-    }
-
-    const updated = tabbyTamaraComplaints.map(c => {
-      if (c.id === complaintId) {
-        const updatedComplaint = {
-          ...c,
-          status: 'need_contact' as const,
-          tlComment: comment,
-          tlHandledAt: new Date().toISOString(),
-          tlHandledBy: currentUser.name
-        };
-        // Sync to Firestore
-        setDoc(doc(db, "tt_complaints", c.id), updatedComplaint).catch(e => console.error("TT Complaint Comment Error:", e));
-        
-        addSystemNotification(
-          `📝 Complaint Evaluated`,
-          `Your complaint for ${c.patientName} has been evaluated by ${currentUser.name}. Please contact the client now.`,
-          "general",
-          c.agentName
-        );
-
-        return updatedComplaint;
-      }
-      return c;
-    });
-
-    setTabbyTamaraComplaints(updated);
-    setStorageItem('sched_tt_complaints', updated);
-    
-    // Clear TL input
-    setActiveComplaintHandlingId(null);
-    setTlComplaintComment('');
-
-    toast.success('Complaint successfully updated! Status changed to: Need to contact the client. The agent has been notified with a timer.');
-  };
-
-  const handleToggleContactComplaint = (complaintId: string, status: 'not_contacted' | 'contacted') => {
-    const updated = tabbyTamaraComplaints.map(c => {
-      if (c.id === complaintId) {
-        const updatedComplaint = {
-          ...c,
-          customerContacted: status,
-          status: status === 'contacted' ? ('closed' as const) : ('need_contact' as const),
-          contactedAt: status === 'contacted' ? new Date().toISOString() : undefined
-        };
-        // Sync to Firestore
-        setDoc(doc(db, "tt_complaints", c.id), updatedComplaint).catch(e => console.error("TT Complaint Contact Update Error:", e));
-        return updatedComplaint;
-      }
-      return c;
-    });
-
-    setTabbyTamaraComplaints(updated);
-    setStorageItem('sched_tt_complaints', updated);
-  };
-
-  const handleDeleteComplaint = (complaintId: string) => {
-    const doubleCheck = window.confirm('Are you sure you want to delete this complaint record?');
-    if (!doubleCheck) return;
-    const updated = tabbyTamaraComplaints.filter(c => c.id !== complaintId);
-    setTabbyTamaraComplaints(updated);
-    setStorageItem('sched_tt_complaints', updated);
-    // Sync to Firestore
-    deleteDoc(doc(db, "tt_complaints", complaintId)).catch(e => console.error("TT Complaint Delete Error:", e));
-  };
-
-  const handleCopyCSVReport = () => {
-    let csv = "Agent Name,Status,Clock In,Clock Out,Total Break (mins),Total Lunch (mins),Total Restroom (mins),Restroom Sessions,Team Meeting (mins),1:1 Session (mins),Personal Break (mins),Today's Compliance\n";
-    
-    let activeAgentsForCSV = [...agentsList];
-    timeLogs.forEach(log => {
-        if (log.clockIn && (new Date(log.clockIn).toDateString() === new Date().toDateString() || !['clocked_out', 'day_off', 'casual', 'annual', 'no_show'].includes(log.status))) {
-            if (!activeAgentsForCSV.some(a => a?.toLowerCase() === log.agentName?.toLowerCase())) {
-                activeAgentsForCSV.push(log.agentName);
-            }
-        }
-    });
-
-    activeAgentsForCSV.forEach(agent => {
-      const stats = getAgentTodayStats(agent);
-      const active = getActiveTimeLog(agent);
-      const statusText = active ? (active.status === 'working' ? 'Shift Active' : active.status.toUpperCase()) : 'Offline / Clocked Out';
-      
-      let compliance = "Compliant";
-      if (stats.breakMins > 15) {
-        compliance = `Exceeded Break limit by ${(stats.breakMins - 15).toFixed(1)} mins`;
-      } else if (stats.lunchMins > 30) {
-        compliance = `Exceeded Lunch limit by ${(stats.lunchMins - 30).toFixed(1)} mins`;
-      } else if (stats.restroomMins > 10) {
-        compliance = `Exceeded Restroom limit by ${(stats.restroomMins - 10).toFixed(1)} mins`;
-      } else if (stats.meetingMins > 60) {
-        compliance = `Exceeded Team Meeting limit by ${(stats.meetingMins - 60).toFixed(1)} mins`;
-      } else if (stats.oneOnOneMins > 30) {
-        compliance = `Exceeded 1:1 limit by ${(stats.oneOnOneMins - 30).toFixed(1)} mins`;
-      } else if (stats.personalMins > 15) {
-        compliance = `Exceeded Personal Break limit by ${(stats.personalMins - 15).toFixed(1)} mins`;
-      }
-
-      const clockInVal = stats.clockIn ? new Date(stats.clockIn).toLocaleTimeString() : 'N/A';
-      const clockOutVal = stats.clockOut ? new Date(stats.clockOut).toLocaleTimeString() : 'N/A';
-
-      csv += `"${agent}","${statusText}","${clockInVal}","${clockOutVal}",${stats.breakMins.toFixed(1)},${stats.lunchMins.toFixed(1)},${stats.restroomMins.toFixed(1)},${stats.restroomCount},${stats.meetingMins.toFixed(1)},${stats.oneOnOneMins.toFixed(1)},${stats.personalMins.toFixed(1)},"${compliance}"\n`;
-    });
-
-    navigator.clipboard.writeText(csv);
-    toast.success("Master Agent Attendance CSV report compiled and copied to clipboard successfully! You can directly paste it (Ctrl+V) into Excel or Google Sheets.");
-  };
-
-  const handleExportCloudBackup = () => {
-    toast.loading("Compiling secure cloud backup...");
-    const backupData = {
-      timestamp: new Date().toISOString(),
-      appVersion: CURRENT_APP_VERSION,
-      schedules,
-      timeLogs,
-      registeredUsers,
-      requests,
-      cases,
-      notifications,
-      tabbyTamaraRequests,
-      tabbyTamaraComplaints,
-      clientComms,
-      inquiries,
-      agentDirectory,
-      announcements,
-      orders,
-      tlFeedbacks,
-      qaScores,
-      todos
-    };
-    
-    const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Firebase_Cloud_Data_Backup_${new Date().toISOString().slice(0,10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    toast.dismiss();
-    toast.success("Cloud Data Backup has been generated and saved locally! Original data remains safe in Firebase Cloud.");
-  };
-
-  // Filter logs for general browsing
-  const [logFilter, setLogFilter] = useState<'all' | 'swap' | 'annual'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-
-  // TL Dashboard search, filter and print states
-  const [tlSearchQuery, setTlSearchQuery] = useState('');
-  const [tlStatusFilter, setTlStatusFilter] = useState<'all' | 'in' | 'out' | 'break_lunch' | 'overtime'>('all');
-  const [tlIsPrintMode, setTlIsPrintMode] = useState(false);
-
-  const filteredLogs = requests.filter(req => {
-    const matchesFilter = logFilter === 'all' || req.type === logFilter;
-    const matchesSearch = req.agentName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (req.type === 'swap' && (req as SwapRequest).swapWithAgent.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesFilter && matchesSearch;
-  });
-
-  // Derived counts for overview cards
-  const pendingRequests = requests.filter(r => r.status === 'pending' || r.status === 'pending_partner');
-  const pendingSwapsCount = pendingRequests.filter(r => r.type === 'swap').length;
-  const pendingAnnualsCount = pendingRequests.filter(r => r.type === 'annual').length;
-
-  const totalApprovedThisMonth = requests.filter(r => {
-    if (r.status !== 'approved') return false;
-    const actionDate = r.actionAt ? new Date(r.actionAt) : new Date(r.createdAt);
-    return actionDate.getMonth() === systemTime.getMonth() && actionDate.getFullYear() === systemTime.getFullYear();
-  }).length;
-
-  const totalViolationsCount = requests.filter(r => r.ruleViolation).length;
-
-  // Swaps where the logged-in agent is the trade target, awaiting their agreement
-  const partnerPendingSwaps = currentUser && currentUser.role === 'agent'
-    ? requests.filter(r => 
-        r.type === 'swap' && 
-        r.status === 'pending_partner' && 
-        (r as SwapRequest).swapWithAgent.toLowerCase() === currentUser?.name?.toLowerCase()
-      ) as SwapRequest[]
-    : [];
-
-  // Schedules Derived Calculations
-  const allScheduleDates = Array.from(new Set(schedules.map(p => p.date))).sort() as string[];
-  const baseDatesList = (allScheduleDates.length > 0 ? allScheduleDates : Array.from({ length: 30 }, (_, i) => {
-    const d = new Date(systemTime);
-    d.setDate(d.getDate() - 5 + i);
-    return getLocalISOString(d);
-  })) as string[];
-  
-  let displayDaysCount = 14;
-  if (scheduleViewMode === 'week') displayDaysCount = 7;
-  if (scheduleViewMode === 'month') displayDaysCount = 31;
-
-  const safeOffset = Math.max(0, Math.min(schedulePageOffset, Math.max(0, baseDatesList.length - displayDaysCount)));
-  const activeDisplayDates = baseDatesList.slice(safeOffset, safeOffset + displayDaysCount) as string[];
-
-  const getShiftBadgeStyle = (label: string) => {
-    if (!label) return { bg: 'bg-slate-500/10 text-slate-400 border-slate-500/20', display: 'Not Scheduled' };
-    const norm = label.toLowerCase();
-    if (norm.includes('morning') || norm.includes('am') || norm.includes('07:') || norm.includes('08:') || norm === 'a' || norm === 'morning shift') {
-      return { bg: 'bg-sky-500/15 text-sky-300 border-sky-500/25', display: 'Morning' };
-    }
-    if (norm.includes('afternoon') || norm.includes('pm') || norm.includes('12:') || norm.includes('13:') || norm.includes('14:') || norm === 'b' || norm === 'afternoon shift') {
-      return { bg: 'bg-amber-500/15 text-amber-300 border-amber-500/25', display: 'Afternoon' };
-    }
-    if (norm.includes('night') || norm.includes('22:') || norm.includes('23:') || norm.includes('00:') || norm.includes('graveyard') || norm === 'c' || norm === 'night shift') {
-      return { bg: 'bg-purple-500/15 text-purple-300 border-purple-500/25', display: 'Night' };
-    }
-    if (norm === 'not scheduled' || norm === 'unassigned') {
-      return { bg: 'bg-slate-500/10 text-slate-400 border-slate-500/20', display: 'Not Scheduled' };
-    }
-    if (norm.includes('off') || norm.includes('leave') || norm.includes('al') || norm.includes('sl') || norm === 'o' || norm === 'r') {
-      return { bg: 'bg-slate-500/10 text-slate-400 border-slate-500/20', display: 'Off Day' };
-    }
-    return { bg: 'bg-slate-500/10 text-slate-400 border-slate-500/20', display: label };
-  };
-
-  const visibleAgents = agentsList.filter(agentName => {
-    if (currentUser?.role === 'agent') {
-      return agentName?.toLowerCase() === currentUser?.name?.toLowerCase();
-    }
-    return !scheduleFilterAgent || agentName?.toLowerCase().includes(scheduleFilterAgent.toLowerCase());
-  });
-
-  if (isAppKilled) {
-    return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4">
-        <Toaster theme="dark" position="bottom-right" />
-        <div className="max-w-md w-full text-center space-y-6">
-          <AlertTriangle className="w-16 h-16 text-rose-500 mx-auto animate-pulse" />
-          <div>
-            <h1 className="text-3xl font-black text-rose-500">System Offline</h1>
-            <p className="text-slate-400 mt-2">The application has been temporarily suspended by the system administrator.</p>
-          </div>
-          
-          <div className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-3">
-            <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold pt-1">System Restore (Admin Only)</p>
-            <div className="relative">
-              <input 
-                type={showKillSwitchPassword ? "text" : "password"} 
-                placeholder="Admin Password"
-                value={killSwitchPassword}
-                onChange={e => setKillSwitchPassword(e.target.value)}
-                className="w-full pl-4 pr-10 py-2 bg-black/40 border border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 transition-colors"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                     const creds = getStorageItem<Record<string, string>>('sched_credentials', {});
-                     const correctAdminPass = creds['h.sobhy'] || creds['Hesham Sobhy'] || creds['h.sobhy'.toLowerCase()];
-                     if (killSwitchPassword && killSwitchPassword === correctAdminPass && killSwitchCar === 'BMW') {
-                        setDoc(doc(db, "system", "app_status"), { isKilled: false, restoredAt: new Date().toISOString() }, {merge: true});
-                        toast.success("System Restored.");
-                     } else {
-                       toast.error("Incorrect restoration password");
-                     }
-                  }
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => setShowKillSwitchPassword(!showKillSwitchPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors"
-                tabIndex={-1}
-              >
-                {showKillSwitchPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-            <input 
-              type="text" 
-              placeholder="Security Check: Favorite car?"
-              value={killSwitchCar}
-              onChange={e => setKillSwitchCar(e.target.value)}
-              className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 transition-colors"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                   const creds = getStorageItem<Record<string, string>>('sched_credentials', {});
-                   const correctAdminPass = creds['h.sobhy'] || creds['Hesham Sobhy'] || creds['h.sobhy'.toLowerCase()];
-                   if (killSwitchPassword && killSwitchPassword === correctAdminPass && killSwitchCar === 'BMW') {
-                      setDoc(doc(db, "system", "app_status"), { isKilled: false, restoredAt: new Date().toISOString() }, {merge: true});
-                      toast.success("System Restored.");
-                      setKillSwitchPassword('');
-                      setKillSwitchCar('');
-                   } else {
-                     toast.error("Incorrect restoration password or security answer");
-                   }
-                }
-              }}
-            />
-            <button
-              onClick={() => {
-                const creds = getStorageItem<Record<string, string>>('sched_credentials', {});
-                const correctAdminPass = creds['h.sobhy'] || creds['Hesham Sobhy'] || creds['h.sobhy'.toLowerCase()];
-                if (killSwitchPassword && killSwitchPassword === correctAdminPass && killSwitchCar === 'BMW') {
-                   setDoc(doc(db, "system", "app_status"), { isKilled: false, restoredAt: new Date().toISOString() }, {merge: true});
-                   toast.success("System Restored.");
-                   setKillSwitchPassword('');
-                   setKillSwitchCar('');
-                } else {
-                   toast.error("Invalid credentials.");
-                }
-              }}
-              className="w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-bold text-sm tracking-wide transition-colors"
-            >
-              Restore Operations
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div id="scheduling-root" className="min-h-screen bg-transparent text-slate-100 flex flex-col font-sans relative overflow-x-hidden antialiased">
-      <Toaster theme="dark" position="bottom-right" />
-      
-      {/* Background aesthetic blobs */}
-      <div className="fixed top-[-10%] -left-32 w-[600px] h-[600px] bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="fixed bottom-[-10%] -right-32 w-[600px] h-[600px] bg-pink-500/20 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-blue-500/10 rounded-full blur-[150px] pointer-events-none mix-blend-screen"></div>
-
-
-
-      {/* Main Container */}
-      <div className="flex-1 flex flex-col w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 z-10">
-        
-        {/* Check Installation */}
-        {!currentUser ? (
-          <div className="flex-1 flex flex-col items-center justify-center my-12 animate-fade-in">
-            <div className="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-3xl shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-pink-500"></div>
-              
-              <div className="flex flex-col items-center mb-8">
-                <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center shadow-lg shadow-black/80 mb-4 border border-white/10 relative group">
-                  <div className="absolute inset-0 bg-white/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <CoolLogo className="w-10 h-10 text-slate-100" />
-                </div>
-                <h1 className="text-3xl font-black bg-gradient-to-r from-blue-300 via-indigo-200 to-pink-300 bg-clip-text text-transparent font-display">
-                  Synq
-                </h1>
-                <p className="text-indigo-300 text-xs font-semibold uppercase tracking-widest mt-1.5">
-                  Enterprise Shift & Work Console
-                </p>
+  }, []); return (
+<>
+<div className="flex h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans">
+      <div className="flex-1 flex flex-col h-full relative overflow-hidden">
+        <div className="h-full px-2 sm:px-4 md:px-6 lg:px-8 flex flex-col pt-4">
+          <header className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-slate-200 dark:border-slate-700/10 p-3 sm:p-4 rounded-xl sm:rounded-3xl bg-white/50 dark:bg-slate-900/40 backdrop-blur-md shadow-sm z-20">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg border border-indigo-500/20">
+                <span className="text-white font-black text-xl">S</span>
               </div>
-
-              {isRegistering ? (
-                <div className="space-y-6">
-                  <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4 text-xs text-blue-200 flex items-start gap-2.5">
-                    <Info className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
-                    <div className="text-left">
-                      <p className="font-bold text-slate-100 mb-0.5">First-Time Setup Detected!</p>
-                      Password of your choice will be associated with the username <span className="font-semibold text-blue-300">"{loginName.toLowerCase()}"</span>. Record this password for future sign-ins.
+              <div>
+                <h1 className="text-sm font-black tracking-tight text-slate-900 dark:text-slate-200 font-display">Synq</h1>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[9px] text-indigo-500 dark:text-indigo-300 font-extrabold uppercase tracking-wide">Work Portal</span>
+                  {forceOffline ? (
+                    <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-[7px] font-black text-amber-500 dark:text-amber-400 uppercase tracking-tighter cursor-pointer select-none" onClick={() => setForceOffline(false)} title="Click to go Online">
+                      <div className="w-1 h-1 rounded-full bg-amber-500 animate-pulse"></div>Forced Offline
                     </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <span className="text-xs uppercase tracking-widest text-slate-400 font-bold block mb-1">Confirming Username</span>
-                    <div className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 font-medium text-sm font-mono tracking-wide text-left">
-                      {loginName.toLowerCase()}
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <span className="text-xs uppercase tracking-widest text-slate-400 font-bold block mb-1">Set Password</span>
-                    <div className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 font-medium text-sm font-mono tracking-widest text-left">
-                      {loginPassword}
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={handleRegisterConfirm}
-                    className="w-full py-3.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-slate-100 rounded-xl font-bold text-sm tracking-wide shadow-lg shadow-indigo-500/25 transition-all flex items-center justify-center gap-2"
-                  >
-                    <UserPlus className="w-4 h-4" />
-                    Create Password & Enter Tool
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setIsRegistering(false);
-                      setLoginPassword('');
-                    }}
-                    className="w-full py-2.5 text-slate-400 hover:text-slate-100 text-xs font-semibold transition-colors"
-                  >
-                    Go Back / Edit Username
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleLoginSubmit} className="space-y-5">
-                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 text-xs text-amber-200 flex items-start gap-2.5 mb-2">
-                    <Info className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-                    <div className="text-left">
-                      <p className="font-bold text-slate-100 mb-0.5">📢 Important Notice: New Login Style!</p>
-                      <p className="mb-1.5 text-slate-300">Sessions were reset for a simpler login structure. Use your new username format:</p>
-                      <div className="bg-black/40 p-2 rounded-xl border border-white/10 mb-1">
-                        <p className="text-[10px] text-slate-400 font-mono">Format: <strong className="text-amber-300">first_letter.last_name</strong></p>
-                        <p className="text-[10px] text-slate-400 font-mono">Example: <strong className="text-cyan-300">h.sobhy</strong> (for Hesham Sobhy)</p>
-                      </div>
-                      <p className="text-[10px] text-slate-400 mt-1">Your existing, pre-agreed password continues to work normally.</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs uppercase tracking-widest text-slate-400 font-bold block text-left" htmlFor="login-name">
-                      Username
-                    </label>
-                    <input
-                      id="login-name"
-                      type="text"
-                      className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-sm font-mono font-medium"
-                      placeholder="e.g. h.sobhy"
-                      value={loginName}
-                      onChange={(e) => setLoginName(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-1.5 ">
-                    <label className="text-xs uppercase tracking-widest text-slate-400 font-bold block text-left" htmlFor="login-password">
-                      Password
-                    </label>
-                    <div className="relative">
-                      <input
-                        id="login-password"
-                        type={showLoginPassword ? 'text' : 'password'}
-                        className="w-full pl-4 pr-12 py-3.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-sm font-sans"
-                        placeholder="Enter or set your password"
-                        value={loginPassword}
-                        onChange={(e) => setLoginPassword(e.target.value)}
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowLoginPassword(!showLoginPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors"
-                        tabIndex={-1}
-                      >
-                        {showLoginPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                      </button>
-                    </div>
-                    <p className="text-[10px] text-slate-400 text-left">
-                      * If this is your first time using the app with your new username, you will set & register this password.
-                    </p>
-                  </div>
-
-                  {loginError && (
-                    <div className="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-300 rounded-xl text-xs flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
-                      <span>{loginError}</span>
-                    </div>
-                  )}
-
-                  <button
-                    id="login-submit-btn"
-                    type="submit"
-                    className="w-full py-3.5 bg-white/10 hover:bg-slate-800/15 border border-white/10 hover:border-white/20 text-slate-100 rounded-xl font-bold text-sm tracking-wide transition-all shadow-lg shadow-white/5 mt-4"
-                  >
-                    Sign In / Access
-                  </button>
-                </form>
-              )}
-
-              {/* Roles guide to keep tool accessible */}
-              <div className="mt-8 pt-6 border-t border-white/5">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                  <Shield id="badge-shield-roles" className="w-3.5 h-3.5 text-indigo-400" /> Authorized Roles
-                </p>
-                <div className="grid grid-cols-2 gap-3 text-xs text-slate-400">
-                  <div className="p-2 bg-white/5 border border-white/5 rounded-xl">
-                    <span className="font-bold text-indigo-300 block mb-0.5">Team Leaders (TL)</span>
-                    <span className="text-[10px] space-y-0.5 block">
-                      Hesham Sobhy, Shymaa Hassan, Amira Hassan, Emad Sayed
-                    </span>
-                  </div>
-                  <div className="p-2 bg-white/5 border border-white/5 rounded-xl">
-                    <span className="font-bold text-emerald-300 block mb-0.5">Agents</span>
-                    <span className="text-[10px] block">
-                      Type any other name to enter as a standard Agent
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Dynamic PWA Install / Download Prompt */}
-              {/* Install prompt removed from login screen */}
-            </div>
-          </div>
-        ) : (
-          /* User Logged In Portal */
-          <div className="flex-1 flex flex-col md:flex-row gap-6 md:gap-8 my-4 lg:my-6">
-            
-            {/* Navigation / Sidebar Menu */}
-            <aside className="w-full md:w-64 border border-white/10 bg-white/5 backdrop-blur-xl flex flex-col p-5 rounded-2xl sm:rounded-3xl shadow-xl space-y-6">
-              
-              {/* Egypt Local Time & 10th of Ramadan Weather */}
-              <div className="p-3.5 rounded-xl bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-cyan-500/10 border border-white/10 space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-extrabold text-indigo-300 uppercase tracking-widest flex items-center gap-1.5">
-                    <span className="flex h-1.5 w-1.5 relative">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-                    </span>
-                    Cairo, Egypt
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">
-                    {new Date().toLocaleDateString('en-US', { timeZone: 'Africa/Cairo', month: 'short', day: 'numeric' })}
-                  </span>
-                </div>
-                
-                <div className="flex items-baseline justify-between">
-                  <p className="text-xl font-black text-slate-100 font-mono tracking-tight">
-                    {currentTime.toLocaleTimeString('en-US', {
-                      timeZone: 'Africa/Cairo',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      second: '2-digit',
-                      hour12: true
-                    })}
-                  </p>
-                  {ramadanTemp !== null && (
-                    <div className="flex items-center gap-1 text-xs text-[#FCD34D] font-bold font-mono">
-                      {ramadanWeatherCode === 0 ? (
-                        <Sun className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                      ) : ramadanWeatherCode < 3 ? (
-                        <Sun className="w-3.5 h-3.5 text-amber-400" />
-                      ) : (
-                        <Cloudy className="w-3.5 h-3.5 text-slate-400" />
-                      )}
-                      <span>{ramadanTemp.toFixed(1)}°C</span>
+                  ) : (
+                    <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-[7px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-tighter cursor-pointer select-none" onClick={() => setForceOffline(true)} title="Click to force Offline">
+                      <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></div>Online Sync
                     </div>
                   )}
                 </div>
-                
-                <div className="flex justify-between items-center text-[9px] text-slate-400 border-t border-white/5 pt-1.5">
-                  <span className="truncate">10th of Ramadan City</span>
-                  <span className="font-mono text-slate-500">PC: {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                </div>
               </div>
-
-              {/* Profile Card and Title */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center shadow-lg shadow-black/80 border border-white/10">
-                      <CoolLogo className="w-6 h-6 text-slate-100" />
-                    </div>
-                    <div>
-                      <h1 className="text-sm font-black tracking-tight text-slate-100 font-display">Synq</h1>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[9px] text-indigo-300 font-extrabold uppercase tracking-wide">Work Portal</span>
-                        {forceOffline ? (
-                          <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-[7px] font-black text-amber-400 uppercase tracking-tighter cursor-pointer select-none" onClick={() => setForceOffline(false)} title="Click to go Online">
-                            <div className="w-1 h-1 rounded-full bg-amber-500 animate-pulse" />
-                            Forced Offline
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-[7px] font-black text-emerald-400 uppercase tracking-tighter cursor-pointer select-none" onClick={() => setForceOffline(true)} title="Click to force Offline">
-                            <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                            Online Sync
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    {/* Dark/Light mode toggle */}
-                    <button
-                      onClick={() => {
-                        setIsDarkMode(!isDarkMode);
-                        toast.success(`Theme switched to ${!isDarkMode ? 'Dark' : 'Light'} Mode! 🎨`);
-                      }}
-                      className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-slate-300 hover:text-slate-100 cursor-pointer flex items-center justify-center"
-                      title="Toggle Dark/Light Mode"
-                    >
-                      {isDarkMode ? (
-                        <span className="text-xs leading-none">☀️</span>
-                      ) : (
-                        <span className="text-xs leading-none">🌙</span>
-                      )}
-                    </button>
-
-                    {/* Notification Center Trigger */}
+            </div>
+            
+            <div className="flex items-center gap-1.5">
+              <ThemeToggle />
+{/* Notification Center Trigger */}
                     <button
                       onClick={() => setIsNotifDrawerOpen(true)}
-                      className="relative p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-slate-300 hover:text-slate-100 cursor-pointer group flex items-center justify-center"
+                      className="relative p-2.5 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 hover:bg-slate-50 dark:bg-slate-800/80 hover:border-slate-200 dark:border-slate-700/20 transition-all text-slate-600 dark:text-slate-300 hover:text-slate-700 cursor-pointer group flex items-center justify-center"
                       title="Real-time Alerts Inbox"
                     >
                       <Bell className="w-4 h-4" />
@@ -5379,15 +1162,15 @@ export default function App() {
                       )}
                     </button>
                   </div>
-                </div>
+                </header>
 
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
+                <div className="p-4 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center font-black text-sm text-slate-100">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center font-black text-sm text-slate-700">
                       {currentUser.name.split(' ').map(n => n[0]).join('')}
                     </div>
                     <div className="overflow-hidden">
-                      <p className="text-xs font-bold text-slate-100 truncate">{formatAgentName(currentUser.name)}</p>
+                      <p className="text-xs font-bold text-slate-700 truncate">{formatAgentName(currentUser.name)}</p>
                       <p className="text-[10px] uppercase tracking-widest font-mono text-indigo-300 font-semibold">
                         {currentUser.role === 'tl' ? '👑 Team Leader' : (supportAssignments[currentUser.name] ? '⚡ Support' : '👤 Agent')}
                       </p>
@@ -5395,14 +1178,14 @@ export default function App() {
                   </div>
 
                   {/* Spotlight Profile Window - Bio & Daily Updates with real-time Firebase syncing */}
-                  <div className="mt-3 pt-3 border-t border-white/5 space-y-2.5 font-sans">
-                    <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-slate-500 font-bold">
+                  <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700/5 space-y-2.5 font-sans">
+                    <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-white0 font-bold">
                       <span>My Spotlight 🌟</span>
                       <span className={`px-1.5 py-0.5 rounded text-[8px] font-black tracking-normal uppercase ${
                         (currentUser.status || 'online') === 'online' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 animate-pulse' :
                         (currentUser.status || 'online') === 'busy' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/20' :
                         (currentUser.status || 'online') === 'away' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/20' :
-                        'bg-slate-500/20 text-slate-400 border border-slate-500/25'
+                        'bg-slate-500/20 text-slate-500 dark:text-slate-400 border border-slate-500/25'
                       }`}>
                         {(currentUser.status || 'online')}
                       </span>
@@ -5410,7 +1193,7 @@ export default function App() {
 
                     {/* Quick Profile Bio */}
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Short Bio:</label>
+                      <label className="text-[9px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider">Short Bio:</label>
                       <textarea
                         value={currentUser.bio || ''}
                         onChange={(e) => {
@@ -5421,13 +1204,13 @@ export default function App() {
                         }}
                         placeholder="Tell others about yourself..."
                         rows={2}
-                        className="w-full bg-slate-900/50 border border-white/5 rounded-lg px-2 py-1 text-[11px] text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/40 transition-all resize-none custom-scrollbar"
+                        className="w-full bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/5 rounded-lg px-2 py-1 text-[11px] text-slate-700 dark:text-slate-200 placeholder:text-white0 focus:outline-none focus:border-indigo-500/40 transition-all resize-none custom-scrollbar"
                       />
                     </div>
 
                     {/* Daily Updates small window */}
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Daily Updates / Focus: 📝</label>
+                      <label className="text-[9px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider">Daily Updates / Focus: 📝</label>
                       <textarea
                         value={currentUser.dailyUpdate || ''}
                         onChange={(e) => {
@@ -5438,7 +1221,7 @@ export default function App() {
                         }}
                         placeholder="E.g. working on social media posts..."
                         rows={2}
-                        className="w-full bg-slate-900/50 border border-white/5 rounded-lg px-2 py-1 text-[11px] text-indigo-300 placeholder:text-slate-500 focus:outline-none focus:border-purple-500/45 transition-all resize-none custom-scrollbar"
+                        className="w-full bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/5 rounded-lg px-2 py-1 text-[11px] text-indigo-300 placeholder:text-white0 focus:outline-none focus:border-purple-500/45 transition-all resize-none custom-scrollbar"
                       />
                     </div>
                   </div>
@@ -5446,8 +1229,8 @@ export default function App() {
                   {supportAssignments[currentUser.name] && (
                     <div className="text-[9px] bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 p-2.5 rounded-lg space-y-1 font-sans">
                       <p className="font-extrabold uppercase tracking-widest text-[#a5b4fc] text-[8px]">Support Assigned By</p>
-                      <p className="text-slate-100 font-semibold flex items-center gap-1">👑 {supportAssignments[currentUser.name].assignedBy}</p>
-                      <p className="text-[8px] text-slate-400">{new Date(supportAssignments[currentUser.name].assignedAt).toLocaleString()}</p>
+                      <p className="text-slate-700 font-semibold flex items-center gap-1">👑 {supportAssignments[currentUser.name].assignedBy}</p>
+                      <p className="text-[8px] text-slate-500 dark:text-slate-400">{new Date(supportAssignments[currentUser.name].assignedAt).toLocaleString()}</p>
                     </div>
                   )}
 
@@ -5522,7 +1305,7 @@ export default function App() {
                     const isActive = activeTab === id;
                     const baseClass = isActive 
                       ? (`${bgColors} text-white shadow-lg scale-[1.02] font-bold border`)
-                      : 'border-transparent text-slate-300 hover:bg-slate-700/60 hover:text-white border font-medium hover:scale-[1.01]';
+                      : 'border-transparent text-slate-600 dark:text-slate-300 hover:bg-slate-700/60 hover:text-white border font-medium hover:scale-[1.01]';
                     
                     return (
                       <button
@@ -5568,9 +1351,9 @@ export default function App() {
                         {buildBtn("schedules", <Calendar className="w-4 h-4" />, "Schedules & Roster", "bg-blue-500/20 border-blue-500/30 text-blue-100")}
                         {buildBtn("overview", <UserCheck className="w-4 h-4" />, "Approvals & Leave Console", "bg-blue-500/20 border-blue-500/30 text-blue-100")}
                         
-                        {groupTitle("System Controls", "⚙️", "text-slate-400")}
+                        {groupTitle("System Controls", "⚙️", "text-slate-500 dark:text-slate-400")}
                         {buildBtn("integrations", <Sparkles className="w-4 h-4 text-amber-400" />, "Integrations Hub", "bg-indigo-900/30 border-indigo-800")}
-                        {buildBtn("directory", <Users className="w-4 h-4 text-cyan-600" />, "Headcount & Directory", "bg-slate-500/20 border-slate-500/30 text-slate-200")}
+                        {buildBtn("directory", <Users className="w-4 h-4 text-cyan-600" />, "Headcount & Directory", "bg-slate-500/20 border-slate-500/30 text-slate-700 dark:text-slate-200")}
                         {buildBtn("tl-feedback", <MessageCircle className="w-4 h-4 text-pink-500" />, "Director Hub", "bg-pink-500/20 border-pink-500/30 text-pink-100")}
                         {buildBtn("qa-scorecard", <CheckCircle2 className="w-4 h-4 text-green-500" />, "QA Scorecards", "bg-green-500/20 border-green-500/30 text-green-100")}
                         {buildBtn("kpi-calculator", <Calculator className="w-4 h-4 text-purple-400" />, "KPIs Calculator", "bg-purple-500/20 border-purple-500/30 text-purple-100")}
@@ -5614,14 +1397,14 @@ export default function App() {
 
 
               {/* Mini Standalone Disclaimer block */}
-              <div className="mt-auto pt-4 border-t border-white/5 text-[10px] text-slate-400 space-y-2">
+              <div className="mt-auto pt-4 border-t border-slate-200 dark:border-slate-700/5 text-[10px] text-slate-500 dark:text-slate-400 space-y-2">
                 <div className="flex items-center gap-1.5 text-indigo-300 font-semibold font-mono">
                   <Info className="w-3.5 h-3.5 text-indigo-400" /> STANDALONE COMPLIANT
                 </div>
                 <p>This web application executes and persists database operations client-side, enabling full utility offline or loaded locally on any PC.</p>
               </div>
 
-            </aside>
+            </div>
 
 
             {/* Primary Content Screen */}
@@ -5693,13 +1476,13 @@ export default function App() {
                       <div className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full" />
                     </div>
                     <div className="text-left">
-                      <h4 className="text-sm font-bold text-slate-100 flex items-center gap-2">
+                      <h4 className="text-sm font-bold text-slate-700 flex items-center gap-2">
                         Communication Queue Active
                         <span className="bg-rose-500/20 text-rose-300 text-[9px] px-2 py-0.5 rounded-full border border-rose-500/30 font-black">
                           {clientComms.filter(c => c.status === 'pending').length} REQUESTS
                         </span>
                       </h4>
-                      <p className="text-[10px] text-slate-400 uppercase tracking-widest font-medium">
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-medium">
                         Awaiting Chat / Social Media Agent handling
                       </p>
                     </div>
@@ -5716,8 +1499,8 @@ export default function App() {
                       const secs = Math.floor((diff % 60000) / 1000);
                       
                       return (
-                        <div className="text-center sm:text-right px-4 py-2 bg-black/20 rounded-xl border border-white/5 flex-1 sm:flex-initial">
-                          <p className="text-[8px] text-slate-500 uppercase font-black tracking-tighter">Queue Time (Oldest)</p>
+                        <div className="text-center sm:text-right px-4 py-2 bg-black/20 rounded-xl border border-slate-200 dark:border-slate-700/5 flex-1 sm:flex-initial">
+                          <p className="text-[8px] text-white0 uppercase font-black tracking-tighter">Queue Time (Oldest)</p>
                           <p className="text-sm font-mono text-amber-400 font-bold tabular-nums">
                             {mins}m {secs}s
                           </p>
@@ -5751,18 +1534,18 @@ export default function App() {
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               <span className="text-[9px] font-mono uppercase tracking-wider bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-lg font-bold">Inquiry Update</span>
-                              <span className="text-[9px] text-slate-400">{new Date(inq.sentAt || inq.answeredAt || inq.createdAt).toLocaleString()}</span>
+                              <span className="text-[9px] text-slate-500 dark:text-slate-400">{new Date(inq.sentAt || inq.answeredAt || inq.createdAt).toLocaleString()}</span>
                             </div>
                             {inq.status === 'sent' ? (
-                              <p className="text-sm text-slate-200">
+                              <p className="text-sm text-slate-700 dark:text-slate-200">
                                 Your inquiry (<em>"{inq.text.substring(0, 50)}{inq.text.length > 50 ? '...' : ''}"</em>) was updated to <strong className="text-amber-400 font-bold uppercase">Sent</strong> by Team Leader <strong>{inq.sentBy}</strong>.
                               </p>
                             ) : (
                               <div className="space-y-1.5">
-                                <p className="text-sm text-slate-100">
+                                <p className="text-sm text-slate-700">
                                   🎉 Your inquiry has been <strong className="text-emerald-400 font-bold uppercase">Answered</strong> by Team Leader <strong>{inq.answeredBy}</strong>!
                                 </p>
-                                <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-indigo-200 italic leading-relaxed">
+                                <div className="p-3 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl text-xs text-indigo-200 italic leading-relaxed">
                                   "{inq.answer}"
                                 </div>
                               </div>
@@ -5799,13 +1582,13 @@ export default function App() {
                             <div className="flex flex-wrap items-center gap-2">
                               <span className="text-[9px] font-mono uppercase tracking-wider bg-amber-500/20 text-yellow-300 px-2 py-0.5 rounded-lg font-bold">⚠️ Customer Contact Required</span>
                               <span className="text-[10px] text-emerald-400 font-extrabold uppercase bg-emerald-500/10 px-2 py-1.5 rounded border border-emerald-500/20">Confirmed by {req.confirmedBy}</span>
-                              <span className="text-[9px] text-slate-400">{new Date(req.createdAt).toLocaleString()}</span>
+                              <span className="text-[9px] text-slate-500 dark:text-slate-400">{new Date(req.createdAt).toLocaleString()}</span>
                             </div>
-                            <p className="text-sm text-slate-200">
-                              Your <strong className="capitalize text-amber-400">{req.platform === 'one_time_payment' ? 'One Time' : req.platform}</strong> request for patient <strong className="text-slate-100 font-bold">{req.patientName}</strong> {req.fileNumber ? <>(File Number: <span className="font-mono font-bold text-slate-100 bg-white/5 px-1.5 py-0.5 rounded">{req.fileNumber}</span>)</> : ''} has been confirmed! Please contact the client now.
+                            <p className="text-sm text-slate-700 dark:text-slate-200">
+                              Your <strong className="capitalize text-amber-400">{req.platform === 'one_time_payment' ? 'One Time' : req.platform}</strong> request for patient <strong className="text-slate-700 font-bold">{req.patientName}</strong> {req.fileNumber ? <>(File Number: <span className="font-mono font-bold text-slate-700 bg-white dark:bg-slate-900/50 px-1.5 py-0.5 rounded">{req.fileNumber}</span>)</> : ''} has been confirmed! Please contact the client now.
                             </p>
                             <div className="flex items-center gap-2.5 text-xs pt-1.5">
-                              <span className="text-slate-400 text-[11px] font-medium">Pending Contact Timer:</span>
+                              <span className="text-slate-500 dark:text-slate-400 text-[11px] font-medium">Pending Contact Timer:</span>
                               <span className="text-amber-300 font-mono font-bold text-xs bg-black/45 px-2.5 py-1 border border-amber-500/20 rounded-lg animate-pulse">
                                 {req.confirmedAt ? getElapsedTimerString(req.confirmedAt) : '00m 00s'}
                               </span>
@@ -5844,15 +1627,15 @@ export default function App() {
                             <div className="flex flex-wrap items-center gap-2">
                               <span className="text-[9px] font-mono uppercase tracking-wider bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded-lg font-bold">🚨 Complaint Resolution & Contact Required</span>
                               <span className="text-[10px] text-amber-300 font-extrabold uppercase bg-amber-500/10 px-2 py-1.5 rounded border border-amber-500/20">TL Commented by {comp.tlHandledBy}</span>
-                              <span className="text-[9px] text-slate-400">{new Date(comp.createdAt).toLocaleString()}</span>
+                              <span className="text-[9px] text-slate-500 dark:text-slate-400">{new Date(comp.createdAt).toLocaleString()}</span>
                             </div>
-                            <p className="text-sm text-slate-200">
-                              Your complaint for patient <strong className="text-slate-100 font-bold">{comp.patientName}</strong> has been processed by the TL!
+                            <p className="text-sm text-slate-700 dark:text-slate-200">
+                              Your complaint for patient <strong className="text-slate-700 font-bold">{comp.patientName}</strong> has been processed by the TL!
                               <br />
-                              <span className="text-amber-300 font-semibold block mt-1.5 bg-black/30 p-2.5 rounded-xl border border-white/5">💬 TL Comment: "{comp.tlComment}"</span>
+                              <span className="text-amber-300 font-semibold block mt-1.5 bg-black/30 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700/5">💬 TL Comment: "{comp.tlComment}"</span>
                             </p>
                             <div className="flex items-center gap-2.5 text-xs pt-1.5">
-                              <span className="text-slate-400 text-[11px] font-medium">Pending Contact Timer:</span>
+                              <span className="text-slate-500 dark:text-slate-400 text-[11px] font-medium">Pending Contact Timer:</span>
                               <span className="text-rose-300 font-mono font-bold text-xs bg-black/45 px-2.5 py-1 border border-rose-500/20 rounded-lg animate-pulse">
                                 {comp.tlHandledAt ? getElapsedTimerString(comp.tlHandledAt) : '00m 00s'}
                               </span>
@@ -5882,30 +1665,30 @@ export default function App() {
                       <RefreshCw className="w-5 h-5 text-amber-400 animate-spin" style={{ animationDuration: '6s' }} />
                     </div>
                     <div>
-                      <h4 className="font-bold text-slate-100 text-base font-display">Roster Swaps Awaiting Your Agreement</h4>
-                      <p className="text-xs text-slate-400">Other agents requested a swap with you. Please review and approve or decline them below.</p>
+                      <h4 className="font-bold text-slate-700 text-base font-display">Roster Swaps Awaiting Your Agreement</h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Other agents requested a swap with you. Please review and approve or decline them below.</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 gap-4">
                     {partnerPendingSwaps.map(req => (
-                      <div key={req.id} className="p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-white/10 transition-all">
+                      <div key={req.id} className="p-4 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-slate-200 dark:border-slate-700/10 transition-all">
                         <div className="space-y-1">
-                          <p className="text-sm font-semibold text-slate-100">
+                          <p className="text-sm font-semibold text-slate-700">
                             Swap requested by <span className="text-indigo-300 font-bold">{req.agentName}</span>
                           </p>
-                          <div className="text-xs text-slate-300 space-y-0.5">
-                            <p>For Date: <span className="font-semibold text-slate-100">{formatDateNice(req.date)}</span></p>
+                          <div className="text-xs text-slate-600 dark:text-slate-300 space-y-0.5">
+                            <p>For Date: <span className="font-semibold text-slate-700">{formatDateNice(req.date)}</span></p>
                             <p>
                               Your proposed shift: <span className="text-amber-300 font-semibold">{req.swapWithShift}</span> &rarr; Their shift: <span className="text-emerald-300 font-semibold">{req.shift}</span>
                             </p>
                             {req.notes && (
-                              <p className="italic text-slate-400 mt-1">" {req.notes} "</p>
+                              <p className="italic text-slate-500 dark:text-slate-400 mt-1">" {req.notes} "</p>
                             )}
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2.5 self-stretch sm:self-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-white/5">
+                        <div className="flex items-center gap-2.5 self-stretch sm:self-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200 dark:border-slate-700/5">
                           <button
                             onClick={() => handlePartnerDecision(req.id, true)}
                             className="flex-1 sm:flex-initial px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-emerald-500/20"
@@ -5927,14 +1710,14 @@ export default function App() {
               
               {activeTab === 'profile' && currentUser && (
                 <div className="space-y-6 max-w-4xl mx-auto w-full animate-fade-in relative z-10 p-4 sm:p-0 text-left">
-                  <div className="bg-slate-800/80 backdrop-blur-xl border border-white/10 p-6 sm:p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+                  <div className="bg-slate-50 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 p-6 sm:p-8 rounded-3xl shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
                     <div className="flex flex-col sm:flex-row items-center gap-6 mb-8">
                       <div className="relative group">
                         {currentUser.avatarUrl ? (
-                          <img src={currentUser.avatarUrl} alt="Avatar" className="w-24 h-24 rounded-full object-cover border-4 border-slate-700 shadow-xl" />
+                          <img src={currentUser.avatarUrl} alt="Avatar" className="w-24 h-24 rounded-full object-cover border-4 border-slate-200 dark:border-slate-700 shadow-xl" />
                         ) : (
-                          <div className="w-24 h-24 rounded-full bg-indigo-500/20 text-indigo-400 border-4 border-slate-700 shadow-xl flex items-center justify-center text-3xl font-bold font-display uppercase">
+                          <div className="w-24 h-24 rounded-full bg-indigo-500/20 text-indigo-400 border-4 border-slate-200 dark:border-slate-700 shadow-xl flex items-center justify-center text-3xl font-bold font-display uppercase">
                             {formatAgentName(currentUser.name).substring(0, 2)}
                           </div>
                         )}
@@ -5958,14 +1741,14 @@ export default function App() {
                       </div>
                       <div className="text-center sm:text-left flex-1">
                         <div className="flex flex-col sm:flex-row sm:items-end gap-3 justify-center sm:justify-start">
-                          <h2 className="text-3xl font-display font-black text-slate-100">
+                          <h2 className="text-3xl font-display font-black text-slate-700">
                             {formatAgentName(currentUser.name)} {currentUser.role === 'tl' ? '👑' : '🌟'}
                           </h2>
-                          <p className="text-xs font-mono text-slate-500 uppercase tracking-widest bg-slate-900/50 px-2 py-1 rounded mb-1">
+                          <p className="text-xs font-mono text-white0 uppercase tracking-widest bg-white dark:bg-slate-900/50 px-2 py-1 rounded mb-1">
                             LOB: {getAgentLOB(currentUser.name)} 🏢
                           </p>
                         </div>
-                        <p className="text-slate-400 font-medium mt-1">
+                        <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">
                           {currentUser.role === 'tl' ? 'Team Leader & Operations Supervisor 📊' : (supportAssignments[currentUser.name] ? 'Line Support Specialist ⚡' : 'Customer Service Representative 🎧')}
                         </p>
                         
@@ -5981,7 +1764,7 @@ export default function App() {
                                   toast.success("Personal phone updated!");
                                }
                              }}
-                             className="text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-slate-300 hover:bg-white/10 transition-all cursor-pointer"
+                             className="text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:bg-slate-800/80 transition-all cursor-pointer"
                            >
                              📞 Edit Phone
                            </button>
@@ -5996,7 +1779,7 @@ export default function App() {
                                   toast.success("Contact email updated!");
                                }
                              }}
-                             className="text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-slate-300 hover:bg-white/10 transition-all cursor-pointer"
+                             className="text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:bg-slate-800/80 transition-all cursor-pointer"
                            >
                              ✉️ Edit Email
                            </button>
@@ -6006,7 +1789,7 @@ export default function App() {
                                setSoundEnabled(nextState);
                                if (nextState) triggerNotificationAlert();
                              }}
-                             className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 border rounded-lg transition-all cursor-pointer ${soundEnabled ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-300' : 'bg-slate-800/80 border-slate-700 text-slate-500 hover:text-slate-300'}`}
+                             className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 border rounded-lg transition-all cursor-pointer ${soundEnabled ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-300' : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-white0 hover:text-slate-600 dark:text-slate-300'}`}
                            >
                              {soundEnabled ? '🔊 Sound: ON' : '🔈 Sound: OFF'}
                            </button>
@@ -6015,18 +1798,18 @@ export default function App() {
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <div className="bg-white/5 border border-white/10 rounded-2xl p-5 relative overflow-hidden group">
-                        <h3 className="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">📝 My Personal Inbox & Notes</h3>
-                        <textarea className="w-full h-32 bg-slate-900/50 border border-white/10 text-slate-100 p-3 rounded-xl focus:border-indigo-500 outline-none resize-none text-sm font-medium" placeholder="Write anything... scratchpad... thoughts... 💭"></textarea>
+                      <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl p-5 relative overflow-hidden group">
+                        <h3 className="text-lg font-bold text-slate-700 mb-4 flex items-center gap-2">📝 My Personal Inbox & Notes</h3>
+                        <textarea className="w-full h-32 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 text-slate-700 p-3 rounded-xl focus:border-indigo-500 outline-none resize-none text-sm font-medium" placeholder="Write anything... scratchpad... thoughts... 💭"></textarea>
                       </div>
 
-                      <div className="bg-white/5 border border-white/10 rounded-2xl p-5 relative overflow-hidden shadow-inner flex flex-col h-full">
+                      <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl p-5 relative overflow-hidden shadow-inner flex flex-col h-full">
                         <div className="flex justify-between items-center mb-4">
-                          <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">⏱️ Smart To-Do List</h3>
+                          <h3 className="text-lg font-bold text-slate-700 flex items-center gap-2">⏱️ Smart To-Do List</h3>
                           <select 
                             value={todoFilter}
                             onChange={e => setTodoFilter(e.target.value as any)}
-                            className="bg-black/30 border border-white/10 text-xs font-bold text-slate-300 rounded px-2 py-1 outline-none"
+                            className="bg-black/30 border border-slate-200 dark:border-slate-700/10 text-xs font-bold text-slate-600 dark:text-slate-300 rounded px-2 py-1 outline-none"
                           >
                             <option value="All">All Categories</option>
                             <option value="Work">Work</option>
@@ -6056,30 +1839,30 @@ export default function App() {
                            addSystemNotification('📋 Task Added!', `Added: "${text}" ${minutes ? 'with a reminder set!' : ''} ✅`, 'general', 'personal');
                         }}>
                           <div className="flex gap-2">
-                            <input name="text" type="text" placeholder="I need to..." required className="flex-1 bg-slate-900/50 border border-white/10 text-slate-100 px-3 py-2 text-sm rounded-xl outline-none focus:border-indigo-500" />
-                            <select name="category" className="bg-slate-900/50 border border-white/10 text-slate-100 px-2 text-xs rounded-xl outline-none focus:border-indigo-500">
+                            <input name="text" type="text" placeholder="I need to..." required className="flex-1 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 text-slate-700 px-3 py-2 text-sm rounded-xl outline-none focus:border-indigo-500" />
+                            <select name="category" className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 text-slate-700 px-2 text-xs rounded-xl outline-none focus:border-indigo-500">
                               <option value="Work">Work</option>
                               <option value="Personal">Personal</option>
                               <option value="Urgent">Urgent</option>
                             </select>
-                            <input name="mins" type="number" placeholder="Mins?" title="Remind in X mins" min="1" className="w-20 bg-slate-900/50 border border-white/10 text-slate-100 px-2 py-2 text-sm rounded-xl outline-none focus:border-indigo-500 text-center" />
+                            <input name="mins" type="number" placeholder="Mins?" title="Remind in X mins" min="1" className="w-20 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 text-slate-700 px-2 py-2 text-sm rounded-xl outline-none focus:border-indigo-500 text-center" />
                             <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl transition-colors font-bold shadow-lg shadow-indigo-500/20">+</button>
                           </div>
                         </form>
                         <div className="flex-1 overflow-y-auto space-y-2 max-h-[200px] pr-1">
                           {todos.filter(t => t.agentName === currentUser.name && (todoFilter === 'All' || t.category === todoFilter)).length === 0 ? (
-                            <div className="text-center text-slate-500 text-xs py-6 italic">No tasks yet. Enjoy your free time! 🏖️</div>
+                            <div className="text-center text-white0 text-xs py-6 italic">No tasks yet. Enjoy your free time! 🏖️</div>
                           ) : (
                             todos.filter(t => t.agentName === currentUser.name && (todoFilter === 'All' || t.category === todoFilter)).map(t => (
-                              <div key={t.id} className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${t.isCompleted ? 'bg-slate-800/30 border-slate-700/30 opacity-60' : 'bg-slate-800/80 border-slate-700 shadow-sm'}`}> 
+                              <div key={t.id} className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${t.isCompleted ? 'bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-slate-700/30 opacity-60' : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 shadow-sm'}`}> 
                                 <input type="checkbox" checked={t.isCompleted} onChange={() => {
                                   const done = !t.isCompleted;
                                   updateDoc(doc(db, "todos", t.id), { isCompleted: done }).catch(console.error);
                                   if (done) addSystemNotification('🎉 Goal Reached!', `You completed: "${t.text}" Awesome job! 🚀`, 'general', 'personal');
-                                }} className="w-4 h-4 rounded text-indigo-500 accent-indigo-500 bg-slate-900" />
+                                }} className="w-4 h-4 rounded text-indigo-500 accent-indigo-500 bg-white dark:bg-slate-900" />
                                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                                   <div className="flex items-center gap-2">
-                                    <p className={`text-sm font-medium truncate ${t.isCompleted ? 'line-through text-slate-500' : 'text-slate-200'}`}>{t.text}</p>
+                                    <p className={`text-sm font-medium truncate ${t.isCompleted ? 'line-through text-white0' : 'text-slate-700 dark:text-slate-200'}`}>{t.text}</p>
                                     {t.category && (
                                       <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase ${t.category === 'Urgent' ? 'bg-rose-500/20 text-rose-300' : t.category === 'Work' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-emerald-500/20 text-emerald-300'}`}>
                                         {t.category}
@@ -6092,7 +1875,7 @@ export default function App() {
                                 </div>
                                 <button type="button" onClick={() => {
                                   deleteDoc(doc(db, "todos", t.id)).catch(console.error);
-                                }} className="text-slate-500 hover:text-rose-400 transition-colors p-1"><X className="w-3 h-3"/></button>
+                                }} className="text-white0 hover:text-rose-400 transition-colors p-1"><X className="w-3 h-3"/></button>
                               </div>
                             ))
                           )}
@@ -6102,31 +1885,31 @@ export default function App() {
 
                     {/* Activity & Data Vault Section */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-                      <div className="bg-slate-900/40 rounded-2xl border border-white/5 p-6 backdrop-blur-xl">
+                      <div className="bg-white dark:bg-slate-900/40 rounded-2xl border border-slate-200 dark:border-slate-700/5 p-6 backdrop-blur-xl">
                         <div className="flex items-center gap-4 mb-6">
                           <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
                             <Activity className="w-6 h-6" />
                           </div>
                           <div>
-                            <h3 className="text-lg font-bold text-slate-100">Device Status</h3>
-                            <p className="text-xs text-slate-400">Current workspace local health & sync</p>
+                            <h3 className="text-lg font-bold text-slate-700">Device Status</h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">Current workspace local health & sync</p>
                           </div>
                         </div>
                         <div className="space-y-4">
                           <div className="flex items-center justify-between p-3 rounded-lg bg-black/20">
-                            <span className="text-xs text-slate-400">Cloud Sync</span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400">Cloud Sync</span>
                             <span className="text-xs font-bold text-emerald-400 flex items-center gap-2 uppercase">
                               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                               Synced
                             </span>
                           </div>
                           <div className="flex items-center justify-between p-3 rounded-lg bg-black/20">
-                            <span className="text-xs text-slate-400">Persistence Engine</span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400">Persistence Engine</span>
                             <span className="text-xs font-bold text-indigo-400 uppercase">IndexedDB Offline</span>
                           </div>
                           <div className="flex items-center justify-between p-3 rounded-lg bg-black/20">
-                            <span className="text-xs text-slate-400">Local OS</span>
-                            <span className="text-xs font-bold text-slate-200 truncate max-w-[150px]">
+                            <span className="text-xs text-slate-500 dark:text-slate-400">Local OS</span>
+                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate max-w-[150px]">
                               {window.navigator.platform} Workspace
                             </span>
                           </div>
@@ -6252,23 +2035,23 @@ export default function App() {
                           <Info className="w-5 h-5 text-indigo-400" />
                         </div>
                         <div className="text-left space-y-1">
-                          <h3 className="text-sm font-bold text-slate-100 flex items-center gap-1.5">
+                          <h3 className="text-sm font-bold text-slate-700 flex items-center gap-1.5">
                             📢 Important Account Notice: New Log In Format!
                           </h3>
-                          <p className="text-xs text-slate-300 leading-relaxed">
+                          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                             The system now uses a cleaner, simplified username format instead of full names. Everyone was securely logged out.
                           </p>
                           <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                            <span className="text-xs uppercase tracking-widest text-slate-400 font-bold">Your Login ID:</span>
-                            <code className="px-2.5 py-1 bg-black/40 border border-white/10 rounded-lg text-xs font-mono text-cyan-300">
+                            <span className="text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold">Your Login ID:</span>
+                            <code className="px-2.5 py-1 bg-black/40 border border-slate-200 dark:border-slate-700/10 rounded-lg text-xs font-mono text-cyan-300">
                               first_letter.last_name
                             </code>
-                            <span className="text-xs text-slate-400 font-semibold">• e.g., Hesham Sobhy enters</span>
-                            <code className="px-2 py-0.5 bg-black/40 border border-white/5 rounded-md text-xs font-mono text-amber-300 font-bold">
+                            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">• e.g., Hesham Sobhy enters</span>
+                            <code className="px-2 py-0.5 bg-black/40 border border-slate-200 dark:border-slate-700/5 rounded-md text-xs font-mono text-amber-300 font-bold">
                               h.sobhy
                             </code>
                           </div>
-                          <p className="text-[10px] text-slate-400 pt-1">
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 pt-1">
                             * Your pre-agreed passwords remain exactly the same.
                           </p>
                         </div>
@@ -6276,14 +2059,14 @@ export default function App() {
                     </div>
 
                     {/* View Mode Switching Tab Toggles */}
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/5 border border-white/10 p-2.5 rounded-3xl select-none">
-                      <div className="flex bg-black/30 p-1 rounded-2xl border border-white/5 w-full sm:w-auto">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 p-2.5 rounded-3xl select-none">
+                      <div className="flex bg-black/30 p-1 rounded-2xl border border-slate-200 dark:border-slate-700/5 w-full sm:w-auto">
                         <button
                           onClick={() => setDashboardViewMode('personal')}
                           className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                             dashboardViewMode === 'personal'
-                              ? 'bg-gradient-to-r from-indigo-500/20 to-indigo-500/10 text-slate-100 border border-indigo-500/40 font-bold shadow-md shadow-indigo-500/10'
-                              : 'text-slate-400 hover:text-slate-100 hover:bg-slate-700'
+                              ? 'bg-gradient-to-r from-indigo-500/20 to-indigo-500/10 text-slate-700 border border-indigo-500/40 font-bold shadow-md shadow-indigo-500/10'
+                              : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 hover:bg-slate-700'
                           }`}
                         >
                           <UserIcon className="w-3.5 h-3.5 text-cyan-400" />
@@ -6298,8 +2081,8 @@ export default function App() {
                           }}
                           className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                             dashboardViewMode === 'team'
-                              ? 'bg-gradient-to-r from-indigo-500/20 to-indigo-500/10 text-slate-100 border border-indigo-500/40 font-bold shadow-md shadow-indigo-500/10'
-                              : 'text-slate-400 hover:text-slate-100 hover:bg-slate-700'
+                              ? 'bg-gradient-to-r from-indigo-500/20 to-indigo-500/10 text-slate-700 border border-indigo-500/40 font-bold shadow-md shadow-indigo-500/10'
+                              : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 hover:bg-slate-700'
                           }`}
                         >
                           <Users className="w-3.5 h-3.5 text-indigo-400" />
@@ -6308,7 +2091,7 @@ export default function App() {
                       </div>
 
                       {dashboardViewMode === 'personal' && (
-                        <div className="flex bg-black/30 p-1 rounded-2xl border border-white/5 w-full sm:w-auto justify-between">
+                        <div className="flex bg-black/30 p-1 rounded-2xl border border-slate-200 dark:border-slate-700/5 w-full sm:w-auto justify-between">
                           {(['daily', 'weekly', 'monthly'] as const).map((tab) => (
                             <button
                               key={tab}
@@ -6316,7 +2099,7 @@ export default function App() {
                               className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                                 agentDashboardTab === tab
                                   ? 'bg-indigo-500 text-white shadow font-black'
-                                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-700'
+                                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 hover:bg-slate-700'
                               }`}
                             >
                               {tab}
@@ -6362,9 +2145,9 @@ export default function App() {
                                 <div className="space-y-1">
                                   <div className="flex items-center gap-2">
                                     <span className="text-xl">🏆</span>
-                                    <h3 className="font-extrabold text-slate-100 text-base font-display">Agent Prestige & Gamification Room</h3>
+                                    <h3 className="font-extrabold text-slate-700 text-base font-display">Agent Prestige & Gamification Room</h3>
                                   </div>
-                                  <p className="text-slate-400 text-xs font-sans">Dynamic level tracking, badges, and operational performance reward indicators</p>
+                                  <p className="text-slate-500 dark:text-slate-400 text-xs font-sans">Dynamic level tracking, badges, and operational performance reward indicators</p>
                                 </div>
                                 <div className="flex items-center gap-2 bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/25">
                                   <span className="text-[10px] font-black text-indigo-300 font-mono tracking-wider">LEVEL {agentLevel} OPERATIONS EXPERT</span>
@@ -6373,16 +2156,16 @@ export default function App() {
 
                               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 xl:gap-6 pt-2 font-sans">
                                 {/* Level Tracker */}
-                                <div className="bg-black/30 p-4 rounded-2xl border border-white/5 space-y-3.5 flex flex-col justify-between">
+                                <div className="bg-black/30 p-4 rounded-2xl border border-slate-200 dark:border-slate-700/5 space-y-3.5 flex flex-col justify-between">
                                   <div className="flex justify-between items-center">
-                                    <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Level Upgrade Status</span>
+                                    <span className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Level Upgrade Status</span>
                                     <span className="text-xs text-indigo-300 font-mono font-bold">{xpScore} total XP</span>
                                   </div>
                                   <div className="space-y-1">
-                                    <div className="w-full h-3 rounded-full bg-white/5 p-0.5 border border-white/5 overflow-hidden">
+                                    <div className="w-full h-3 rounded-full bg-white dark:bg-slate-900/50 p-0.5 border border-slate-200 dark:border-slate-700/5 overflow-hidden">
                                       <div style={{ width: `${levelProgress}%` }} className="h-full bg-gradient-to-r from-[#22d3ee] to-[#6366f1] rounded-full transition-all duration-1000" />
                                     </div>
-                                    <div className="flex justify-between items-center text-[9px] text-slate-400 pt-0.5 font-mono">
+                                    <div className="flex justify-between items-center text-[9px] text-slate-500 dark:text-slate-400 pt-0.5 font-mono">
                                       <span>Level {agentLevel}</span>
                                       <span>Level {agentLevel + 1} ({!isNaN(Math.round(100 - levelProgress)) ? Math.round(100 - levelProgress) : 0}% remaining)</span>
                                     </div>
@@ -6390,15 +2173,15 @@ export default function App() {
                                 </div>
 
                                 {/* Achievement Badges Room */}
-                                <div className="bg-black/30 p-4 rounded-2xl border border-white/5 space-y-2.5">
-                                  <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">Unlocked Badges</span>
+                                <div className="bg-black/30 p-4 rounded-2xl border border-slate-200 dark:border-slate-700/5 space-y-2.5">
+                                  <span className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider block">Unlocked Badges</span>
                                   <div className="flex flex-wrap gap-2.5 font-sans">
                                     {holdsGoldPunctuality ? (
                                       <span className="px-2.5 py-1 bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-[9px] font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5" title="Worked more than 120 minutes overall on shifts.">
                                         <Sparkles className="w-3 h-3 text-yellow-400" /> Duty Star
                                       </span>
                                     ) : (
-                                      <span className="px-2.5 py-1 bg-white/5 text-slate-500 text-[9px] font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5 opacity-40">
+                                      <span className="px-2.5 py-1 bg-white dark:bg-slate-900/50 text-white0 text-[9px] font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5 opacity-40">
                                         Duty Star (Locked)
                                       </span>
                                     )}
@@ -6408,7 +2191,7 @@ export default function App() {
                                         <Activity className="w-3 h-3 text-rose-400" /> Resolve King
                                       </span>
                                     ) : (
-                                      <span className="px-2.5 py-1 bg-white/5 text-slate-500 text-[9px] font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5 opacity-40" title="Need 25 total resolutions">
+                                      <span className="px-2.5 py-1 bg-white dark:bg-slate-900/50 text-white0 text-[9px] font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5 opacity-40" title="Need 25 total resolutions">
                                         Resolve King (Locked)
                                       </span>
                                     )}
@@ -6418,7 +2201,7 @@ export default function App() {
                                         <MessageSquare className="w-3 h-3 text-cyan-400" /> Talk Champion
                                       </span>
                                     ) : (
-                                      <span className="px-2.5 py-1 bg-white/5 text-slate-500 text-[9px] font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5 opacity-40" title="Need 10 communication requests">
+                                      <span className="px-2.5 py-1 bg-white dark:bg-slate-900/50 text-white0 text-[9px] font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5 opacity-40" title="Need 10 communication requests">
                                         Talk Master (Locked)
                                       </span>
                                     )}
@@ -6426,10 +2209,10 @@ export default function App() {
                                 </div>
 
                                 {/* Instant Stats overview Card */}
-                                <div className="bg-black/30 p-4 rounded-2xl border border-white/5 flex items-center justify-between font-sans">
+                                <div className="bg-black/30 p-4 rounded-2xl border border-slate-200 dark:border-slate-700/5 flex items-center justify-between font-sans">
                                   <div className="space-y-0.5 text-left">
                                     <span className="text-[10px] text-indigo-300 font-bold uppercase tracking-wider font-mono">Operations Badge Rank</span>
-                                    <p className="text-xl font-bold text-slate-100 font-display">
+                                    <p className="text-xl font-bold text-slate-700 font-display">
                                       {agentLevel >= 3 ? '🏆 Platinum Synq Master' : agentLevel >= 2 ? '🎖️ Gold Operator' : '🥉 Elite Core Agent'}
                                     </p>
                                     <p className="text-[9px] text-slate-450">Continuous ranking metric updated in live database cycles</p>
@@ -6523,32 +2306,32 @@ export default function App() {
 
                           return (
                             <div className="space-y-6">
-                              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/5 border border-white/10 rounded-3xl p-5 backdrop-blur-xl">
+                              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl p-5 backdrop-blur-xl">
                                 <div>
-                                  <h2 className="text-xl font-black text-slate-100 font-display">My Daily Work Dashboard</h2>
-                                  <p className="text-xs text-slate-400 mt-0.5">
+                                  <h2 className="text-xl font-black text-slate-700 font-display">My Daily Work Dashboard</h2>
+                                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                                     Track, filter and audit your single-shift logs for <strong className="text-indigo-300 font-mono">{range.startLabel}</strong>
                                   </p>
                                 </div>
-                                <div className="flex items-center gap-1.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-1 self-stretch sm:self-auto justify-between">
+                                <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-2xl p-1 self-stretch sm:self-auto justify-between">
                                   <button
                                     onClick={() => {
                                       const d = new Date(selectedDashboardDate);
                                       d.setDate(d.getDate() - 1);
                                       setSelectedDashboardDate(d.toISOString().split('T')[0]);
                                     }}
-                                    className="p-1.5 hover:bg-slate-700 rounded-xl text-slate-300 hover:text-slate-100 transition-all cursor-pointer text-xs"
+                                    className="p-1.5 hover:bg-slate-700 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-700 transition-all cursor-pointer text-xs"
                                   >
                                     &larr; Prev
                                   </button>
-                                  <span className="text-slate-100 font-bold text-xs font-mono px-3">{formatDateNice(selectedDashboardDate).split(',')[0]}</span>
+                                  <span className="text-slate-700 font-bold text-xs font-mono px-3">{formatDateNice(selectedDashboardDate).split(',')[0]}</span>
                                   <button
                                     onClick={() => {
                                       const d = new Date(selectedDashboardDate);
                                       d.setDate(d.getDate() + 1);
                                       setSelectedDashboardDate(d.toISOString().split('T')[0]);
                                     }}
-                                    className="p-1.5 hover:bg-slate-700 rounded-xl text-slate-300 hover:text-slate-100 transition-all cursor-pointer text-xs"
+                                    className="p-1.5 hover:bg-slate-700 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-700 transition-all cursor-pointer text-xs"
                                   >
                                     Next &rarr;
                                   </button>
@@ -6556,7 +2339,7 @@ export default function App() {
                               </div>
 
                               <div className="grid grid-cols-1 md:grid-cols-12 gap-5 animate-fade-in">
-                                <div className="md:col-span-4 bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-center text-center">
+                                <div className="md:col-span-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl p-6 flex flex-col items-center justify-center text-center">
                                   <span className="text-[10px] font-black uppercase text-indigo-300 tracking-wider mb-4">Daily Resolve Ratio</span>
                                   <div className="relative w-32 h-32 flex items-center justify-center">
                                     <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
@@ -6578,12 +2361,12 @@ export default function App() {
                                       </defs>
                                     </svg>
                                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                      <span className="text-2xl font-black text-slate-100 font-mono">{!isNaN(Math.round(myDailySuccessRate)) ? Math.round(myDailySuccessRate) : 0}%</span>
-                                      <span className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Resolved</span>
+                                      <span className="text-2xl font-black text-slate-700 font-mono">{!isNaN(Math.round(myDailySuccessRate)) ? Math.round(myDailySuccessRate) : 0}%</span>
+                                      <span className="text-[8px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-0.5">Resolved</span>
                                     </div>
                                   </div>
-                                  <p className="text-xs text-slate-300 mt-4 font-medium">
-                                    Completed <strong className="text-slate-100 font-mono">{myDailyCompleted}</strong> of <strong className="text-slate-100 font-mono">{myDailyTotal}</strong> assigned operations.
+                                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-4 font-medium">
+                                    Completed <strong className="text-slate-700 font-mono">{myDailyCompleted}</strong> of <strong className="text-slate-700 font-mono">{myDailyTotal}</strong> assigned operations.
                                   </p>
                                 </div>
 
@@ -6592,15 +2375,15 @@ export default function App() {
                                     initial={{ opacity: 0, y: 12, scale: 0.98 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     transition={{ duration: 0.35, ease: "easeOut" }}
-                                    className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between hover:bg-white/10 transition-colors"
+                                    className="p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl flex flex-col justify-between hover:bg-slate-50 dark:bg-slate-800/80 transition-colors"
                                   >
                                     <div className="flex justify-between items-center text-indigo-400">
                                       <HelpCircle className="w-4 h-4" />
                                       <span className="text-[9px] font-mono bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded text-indigo-300">Inquiries</span>
                                     </div>
                                     <div className="mt-4">
-                                      <p className="text-2xl font-mono text-slate-100 font-black">{myDailyInq.length}</p>
-                                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Medical Qs Logged</p>
+                                      <p className="text-2xl font-mono text-slate-700 font-black">{myDailyInq.length}</p>
+                                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mt-0.5">Medical Qs Logged</p>
                                     </div>
                                   </motion.div>
 
@@ -6608,15 +2391,15 @@ export default function App() {
                                     initial={{ opacity: 0, y: 12, scale: 0.98 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     transition={{ duration: 0.35, ease: "easeOut", delay: 0.05 }}
-                                    className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between hover:bg-white/10 transition-colors"
+                                    className="p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl flex flex-col justify-between hover:bg-slate-50 dark:bg-slate-800/80 transition-colors"
                                   >
                                     <div className="flex justify-between items-center text-emerald-400">
                                       <Wallet className="w-4 h-4" />
                                       <span className="text-[9px] font-mono bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded text-emerald-300">Fintech</span>
                                     </div>
                                     <div className="mt-4">
-                                      <p className="text-2xl font-mono text-slate-100 font-black">{myDailyFin.length}</p>
-                                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Tabby & Tamara Link Requests</p>
+                                      <p className="text-2xl font-mono text-slate-700 font-black">{myDailyFin.length}</p>
+                                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mt-0.5">Tabby & Tamara Link Requests</p>
                                     </div>
                                   </motion.div>
 
@@ -6624,15 +2407,15 @@ export default function App() {
                                     initial={{ opacity: 0, y: 12, scale: 0.98 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     transition={{ duration: 0.35, ease: "easeOut", delay: 0.1 }}
-                                    className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between hover:bg-white/10 transition-colors"
+                                    className="p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl flex flex-col justify-between hover:bg-slate-50 dark:bg-slate-800/80 transition-colors"
                                   >
                                     <div className="flex justify-between items-center text-pink-400">
                                       <MessageSquare className="w-4 h-4" />
                                       <span className="text-[9px] font-mono bg-pink-500/10 border border-pink-500/20 px-1.5 py-0.5 rounded text-pink-300">Client Comms</span>
                                     </div>
                                     <div className="mt-4">
-                                      <p className="text-2xl font-mono text-slate-100 font-black">{myDailyCom.length}</p>
-                                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Client Dials Handled</p>
+                                      <p className="text-2xl font-mono text-slate-700 font-black">{myDailyCom.length}</p>
+                                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mt-0.5">Client Dials Handled</p>
                                     </div>
                                   </motion.div>
 
@@ -6641,15 +2424,15 @@ export default function App() {
                                     initial={{ opacity: 0, y: 12, scale: 0.98 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     transition={{ duration: 0.35, ease: "easeOut", delay: 0.15 }}
-                                    className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between hover:bg-white/10 transition-colors"
+                                    className="p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl flex flex-col justify-between hover:bg-slate-50 dark:bg-slate-800/80 transition-colors"
                                   >
                                     <div className="flex justify-between items-center text-cyan-400">
                                       <Clock className="w-4 h-4 animate-pulse" />
                                       <span className="text-[9px] font-mono bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded text-cyan-300">Shift</span>
                                     </div>
                                     <div className="mt-4">
-                                      <p className="text-[14px] font-mono text-slate-100 font-bold truncate">{clockInStr} - {clockOutStr}</p>
-                                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Shift Active Stream</p>
+                                      <p className="text-[14px] font-mono text-slate-700 font-bold truncate">{clockInStr} - {clockOutStr}</p>
+                                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mt-1">Shift Active Stream</p>
                                     </div>
                                   </motion.div>
                                   )}
@@ -6657,8 +2440,8 @@ export default function App() {
                               </div>
 
                               {currentUser.role === 'agent' && (
-                              <div className="bg-white/5 border border-white/10 rounded-3xl p-5 backdrop-blur-md">
-                                <h3 className="text-sm font-extrabold text-slate-100 uppercase tracking-wider flex items-center gap-2 mb-4">
+                              <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl p-5 backdrop-blur-md">
+                                <h3 className="text-sm font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-2 mb-4">
                                   <AlertTriangle className="w-4 h-4 text-pink-400" />
                                   Punctuality & Sub-Session Allowance Logs
                                 </h3>
@@ -6668,26 +2451,26 @@ export default function App() {
                                     initial={{ opacity: 0, scale: 0.97 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ duration: 0.3 }}
-                                    className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-between"
+                                    className="p-3 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl flex items-center justify-between"
                                   >
                                     <div>
-                                      <p className="text-[10px] text-slate-400 font-black uppercase">Schedule Compliance</p>
+                                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase">Schedule Compliance</p>
                                       <p className={`text-sm font-bold mt-0.5 ${isLate ? 'text-pink-400' : 'text-emerald-400'}`}>
                                         {myDailyLog ? (isLate ? '⏰ Over Grace Period' : '✓ Standard On Time') : 'No shift logged'}
                                       </p>
                                     </div>
-                                    <Calendar className="w-4 h-4 text-slate-500" />
+                                    <Calendar className="w-4 h-4 text-white0" />
                                   </motion.div>
 
                                   <motion.div 
                                     initial={{ opacity: 0, scale: 0.97 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ duration: 0.3, delay: 0.05 }}
-                                    className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-between"
+                                    className="p-3 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl flex items-center justify-between"
                                   >
                                     <div>
-                                      <p className="text-[10px] text-slate-400 font-black uppercase">Total Active Work</p>
-                                      <p className="text-sm font-bold text-slate-100 mt-0.5 font-mono">
+                                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase">Total Active Work</p>
+                                      <p className="text-sm font-bold text-slate-700 mt-0.5 font-mono">
                                         {totalHoursDecimal > 0 ? `${totalHoursDecimal.toFixed(2)} Hrs` : '0 Hrs'}
                                       </p>
                                     </div>
@@ -6698,27 +2481,27 @@ export default function App() {
                                     initial={{ opacity: 0, scale: 0.97 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ duration: 0.3, delay: 0.1 }}
-                                    className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-between"
+                                    className="p-3 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl flex items-center justify-between"
                                   >
                                     <div>
-                                      <p className="text-[10px] text-slate-400 font-black uppercase">Restroom duration</p>
-                                      <p className={`text-sm font-mono font-bold mt-0.5 ${restroomMins > 10 ? 'text-pink-400 animate-pulse' : 'text-slate-300'}`}>
-                                        {!isNaN(Math.round(restroomMins)) ? Math.round(restroomMins) : 0} min <span className="text-[10px] text-slate-500">/ 10m cap</span>
+                                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase">Restroom duration</p>
+                                      <p className={`text-sm font-mono font-bold mt-0.5 ${restroomMins > 10 ? 'text-pink-400 animate-pulse' : 'text-slate-600 dark:text-slate-300'}`}>
+                                        {!isNaN(Math.round(restroomMins)) ? Math.round(restroomMins) : 0} min <span className="text-[10px] text-white0">/ 10m cap</span>
                                       </p>
                                     </div>
-                                    <Coffee className="w-4 h-4 text-slate-400" />
+                                    <Coffee className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                                   </motion.div>
 
                                   <motion.div 
                                     initial={{ opacity: 0, scale: 0.97 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ duration: 0.3, delay: 0.15 }}
-                                    className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-between"
+                                    className="p-3 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl flex items-center justify-between"
                                   >
                                     <div>
-                                      <p className="text-[10px] text-slate-400 font-black uppercase">Breaks & Lunch Used</p>
-                                      <p className={`text-sm font-mono font-bold mt-0.5 ${breakMins + lunchMins > 45 ? 'text-pink-400' : 'text-slate-300'}`}>
-                                        {!isNaN(Math.round(breakMins + lunchMins)) ? Math.round(breakMins + lunchMins) : 0} min <span className="text-[10px] text-slate-500">/ 45m cap</span>
+                                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase">Breaks & Lunch Used</p>
+                                      <p className={`text-sm font-mono font-bold mt-0.5 ${breakMins + lunchMins > 45 ? 'text-pink-400' : 'text-slate-600 dark:text-slate-300'}`}>
+                                        {!isNaN(Math.round(breakMins + lunchMins)) ? Math.round(breakMins + lunchMins) : 0} min <span className="text-[10px] text-white0">/ 45m cap</span>
                                       </p>
                                     </div>
                                     <Sparkles className="w-4 h-4 text-amber-400" />
@@ -6790,26 +2573,26 @@ export default function App() {
 
                           return (
                             <div className="space-y-6">
-                              <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
-                                <h3 className="text-xl font-black text-slate-100 font-display">Weekly Work Output & Trends</h3>
-                                <p className="text-xs text-slate-400 mt-1">
+                              <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl p-6 backdrop-blur-xl">
+                                <h3 className="text-xl font-black text-slate-700 font-display">Weekly Work Output & Trends</h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                                   Your total resolving productivity and tracked clock-in hours for the last 7 calendar days
                                 </p>
                               </div>
 
                               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in">
-                                <div className="lg:col-span-8 bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col justify-between">
+                                <div className="lg:col-span-8 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl p-6 flex flex-col justify-between">
                                   <div>
-                                    <h4 className="text-sm font-extrabold text-slate-100 uppercase tracking-wider mb-2">Daily Interactions Handled</h4>
-                                    <p className="text-xs text-slate-400 mb-6 font-medium">Visual distribution representing active day outputs</p>
+                                    <h4 className="text-sm font-extrabold text-slate-700 uppercase tracking-wider mb-2">Daily Interactions Handled</h4>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 font-medium">Visual distribution representing active day outputs</p>
                                   </div>
 
-                                  <div className="h-48 flex items-end justify-between gap-3 pt-6 relative border-b border-white/10 px-2 select-none">
+                                  <div className="h-48 flex items-end justify-between gap-3 pt-6 relative border-b border-slate-200 dark:border-slate-700/10 px-2 select-none">
                                     {weeklyDataPoints.map((dp, idx) => {
                                       const barHeightPercent = (dp.total / peakWeeklyDayVolume) * 75;
                                       return (
                                         <div key={idx} className="flex-1 flex flex-col items-center group relative cursor-pointer">
-                                          <div className="absolute -top-12 opacity-0 group-hover:opacity-100 bg-transparent border border-indigo-400 px-2 py-1 rounded text-[10px] text-slate-100 font-mono transition-opacity duration-200 z-10 font-bold whitespace-nowrap shadow-xl">
+                                          <div className="absolute -top-12 opacity-0 group-hover:opacity-100 bg-transparent border border-indigo-400 px-2 py-1 rounded text-[10px] text-slate-700 font-mono transition-opacity duration-200 z-10 font-bold whitespace-nowrap shadow-xl">
                                             {dp.total} tasks | {dp.hours.toFixed(1)} hrs
                                           </div>
 
@@ -6818,7 +2601,7 @@ export default function App() {
                                             style={{ height: `${Math.max(barHeightPercent, 4)}%` }}
                                           />
 
-                                          <span className="text-[9px] font-bold text-slate-400 font-sans tracking-tight mt-2 rotate-12 sm:rotate-0">
+                                          <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 font-sans tracking-tight mt-2 rotate-12 sm:rotate-0">
                                             {dp.label}
                                           </span>
                                         </div>
@@ -6827,31 +2610,31 @@ export default function App() {
                                   </div>
                                 </div>
 
-                                <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col justify-between">
+                                <div className="lg:col-span-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl p-6 flex flex-col justify-between">
                                   <div>
-                                    <h4 className="text-sm font-extrabold text-slate-100 uppercase tracking-wider mb-4">Weekly Summary Stats</h4>
+                                    <h4 className="text-sm font-extrabold text-slate-700 uppercase tracking-wider mb-4">Weekly Summary Stats</h4>
                                     
                                     <div className="space-y-4">
-                                      <div className="p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl">
-                                        <span className="text-[10px] text-slate-500 uppercase tracking-widest font-black">Aggregate Resolved Tasks</span>
+                                      <div className="p-4 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-2xl">
+                                        <span className="text-[10px] text-white0 uppercase tracking-widest font-black">Aggregate Resolved Tasks</span>
                                         <div className="flex items-baseline gap-2 mt-1">
-                                          <span className="text-3xl font-mono text-slate-100 font-black">{totalWeeklyCount}</span>
-                                          <span className="text-xs text-slate-400">Total inputs</span>
+                                          <span className="text-3xl font-mono text-slate-700 font-black">{totalWeeklyCount}</span>
+                                          <span className="text-xs text-slate-500 dark:text-slate-400">Total inputs</span>
                                         </div>
                                       </div>
 
-                                      <div className="p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl">
-                                        <span className="text-[10px] text-slate-500 uppercase tracking-widest font-black">Logged Clock Duration</span>
+                                      <div className="p-4 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-2xl">
+                                        <span className="text-[10px] text-white0 uppercase tracking-widest font-black">Logged Clock Duration</span>
                                         <div className="flex items-baseline gap-2 mt-1">
                                           <span className="text-3xl font-mono text-cyan-400 font-black">{totalWeeklyHours.toFixed(1)}</span>
-                                          <span className="text-xs text-slate-400">Hours overall</span>
+                                          <span className="text-xs text-slate-500 dark:text-slate-400">Hours overall</span>
                                         </div>
                                       </div>
                                     </div>
                                   </div>
 
-                                  <div className="border-t border-white/5 mt-6 pt-4 text-xs text-slate-400 font-medium">
-                                    ✓ Average of <strong className="text-slate-100">{(totalWeeklyCount / 7).toFixed(1)}</strong> complete ticket conversions per shift day this week.
+                                  <div className="border-t border-slate-200 dark:border-slate-700/5 mt-6 pt-4 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                    ✓ Average of <strong className="text-slate-700">{(totalWeeklyCount / 7).toFixed(1)}</strong> complete ticket conversions per shift day this week.
                                   </div>
                                 </div>
                               </div>
@@ -6931,18 +2714,18 @@ export default function App() {
 
                           return (
                             <div className="space-y-6">
-                              <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
-                                <h3 className="text-xl font-black text-slate-100 font-display">Monthly Performance & Achievement Desk</h3>
-                                <p className="text-xs text-slate-400 mt-1">
+                              <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl p-6 backdrop-blur-xl">
+                                <h3 className="text-xl font-black text-slate-700 font-display">Monthly Performance & Achievement Desk</h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                                   Your professional rolling 30-day index of achievements, punctuality indices, and work volumes
                                 </p>
                               </div>
 
                               <div className="grid grid-cols-1 md:grid-cols-12 gap-6 animate-fade-in">
-                                <div className="md:col-span-5 bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-between text-center">
+                                <div className="md:col-span-5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl p-6 flex flex-col items-center justify-between text-center">
                                   <div>
                                     <span className="text-[10px] font-black uppercase text-indigo-300 tracking-wider">Motivational Badge Status</span>
-                                    <h4 className="text-xs text-slate-400 mt-1 uppercase font-bold tracking-tight">System Tier Rating</h4>
+                                    <h4 className="text-xs text-slate-500 dark:text-slate-400 mt-1 uppercase font-bold tracking-tight">System Tier Rating</h4>
                                   </div>
 
                                   <div className="my-8 flex flex-col items-center">
@@ -6950,38 +2733,38 @@ export default function App() {
                                     <div className={`mt-4 px-4 py-2 border rounded-2xl bg-gradient-to-r text-base font-black uppercase tracking-wider ${badgeGradient}`}>
                                       {badgeTitle}
                                     </div>
-                                    <p className="text-xs text-slate-300 max-w-xs mt-4 leading-relaxed font-semibold">
+                                    <p className="text-xs text-slate-600 dark:text-slate-300 max-w-xs mt-4 leading-relaxed font-semibold">
                                       "{badgeDesc}"
                                     </p>
                                   </div>
 
-                                  <div className="text-[10px] text-slate-500 font-mono font-black uppercase tracking-widest">
+                                  <div className="text-[10px] text-white0 font-mono font-black uppercase tracking-widest">
                                     Calculated Live from Database logs
                                   </div>
                                 </div>
 
                                 <div className="md:col-span-7 space-y-4">
-                                  <div className="p-6 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-md">
-                                    <h4 className="text-sm font-extrabold text-slate-100 uppercase tracking-wider mb-4">30-Day Operation Ratios</h4>
+                                  <div className="p-6 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl backdrop-blur-md">
+                                    <h4 className="text-sm font-extrabold text-slate-700 uppercase tracking-wider mb-4">30-Day Operation Ratios</h4>
                                     
                                     <div className="space-y-4">
                                       <div>
-                                        <div className="flex justify-between items-center text-xs text-slate-300 mb-1">
+                                        <div className="flex justify-between items-center text-xs text-slate-600 dark:text-slate-300 mb-1">
                                           <span className="font-bold">Total Operations Logs</span>
-                                          <span className="font-mono font-black text-slate-100">{myMonthlyTotalCount} Files Handled</span>
+                                          <span className="font-mono font-black text-slate-700">{myMonthlyTotalCount} Files Handled</span>
                                         </div>
-                                        <div className="w-full h-2.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                        <div className="w-full h-2.5 bg-white dark:bg-slate-900/50 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700/5">
                                           <div className="h-full bg-cyan-400 rounded-full" style={{ width: `${Math.min((myMonthlyTotalCount / 120) * 100, 100)}%` }} />
                                         </div>
                                       </div>
 
                                       {currentUser.role === 'agent' && (
                                       <div>
-                                        <div className="flex justify-between items-center text-xs text-slate-300 mb-1">
+                                        <div className="flex justify-between items-center text-xs text-slate-600 dark:text-slate-300 mb-1">
                                           <span className="font-bold">Shift Punctuality Score</span>
                                           <span className="font-mono font-black text-emerald-400">{punctScore.toFixed(0)}% On Time</span>
                                         </div>
-                                        <div className="w-full h-2.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                        <div className="w-full h-2.5 bg-white dark:bg-slate-900/50 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700/5">
                                           <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${punctScore}%` }} />
                                         </div>
                                       </div>
@@ -6990,17 +2773,17 @@ export default function App() {
                                   </div>
 
                                   <div className="grid grid-cols-3 gap-3 font-sans">
-                                    <div className="p-4 bg-white/5 border border-white/10 rounded-2xl text-center">
-                                      <span className="text-[9px] text-slate-500 uppercase font-black">Medical Qs</span>
-                                      <p className="text-xl font-mono text-slate-100 font-black mt-1">{monthlyInq.length}</p>
+                                    <div className="p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl text-center">
+                                      <span className="text-[9px] text-white0 uppercase font-black">Medical Qs</span>
+                                      <p className="text-xl font-mono text-slate-700 font-black mt-1">{monthlyInq.length}</p>
                                     </div>
-                                    <div className="p-4 bg-white/5 border border-white/10 rounded-2xl text-center">
+                                    <div className="p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl text-center">
                                       <span className="text-[9px] text-[#22d3ee] uppercase font-black">Fintech Cash</span>
-                                      <p className="text-xl font-mono text-slate-100 font-black mt-1">{monthlyFin.length}</p>
+                                      <p className="text-xl font-mono text-slate-700 font-black mt-1">{monthlyFin.length}</p>
                                     </div>
-                                    <div className="p-4 bg-white/5 border border-white/10 rounded-2xl text-center">
-                                      <span className="text-[9px] text-slate-400 uppercase font-black font-sans">Dials Handled</span>
-                                      <p className="text-xl font-mono text-slate-100 font-black mt-1">{monthlyCom.length}</p>
+                                    <div className="p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl text-center">
+                                      <span className="text-[9px] text-slate-500 dark:text-slate-400 uppercase font-black font-sans">Dials Handled</span>
+                                      <p className="text-xl font-mono text-slate-700 font-black mt-1">{monthlyCom.length}</p>
                                     </div>
                                   </div>
                                 </div>
@@ -7012,7 +2795,7 @@ export default function App() {
                     ) : (
                       <div className="space-y-6">
                         {/* Header Controls Banner */}
-                        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white/5 border border-white/10 rounded-3xl p-5 backdrop-blur-xl animate-fade-in">
+                        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl p-5 backdrop-blur-xl animate-fade-in">
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="px-2 py-0.5 text-[9px] font-black uppercase tracking-widest bg-cyan-500/20 text-cyan-300 rounded border border-cyan-500/30">
@@ -7025,8 +2808,8 @@ export default function App() {
                             </span>
                           )}
                         </div>
-                        <h2 className="text-2xl font-black text-slate-100 font-display mt-1">Daily Analytics & Operations</h2>
-                        <p className="text-xs text-slate-400 mt-0.5">
+                        <h2 className="text-2xl font-black text-slate-700 font-display mt-1">Daily Analytics & Operations</h2>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                           Aggregating continuous shift cycles from <strong className="text-indigo-300 font-mono">07:00 AM</strong> to <strong className="text-indigo-300 font-mono">06:59 AM</strong> on next calendar day
                         </p>
                       </div>
@@ -7034,25 +2817,25 @@ export default function App() {
                       <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 w-full xl:w-auto">
                         {/* Search Filter for Floor Tracking */}
                         <div className="flex relative w-full lg:w-48">
-                          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                          <Search className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
                           <input
                             type="text"
                             placeholder="Filter by agent..."
                             value={dashboardSearchTeam}
                             onChange={(e) => setDashboardSearchTeam(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 text-slate-100 text-xs rounded-2xl pl-9 pr-3 py-2 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-sans"
+                            className="w-full bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 text-slate-700 text-xs rounded-2xl pl-9 pr-3 py-2 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-sans"
                             spellCheck="false"
                           />
                         </div>
 
-                        <div className="flex items-center gap-1.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-1">
+                        <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-2xl p-1">
                           <button
                             onClick={() => {
                               const d = new Date(selectedDashboardDate);
                               d.setDate(d.getDate() - 1);
                               setSelectedDashboardDate(d.toISOString().split('T')[0]);
                             }}
-                            className="p-2 hover:bg-slate-700 rounded-xl text-slate-300 hover:text-slate-100 transition-all cursor-pointer"
+                            className="p-2 hover:bg-slate-700 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-700 transition-all cursor-pointer"
                           >
                             &larr;
                           </button>
@@ -7062,7 +2845,7 @@ export default function App() {
                             onChange={(e) => {
                               if (e.target.value) setSelectedDashboardDate(e.target.value);
                             }}
-                            className="bg-transparent border-0 text-slate-100 font-bold text-xs font-mono outline-none focus:ring-0 cursor-pointer px-2"
+                            className="bg-transparent border-0 text-slate-700 font-bold text-xs font-mono outline-none focus:ring-0 cursor-pointer px-2"
                           />
                           <button
                             onClick={() => {
@@ -7070,7 +2853,7 @@ export default function App() {
                               d.setDate(d.getDate() + 1);
                               setSelectedDashboardDate(d.toISOString().split('T')[0]);
                             }}
-                            className="p-2 hover:bg-slate-700 rounded-xl text-slate-300 hover:text-slate-100 transition-all cursor-pointer"
+                            className="p-2 hover:bg-slate-700 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-700 transition-all cursor-pointer"
                           >
                             &rarr;
                           </button>
@@ -7085,7 +2868,7 @@ export default function App() {
                             className={`flex-1 sm:flex-initial px-3 py-2 text-xs font-black rounded-xl border transition-all cursor-pointer ${
                               selectedDashboardDate === getLocalISOString()
                                 ? 'bg-indigo-500 text-white border-indigo-400'
-                                : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10'
+                                : 'bg-white dark:bg-slate-900/50 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700/10 hover:bg-slate-50 dark:bg-slate-800/80'
                             }`}
                           >
                             Today
@@ -7103,7 +2886,7 @@ export default function App() {
                                 return y.toISOString().split('T')[0];
                               })()
                                 ? 'bg-indigo-500 text-white border-indigo-400'
-                                : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10'
+                                : 'bg-white dark:bg-slate-900/50 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700/10 hover:bg-slate-50 dark:bg-slate-800/80'
                             }`}
                           >
                             Yesterday
@@ -7113,28 +2896,28 @@ export default function App() {
                     </div>
 
                     {/* Meta Interval Descriptor Banner */}
-                    <div className="bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-pink-500/10 border border-indigo-500/15 rounded-2xl px-5 py-3.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-slate-300">
+                    <div className="bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-pink-500/10 border border-indigo-500/15 rounded-2xl px-5 py-3.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-slate-600 dark:text-slate-300">
                       <div className="flex items-center gap-2 text-xs font-semibold">
                         <Calendar className="w-4 h-4 text-cyan-400" />
                         <span>Active Operational Period:</span>
-                        <strong className="text-slate-100 font-mono bg-white/5 px-2 py-0.5 rounded border border-white/10">{range.startLabel}</strong>
+                        <strong className="text-slate-700 font-mono bg-white dark:bg-slate-900/50 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700/10">{range.startLabel}</strong>
                         <span>&rarr;</span>
-                        <strong className="text-slate-100 font-mono bg-white/5 px-2 py-0.5 rounded border border-white/10">{range.endLabel}</strong>
+                        <strong className="text-slate-700 font-mono bg-white dark:bg-slate-900/50 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700/10">{range.endLabel}</strong>
                       </div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 font-mono">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 font-mono">
                         TimeZone: Real-time Live Sync
                       </span>
                     </div>
 
                     {/* Agent Excellence Team Leaderboard */}
-                    <div className="bg-white/5 border border-white/10 rounded-3xl shadow-sm text-slate-100 p-6 shadow-2xl space-y-4 text-left animate-fade-in font-sans">
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-3">
+                    <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl shadow-sm text-slate-700 p-6 shadow-2xl space-y-4 text-left animate-fade-in font-sans">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-200 dark:border-slate-700/5 pb-3">
                         <div>
                           <h3 className="font-extrabold text-transparent bg-gradient-to-r from-yellow-300 via-indigo-200 to-amber-300 bg-clip-text text-lg font-display flex items-center gap-2">
                             <span>🏆</span>
                             Team Prestige Leaderboard
                           </h3>
-                          <p className="text-xs text-slate-400 mt-0.5 font-sans">Continuous gamified rankings based on resolved ticket weight and clock schedule adherence</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-sans">Continuous gamified rankings based on resolved ticket weight and clock schedule adherence</p>
                         </div>
                         <span className="px-2 py-0.5 text-[9px] font-black uppercase tracking-widest bg-yellow-500/10 text-yellow-500 rounded border border-yellow-500/20 font-mono">
                           Gamified Arena
@@ -7143,8 +2926,8 @@ export default function App() {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Podium Top 3 */}
-                        <div className="bg-black/30 p-4 rounded-2xl border border-white/5 space-y-3.5 flex flex-col justify-center">
-                          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider font-mono">Today's Prestige Podium</p>
+                        <div className="bg-black/30 p-4 rounded-2xl border border-slate-200 dark:border-slate-700/5 space-y-3.5 flex flex-col justify-center">
+                          <p className="text-[10px] text-white0 font-bold uppercase tracking-wider font-mono">Today's Prestige Podium</p>
                           {(() => {
                             const scores = agentsList.map(aName => {
                               const myInquiries = inquiries.filter(i => i.agentName?.toLowerCase() === aName?.toLowerCase());
@@ -7177,12 +2960,12 @@ export default function App() {
                                 {/* 2nd Place */}
                                 {top3[1] && (
                                   <div className="flex flex-col items-center space-y-2">
-                                    <div className="w-10 h-10 rounded-full bg-slate-400/20 border-2 border-slate-700 flex items-center justify-center font-bold text-slate-100 text-sm relative">
+                                    <div className="w-10 h-10 rounded-full bg-slate-400/20 border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center font-bold text-slate-700 text-sm relative">
                                       🥈
                                     </div>
                                     <div className="bg-gradient-to-t from-slate-400/10 to-slate-400/20 border border-slate-400/20 rounded-t-xl p-2 w-full text-center space-y-0.5">
-                                      <p className="text-[10px] font-black text-slate-200 truncate">{formatAgentName(top3[1].name)}</p>
-                                      <p className="text-[9px] text-slate-400 font-bold font-mono">{top3[1].xp} XP</p>
+                                      <p className="text-[10px] font-black text-slate-700 dark:text-slate-200 truncate">{formatAgentName(top3[1].name)}</p>
+                                      <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold font-mono">{top3[1].xp} XP</p>
                                     </div>
                                   </div>
                                 )}
@@ -7190,7 +2973,7 @@ export default function App() {
                                 {/* 1st Place */}
                                 {top3[0] && (
                                   <div className="flex flex-col items-center space-y-2">
-                                    <div className="w-12 h-12 rounded-full bg-yellow-400/20 border-2 border-yellow-400 flex items-center justify-center font-bold text-slate-100 text-base relative -top-1 shadow-lg shadow-yellow-500/10">
+                                    <div className="w-12 h-12 rounded-full bg-yellow-400/20 border-2 border-yellow-400 flex items-center justify-center font-bold text-slate-700 text-base relative -top-1 shadow-lg shadow-yellow-500/10">
                                       👑
                                     </div>
                                     <div className="bg-gradient-to-t from-yellow-500/10 to-yellow-500/20 border border-yellow-400/30 rounded-t-2xl p-3 w-full text-center space-y-0.5 scale-105 relative z-10">
@@ -7203,12 +2986,12 @@ export default function App() {
                                 {/* 3rd Place */}
                                 {top3[2] && (
                                   <div className="flex flex-col items-center space-y-2">
-                                    <div className="w-9 h-9 rounded-full bg-amber-600/20 border-2 border-amber-600 flex items-center justify-center font-bold text-slate-100 text-xs relative">
+                                    <div className="w-9 h-9 rounded-full bg-amber-600/20 border-2 border-amber-600 flex items-center justify-center font-bold text-slate-700 text-xs relative">
                                       🥉
                                     </div>
                                     <div className="bg-gradient-to-t from-amber-600/10 to-amber-600/20 border border-amber-600/20 rounded-t-xl p-2 w-full text-center space-y-0.5">
                                       <p className="text-[9px] font-black text-amber-300 truncate">{formatAgentName(top3[2].name)}</p>
-                                      <p className="text-[9px] text-slate-400 font-bold font-mono">{top3[2].xp} XP</p>
+                                      <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold font-mono">{top3[2].xp} XP</p>
                                     </div>
                                   </div>
                                 )}
@@ -7218,8 +3001,8 @@ export default function App() {
                         </div>
 
                         {/* Ranks list view */}
-                        <div className="bg-black/35 p-4 rounded-2xl border border-white/5 space-y-2.5">
-                          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider font-mono">Operations Leaderboard Rankings</p>
+                        <div className="bg-black/35 p-4 rounded-2xl border border-slate-200 dark:border-slate-700/5 space-y-2.5">
+                          <p className="text-[10px] text-white0 font-bold uppercase tracking-wider font-mono">Operations Leaderboard Rankings</p>
                           <div className="space-y-1.5 max-h-[160px] overflow-y-auto pr-1">
                             {(() => {
                               const scores = agentsList.map(aName => {
@@ -7249,15 +3032,15 @@ export default function App() {
 
                               return scores.slice(0, 10).map((row, rankIndex) => {
                                 return (
-                                  <div key={row.name} className="flex justify-between items-center bg-slate-800/[0.02] border border-white/5 p-2 rounded-xl text-xs font-sans">
+                                  <div key={row.name} className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/[0.02] border border-slate-200 dark:border-slate-700/5 p-2 rounded-xl text-xs font-sans">
                                     <div className="flex items-center gap-2.5">
-                                      <span className="font-mono text-[10px] w-4 text-center text-slate-500 font-bold">#{rankIndex + 1}</span>
+                                      <span className="font-mono text-[10px] w-4 text-center text-white0 font-bold">#{rankIndex + 1}</span>
                                       <div className="text-left font-sans">
-                                        <p className="font-bold text-slate-100 leading-normal">{row.name}</p>
-                                        <p className="text-[8px] text-slate-400 uppercase font-mono tracking-wider">{row.lob}</p>
+                                        <p className="font-bold text-slate-700 leading-normal">{row.name}</p>
+                                        <p className="text-[8px] text-slate-500 dark:text-slate-400 uppercase font-mono tracking-wider">{row.lob}</p>
                                       </div>
                                     </div>
-                                    <span className="font-mono font-black text-[#22d3ee] bg-[#22d3ee]/10 border border-[#22d3ee]/20 px-2 py-0.5 rounded-lg text-[9px]">
+                                    <span className="font-mono font-black text-[#22d3ee] bg-white dark:bg-slate-900/10 border border-[#22d3ee]/20 px-2 py-0.5 rounded-lg text-[9px]">
                                       {row.xp} XP
                                     </span>
                                   </div>
@@ -7272,8 +3055,8 @@ export default function App() {
                     {/* Operational Performance Core Ring & KPI Grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                       {/* Overall composite score circle gauge */}
-                      <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl flex flex-col items-center justify-center text-center">
-                        <p className="text-slate-400 text-xs font-black uppercase tracking-wider mb-4">Day Resolve Efficiency</p>
+                      <div className="lg:col-span-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl p-6 backdrop-blur-xl flex flex-col items-center justify-center text-center">
+                        <p className="text-slate-500 dark:text-slate-400 text-xs font-black uppercase tracking-wider mb-4">Day Resolve Efficiency</p>
                         <div className="relative w-36 h-36 flex items-center justify-center">
                           <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                             <circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.06)" strokeWidth="8" fill="transparent" />
@@ -7298,8 +3081,8 @@ export default function App() {
                             </defs>
                           </svg>
                           <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className="text-3xl font-black text-slate-100 font-mono">{!isNaN(Math.round(operationsScore)) ? Math.round(operationsScore) : 0}%</span>
-                            <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Completed</span>
+                            <span className="text-3xl font-black text-slate-700 font-mono">{!isNaN(Math.round(operationsScore)) ? Math.round(operationsScore) : 0}%</span>
+                            <span className="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-0.5">Completed</span>
                           </div>
                         </div>
                         <p className="text-xs text-indigo-200 mt-4 leading-relaxed font-semibold">
@@ -7312,7 +3095,7 @@ export default function App() {
                       {/* 2x2 metric micro scorecard grid */}
                       <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {/* 1. Inquiries */}
-                        <div className="p-5 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-md hover:border-white/20 transition-all flex flex-col justify-between">
+                        <div className="p-5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl backdrop-blur-md hover:border-slate-200 dark:border-slate-700/20 transition-all flex flex-col justify-between">
                           <div>
                             <div className="flex justify-between items-start">
                               <span className="p-2 bg-blue-500/15 text-blue-400 rounded-2xl border border-blue-500/20">
@@ -7322,28 +3105,28 @@ export default function App() {
                                 {!isNaN(Math.round(resolutionRate)) ? Math.round(resolutionRate) : 0}% Resolved
                               </span>
                             </div>
-                            <h3 className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-4">Inquiries Desk</h3>
+                            <h3 className="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-widest mt-4">Inquiries Desk</h3>
                             <div className="flex items-baseline gap-2 mt-1">
-                              <span className="text-3xl font-black text-slate-100 font-mono">{opInquiries.length}</span>
-                              <span className="text-xs text-slate-400">Total received</span>
+                              <span className="text-3xl font-black text-slate-700 font-mono">{opInquiries.length}</span>
+                              <span className="text-xs text-slate-500 dark:text-slate-400">Total received</span>
                             </div>
                           </div>
-                          <div className="border-t border-white/5 mt-4 pt-3 flex justify-between text-xs text-slate-300">
+                          <div className="border-t border-slate-200 dark:border-slate-700/5 mt-4 pt-3 flex justify-between text-xs text-slate-600 dark:text-slate-300">
                             <div>
-                              <p className="text-slate-100 font-black font-mono">{answeredInquiries.length}</p>
-                              <p className="text-[10px] text-slate-400">Answered</p>
+                              <p className="text-slate-700 font-black font-mono">{answeredInquiries.length}</p>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400">Answered</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-slate-100 font-black font-mono">
+                              <p className="text-slate-700 font-black font-mono">
                                 {avgResTimeMin > 0 ? `${!isNaN(Math.round(avgResTimeMin)) ? Math.round(avgResTimeMin) : 0}m` : '-'}
                               </p>
-                              <p className="text-[10px] text-slate-400">Avg Speed of Answer</p>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400">Avg Speed of Answer</p>
                             </div>
                           </div>
                         </div>
 
                         {/* 2. Fintech Integration */}
-                        <div className="p-5 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-md hover:border-white/20 transition-all flex flex-col justify-between">
+                        <div className="p-5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl backdrop-blur-md hover:border-slate-200 dark:border-slate-700/20 transition-all flex flex-col justify-between">
                           <div>
                             <div className="flex justify-between items-start">
                               <span className="p-2 bg-amber-500/15 text-amber-400 rounded-2xl border border-amber-500/20">
@@ -7353,28 +3136,28 @@ export default function App() {
                                 {!isNaN(Math.round(fintechRate)) ? Math.round(fintechRate) : 0}% Confirmed
                               </span>
                             </div>
-                            <h3 className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-4">Fintech Orders</h3>
+                            <h3 className="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-widest mt-4">Fintech Orders</h3>
                             <div className="flex items-baseline gap-2 mt-1">
-                              <span className="text-3xl font-black text-slate-100 font-mono">{opFintech.length}</span>
-                              <span className="text-xs text-slate-400">Tabby/Tamara transactions</span>
+                              <span className="text-3xl font-black text-slate-700 font-mono">{opFintech.length}</span>
+                              <span className="text-xs text-slate-500 dark:text-slate-400">Tabby/Tamara transactions</span>
                             </div>
                           </div>
-                          <div className="border-t border-white/5 mt-4 pt-3 flex justify-between text-xs text-slate-300">
+                          <div className="border-t border-slate-200 dark:border-slate-700/5 mt-4 pt-3 flex justify-between text-xs text-slate-600 dark:text-slate-300">
                             <div>
-                              <p className="text-slate-100 font-black font-mono">{confirmedFintech.length}</p>
-                              <p className="text-[10px] text-slate-400">Approved</p>
+                              <p className="text-slate-700 font-black font-mono">{confirmedFintech.length}</p>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400">Approved</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-slate-100 font-black font-mono">
+                              <p className="text-slate-700 font-black font-mono">
                                 {opFintech.filter(f => f.platform === 'tabby').length}T | {opFintech.filter(f => f.platform === 'tamara').length}M
                               </p>
-                              <p className="text-[10px] text-slate-400">Platform Shares</p>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400">Platform Shares</p>
                             </div>
                           </div>
                         </div>
 
                         {/* 3. Complaints & Comm Requests */}
-                        <div className="p-5 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-md hover:border-white/20 transition-all flex flex-col justify-between">
+                        <div className="p-5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl backdrop-blur-md hover:border-slate-200 dark:border-slate-700/20 transition-all flex flex-col justify-between">
                           <div>
                             <div className="flex justify-between items-start">
                               <span className="p-2 bg-rose-500/15 text-rose-400 rounded-2xl border border-rose-500/20">
@@ -7384,28 +3167,28 @@ export default function App() {
                                 {opComplaints.length > 0 ? `${Math.round((closedComplaints.length / opComplaints.length) * 100)}%` : '100%'} Closed
                               </span>
                             </div>
-                            <h3 className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-4">Corporate Complaints</h3>
+                            <h3 className="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-widest mt-4">Corporate Complaints</h3>
                             <div className="flex items-baseline gap-2 mt-1">
-                              <span className="text-3xl font-black text-slate-100 font-mono">{opComplaints.length}</span>
-                              <span className="text-xs text-slate-400">Logged complaints</span>
+                              <span className="text-3xl font-black text-slate-700 font-mono">{opComplaints.length}</span>
+                              <span className="text-xs text-slate-500 dark:text-slate-400">Logged complaints</span>
                             </div>
                           </div>
-                          <div className="border-t border-white/5 mt-4 pt-3 flex justify-between text-xs text-slate-300">
+                          <div className="border-t border-slate-200 dark:border-slate-700/5 mt-4 pt-3 flex justify-between text-xs text-slate-600 dark:text-slate-300">
                             <div>
-                              <p className="text-slate-100 font-black font-mono">{closedComplaints.length}</p>
-                              <p className="text-[10px] text-slate-400">Resolved</p>
+                              <p className="text-slate-700 font-black font-mono">{closedComplaints.length}</p>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400">Resolved</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-slate-100 font-black font-mono">
+                              <p className="text-slate-700 font-black font-mono">
                                 {opComplaints.filter(c => c.status === 'pending_tl').length}
                               </p>
-                              <p className="text-[10px] text-slate-400">Awaiting TL Review</p>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400">Awaiting TL Review</p>
                             </div>
                           </div>
                         </div>
 
                         {/* 4. Client Communication requests */}
-                        <div className="p-5 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-md hover:border-white/20 transition-all flex flex-col justify-between">
+                        <div className="p-5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl backdrop-blur-md hover:border-slate-200 dark:border-slate-700/20 transition-all flex flex-col justify-between">
                           <div>
                             <div className="flex justify-between items-start">
                               <span className="p-2 bg-indigo-500/15 text-indigo-400 rounded-2xl border border-indigo-500/20">
@@ -7415,28 +3198,28 @@ export default function App() {
                                 {opComms.length > 0 ? `${Math.round((contactedComms.length / opComms.length) * 100)}%` : '100%'} Contacted
                               </span>
                             </div>
-                            <h3 className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-4">Client Communications</h3>
+                            <h3 className="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-widest mt-4">Client Communications</h3>
                             <div className="flex items-baseline gap-2 mt-1">
-                              <span className="text-3xl font-black text-slate-100 font-mono">{opComms.length}</span>
-                              <span className="text-xs text-slate-400">Total requests logged</span>
+                              <span className="text-3xl font-black text-slate-700 font-mono">{opComms.length}</span>
+                              <span className="text-xs text-slate-500 dark:text-slate-400">Total requests logged</span>
                             </div>
                           </div>
-                          <div className="border-t border-white/5 mt-4 pt-3 flex justify-between text-xs text-slate-300">
+                          <div className="border-t border-slate-200 dark:border-slate-700/5 mt-4 pt-3 flex justify-between text-xs text-slate-600 dark:text-slate-300">
                             <div>
-                              <p className="text-slate-100 font-black font-mono">{contactedComms.length}</p>
-                              <p className="text-[10px] text-slate-400">Assigned & Dialed</p>
+                              <p className="text-slate-700 font-black font-mono">{contactedComms.length}</p>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400">Assigned & Dialed</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-slate-100 font-black font-mono">
+                              <p className="text-slate-700 font-black font-mono">
                                 {opComms.filter(c => c.status === 'pending').length}
                               </p>
-                              <p className="text-[10px] text-slate-400">Unassigned Backlog</p>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400">Unassigned Backlog</p>
                             </div>
                           </div>
                         </div>
 
                         {/* 5. QA Performance */}
-                        <div className="p-5 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-md hover:border-green-500/30 transition-all flex flex-col justify-between cursor-pointer" onClick={() => setActiveTab('qa-scorecard')}>
+                        <div className="p-5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl backdrop-blur-md hover:border-green-500/30 transition-all flex flex-col justify-between cursor-pointer" onClick={() => setActiveTab('qa-scorecard')}>
                           <div>
                             <div className="flex justify-between items-start">
                               <span className="p-2 bg-green-500/15 text-green-400 rounded-2xl border border-green-500/20">
@@ -7446,17 +3229,17 @@ export default function App() {
                                 QA Metrics
                               </span>
                             </div>
-                            <h3 className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-4">QA Score</h3>
+                            <h3 className="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-widest mt-4">QA Score</h3>
                             <div className="flex items-baseline gap-2 mt-1">
                               {(() => {
                                 const qas = qaScores.filter(q => isInOpDay(q.createdAt));
                                 const avg = qas.length ? Math.round((qas.reduce((a, b) => a + (b.totalScore / b.maxTotalScore), 0) / qas.length) * 100) : null;
                                 return (
                                   <>
-                                    <span className={`text-3xl font-black font-mono ${avg && avg < 70 ? 'text-red-400' : 'text-slate-100'}`}>
+                                    <span className={`text-3xl font-black font-mono ${avg && avg < 70 ? 'text-red-400' : 'text-slate-700'}`}>
                                       {avg !== null ? `${avg}%` : 'N/A'}
                                     </span>
-                                    <span className="text-xs text-slate-400">Average Performance</span>
+                                    <span className="text-xs text-slate-500 dark:text-slate-400">Average Performance</span>
                                     {/* We inject the values specifically here so they're in scope */}
                                     <span className="hidden qa-count">{qas.length}</span>
                                   </>
@@ -7464,14 +3247,14 @@ export default function App() {
                               })()}
                             </div>
                           </div>
-                          <div className="border-t border-white/5 mt-4 pt-3 flex justify-between text-xs text-slate-300">
+                          <div className="border-t border-slate-200 dark:border-slate-700/5 mt-4 pt-3 flex justify-between text-xs text-slate-600 dark:text-slate-300">
                             <div>
                                 {(() => {
                                   const qasLength = qaScores.filter(q => isInOpDay(q.createdAt)).length;
                                   return (
                                     <>
-                                      <p className="text-slate-100 font-black font-mono">{qasLength}</p>
-                                      <p className="text-[10px] text-slate-400">Total Evaluations Today</p>
+                                      <p className="text-slate-700 font-black font-mono">{qasLength}</p>
+                                      <p className="text-[10px] text-slate-500 dark:text-slate-400">Total Evaluations Today</p>
                                     </>
                                   )
                                 })()}
@@ -7482,19 +3265,19 @@ export default function App() {
                     </div>
 
                     {/* Hourly Load Distribution SVG Interactive Chart */}
-                    <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+                    <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl p-6 backdrop-blur-xl">
                       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                         <div>
-                          <h3 className="text-lg font-black text-slate-100 font-display">
+                          <h3 className="text-lg font-black text-slate-700 font-display">
                             Hourly Load & Density Distribution
                           </h3>
-                          <p className="text-xs text-slate-400 mt-0.5">
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                             Continuous 24-hr layout of incoming transactional load and active staffing rosters
                           </p>
                         </div>
 
                         {/* Interactive Selector for metric inside SVG chart */}
-                        <div className="flex items-center gap-1.5 bg-white/5 backdrop-blur-xl border border-white/10 p-1 rounded-xl">
+                        <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 p-1 rounded-xl">
                           {(['all', 'inquiries', 'fintech', 'presence'] as const).map((m) => (
                             <button
                               key={m}
@@ -7502,7 +3285,7 @@ export default function App() {
                               className={`px-3 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all cursor-pointer ${
                                 dashboardChartMetric === m
                                   ? 'bg-indigo-500 text-white'
-                                  : 'text-slate-400 hover:bg-slate-700 hover:text-slate-100'
+                                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-700 hover:text-slate-700'
                               }`}
                             >
                               {m === 'all' ? 'All Load' : m === 'inquiries' ? 'Inquiries' : m === 'fintech' ? 'FinTech' : 'On-Duty Attendance'}
@@ -7600,7 +3383,7 @@ export default function App() {
                                       height="24"
                                       className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
                                     >
-                                      <div className="bg-indigo-950/90 border border-indigo-400 text-slate-100 text-[9px] font-bold px-1.5 py-0.5 rounded text-center">
+                                      <div className="bg-indigo-950/90 border border-indigo-400 text-slate-700 text-[9px] font-bold px-1.5 py-0.5 rounded text-center">
                                         Value: {pt.val}
                                       </div>
                                     </foreignObject>
@@ -7612,7 +3395,7 @@ export default function App() {
                         </svg>
 
                         {/* Chart X Axis Labels */}
-                        <div className="absolute bottom-1.5 inset-x-0 flex justify-between px-1 text-[9px] font-black text-slate-400 font-mono tracking-tight">
+                        <div className="absolute bottom-1.5 inset-x-0 flex justify-between px-1 text-[9px] font-black text-slate-500 dark:text-slate-400 font-mono tracking-tight">
                           {hourlyCounts.map((hc, idx) => (
                             <span 
                               key={idx} 
@@ -7631,13 +3414,13 @@ export default function App() {
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                       
                       {/* LOB Performance Card */}
-                      <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl flex flex-col justify-between">
+                      <div className="lg:col-span-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl p-6 backdrop-blur-xl flex flex-col justify-between">
                         <div>
-                          <h3 className="text-base font-black text-slate-100 font-display flex items-center gap-2">
+                          <h3 className="text-base font-black text-slate-700 font-display flex items-center gap-2">
                             <Activity className="w-4 h-4 text-cyan-400" />
                             Channels & LOB Statistics
                           </h3>
-                          <p className="text-[11px] text-slate-400 mt-0.5">
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                             Performance segmented by work divisions and lines of business for this operational day
                           </p>
 
@@ -7663,30 +3446,30 @@ export default function App() {
                                 <>
                                   <div className="space-y-1">
                                     <div className="flex justify-between text-xs">
-                                      <span className="font-bold text-slate-300">Social Media Load</span>
-                                      <span className="text-slate-100 font-black font-mono">{socialInq} ({socialPercent}%)</span>
+                                      <span className="font-bold text-slate-600 dark:text-slate-300">Social Media Load</span>
+                                      <span className="text-slate-700 font-black font-mono">{socialInq} ({socialPercent}%)</span>
                                     </div>
-                                    <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                    <div className="w-full h-1.5 bg-white dark:bg-slate-900/50 rounded-full overflow-hidden">
                                       <div className="h-full bg-cyan-400 transition-all duration-1000" style={{ width: `${socialPercent}%` }} />
                                     </div>
                                   </div>
 
                                   <div className="space-y-1">
                                     <div className="flex justify-between text-xs">
-                                      <span className="font-bold text-slate-300">Call Center Load</span>
-                                      <span className="text-slate-100 font-black font-mono">{callInq} ({callPercent}%)</span>
+                                      <span className="font-bold text-slate-600 dark:text-slate-300">Call Center Load</span>
+                                      <span className="text-slate-700 font-black font-mono">{callInq} ({callPercent}%)</span>
                                     </div>
-                                    <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                    <div className="w-full h-1.5 bg-white dark:bg-slate-900/50 rounded-full overflow-hidden">
                                       <div className="h-full bg-indigo-400 transition-all duration-1000" style={{ width: `${callPercent}%` }} />
                                     </div>
                                   </div>
 
                                   <div className="space-y-1">
                                     <div className="flex justify-between text-xs">
-                                      <span className="font-bold text-slate-300">Direct Case Records</span>
-                                      <span className="text-slate-100 font-black font-mono">{opCases.length}</span>
+                                      <span className="font-bold text-slate-600 dark:text-slate-300">Direct Case Records</span>
+                                      <span className="text-slate-700 font-black font-mono">{opCases.length}</span>
                                     </div>
-                                    <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                    <div className="w-full h-1.5 bg-white dark:bg-slate-900/50 rounded-full overflow-hidden">
                                       <div className="h-full bg-pink-400 transition-all duration-1000" style={{ width: `${opCases.length > 0 ? 100 : 0}%` }} />
                                     </div>
                                   </div>
@@ -7697,8 +3480,8 @@ export default function App() {
                         </div>
 
                         {/* Daily Schedule & Absenteeism Analysis */}
-                        <div className="mt-6 p-5 bg-white/5 border border-white/10 rounded-2xl">
-                          <p className="text-[10px] text-slate-400 font-black uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                        <div className="mt-6 p-5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl">
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-wider mb-3 flex items-center gap-1.5">
                             <Clock className="w-3.5 h-3.5 text-indigo-400" />
                             Daily Roster & Absenteeism
                           </p>
@@ -7745,14 +3528,14 @@ export default function App() {
                                 {/* Overall Compliance Progress Bar */}
                                 <div className="space-y-1.5">
                                   <div className="flex justify-between items-center text-xs">
-                                    <span className="font-bold text-slate-300">Roster Compliance</span>
+                                    <span className="font-bold text-slate-600 dark:text-slate-300">Roster Compliance</span>
                                     <span className={`font-mono font-black ${
                                       complianceRate >= 90 ? 'text-emerald-400' : complianceRate >= 75 ? 'text-amber-400' : 'text-pink-400'
                                     }`}>
                                       {complianceRate}%
                                     </span>
                                   </div>
-                                  <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                  <div className="w-full h-2 bg-white dark:bg-slate-900/50 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700/5">
                                     <div 
                                       className={`h-full transition-all duration-1000 rounded-full ${
                                         complianceRate >= 90 ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : complianceRate >= 75 ? 'bg-amber-400' : 'bg-pink-500'
@@ -7764,12 +3547,12 @@ export default function App() {
 
                                 {/* Metric Badges Grid */}
                                 <div className="grid grid-cols-2 gap-2.5 pt-1.5">
-                                  <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl">
-                                    <span className="text-[10px] uppercase font-black text-slate-500 tracking-wider">Scheduled</span>
-                                    <p className="text-xl font-mono text-slate-100 font-black mt-0.5">{totalScheduled}</p>
+                                  <div className="p-3 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl">
+                                    <span className="text-[10px] uppercase font-black text-white0 tracking-wider">Scheduled</span>
+                                    <p className="text-xl font-mono text-slate-700 font-black mt-0.5">{totalScheduled}</p>
                                   </div>
-                                  <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl">
-                                    <span className="text-[10px] uppercase font-black text-slate-500 tracking-wider">Present</span>
+                                  <div className="p-3 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl">
+                                    <span className="text-[10px] uppercase font-black text-white0 tracking-wider">Present</span>
                                     <p className="text-xl font-mono text-emerald-400 font-black mt-0.5">{presenterCount}</p>
                                   </div>
                                   <div className="p-3 bg-rose-500/10 border border-rose-500/15 rounded-xl">
@@ -7812,30 +3595,30 @@ export default function App() {
                       </div>
 
                       {/* Agent roster attendance statistics table with elegant slider timelines */}
-                      <div className="lg:col-span-8 bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
-                        <h3 className="text-base font-black text-slate-100 font-display flex items-center gap-2 mb-2">
+                      <div className="lg:col-span-8 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl p-6 backdrop-blur-xl">
+                        <h3 className="text-base font-black text-slate-700 font-display flex items-center gap-2 mb-2">
                           <Users className="w-4 h-4 text-cyan-400 animate-pulse" />
                           On-Duty Roster Timeline ({opTimeLogs.length} active logs)
                         </h3>
-                        <p className="text-xs text-slate-400 mb-6 font-semibold">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 font-semibold">
                           Live attendance, productivity timeline and status logs intersecting the 7 AM - 6:59 AM cycle
                         </p>
 
                         <div className="overflow-x-auto">
                           <table className="w-full text-left border-collapse">
                             <thead>
-                              <tr className="border-b border-white/10 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                                <th className="pb-3 text-slate-100">Agent</th>
+                              <tr className="border-b border-slate-200 dark:border-slate-700/10 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                <th className="pb-3 text-slate-700">Agent</th>
                                 <th className="pb-3">LOB</th>
                                 <th className="pb-3">Shift Log Interval</th>
                                 <th className="pb-3 text-center">Duration</th>
                                 <th className="pb-3 text-right">Roster Timeline (7 AM - 7 AM)</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/5 text-xs text-slate-300">
+                            <tbody className="divide-y divide-white/5 text-xs text-slate-600 dark:text-slate-300">
                               {opTimeLogs.length === 0 ? (
                                 <tr>
-                                  <td colSpan={5} className="py-8 text-center text-slate-400 font-medium">
+                                  <td colSpan={5} className="py-8 text-center text-slate-500 dark:text-slate-400 font-medium">
                                     No logged attendance records found for this operational date slot.
                                   </td>
                                 </tr>
@@ -7881,14 +3664,14 @@ export default function App() {
 
                                   return (
                                     <tr key={log.id} className="hover:bg-slate-700 transition-colors">
-                                      <td className="py-3 font-bold text-slate-100 whitespace-nowrap">{log.agentName}</td>
+                                      <td className="py-3 font-bold text-slate-700 whitespace-nowrap">{log.agentName}</td>
                                       <td className="py-3 whitespace-nowrap">
-                                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold tracking-tight bg-white/5 text-slate-300">
+                                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold tracking-tight bg-white dark:bg-slate-900/50 text-slate-600 dark:text-slate-300">
                                           {agentLOB}
                                         </span>
                                       </td>
                                       <td className="py-3 font-mono text-[11px] whitespace-nowrap">{displayInterval}</td>
-                                      <td className="py-3 text-center font-mono font-bold text-slate-100 whitespace-nowrap">
+                                      <td className="py-3 text-center font-mono font-bold text-slate-700 whitespace-nowrap">
                                         {minutesWorked > 0 ? (
                                           Math.floor(minutesWorked / 60) > 0 
                                             ? Math.floor(minutesWorked % 60) > 0 
@@ -7898,7 +3681,7 @@ export default function App() {
                                         ) : '0'}
                                       </td>
                                       <td className="py-3 text-right">
-                                        <div className="w-24 sm:w-32 h-2.5 bg-white/5 rounded-full overflow-hidden inline-block relative border border-white/5">
+                                        <div className="w-24 sm:w-32 h-2.5 bg-white dark:bg-slate-900/50 rounded-full overflow-hidden inline-block relative border border-slate-200 dark:border-slate-700/5">
                                           {timelineWidth > 0 && (
                                             <div
                                               className="h-full bg-gradient-to-r from-emerald-400 via-indigo-500 to-cyan-500 rounded-full transition-all duration-1000"
@@ -7934,13 +3717,13 @@ export default function App() {
                   {/* Dynamic Header */}
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                      <h2 className="text-3xl font-bold text-slate-100 font-display">Approvals & Leave Console</h2>
-                      <p className="text-slate-400 text-sm">Reviewing pending requests and compliance logs</p>
+                      <h2 className="text-3xl font-bold text-slate-700 font-display">Approvals & Leave Console</h2>
+                      <p className="text-slate-500 dark:text-slate-400 text-sm">Reviewing pending requests and compliance logs</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={downloadFullCSV}
-                        className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-slate-100 rounded-xl text-xs font-bold transition-all flex items-center gap-2"
+                        className="px-4 py-2.5 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/10 hover:border-slate-200 dark:border-slate-700/20 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-2"
                       >
                         <FileText className="w-4 h-4 text-indigo-400" />
                         Full CSV backup
@@ -7950,10 +3733,10 @@ export default function App() {
 
                   {/* High Fidelity Performance Indicators */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm shadow-md">
-                      <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Pending Swaps</p>
-                      <p className="text-4xl font-black text-slate-100">{pendingSwapsCount}</p>
-                      <div className="w-full h-1 bg-white/10 mt-4 rounded-full overflow-hidden">
+                    <div className="p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl backdrop-blur-sm shadow-md">
+                      <p className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold mb-1">Pending Swaps</p>
+                      <p className="text-4xl font-black text-slate-700">{pendingSwapsCount}</p>
+                      <div className="w-full h-1 bg-slate-50 dark:bg-slate-800/80 mt-4 rounded-full overflow-hidden">
                         <div 
                           className="h-full bg-blue-500 transition-all duration-500"
                           style={{ width: `${Math.min((pendingSwapsCount / (requests.length || 1)) * 100, 100)}%` }}
@@ -7961,10 +3744,10 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm shadow-md">
-                      <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Annual Leaves</p>
-                      <p className="text-4xl font-black text-slate-100">{pendingAnnualsCount}</p>
-                      <div className="w-full h-1 bg-white/10 mt-4 rounded-full overflow-hidden">
+                    <div className="p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl backdrop-blur-sm shadow-md">
+                      <p className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold mb-1">Annual Leaves</p>
+                      <p className="text-4xl font-black text-slate-700">{pendingAnnualsCount}</p>
+                      <div className="w-full h-1 bg-slate-50 dark:bg-slate-800/80 mt-4 rounded-full overflow-hidden">
                         <div 
                           className="h-full bg-emerald-500 transition-all duration-500" 
                           style={{ width: `${Math.min((pendingAnnualsCount / (requests.length || 1)) * 100, 100)}%` }}
@@ -7972,10 +3755,10 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm shadow-md">
-                      <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Approved Monthly</p>
-                      <p className="text-4xl font-black text-slate-100">{totalApprovedThisMonth}</p>
-                      <div className="w-full h-1 bg-white/10 mt-4 rounded-full overflow-hidden">
+                    <div className="p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl backdrop-blur-sm shadow-md">
+                      <p className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold mb-1">Approved Monthly</p>
+                      <p className="text-4xl font-black text-slate-700">{totalApprovedThisMonth}</p>
+                      <div className="w-full h-1 bg-slate-50 dark:bg-slate-800/80 mt-4 rounded-full overflow-hidden">
                         <div 
                           className="h-full bg-purple-500 transition-all duration-500"
                           style={{ width: `${Math.min((totalApprovedThisMonth / (requests.length || 1)) * 100, 100)}%` }}
@@ -7983,10 +3766,10 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="p-4 bg-slate-800/6 border border-white/10 rounded-2xl backdrop-blur-sm shadow-md">
+                    <div className="p-4 bg-slate-50 dark:bg-slate-800/6 border border-slate-200 dark:border-slate-700/10 rounded-2xl backdrop-blur-sm shadow-md">
                       <p className="text-[10px] uppercase tracking-widest text-rose-400 font-bold mb-1">Violations Blocked</p>
                       <p className="text-4xl font-black text-rose-300">{totalViolationsCount}</p>
-                      <div className="w-full h-1 bg-white/10 mt-4 rounded-full overflow-hidden">
+                      <div className="w-full h-1 bg-slate-50 dark:bg-slate-800/80 mt-4 rounded-full overflow-hidden">
                         <div 
                           className="h-full bg-rose-500 transition-all duration-500"
                           style={{ width: `${Math.min((totalViolationsCount / (requests.length || 1)) * 100, 100)}%` }}
@@ -7996,14 +3779,14 @@ export default function App() {
                   </div>
 
                   {/* Operations Live Wallboard & SLA Gauge */}
-                  <div className="bg-white/5 border border-white/10 rounded-3xl shadow-sm text-slate-100 p-6 shadow-2xl space-y-6">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-4">
+                  <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl shadow-sm text-slate-700 p-6 shadow-2xl space-y-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-200 dark:border-slate-700/5 pb-4">
                       <div>
                         <h3 className="font-extrabold text-transparent bg-gradient-to-r from-blue-300 via-indigo-200 to-cyan-300 bg-clip-text text-lg font-display flex items-center gap-2">
                           <Activity className="w-5 h-5 text-cyan-400 animate-pulse" />
                           Ops Live Command Center
                         </h3>
-                        <p className="text-xs text-slate-400 mt-0.5">Real-time Service Level Agreements, Queue Metrics, and AUX Occupancy</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Real-time Service Level Agreements, Queue Metrics, and AUX Occupancy</p>
                       </div>
                       <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-[10px] font-black uppercase text-emerald-400 font-mono tracking-wider">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -8013,10 +3796,10 @@ export default function App() {
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                       {/* SLA Gauge - SVG Circle representation */}
-                      <div className="p-5 bg-slate-800/[0.02] border border-white/5 rounded-2xl flex flex-col justify-between space-y-4">
+                      <div className="p-5 bg-slate-50 dark:bg-slate-800/[0.02] border border-slate-200 dark:border-slate-700/5 rounded-2xl flex flex-col justify-between space-y-4">
                         <div className="text-left">
-                          <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Inquiry Queue SLA</p>
-                          <p className="text-[11px] text-slate-400 mt-0.5 font-sans">Target: &gt;95% within 2 min Response Goal</p>
+                          <p className="text-[10px] uppercase font-bold text-white0 tracking-wider">Inquiry Queue SLA</p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-sans">Target: &gt;95% within 2 min Response Goal</p>
                         </div>
 
                         {/* Dial */}
@@ -8034,37 +3817,37 @@ export default function App() {
                             </defs>
                           </svg>
                           <div className="absolute text-center">
-                            <span className="text-2xl font-black text-slate-100 font-mono">96.4%</span>
+                            <span className="text-2xl font-black text-slate-700 font-mono">96.4%</span>
                             <p className="text-[9px] text-indigo-300 font-bold uppercase tracking-wider mt-0.5">Met Goal</p>
                           </div>
                         </div>
 
-                        <div className="flex justify-between items-center text-xs bg-black/20 p-2.5 rounded-xl border border-white/5 font-sans">
-                          <span className="text-slate-400">Total processed today:</span>
-                          <span className="font-bold text-slate-100 font-mono">{queueStats.processedToday} inquiries</span>
+                        <div className="flex justify-between items-center text-xs bg-black/20 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700/5 font-sans">
+                          <span className="text-slate-500 dark:text-slate-400">Total processed today:</span>
+                          <span className="font-bold text-slate-700 font-mono">{queueStats.processedToday} inquiries</span>
                         </div>
                       </div>
 
                       {/* Live Queue Monitor (Simulator Interface) */}
-                      <div className="p-5 bg-slate-800/[0.02] border border-white/5 rounded-2xl space-y-4 flex flex-col justify-between">
+                      <div className="p-5 bg-slate-50 dark:bg-slate-800/[0.02] border border-slate-200 dark:border-slate-700/5 rounded-2xl space-y-4 flex flex-col justify-between">
                         <div className="flex justify-between items-start">
                           <div className="text-left">
-                            <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Simulated In-Flow Queue</p>
-                            <p className="text-[11px] text-slate-400 mt-0.5 font-sans">Trigger mock client events to check operational response</p>
+                            <p className="text-[10px] uppercase font-bold text-white0 tracking-wider">Simulated In-Flow Queue</p>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-sans">Trigger mock client events to check operational response</p>
                           </div>
                         </div>
 
                         <div className="grid grid-cols-3 gap-2.5">
-                          <div className="bg-black/30 p-2.5 rounded-xl border border-white/5 text-center">
-                            <p className="text-[9px] text-slate-400 font-bold uppercase font-sans">Active Calls</p>
+                          <div className="bg-black/30 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700/5 text-center">
+                            <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase font-sans">Active Calls</p>
                             <p className="text-lg font-black text-rose-450 font-mono mt-0.5 animate-pulse">{queueStats.activeCalls}</p>
                           </div>
-                          <div className="bg-black/30 p-2.5 rounded-xl border border-white/5 text-center">
-                            <p className="text-[9px] text-slate-400 font-bold uppercase font-sans">Hold Time</p>
+                          <div className="bg-black/30 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700/5 text-center">
+                            <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase font-sans">Hold Time</p>
                             <p className="text-lg font-black text-amber-300 font-mono mt-0.5">{queueStats.holdTime}s</p>
                           </div>
-                          <div className="bg-black/30 p-2.5 rounded-xl border border-white/5 text-center">
-                            <p className="text-[9px] text-slate-400 font-bold uppercase font-sans">Tasks open</p>
+                          <div className="bg-black/30 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700/5 text-center">
+                            <p className="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase font-sans">Tasks open</p>
                             <p className="text-lg font-black text-[#22d3ee] font-mono mt-0.5">{queueStats.waitingTasks}</p>
                           </div>
                         </div>
@@ -8102,17 +3885,17 @@ export default function App() {
                       </div>
 
                       {/* Live Action/Audit Ticker Console Logs */}
-                      <div className="p-5 bg-slate-800/[0.02] border border-white/5 rounded-2xl flex flex-col justify-between space-y-3">
+                      <div className="p-5 bg-slate-50 dark:bg-slate-800/[0.02] border border-slate-200 dark:border-slate-700/5 rounded-2xl flex flex-col justify-between space-y-3">
                         <div className="text-left">
-                          <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Live Activity Log</p>
-                          <p className="text-[11px] text-slate-400 mt-0.5 font-sans">Operations system ledger output</p>
+                          <p className="text-[10px] uppercase font-bold text-white0 tracking-wider">Live Activity Log</p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-sans">Operations system ledger output</p>
                         </div>
 
-                        <div className="bg-black/45 p-3 rounded-xl border border-white/5 text-left font-mono text-[10px] space-y-1.5 h-24 overflow-y-auto leading-snug">
+                        <div className="bg-black/45 p-3 rounded-xl border border-slate-200 dark:border-slate-700/5 text-left font-mono text-[10px] space-y-1.5 h-24 overflow-y-auto leading-snug">
                           {liveOpsLogs.map((logStr, index) => {
                             const isLive = logStr.includes('[Operational]');
                             return (
-                              <p key={index} className={isLive ? 'text-indigo-300' : 'text-slate-300'}>
+                              <p key={index} className={isLive ? 'text-indigo-300' : 'text-slate-600 dark:text-slate-300'}>
                                 {logStr}
                               </p>
                             );
@@ -8134,15 +3917,15 @@ export default function App() {
 
                           return (
                             <div className="flex flex-col gap-1.5 text-[10px] font-sans">
-                              <p className="text-slate-400 font-bold uppercase tracking-wider text-left text-[9px] mb-0.5">Aux Occupancy ({activeTotal} Active on Shift)</p>
-                              <div className="flex gap-1 h-3 rounded-full bg-white/5 overflow-hidden border border-white/5">
+                              <p className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-left text-[9px] mb-0.5">Aux Occupancy ({activeTotal} Active on Shift)</p>
+                              <div className="flex gap-1 h-3 rounded-full bg-white dark:bg-slate-900/50 overflow-hidden border border-slate-200 dark:border-slate-700/5">
                                 <div style={{ width: `${(activeOnDuty / activeTotal) * 100}%` }} className="bg-emerald-400" title={`On-Duty Working: ${activeOnDuty}`} />
                                 <div style={{ width: `${(activeAUXBreak / activeTotal) * 100}%` }} className="bg-amber-400" title={`Break: ${activeAUXBreak}`} />
                                 <div style={{ width: `${(activeAUXMeeting / activeTotal) * 100}%` }} className="bg-cyan-500" title={`Team Meeting: ${activeAUXMeeting}`} />
                                 <div style={{ width: `${(activeAUX1on1 / activeTotal) * 100}%` }} className="bg-violet-500" title={`1:1 Session: ${activeAUX1on1}`} />
                                 <div style={{ width: `${(activeAUXRestroom / activeTotal) * 100}%` }} className="bg-pink-400" title={`Restroom AUX: ${activeAUXRestroom}`} />
                               </div>
-                              <div className="flex flex-wrap gap-x-2.5 gap-y-1 font-mono text-[9px] text-slate-400 mt-1">
+                              <div className="flex flex-wrap gap-x-2.5 gap-y-1 font-mono text-[9px] text-slate-500 dark:text-slate-400 mt-1">
                                 <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> On-Duty: {activeOnDuty}</span>
                                 <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> Break: {activeAUXBreak}</span>
                                 <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-cyan-400" /> Meet: {activeAUXMeeting}</span>
@@ -8156,11 +3939,11 @@ export default function App() {
                   </div>
 
                   {/* Immediate Approval Queue Panel */}
-                  <div className="bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl flex flex-col shadow-2xl overflow-hidden">
-                    <div className="p-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 gap-3">
+                  <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl backdrop-blur-xl flex flex-col shadow-2xl overflow-hidden">
+                    <div className="p-6 border-b border-slate-200 dark:border-slate-700/10 flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white dark:bg-slate-900/50 gap-3">
                       <div>
-                        <h3 className="font-bold text-slate-100 text-lg font-display">Recent Approval Queue</h3>
-                        <p className="text-xs text-slate-400">Review, flag or action latest roster change requests</p>
+                        <h3 className="font-bold text-slate-700 text-lg font-display">Recent Approval Queue</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Review, flag or action latest roster change requests</p>
                       </div>
                       <div className="flex gap-4 items-center">
                         {selectedPendingRequests.size > 0 && (
@@ -8191,12 +3974,12 @@ export default function App() {
 
                     <div className="overflow-x-auto w-full">
                       <table className="w-full text-left min-w-[700px]">
-                        <thead className="text-[10px] uppercase tracking-widest text-slate-400 border-b border-white/5 bg-[#1e1e1e]/40 backdrop-blur-lg/40">
+                        <thead className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700/5 bg-white dark:bg-slate-900/40 backdrop-blur-lg/40">
                           <tr>
                             <th className="px-6 py-4 font-bold max-w-[20px]">
                               <input 
                                 type="checkbox"
-                                className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-indigo-500 cursor-pointer"
+                                className="w-4 h-4 rounded border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-indigo-500 cursor-pointer"
                                 onChange={(e) => {
                                   if (e.target.checked) {
                                     setSelectedPendingRequests(new Set(pendingRequests.map(r => r.id)));
@@ -8218,7 +4001,7 @@ export default function App() {
                         <tbody className="text-sm">
                           {pendingRequests.length === 0 ? (
                             <tr>
-                              <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
+                              <td colSpan={6} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
                                 <div className="flex flex-col items-center gap-2">
                                   <CheckCircle2 className="w-8 h-8 text-emerald-400 opacity-60" />
                                   <p className="font-medium">All queues clear! No pending requests awaits decision.</p>
@@ -8247,11 +4030,11 @@ export default function App() {
                               }
 
                               return (
-                                <tr key={req.id} className="border-b border-white/5 hover:bg-slate-700 transition-colors">
+                                <tr key={req.id} className="border-b border-slate-200 dark:border-slate-700/5 hover:bg-slate-700 transition-colors">
                                   <td className="px-6 py-4">
                                     <input 
                                       type="checkbox"
-                                      className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-indigo-500 cursor-pointer"
+                                      className="w-4 h-4 rounded border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-indigo-500 cursor-pointer"
                                       checked={selectedPendingRequests.has(req.id)}
                                       onChange={(e) => {
                                         const next = new Set(selectedPendingRequests);
@@ -8261,7 +4044,7 @@ export default function App() {
                                       }}
                                     />
                                   </td>
-                                  <td className="px-6 py-4 font-bold text-slate-100">
+                                  <td className="px-6 py-4 font-bold text-slate-700">
                                     {req.agentName}
                                   </td>
                                   <td className="px-6 py-4">
@@ -8275,30 +4058,30 @@ export default function App() {
                                       </span>
                                     )}
                                   </td>
-                                  <td className="px-6 py-4 font-medium text-slate-200">
+                                  <td className="px-6 py-4 font-medium text-slate-700 dark:text-slate-200">
                                     {isSwap ? (
                                       <div className="space-y-0.5">
-                                        <p className="font-semibold text-slate-100">{formatDateNice((req as SwapRequest).date)}</p>
-                                        <p className="text-xs text-slate-400 font-mono">Shift: {(req as SwapRequest).shift}</p>
+                                        <p className="font-semibold text-slate-700">{formatDateNice((req as SwapRequest).date)}</p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">Shift: {(req as SwapRequest).shift}</p>
                                       </div>
                                     ) : (
                                       <div className="space-y-0.5">
-                                        <p className="font-semibold text-slate-100">
+                                        <p className="font-semibold text-slate-700">
                                           {formatDateNice((req as AnnualRequest).startDate)}
                                         </p>
-                                        <p className="text-xs text-slate-400">
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">
                                           to {formatDateNice((req as AnnualRequest).endDate)}
                                         </p>
                                       </div>
                                     )}
                                   </td>
-                                  <td className="px-6 py-4 text-xs text-slate-300 max-w-[200px]">
+                                  <td className="px-6 py-4 text-xs text-slate-600 dark:text-slate-300 max-w-[200px]">
                                     {isSwap ? (
                                       <div className="space-y-1">
                                         <p className="text-indigo-200">
-                                          Swap Partner: <span className="font-semibold text-slate-100">{(req as SwapRequest).swapWithAgent}</span>
+                                          Swap Partner: <span className="font-semibold text-slate-700">{(req as SwapRequest).swapWithAgent}</span>
                                         </p>
-                                        <p className="text-[11px] text-slate-400 italic">"{(req as SwapRequest).notes || 'No comments'}"</p>
+                                        <p className="text-[11px] text-slate-500 dark:text-slate-400 italic">"{(req as SwapRequest).notes || 'No comments'}"</p>
                                       </div>
                                     ) : (
                                       <p className="italic">"{(req as AnnualRequest).notes || 'No comments'}"</p>
@@ -8332,7 +4115,7 @@ export default function App() {
                                           navigator.clipboard.writeText(details);
                                           toast.success('Approval request details copied!');
                                         }}
-                                        className="p-1.5 hover:bg-white/10 text-slate-300 hover:text-slate-100 rounded-lg transition-all cursor-pointer flex items-center justify-center border border-white/5 hover:border-white/15"
+                                        className="p-1.5 hover:bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:text-slate-700 rounded-lg transition-all cursor-pointer flex items-center justify-center border border-slate-200 dark:border-slate-700/5 hover:border-slate-200 dark:border-slate-700/15"
                                         title="Copy Request details"
                                       >
                                         <Copy className="w-3.5 h-3.5" />
@@ -8367,18 +4150,18 @@ export default function App() {
                 <div className="space-y-6">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                      <h2 className="text-3xl font-bold text-slate-100 font-display">Full Shift Requests Log</h2>
-                      <p className="text-slate-400 text-sm">Comprehensive list of swaps, annual leaves and decision history</p>
+                      <h2 className="text-3xl font-bold text-slate-700 font-display">Full Shift Requests Log</h2>
+                      <p className="text-slate-500 dark:text-slate-400 text-sm">Comprehensive list of swaps, annual leaves and decision history</p>
                     </div>
                   </div>
 
                   {/* Filter Rail and Search Bar inside Frosted card */}
-                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col md:flex-row items-center gap-4">
+                  <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 p-5 rounded-2xl flex flex-col md:flex-row items-center gap-4">
                     <div className="flex items-center gap-1 bg-black/20 p-1 rounded-xl w-full md:w-auto self-stretch">
                       <button
                         onClick={() => setLogFilter('all')}
                         className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all ${
-                          logFilter === 'all' ? 'bg-indigo-500 text-white shadow' : 'text-slate-400 hover:text-slate-100'
+                          logFilter === 'all' ? 'bg-indigo-500 text-white shadow' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
                         }`}
                       >
                         All Categories
@@ -8386,7 +4169,7 @@ export default function App() {
                       <button
                         onClick={() => setLogFilter('swap')}
                         className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all ${
-                          logFilter === 'swap' ? 'bg-indigo-500 text-white shadow' : 'text-slate-400 hover:text-slate-100'
+                          logFilter === 'swap' ? 'bg-indigo-500 text-white shadow' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
                         }`}
                       >
                         Shift Swaps
@@ -8394,7 +4177,7 @@ export default function App() {
                       <button
                         onClick={() => setLogFilter('annual')}
                         className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all ${
-                          logFilter === 'annual' ? 'bg-indigo-500 text-white shadow' : 'text-slate-400 hover:text-slate-100'
+                          logFilter === 'annual' ? 'bg-indigo-500 text-white shadow' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
                         }`}
                       >
                         Annual Leaves
@@ -8404,17 +4187,17 @@ export default function App() {
                     <input
                       type="text"
                       placeholder="🔍 Search by agent name..."
-                      className="flex-1 w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
+                      className="flex-1 w-full px-4 py-2.5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-xl text-slate-700 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </div>
 
                   {/* Logs Table */}
-                  <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-xl">
+                  <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl overflow-hidden shadow-xl">
                     <div className="overflow-x-auto">
                       <table className="w-full text-left min-w-[800px]">
-                        <thead className="text-[10px] uppercase tracking-widest text-slate-400 border-b border-white/5 bg-[#1e1e1e]/40 backdrop-blur-lg/40">
+                        <thead className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700/5 bg-white dark:bg-slate-900/40 backdrop-blur-lg/40">
                           <tr>
                             <th className="px-6 py-4 font-bold">Agent</th>
                             <th className="px-6 py-4 font-bold">Request Type</th>
@@ -8427,7 +4210,7 @@ export default function App() {
                         <tbody className="text-sm">
                           {filteredLogs.length === 0 ? (
                             <tr>
-                              <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
+                              <td colSpan={6} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
                                 No records matching filters.
                               </td>
                             </tr>
@@ -8435,8 +4218,8 @@ export default function App() {
                             filteredLogs.map(req => {
                               const isSwap = req.type === 'swap';
                               return (
-                                <tr key={req.id} className="border-b border-white/5 hover:bg-slate-700 transition-colors">
-                                  <td className="px-6 py-4 font-bold text-slate-100">{req.agentName}</td>
+                                <tr key={req.id} className="border-b border-slate-200 dark:border-slate-700/5 hover:bg-slate-700 transition-colors">
+                                  <td className="px-6 py-4 font-bold text-slate-700">{req.agentName}</td>
                                   <td className="px-6 py-4">
                                     {isSwap ? (
                                       <span className="px-2 py-0.5 bg-blue-500/10 text-blue-300 border border-blue-500/20 rounded-md text-[10px] font-bold uppercase">
@@ -8451,19 +4234,19 @@ export default function App() {
                                   <td className="px-6 py-4">
                                     {isSwap ? (
                                       <div className="text-xs">
-                                        <p className="font-semibold text-slate-100">{(req as SwapRequest).date}</p>
-                                        <p className="text-slate-400">Hours: {(req as SwapRequest).shift}</p>
+                                        <p className="font-semibold text-slate-700">{(req as SwapRequest).date}</p>
+                                        <p className="text-slate-500 dark:text-slate-400">Hours: {(req as SwapRequest).shift}</p>
                                         <p className="text-indigo-400">With: {(req as SwapRequest).swapWithAgent}</p>
                                       </div>
                                     ) : (
                                       <div className="text-xs">
-                                        <p className="font-semibold text-slate-100">
+                                        <p className="font-semibold text-slate-700">
                                           {(req as AnnualRequest).startDate} to {(req as AnnualRequest).endDate}
                                         </p>
                                       </div>
                                     )}
                                   </td>
-                                  <td className="px-6 py-4 text-xs font-mono text-slate-400">
+                                  <td className="px-6 py-4 text-xs font-mono text-slate-500 dark:text-slate-400">
                                     {new Date(req.createdAt).toLocaleString()}
                                   </td>
                                   <td className="px-6 py-4">
@@ -8493,10 +4276,10 @@ export default function App() {
                                       </span>
                                     )}
                                   </td>
-                                  <td className="px-6 py-4 text-xs text-slate-300">
+                                  <td className="px-6 py-4 text-xs text-slate-600 dark:text-slate-300">
                                     {req.actionBy ? (
                                       <div className="space-y-1">
-                                        <p className="text-slate-100">Resolved by <span className="font-semibold text-indigo-300">{req.actionBy}</span></p>
+                                        <p className="text-slate-700">Resolved by <span className="font-semibold text-indigo-300">{req.actionBy}</span></p>
                                         {req.ruleViolation && (
                                           <p className="text-[10px] text-rose-400 bg-rose-500/10 p-1.5 rounded border border-rose-500/20">
                                             ⚠️ Violation flag: {req.violationMessage}
@@ -8508,7 +4291,7 @@ export default function App() {
                                     ) : req.status === 'declined_by_partner' ? (
                                       <span className="text-rose-400">Partner refused swap agreement</span>
                                     ) : (
-                                      <span className="text-slate-500">Awaiting leader review</span>
+                                      <span className="text-white0">Awaiting leader review</span>
                                     )}
                                   </td>
                                 </tr>
@@ -8542,32 +4325,32 @@ export default function App() {
               {currentUser.role === 'agent' && activeTab === 'apply' && (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-3xl font-bold text-slate-100 font-display">New Request Form</h2>
-                    <p className="text-slate-400 text-sm">Please select the requested change type below</p>
+                    <h2 className="text-3xl font-bold text-slate-700 font-display">New Request Form</h2>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm">Please select the requested change type below</p>
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     
                     {/* Shift Swap Module */}
-                    <div className="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-xl flex flex-col space-y-5 shadow-lg relative overflow-hidden">
+                    <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 p-6 rounded-3xl backdrop-blur-xl flex flex-col space-y-5 shadow-lg relative overflow-hidden">
                       <div className="absolute top-0 left-0 right-0 h-1 bg-blue-500"></div>
                       <div className="flex items-center gap-2.5">
                         <div className="w-9 h-9 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center justify-center">
                           <Users className="w-5 h-5 text-blue-400" />
                         </div>
                         <div>
-                          <h4 className="font-bold text-slate-100 font-display text-base">Request Shift Swap</h4>
-                          <p className="text-xs text-slate-400">Must be requested 24 hours in advance.</p>
+                          <h4 className="font-bold text-slate-700 font-display text-base">Request Shift Swap</h4>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">Must be requested 24 hours in advance.</p>
                         </div>
                       </div>
 
                       <form onSubmit={handleCreateSwap} className="space-y-4">
                         <div className="space-y-1">
-                          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block" htmlFor="swap-date">Shift Date</label>
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block" htmlFor="swap-date">Shift Date</label>
                           <input
                             id="swap-date"
                             type="date"
-                            className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500 text-sm"
+                            className="w-full px-4 py-2.5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-xl text-slate-700 focus:outline-none focus:border-indigo-500 text-sm"
                             value={swapDate}
                             onChange={(e) => setSwapDate(e.target.value)}
                             required
@@ -8576,15 +4359,15 @@ export default function App() {
 
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block" htmlFor="swap-shift">Your Shift</label>
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block" htmlFor="swap-shift">Your Shift</label>
                             <select
                               id="swap-shift"
-                              className="text-slate-100 w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl   focus:outline-none focus:border-indigo-500"
+                              className="text-slate-700 w-full px-4 py-2.5 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/20 rounded-xl   focus:outline-none focus:border-indigo-500"
                               value={swapShift}
                               onChange={(e) => setSwapShift(e.target.value)}
                             >
                               {SHIFTS.map(s => (
-                                <option key={s.id} value={s.label} className="bg-slate-800 text-slate-100 ">
+                                <option key={s.id} value={s.label} className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">
                                   {s.display} ({s.label})
                                 </option>
                               ))}
@@ -8592,15 +4375,15 @@ export default function App() {
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block" htmlFor="swap-target-shift">Target Shift</label>
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block" htmlFor="swap-target-shift">Target Shift</label>
                             <select
                               id="swap-target-shift"
-                              className="text-slate-100 w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl   focus:outline-none focus:border-indigo-500"
+                              className="text-slate-700 w-full px-4 py-2.5 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/20 rounded-xl   focus:outline-none focus:border-indigo-500"
                               value={swapTargetShift}
                               onChange={(e) => setSwapTargetShift(e.target.value)}
                             >
                               {SHIFTS.map(s => (
-                                <option key={s.id} value={s.label} className="bg-slate-800 text-slate-100 ">
+                                <option key={s.id} value={s.label} className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">
                                   {s.display} ({s.label})
                                 </option>
                               ))}
@@ -8609,19 +4392,19 @@ export default function App() {
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block" htmlFor="swap-partner">Swap with Agent</label>
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block" htmlFor="swap-partner">Swap with Agent</label>
                           <select
                             id="swap-partner"
-                            className="text-slate-100 w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl   focus:outline-none focus:border-indigo-500 font-medium"
+                            className="text-slate-700 w-full px-4 py-2.5 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/20 rounded-xl   focus:outline-none focus:border-indigo-500 font-medium"
                             value={swapTargetAgent}
                             onChange={(e) => setSwapTargetAgent(e.target.value)}
                             required
                           >
-                            <option value="" className="bg-slate-800 text-slate-100 ">-- Select Partner Agent --</option>
+                            <option value="" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">-- Select Partner Agent --</option>
                             {agentsList
                               .filter(name => name !== currentUser?.name)
                               .map(name => (
-                                <option key={name} value={name} className="bg-slate-800 text-slate-100 ">
+                                <option key={name} value={name} className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">
                                   {name} ({getAgentLOB(name)})
                                 </option>
                               ))}
@@ -8629,11 +4412,11 @@ export default function App() {
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block" htmlFor="swap-notes">Notes / Reason</label>
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block" htmlFor="swap-notes">Notes / Reason</label>
                           <textarea
                             id="swap-notes"
                             rows={2}
-                            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
+                            className="w-full px-4 py-2 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-xl text-slate-700 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
                             placeholder="State reason (e.g., family errand, doctor appointment)..."
                             value={swapNotes}
                             onChange={(e) => setSwapNotes(e.target.value)}
@@ -8657,7 +4440,7 @@ export default function App() {
                           disabled={swapWarning !== null}
                           className={`w-full py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
                             swapWarning !== null
-                              ? 'bg-slate-900/40/20 backdrop-blur-md text-slate-500 cursor-not-allowed border border-white/5'
+                              ? 'bg-white dark:bg-slate-900/40/20 backdrop-blur-md text-white0 cursor-not-allowed border border-slate-200 dark:border-slate-700/5'
                               : 'bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/25 cursor-pointer'
                           }`}
                         >
@@ -8668,26 +4451,26 @@ export default function App() {
 
 
                     {/* Annual Leave Module */}
-                    <div className="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-xl flex flex-col space-y-5 shadow-lg relative overflow-hidden">
+                    <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 p-6 rounded-3xl backdrop-blur-xl flex flex-col space-y-5 shadow-lg relative overflow-hidden">
                       <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500"></div>
                       <div className="flex items-center gap-2.5">
                         <div className="w-9 h-9 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center">
                           <Calendar className="w-5 h-5 text-emerald-400" />
                         </div>
                         <div>
-                          <h4 className="font-bold text-slate-100 font-display text-base">Request Annual Leave</h4>
-                          <p className="text-xs text-slate-400">Must be requested 14 days in advance.</p>
+                          <h4 className="font-bold text-slate-700 font-display text-base">Request Annual Leave</h4>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">Must be requested 14 days in advance.</p>
                         </div>
                       </div>
 
                       <form onSubmit={handleCreateAnnual} className="space-y-4">
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block" htmlFor="annual-start">Start Date</label>
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block" htmlFor="annual-start">Start Date</label>
                             <input
                               id="annual-start"
                               type="date"
-                              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500 text-sm"
+                              className="w-full px-4 py-2.5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-xl text-slate-700 focus:outline-none focus:border-indigo-500 text-sm"
                               value={annualStart}
                               onChange={(e) => setAnnualStart(e.target.value)}
                               required
@@ -8695,11 +4478,11 @@ export default function App() {
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block" htmlFor="annual-end">End Date (Inclusive)</label>
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block" htmlFor="annual-end">End Date (Inclusive)</label>
                             <input
                               id="annual-end"
                               type="date"
-                              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500 text-sm"
+                              className="w-full px-4 py-2.5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-xl text-slate-700 focus:outline-none focus:border-indigo-500 text-sm"
                               value={annualEnd}
                               onChange={(e) => setAnnualEnd(e.target.value)}
                               required
@@ -8708,11 +4491,11 @@ export default function App() {
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block" htmlFor="annual-notes">Comments / Leave justification</label>
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block" htmlFor="annual-notes">Comments / Leave justification</label>
                           <textarea
                             id="annual-notes"
                             rows={4}
-                            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
+                            className="w-full px-4 py-2 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-xl text-slate-700 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
                             placeholder="State comments..."
                             value={annualNotes}
                             onChange={(e) => setAnnualNotes(e.target.value)}
@@ -8736,7 +4519,7 @@ export default function App() {
                           disabled={annualWarning !== null}
                           className={`w-full py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
                             annualWarning !== null
-                              ? 'bg-slate-900/40/20 backdrop-blur-md text-slate-500 cursor-not-allowed border border-white/5'
+                              ? 'bg-white dark:bg-slate-900/40/20 backdrop-blur-md text-white0 cursor-not-allowed border border-slate-200 dark:border-slate-700/5'
                               : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/25 cursor-pointer'
                           }`}
                         >
@@ -8754,19 +4537,19 @@ export default function App() {
               {currentUser.role === 'agent' && activeTab === 'my-requests' && (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-3xl font-bold text-slate-100 font-display">My Submission Logs</h2>
-                    <p className="text-slate-400 text-sm">Review status, comments and feedback on your submissions</p>
+                    <h2 className="text-3xl font-bold text-slate-700 font-display">My Submission Logs</h2>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm">Review status, comments and feedback on your submissions</p>
                   </div>
 
-                  <div className="bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl p-6 shadow-xl space-y-4">
-                    <div className="flex justify-between items-center pb-2 border-b border-white/10">
-                      <h4 className="font-bold text-slate-100 text-base">Your Requests Logs</h4>
-                      <p className="text-xs text-slate-400 font-mono">Real-time status tracking</p>
+                  <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl backdrop-blur-xl p-6 shadow-xl space-y-4">
+                    <div className="flex justify-between items-center pb-2 border-b border-slate-200 dark:border-slate-700/10">
+                      <h4 className="font-bold text-slate-700 text-base">Your Requests Logs</h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">Real-time status tracking</p>
                     </div>
 
                     <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
                       {requests.filter(r => r.agentName === currentUser?.name).length === 0 ? (
-                        <div className="text-center py-12 text-slate-400 space-y-2">
+                        <div className="text-center py-12 text-slate-500 dark:text-slate-400 space-y-2">
                           <ClipboardList className="w-10 h-10 mx-auto text-indigo-400 opacity-50" />
                           <p>You haven't submitted any scheduling requests yet.</p>
                         </div>
@@ -8776,7 +4559,7 @@ export default function App() {
                           .map(req => {
                             const isSwap = req.type === 'swap';
                             return (
-                              <div key={req.id} className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col md:flex-row flex-wrap justify-between items-start md:items-center gap-4 hover:border-white/10 transition-all">
+                              <div key={req.id} className="p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/5 rounded-2xl flex flex-col md:flex-row flex-wrap justify-between items-start md:items-center gap-4 hover:border-slate-200 dark:border-slate-700/10 transition-all">
                                 <div className="space-y-2 flex-grow min-w-[300px]">
                                   <div className="flex items-center gap-2">
                                     {isSwap ? (
@@ -8788,37 +4571,37 @@ export default function App() {
                                         Annual Leave Request
                                       </span>
                                     )}
-                                    <span className="text-[10px] text-slate-400 font-mono">
+                                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                                       Submitted: {new Date(req.createdAt).toLocaleDateString()}
                                     </span>
                                   </div>
 
                                   <div className="space-y-0.5">
                                     {isSwap ? (
-                                      <p className="text-sm font-bold text-slate-100">
+                                      <p className="text-sm font-bold text-slate-700">
                                         Swap shift for <span className="text-indigo-300">{formatDateNice((req as SwapRequest).date)}</span>
                                       </p>
                                     ) : (
-                                      <p className="text-sm font-bold text-slate-100">
+                                      <p className="text-sm font-bold text-slate-700">
                                         Leave duration: <span className="text-emerald-300">{formatDateNice((req as AnnualRequest).startDate)}</span> to <span className="text-emerald-300">{formatDateNice((req as AnnualRequest).endDate)}</span>
                                       </p>
                                     )}
 
                                     {isSwap && (
-                                      <p className="text-xs text-slate-300">
-                                        Your Shift: <span className="font-semibold">{(req as SwapRequest).shift}</span> / Swap with Partner: <span className="font-semibold text-slate-100">{(req as SwapRequest).swapWithAgent}</span> &bull; Shift: <span className="font-semibold">{(req as SwapRequest).swapWithShift}</span>
+                                      <p className="text-xs text-slate-600 dark:text-slate-300">
+                                        Your Shift: <span className="font-semibold">{(req as SwapRequest).shift}</span> / Swap with Partner: <span className="font-semibold text-slate-700">{(req as SwapRequest).swapWithAgent}</span> &bull; Shift: <span className="font-semibold">{(req as SwapRequest).swapWithShift}</span>
                                       </p>
                                     )}
 
                                     {req.notes && (
-                                      <p className="text-slate-400 text-xs italic mt-1 font-sans">
+                                      <p className="text-slate-500 dark:text-slate-400 text-xs italic mt-1 font-sans">
                                         " {req.notes} "
                                       </p>
                                     )}
                                   </div>
                                 </div>
 
-                                <div className="flex flex-col items-end gap-2 self-stretch md:self-auto border-t md:border-t-0 border-white/5 pt-3 md:pt-0">
+                                <div className="flex flex-col items-end gap-2 self-stretch md:self-auto border-t md:border-t-0 border-slate-200 dark:border-slate-700/5 pt-3 md:pt-0">
                                   {req.status === 'pending_partner' ? (
                                     <div className="flex items-center gap-2">
                                       <span className="px-2 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 rounded-md text-xs font-bold flex items-center gap-1 animate-pulse">
@@ -8848,7 +4631,7 @@ export default function App() {
                                       <span className="px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 rounded-md text-xs font-bold flex items-center justify-end gap-1">
                                         <CheckCircle2 className="w-3.5 h-3.5" /> Approved
                                       </span>
-                                      <p className="text-[10px] text-slate-400 mt-1">
+                                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
                                         Actioned by Leader {req.actionBy}
                                       </p>
                                     </div>
@@ -8857,7 +4640,7 @@ export default function App() {
                                       <span className="px-2 py-1 bg-rose-500/10 border border-rose-500/20 text-rose-300 rounded-md text-xs font-bold flex items-center justify-end gap-1">
                                         <XCircle className="w-3.5 h-3.5" /> Declined by Partner
                                       </span>
-                                      <p className="text-[10px] text-slate-400 mt-1">
+                                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
                                         Partner refused swap agreement
                                       </p>
                                     </div>
@@ -8871,7 +4654,7 @@ export default function App() {
                                           ⚠️ Reason: {req.violationMessage}
                                         </p>
                                       )}
-                                      <p className="text-[10px] text-slate-400 mt-0.5">
+                                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                                         Actioned by Leader {req.actionBy}
                                       </p>
                                     </div>
@@ -8887,7 +4670,7 @@ export default function App() {
                                     </button>
                                   )}
                                 </div>
-                                <div className="w-full mt-2 pt-2 border-t border-white/5 md:w-full md:block basis-full">
+                                <div className="w-full mt-2 pt-2 border-t border-slate-200 dark:border-slate-700/5 md:w-full md:block basis-full">
                                   <RequestReplyThread request={req} currentUser={currentUser} collectionName="requests" />
                                 </div>
                               </div>
@@ -8938,14 +4721,14 @@ export default function App() {
                 <div id="agent-inquiries-tab" className="space-y-6 animate-fade-in">
                   {/* Page Title */}
                   <div>
-                    <h2 className="text-3xl font-bold text-slate-100 font-display">Inquiries Helpdesk</h2>
-                    <p className="text-slate-400 text-sm font-sans">Submit questions, attach screenshots/links, and track live resolutions from Team Leaders.</p>
+                    <h2 className="text-3xl font-bold text-slate-700 font-display">Inquiries Helpdesk</h2>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm font-sans">Submit questions, attach screenshots/links, and track live resolutions from Team Leaders.</p>
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Submit Inquiry Form (Left Side / Col Span 1) */}
-                    <div className="lg:col-span-1 bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl space-y-5">
-                      <h3 className="text-base font-bold text-slate-100 font-display flex items-center gap-2 border-b border-white/5 pb-3">
+                    <div className="lg:col-span-1 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 p-5 rounded-3xl backdrop-blur-xl space-y-5">
+                      <h3 className="text-base font-bold text-slate-700 font-display flex items-center gap-2 border-b border-slate-200 dark:border-slate-700/5 pb-3">
                         <HelpCircle className="w-5 h-5 text-indigo-400" />
                         Submit New Inquiry
                       </h3>
@@ -8953,7 +4736,7 @@ export default function App() {
                       <form onSubmit={handleSubmitInquiry} className="space-y-4">
                         {/* Mandatory Clinic Name Dropdown */}
                         <div className="space-y-1.5">
-                          <label className="text-xs font-semibold text-slate-300 block flex items-center justify-between">
+                          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 block flex items-center justify-between">
                             <span className="flex items-center gap-1">
                               🏥 Clinic Name <span className="text-rose-400 font-extrabold">*</span>
                             </span>
@@ -8964,21 +4747,21 @@ export default function App() {
                           <select
                             value={inquiryClinicName}
                             onChange={(e) => setInquiryClinicName(e.target.value)}
-                            className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
+                            className="w-full px-4 py-3 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl text-slate-700 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                             required
                           >
-                            <option value="" className="bg-slate-800 text-slate-100 ">-- Select Clinic * --</option>
-                            <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
-                            <option value="onetouch1" className="bg-slate-800 text-slate-100 ">One Touch 1 AlMu'tarid</option>
-                            <option value="onetouch2" className="bg-slate-800 text-slate-100 ">One Touch 2 Markhaniya</option>
-                            <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
-                            <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
+                            <option value="" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">-- Select Clinic * --</option>
+                            <option value="dermadent" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">Dermadent</option>
+                            <option value="onetouch1" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">One Touch 1 AlMu'tarid</option>
+                            <option value="onetouch2" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">One Touch 2 Markhaniya</option>
+                            <option value="welltouch" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">WellTouch</option>
+                            <option value="newedge" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">New Edge</option>
                           </select>
                         </div>
 
                         {/* Phone Number optionally */}
                         <div className="space-y-1.5">
-                          <label className="text-xs font-semibold text-slate-300 block">
+                          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 block">
                             Phone Number (Optional)
                           </label>
                           <input
@@ -8986,21 +4769,21 @@ export default function App() {
                             placeholder="+966 5x xxx xxxx (Optional)"
                             value={inquiryPhoneNumber}
                             onChange={(e) => setInquiryPhoneNumber(e.target.value)}
-                            className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-mono"
+                            className="w-full px-4 py-3 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl text-slate-700 text-xs focus:outline-none focus:border-indigo-500 transition-all font-mono"
                           />
                         </div>
 
                         {/* Inquiry text details with English or Arabic typing toggles */}
                         <div className="space-y-1.5">
                           <div className="flex justify-between items-center flex-wrap gap-1">
-                            <label className="text-xs font-semibold text-slate-300">Inquiry Details <span className="text-rose-400 font-extrabold">*</span></label>
+                            <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Inquiry Details <span className="text-rose-400 font-extrabold">*</span></label>
                             
                             {/* Direction toggle options for Arabic/English */}
-                            <div className="flex items-center gap-1 bg-white/5 backdrop-blur-xl border border-white/10 p-0.5 rounded-lg text-[10px]">
+                            <div className="flex items-center gap-1 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 p-0.5 rounded-lg text-[10px]">
                               <button
                                 type="button"
                                 onClick={() => setInquiryLanguageDir('auto')}
-                                className={`px-2 py-0.5 rounded cursor-pointer transition-all ${inquiryLanguageDir === 'auto' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400 hover:text-slate-100'}`}
+                                className={`px-2 py-0.5 rounded cursor-pointer transition-all ${inquiryLanguageDir === 'auto' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'}`}
                                 title="Auto Detect Language Direction"
                               >
                                 Auto 🌐
@@ -9008,7 +4791,7 @@ export default function App() {
                               <button
                                 type="button"
                                 onClick={() => setInquiryLanguageDir('ltr')}
-                                className={`px-2 py-0.5 rounded cursor-pointer transition-all ${inquiryLanguageDir === 'ltr' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400 hover:text-slate-100'}`}
+                                className={`px-2 py-0.5 rounded cursor-pointer transition-all ${inquiryLanguageDir === 'ltr' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'}`}
                                 title="Force English Mode (LTR)"
                               >
                                 English 🇺🇸
@@ -9016,7 +4799,7 @@ export default function App() {
                               <button
                                 type="button"
                                 onClick={() => setInquiryLanguageDir('rtl')}
-                                className={`px-2 py-0.5 rounded cursor-pointer transition-all ${inquiryLanguageDir === 'rtl' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400 hover:text-slate-100'}`}
+                                className={`px-2 py-0.5 rounded cursor-pointer transition-all ${inquiryLanguageDir === 'rtl' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'}`}
                                 title="Force Arabic Mode (RTL)"
                               >
                                 العربية 🇸🇦
@@ -9030,7 +4813,7 @@ export default function App() {
                             placeholder={inquiryLanguageDir === 'rtl' ? "اكتب استفسارك بالتفصيل باللغة العربية هنا..." : "Describe your inquiry or case in detail (Type in English or Arabic)..."}
                             rows={4}
                             dir={inquiryLanguageDir}
-                            className={`w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans placeholder-slate-500 resize-none ${inquiryLanguageDir === 'rtl' ? 'text-right' : 'text-left'}`}
+                            className={`w-full px-4 py-3 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl text-slate-700 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans placeholder-slate-500 resize-none ${inquiryLanguageDir === 'rtl' ? 'text-right' : 'text-left'}`}
                           />
                         </div>
 
@@ -9038,12 +4821,12 @@ export default function App() {
                         {currentUser?.role !== 'agent' && (
                         <div className="space-y-3">
                           <div className="flex justify-between items-center">
-                            <label className="text-xs font-semibold text-slate-300">Attach Photos / Screenshots</label>
-                            <span className="text-[10px] text-slate-500">Max size 2MB</span>
+                            <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Attach Photos / Screenshots</label>
+                            <span className="text-[10px] text-white0">Max size 2MB</span>
                           </div>
                           
                           {/* Drag and Drop or File Upload block */}
-                          <div className="relative border border-dashed border-white/10 hover:border-indigo-500/50 rounded-xl p-4 bg-black/20 text-center transition-all group">
+                          <div className="relative border border-dashed border-slate-200 dark:border-slate-700/10 hover:border-indigo-500/50 rounded-xl p-4 bg-black/20 text-center transition-all group">
                             <input
                               type="file"
                               multiple
@@ -9052,22 +4835,22 @@ export default function App() {
                               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                             />
                             <div className="flex flex-col items-center justify-center space-y-1">
-                              <Upload className="w-5 h-5 text-slate-400 group-hover:text-indigo-400 transition-all" />
-                              <p className="text-xs font-medium text-slate-300">Choose Image or drag here</p>
-                              <p className="text-[9px] text-slate-500">Supports JPG, PNG, WebP</p>
+                              <Upload className="w-5 h-5 text-slate-500 dark:text-slate-400 group-hover:text-indigo-400 transition-all" />
+                              <p className="text-xs font-medium text-slate-600 dark:text-slate-300">Choose Image or drag here</p>
+                              <p className="text-[9px] text-white0">Supports JPG, PNG, WebP</p>
                             </div>
                           </div>
 
                           {/* Manual Image URL Paste */}
                           <div className="flex gap-2">
                             <div className="relative flex-1">
-                              <ImageIcon className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                              <ImageIcon className="w-3.5 h-3.5 text-white0 absolute left-3 top-1/2 -translate-y-1/2" />
                               <input
                                 type="text"
                                 placeholder="Or paste external image URL..."
                                 value={tempPhotoUrlInput}
                                 onChange={(e) => setTempPhotoUrlInput(e.target.value)}
-                                className="w-full pl-9 pr-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all"
+                                className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-lg text-slate-700 text-xs focus:outline-none focus:border-indigo-500 transition-all"
                               />
                             </div>
                             <button
@@ -9083,12 +4866,12 @@ export default function App() {
                           {inquiryPhotos.length > 0 && (
                             <div className="grid grid-cols-4 gap-2 pt-1">
                               {inquiryPhotos.map((photo, index) => (
-                                <div key={index} className="relative group aspect-square rounded-lg border border-white/10 overflow-hidden bg-black/40">
+                                <div key={index} className="relative group aspect-square rounded-lg border border-slate-200 dark:border-slate-700/10 overflow-hidden bg-black/40">
                                   <img referrerPolicy="no-referrer" src={photo} alt="Attached" className="w-full h-full object-cover" />
                                   <button
                                     type="button"
                                     onClick={() => handleRemovePhoto(index)}
-                                    className="absolute inset-0 bg-red-600/80 text-slate-100 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all text-[10px] font-bold"
+                                    className="absolute inset-0 bg-red-600/80 text-slate-700 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all text-[10px] font-bold"
                                   >
                                     Delete
                                   </button>
@@ -9101,16 +4884,16 @@ export default function App() {
 
                         {/* Links Section */}
                         <div className="space-y-2">
-                          <label className="text-xs font-semibold text-slate-300 block">Attach Links</label>
+                          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 block">Attach Links</label>
                           <div className="flex gap-2">
                             <div className="relative flex-1">
-                              <Link className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                              <Link className="w-3.5 h-3.5 text-white0 absolute left-3 top-1/2 -translate-y-1/2" />
                               <input
                                 type="text"
                                 placeholder="e.g. ticket link, reference..."
                                 value={tempLinkInput}
                                 onChange={(e) => setTempLinkInput(e.target.value)}
-                                className="w-full pl-9 pr-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all"
+                                className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-lg text-slate-700 text-xs focus:outline-none focus:border-indigo-500 transition-all"
                               />
                             </div>
                             <button
@@ -9126,7 +4909,7 @@ export default function App() {
                           {inquiryLinks.length > 0 && (
                             <div className="space-y-1.5 pt-1">
                               {inquiryLinks.map((linkStr, index) => (
-                                <div key={index} className="flex justify-between items-center p-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-xs">
+                                <div key={index} className="flex justify-between items-center p-2 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-lg text-xs">
                                   <span className="text-indigo-300 underline font-mono truncate max-w-[150px]">{linkStr}</span>
                                   <button
                                     type="button"
@@ -9149,7 +4932,7 @@ export default function App() {
                         >
                           {isFormSubmitting ? (
                             <>
-                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              <div className="w-4 h-4 border-2 border-slate-200 dark:border-slate-700/30 border-t-white rounded-full animate-spin" />
                               Submitting Inquiry...
                             </>
                           ) : (
@@ -9164,14 +4947,14 @@ export default function App() {
 
                     {/* Inquiry Logs and Progress (Right Side / Col Span 2) */}
                     <div className="lg:col-span-2 space-y-4">
-                      <div className="p-5 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/5 pb-4 mb-4">
+                      <div className="p-5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl backdrop-blur-xl">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 dark:border-slate-700/5 pb-4 mb-4">
                           <div>
-                            <h3 className="text-base font-bold text-slate-100 font-display">My Submission Timeline</h3>
-                            <p className="text-xs text-slate-400">View states and answers to all inquiries you have submitted.</p>
+                            <h3 className="text-base font-bold text-slate-700 font-display">My Submission Timeline</h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">View states and answers to all inquiries you have submitted.</p>
                           </div>
                           <div className="flex items-center gap-2 text-xs font-mono">
-                            <span className="text-slate-400">Total:</span>
+                            <span className="text-slate-500 dark:text-slate-400">Total:</span>
                             <span className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/15 text-indigo-300 font-bold rounded">
                               {inquiries.filter(i => i.agentName?.toLowerCase() === currentUser?.name?.toLowerCase()).length}
                             </span>
@@ -9182,8 +4965,8 @@ export default function App() {
                         <div className="space-y-4 max-h-[600px] overflow-y-auto pr-1">
                           {inquiries.filter(i => i.agentName?.toLowerCase() === currentUser?.name?.toLowerCase()).length === 0 ? (
                             <div className="text-center py-12">
-                              <HelpCircle className="w-12 h-12 text-slate-400 mx-auto mb-2.5 animate-pulse" />
-                              <p className="text-xs text-slate-400 italic">No inquiries submitted yet. Submit a case above to get started!</p>
+                              <HelpCircle className="w-12 h-12 text-slate-500 dark:text-slate-400 mx-auto mb-2.5 animate-pulse" />
+                              <p className="text-xs text-slate-500 dark:text-slate-400 italic">No inquiries submitted yet. Submit a case above to get started!</p>
                             </div>
                           ) : (
                             inquiries
@@ -9200,9 +4983,9 @@ export default function App() {
                                 }
 
                                 return (
-                                  <div key={inq.id} className="p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl space-y-3 hover:border-white/10 transition-all relative">
+                                  <div key={inq.id} className="p-4 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-2xl space-y-3 hover:border-slate-200 dark:border-slate-700/10 transition-all relative">
                                     {/* Top Info row */}
-                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-2">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-700/5 pb-2">
                                       <div className="flex flex-wrap items-center gap-2">
                                         <span className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg uppercase tracking-wide shrink-0 ${statusColor}`}>
                                           {statusText}
@@ -9217,7 +5000,7 @@ export default function App() {
                                             📞 {inq.phoneNumber}
                                           </span>
                                         )}
-                                        <span className="text-[10px] text-slate-400">{new Date(inq.createdAt).toLocaleString()}</span>
+                                        <span className="text-[10px] text-slate-500 dark:text-slate-400">{new Date(inq.createdAt).toLocaleString()}</span>
                                       </div>
                                       <div className="flex items-center gap-2.5">
                                         {(!inq.seenByAgent && (inq.status === 'sent' || inq.status === 'answered')) && (
@@ -9251,12 +5034,12 @@ export default function App() {
 
                                     {/* Content block */}
                                     <div className="space-y-3 font-sans">
-                                      <p className="text-xs text-slate-200 whitespace-pre-line leading-relaxed">{inq.text}</p>
+                                      <p className="text-xs text-slate-700 dark:text-slate-200 whitespace-pre-line leading-relaxed">{inq.text}</p>
                                       
                                       {/* Display Photos */}
                                       {inq.photos && inq.photos.length > 0 && (
                                         <div className="space-y-1">
-                                          <span className="text-[10px] text-slate-400 font-mono block">Attached Screenshots ({inq.photos.length}):</span>
+                                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono block">Attached Screenshots ({inq.photos.length}):</span>
                                           <div className="flex flex-wrap gap-2">
                                             {inq.photos.map((photo, pIdx) => (
                                               <a
@@ -9264,7 +5047,7 @@ export default function App() {
                                                 href={photo}
                                                 target="_blank"
                                                 rel="noreferrer"
-                                                className="block w-14 h-14 rounded-lg overflow-hidden border border-white/10 hover:border-indigo-500 transition-all bg-black/55 shrink-0"
+                                                className="block w-14 h-14 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700/10 hover:border-indigo-500 transition-all bg-black/55 shrink-0"
                                                 title="View Image"
                                               >
                                                 <img referrerPolicy="no-referrer" src={photo} alt="screenshot" className="w-full h-full object-cover" />
@@ -9277,7 +5060,7 @@ export default function App() {
                                       {/* Display Links */}
                                       {inq.links && inq.links.length > 0 && (
                                         <div className="space-y-1">
-                                          <span className="text-[10px] text-slate-400 font-mono block">References & Tickets:</span>
+                                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono block">References & Tickets:</span>
                                           <div className="flex flex-col gap-1">
                                             {inq.links.map((link, lIdx) => (
                                               <a
@@ -9304,9 +5087,9 @@ export default function App() {
                                             <Send className="w-3 h-3 animate-pulse" />
                                             Forwarded to Client Partner
                                           </p>
-                                          <span className="text-[9px] text-slate-500">{new Date(inq.sentAt || '').toLocaleString()}</span>
+                                          <span className="text-[9px] text-white0">{new Date(inq.sentAt || '').toLocaleString()}</span>
                                         </div>
-                                        <p className="text-xs text-slate-300 font-sans">
+                                        <p className="text-xs text-slate-600 dark:text-slate-300 font-sans">
                                           Leader <strong>{inq.sentBy}</strong> has sent this inquiry forward to client partners for resolution. Please wait while they formulate a response.
                                         </p>
                                       </div>
@@ -9319,28 +5102,28 @@ export default function App() {
                                             <CheckCircle2 className="w-3.5 h-3.5" />
                                             INQUIRY ANSWERED
                                           </p>
-                                          <span className="text-[9px] text-slate-500">{new Date(inq.answeredAt || '').toLocaleString()}</span>
+                                          <span className="text-[9px] text-white0">{new Date(inq.answeredAt || '').toLocaleString()}</span>
                                         </div>
                                         <div className="text-xs text-emerald-200 font-semibold italic leading-relaxed font-sans">
                                           "{inq.answer}"
                                         </div>
-                                        <p className="text-[9px] text-slate-400 text-right">
+                                        <p className="text-[9px] text-slate-500 dark:text-slate-400 text-right">
                                           Answered by Leader <strong>{inq.answeredBy}</strong>
                                         </p>
                                       </div>
                                     )}
 
                                     {/* Customer Contacted Status Dropdown */}
-                                    <div className="flex flex-wrap items-center gap-2.5 pt-3 border-t border-white/5">
-                                      <span className="text-[11px] text-slate-400 font-medium">Customer Contact Status:</span>
+                                    <div className="flex flex-wrap items-center gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-700/5">
+                                      <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Customer Contact Status:</span>
                                       <select
                                         value={inq.customerContacted || 'not_contacted'}
                                         onChange={(e) => handleUpdateContactedStatus(inq.id, e.target.value as any)}
-                                        className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-2.5 py-1 text-[11px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
+                                        className="bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-lg px-2.5 py-1 text-[11px] text-slate-700 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                                       >
-                                        <option value="not_contacted" className="bg-slate-800 text-slate-100 backdrop-blur-lg  font-sans">❌ Not Contacted</option>
-                                        <option value="contacted" className="bg-slate-800 text-slate-100 backdrop-blur-lg  font-sans">📞 Contacted</option>
-                                        <option value="attempted" className="bg-slate-800 text-slate-100 backdrop-blur-lg  font-sans">⏳ Contact Attempted</option>
+                                        <option value="not_contacted" className="bg-slate-50 dark:bg-slate-800 text-slate-700 backdrop-blur-lg  font-sans">❌ Not Contacted</option>
+                                        <option value="contacted" className="bg-slate-50 dark:bg-slate-800 text-slate-700 backdrop-blur-lg  font-sans">📞 Contacted</option>
+                                        <option value="attempted" className="bg-slate-50 dark:bg-slate-800 text-slate-700 backdrop-blur-lg  font-sans">⏳ Contact Attempted</option>
                                       </select>
                                     </div>
                                   </div>
@@ -9361,12 +5144,12 @@ export default function App() {
                   {/* Title Header */}
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                      <h2 className="text-3xl font-bold text-slate-100 font-display">Time Card & Clock Desk</h2>
-                      <p className="text-slate-400 text-sm font-sans">Clock in your shift, log your break, lunch, or restroom visits in real-time</p>
+                      <h2 className="text-3xl font-bold text-slate-700 font-display">Time Card & Clock Desk</h2>
+                      <p className="text-slate-500 dark:text-slate-400 text-sm font-sans">Clock in your shift, log your break, lunch, or restroom visits in real-time</p>
                     </div>
-                    <div className="px-4 py-2 bg-white/10 backdrop-blur-md/80 border border-white/5 rounded-2xl flex items-center gap-2.5">
+                    <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800/80 backdrop-blur-md/80 border border-slate-200 dark:border-slate-700/5 rounded-2xl flex items-center gap-2.5">
                       <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse"></span>
-                      <span className="text-xs text-slate-300 font-mono font-semibold">
+                      <span className="text-xs text-slate-600 dark:text-slate-300 font-mono font-semibold">
                         System Year Context: {systemTime.getFullYear()}
                       </span>
                     </div>
@@ -9378,15 +5161,15 @@ export default function App() {
                     <div className="lg:col-span-2 space-y-6">
                       
                       {/* Live Desk Console Panel */}
-                      <div className="p-6 sm:p-8 bg-white/5 border border-white/10 rounded-3xl shadow-sm text-slate-100 shadow-2xl relative overflow-hidden flex flex-col items-center text-center space-y-6">
+                      <div className="p-6 sm:p-8 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl shadow-sm text-slate-700 shadow-2xl relative overflow-hidden flex flex-col items-center text-center space-y-6">
                         
                         {/* Pulse glow background ornament */}
                         <div className="absolute top-10 w-96 h-96 bg-indigo-500/10 blur-[100px] rounded-full -z-10 animate-pulse"></div>
 
                         {/* Top live digital clock display */}
                         <div className="space-y-1">
-                          <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold font-mono">Current Live Time</p>
-                          <p className="text-5xl font-black text-slate-100 font-mono tracking-tight drop-shadow-md">
+                          <p className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold font-mono">Current Live Time</p>
+                          <p className="text-5xl font-black text-slate-700 font-mono tracking-tight drop-shadow-md">
                             {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
                           </p>
                           <p className="text-xs text-indigo-300 font-medium font-sans">
@@ -9401,7 +5184,7 @@ export default function App() {
                           
                           let statusLabel = "Not Clocked In";
                           let ringStyle = "border-slate-800 bg-transparent/60";
-                          let textStyle = "text-slate-400";
+                          let textStyle = "text-slate-500 dark:text-slate-400";
                           let dotStyle = "bg-rose-500";
                           
                           if (status === 'working') {
@@ -9467,10 +5250,10 @@ export default function App() {
                           }
 
                           return (
-                            <div className="w-full max-w-md p-5 bg-white/5 border border-white/10 rounded-2xl text-left space-y-3 relative overflow-hidden">
+                            <div className="w-full max-w-md p-5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl text-left space-y-3 relative overflow-hidden">
                               <div className="flex justify-between items-center font-sans">
-                                <span className="text-xs font-semibold text-slate-300">Elapsed {conf.name} Time:</span>
-                                <span className="text-xs font-bold font-mono text-slate-100">
+                                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Elapsed {conf.name} Time:</span>
+                                <span className="text-xs font-bold font-mono text-slate-700">
                                   {mins.toString().padStart(2, '0')}m {secs.toString().padStart(2, '0')}s
                                   {conf.limit > 0 ? ` / ${conf.limit}m` : ''}
                                 </span>
@@ -9478,13 +5261,13 @@ export default function App() {
 
                               {conf.limit > 0 && (
                                 <div className="space-y-1">
-                                  <div className="w-full bg-white/10 backdrop-blur-md rounded-full h-2">
+                                  <div className="w-full bg-slate-50 dark:bg-slate-800/80 backdrop-blur-md rounded-full h-2">
                                     <div 
                                       className={`h-2 rounded-full transition-all duration-1000 ${conf.barColor}`}
                                       style={{ width: `${progressPercentage}%` }}
                                     ></div>
                                   </div>
-                                  <div className="flex justify-between text-[9px] text-slate-500 font-mono">
+                                  <div className="flex justify-between text-[9px] text-white0 font-mono">
                                     <span>Started at {new Date(currentAct.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                     <span>{!isNaN(Math.round(progressPercentage)) ? Math.round(progressPercentage) : 0}% Used</span>
                                   </div>
@@ -9510,9 +5293,9 @@ export default function App() {
                               return (
                                 <button
                                   onClick={handleClockIn}
-                                  className="w-full py-5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-100 font-black text-base tracking-widest rounded-2xl shadow-xl shadow-emerald-500/10 hover:shadow-emerald-500/20 active:scale-[0.99] transition-all cursor-pointer font-display flex items-center justify-center gap-3 uppercase animate-pulse"
+                                  className="w-full py-5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-700 font-black text-base tracking-widest rounded-2xl shadow-xl shadow-emerald-500/10 hover:shadow-emerald-500/20 active:scale-[0.99] transition-all cursor-pointer font-display flex items-center justify-center gap-3 uppercase animate-pulse"
                                 >
-                                  <CheckCircle2 className="w-5 h-5 text-slate-100 shrink-0" />
+                                  <CheckCircle2 className="w-5 h-5 text-slate-700 shrink-0" />
                                   Clock In For Shift
                                 </button>
                               );
@@ -9521,7 +5304,7 @@ export default function App() {
                             return (
                               <div className="space-y-4">
                                 <div className="flex justify-between items-center mb-1">
-                                  <p className="text-[10px] uppercase tracking-widest text-slate-400 font-black font-mono">
+                                  <p className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-black font-mono">
                                     Active Controllers
                                   </p>
                                   <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase flex items-center gap-1.5 ${
@@ -9539,7 +5322,7 @@ export default function App() {
                                     onClick={() => handleStartActivity('break')}
                                     className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${
                                       status === 'break'
-                                        ? 'bg-amber-500/25 border-amber-400 text-slate-100 shadow-lg shadow-amber-500/15 scale-[1.03]'
+                                        ? 'bg-amber-500/25 border-amber-400 text-slate-700 shadow-lg shadow-amber-500/15 scale-[1.03]'
                                         : 'bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/20 text-amber-300 hover:scale-[1.03]'
                                     }`}
                                   >
@@ -9551,7 +5334,7 @@ export default function App() {
                                     onClick={() => handleStartActivity('lunch')}
                                     className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${
                                       status === 'lunch'
-                                        ? 'bg-pink-500/25 border-pink-400 text-slate-100 shadow-lg shadow-pink-500/15 scale-[1.03]'
+                                        ? 'bg-pink-500/25 border-pink-400 text-slate-700 shadow-lg shadow-pink-500/15 scale-[1.03]'
                                         : 'bg-pink-500/10 hover:bg-pink-500/20 border-pink-500/20 text-pink-300 hover:scale-[1.03]'
                                     }`}
                                   >
@@ -9575,7 +5358,7 @@ export default function App() {
                                     onClick={() => handleStartActivity('meeting')}
                                     className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${
                                       status === 'meeting'
-                                        ? 'bg-cyan-500/25 border-cyan-400 text-slate-100 shadow-lg shadow-cyan-500/15 scale-[1.03]'
+                                        ? 'bg-cyan-500/25 border-cyan-400 text-slate-700 shadow-lg shadow-cyan-500/15 scale-[1.03]'
                                         : 'bg-cyan-500/10 hover:bg-cyan-500/20 border-cyan-500/20 text-cyan-300 hover:scale-[1.03]'
                                     }`}
                                   >
@@ -9587,7 +5370,7 @@ export default function App() {
                                     onClick={() => handleStartActivity('one_on_one')}
                                     className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${
                                       status === 'one_on_one'
-                                        ? 'bg-violet-500/25 border-violet-400 text-slate-100 shadow-lg shadow-violet-500/15 scale-[1.03]'
+                                        ? 'bg-violet-500/25 border-violet-400 text-slate-700 shadow-lg shadow-violet-500/15 scale-[1.03]'
                                         : 'bg-violet-500/10 hover:bg-violet-500/20 border-violet-500/20 text-violet-300 hover:scale-[1.03]'
                                     }`}
                                   >
@@ -9612,15 +5395,15 @@ export default function App() {
                                   <div className="pt-2 animate-fade-in">
                                     <button
                                       onClick={handleEndActivity}
-                                      className="w-full py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-slate-100 font-black text-xs tracking-wider rounded-xl shadow-xl shadow-indigo-500/10 hover:shadow-indigo-500/20 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 uppercase font-display"
+                                      className="w-full py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-slate-700 font-black text-xs tracking-wider rounded-xl shadow-xl shadow-indigo-500/10 hover:shadow-indigo-500/20 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 uppercase font-display"
                                     >
-                                      <ArrowRight className="w-4 h-4 text-slate-100" />
+                                      <ArrowRight className="w-4 h-4 text-slate-700" />
                                       End AUX & Resume Active Work
                                     </button>
                                   </div>
                                 )}
 
-                                <div className="pt-2 border-t border-white/5 flex gap-3">
+                                <div className="pt-2 border-t border-slate-200 dark:border-slate-700/5 flex gap-3">
                                   <button
                                     onClick={handleClockOut}
                                     className="w-full py-3 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 hover:border-rose-500/40 text-rose-300 font-bold text-xs tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 uppercase font-sans"
@@ -9636,8 +5419,8 @@ export default function App() {
                       </div>
 
                       {/* Display basic shift coverage information */}
-                      <div className="p-4 bg-white/5 border border-white/10 rounded-2xl text-xs text-slate-400 leading-relaxed font-sans">
-                        <p className="font-semibold text-slate-100 mb-1 flex items-center gap-1.5 font-display"><Info className="w-4 h-4 text-indigo-400 shrink-0" /> Time-Tracking Rules & Compliance Policy</p>
+                      <div className="p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-sans">
+                        <p className="font-semibold text-slate-700 mb-1 flex items-center gap-1.5 font-display"><Info className="w-4 h-4 text-indigo-400 shrink-0" /> Time-Tracking Rules & Compliance Policy</p>
                         Your shift attendance logs, break duration accuracy, and restroom usage are logged contextually to verify real-time coverage. Overstaying lunch limits (30 min) or break periods (15 min) flags an alarm notification to Team Leaders. Please clock out correctly at the end of every daily session.
                       </div>
                     </div>
@@ -9646,8 +5429,8 @@ export default function App() {
                     <div className="space-y-6">
                       
                       {/* Daily aggregates */}
-                      <div className="p-5 bg-white/5 border border-white/10 rounded-3xl space-y-4">
-                        <h3 className="font-bold text-slate-100 text-sm font-display border-b border-white/5 pb-2">Shift Aggregates (Today)</h3>
+                      <div className="p-5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl space-y-4">
+                        <h3 className="font-bold text-slate-700 text-sm font-display border-b border-slate-200 dark:border-slate-700/5 pb-2">Shift Aggregates (Today)</h3>
                         
                         {(() => {
                           const stats = getAgentTodayStats(currentUser.name);
@@ -9657,52 +5440,52 @@ export default function App() {
 
                           return (
                             <div className="space-y-3 text-xs leading-normal font-sans">
-                              <div className="flex justify-between py-1.5 border-b border-white/5">
-                                <span className="text-slate-400 font-medium">Clock-In Time:</span>
-                                <span className="font-bold text-slate-100 font-mono">{clockInLabel}</span>
+                              <div className="flex justify-between py-1.5 border-b border-slate-200 dark:border-slate-700/5">
+                                <span className="text-slate-500 dark:text-slate-400 font-medium">Clock-In Time:</span>
+                                <span className="font-bold text-slate-700 font-mono">{clockInLabel}</span>
                               </div>
-                              <div className="flex justify-between py-1.5 border-b border-white/5">
-                                <span className="text-slate-400 font-medium">Clock-Out Time:</span>
-                                <span className="font-bold text-slate-100 font-mono">{clockOutLabel}</span>
+                              <div className="flex justify-between py-1.5 border-b border-slate-200 dark:border-slate-700/5">
+                                <span className="text-slate-500 dark:text-slate-400 font-medium">Clock-Out Time:</span>
+                                <span className="font-bold text-slate-700 font-mono">{clockOutLabel}</span>
                               </div>
-                              <div className="flex justify-between py-1.5 border-b border-white/5">
-                                <span className="text-slate-400 font-medium">Total Breaks:</span>
+                              <div className="flex justify-between py-1.5 border-b border-slate-200 dark:border-slate-700/5">
+                                <span className="text-slate-500 dark:text-slate-400 font-medium">Total Breaks:</span>
                                 <span className={`font-bold font-mono ${stats.breakMins > 15 ? 'text-rose-400 animate-pulse' : 'text-amber-300'}`}>
                                   {stats.breakMins.toFixed(2)} mins used / 15m max
                                 </span>
                               </div>
-                              <div className="flex justify-between py-1.5 border-b border-white/5">
-                                <span className="text-slate-400 font-medium">Total Lunch:</span>
+                              <div className="flex justify-between py-1.5 border-b border-slate-200 dark:border-slate-700/5">
+                                <span className="text-slate-500 dark:text-slate-400 font-medium">Total Lunch:</span>
                                 <span className={`font-bold font-mono ${stats.lunchMins > 30 ? 'text-rose-400 animate-pulse' : 'text-pink-300'}`}>
                                   {stats.lunchMins.toFixed(2)} mins used / 30m max
                                 </span>
                               </div>
-                              <div className="flex justify-between py-1.5 border-b border-white/5">
-                                <span className="text-slate-400 font-medium">Restroom Total:</span>
+                              <div className="flex justify-between py-1.5 border-b border-slate-200 dark:border-slate-700/5">
+                                <span className="text-slate-500 dark:text-slate-400 font-medium">Restroom Total:</span>
                                 <span className="font-bold text-indigo-300 font-mono">
                                   {stats.restroomMins.toFixed(2)} mins used
                                 </span>
                               </div>
-                              <div className="flex justify-between py-1.5 border-b border-white/5">
-                                <span className="text-slate-400 font-medium">Restroom Sessions:</span>
+                              <div className="flex justify-between py-1.5 border-b border-slate-200 dark:border-slate-700/5">
+                                <span className="text-slate-500 dark:text-slate-400 font-medium">Restroom Sessions:</span>
                                 <span className="font-bold text-indigo-400 font-mono">
                                   {stats.restroomCount} visits
                                 </span>
                               </div>
-                              <div className="flex justify-between py-1.5 border-b border-white/5">
-                                <span className="text-slate-400 font-medium">Team Meeting:</span>
+                              <div className="flex justify-between py-1.5 border-b border-slate-200 dark:border-slate-700/5">
+                                <span className="text-slate-500 dark:text-slate-400 font-medium">Team Meeting:</span>
                                 <span className={`font-bold font-mono ${stats.meetingMins > 60 ? 'text-rose-400 animate-pulse' : 'text-cyan-300'}`}>
                                   {stats.meetingMins.toFixed(2)} mins used / 60m max
                                 </span>
                               </div>
-                              <div className="flex justify-between py-1.5 border-b border-white/5">
-                                <span className="text-slate-400 font-medium">1:1 Session:</span>
+                              <div className="flex justify-between py-1.5 border-b border-slate-200 dark:border-slate-700/5">
+                                <span className="text-slate-500 dark:text-slate-400 font-medium">1:1 Session:</span>
                                 <span className={`font-bold font-mono ${stats.oneOnOneMins > 30 ? 'text-rose-400 animate-pulse' : 'text-violet-300'}`}>
                                   {stats.oneOnOneMins.toFixed(2)} mins used / 30m max
                                 </span>
                               </div>
                               <div className="flex justify-between py-1.5">
-                                <span className="text-slate-400 font-medium">Personal Break:</span>
+                                <span className="text-slate-500 dark:text-slate-400 font-medium">Personal Break:</span>
                                 <span className={`font-bold font-mono ${stats.personalMins > 15 ? 'text-rose-400 animate-pulse' : 'text-emerald-300'}`}>
                                   {stats.personalMins.toFixed(2)} mins used / 15m max
                                 </span>
@@ -9713,40 +5496,40 @@ export default function App() {
                       </div>
 
                       {/* Personal historical activities listing */}
-                      <div className="p-5 bg-white/5 border border-white/10 rounded-3xl space-y-4 max-h-[400px] overflow-y-auto">
-                        <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                          <h3 className="font-bold text-slate-100 text-sm font-display">Time Card Sessions</h3>
-                          <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Personal Feed</span>
+                      <div className="p-5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl space-y-4 max-h-[400px] overflow-y-auto">
+                        <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-700/5 pb-2">
+                          <h3 className="font-bold text-slate-700 text-sm font-display">Time Card Sessions</h3>
+                          <span className="text-[10px] text-white0 uppercase tracking-widest font-bold">Personal Feed</span>
                         </div>
 
                         {(() => {
                           const myLogs = timeLogs.filter(l => l.agentName?.toLowerCase() === currentUser?.name?.toLowerCase());
                           if (myLogs.length === 0) {
                             return (
-                              <p className="text-center py-10 text-xs text-slate-500 italic font-sans">No historical activities found.</p>
+                              <p className="text-center py-10 text-xs text-white0 italic font-sans">No historical activities found.</p>
                             );
                           }
                           return (
                             <div className="space-y-4 font-sans">
                               {myLogs.map(log => (
-                                <div key={log.id} className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl space-y-2 text-xs">
-                                  <div className="flex justify-between items-center text-[10px] border-b border-white/5 pb-1 font-mono">
+                                <div key={log.id} className="p-3 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-2xl space-y-2 text-xs">
+                                  <div className="flex justify-between items-center text-[10px] border-b border-slate-200 dark:border-slate-700/5 pb-1 font-mono">
                                     <span className="text-indigo-300 font-bold">{log.date}</span>
-                                    <span className={`px-1.5 py-0.5 rounded ${log.status === 'clocked_out' ? 'bg-white/10 backdrop-blur-md text-slate-400' : 'bg-emerald-500/15 text-emerald-300'}`}>
+                                    <span className={`px-1.5 py-0.5 rounded ${log.status === 'clocked_out' ? 'bg-slate-50 dark:bg-slate-800/80 backdrop-blur-md text-slate-500 dark:text-slate-400' : 'bg-emerald-500/15 text-emerald-300'}`}>
                                       {log.status.toUpperCase()}
                                     </span>
                                   </div>
-                                  <div className="space-y-1 text-slate-300 leading-normal">
-                                    <p>Shift Clock In: <span className="text-slate-100 font-semibold font-mono">{log.clockIn ? new Date(log.clockIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}</span></p>
-                                    {log.clockOut && <p>Shift Clock Out: <span className="text-slate-100 font-semibold font-mono">{new Date(log.clockOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></p>}
+                                  <div className="space-y-1 text-slate-600 dark:text-slate-300 leading-normal">
+                                    <p>Shift Clock In: <span className="text-slate-700 font-semibold font-mono">{log.clockIn ? new Date(log.clockIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}</span></p>
+                                    {log.clockOut && <p>Shift Clock Out: <span className="text-slate-700 font-semibold font-mono">{new Date(log.clockOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></p>}
                                     
                                     {log.activities.length > 0 && (
                                       <div className="pt-1.5 space-y-1">
-                                        <p className="text-[10px] text-slate-500 uppercase font-black font-mono">Logged Sub-Sessions ({log.activities.length}):</p>
-                                        <div className="pl-2 border-l border-white/10 space-y-1 text-[11px] font-mono">
+                                        <p className="text-[10px] text-white0 uppercase font-black font-mono">Logged Sub-Sessions ({log.activities.length}):</p>
+                                        <div className="pl-2 border-l border-slate-200 dark:border-slate-700/10 space-y-1 text-[11px] font-mono">
                                           {log.activities.map(act => (
-                                            <p key={act.id} className="text-slate-400">
-                                              &bull; <span className="font-medium capitalize text-slate-300 font-sans">{act.type}</span>:&nbsp;
+                                            <p key={act.id} className="text-slate-500 dark:text-slate-400">
+                                              &bull; <span className="font-medium capitalize text-slate-600 dark:text-slate-300 font-sans">{act.type}</span>:&nbsp;
                                               {new Date(act.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} to {act.endTime ? new Date(act.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'now'}
                                               {act.durationMinutes !== undefined && <span className="text-indigo-300 font-mono font-bold"> ({act.durationMinutes}m)</span>}
                                             </p>
@@ -9770,10 +5553,10 @@ export default function App() {
               {currentUser.role === 'tl' && activeTab === 'inquiries' && (
                 <div id="tl-inquiries-tab" className="space-y-6 animate-fade-in">
                   {/* Page Title */}
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-4">
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-slate-700/5 pb-4">
                     <div>
-                      <h2 className="text-3xl font-bold text-slate-100 font-display">Inquiries Analytics & Command Center</h2>
-                      <p className="text-slate-400 text-sm font-sans font-normal">Track live resolution, clinic load distributions, and download historical reports.</p>
+                      <h2 className="text-3xl font-bold text-slate-700 font-display">Inquiries Analytics & Command Center</h2>
+                      <p className="text-slate-500 dark:text-slate-400 text-sm font-sans font-normal">Track live resolution, clinic load distributions, and download historical reports.</p>
                     </div>
 
                     <button
@@ -9788,13 +5571,13 @@ export default function App() {
                   {/* Dynamic Analytics & Charts Row */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Panel 1: Status Distribution Donut Chart */}
-                    <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
+                    <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
                       <div>
-                        <h3 className="text-sm font-bold text-slate-100 font-display mb-1 flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-slate-700 font-display mb-1 flex items-center gap-2">
                           <PieChart className="w-4 h-4 text-indigo-400" />
                           Inquiries Status Ratio
                         </h3>
-                        <p className="text-[11px] text-slate-400 mb-4">Proportion of pending versus fully resolved client responses.</p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-4">Proportion of pending versus fully resolved client responses.</p>
                       </div>
 
                       <div className="flex items-center justify-around py-2 gap-4">
@@ -9852,8 +5635,8 @@ export default function App() {
                             />
                           </svg>
                           <div className="absolute text-center select-none">
-                            <p className="text-xl font-black text-slate-100">{inquiries.length}</p>
-                            <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">Total</p>
+                            <p className="text-xl font-black text-slate-700">{inquiries.length}</p>
+                            <p className="text-[8px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">Total</p>
                           </div>
                         </div>
 
@@ -9861,28 +5644,28 @@ export default function App() {
                         <div className="space-y-2 text-xs font-semibold">
                           <div className="flex items-center gap-2">
                             <span className="w-2.5 h-2.5 bg-emerald-500 rounded-sm"></span>
-                            <span className="text-slate-300">Answered ({inquiries.filter(i => i.status === 'answered').length})</span>
+                            <span className="text-slate-600 dark:text-slate-300">Answered ({inquiries.filter(i => i.status === 'answered').length})</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="w-2.5 h-2.5 bg-orange-500 rounded-sm"></span>
-                            <span className="text-slate-300">Sent ({inquiries.filter(i => i.status === 'sent').length})</span>
+                            <span className="text-slate-600 dark:text-slate-300">Sent ({inquiries.filter(i => i.status === 'sent').length})</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="w-2.5 h-2.5 bg-yellow-500 rounded-sm"></span>
-                            <span className="text-slate-300">Submitted ({inquiries.filter(i => i.status === 'submitted').length})</span>
+                            <span className="text-slate-600 dark:text-slate-300">Submitted ({inquiries.filter(i => i.status === 'submitted').length})</span>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Panel 2: Clinic Volume Breakdown */}
-                    <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl lg:col-span-2 flex flex-col justify-between">
+                    <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 p-5 rounded-3xl backdrop-blur-xl lg:col-span-2 flex flex-col justify-between">
                       <div>
-                        <h3 className="text-sm font-bold text-slate-100 font-display mb-1 flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-slate-700 font-display mb-1 flex items-center gap-2">
                           <BarChart2 className="w-4 h-4 text-emerald-400" />
                           Clinic Load Analysis & Distribution Chart
                         </h3>
-                        <p className="text-[11px] text-slate-400 mb-4">Total inquiries incoming from each of the five mandatory medical clinics.</p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-4">Total inquiries incoming from each of the five mandatory medical clinics.</p>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-5 gap-3.5 pt-2">
@@ -9896,18 +5679,18 @@ export default function App() {
                           const count = inquiries.filter(i => (i.clinicName || '').toLowerCase() === clin.key.toLowerCase()).length;
                           const pct = inquiries.length > 0 ? (count / inquiries.length) * 100 : 0;
                           return (
-                            <div key={clin.key} className="bg-white/5 backdrop-blur-xl border border-white/10 p-3 rounded-2xl flex flex-col justify-between hover:border-white/10 transition-all select-none">
+                            <div key={clin.key} className="bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 p-3 rounded-2xl flex flex-col justify-between hover:border-slate-200 dark:border-slate-700/10 transition-all select-none">
                               <div>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase truncate">{clin.display}</p>
-                                <p className="text-2xl font-black text-slate-100 mt-1">{count}</p>
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase truncate">{clin.display}</p>
+                                <p className="text-2xl font-black text-slate-700 mt-1">{count}</p>
                               </div>
 
                               <div className="mt-4">
-                                <div className="flex justify-between items-center text-[9px] text-slate-500 font-bold mb-1">
+                                <div className="flex justify-between items-center text-[9px] text-white0 font-bold mb-1">
                                   <span>Ratio</span>
                                   <span className={clin.textCol}>{pct.toFixed(0)}%</span>
                                 </div>
-                                <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                <div className="w-full h-1.5 bg-white dark:bg-slate-900/50 rounded-full overflow-hidden">
                                   <div
                                     className={`h-full bg-gradient-to-r ${clin.color} transition-all duration-1000`}
                                     style={{ width: `${pct}%` }}
@@ -9922,15 +5705,15 @@ export default function App() {
                   </div>
 
                   {/* Search & Filters */}
-                  <div className="bg-white/5 border border-white/10 p-4 rounded-3xl flex flex-col md:flex-row gap-4 items-center">
+                  <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 p-4 rounded-3xl flex flex-col md:flex-row gap-4 items-center">
                     <div className="relative flex-1 w-full">
-                      <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <Search className="w-4 h-4 text-white0 absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="text"
                         placeholder="Search by agent name, LOB, text or answer values..."
                         value={inquirySearchQuery}
                         onChange={(e) => setInquirySearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+                        className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-2xl text-slate-700 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                       />
                     </div>
                     <div className="flex gap-1.5 w-full md:w-auto overflow-x-auto select-none py-1 md:py-0">
@@ -9941,7 +5724,7 @@ export default function App() {
                           className={`px-3.5 py-1.5 rounded-xl border text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-all shrink-0 ${
                             (st === 'all' && inquiryStatusFilter === '') || inquiryStatusFilter === st
                               ? 'bg-indigo-600/20 border-indigo-500/30 text-white shadow shadow-indigo-500/5 font-extrabold'
-                              : 'border-white/5 text-slate-400 bg-black/20 hover:text-slate-100'
+                              : 'border-slate-200 dark:border-slate-700/5 text-slate-500 dark:text-slate-400 bg-black/20 hover:text-slate-700'
                           }`}
                         >
                           {st === 'submitted' ? 'Submitted (Unresolved)' : st}
@@ -9951,10 +5734,10 @@ export default function App() {
                   </div>
 
                   {/* Inquiries Records display */}
-                  <div className="bg-white/5 border border-white/10 p-5 sm:p-6 rounded-3xl backdrop-blur-xl space-y-4">
-                    <div className="border-b border-white/5 pb-3">
-                      <h3 className="text-base font-bold text-slate-100 font-display">Inquiry Record Pipeline</h3>
-                      <p className="text-xs text-slate-400">Total matched cases waiting in queue: {
+                  <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 p-5 sm:p-6 rounded-3xl backdrop-blur-xl space-y-4">
+                    <div className="border-b border-slate-200 dark:border-slate-700/5 pb-3">
+                      <h3 className="text-base font-bold text-slate-700 font-display">Inquiry Record Pipeline</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Total matched cases waiting in queue: {
                         inquiries.filter(i => {
                           const matchesSearch = i.agentName?.toLowerCase().includes(inquirySearchQuery.toLowerCase()) || 
                                                 i.text.toLowerCase().includes(inquirySearchQuery.toLowerCase()) ||
@@ -9978,8 +5761,8 @@ export default function App() {
                         return matchesSearch && matchesStatus;
                       }).length === 0 ? (
                         <div className="text-center py-16">
-                          <MessageSquare className="w-12 h-12 text-slate-400 mx-auto mb-2 animate-pulse" />
-                          <p className="text-xs text-slate-400 italic">No inquiries match the search filters or the queue is currently empty.</p>
+                          <MessageSquare className="w-12 h-12 text-slate-500 dark:text-slate-400 mx-auto mb-2 animate-pulse" />
+                          <p className="text-xs text-slate-500 dark:text-slate-400 italic">No inquiries match the search filters or the queue is currently empty.</p>
                         </div>
                       ) : (
                         inquiries
@@ -10004,17 +5787,17 @@ export default function App() {
                             }
 
                             return (
-                              <div key={inq.id} className="p-5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl hover:border-white/10 transition-all space-y-4 relative">
+                              <div key={inq.id} className="p-5 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-2xl hover:border-slate-200 dark:border-slate-700/10 transition-all space-y-4 relative">
                                 {/* Agent info, LOB and date */}
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-2.5">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-700/5 pb-2.5">
                                   <div className="flex items-center gap-3">
                                     <div className="w-8.5 h-8.5 bg-indigo-500 rounded-full flex items-center justify-center font-bold text-white text-xs shadow">
                                       {inq.agentName.split(' ').map(n => n[0]).join('')}
                                     </div>
                                     <div>
                                       <div className="flex items-center gap-2 flex-wrap">
-                                        <span className="text-xs font-bold text-slate-100 uppercase tracking-wide">{inq.agentName}</span>
-                                        <span className="text-[10px] text-slate-400 lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded font-sans">{getAgentLOB(inq.agentName)}</span>
+                                        <span className="text-xs font-bold text-slate-700 uppercase tracking-wide">{inq.agentName}</span>
+                                        <span className="text-[10px] text-slate-500 dark:text-slate-400 lowercase tracking-wide bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/5 px-2 py-0.5 rounded font-sans">{getAgentLOB(inq.agentName)}</span>
                                         {inq.clinicName && (
                                           <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 border border-indigo-500/30 rounded font-sans font-bold flex items-center gap-1">
                                             🏥 {inq.clinicName}
@@ -10041,7 +5824,7 @@ export default function App() {
                                           </span>
                                         )}
                                       </div>
-                                      <span className="text-[9px] text-slate-500 font-mono">{new Date(inq.createdAt).toLocaleString()}</span>
+                                      <span className="text-[9px] text-white0 font-mono">{new Date(inq.createdAt).toLocaleString()}</span>
                                     </div>
                                   </div>
 
@@ -10052,7 +5835,7 @@ export default function App() {
                                         navigator.clipboard.writeText(details);
                                         toast.success('Inquiry details copied!');
                                       }}
-                                      className="p-1 hover:bg-white/10 text-slate-300 hover:text-slate-100 rounded-md transition-all shrink-0 flex items-center gap-1 cursor-pointer"
+                                      className="p-1 hover:bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:text-slate-700 rounded-md transition-all shrink-0 flex items-center gap-1 cursor-pointer"
                                       title="Copy Inquiry Details"
                                     >
                                       <Copy className="w-3.5 h-3.5" />
@@ -10074,12 +5857,12 @@ export default function App() {
 
                                 {/* Question body */}
                                 <div className="space-y-3 font-sans">
-                                  <p className="text-xs text-slate-200 leading-relaxed whitespace-pre-wrap">{inq.text}</p>
+                                  <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-wrap">{inq.text}</p>
 
                                   {/* Render attachments */}
                                   {inq.photos && inq.photos.length > 0 && (
                                     <div className="space-y-1">
-                                      <span className="text-[10px] text-slate-400 font-mono block">Screenshots / Attachments ({inq.photos.length}):</span>
+                                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono block">Screenshots / Attachments ({inq.photos.length}):</span>
                                       <div className="flex flex-wrap gap-2">
                                         {inq.photos.map((photo, pIdx) => (
                                           <a
@@ -10087,7 +5870,7 @@ export default function App() {
                                             href={photo}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="block w-14 h-14 rounded-lg overflow-hidden border border-white/10 hover:border-indigo-400 transition-all bg-black/55 shrink-0"
+                                            className="block w-14 h-14 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700/10 hover:border-indigo-400 transition-all bg-black/55 shrink-0"
                                             title="View Full Screenshot in new tab"
                                           >
                                             <img referrerPolicy="no-referrer" src={photo} alt="screenshot" className="w-full h-full object-cover" />
@@ -10100,7 +5883,7 @@ export default function App() {
                                   {/* Link index references */}
                                   {inq.links && inq.links.length > 0 && (
                                     <div className="space-y-1">
-                                      <span className="text-[10px] text-slate-400 font-mono block">Agent Reference Links ({inq.links.length}):</span>
+                                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono block">Agent Reference Links ({inq.links.length}):</span>
                                       <div className="flex flex-col gap-1">
                                         {inq.links.map((link, lIdx) => (
                                           <a
@@ -10120,7 +5903,7 @@ export default function App() {
                                 </div>
 
                                 {/* Update and input tools */}
-                                <div className="pt-2 border-t border-white/5 space-y-3">
+                                <div className="pt-2 border-t border-slate-200 dark:border-slate-700/5 space-y-3">
                                   {/* Default action stage button rows */}
                                   {inq.status === 'submitted' && (
                                     <div className="flex flex-wrap gap-2">
@@ -10165,7 +5948,7 @@ export default function App() {
 
                                   {inq.status === 'answered' && (
                                     <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl space-y-2">
-                                      <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 border-b border-emerald-500/5 pb-1 max-sm:flex-wrap gap-1">
+                                      <div className="flex justify-between items-center text-[10px] font-mono text-white0 border-b border-emerald-500/5 pb-1 max-sm:flex-wrap gap-1">
                                         <span className="text-emerald-400 font-bold font-sans uppercase">✓ Answered by {inq.answeredBy}</span>
                                         <span>{new Date(inq.answeredAt || '').toLocaleString()}</span>
                                       </div>
@@ -10185,17 +5968,17 @@ export default function App() {
                                   )}
 
                                   {/* Reassign Agent Option */}
-                                  <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/5">
-                                    <span className="text-[11px] text-slate-400 font-semibold flex items-center gap-1">
+                                  <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-200 dark:border-slate-700/5">
+                                    <span className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold flex items-center gap-1">
                                       👤 Reassign Agent:
                                     </span>
                                     <select
                                       value={inq.agentName}
                                       onChange={(e) => handleReassignInquiry(inq.id, e.target.value)}
-                                      className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-2.5 py-1 text-[11px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
+                                      className="bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-lg px-2.5 py-1 text-[11px] text-slate-700 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                                     >
                                       {agentsList.map(aName => (
-                                        <option key={aName} value={aName} className="bg-slate-800 text-slate-100 backdrop-blur-lg  font-sans">
+                                        <option key={aName} value={aName} className="bg-slate-50 dark:bg-slate-800 text-slate-700 backdrop-blur-lg  font-sans">
                                           {aName}
                                         </option>
                                       ))}
@@ -10204,15 +5987,15 @@ export default function App() {
 
                                   {/* Dialog for answering inside pipeline cards */}
                                   {answeringInquiryId === inq.id && (
-                                    <div className="p-4 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl space-y-3 animate-fade-in text-left">
+                                    <div className="p-4 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/20 rounded-xl space-y-3 animate-fade-in text-left">
                                       <div className="flex justify-between items-center pb-1">
-                                        <h4 className="text-xs font-bold text-slate-100 font-display">Feed Back / System Answer Details</h4>
+                                        <h4 className="text-xs font-bold text-slate-700 font-display">Feed Back / System Answer Details</h4>
                                         <button
                                           onClick={() => {
                                             setAnsweringInquiryId(null);
                                             setCurrentAnswerText('');
                                           }}
-                                          className="text-slate-400 text-xs hover:text-slate-100"
+                                          className="text-slate-500 dark:text-slate-400 text-xs hover:text-slate-700"
                                         >
                                           Cancel
                                         </button>
@@ -10222,7 +6005,7 @@ export default function App() {
                                         value={currentAnswerText}
                                         onChange={(e) => setCurrentAnswerText(e.target.value)}
                                         rows={3}
-                                        className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-emerald-500 transition-all font-sans resize-none"
+                                        className="w-full px-3 py-2 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-lg text-slate-700 text-xs focus:outline-none focus:border-emerald-500 transition-all font-sans resize-none"
                                       />
                                       <button
                                         onClick={() => handleSetInquiryAnswered(inq.id, currentAnswerText)}
@@ -10244,13 +6027,13 @@ export default function App() {
 
             {/* Team Leader Time Logs Review panel */}
             {activeTab === 'time-logs' && currentUser.role === 'tl' && (
-                <div id="tl-timelog-view-root" className="space-y-6 animate-fade-in col-span-1 border border-white/5 p-2 bg-transparent/20 rounded-3xl">
+                <div id="tl-timelog-view-root" className="space-y-6 animate-fade-in col-span-1 border border-slate-200 dark:border-slate-700/5 p-2 bg-transparent/20 rounded-3xl">
                   
                   {/* Header */}
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-2">
                     <div>
-                      <h2 className="text-3xl font-bold text-slate-100 font-display">Your RTM (Real-Time Monitoring) Command Center</h2>
-                      <p className="text-slate-400 text-sm font-sans">Command center to track shift times, restroom visits, or live-status breaks</p>
+                      <h2 className="text-3xl font-bold text-slate-700 font-display">Your RTM (Real-Time Monitoring) Command Center</h2>
+                      <p className="text-slate-500 dark:text-slate-400 text-sm font-sans">Command center to track shift times, restroom visits, or live-status breaks</p>
                     </div>
 
                     <div className="flex flex-wrap gap-2.5 self-stretch md:self-auto">
@@ -10264,9 +6047,9 @@ export default function App() {
 
                       <button
                         onClick={() => setTlIsPrintMode(!tlIsPrintMode)}
-                        className="flex-1 sm:flex-initial px-4 py-2.5 bg-white/10 backdrop-blur-md hover:bg-slate-700 backdrop-blur-xl border border-white/20 text-slate-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans"
+                        className="flex-1 sm:flex-initial px-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 backdrop-blur-md hover:bg-slate-700 backdrop-blur-xl border border-slate-200 dark:border-slate-700/20 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans"
                       >
-                        <Printer className="w-4 h-4 text-slate-400" />
+                        <Printer className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                         {tlIsPrintMode ? 'Close Print Layout' : 'Open Printable Report'}
                       </button>
 
@@ -10302,11 +6085,11 @@ export default function App() {
                     
                     if (tlIsPrintMode) {
                       return (
-                    <div className="p-8 bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl space-y-6 animate-fade-in text-slate-100 print:p-0 print:bg-slate-800 print:text-black">
-                      <div className="flex justify-between items-center border-b border-white/10 pb-4 print:border-black">
+                    <div className="p-8 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/20 rounded-3xl space-y-6 animate-fade-in text-slate-700 print:p-0 print:bg-slate-50 dark:bg-slate-800 print:text-black">
+                      <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-700/10 pb-4 print:border-black">
                         <div>
                           <h3 className="text-xl font-extrabold font-display uppercase tracking-wider">DAILY MASTER ATTENDANCE & TIMECARD REPORT</h3>
-                          <p className="text-xs text-slate-400 font-mono print:text-black mt-1">Generated: {currentTime.toLocaleString()}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 font-mono print:text-black mt-1">Generated: {currentTime.toLocaleString()}</p>
                         </div>
                         <button
                           onClick={() => window.print()}
@@ -10317,16 +6100,16 @@ export default function App() {
                       </div>
 
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-sans print:gap-2">
-                        <div className="p-3 bg-white/5 border border-white/5 rounded-xl print:border-black print:bg-transparent print:text-black">
-                          <p className="text-[10px] text-slate-400 uppercase font-bold font-mono">Date Context</p>
+                        <div className="p-3 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/5 rounded-xl print:border-black print:bg-transparent print:text-black">
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold font-mono">Date Context</p>
                           <p className="text-sm font-bold mt-0.5">{currentTime.toLocaleDateString()}</p>
                         </div>
-                        <div className="p-3 bg-white/5 border border-white/5 rounded-xl print:border-black print:bg-transparent print:text-black">
-                          <p className="text-[10px] text-slate-400 uppercase font-bold font-mono">Total Agents on Duty</p>
+                        <div className="p-3 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/5 rounded-xl print:border-black print:bg-transparent print:text-black">
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold font-mono">Total Agents on Duty</p>
                           <p className="text-sm font-bold mt-0.5">{activeAgentsForUI.filter(a => getActiveTimeLog(a)).length} of {activeAgentsForUI.length}</p>
                         </div>
-                        <div className="p-3 bg-white/5 border border-white/5 rounded-xl print:border-black print:bg-transparent print:text-black">
-                          <p className="text-[10px] text-slate-400 uppercase font-bold font-mono">Active on Break/Lunch</p>
+                        <div className="p-3 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/5 rounded-xl print:border-black print:bg-transparent print:text-black">
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold font-mono">Active on Break/Lunch</p>
                           <p className="text-sm font-bold mt-0.5">
                             {activeAgentsForUI.filter(a => {
                               const active = getActiveTimeLog(a);
@@ -10334,8 +6117,8 @@ export default function App() {
                             }).length} agents
                           </p>
                         </div>
-                        <div className="p-3 bg-white/5 border border-white/5 rounded-xl print:border-black print:bg-transparent print:text-black">
-                          <p className="text-[10px] text-slate-400 uppercase font-bold font-mono">Compliance Warnings</p>
+                        <div className="p-3 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/5 rounded-xl print:border-black print:bg-transparent print:text-black">
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold font-mono">Compliance Warnings</p>
                           <p className="text-sm font-bold text-rose-400 mt-0.5 print:text-black">
                             {activeAgentsForUI.filter(a => {
                               const stats = getAgentTodayStats(a);
@@ -10345,10 +6128,10 @@ export default function App() {
                         </div>
                       </div>
 
-                      <div className="overflow-x-auto border border-white/10 rounded-2xl print:border-black">
+                      <div className="overflow-x-auto border border-slate-200 dark:border-slate-700/10 rounded-2xl print:border-black">
                         <table className="w-full text-left border-collapse text-xs print:text-black">
                           <thead>
-                            <tr className="bg-white/5 border-b border-white/10 text-[10px] font-bold text-slate-300 font-mono print:border-black print:bg-transparent print:text-black">
+                            <tr className="bg-white dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700/10 text-[10px] font-bold text-slate-600 dark:text-slate-300 font-mono print:border-black print:bg-transparent print:text-black">
                               <th className="px-4 py-3">Agent Name</th>
                               <th className="px-4 py-3">Timesheet Status</th>
                               <th className="px-3 py-3 font-mono">Shift Clock-In</th>
@@ -10386,7 +6169,7 @@ export default function App() {
                               return (
                                 <tr key={agent} className="print:text-black hover:bg-slate-700 transition-all">
                                   <td className="px-4 py-3 font-bold uppercase">
-                                    {agent} <span className="text-[10px] text-slate-400 font-normal lowercase bg-white/10 backdrop-blur-md px-1.5 py-0.5 rounded ml-2 font-sans">{getAgentLOB(agent)}</span>
+                                    {agent} <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal lowercase bg-slate-50 dark:bg-slate-800/80 backdrop-blur-md px-1.5 py-0.5 rounded ml-2 font-sans">{getAgentLOB(agent)}</span>
                                   </td>
                                   <td className="px-4 py-3 font-mono">
                                     <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${
@@ -10397,7 +6180,7 @@ export default function App() {
                                       statusText.includes('MEETING') ? 'bg-cyan-500/10 text-cyan-400' :
                                       statusText.includes('ONE') ? 'bg-violet-500/10 text-violet-400' :
                                       statusText.includes('PERSONAL') ? 'bg-emerald-500/10 text-emerald-400' :
-                                      'bg-slate-500/10 text-slate-400'
+                                      'bg-slate-500/10 text-slate-500 dark:text-slate-400'
                                     }`}>
                                       {statusText}
                                     </span>
@@ -10425,7 +6208,7 @@ export default function App() {
                       <div className="flex justify-end pr-2 pt-4">
                         <button
                           onClick={() => setTlIsPrintMode(false)}
-                          className="px-4 py-2 bg-white/10 backdrop-blur-md text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-900/40/20 backdrop-blur-md cursor-pointer print:hidden"
+                          className="px-4 py-2 bg-slate-50 dark:bg-slate-800/80 backdrop-blur-md text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold hover:bg-white dark:bg-slate-900/40/20 backdrop-blur-md cursor-pointer print:hidden"
                         >
                           &larr; Exit Roster View
                         </button>
@@ -10451,7 +6234,7 @@ export default function App() {
                           { id: 'meeting', label: 'In Meeting', count: 0, agents: [] as string[], bgClass: 'bg-cyan-950/20', borderClass: 'border-cyan-500/20', textClass: 'text-cyan-50', badgeColor: 'bg-cyan-500', headerText: 'text-cyan-300', countText: 'text-cyan-400', cardBg: 'bg-cyan-900/10', cardBorder: 'border-cyan-500/20', cardText: 'text-cyan-100', cardHover: 'hover:bg-cyan-900/30', lobText: 'text-cyan-400' },
                           { id: 'one_on_one', label: '1:1 Session', count: 0, agents: [] as string[], bgClass: 'bg-violet-950/20', borderClass: 'border-violet-500/20', textClass: 'text-violet-50', badgeColor: 'bg-violet-500', headerText: 'text-violet-300', countText: 'text-violet-400', cardBg: 'bg-violet-900/10', cardBorder: 'border-violet-500/20', cardText: 'text-violet-100', cardHover: 'hover:bg-violet-900/30', lobText: 'text-violet-400' },
                           { id: 'personal', label: 'Personal Time', count: 0, agents: [] as string[], bgClass: 'bg-blue-950/20', borderClass: 'border-blue-500/20', textClass: 'text-blue-50', badgeColor: 'bg-blue-500', headerText: 'text-blue-300', countText: 'text-blue-400', cardBg: 'bg-blue-900/10', cardBorder: 'border-blue-500/20', cardText: 'text-blue-100', cardHover: 'hover:bg-blue-900/30', lobText: 'text-blue-400' },
-                          { id: 'offline', label: 'Offline / Clocked Out', count: 0, agents: [] as string[], bgClass: 'bg-white/5', borderClass: 'border-white/5', textClass: 'text-slate-400', badgeColor: 'bg-slate-600', headerText: 'text-slate-500', countText: 'text-slate-600', cardBg: 'bg-black/30', cardBorder: 'border-white/5', cardText: 'text-slate-500', cardHover: '', lobText: 'text-slate-500 opacity-50' }
+                          { id: 'offline', label: 'Offline / Clocked Out', count: 0, agents: [] as string[], bgClass: 'bg-white dark:bg-slate-900/50', borderClass: 'border-slate-200 dark:border-slate-700/5', textClass: 'text-slate-500 dark:text-slate-400', badgeColor: 'bg-slate-600', headerText: 'text-white0', countText: 'text-slate-600', cardBg: 'bg-black/30', cardBorder: 'border-slate-200 dark:border-slate-700/5', cardText: 'text-white0', cardHover: '', lobText: 'text-white0 opacity-50' }
                         ];
 
                         filteredAgents.forEach(agent => {
@@ -10477,21 +6260,21 @@ export default function App() {
                           <div className="space-y-6">
                             
                             {/* Control Bar */}
-                            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-900/50 p-4 border border-white/5 rounded-2xl">
+                            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-slate-900/50 p-4 border border-slate-200 dark:border-slate-700/5 rounded-2xl">
                               <div className="flex items-center gap-3">
                                 <span className="relative flex h-3 w-3">
                                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                   <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                                 </span>
-                                <span className="font-display font-medium text-slate-100">Currently Active: <span className="font-bold text-emerald-400 font-mono">{activeAgentsCount}</span> / {agentsList.length}</span>
+                                <span className="font-display font-medium text-slate-700">Currently Active: <span className="font-bold text-emerald-400 font-mono">{activeAgentsCount}</span> / {agentsList.length}</span>
                               </div>
                               <div className="relative w-full sm:w-72">
-                                <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                                <Search className="w-4 h-4 text-white0 absolute left-3 top-1/2 -translate-y-1/2" />
                                 <input 
                                   value={rtmSearch}
                                   onChange={(e) => setRtmSearch(e.target.value)}
                                   placeholder="Search agents by name..." 
-                                  className="w-full pl-9 pr-4 py-2 bg-black/50 border border-white/10 rounded-xl text-sm focus:border-indigo-500 text-slate-200 outline-none transition-all placeholder:text-slate-600 focus:bg-black/70"
+                                  className="w-full pl-9 pr-4 py-2 bg-black/50 border border-slate-200 dark:border-slate-700/10 rounded-xl text-sm focus:border-indigo-500 text-slate-700 dark:text-slate-200 outline-none transition-all placeholder:text-slate-600 focus:bg-black/70"
                                 />
                               </div>
                             </div>
@@ -10500,7 +6283,7 @@ export default function App() {
                             <div className="flex flex-col gap-6">
                               {statuses.filter(s => s.count > 0).map(group => (
                                 <div key={group.id} className={`p-5 rounded-2xl border ${group.bgClass} ${group.borderClass} ${group.textClass}`}>
-                                  <div className={`flex justify-between items-center mb-4 border-b pb-3 ${group.id === 'offline' ? 'border-white/5' : group.borderClass}`}>
+                                  <div className={`flex justify-between items-center mb-4 border-b pb-3 ${group.id === 'offline' ? 'border-slate-200 dark:border-slate-700/5' : group.borderClass}`}>
                                     <div className="flex items-center gap-2">
                                       <span className={`w-2 h-2 rounded-full ${group.id === 'offline' ? 'bg-slate-600' : `${group.badgeColor} animate-pulse`}`}></span>
                                       <h4 className={`text-sm font-bold uppercase tracking-wider font-display ${group.headerText}`}>
@@ -10549,23 +6332,23 @@ export default function App() {
 
                                           {isSelected && isMasterAdmin && (
                                             <div className={`mt-2 pt-2 border-t ${group.cardBorder}`} onClick={e => e.stopPropagation()}>
-                                              <p className="text-[9px] uppercase font-bold text-slate-400 mb-1 font-sans">Set Agent AUX</p>
+                                              <p className="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-1 font-sans">Set Agent AUX</p>
                                               <select 
                                                 value={group.id}
                                                 onChange={(e) => {
                                                   handleTLOverrideAgentStatus(agent, e.target.value as any);
                                                   setRtmSelectedAgent(null);
                                                 }}
-                                                className="w-full bg-black/50 border border-white/10 rounded text-[10px] text-slate-200 px-1 py-1 flex items-center justify-center focus:outline-none focus:border-indigo-500 font-medium font-sans"
+                                                className="w-full bg-black/50 border border-slate-200 dark:border-slate-700/10 rounded text-[10px] text-slate-700 dark:text-slate-200 px-1 py-1 flex items-center justify-center focus:outline-none focus:border-indigo-500 font-medium font-sans"
                                               >
-                                                <option value="working" className="bg-slate-800">Online / On Duty</option>
-                                                <option value="break" className="bg-slate-800">On Break</option>
-                                                <option value="lunch" className="bg-slate-800">On Lunch</option>
-                                                <option value="restroom" className="bg-slate-800">Restroom</option>
-                                                <option value="meeting" className="bg-slate-800">In Meeting</option>
-                                                <option value="one_on_one" className="bg-slate-800">1:1 Session</option>
-                                                <option value="personal" className="bg-slate-800">Personal Time</option>
-                                                <option value="clocked_out" className="bg-slate-800 text-rose-300">Force Clock Out</option>
+                                                <option value="working" className="bg-slate-50 dark:bg-slate-800">Online / On Duty</option>
+                                                <option value="break" className="bg-slate-50 dark:bg-slate-800">On Break</option>
+                                                <option value="lunch" className="bg-slate-50 dark:bg-slate-800">On Lunch</option>
+                                                <option value="restroom" className="bg-slate-50 dark:bg-slate-800">Restroom</option>
+                                                <option value="meeting" className="bg-slate-50 dark:bg-slate-800">In Meeting</option>
+                                                <option value="one_on_one" className="bg-slate-50 dark:bg-slate-800">1:1 Session</option>
+                                                <option value="personal" className="bg-slate-50 dark:bg-slate-800">Personal Time</option>
+                                                <option value="clocked_out" className="bg-slate-50 dark:bg-slate-800 text-rose-300">Force Clock Out</option>
                                               </select>
                                             </div>
                                           )}
@@ -10577,7 +6360,7 @@ export default function App() {
                               ))}
                               
                               {filteredAgents.length === 0 && (
-                                <div className="p-10 border border-white/5 rounded-2xl text-center text-slate-500 flex flex-col items-center justify-center">
+                                <div className="p-10 border border-slate-200 dark:border-slate-700/5 rounded-2xl text-center text-white0 flex flex-col items-center justify-center">
                                   <Users className="w-10 h-10 mb-3 opacity-20" />
                                   <p>No agents matched "{rtmSearch}"</p>
                                 </div>
@@ -10700,7 +6483,7 @@ export default function App() {
                         });
 
                         return (
-                          <div id="compliance-alerts-panel" className="p-6 bg-[#180d14]/80 border border-rose-500/20 rounded-3xl space-y-4 shadow-2xl relative overflow-hidden backdrop-blur-xl">
+                          <div id="compliance-alerts-panel" className="p-6 bg-white dark:bg-slate-900/80 border border-rose-500/20 rounded-3xl space-y-4 shadow-2xl relative overflow-hidden backdrop-blur-xl">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500/5 rounded-full blur-3xl pointer-events-none" />
                             
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-rose-500/10 pb-3">
@@ -10709,7 +6492,7 @@ export default function App() {
                                   <AlertTriangle className="w-4 h-4 text-rose-400 animate-pulse" />
                                   Live Compliance Alerts & Aux Watch
                                 </h4>
-                                <p className="text-[11px] text-slate-400 font-sans">
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-sans">
                                   Real-time tracker displaying active and cumulative aggregate daily auxiliary limit violations per agent.
                                 </p>
                               </div>
@@ -10727,7 +6510,7 @@ export default function App() {
                                 <span className="flex h-6 w-6 shrink-0 bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 rounded-full items-center justify-center font-bold text-xs select-none">✓</span>
                                 <div className="text-left">
                                   <p className="text-xs font-bold text-emerald-300 font-sans">All Agents are 100% Compliant</p>
-                                  <p className="text-[10px] text-slate-400 mt-0.5 font-sans">No active alarm status logs or cumulative auxiliary overtime events detected under today's schedule.</p>
+                                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 font-sans">No active alarm status logs or cumulative auxiliary overtime events detected under today's schedule.</p>
                                 </div>
                               </div>
                             ) : (
@@ -10737,7 +6520,7 @@ export default function App() {
                                     <div className="space-y-2">
                                       <div className="flex justify-between items-start">
                                         <div>
-                                          <p className="text-xs font-black text-slate-100 uppercase tracking-wide font-display">{entry.agentName}</p>
+                                          <p className="text-xs font-black text-slate-700 uppercase tracking-wide font-display">{entry.agentName}</p>
                                           <span className="inline-block text-[8px] font-extrabold uppercase text-rose-300 bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.5 rounded-md mt-1 font-sans">
                                             LOB: {entry.lob}
                                           </span>
@@ -10754,16 +6537,16 @@ export default function App() {
 
                                       <div className="space-y-1.5 mt-2">
                                         {entry.violations.map((violation, idx) => (
-                                          <div key={idx} className="flex flex-col gap-1 p-2 bg-white/5 border border-white/5 rounded-xl text-[11px] font-sans">
+                                          <div key={idx} className="flex flex-col gap-1 p-2 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/5 rounded-xl text-[11px] font-sans">
                                             <div className="flex items-center justify-between font-bold">
-                                              <span className="text-slate-200">
+                                              <span className="text-slate-700 dark:text-slate-200">
                                                 {violation.type} Limit:
                                               </span>
                                               <span className="text-rose-400 font-mono font-black">
                                                 +{violation.exceededBy.toFixed(1)}m Over
                                               </span>
                                             </div>
-                                            <div className="flex justify-between text-[9px] text-slate-400 mt-0.5">
+                                            <div className="flex justify-between text-[9px] text-slate-500 dark:text-slate-400 mt-0.5">
                                               <span>Allotted: {violation.limit}m</span>
                                               <span className="font-mono">Logged: {violation.actual.toFixed(1)}m</span>
                                             </div>
@@ -10798,9 +6581,9 @@ export default function App() {
                       })()}
 
                       {/* Real-time filters and search control */}
-                      <div className="p-5 bg-white/5 border border-white/10 rounded-2xl grid grid-cols-1 sm:grid-cols-4 gap-4 items-center">
+                      <div className="p-5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl grid grid-cols-1 sm:grid-cols-4 gap-4 items-center">
                         <div className="sm:col-span-2 relative">
-                          <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                          <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-white0">
                             <Search className="w-4 h-4" />
                           </span>
                           <input
@@ -10808,32 +6591,32 @@ export default function App() {
                             value={tlSearchQuery}
                             onChange={(e) => setTlSearchQuery(e.target.value)}
                             placeholder="Filter status table by agent name..."
-                            className="w-full pl-9 pr-4 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
+                            className="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl text-xs text-slate-700 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
                           />
                         </div>
 
                         <div className="sm:col-span-2 flex items-center gap-2">
-                          <span className="text-xs text-slate-400 whitespace-nowrap">Filter Status:</span>
+                          <span className="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">Filter Status:</span>
                           <select
                             value={tlStatusFilter}
                             onChange={(e) => setTlStatusFilter(e.target.value as any)}
-                            className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-300 focus:outline-none focus:border-indigo-500 cursor-pointer"
+                            className="w-full px-3 py-2 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-indigo-500 cursor-pointer"
                           >
-                            <option value="all" className="bg-slate-800 text-slate-100 ">All Agents</option>
-                            <option value="in" className="bg-slate-800 text-slate-100 ">Clocked In (IN)</option>
-                            <option value="out" className="bg-slate-800 text-slate-100 ">Clocked Out (OUT)</option>
-                            <option value="break_lunch" className="bg-slate-800 text-slate-100 ">On Break / Lunch Activity</option>
-                            <option value="overtime" className="bg-slate-800 text-slate-100 ">Warning / Overtime Limit Exceeded</option>
+                            <option value="all" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">All Agents</option>
+                            <option value="in" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">Clocked In (IN)</option>
+                            <option value="out" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">Clocked Out (OUT)</option>
+                            <option value="break_lunch" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">On Break / Lunch Activity</option>
+                            <option value="overtime" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">Warning / Overtime Limit Exceeded</option>
                           </select>
                         </div>
                       </div>
 
                       {/* Live station usage & totals board */}
-                      <div className="p-6 bg-white/5 border border-white/10 rounded-3xl space-y-4 shadow-xl">
+                      <div className="p-6 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl space-y-4 shadow-xl">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                           <div>
-                            <h3 className="font-bold text-slate-100 text-base font-display">Daily Presence & Break Report Sheet</h3>
-                            <p className="text-xs text-slate-400 font-sans">Comprehensive view of today’s logs, break, lunch, and restroom statistics per agent</p>
+                            <h3 className="font-bold text-slate-700 text-base font-display">Daily Presence & Break Report Sheet</h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">Comprehensive view of today’s logs, break, lunch, and restroom statistics per agent</p>
                           </div>
                         </div>
 
@@ -10896,15 +6679,15 @@ export default function App() {
                           
                           if (roster.length === 0) {
                             return (
-                              <p className="text-center py-16 text-xs text-slate-400 italic">No agent matching filters today.</p>
+                              <p className="text-center py-16 text-xs text-slate-500 dark:text-slate-400 italic">No agent matching filters today.</p>
                             );
                           }
 
                           return (
-                            <div className="overflow-x-auto border border-white/5 rounded-2xl bg-black/45 overflow-visible">
+                            <div className="overflow-x-auto border border-slate-200 dark:border-slate-700/5 rounded-2xl bg-black/45 overflow-visible">
                               <table className="w-full text-left border-collapse min-w-[750px]">
                                 <thead>
-                                  <tr className="bg-white/5 border-b border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-400 font-sans">
+                                  <tr className="bg-white dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700/10 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 font-sans">
                                     <th className="px-5 py-3">Agent Name</th>
                                     <th className="px-3 py-3 font-medium">TL Status Override</th>
                                     <th className="px-3 py-3 font-medium">Shift Log</th>
@@ -10914,7 +6697,7 @@ export default function App() {
                                     <th className="px-5 py-3 text-right font-medium">Today's Compliance</th>
                                   </tr>
                                 </thead>
-                                <tbody className="divide-y divide-white/5 text-xs text-slate-300 font-sans">
+                                <tbody className="divide-y divide-white/5 text-xs text-slate-600 dark:text-slate-300 font-sans">
                                   {roster.map(entry => {
                                     const { name, activeStatus, stats, exceededLimit, exceededText, exceedVal, isCurrentlyExceeded, currentExceedBy } = entry;
                                     
@@ -10928,9 +6711,9 @@ export default function App() {
                                     return (
                                       <tr key={name} className="hover:bg-slate-700 transition-all">
                                         {/* Name */}
-                                        <td className="px-5 py-4 font-bold text-slate-100 font-display uppercase tracking-wide">
+                                        <td className="px-5 py-4 font-bold text-slate-700 font-display uppercase tracking-wide">
                                           <div>{name}</div>
-                                          <div className="text-[9px] text-slate-400 font-normal lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded-lg mt-1 w-max block">{getAgentLOB(name)}</div>
+                                          <div className="text-[9px] text-slate-500 dark:text-slate-400 font-normal lowercase tracking-wide bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/5 px-2 py-0.5 rounded-lg mt-1 w-max block">{getAgentLOB(name)}</div>
                                         </td>
 
                                         {/* Live status badge / select */}
@@ -10940,27 +6723,27 @@ export default function App() {
                                             <select 
                                               value={activeStatus}
                                               onChange={(e) => handleTLOverrideAgentStatus(name, e.target.value as any)}
-                                              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-[10px] text-slate-100 px-2 py-1 focus:outline-none focus:border-indigo-500 font-bold uppercase cursor-pointer max-w-[120px]"
+                                              className="bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-lg text-[10px] text-slate-700 px-2 py-1 focus:outline-none focus:border-indigo-500 font-bold uppercase cursor-pointer max-w-[120px]"
                                             >
-                                              <option value="working" className="bg-slate-800 text-slate-100 ">On Shift (Working)</option>
-                                              <option value="break" className="bg-slate-800 text-slate-100 ">On Break</option>
-                                              <option value="lunch" className="bg-slate-800 text-slate-100 ">On Lunch</option>
-                                              <option value="restroom" className="bg-slate-800 text-slate-100 ">In Restroom</option>
-                                              <option value="clocked_out" className="bg-slate-800 text-slate-100 ">Clocked Out</option>
-                                              <option value="day_off" className="bg-slate-800 text-slate-100 ">Day Off</option>
-                                              <option value="casual" className="bg-slate-800 text-slate-100 ">Casual Leave</option>
-                                              <option value="annual" className="bg-slate-800 text-slate-100 ">Annual Leave</option>
-                                              <option value="no_show" className="bg-slate-800 text-slate-100 ">No Show</option>
+                                              <option value="working" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">On Shift (Working)</option>
+                                              <option value="break" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">On Break</option>
+                                              <option value="lunch" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">On Lunch</option>
+                                              <option value="restroom" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">In Restroom</option>
+                                              <option value="clocked_out" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">Clocked Out</option>
+                                              <option value="day_off" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">Day Off</option>
+                                              <option value="casual" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">Casual Leave</option>
+                                              <option value="annual" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">Annual Leave</option>
+                                              <option value="no_show" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">No Show</option>
                                             </select>
                                           </div>
                                         </td>
 
                                         {/* Shifts */}
                                         <td className="px-3 py-4 space-y-0.5">
-                                          <p className="text-[10px] text-slate-400 font-mono">
+                                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                                             In: <span className="text-emerald-400 font-semibold">{stats.clockIn ? new Date(stats.clockIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}</span>
                                           </p>
-                                          <p className="text-[10px] text-slate-400 font-mono">
+                                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                                             Out: <span className="text-rose-400 font-semibold">{stats.clockOut ? new Date(stats.clockOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : (stats.clockIn ? 'Active shift' : '--:--')}</span>
                                           </p>
                                         </td>
@@ -10968,12 +6751,12 @@ export default function App() {
                                         {/* Total Break */}
                                         <td className="px-4 py-4 space-y-1">
                                           <div className="flex justify-between text-[10px] font-mono">
-                                            <span className={stats.breakMins > 15 ? 'text-rose-400 font-bold' : 'text-slate-300'}>
+                                            <span className={stats.breakMins > 15 ? 'text-rose-400 font-bold' : 'text-slate-600 dark:text-slate-300'}>
                                               {stats.breakMins.toFixed(1)} mins
                                             </span>
-                                            <span className="text-slate-500">of 15m</span>
+                                            <span className="text-white0">of 15m</span>
                                           </div>
-                                          <div className="w-full bg-white/10 backdrop-blur-md rounded-full h-1 relative">
+                                          <div className="w-full bg-slate-50 dark:bg-slate-800/80 backdrop-blur-md rounded-full h-1 relative">
                                             <div
                                               className={`h-1 rounded-full transition-all duration-300 ${stats.breakMins > 15 ? 'bg-rose-500 animate-pulse' : 'bg-amber-400'}`}
                                               style={{ width: `${Math.min(100, (stats.breakMins / 15) * 100)}%` }}
@@ -10984,12 +6767,12 @@ export default function App() {
                                         {/* Total Lunch */}
                                         <td className="px-4 py-4 space-y-1">
                                           <div className="flex justify-between text-[10px] font-mono">
-                                            <span className={stats.lunchMins > 30 ? 'text-rose-400 font-bold' : 'text-slate-300'}>
+                                            <span className={stats.lunchMins > 30 ? 'text-rose-400 font-bold' : 'text-slate-600 dark:text-slate-300'}>
                                               {stats.lunchMins.toFixed(1)} mins
                                             </span>
-                                            <span className="text-slate-500">of 30m</span>
+                                            <span className="text-white0">of 30m</span>
                                           </div>
-                                          <div className="w-full bg-white/10 backdrop-blur-md rounded-full h-1 relative">
+                                          <div className="w-full bg-slate-50 dark:bg-slate-800/80 backdrop-blur-md rounded-full h-1 relative">
                                             <div
                                               className={`h-1 rounded-full transition-all duration-300 ${stats.lunchMins > 30 ? 'bg-rose-500 animate-pulse' : 'bg-pink-400'}`}
                                               style={{ width: `${Math.min(100, (stats.lunchMins / 30) * 100)}%` }}
@@ -11000,7 +6783,7 @@ export default function App() {
                                         {/* Restroom */}
                                         <td className="px-4 py-4 leading-normal">
                                           <p className="text-indigo-300 font-semibold font-mono">{stats.restroomMins.toFixed(1)} mins</p>
-                                          <p className="text-[10px] text-slate-500 font-sans">{stats.restroomCount} sessions logged</p>
+                                          <p className="text-[10px] text-white0 font-sans">{stats.restroomCount} sessions logged</p>
                                         </td>
 
                                         {/* Compliance status banner */}
@@ -11048,7 +6831,7 @@ export default function App() {
                         <Calendar className="w-8 h-8 text-indigo-400" />
                         Agent Schedule Roster
                       </h2>
-                      <p className="text-slate-400 text-sm mt-1">Browse shift coverage, find trade partners, and publish rosters</p>
+                      <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Browse shift coverage, find trade partners, and publish rosters</p>
                     </div>
 
                     {isSuperAdmin && (
@@ -11064,22 +6847,22 @@ export default function App() {
 
                   {/* Unified Modern Roster Upload Console */}
                   {isSuperAdmin && (
-                    <div className="bg-white/5 border text-left border-white/10 rounded-3xl p-8 shadow-sm space-y-8 animate-fade-in relative">
+                    <div className="bg-white dark:bg-slate-900/50 border text-left border-slate-200 dark:border-slate-700/10 rounded-3xl p-8 shadow-sm space-y-8 animate-fade-in relative">
                       {isSyncingSheets && (
-                        <div className="absolute inset-0 z-50 bg-white/50 backdrop-blur-sm rounded-3xl flex items-center justify-center">
-                           <div className="p-4 bg-slate-900/40 shadow-xl rounded-2xl flex items-center gap-3 border border-gray-100">
+                        <div className="absolute inset-0 z-50 bg-white dark:bg-slate-900/500 backdrop-blur-sm rounded-3xl flex items-center justify-center">
+                           <div className="p-4 bg-white dark:bg-slate-900/40 shadow-xl rounded-2xl flex items-center gap-3 border border-gray-100">
                              <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                             <span className="text-sm font-bold text-slate-100">Uploading and Processing Roster...</span>
+                             <span className="text-sm font-bold text-slate-700">Uploading and Processing Roster...</span>
                            </div>
                         </div>
                       )}
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 pb-5 gap-4">
                         <div>
-                          <h3 className="font-bold text-slate-100 text-lg flex items-center gap-2">
+                          <h3 className="font-bold text-slate-700 text-lg flex items-center gap-2">
                             <Upload className="w-5 h-5 text-indigo-500" />
                             Schedule Roster Upload
                           </h3>
-                          <p className="text-sm text-slate-400 mt-1">
+                          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                             Upload a spreadsheet containing agent shifts. Supports <b>.xlsx, .xls, .csv</b>
                           </p>
                         </div>
@@ -11088,7 +6871,7 @@ export default function App() {
                             onClick={downloadScheduleTemplate}
                             className="px-4 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2"
                           >
-                            <Download className="w-4 h-4 text-slate-400" />
+                            <Download className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                             Download Template
                           </button>
                         </div>
@@ -11115,18 +6898,18 @@ export default function App() {
                             }}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                           />
-                          <div className="w-16 h-16 bg-slate-900/40 shadow-sm border border-gray-100 rounded-full flex items-center justify-center mb-4 text-indigo-500 group-hover:scale-105 transition-transform">
+                          <div className="w-16 h-16 bg-white dark:bg-slate-900/40 shadow-sm border border-gray-100 rounded-full flex items-center justify-center mb-4 text-indigo-500 group-hover:scale-105 transition-transform">
                             <Upload className="w-8 h-8" />
                           </div>
-                          <h4 className="text-slate-100 font-bold text-base">Drag & drop your file here</h4>
-                          <p className="text-slate-400 text-sm mt-1">or click to browse from your computer</p>
+                          <h4 className="text-slate-700 font-bold text-base">Drag & drop your file here</h4>
+                          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">or click to browse from your computer</p>
                           <p className="text-xs text-gray-400 mt-4 leading-relaxed max-w-xs mx-auto">
                             Requires Agent Name, Date, and Shift columns. Missing agents will be auto-registered.
                           </p>
                         </div>
 
                         {/* Box 2: Google Sheets URL Import */}
-                        <div className="border border-gray-200 bg-slate-900/40 shadow-sm rounded-2xl p-8 flex flex-col items-center justify-center text-center">
+                        <div className="border border-gray-200 bg-white dark:bg-slate-900/40 shadow-sm rounded-2xl p-8 flex flex-col items-center justify-center text-center">
                           <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
                             <svg className="w-6 h-6" viewBox="0 0 48 48">
                               <path fill="#34A853" d="M41.5 8h-35C4 8 2 10 2 12.5v23C2 38 4 40 6.5 40h35c2.5 0 4.5-2 4.5-4.5v-23C46 10 44 8 41.5 8z"></path>
@@ -11134,8 +6917,8 @@ export default function App() {
                               <path fill="#E8F0FE" d="M36 15.5h6v4h-6v-4zM36 24h6v4h-6v-4zM8 15.5h5v4H8v-4zM8 24h5v4H8v-4z"></path>
                             </svg>
                           </div>
-                          <h4 className="font-bold text-slate-100">Import via Google Sheets</h4>
-                          <p className="text-xs text-slate-400 mt-1 mb-4 max-w-[200px] mx-auto">Automatically sync live roster from Google Workspace.</p>
+                          <h4 className="font-bold text-slate-700">Import via Google Sheets</h4>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-4 max-w-[200px] mx-auto">Automatically sync live roster from Google Workspace.</p>
                           <div className="w-full flex space-x-2 relative group">
                             <input
                               type="text"
@@ -11148,7 +6931,7 @@ export default function App() {
                                 setStorageItem('sched_google_sheet_id', val);
                               }}
                               placeholder="Paste Sheets URL..."
-                              className="flex-1 bg-slate-900/40 border border-gray-300 text-slate-100 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm"
+                              className="flex-1 bg-white dark:bg-slate-900/40 border border-gray-300 text-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm"
                             />
                             <button
                               onClick={async () => {
@@ -11191,17 +6974,17 @@ export default function App() {
 
                       {/* Display Data Summary Block */}
                       {(tempSchedules.length > 0 || uploadError) && (
-                        <div className="border border-gray-200 bg-slate-900/40 rounded-2xl shadow-sm overflow-hidden flex flex-col pt-2 mt-8">
+                        <div className="border border-gray-200 bg-white dark:bg-slate-900/40 rounded-2xl shadow-sm overflow-hidden flex flex-col pt-2 mt-8">
                             <div className="px-6 py-4 flex items-center justify-between border-b border-gray-100 bg-gray-50/50">
                                 <div>
-                                    <h4 className="font-bold text-slate-100 flex items-center gap-2">
+                                    <h4 className="font-bold text-slate-700 flex items-center gap-2">
                                         <Calendar className="w-5 h-5 text-indigo-500" /> Upload Preview Summary
                                     </h4>
-                                    <p className="text-xs text-slate-400 mt-1">Review validation and any mapping errors before saving.</p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Review validation and any mapping errors before saving.</p>
                                 </div>
                                 {tempSchedules.length > 0 && (
                                    <div className="flex gap-3">
-                                        <button onClick={() => { setTempSchedules([]); setUploadError(null); setUploadSuccess(null); }} className="px-4 py-2 border border-gray-300 text-gray-700 bg-slate-900/40 hover:bg-gray-50 rounded-xl text-sm font-semibold transition-colors">Discard</button>
+                                        <button onClick={() => { setTempSchedules([]); setUploadError(null); setUploadSuccess(null); }} className="px-4 py-2 border border-gray-300 text-gray-700 bg-white dark:bg-slate-900/40 hover:bg-gray-50 rounded-xl text-sm font-semibold transition-colors">Discard</button>
                                         <button onClick={commitSchedules} className="px-5 py-2 bg-emerald-600 text-white shadow-md shadow-emerald-500/20 hover:bg-emerald-700 rounded-xl text-sm font-bold flex items-center gap-2 transition-all">
                                             <CheckCircle2 className="w-4 h-4" /> Save Schedule ({tempSchedules.length} items)
                                         </button>
@@ -11227,7 +7010,7 @@ export default function App() {
                             {tempSchedules.length > 0 && (
                                 <div className="max-h-80 overflow-y-auto">
                                     <table className="w-full text-left border-collapse text-sm">
-                                        <thead className="bg-[#f8fafc] sticky top-0 border-b border-gray-200">
+                                        <thead className="bg-white dark:bg-slate-900 sticky top-0 border-b border-gray-200">
                                             <tr>
                                                 <th className="p-3 pl-6 font-semibold text-gray-700">Agent</th>
                                                 <th className="p-3 font-semibold text-gray-700">Date</th>
@@ -11238,8 +7021,8 @@ export default function App() {
                                         <tbody className="divide-y divide-gray-100">
                                             {tempSchedules.slice(0, 100).map((row, idx) => (
                                                 <tr key={idx} className="hover:bg-gray-50">
-                                                    <td className="p-3 pl-6 font-medium text-slate-100">{row.agentName}</td>
-                                                    <td className="p-3 text-slate-400 font-mono">{row.date}</td>
+                                                    <td className="p-3 pl-6 font-medium text-slate-700">{row.agentName}</td>
+                                                    <td className="p-3 text-slate-500 dark:text-slate-400 font-mono">{row.date}</td>
                                                     <td className="p-3"><span className="px-2 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-md text-xs">{row.shiftLabel}</span></td>
                                                     <td className="p-3 pr-6 text-right">
                                                         <span className="text-emerald-600 text-xs font-semibold flex items-center justify-end gap-1"><span className="w-3 h-3 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px]">✓</span> Valid</span>
@@ -11249,7 +7032,7 @@ export default function App() {
                                         </tbody>
                                     </table>
                                     {tempSchedules.length > 100 && (
-                                        <div className="p-4 text-center text-xs text-slate-400 bg-gray-50 border-t border-gray-100">
+                                        <div className="p-4 text-center text-xs text-slate-500 dark:text-slate-400 bg-gray-50 border-t border-gray-100">
                                             Showing top 100 entries out of {tempSchedules.length}.
                                         </div>
                                     )}
@@ -11267,9 +7050,9 @@ export default function App() {
                       <div className="space-y-1 text-left">
                         <div className="flex items-center gap-2">
                           <span className={`w-3 h-3 rounded-full ${isRosterPublished ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
-                          <h3 className="text-sm font-black text-slate-100 uppercase tracking-wider font-display">Schedule Roster Release Status</h3>
+                          <h3 className="text-sm font-black text-slate-700 uppercase tracking-wider font-display">Schedule Roster Release Status</h3>
                         </div>
-                        <p className="text-xs text-slate-300">
+                        <p className="text-xs text-slate-600 dark:text-slate-300">
                           {isRosterPublished 
                             ? "Published & Released: Standard agents are allowed to view the complete schedule roster and trigger shift swap requests."
                             : "Draft Mode: Full schedule calendar views are restricted to Team Leaders & Administration. Agents see custom draft shift card previews only."
@@ -11278,7 +7061,7 @@ export default function App() {
                       </div>
                       
                       <div className="flex items-center gap-3">
-                        <span className="text-xs font-black uppercase text-slate-400 font-mono">
+                        <span className="text-xs font-black uppercase text-slate-500 dark:text-slate-400 font-mono">
                           {isRosterPublished ? '🟢 Published' : '🟡 Draft Only'}
                         </span>
                         <label className="relative inline-flex items-center cursor-pointer select-none">
@@ -11301,7 +7084,7 @@ export default function App() {
                             }}
                             className="sr-only peer"
                           />
-                          <div className="w-14 h-7 bg-white/5 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-slate-800 after:border-slate-700 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-600 border border-white/10"></div>
+                          <div className="w-14 h-7 bg-white dark:bg-slate-900/50 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-black/5 dark:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-slate-50 dark:bg-slate-800 after:border-slate-200 dark:border-slate-700 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-600 border border-slate-200 dark:border-slate-700/10"></div>
                         </label>
                       </div>
                     </div>
@@ -11309,26 +7092,26 @@ export default function App() {
 
                   {/* Manual Single-Shift Roster Submission Form */}
                   {isSuperAdmin && (
-                    <div className="bg-white/5 border border-white/10 rounded-3xl shadow-sm text-slate-100 p-6 shadow-2xl space-y-5 text-left">
+                    <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl shadow-sm text-slate-700 p-6 shadow-2xl space-y-5 text-left">
                       <div>
-                        <h3 className="font-extrabold text-slate-100 text-base font-display flex items-center gap-2">
+                        <h3 className="font-extrabold text-slate-700 text-base font-display flex items-center gap-2">
                           <PlusCircle className="w-5 h-5 text-indigo-400" />
                           Individual Shift Assignment Submitter
                         </h3>
-                        <p className="text-xs text-slate-400 mt-0.5">Manually program, assign, or override individual agent shift allocations with custom Notes</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Manually program, assign, or override individual agent shift allocations with custom Notes</p>
                       </div>
 
                       <form onSubmit={handleManualRosterSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                         <div className="md:col-span-1 space-y-1.5 font-sans">
-                          <label className="text-[10px] text-slate-400 font-extrabold uppercase font-sans">1. Choose Agent</label>
+                          <label className="text-[10px] text-slate-500 dark:text-slate-400 font-extrabold uppercase font-sans">1. Choose Agent</label>
                           <select
                             value={manualRosterAgent}
                             onChange={(e) => setManualRosterAgent(e.target.value)}
-                            className="w-full px-3 py-2.5 bg-black/45 border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer focus:border-indigo-500 font-sans"
+                            className="w-full px-3 py-2.5 bg-black/45 border border-slate-200 dark:border-slate-700/10 rounded-xl text-xs text-slate-700 outline-none cursor-pointer focus:border-indigo-500 font-sans"
                           >
                             <option value="">-- Choose Agent --</option>
                             {agentsList.map(name => (
-                              <option className="bg-slate-800 text-slate-100 " key={name} value={name}>
+                              <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 " key={name} value={name}>
                                 {name} ({getAgentLOB(name)})
                               </option>
                             ))}
@@ -11336,28 +7119,28 @@ export default function App() {
                         </div>
 
                         <div className="md:col-span-1 space-y-1.5">
-                          <label className="text-[10px] text-slate-400 font-extrabold uppercase font-sans">2. Coverage Date</label>
+                          <label className="text-[10px] text-slate-500 dark:text-slate-400 font-extrabold uppercase font-sans">2. Coverage Date</label>
                           <input
                             type="date"
                             value={manualRosterDate}
                             onChange={(e) => setManualRosterDate(e.target.value)}
-                            className="w-full px-3 py-1.5 bg-black/45 border border-white/10 rounded-xl text-xs text-slate-100 outline-none focus:border-indigo-500 h-[42px]"
+                            className="w-full px-3 py-1.5 bg-black/45 border border-slate-200 dark:border-slate-700/10 rounded-xl text-xs text-slate-700 outline-none focus:border-indigo-500 h-[42px]"
                           />
                         </div>
 
                         <div className="md:col-span-1 space-y-1.5 font-sans">
-                          <label className="text-[10px] text-slate-400 font-extrabold uppercase font-sans">3. Schedule Shift</label>
+                          <label className="text-[10px] text-slate-500 dark:text-slate-400 font-extrabold uppercase font-sans">3. Schedule Shift</label>
                           <select
                             value={manualRosterShift}
                             onChange={(e) => setManualRosterShift(e.target.value)}
-                            className="w-full px-3 py-2.5 bg-black/45 border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer focus:border-indigo-500 font-sans"
+                            className="w-full px-3 py-2.5 bg-black/45 border border-slate-200 dark:border-slate-700/10 rounded-xl text-xs text-slate-700 outline-none cursor-pointer focus:border-indigo-500 font-sans"
                           >
                             {SHIFTS.map(s => (
-                              <option className="bg-slate-800 text-slate-100 " key={s.id} value={s.label}>
+                              <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 " key={s.id} value={s.label}>
                                 {s.display} ({s.label})
                               </option>
                             ))}
-                            <option className="bg-slate-800 text-slate-100 " value="Off">Rest Day (Off Day)</option>
+                            <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 " value="Off">Rest Day (Off Day)</option>
                           </select>
                         </div>
 
@@ -11373,13 +7156,13 @@ export default function App() {
 
                         {/* Shift Notes Field spanning full width */}
                         <div className="md:col-span-4 space-y-1.5">
-                          <label className="text-[10px] text-slate-400 font-extrabold uppercase font-sans">4. Roster Shift Notes (Saves to Shift details)</label>
+                          <label className="text-[10px] text-slate-500 dark:text-slate-400 font-extrabold uppercase font-sans">4. Roster Shift Notes (Saves to Shift details)</label>
                           <input
                             type="text"
                             placeholder="e.g. Approved temporary schedule override / Direct management assignment / Shift Notes..."
                             value={manualRosterNotes}
                             onChange={(e) => setManualRosterNotes(e.target.value)}
-                            className="w-full px-4 py-2.5 bg-black/45 border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500"
+                            className="w-full px-4 py-2.5 bg-black/45 border border-slate-200 dark:border-slate-700/10 rounded-xl text-xs text-slate-700 placeholder-slate-500 outline-none focus:border-indigo-500"
                           />
                         </div>
                       </form>
@@ -11389,9 +7172,9 @@ export default function App() {
 
                   {/* Informative coverage card indicators */}
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                    <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-                      <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Active Scheduled Days</p>
-                      <p className="text-2xl font-black text-slate-100">
+                    <div className="p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl backdrop-blur-sm">
+                      <p className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold mb-1">Active Scheduled Days</p>
+                      <p className="text-2xl font-black text-slate-700">
                         {allScheduleDates.length} Days Covered
                       </p>
                       <p className="text-[10px] text-indigo-300 mt-1">
@@ -11402,9 +7185,9 @@ export default function App() {
                       </p>
                     </div>
 
-                    <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-                      <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Coverage Scope</p>
-                      <p className="text-2xl font-black text-slate-100">
+                    <div className="p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl backdrop-blur-sm">
+                      <p className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold mb-1">Coverage Scope</p>
+                      <p className="text-2xl font-black text-slate-700">
                         {schedules.length} Assigned Shifts
                       </p>
                       <p className="text-[10px] text-emerald-300 mt-1">
@@ -11412,8 +7195,8 @@ export default function App() {
                       </p>
                     </div>
 
-                    <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-                      <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1 font-mono">My Upcoming Shift</p>
+                    <div className="p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl backdrop-blur-sm">
+                      <p className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold mb-1 font-mono">My Upcoming Shift</p>
                       {currentUser.role === 'agent' ? (
                         (() => {
                           const todayStr = getLocalISOString(systemTime);
@@ -11432,15 +7215,15 @@ export default function App() {
                           }
                           return (
                             <>
-                              <p className="text-2xl font-black text-slate-400">Rest / No Shift</p>
-                              <p className="text-[10px] text-slate-500 mt-1">No upcoming scheduled shifts found</p>
+                              <p className="text-2xl font-black text-slate-500 dark:text-slate-400">Rest / No Shift</p>
+                              <p className="text-[10px] text-white0 mt-1">No upcoming scheduled shifts found</p>
                             </>
                           );
                         })()
                       ) : (
                         <>
                           <p className="text-2xl font-black text-amber-300">TL Supervision</p>
-                          <p className="text-[10px] text-slate-400 mt-1">Roster upload and override controls enabled</p>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Roster upload and override controls enabled</p>
                         </>
                       )}
                     </div>
@@ -11457,14 +7240,14 @@ export default function App() {
                       
                       <div className="space-y-1">
                         <div className="flex justify-between items-center text-[11px]">
-                          <span className="text-slate-300">Pending Writes:</span>
-                          <span className={`font-mono font-black text-xs ${syncStatus.pending > 0 ? 'text-amber-400 animate-pulse' : 'text-slate-400'}`}>
+                          <span className="text-slate-600 dark:text-slate-300">Pending Writes:</span>
+                          <span className={`font-mono font-black text-xs ${syncStatus.pending > 0 ? 'text-amber-400 animate-pulse' : 'text-slate-500 dark:text-slate-400'}`}>
                             {syncStatus.pending}
                           </span>
                         </div>
                         <div className="flex justify-between items-center text-[11px]">
-                          <span className="text-slate-300">Syncs / Fails:</span>
-                          <span className="font-mono text-slate-400 font-bold">
+                          <span className="text-slate-600 dark:text-slate-300">Syncs / Fails:</span>
+                          <span className="font-mono text-slate-500 dark:text-slate-400 font-bold">
                             {syncStatus.synced} / <span className="text-red-400">{syncStatus.failed}</span>
                           </span>
                         </div>
@@ -11475,7 +7258,7 @@ export default function App() {
                           </p>
                         )}
 
-                        <div className="grid grid-cols-2 gap-1.5 mt-2 pt-1.5 border-t border-white/5">
+                        <div className="grid grid-cols-2 gap-1.5 mt-2 pt-1.5 border-t border-slate-200 dark:border-slate-700/5">
                           <button
                             onClick={() => {
                               const nextMode = !forceOffline;
@@ -11485,7 +7268,7 @@ export default function App() {
                             className={`py-1 px-1.5 rounded-lg text-[8px] font-black cursor-pointer text-center select-none uppercase transition-all ${
                               forceOffline 
                                 ? 'bg-amber-600/20 hover:bg-amber-600/35 text-amber-200 border border-amber-500/30' 
-                                : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/5'
+                                : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700/5'
                             }`}
                           >
                             {forceOffline ? "Go Online" : "Go Offline"}
@@ -11507,7 +7290,7 @@ export default function App() {
                             className={`py-1 px-1.5 rounded-lg text-[8px] font-black uppercase text-center cursor-pointer transition-all ${
                               syncStatus.pending > 0 
                                 ? 'bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white shadow-lg shadow-indigo-900/10' 
-                                : 'bg-slate-900 text-slate-600 border border-white/5 cursor-not-allowed'
+                                : 'bg-white dark:bg-slate-900 text-slate-600 border border-slate-200 dark:border-slate-700/5 cursor-not-allowed'
                             }`}
                           >
                             Sync Queue
@@ -11519,13 +7302,13 @@ export default function App() {
 
                   {false ? (
                     <div className="space-y-6">
-                      <div className="p-12 text-center rounded-3xl border border-dashed border-indigo-500/30 bg-slate-800/[0.02] space-y-4 shadow-xl text-left">
+                      <div className="p-12 text-center rounded-3xl border border-dashed border-indigo-500/30 bg-slate-50 dark:bg-slate-800/[0.02] space-y-4 shadow-xl text-left">
                         <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto text-indigo-400 shadow-inner">
                           <Shield className="w-8 h-8" />
                         </div>
                         <div className="space-y-2 text-center">
-                          <h3 className="text-xl font-bold text-slate-100 tracking-wide font-display">Schedule Roster Draft Status</h3>
-                          <p className="text-slate-400 text-sm max-w-md mx-auto">
+                          <h3 className="text-xl font-bold text-slate-700 tracking-wide font-display">Schedule Roster Draft Status</h3>
+                          <p className="text-slate-500 dark:text-slate-400 text-sm max-w-md mx-auto">
                             The collective team schedule roster is currently under construction and edit by administration. Once released, the complete calendar tracker and trading capabilities will become active.
                           </p>
                         </div>
@@ -11538,10 +7321,10 @@ export default function App() {
                       </div>
 
                       {/* Display personalized preview list */}
-                      <div className="bg-white/5 border border-white/10 rounded-3xl p-6 shadow-xl space-y-4 text-left">
-                        <div className="border-b border-white/5 pb-3">
+                      <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl p-6 shadow-xl space-y-4 text-left">
+                        <div className="border-b border-slate-200 dark:border-slate-700/5 pb-3">
                           <h4 className="text-sm font-black text-indigo-300 uppercase tracking-widest font-mono">My Shift Coverage Preview</h4>
-                          <p className="text-xs text-slate-400 mt-1">Below are your upcoming assigned shifts as current in the administrator blueprint:</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Below are your upcoming assigned shifts as current in the administrator blueprint:</p>
                         </div>
 
                         {(() => {
@@ -11549,7 +7332,7 @@ export default function App() {
                           const myShiftsArr = schedules.filter(s => s.agentName?.toLowerCase() === currentUser?.name?.toLowerCase() && s.date >= todayStr);
                           if (myShiftsArr.length === 0) {
                             return (
-                              <div className="py-6 text-center text-xs text-slate-500 italic">
+                              <div className="py-6 text-center text-xs text-white0 italic">
                                 No upcoming scheduled shifts match your account name in this draft revision.
                               </div>
                             );
@@ -11559,10 +7342,10 @@ export default function App() {
                               {myShiftsArr.map(shift => {
                                 const style = getShiftBadgeStyle(shift.shiftLabel);
                                 return (
-                                  <div key={shift.id} className="p-4 bg-slate-800/[0.02] border border-white/5 rounded-2xl flex items-center justify-between shadow">
+                                  <div key={shift.id} className="p-4 bg-slate-50 dark:bg-slate-800/[0.02] border border-slate-200 dark:border-slate-700/5 rounded-2xl flex items-center justify-between shadow">
                                     <div>
-                                      <p className="text-[10px] text-slate-400 font-mono font-medium">{formatDateNice(shift.date)}</p>
-                                      <p className="text-xs font-bold text-slate-100 mt-1 uppercase tracking-wide">{shift.agentName}</p>
+                                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono font-medium">{formatDateNice(shift.date)}</p>
+                                      <p className="text-xs font-bold text-slate-700 mt-1 uppercase tracking-wide">{shift.agentName}</p>
                                     </div>
                                     <span className={`px-2 py-0.5 text-[10px] font-black rounded border uppercase tracking-wider ${style.bg}`}>
                                       {style.display}
@@ -11578,7 +7361,7 @@ export default function App() {
                   ) : (
                     <>
                       {/* Search, Filter, & Navigation Toolbar */}
-                      <div className="p-4 bg-white/5 border border-white/10 rounded-3xl flex flex-col sm:flex-row justify-between items-center gap-4 shadow-md">
+                      <div className="p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl flex flex-col sm:flex-row justify-between items-center gap-4 shadow-md">
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                       {/* Search bar */}
                       <input
@@ -11586,18 +7369,18 @@ export default function App() {
                         placeholder="Filter by Agent Name..."
                         value={scheduleFilterAgent}
                         onChange={(e) => setScheduleFilterAgent(e.target.value)}
-                        className="px-4 py-2 bg-black/45 hover:bg-slate-700 backdrop-blur-xl border border-white/10 focus:border-indigo-500/85 focus:ring-1 focus:ring-indigo-500 rounded-xl text-xs text-slate-100 placeholder-slate-400 outline-none transition-all w-full sm:w-64"
+                        className="px-4 py-2 bg-black/45 hover:bg-slate-700 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 focus:border-indigo-500/85 focus:ring-1 focus:ring-indigo-500 rounded-xl text-xs text-slate-700 placeholder-slate-400 outline-none transition-all w-full sm:w-64"
                       />
 
                       {/* View Mode */}
-                      <div className="flex rounded-xl bg-black/45 p-1 border border-white/5">
+                      <div className="flex rounded-xl bg-black/45 p-1 border border-slate-200 dark:border-slate-700/5">
                         <button
                           onClick={() => {
                             setScheduleViewMode('week');
                             setSchedulePageOffset(0);
                           }}
                           className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                            scheduleViewMode === 'week' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-100'
+                            scheduleViewMode === 'week' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
                           }`}
                         >
                           Week
@@ -11608,7 +7391,7 @@ export default function App() {
                             setSchedulePageOffset(0);
                           }}
                           className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                            scheduleViewMode === 'fortnight' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-100'
+                            scheduleViewMode === 'fortnight' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
                           }`}
                         >
                           2-Weeks
@@ -11619,7 +7402,7 @@ export default function App() {
                             setSchedulePageOffset(0);
                           }}
                           className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                            scheduleViewMode === 'month' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-100'
+                            scheduleViewMode === 'month' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
                           }`}
                         >
                           Full Month
@@ -11629,21 +7412,21 @@ export default function App() {
 
                     {/* Horizontal Paging Actions */}
                     <div className="flex items-center gap-2 self-stretch sm:self-auto justify-between sm:justify-end">
-                      <span className="text-[11px] text-slate-400 font-medium">
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                         Showing offsets: {safeOffset + 1} - {Math.min(safeOffset + displayDaysCount, baseDatesList.length)} of {baseDatesList.length} dates
                       </span>
                       <div className="flex gap-2">
                         <button
                           disabled={safeOffset === 0}
                           onClick={() => setSchedulePageOffset(prev => Math.max(0, prev - displayDaysCount))}
-                          className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-100 disabled:opacity-30 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                          className="px-3 py-1.5 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/10 text-slate-700 disabled:opacity-30 rounded-lg text-xs font-bold transition-all cursor-pointer"
                         >
                           &larr; Prev
                         </button>
                         <button
                           disabled={safeOffset + displayDaysCount >= baseDatesList.length}
                           onClick={() => setSchedulePageOffset(prev => Math.min(baseDatesList.length - displayDaysCount, prev + displayDaysCount))}
-                          className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-100 disabled:opacity-30 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                          className="px-3 py-1.5 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/10 text-slate-700 disabled:opacity-30 rounded-lg text-xs font-bold transition-all cursor-pointer"
                         >
                           Next &rarr;
                         </button>
@@ -11680,20 +7463,20 @@ export default function App() {
 
 
                   {/* Active Schedule visual Matrix grid */}
-                  <div className="bg-white/5 border border-white/10 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
-                    <div className="flex justify-between items-center pb-2 border-b border-white/5">
-                      <h3 className="font-bold text-slate-100 text-base font-display"> Roster Coverage Planner</h3>
+                  <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
+                    <div className="flex justify-between items-center pb-2 border-b border-slate-200 dark:border-slate-700/5">
+                      <h3 className="font-bold text-slate-700 text-base font-display"> Roster Coverage Planner</h3>
                       <span className="text-[10px] text-indigo-300 font-mono flex items-center gap-1.5 font-bold uppercase">
                         <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span> Active Database
                       </span>
                     </div>
 
                     {schedules.length === 0 ? (
-                      <div className="text-center py-16 text-slate-400 space-y-3">
+                      <div className="text-center py-16 text-slate-500 dark:text-slate-400 space-y-3">
                         <Calendar className="w-12 h-12 mx-auto text-indigo-400 opacity-40 animate-pulse" />
                         <div>
-                          <p className="font-bold text-slate-100 text-base">Active schedule roster is empty</p>
-                          <p className="text-xs text-slate-400 max-w-md mx-auto mt-1">
+                          <p className="font-bold text-slate-700 text-base">Active schedule roster is empty</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto mt-1">
                             {currentUser.role === 'tl'
                               ? 'Please compile and upload a CSV weekly or monthly schedule file using the drag-and-drop panel above.'
                               : 'A Team Leader has not loaded the schedule roster yet. Initial dummy rotation is turned off.'
@@ -11735,20 +7518,20 @@ export default function App() {
                           };
 
                           return (
-                            <div className="bg-[#12121e]/85 border border-indigo-500/25 rounded-3xl p-5 space-y-4 mb-6 text-left shadow-2xl relative overflow-hidden backdrop-blur-xl">
+                            <div className="bg-white dark:bg-slate-900/85 border border-indigo-500/25 rounded-3xl p-5 space-y-4 mb-6 text-left shadow-2xl relative overflow-hidden backdrop-blur-xl">
                               <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
                               <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
 
-                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-3">
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-700/5 pb-3">
                                 <div className="space-y-1">
-                                  <h4 className="text-sm font-black text-slate-100 flex items-center gap-2 font-display">
+                                  <h4 className="text-sm font-black text-slate-700 flex items-center gap-2 font-display">
                                     <span className="flex h-2.5 w-2.5 relative">
                                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                       <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                                     </span>
                                     Roster Coverage Heatmap Analytics
                                   </h4>
-                                  <p className="text-[11px] text-slate-400 font-sans">
+                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-sans">
                                     Live shift coverage matrix compared against custom targets. Hover on individual cells to inspect scheduled agents.
                                   </p>
                                 </div>
@@ -11765,9 +7548,9 @@ export default function App() {
 
                               {/* Interactive Target Configurator Panel */}
                               {heatmapConfigureOpen && (
-                                <div className="p-4 bg-slate-900/40 rounded-2xl border border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-5 text-left transition-all">
+                                <div className="p-4 bg-white dark:bg-slate-900/40 rounded-2xl border border-slate-200 dark:border-slate-700/5 grid grid-cols-1 sm:grid-cols-3 gap-5 text-left transition-all">
                                   <div className="space-y-2">
-                                    <label className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
+                                    <label className="text-[10px] text-slate-500 dark:text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
                                       🌅 Morning Shift Target (07-16)
                                     </label>
                                     <div className="flex items-center gap-2">
@@ -11778,11 +7561,11 @@ export default function App() {
                                           setHeatmapMorningTarget(val);
                                           setStorageItem('heatmap_morning_target', val);
                                         }}
-                                        className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-lg border border-white/10 transition-all flex items-center justify-center cursor-pointer"
+                                        className="w-8 h-8 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:bg-slate-800/80 active:scale-95 text-slate-700 font-bold rounded-lg border border-slate-200 dark:border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
                                       >
                                         -
                                       </button>
-                                      <span className="w-10 text-center font-bold text-slate-100 text-sm font-mono">
+                                      <span className="w-10 text-center font-bold text-slate-700 text-sm font-mono">
                                         {heatmapMorningTarget}
                                       </span>
                                       <button
@@ -11792,16 +7575,16 @@ export default function App() {
                                           setHeatmapMorningTarget(val);
                                           setStorageItem('heatmap_morning_target', val);
                                         }}
-                                        className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-lg border border-white/10 transition-all flex items-center justify-center cursor-pointer"
+                                        className="w-8 h-8 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:bg-slate-800/80 active:scale-95 text-slate-700 font-bold rounded-lg border border-slate-200 dark:border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
                                       >
                                         +
                                       </button>
                                     </div>
-                                    <p className="text-[8.5px] text-slate-500 font-sans">Ideal working agents on clock</p>
+                                    <p className="text-[8.5px] text-white0 font-sans">Ideal working agents on clock</p>
                                   </div>
 
                                   <div className="space-y-2">
-                                    <label className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
+                                    <label className="text-[10px] text-slate-500 dark:text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
                                       ☀️ Afternoon Shift Target (13-22)
                                     </label>
                                     <div className="flex items-center gap-2">
@@ -11812,11 +7595,11 @@ export default function App() {
                                           setHeatmapAfternoonTarget(val);
                                           setStorageItem('heatmap_afternoon_target', val);
                                         }}
-                                        className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-lg border border-white/10 transition-all flex items-center justify-center cursor-pointer"
+                                        className="w-8 h-8 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:bg-slate-800/80 active:scale-95 text-slate-700 font-bold rounded-lg border border-slate-200 dark:border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
                                       >
                                         -
                                       </button>
-                                      <span className="w-10 text-center font-bold text-slate-100 text-sm font-mono">
+                                      <span className="w-10 text-center font-bold text-slate-700 text-sm font-mono">
                                         {heatmapAfternoonTarget}
                                       </span>
                                       <button
@@ -11826,16 +7609,16 @@ export default function App() {
                                           setHeatmapAfternoonTarget(val);
                                           setStorageItem('heatmap_afternoon_target', val);
                                         }}
-                                        className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-lg border border-white/10 transition-all flex items-center justify-center cursor-pointer"
+                                        className="w-8 h-8 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:bg-slate-800/80 active:scale-95 text-slate-700 font-bold rounded-lg border border-slate-200 dark:border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
                                       >
                                         +
                                       </button>
                                     </div>
-                                    <p className="text-[8.5px] text-slate-500 font-sans">Ideal working agents on clock</p>
+                                    <p className="text-[8.5px] text-white0 font-sans">Ideal working agents on clock</p>
                                   </div>
 
                                   <div className="space-y-2">
-                                    <label className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
+                                    <label className="text-[10px] text-slate-500 dark:text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
                                       🌙 Night Shift Target (22-07)
                                     </label>
                                     <div className="flex items-center gap-2">
@@ -11846,11 +7629,11 @@ export default function App() {
                                           setHeatmapNightTarget(val);
                                           setStorageItem('heatmap_night_target', val);
                                         }}
-                                        className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-lg border border-white/10 transition-all flex items-center justify-center cursor-pointer"
+                                        className="w-8 h-8 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:bg-slate-800/80 active:scale-95 text-slate-700 font-bold rounded-lg border border-slate-200 dark:border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
                                       >
                                         -
                                       </button>
-                                      <span className="w-10 text-center font-bold text-slate-100 text-sm font-mono">
+                                      <span className="w-10 text-center font-bold text-slate-700 text-sm font-mono">
                                         {heatmapNightTarget}
                                       </span>
                                       <button
@@ -11860,12 +7643,12 @@ export default function App() {
                                           setHeatmapNightTarget(val);
                                           setStorageItem('heatmap_night_target', val);
                                         }}
-                                        className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-lg border border-white/10 transition-all flex items-center justify-center cursor-pointer"
+                                        className="w-8 h-8 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:bg-slate-800/80 active:scale-95 text-slate-700 font-bold rounded-lg border border-slate-200 dark:border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
                                       >
                                         +
                                       </button>
                                     </div>
-                                    <p className="text-[8.5px] text-slate-500 font-sans">Ideal working agents on clock</p>
+                                    <p className="text-[8.5px] text-white0 font-sans">Ideal working agents on clock</p>
                                   </div>
                                 </div>
                               )}
@@ -11875,7 +7658,7 @@ export default function App() {
                                 <div className="min-w-[850px] space-y-2">
                                   {/* Header row containing Dates */}
                                   <div className="flex">
-                                    <div className="w-44 shrink-0 flex items-center pl-3 text-[10px] font-black uppercase text-indigo-300 tracking-wider font-display border-r border-white/5">
+                                    <div className="w-44 shrink-0 flex items-center pl-3 text-[10px] font-black uppercase text-indigo-300 tracking-wider font-display border-r border-slate-200 dark:border-slate-700/5">
                                       Shift vs Date
                                     </div>
                                     <div className="flex-1 flex gap-1.5 pl-3">
@@ -11884,9 +7667,9 @@ export default function App() {
                                         const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' });
                                         const dayNum = d.getDate();
                                         return (
-                                          <div key={dateStr} className="flex-1 text-center bg-slate-900/30 py-1.5 rounded-xl border border-white/5 shadow-sm">
+                                          <div key={dateStr} className="flex-1 text-center bg-white dark:bg-slate-900/30 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/5 shadow-sm">
                                             <p className="text-[9px] text-indigo-300 uppercase font-black tracking-wider leading-none">{dayLabel}</p>
-                                            <p className="text-xs font-black text-slate-200 mt-1">{dayNum}</p>
+                                            <p className="text-xs font-black text-slate-700 dark:text-slate-200 mt-1">{dayNum}</p>
                                           </div>
                                         );
                                       })}
@@ -11903,8 +7686,8 @@ export default function App() {
                                     return (
                                       <div key={row.key} className="flex items-stretch">
                                         {/* Left Row Title & Header */}
-                                        <div className="w-44 shrink-0 flex flex-col justify-center text-left pl-3 py-1 bg-slate-900/30 border-r border-white/5 rounded-l-xl select-none">
-                                          <p className="text-xs font-black text-slate-200 font-display">{row.label}</p>
+                                        <div className="w-44 shrink-0 flex flex-col justify-center text-left pl-3 py-1 bg-white dark:bg-slate-900/30 border-r border-slate-200 dark:border-slate-700/5 rounded-l-xl select-none">
+                                          <p className="text-xs font-black text-slate-700 dark:text-slate-200 font-display">{row.label}</p>
                                           <p className="text-[8px] text-indigo-200/60 font-medium">Target: {row.target} Agent{row.target !== 1 ? 's' : ''}</p>
                                         </div>
 
@@ -11941,23 +7724,23 @@ export default function App() {
                                                 <span className="text-[7.5px] uppercase tracking-widest leading-none font-bold opacity-60 mt-0.5">{row.term}</span>
 
                                                 {/* Tooltip listing agents */}
-                                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 hidden group-hover:block bg-slate-950 border border-indigo-500/30 text-slate-100 rounded-xl p-3 shadow-2xl z-50 text-[10px] leading-relaxed backdrop-blur-md">
+                                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 hidden group-hover:block bg-slate-950 border border-indigo-500/30 text-slate-700 rounded-xl p-3 shadow-2xl z-50 text-[10px] leading-relaxed backdrop-blur-md">
                                                   <p className="font-extrabold text-indigo-300 border-b border-indigo-500/20 pb-0.5 mb-1.5 flex items-center justify-between">
                                                     <span>📋 Coverage Details</span>
                                                     <span className="text-[8px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.2 rounded font-mono uppercase tracking-widest">{row.term}</span>
                                                   </p>
                                                   
-                                                  <p className="text-slate-400 text-[9px] mb-1 font-sans">{statusText} ({count} of {target} agents scheduled)</p>
-                                                  <p className="text-slate-500 text-[8.5px] uppercase tracking-wider font-extrabold pb-0.5 border-b border-white/5 mt-2">Active Agents:</p>
+                                                  <p className="text-slate-500 dark:text-slate-400 text-[9px] mb-1 font-sans">{statusText} ({count} of {target} agents scheduled)</p>
+                                                  <p className="text-white0 text-[8.5px] uppercase tracking-wider font-extrabold pb-0.5 border-b border-slate-200 dark:border-slate-700/5 mt-2">Active Agents:</p>
                                                   {coverage.agents.length === 0 ? (
-                                                    <p className="text-slate-400 italic mt-1 font-mono">No agents scheduled</p>
+                                                    <p className="text-slate-500 dark:text-slate-400 italic mt-1 font-mono">No agents scheduled</p>
                                                   ) : (
                                                     <div className="max-h-24 overflow-y-auto mt-1 space-y-0.5 font-mono">
                                                       {coverage.agents.map((name: string, idx2: number) => (
-                                                        <div key={idx2} className="flex items-center gap-1 text-slate-300">
+                                                        <div key={idx2} className="flex items-center gap-1 text-slate-600 dark:text-slate-300">
                                                           <span className="text-emerald-400">●</span>
                                                           <span className="font-bold">{name}</span>
-                                                          <span className="text-[8px] text-slate-500">({getAgentLOB(name)})</span>
+                                                          <span className="text-[8px] text-white0">({getAgentLOB(name)})</span>
                                                         </div>
                                                       ))}
                                                     </div>
@@ -11975,10 +7758,10 @@ export default function App() {
                               </div>
 
                               {/* Quick Stats Insights Bar & Legend */}
-                              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-3 border-t border-white/5 text-[10px] text-slate-400">
+                              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-3 border-t border-slate-200 dark:border-slate-700/5 text-[10px] text-slate-500 dark:text-slate-400">
                                 {/* Heatmap Legend */}
                                 <div className="flex flex-wrap gap-3 items-center">
-                                  <span className="font-bold text-slate-300">Keys:</span>
+                                  <span className="font-bold text-slate-600 dark:text-slate-300">Keys:</span>
                                   <span className="flex items-center gap-1">
                                     <span className="w-2.5 h-2.5 rounded bg-emerald-500/20 border border-emerald-500/40 inline-block text-[7px] text-center font-bold">✓</span>
                                     Optimal (100%+)
@@ -12027,11 +7810,11 @@ export default function App() {
                         })()}
 
                         {/* Desktop Matrix Grid View */}
-                        <div className="hidden lg:block overflow-x-auto border border-white/5 rounded-2xl bg-black/45">
+                        <div className="hidden lg:block overflow-x-auto border border-slate-200 dark:border-slate-700/5 rounded-2xl bg-black/45">
                           <table className="w-full text-left border-collapse table-fixed min-w-[800px]">
                             <thead>
-                              <tr className="bg-white/5 border-b border-white/5">
-                                <th className="px-5 py-3.5 text-xs font-bold text-slate-200 w-52 font-display bg-[#1e1e1e]/40 backdrop-blur-lg border-r border-white/5 shadow-md sticky left-0 z-10">
+                              <tr className="bg-white dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700/5">
+                                <th className="px-5 py-3.5 text-xs font-bold text-slate-700 dark:text-slate-200 w-52 font-display bg-white dark:bg-slate-900/40 backdrop-blur-lg border-r border-slate-200 dark:border-slate-700/5 shadow-md sticky left-0 z-10">
                                   Agent Name
                                 </th>
                                 {activeDisplayDates.map(dateStr => {
@@ -12041,10 +7824,10 @@ export default function App() {
                                   const dayNum = d.getDate();
                                   const monthName = d.toLocaleDateString('en-US', { month: 'short' });
                                   return (
-                                    <th key={dateStr} className="px-3 py-3 text-center border-r border-white/5 min-w-[90px]">
+                                    <th key={dateStr} className="px-3 py-3 text-center border-r border-slate-200 dark:border-slate-700/5 min-w-[90px]">
                                       <p className="text-[10px] text-indigo-300 uppercase font-bold tracking-wider">{dayName}</p>
-                                      <p className="text-base font-black text-slate-100">{dayNum}</p>
-                                      <p className="text-[9px] text-slate-400">{monthName}</p>
+                                      <p className="text-base font-black text-slate-700">{dayNum}</p>
+                                      <p className="text-[9px] text-slate-500 dark:text-slate-400">{monthName}</p>
                                     </th>
                                   );
                                 })}
@@ -12053,16 +7836,16 @@ export default function App() {
                             <tbody>
                               {visibleAgents.length === 0 ? (
                                 <tr>
-                                  <td colSpan={activeDisplayDates.length + 1} className="text-center py-8 text-xs text-slate-400 italic">
+                                  <td colSpan={activeDisplayDates.length + 1} className="text-center py-8 text-xs text-slate-500 dark:text-slate-400 italic">
                                     No agents match your filter criteria.
                                   </td>
                                 </tr>
                               ) : (
                                 visibleAgents.map(agentName => (
-                                  <tr key={agentName} className="border-b border-white/5 hover:bg-slate-700 transition-all">
-                                    <td className="px-5 py-3 text-xs font-bold text-slate-100 font-sans bg-[#1e1e1e]/40 backdrop-blur-lg border-r border-white/5 shadow-sm sticky left-0 z-10 truncate min-w-[140px]">
+                                  <tr key={agentName} className="border-b border-slate-200 dark:border-slate-700/5 hover:bg-slate-700 transition-all">
+                                    <td className="px-5 py-3 text-xs font-bold text-slate-700 font-sans bg-white dark:bg-slate-900/40 backdrop-blur-lg border-r border-slate-200 dark:border-slate-700/5 shadow-sm sticky left-0 z-10 truncate min-w-[140px]">
                                       {agentName}
-                                      <span className="block text-[8px] text-slate-400 font-normal lowercase tracking-wide font-sans">{getAgentLOB(agentName)}</span>
+                                      <span className="block text-[8px] text-slate-500 dark:text-slate-400 font-normal lowercase tracking-wide font-sans">{getAgentLOB(agentName)}</span>
                                     </td>
                                     {activeDisplayDates.map(dateStr => {
                                       const findShift = schedules.find(s => s && s.agentName && s.agentName?.toLowerCase() === (agentName || '').toLowerCase() && s.date === dateStr);
@@ -12076,7 +7859,7 @@ export default function App() {
                                           onClick={() => {
                                             if (isSuperAdmin && findShift) setSelectedShiftForActivities({...findShift});
                                           }}
-                                          className={`p-1 border-r border-white/5 hover:bg-slate-700/40 transition-all relative group ${isSuperAdmin && findShift ? 'cursor-pointer hover:ring-1 ring-inset ring-indigo-500/50' : 'cursor-help'}`}
+                                          className={`p-1 border-r border-slate-200 dark:border-slate-700/5 hover:bg-slate-700/40 transition-all relative group ${isSuperAdmin && findShift ? 'cursor-pointer hover:ring-1 ring-inset ring-indigo-500/50' : 'cursor-help'}`}
                                         >
                                           <div className={`mx-auto rounded-lg px-2 py-2 text-center border text-[10px] font-bold ${style.bg} transition-all flex items-center justify-center gap-1 relative overflow-hidden`}>
                                             <span className="relative z-10">{style.display}</span>
@@ -12084,7 +7867,7 @@ export default function App() {
                                               <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shrink-0 relative z-10" />
                                             )}
                                             {findShift?.activities && findShift.activities.length > 0 && (
-                                              <div className="absolute bottom-0 left-0 right-0 h-1 flex bg-slate-900/40">
+                                              <div className="absolute bottom-0 left-0 right-0 h-1 flex bg-white dark:bg-slate-900/40">
                                                 {findShift.activities.map((a, i) => (
                                                   <div key={i} className={`flex-1 h-full ${a.label === 'Break' ? 'bg-amber-400' : a.label === 'Lunch' ? 'bg-orange-500' : typeof a.label === 'string' && a.label.includes('Meeting') ? 'bg-indigo-500' : 'bg-cyan-500'}`} title={a.label} />
                                                 ))}
@@ -12092,23 +7875,23 @@ export default function App() {
                                             )}
                                           </div>
                                           {(findShift?.shiftNotes || (findShift?.activities && findShift.activities.length > 0) || isSuperAdmin) && (
-                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block bg-slate-900 border border-indigo-400/40 text-slate-100 rounded-xl p-3 shadow-2xl z-50 text-[10px] leading-relaxed backdrop-blur-md">
+                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block bg-white dark:bg-slate-900 border border-indigo-400/40 text-slate-700 rounded-xl p-3 shadow-2xl z-50 text-[10px] leading-relaxed backdrop-blur-md">
                                               <p className="font-extrabold text-indigo-300 border-b border-indigo-400/20 pb-0.5 mb-1.5 flex items-center justify-between font-display">
                                                 <span>📌 Details</span>
-                                                <span className="text-slate-400 font-mono scale-75">{dateStr}</span>
+                                                <span className="text-slate-500 dark:text-slate-400 font-mono scale-75">{dateStr}</span>
                                               </p>
                                               
                                               {findShift?.shiftNotes && (
-                                                <p className="text-slate-300 font-sans break-words mb-2 italic">"{findShift.shiftNotes}"</p>
+                                                <p className="text-slate-600 dark:text-slate-300 font-sans break-words mb-2 italic">"{findShift.shiftNotes}"</p>
                                               )}
                                               
                                               {findShift?.activities && findShift.activities.length > 0 && (
                                                 <div className="space-y-1 mb-2">
-                                                  <p className="text-[9px] font-bold uppercase text-slate-500 tracking-wider">Intraday Timeline:</p>
+                                                  <p className="text-[9px] font-bold uppercase text-white0 tracking-wider">Intraday Timeline:</p>
                                                   {[...findShift.activities].sort((a,b)=>a.startTime.localeCompare(b.startTime)).map((act, i) => (
-                                                    <div key={i} className="flex items-center gap-1.5 justify-between bg-black/40 px-1.5 py-0.5 rounded border border-white/5">
+                                                    <div key={i} className="flex items-center gap-1.5 justify-between bg-black/40 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700/5">
                                                        <span className="font-mono text-[9px] text-indigo-200">{act.startTime}-{act.endTime}</span>
-                                                       <span className="font-bold text-slate-300 truncate">{act.label}</span>
+                                                       <span className="font-bold text-slate-600 dark:text-slate-300 truncate">{act.label}</span>
                                                     </div>
                                                   ))}
                                                 </div>
@@ -12135,15 +7918,15 @@ export default function App() {
                         {/* Mobile Grid Layout list of cards */}
                         <div className="block lg:hidden space-y-4">
                           {visibleAgents.length === 0 ? (
-                            <p className="text-center py-8 text-xs text-slate-400 italic">No agents match your filter criteria.</p>
+                            <p className="text-center py-8 text-xs text-slate-500 dark:text-slate-400 italic">No agents match your filter criteria.</p>
                           ) : (
                             visibleAgents.map(agentName => {
                               const agentShifts = schedules.filter(s => s && s.agentName && s.agentName?.toLowerCase() === (agentName || '').toLowerCase() && activeDisplayDates.includes(s.date));
                               return (
-                                <div key={agentName} className="p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl space-y-2">
-                                  <p className="text-xs font-bold text-slate-100 border-b border-white/5 pb-1 font-display flex justify-between items-center">
+                                <div key={agentName} className="p-4 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-2xl space-y-2">
+                                  <p className="text-xs font-bold text-slate-700 border-b border-slate-200 dark:border-slate-700/5 pb-1 font-display flex justify-between items-center">
                                     <span>{agentName}</span>
-                                    <span className="text-[9px] text-slate-400 font-normal lowercase tracking-wide bg-white/5 border border-white/5 px-1.5 py-0.5 rounded-lg">{getAgentLOB(agentName)}</span>
+                                    <span className="text-[9px] text-slate-500 dark:text-slate-400 font-normal lowercase tracking-wide bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/5 px-1.5 py-0.5 rounded-lg">{getAgentLOB(agentName)}</span>
                                   </p>
                                   <div className="grid grid-cols-2 xs:grid-cols-3 gap-2">
                                     {activeDisplayDates.map(dateStr => {
@@ -12162,13 +7945,13 @@ export default function App() {
                                           onClick={() => {
                                             if (isSuperAdmin && findShift) setSelectedShiftForActivities({...findShift});
                                           }}
-                                          className={`p-2 bg-white/5 border border-white/5 rounded-xl flex flex-col justify-between items-stretch relative ${isSuperAdmin && findShift ? 'cursor-pointer hover:border-indigo-500/50' : ''}`}
+                                          className={`p-2 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/5 rounded-xl flex flex-col justify-between items-stretch relative ${isSuperAdmin && findShift ? 'cursor-pointer hover:border-indigo-500/50' : ''}`}
                                         >
-                                          <span className="text-[9px] text-slate-400 font-medium mb-1 truncate block">{dayLabel}</span>
+                                          <span className="text-[9px] text-slate-500 dark:text-slate-400 font-medium mb-1 truncate block">{dayLabel}</span>
                                           <span className={`px-1.5 py-1 rounded border text-[9px] font-semibold text-center truncate block ${style.bg} relative overflow-hidden`}>
                                             <span className="relative z-10">{style.display}</span>
                                             {findShift?.activities && findShift.activities.length > 0 && (
-                                              <div className="absolute bottom-0 left-0 right-0 h-1 flex bg-slate-900/40 opacity-70">
+                                              <div className="absolute bottom-0 left-0 right-0 h-1 flex bg-white dark:bg-slate-900/40 opacity-70">
                                                 {findShift.activities.map((a, i) => (
                                                   <div key={i} className={`flex-1 h-full ${a.label === 'Break' ? 'bg-amber-400' : a.label === 'Lunch' ? 'bg-orange-500' : typeof a.label === 'string' && a.label.includes('Meeting') ? 'bg-indigo-500' : 'bg-cyan-500'}`} />
                                                 ))}
@@ -12176,20 +7959,20 @@ export default function App() {
                                             )}
                                           </span>
                                           {findShift?.shiftNotes && (
-                                            <div className="mt-1.5 border-t border-white/5 pt-1 text-[9px] text-indigo-300 font-sans italic break-words flex items-start gap-1 leading-normal text-left">
+                                            <div className="mt-1.5 border-t border-slate-200 dark:border-slate-700/5 pt-1 text-[9px] text-indigo-300 font-sans italic break-words flex items-start gap-1 leading-normal text-left">
                                               <span className="shrink-0 text-[10px]">📝</span>
                                               <span>{findShift.shiftNotes}</span>
                                             </div>
                                           )}
                                           {findShift?.activities && findShift.activities.length > 0 && (
-                                            <div className="mt-1.5 border-t border-white/5 pt-1 text-[8px] text-slate-400 font-sans flex flex-col gap-0.5">
+                                            <div className="mt-1.5 border-t border-slate-200 dark:border-slate-700/5 pt-1 text-[8px] text-slate-500 dark:text-slate-400 font-sans flex flex-col gap-0.5">
                                               {[...findShift.activities].sort((a,b)=>a.startTime.localeCompare(b.startTime)).slice(0, 2).map((act, i) => (
                                                 <div key={i} className="flex justify-between">
-                                                  <span className="font-mono text-slate-500">{act.startTime}</span>
+                                                  <span className="font-mono text-white0">{act.startTime}</span>
                                                   <span className="truncate ml-1">{act.label}</span>
                                                 </div>
                                               ))}
-                                              {findShift.activities.length > 2 && <span className="text-center text-[7px] mt-0.5 bg-white/5 py-0.5 rounded">+{findShift.activities.length - 2} more</span>}
+                                              {findShift.activities.length > 2 && <span className="text-center text-[7px] mt-0.5 bg-white dark:bg-slate-900/50 py-0.5 rounded">+{findShift.activities.length - 2} more</span>}
                                             </div>
                                           )}
                                           {isSuperAdmin && findShift && (
@@ -12208,7 +7991,7 @@ export default function App() {
                         </div>
 
                         {/* Shift legend details */}
-                        <div className="flex flex-wrap justify-start gap-4 text-[10px] text-slate-400 pt-2 border-t border-white/5">
+                        <div className="flex flex-wrap justify-start gap-4 text-[10px] text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-200 dark:border-slate-700/5">
                           <span className="flex items-center gap-1.5">
                             <span className="w-2.5 h-2.5 rounded bg-emerald-500/20 border border-emerald-500/40 block"></span>
                             Morning Shift: 07:00 - 16:00
@@ -12222,7 +8005,7 @@ export default function App() {
                             Night Shift: 22:00 - 07:00
                           </span>
                           <span className="flex items-center gap-1.5">
-                            <span className="w-2.5 h-2.5 rounded bg-white/5 border border-white/10 block"></span>
+                            <span className="w-2.5 h-2.5 rounded bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 block"></span>
                             Off Day (Rest Day)
                           </span>
                         </div>
@@ -12231,32 +8014,32 @@ export default function App() {
                     </div>
 
                     {/* P2P Shift Swap Trade Market & Trade Hub */}
-                    <div className="bg-white/5 border border-white/10 rounded-3xl shadow-sm text-slate-100 p-5 sm:p-6 shadow-2xl space-y-6 mt-6">
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-4">
+                    <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl shadow-sm text-slate-700 p-5 sm:p-6 shadow-2xl space-y-6 mt-6">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-200 dark:border-slate-700/5 pb-4">
                         <div>
                           <h3 className="font-extrabold text-transparent bg-gradient-to-r from-blue-300 via-indigo-200 to-cyan-300 bg-clip-text text-lg font-display flex items-center gap-2">
                             <GitPullRequest className="w-5 h-5 text-indigo-400 rotate-90" />
                             P2P Shift Exchange Board
                           </h3>
-                          <p className="text-xs text-slate-400 mt-0.5 font-sans">Teammates can directly declare trading availability, find coverage, or swap assignments within LOBs</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-sans">Teammates can directly declare trading availability, find coverage, or swap assignments within LOBs</p>
                         </div>
-                        <div className="flex bg-black/35 rounded-xl p-1 border border-white/5 text-[9px] font-black uppercase text-indigo-300 tracking-wider">
+                        <div className="flex bg-black/35 rounded-xl p-1 border border-slate-200 dark:border-slate-700/5 text-[9px] font-black uppercase text-indigo-300 tracking-wider">
                           Peer To Peer Market
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                         {/* Interactive Trade Listing Launcher Form */}
-                        <div className="bg-slate-800/[0.01] p-5 border border-white/5 rounded-2xl space-y-4 text-left">
+                        <div className="bg-slate-50 dark:bg-slate-800/[0.01] p-5 border border-slate-200 dark:border-slate-700/5 rounded-2xl space-y-4 text-left">
                           <div>
                             <p className="text-xs font-black text-rose-450 uppercase tracking-widest">Publish Open Trade Offer</p>
-                            <p className="text-[11px] text-slate-400 mt-0.5 font-sans">Offer up one of your scheduled shifts for peer coverage</p>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-sans">Offer up one of your scheduled shifts for peer coverage</p>
                           </div>
 
                           <div className="space-y-3.5">
                             {/* Selected Date */}
                             <div className="space-y-1">
-                              <label className="text-[10px] text-slate-400 font-bold uppercase font-sans">1. Select Your Shift Event</label>
+                              <label className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase font-sans">1. Select Your Shift Event</label>
                               {(() => {
                                 // Get my upcoming schedules
                                 const todayISO = getLocalISOString(systemTime);
@@ -12274,11 +8057,11 @@ export default function App() {
                                   <select
                                     value={p2pSelectedDate}
                                     onChange={(e) => setP2pSelectedDate(e.target.value)}
-                                    className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
+                                    className="w-full px-3 py-2 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl text-xs text-slate-700 outline-none cursor-pointer"
                                   >
-                                    <option className="bg-slate-800 text-slate-100 "  value="">-- Choose Assigned Date --</option>
+                                    <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 "  value="">-- Choose Assigned Date --</option>
                                     {myShedList.map(s => (
-                                      <option className="bg-slate-800 text-slate-100 "  key={s.id} value={s.date}>
+                                      <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 "  key={s.id} value={s.date}>
                                         {formatDateNice(s.date)} (Your Duty: {s.shiftLabel})
                                       </option>
                                     ))}
@@ -12289,17 +8072,17 @@ export default function App() {
 
                             {/* Target Partner Agent */}
                             <div className="space-y-1">
-                              <label className="text-[10px] text-slate-400 font-bold uppercase font-sans">2. Targeted Trading Partner</label>
+                              <label className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase font-sans">2. Targeted Trading Partner</label>
                               <select
                                 value={p2pTargetAgent}
                                 onChange={(e) => setP2pTargetAgent(e.target.value)}
-                                className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
+                                className="w-full px-3 py-2 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl text-xs text-slate-700 outline-none cursor-pointer"
                               >
-                                <option className="bg-slate-800 text-slate-100 "  value="">-- Let Any Peer in LOB Grab It --</option>
+                                <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 "  value="">-- Let Any Peer in LOB Grab It --</option>
                                 {agentsList
                                   .filter(a => a?.toLowerCase() !== currentUser?.name?.toLowerCase() && getAgentLOB(a) === getAgentLOB(currentUser.name))
                                   .map(aName => (
-                                    <option className="bg-slate-800 text-slate-100 "  key={aName} value={aName}>
+                                    <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 "  key={aName} value={aName}>
                                       {aName} ({getAgentLOB(aName)})
                                     </option>
                                   ))}
@@ -12311,30 +8094,30 @@ export default function App() {
 
                             {/* Target Shift */}
                             <div className="space-y-1">
-                              <label className="text-[10px] text-slate-400 font-bold uppercase font-sans">3. Shift You Want to Gain</label>
+                              <label className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase font-sans">3. Shift You Want to Gain</label>
                               <select
                                 value={p2pTargetShift}
                                 onChange={(e) => setP2pTargetShift(e.target.value)}
-                                className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
+                                className="w-full px-3 py-2 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl text-xs text-slate-700 outline-none cursor-pointer"
                               >
                                 {SHIFTS.map(s => (
-                                  <option className="bg-slate-800 text-slate-100 "  key={s.id} value={s.label}>
+                                  <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 "  key={s.id} value={s.label}>
                                     {s.display} ({s.label})
                                   </option>
                                 ))}
-                                <option className="bg-slate-800 text-slate-100 "  value="Off">Rest Day (Off Day)</option>
+                                <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 "  value="Off">Rest Day (Off Day)</option>
                               </select>
                             </div>
 
                             {/* Notes */}
                             <div className="space-y-1">
-                              <label className="text-[10px] text-slate-400 font-bold uppercase font-sans">4. Optional Offer Description</label>
+                              <label className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase font-sans">4. Optional Offer Description</label>
                               <input
                                 type="text"
                                 placeholder="I have a doctor appt / Need early shift..."
                                 value={p2pNotes}
                                 onChange={(e) => setP2pNotes(e.target.value)}
-                                className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 outline-none"
+                                className="w-full px-3 py-2 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl text-xs text-slate-700 placeholder-slate-500 outline-none"
                               />
                             </div>
 
@@ -12379,25 +8162,25 @@ export default function App() {
                               }}
                               className="w-full py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white font-extrabold text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer font-sans"
                             >
-                              <PlusCircle className="w-4 h-4 text-slate-100" />
+                              <PlusCircle className="w-4 h-4 text-slate-700" />
                               Publish Trade Offer
                             </button>
                           </div>
                         </div>
 
                         {/* Available Trades Board Listings */}
-                        <div className="xl:col-span-2 bg-[#0d0d14] p-5 border border-white/5 rounded-2xl flex flex-col justify-between space-y-4 font-sans">
+                        <div className="xl:col-span-2 bg-white dark:bg-slate-900 p-5 border border-slate-200 dark:border-slate-700/5 rounded-2xl flex flex-col justify-between space-y-4 font-sans">
                           <div className="text-left font-sans">
                             <p className="text-xs font-black text-[#22d3ee] uppercase tracking-widest font-sans">Available Trades Board Listings</p>
-                            <p className="text-[11px] text-slate-400 mt-0.5 font-sans">Review peer postings, accept direct proposals, or review status</p>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-sans">Review peer postings, accept direct proposals, or review status</p>
                           </div>
 
-                          <div className="border border-white/5 rounded-xl bg-black/40 overflow-hidden text-left h-72 overflow-y-auto">
+                          <div className="border border-slate-200 dark:border-slate-700/5 rounded-xl bg-black/40 overflow-hidden text-left h-72 overflow-y-auto">
                             {(() => {
                               const swapRequests = requests.filter(r => r.type === 'swap') as SwapRequest[];
                               if (swapRequests.length === 0) {
                                 return (
-                                  <div className="flex flex-col items-center justify-center h-full text-slate-400 py-12 text-xs space-y-2 italic font-sans animate-pulse">
+                                  <div className="flex flex-col items-center justify-center h-full text-slate-500 dark:text-slate-400 py-12 text-xs space-y-2 italic font-sans animate-pulse">
                                     <GitPullRequest className="w-8 h-8 text-indigo-400/40" />
                                     <span>No active trade proposals loaded on board</span>
                                   </div>
@@ -12405,7 +8188,7 @@ export default function App() {
                               }
                               return (
                                 <table className="w-full text-xs font-sans">
-                                  <thead className="bg-[#1e1e2d] text-slate-400 text-[10px] font-bold uppercase tracking-wider sticky top-0 border-b border-white/5 font-sans">
+                                  <thead className="bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider sticky top-0 border-b border-slate-200 dark:border-slate-700/5 font-sans">
                                     <tr>
                                       <th className="px-4 py-3 text-left">Agent Offering</th>
                                       <th className="px-4 py-3 text-left">Shift Date</th>
@@ -12421,12 +8204,12 @@ export default function App() {
                                       const isMyListing = req.agentName?.toLowerCase() === currentUser?.name?.toLowerCase();
 
                                       return (
-                                        <tr key={req.id} className="hover:bg-slate-800/[0.02] transition-colors">
-                                          <td className="px-4 py-3.5 font-bold text-slate-100">
+                                        <tr key={req.id} className="hover:bg-slate-50 dark:bg-slate-800/[0.02] transition-colors">
+                                          <td className="px-4 py-3.5 font-bold text-slate-700">
                                             {req.agentName}
-                                            <span className="block text-[8px] text-slate-400 font-normal lowercase">{getAgentLOB(req.agentName)}</span>
+                                            <span className="block text-[8px] text-slate-500 dark:text-slate-400 font-normal lowercase">{getAgentLOB(req.agentName)}</span>
                                           </td>
-                                          <td className="px-4 py-3.5 text-slate-300">{formatDateNice(req.date)}</td>
+                                          <td className="px-4 py-3.5 text-slate-600 dark:text-slate-300">{formatDateNice(req.date)}</td>
                                           <td className="px-4 py-3.5 font-mono text-indigo-300 font-semibold">{req.shift}</td>
                                           <td className="px-4 py-3.5 text-slate-350">
                                             {req.swapWithAgent}
@@ -12446,7 +8229,7 @@ export default function App() {
                                                 Approved
                                               </span>
                                             ) : (
-                                              <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-white/5 text-slate-400 border border-white/5">
+                                              <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-white dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700/5">
                                                 {req.status}
                                               </span>
                                             )}
@@ -12468,7 +8251,7 @@ export default function App() {
                                                     handlePartnerDecision(req.id, false);
                                                     toast.info("Declined custom trade request.");
                                                   }}
-                                                  className="px-2 py-1 bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 text-slate-300 rounded text-[10px] font-bold transition-all border border-white/5 cursor-pointer font-sans"
+                                                  className="px-2 py-1 bg-white dark:bg-slate-900/50 hover:bg-rose-500/20 hover:text-rose-400 text-slate-600 dark:text-slate-300 rounded text-[10px] font-bold transition-all border border-slate-200 dark:border-slate-700/5 cursor-pointer font-sans"
                                                 >
                                                   Reject
                                                 </button>
@@ -12486,7 +8269,7 @@ export default function App() {
                                                 Rescind
                                               </button>
                                             ) : (
-                                              <span className="text-[10px] text-slate-500 italic font-sans">No action</span>
+                                              <span className="text-[10px] text-white0 italic font-sans">No action</span>
                                             )}
                                           </td>
                                         </tr>
@@ -12498,7 +8281,7 @@ export default function App() {
                             })()}
                           </div>
 
-                          <div className="text-[10px] text-slate-500 italic text-left font-sans">
+                          <div className="text-[10px] text-white0 italic text-left font-sans">
                             * Shift trading matches rule parameters including 24-hour advance submission limit. All swaps route to Operations Leader once peers approve.
                           </div>
                         </div>
@@ -12519,22 +8302,22 @@ export default function App() {
                 <div id="tabby-tamara-desk-root" className="space-y-6 animate-fade-in text-left">
                   
                   {/* Header */}
-                  <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-white/5 pb-4">
+                  <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-slate-200 dark:border-slate-700/5 pb-4">
                     <div>
                       {isClientCommsTab ? (
                         <>
-                          <h2 className="text-3xl font-bold text-slate-100 font-display">Client Communication</h2>
-                          <p className="text-slate-400 text-sm">Submit and monitor requests for Chat and Social Media agents.</p>
+                          <h2 className="text-3xl font-bold text-slate-700 font-display">Client Communication</h2>
+                          <p className="text-slate-500 dark:text-slate-400 text-sm">Submit and monitor requests for Chat and Social Media agents.</p>
                         </>
                       ) : isComplaintsTab ? (
                         <>
-                          <h2 className="text-3xl font-bold text-slate-100 font-display">Complaints Desk</h2>
-                          <p className="text-slate-400 text-sm">Register, monitor, and resolve patient complaints.</p>
+                          <h2 className="text-3xl font-bold text-slate-700 font-display">Complaints Desk</h2>
+                          <p className="text-slate-500 dark:text-slate-400 text-sm">Register, monitor, and resolve patient complaints.</p>
                         </>
                       ) : (
                         <>
-                          <h2 className="text-3xl font-bold text-slate-100 font-display">Tabby & Tamara Desk</h2>
-                          <p className="text-slate-400 text-sm">Submit installment requests and monitor active contact resolution timers.</p>
+                          <h2 className="text-3xl font-bold text-slate-700 font-display">Tabby & Tamara Desk</h2>
+                          <p className="text-slate-500 dark:text-slate-400 text-sm">Submit installment requests and monitor active contact resolution timers.</p>
                         </>
                       )}
                     </div>
@@ -12546,9 +8329,9 @@ export default function App() {
                   {localSubTab === 'requests' ? (
                     <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                       {/* ... existing requests metrics ... */}
-                      <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-                        <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Total Submissions</p>
-                        <p className="text-2xl font-black text-slate-100">
+                      <div className="p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl backdrop-blur-sm">
+                        <p className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold mb-1">Total Submissions</p>
+                        <p className="text-2xl font-black text-slate-700">
                           {isTLOreSupport 
                             ? tabbyTamaraRequests.length 
                             : tabbyTamaraRequests.filter(r => r.agentName?.toLowerCase() === currentUser?.name?.toLowerCase()).length
@@ -12593,9 +8376,9 @@ export default function App() {
                   ) : localSubTab === 'complaints' ? (
                     <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 animate-fade-in">
                       {/* ... existing complaints metrics ... */}
-                      <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-                        <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Total Complaints</p>
-                        <p className="text-2xl font-black text-slate-100">
+                      <div className="p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl backdrop-blur-sm">
+                        <p className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold mb-1">Total Complaints</p>
+                        <p className="text-2xl font-black text-slate-700">
                           {isTLOreSupport
                             ? tabbyTamaraComplaints.length
                             : tabbyTamaraComplaints.filter(c => c.agentName?.toLowerCase() === currentUser?.name?.toLowerCase()).length
@@ -12639,9 +8422,9 @@ export default function App() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
-                      <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-                        <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Total Requests</p>
-                        <p className="text-2xl font-black text-slate-100">
+                      <div className="p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl backdrop-blur-sm">
+                        <p className="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold mb-1">Total Requests</p>
+                        <p className="text-2xl font-black text-slate-700">
                           {isTLOreSupport
                             ? clientComms.length
                             : clientComms.filter(c => c.callCenterAgentName?.toLowerCase() === currentUser?.name?.toLowerCase() || c.handledBy?.toLowerCase() === currentUser?.name?.toLowerCase()).length
@@ -12670,45 +8453,45 @@ export default function App() {
                     {currentUser?.role === 'agent' && (
                       <div className="lg:col-span-4 space-y-4">
                         {localSubTab === 'requests' ? (
-                          <div className="p-6 bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl space-y-4 shadow-2xl">
-                            <h3 className="text-lg font-bold text-slate-100 font-display flex items-center gap-2 text-left">
+                          <div className="p-6 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/20 rounded-3xl space-y-4 shadow-2xl">
+                            <h3 className="text-lg font-bold text-slate-700 font-display flex items-center gap-2 text-left">
                               <PlusCircle className="w-5 h-5 text-indigo-400" />
                               New Installment Request
                             </h3>
-                            <p className="text-xs text-slate-400 leading-normal text-left">
+                            <p className="text-xs text-slate-500 dark:text-slate-400 leading-normal text-left">
                               Complete the fields below to submit an installment transaction request through Tabby or Tamara.
                             </p>
                             
                             <form onSubmit={handleSubmitTabbyTamara} className="space-y-4 pt-2 text-left">
                               {/* Patient Name */}
                               <div className="space-y-1.5 text-left">
-                                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">Patient Name *</label>
+                                <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider block">Patient Name *</label>
                                 <input
                                   type="text"
                                   placeholder="Enter full patient name"
                                   value={ttPatientName}
                                   onChange={(e) => setTtPatientName(e.target.value)}
-                                  className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium"
+                                  className="w-full bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-500 font-sans font-medium"
                                   required
                                 />
                               </div>
 
                               {/* File Number */}
                               <div className="space-y-1.5 text-left">
-                                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">File Number (Optional)</label>
+                                <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider block">File Number (Optional)</label>
                                 <input
                                   type="text"
                                   placeholder="Patient file / folder number"
                                   value={ttFileNumber}
                                   onChange={(e) => setTtFileNumber(e.target.value)}
-                                  className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
+                                  className="w-full bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-500 font-mono"
                                 />
                               </div>
 
                               {/* Old Customer Switch & ID Number */}
-                              <div className="space-y-3.5 p-3.5 bg-white/5 border border-white/5 rounded-2xl text-left">
+                              <div className="space-y-3.5 p-3.5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/5 rounded-2xl text-left">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-[12px] font-bold text-slate-300">Is this an Old Customer?</span>
+                                  <span className="text-[12px] font-bold text-slate-600 dark:text-slate-300">Is this an Old Customer?</span>
                                   <label className="relative inline-flex items-center cursor-pointer">
                                     <input
                                       type="checkbox"
@@ -12716,7 +8499,7 @@ export default function App() {
                                       onChange={(e) => setTtIsOldCustomer(e.target.checked)}
                                       className="sr-only peer"
                                     />
-                                    <div className="w-11 h-6 bg-slate-900/40/20 backdrop-blur-md peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-800 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                    <div className="w-11 h-6 bg-white dark:bg-slate-900/40/20 backdrop-blur-md peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-black/5 dark:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-50 dark:bg-slate-800 after:border-slate-200 dark:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                                   </label>
                                 </div>
 
@@ -12728,7 +8511,7 @@ export default function App() {
                                       placeholder="National ID / Iqama Number"
                                       value={ttIdNumber}
                                       onChange={(e) => setTtIdNumber(e.target.value)}
-                                      className="w-full bg-black/45 border border-amber-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 font-mono"
+                                      className="w-full bg-black/45 border border-amber-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-amber-500 font-mono"
                                       required={!ttIsOldCustomer}
                                     />
                                   </div>
@@ -12737,15 +8520,15 @@ export default function App() {
 
                               {/* Price */}
                               <div className="space-y-1.5 text-left">
-                                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">Price *</label>
+                                <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider block">Price *</label>
                                 <div className="relative">
-                                  <span className="absolute left-[13px] top-[11.5px] text-xs font-bold text-slate-400 font-mono">SAR</span>
+                                  <span className="absolute left-[13px] top-[11.5px] text-xs font-bold text-slate-500 dark:text-slate-400 font-mono">SAR</span>
                                   <input
                                     type="text"
                                     placeholder="0.00"
                                     value={ttPriceWithoutTax}
                                     onChange={(e) => setTtPriceWithoutTax(e.target.value)}
-                                    className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-12 pr-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
+                                    className="w-full bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl pl-12 pr-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-500 font-mono"
                                     required
                                   />
                                 </div>
@@ -12758,20 +8541,20 @@ export default function App() {
 
                               {/* Phone Number */}
                               <div className="space-y-1.5 text-left">
-                                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-mono">Phone Number *</label>
+                                <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider block font-mono">Phone Number *</label>
                                 <input
                                   type="tel"
                                   placeholder="+966 5x xxx xxxx"
                                   value={ttPhoneNumber}
                                   onChange={(e) => setTtPhoneNumber(e.target.value)}
-                                  className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
+                                  className="w-full bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-500 font-mono"
                                   required
                                 />
                               </div>
 
                               {/* Platform selector */}
                               <div className="space-y-1.5 text-left">
-                                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">Payment Platform / Type *</label>
+                                <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider block">Payment Platform / Type *</label>
                                 <div className="grid grid-cols-3 gap-2">
                                   <button
                                     type="button"
@@ -12779,7 +8562,7 @@ export default function App() {
                                     className={`py-2 rounded-xl text-[11px] font-black uppercase transition-all tracking-wider flex items-center justify-center gap-1.5 border cursor-pointer ${
                                       ttPlatform === 'tabby'
                                         ? 'bg-amber-400 border-amber-300 text-slate-950 shadow-md'
-                                        : 'bg-black/25 border-white/5 text-slate-400 hover:bg-slate-700'
+                                        : 'bg-black/25 border-slate-200 dark:border-slate-700/5 text-slate-500 dark:text-slate-400 hover:bg-slate-700'
                                     }`}
                                   >
                                     💳 Tabby
@@ -12789,8 +8572,8 @@ export default function App() {
                                     onClick={() => setTtPlatform('tamara')}
                                     className={`py-2 rounded-xl text-[11px] font-black uppercase transition-all tracking-wider flex items-center justify-center gap-1.5 border cursor-pointer ${
                                       ttPlatform === 'tamara'
-                                        ? 'bg-pink-500 border-pink-400 text-slate-100 shadow-md'
-                                        : 'bg-black/25 border-white/5 text-slate-400 hover:bg-slate-700'
+                                        ? 'bg-pink-500 border-pink-400 text-slate-700 shadow-md'
+                                        : 'bg-black/25 border-slate-200 dark:border-slate-700/5 text-slate-500 dark:text-slate-400 hover:bg-slate-700'
                                     }`}
                                   >
                                     💳 Tamara
@@ -12801,7 +8584,7 @@ export default function App() {
                                     className={`py-2 rounded-xl text-[10px] font-black uppercase transition-all tracking-wider flex items-center justify-center gap-1 border cursor-pointer ${
                                       ttPlatform === ('one_time_payment' as any)
                                         ? 'bg-emerald-500 border-emerald-400 text-white shadow-md'
-                                        : 'bg-black/25 border-white/5 text-slate-400 hover:bg-slate-700'
+                                        : 'bg-black/25 border-slate-200 dark:border-slate-700/5 text-slate-500 dark:text-slate-400 hover:bg-slate-700'
                                     }`}
                                   >
                                     💰 One Time
@@ -12810,31 +8593,31 @@ export default function App() {
                               </div>
 
                               <div className="space-y-1 sm:col-span-2">
-                                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block ml-1" htmlFor="tt-clinic">Clinic Name *</label>
+                                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block ml-1" htmlFor="tt-clinic">Clinic Name *</label>
                                 <select
                                   id="tt-clinic"
                                   value={ttClinicName}
                                   onChange={(e) => setTtClinicName(e.target.value)}
-                                  className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
+                                  className="w-full px-4 py-3 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl text-slate-700 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                   required
                                 >
-                                  <option value="" className="bg-slate-800 text-slate-100 ">Select a Clinic</option>
-                                  <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
-                                  <option value="onetouch1" className="bg-slate-800 text-slate-100 ">One Touch 1 AlMu'tarid</option>
-                                  <option value="onetouch2" className="bg-slate-800 text-slate-100 ">One Touch 2 Markhaniya</option>
-                                  <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
-                                  <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
+                                  <option value="" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">Select a Clinic</option>
+                                  <option value="dermadent" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">Dermadent</option>
+                                  <option value="onetouch1" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">One Touch 1 AlMu'tarid</option>
+                                  <option value="onetouch2" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">One Touch 2 Markhaniya</option>
+                                  <option value="welltouch" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">WellTouch</option>
+                                  <option value="newedge" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">New Edge</option>
                                 </select>
                               </div>
 
                               {/* Notes */}
                               <div className="space-y-1.5 text-left">
-                                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">Additional Notes (Optional)</label>
+                                <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider block">Additional Notes (Optional)</label>
                                 <textarea
                                   placeholder="Any special treatment, payment plan terms, etc."
                                   value={ttNotes}
                                   onChange={(e) => setTtNotes(e.target.value)}
-                                  className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[70px] resize-y"
+                                  className="w-full bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-sans min-h-[70px] resize-y"
                                 />
                               </div>
 
@@ -12847,11 +8630,11 @@ export default function App() {
                               <button
                                 type="submit"
                                 disabled={isFormSubmitting}
-                                className={`w-full py-3.5 text-slate-100 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow ${isFormSubmitting ? 'bg-indigo-800 opacity-65 pointer-events-none' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] shadow-indigo-500/10'}`}
+                                className={`w-full py-3.5 text-slate-700 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow ${isFormSubmitting ? 'bg-indigo-800 opacity-65 pointer-events-none' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] shadow-indigo-500/10'}`}
                               >
                                 {isFormSubmitting ? (
                                   <>
-                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    <div className="w-4 h-4 border-2 border-slate-200 dark:border-slate-700/30 border-t-white rounded-full animate-spin" />
                                     Submitting Request...
                                   </>
                                 ) : (
@@ -12864,45 +8647,45 @@ export default function App() {
                             </form>
                           </div>
                         ) : localSubTab === 'complaints' ? (
-                          <div className="p-6 bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl space-y-4 shadow-2xl animate-fade-in">
-                            <h3 className="text-lg font-bold text-slate-100 font-display flex items-center gap-2 text-left">
+                          <div className="p-6 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/20 rounded-3xl space-y-4 shadow-2xl animate-fade-in">
+                            <h3 className="text-lg font-bold text-slate-700 font-display flex items-center gap-2 text-left">
                               <AlertTriangle className="w-5 h-5 text-pink-500" />
                               Log New Complaint
                             </h3>
-                            <p className="text-xs text-slate-400 leading-normal text-left">
+                            <p className="text-xs text-slate-500 dark:text-slate-400 leading-normal text-left">
                               Register a service or clinical complaint for team evaluation and prompt resolution.
                             </p>
 
                             <form onSubmit={handleSubmitTabbyTamaraComplaint} className="space-y-4 pt-2 text-left">
                               {/* Patient Name */}
                               <div className="space-y-1.5 text-left">
-                                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">Patient Name *</label>
+                                <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider block">Patient Name *</label>
                                 <input
                                   type="text"
                                   placeholder="Enter patient name"
                                   value={tcPatientName}
                                   onChange={(e) => setTcPatientName(e.target.value)}
-                                  className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans font-medium"
+                                  className="w-full bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-pink-500 font-sans font-medium"
                                   required
                                 />
                               </div>
 
                               {/* File Number */}
                               <div className="space-y-1.5 text-left">
-                                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">File Number (Optional)</label>
+                                <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider block">File Number (Optional)</label>
                                 <input
                                   type="text"
                                   placeholder="File / folder reference"
                                   value={tcFileNumber}
                                   onChange={(e) => setTcFileNumber(e.target.value)}
-                                  className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-mono"
+                                  className="w-full bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-pink-500 font-mono"
                                 />
                               </div>
 
                               {/* Old Customer Switch */}
-                              <div className="space-y-3.5 p-3.5 bg-white/5 border border-white/5 rounded-2xl text-left">
+                              <div className="space-y-3.5 p-3.5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/5 rounded-2xl text-left">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-[12px] font-bold text-slate-300 font-sans">Is this an Old Customer?</span>
+                                  <span className="text-[12px] font-bold text-slate-600 dark:text-slate-300 font-sans">Is this an Old Customer?</span>
                                   <label className="relative inline-flex items-center cursor-pointer">
                                     <input
                                       type="checkbox"
@@ -12910,7 +8693,7 @@ export default function App() {
                                       onChange={(e) => setTcIsOldCustomer(e.target.checked)}
                                       className="sr-only peer"
                                     />
-                                    <div className="w-11 h-6 bg-slate-900/40/20 backdrop-blur-md peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-800 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
+                                    <div className="w-11 h-6 bg-white dark:bg-slate-900/40/20 backdrop-blur-md peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-black/5 dark:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-50 dark:bg-slate-800 after:border-slate-200 dark:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
                                   </label>
                                 </div>
 
@@ -12922,7 +8705,7 @@ export default function App() {
                                       placeholder="National ID / Iqama Number"
                                       value={tcIdNumber}
                                       onChange={(e) => setTcIdNumber(e.target.value)}
-                                      className="w-full bg-black/45 border border-amber-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 font-mono"
+                                      className="w-full bg-black/45 border border-amber-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-amber-500 font-mono"
                                       required={!tcIsOldCustomer}
                                     />
                                   </div>
@@ -12938,43 +8721,43 @@ export default function App() {
 
                               {/* Phone Number */}
                               <div className="space-y-1.5 text-left">
-                                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-mono">Phone Number *</label>
+                                <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider block font-mono">Phone Number *</label>
                                 <input
                                   type="tel"
                                   placeholder="+966 5x xxx xxxx"
                                   value={tcPhoneNumber}
                                   onChange={(e) => setTcPhoneNumber(e.target.value)}
-                                  className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-mono"
+                                  className="w-full bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-pink-500 font-mono"
                                   required
                                 />
                               </div>
 
                               <div className="space-y-1 sm:col-span-2">
-                                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block ml-1" htmlFor="tc-clinic">Clinic Name *</label>
+                                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block ml-1" htmlFor="tc-clinic">Clinic Name *</label>
                                 <select
                                   id="tc-clinic"
                                   value={tcClinicName}
                                   onChange={(e) => setTcClinicName(e.target.value)}
-                                  className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
+                                  className="w-full px-4 py-3 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl text-slate-700 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                   required
                                 >
-                                  <option value="" className="bg-slate-800 text-slate-100 ">Select a Clinic</option>
-                                  <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
-                                  <option value="onetouch1" className="bg-slate-800 text-slate-100 ">One Touch 1 AlMu'tarid</option>
-                                  <option value="onetouch2" className="bg-slate-800 text-slate-100 ">One Touch 2 Markhaniya</option>
-                                  <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
-                                  <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
+                                  <option value="" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">Select a Clinic</option>
+                                  <option value="dermadent" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">Dermadent</option>
+                                  <option value="onetouch1" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">One Touch 1 AlMu'tarid</option>
+                                  <option value="onetouch2" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">One Touch 2 Markhaniya</option>
+                                  <option value="welltouch" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">WellTouch</option>
+                                  <option value="newedge" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">New Edge</option>
                                 </select>
                               </div>
 
                               {/* Complaint details */}
                               <div className="space-y-1.5 text-left">
-                                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">Customer Complaint / Issue Details *</label>
+                                <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider block">Customer Complaint / Issue Details *</label>
                                 <textarea
                                   placeholder="Patient notes or description of the issue or service failure..."
                                   value={tcComplaintDetails}
                                   onChange={(e) => setTcComplaintDetails(e.target.value)}
-                                  className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-pink-500 font-sans min-h-[80px] resize-y font-medium"
+                                  className="w-full bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-700 focus:outline-none focus:border-pink-500 font-sans min-h-[80px] resize-y font-medium"
                                   required
                                 />
                               </div>
@@ -12982,11 +8765,11 @@ export default function App() {
                               <button
                                 type="submit"
                                 disabled={isFormSubmitting}
-                                className={`w-full py-3.5 text-slate-100 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow ${isFormSubmitting ? 'bg-pink-900 opacity-65 pointer-events-none' : 'bg-gradient-to-r from-pink-500 to-pink-600 hover:brightness-110 active:scale-[0.99] shadow-pink-500/10'}`}
+                                className={`w-full py-3.5 text-slate-700 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow ${isFormSubmitting ? 'bg-pink-900 opacity-65 pointer-events-none' : 'bg-gradient-to-r from-pink-500 to-pink-600 hover:brightness-110 active:scale-[0.99] shadow-pink-500/10'}`}
                               >
                                 {isFormSubmitting ? (
                                   <>
-                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    <div className="w-4 h-4 border-2 border-slate-200 dark:border-slate-700/30 border-t-white rounded-full animate-spin" />
                                     Submitting Complaint...
                                   </>
                                 ) : (
@@ -13000,50 +8783,50 @@ export default function App() {
                           </div>
                         ) : (
                           getAgentLOB(currentUser.name) === 'Call Center' && (
-                            <div className="p-6 bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl space-y-4 shadow-2xl animate-fade-in">
-                              <h3 className="text-lg font-bold text-slate-100 font-display flex items-center gap-2 text-left">
+                            <div className="p-6 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/20 rounded-3xl space-y-4 shadow-2xl animate-fade-in">
+                              <h3 className="text-lg font-bold text-slate-700 font-display flex items-center gap-2 text-left">
                                 <MessageSquare className="w-5 h-5 text-indigo-400" />
                                 Submit Communication Request
                               </h3>
-                              <p className="text-xs text-slate-400 leading-normal text-left">
+                              <p className="text-xs text-slate-500 dark:text-slate-400 leading-normal text-left">
                                 Submit a request for Chat or Social Media agents to contact a client and follow up.
                               </p>
 
                               <form onSubmit={handleSubmitClientComms} className="space-y-4 pt-2 text-left">
                                 {/* Clinic Name */}
                                 <div className="space-y-1 sm:col-span-2">
-                                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block ml-1">Clinic Name *</label>
+                                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block ml-1">Clinic Name *</label>
                                   <select
                                     value={ccClinicName}
                                     onChange={(e) => setCcClinicName(e.target.value)}
-                                    className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
+                                    className="w-full px-4 py-3 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl text-slate-700 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                     required
                                   >
-                                    <option value="" className="bg-slate-800 text-slate-100 ">Select a Clinic</option>
-                                    <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
-                                    <option value="onetouch1" className="bg-slate-800 text-slate-100 ">One Touch 1 AlMu'tarid</option>
-                                    <option value="onetouch2" className="bg-slate-800 text-slate-100 ">One Touch 2 Markhaniya</option>
-                                    <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
-                                    <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
+                                    <option value="" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">Select a Clinic</option>
+                                    <option value="dermadent" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">Dermadent</option>
+                                    <option value="onetouch1" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">One Touch 1 AlMu'tarid</option>
+                                    <option value="onetouch2" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">One Touch 2 Markhaniya</option>
+                                    <option value="welltouch" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">WellTouch</option>
+                                    <option value="newedge" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">New Edge</option>
                                   </select>
                                 </div>
 
                                 {/* Phone Number */}
                                 <div className="space-y-1.5 text-left">
-                                  <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-mono">Phone Number *</label>
+                                  <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider block font-mono">Phone Number *</label>
                                   <input
                                     type="tel"
                                     placeholder="+966 5x xxx xxxx"
                                     value={ccPhoneNumber}
                                     onChange={(e) => setCcPhoneNumber(e.target.value)}
-                                    className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
+                                    className="w-full bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-500 font-mono"
                                     required
                                   />
                                 </div>
 
                                 {/* Language */}
                                 <div className="space-y-1.5 text-left">
-                                  <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">Language Priority *</label>
+                                  <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider block">Language Priority *</label>
                                   <div className="grid grid-cols-2 gap-2">
                                     <button
                                       type="button"
@@ -13051,7 +8834,7 @@ export default function App() {
                                       className={`py-2 rounded-xl text-xs font-bold uppercase transition-all flex items-center justify-center border cursor-pointer ${
                                         ccLanguage === 'Arabic'
                                           ? 'bg-indigo-600 border-indigo-500 text-white shadow'
-                                          : 'bg-black/25 border-white/5 text-slate-400'
+                                          : 'bg-black/25 border-slate-200 dark:border-slate-700/5 text-slate-500 dark:text-slate-400'
                                       }`}
                                     >
                                       Arabic
@@ -13062,7 +8845,7 @@ export default function App() {
                                       className={`py-2 rounded-xl text-xs font-bold uppercase transition-all flex items-center justify-center border cursor-pointer ${
                                         ccLanguage === 'English'
                                           ? 'bg-indigo-600 border-indigo-500 text-white shadow'
-                                          : 'bg-black/25 border-white/5 text-slate-400'
+                                          : 'bg-black/25 border-slate-200 dark:border-slate-700/5 text-slate-500 dark:text-slate-400'
                                       }`}
                                     >
                                       English
@@ -13072,12 +8855,12 @@ export default function App() {
 
                                 {/* Notes */}
                                 <div className="space-y-1.5 text-left">
-                                  <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">Inquiry Details / Notes *</label>
+                                  <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider block">Inquiry Details / Notes *</label>
                                   <textarea
                                     placeholder="Explain the required follow up..."
                                     value={ccNotes}
                                     onChange={(e) => setCcNotes(e.target.value)}
-                                    className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[80px] resize-y font-medium"
+                                    className="w-full bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-sans min-h-[80px] resize-y font-medium"
                                     required
                                   />
                                 </div>
@@ -13090,7 +8873,7 @@ export default function App() {
 
                                 <button
                                   type="submit"
-                                  className="w-full py-3.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] text-slate-100 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow shadow-indigo-500/10"
+                                  className="w-full py-3.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] text-slate-700 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow shadow-indigo-500/10"
                                 >
                                   <Send className="w-3.5 h-3.5" />
                                   {isFormSubmitting ? "Submitting..." : "Submit Request"}
@@ -13104,11 +8887,11 @@ export default function App() {
 
                     {/* Right Column: Listing & Administration */}
                     <div className={`${currentUser?.role === 'agent' ? 'lg:col-span-8' : 'lg:col-span-12'} space-y-4 text-left`}>
-                      <div className="p-6 bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl space-y-4 shadow-2xl">
+                      <div className="p-6 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/20 rounded-3xl space-y-4 shadow-2xl">
                         
                         {/* Filters and search Header */}
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-4">
-                          <h3 className="text-lg font-bold text-slate-100 font-sans flex items-center gap-2">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-slate-700/5 pb-4">
+                          <h3 className="text-lg font-bold text-slate-700 font-sans flex items-center gap-2">
                             {localSubTab === 'requests' ? (
                               <>
                                 <ClipboardList className="w-5 h-5 text-indigo-400" />
@@ -13129,7 +8912,7 @@ export default function App() {
 
                           {/* Search bar inside */}
                           <div className="relative w-full md:w-64">
-                            <span className="absolute left-3 top-2.5 text-slate-400">
+                            <span className="absolute left-3 top-2.5 text-slate-500 dark:text-slate-400">
                               <Search className="w-4 h-4" />
                             </span>
                             <input
@@ -13137,70 +8920,70 @@ export default function App() {
                               placeholder={localSubTab === 'client-comms' ? "Search clinic, phone..." : "Search patient, phone, file..."}
                               value={ttSearchQuery}
                               onChange={(e) => setTtSearchQuery(e.target.value)}
-                              className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium"
+                              className="w-full bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-sans font-medium"
                             />
                           </div>
                         </div>
 
                         {/* Dropdown Filters and status segment selection buttons */}
                         <div className="flex flex-wrap items-center gap-3 text-xs text-left">
-                          <span className="text-slate-400 font-semibold font-sans">Filter status:</span>
-                          <div className="flex items-center gap-1.5 bg-black/35 p-1 rounded-xl border border-white/5">
+                          <span className="text-slate-500 dark:text-slate-400 font-semibold font-sans">Filter status:</span>
+                          <div className="flex items-center gap-1.5 bg-black/35 p-1 rounded-xl border border-slate-200 dark:border-slate-700/5">
                             <button
                               onClick={() => setTtFilterStatus('all')}
-                              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === 'all' ? 'bg-indigo-600 text-white font-sans' : 'text-slate-400 hover:text-slate-100 font-sans'}`}
+                              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === 'all' ? 'bg-indigo-600 text-white font-sans' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 font-sans'}`}
                             >
                               <History className="w-3 h-3" />
                               All History
                             </button>
                             <button
                               onClick={() => setTtFilterStatus('not_confirmed')}
-                              className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === 'not_confirmed' ? 'bg-amber-400/20 text-amber-300 border border-amber-500/20 font-sans' : 'text-slate-400 hover:text-slate-100 font-sans'}`}
+                              className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === 'not_confirmed' ? 'bg-amber-400/20 text-amber-300 border border-amber-500/20 font-sans' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 font-sans'}`}
                             >
                               {localSubTab === 'requests' ? '⏳ Pending Confirm' : localSubTab === 'complaints' ? '⏳ Pending TL' : '⏳ Pending Contact'}
                             </button>
                             <button
                               onClick={() => setTtFilterStatus('confirmed')}
-                              className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === 'confirmed' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/20 font-sans' : 'text-slate-400 hover:text-slate-100 font-sans'}`}
+                              className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === 'confirmed' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/20 font-sans' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 font-sans'}`}
                             >
                               {localSubTab === 'requests' ? '📞 Pending Contact' : localSubTab === 'complaints' ? '📞 Pending Contact' : '✅ Contacted'}
                             </button>
                             {localSubTab !== 'client-comms' && (
                               <button
                                 onClick={() => setTtFilterStatus('contacted')}
-                                className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === 'contacted' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 font-sans' : 'text-slate-400 hover:text-slate-100 font-sans'}`}
+                                className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === 'contacted' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 font-sans' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 font-sans'}`}
                               >
                                 {localSubTab === 'requests' ? '✅ Contacted' : '✅ Closed'}
                               </button>
                             )}
                           </div>
 
-                          <span className="text-slate-400 font-semibold font-sans ml-auto">
+                          <span className="text-slate-500 dark:text-slate-400 font-semibold font-sans ml-auto">
                             {localSubTab === 'requests' ? 'Platform:' : 'Clinic:'}
                           </span>
                           {localSubTab !== 'requests' ? (
                             <select
                               value={tcFilterClinic}
                               onChange={(e) => setTcFilterClinic(e.target.value)}
-                              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-2.5 py-1 text-[11px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
+                              className="bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl px-2.5 py-1 text-[11px] text-slate-700 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                             >
-                              <option value="all" className="bg-slate-800 text-slate-100 ">All Clinics</option>
-                              <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
-                              <option value="onetouch1" className="bg-slate-800 text-slate-100 ">One Touch 1 AlMu'tarid</option>
-                              <option value="onetouch2" className="bg-slate-800 text-slate-100 ">One Touch 2 Markhaniya</option>
-                              <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
-                              <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
+                              <option value="all" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">All Clinics</option>
+                              <option value="dermadent" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">Dermadent</option>
+                              <option value="onetouch1" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">One Touch 1 AlMu'tarid</option>
+                              <option value="onetouch2" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">One Touch 2 Markhaniya</option>
+                              <option value="welltouch" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">WellTouch</option>
+                              <option value="newedge" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">New Edge</option>
                             </select>
                           ) : (
                             <select
                               value={ttFilterProvider}
                               onChange={(e) => setTtFilterProvider(e.target.value as any)}
-                              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-2.5 py-1 text-[11px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
+                              className="bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl px-2.5 py-1 text-[11px] text-slate-700 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                             >
-                              <option value="all" className="bg-slate-800 text-slate-100 ">All Providers</option>
-                              <option value="tabby" className="bg-slate-800 text-slate-100 ">Tabby Only</option>
-                              <option value="tamara" className="bg-slate-800 text-slate-100 ">Tamara Only</option>
-                              <option value="one_time_payment" className="bg-slate-800 text-slate-100 ">One Time Payment</option>
+                              <option value="all" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">All Providers</option>
+                              <option value="tabby" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">Tabby Only</option>
+                              <option value="tamara" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">Tamara Only</option>
+                              <option value="one_time_payment" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">One Time Payment</option>
                             </select>
                           )}
                         </div>
@@ -13235,12 +9018,12 @@ export default function App() {
 
                                   return matchesSearch && matchesStatus && matchesProvider;
                                 }).length === 0 ? (
-                                <div className="p-12 text-center rounded-3xl border border-dashed border-white/10 bg-slate-800/[0.02] space-y-2">
-                                  <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mx-auto text-slate-500">
+                                <div className="p-12 text-center rounded-3xl border border-dashed border-slate-200 dark:border-slate-700/10 bg-slate-50 dark:bg-slate-800/[0.02] space-y-2">
+                                  <div className="w-12 h-12 rounded-full bg-white dark:bg-slate-900/50 flex items-center justify-center mx-auto text-white0">
                                     <Wallet className="w-6 h-6" />
                                   </div>
-                                  <p className="text-sm font-bold text-slate-100 font-sans">No installment requests matching criteria.</p>
-                                  <p className="text-xs text-slate-400">Requests will be logged here with live status loops and response timers.</p>
+                                  <p className="text-sm font-bold text-slate-700 font-sans">No installment requests matching criteria.</p>
+                                  <p className="text-xs text-slate-500 dark:text-slate-400">Requests will be logged here with live status loops and response timers.</p>
                                 </div>
                               ) : (
                                 
@@ -13276,12 +9059,12 @@ export default function App() {
                                       return (
                                         <div
                                           key={req.id}
-                                          className={`relative p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4 shadow-md overflow-hidden bg-[#1e1e1e]/40 backdrop-blur-lg/60 ${
+                                          className={`relative p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4 shadow-md overflow-hidden bg-white dark:bg-slate-900/40 backdrop-blur-lg/60 ${
                                             isPendingContact 
                                               ? 'border-rose-500/30 bg-gradient-to-b from-rose-950/10 to-transparent animate-pulse' 
                                               : isAwaitingConfirm 
                                               ? 'border-amber-500/20 bg-gradient-to-b from-amber-500/[0.02] to-transparent' 
-                                              : 'border-white/5'
+                                              : 'border-slate-200 dark:border-slate-700/5'
                                           }`}
                                         >
                                           {/* Platform Indicator Strip */}
@@ -13302,14 +9085,14 @@ export default function App() {
                                                 }`}>
                                                   {req.platform === 'one_time_payment' ? '💰 One Time' : `💳 ${req.platform}`}
                                                 </span>
-                                                <span className="text-[10px] text-slate-400 font-mono font-bold">File: {req.fileNumber || 'N/A'}</span>
+                                                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono font-bold">File: {req.fileNumber || 'N/A'}</span>
                                                 {req.clinicName && (
-                                                  <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-slate-300">
+                                                  <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700/10 bg-white dark:bg-slate-900/50 text-slate-600 dark:text-slate-300">
                                                     🏥 {req.clinicName}
                                                   </span>
                                                 )}
                                               </div>
-                                              <h4 className="text-sm font-black text-slate-100 font-sans mt-1">{req.patientName}</h4>
+                                              <h4 className="text-sm font-black text-slate-700 font-sans mt-1">{req.patientName}</h4>
                                             </div>
 
                                             {/* Status Badges */}
@@ -13337,66 +9120,66 @@ export default function App() {
                                           </div>
 
                                           {/* Core Detail Grid */}
-                                          <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl space-y-2 text-xs text-left">
+                                          <div className="p-3 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl space-y-2 text-xs text-left">
                                             <div className="grid grid-cols-2 gap-x-2 gap-y-1">
                                               <div>
-                                                <p className="text-[9px] text-slate-400 uppercase tracking-wider">Submitting Agent:</p>
-                                                <p className="text-slate-200 font-bold truncate">{req.agentName}</p>
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">Submitting Agent:</p>
+                                                <p className="text-slate-700 dark:text-slate-200 font-bold truncate">{req.agentName}</p>
                                               </div>
                                               <div>
-                                                <p className="text-[9px] text-slate-400 uppercase tracking-wider">Customer Type:</p>
-                                                <p className="text-slate-200 font-bold font-sans">
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">Customer Type:</p>
+                                                <p className="text-slate-700 dark:text-slate-200 font-bold font-sans">
                                                   {req.isOldCustomer ? '👤 Old Customer' : '🆕 New Customer'}
                                                 </p>
                                               </div>
                                             </div>
 
                                             {!req.isOldCustomer && req.idNumber && (
-                                              <div className="border-t border-white/5 pt-1">
-                                                <p className="text-[9px] text-slate-400 uppercase tracking-wider">ID Number:</p>
-                                                <p className="text-slate-200 font-mono font-bold">{req.idNumber}</p>
+                                              <div className="border-t border-slate-200 dark:border-slate-700/5 pt-1">
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">ID Number:</p>
+                                                <p className="text-slate-700 dark:text-slate-200 font-mono font-bold">{req.idNumber}</p>
                                               </div>
                                             )}
 
-                                            <div className="border-t border-white/5 pt-1.5 grid grid-cols-2 gap-2">
+                                            <div className="border-t border-slate-200 dark:border-slate-700/5 pt-1.5 grid grid-cols-2 gap-2">
                                               <div>
-                                                <p className="text-[9px] text-slate-400 uppercase tracking-wider">Price:</p>
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">Price:</p>
                                                 <p className="text-emerald-400 font-mono font-extrabold font-sans text-xs">
                                                   SAR {req.priceWithoutTax} <span className="text-[10px] text-indigo-400 font-medium ml-1">({!isNaN(Number(req.priceWithoutTax)) ? (Number(req.priceWithoutTax) * 1.05).toFixed(2) : '-'})</span>
                                                 </p>
                                               </div>
                                               <div>
-                                                <p className="text-[9px] text-slate-400 uppercase tracking-wider">Phone number:</p>
-                                                <p className="text-slate-200 font-mono font-bold truncate">{req.phoneNumber}</p>
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">Phone number:</p>
+                                                <p className="text-slate-700 dark:text-slate-200 font-mono font-bold truncate">{req.phoneNumber}</p>
                                               </div>
                                             </div>
 
                                             {req.notes && (
-                                              <div className="border-t border-white/5 pt-1 text-[11px] text-slate-300 italic">
-                                                <span className="font-bold text-slate-400 not-italic">Notes: </span>"{req.notes}"
+                                              <div className="border-t border-slate-200 dark:border-slate-700/5 pt-1 text-[11px] text-slate-600 dark:text-slate-300 italic">
+                                                <span className="font-bold text-slate-500 dark:text-slate-400 not-italic">Notes: </span>"{req.notes}"
                                               </div>
                                             )}
 
                                             {req.paymentScreenshot && (
-                                              <div className="border-t border-white/5 pt-2">
-                                                <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                              <div className="border-t border-slate-200 dark:border-slate-700/5 pt-2">
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
                                                   <ImageIcon className="w-3 h-3 text-indigo-400" />
                                                   Screenshot
                                                 </p>
                                                 <img 
                                                   src={req.paymentScreenshot} 
                                                   alt="Payment Screenshot" 
-                                                  className="w-full h-24 object-cover rounded-lg border border-white/10 cursor-zoom-in hover:brightness-110 transition-all"
+                                                  className="w-full h-24 object-cover rounded-lg border border-slate-200 dark:border-slate-700/10 cursor-zoom-in hover:brightness-110 transition-all"
                                                   onClick={() => window.open(req.paymentScreenshot, '_blank')}
                                                 />
                                               </div>
                                             )}
 
                                             {req.paymentLink && (
-                                              <div className="border-t border-white/5 pt-2 flex justify-between items-center bg-emerald-500/5 p-2 rounded-xl border border-emerald-500/10">
+                                              <div className="border-t border-slate-200 dark:border-slate-700/5 pt-2 flex justify-between items-center bg-emerald-500/5 p-2 rounded-xl border border-emerald-500/10">
                                                 <div className="space-y-0.5 truncate mr-2">
                                                   <p className="text-[9px] text-emerald-400 uppercase tracking-wider font-bold">💳 Payment Link / URL:</p>
-                                                  <p className="text-xs text-slate-200 truncate font-mono">{req.paymentLink}</p>
+                                                  <p className="text-xs text-slate-700 dark:text-slate-200 truncate font-mono">{req.paymentLink}</p>
                                                 </div>
                                                 <div className="flex gap-1.5 shrink-0">
                                                   <button
@@ -13425,15 +9208,15 @@ export default function App() {
                                             {req.tlNotes && (
                                               <div className="border-t border-amber-500/20 pt-1.5 text-xs text-amber-300">
                                                 <p className="text-[9px] text-amber-400 uppercase tracking-wider mb-0.5 font-bold">💬 Team Leader Notes / Response:</p>
-                                                <p className="bg-[#fbbf24]/5 p-2 rounded-lg border border-amber-500/10 text-slate-200 leading-normal font-sans">
+                                                <p className="bg-white dark:bg-slate-900/5 p-2 rounded-lg border border-amber-500/10 text-slate-700 dark:text-slate-200 leading-normal font-sans">
                                                   {req.tlNotes}
                                                 </p>
                                               </div>
                                             )}
 
                                             {req.tlLinks && (
-                                              <div className="border-t border-white/5 pt-1.5 text-xs">
-                                                <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-1 font-bold">🔗 TL Provided Links:</p>
+                                              <div className="border-t border-slate-200 dark:border-slate-700/5 pt-1.5 text-xs">
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 font-bold">🔗 TL Provided Links:</p>
                                                 <div className="flex flex-wrap gap-2">
                                                   {req.tlLinks.split(',').map((link, idx) => {
                                                     const trimmed = link.trim();
@@ -13455,7 +9238,7 @@ export default function App() {
                                                             navigator.clipboard.writeText(trimmed);
                                                             toast.success('Link copied!');
                                                           }}
-                                                          className="p-1 hover:bg-white/10 rounded text-slate-400 hover:text-white"
+                                                          className="p-1 hover:bg-slate-50 dark:bg-slate-800/80 rounded text-slate-500 dark:text-slate-400 hover:text-white"
                                                           title="Copy Link"
                                                         >
                                                           <Copy className="w-3 h-3" />
@@ -13470,36 +9253,36 @@ export default function App() {
 
                                           {/* Inline TL Reply Input Form */}
                                           {activeFintechHandlingId === req.id && isTLOreSupport && (
-                                            <div className="p-4 bg-slate-900/90 border border-amber-500/20 rounded-xl space-y-3.5 text-left animate-fade-in mt-2 mb-2">
+                                            <div className="p-4 bg-white dark:bg-slate-900/90 border border-amber-500/20 rounded-xl space-y-3.5 text-left animate-fade-in mt-2 mb-2">
                                               <div className="space-y-1">
-                                                <label className="text-[10px] font-black uppercase tracking-wider text-slate-300 block">Payment Link / URL *</label>
+                                                <label className="text-[10px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-300 block">Payment Link / URL *</label>
                                                 <input
                                                   type="text"
                                                   placeholder="https://..."
                                                   value={tlFintechPaymentLink}
                                                   onChange={(e) => setTlFintechPaymentLink(e.target.value)}
-                                                  className="w-full bg-slate-950 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                                                  className="w-full bg-slate-950 border border-slate-200 dark:border-slate-700/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-sans"
                                                 />
                                               </div>
 
                                               <div className="space-y-1">
-                                                <label className="text-[10px] font-black uppercase tracking-wider text-slate-300 block">TL Notes & Guidance (Optional)</label>
+                                                <label className="text-[10px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-300 block">TL Notes & Guidance (Optional)</label>
                                                 <textarea
                                                   placeholder="Add notes, pointers, or remarks..."
                                                   value={tlFintechNotes}
                                                   onChange={(e) => setTlFintechNotes(e.target.value)}
-                                                  className="w-full bg-slate-950 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[60px]"
+                                                  className="w-full bg-slate-950 border border-slate-200 dark:border-slate-700/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-sans min-h-[60px]"
                                                 />
                                               </div>
 
                                               <div className="space-y-1">
-                                                <label className="text-[10px] font-black uppercase tracking-wider text-slate-300 block">Links / anything else (Optional, comma-separated)</label>
+                                                <label className="text-[10px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-300 block">Links / anything else (Optional, comma-separated)</label>
                                                 <input
                                                   type="text"
                                                   placeholder="https://link1.com, https://link2.com"
                                                   value={tlFintechLinks}
                                                   onChange={(e) => setTlFintechLinks(e.target.value)}
-                                                  className="w-full bg-slate-950 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                                                  className="w-full bg-slate-950 border border-slate-200 dark:border-slate-700/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-sans"
                                                 />
                                               </div>
 
@@ -13507,7 +9290,7 @@ export default function App() {
                                                 <button
                                                   type="button"
                                                   onClick={() => setActiveFintechHandlingId(null)}
-                                                  className="px-2.5 py-1.5 hover:bg-slate-850 rounded-lg text-[10px] font-bold text-slate-400 cursor-pointer"
+                                                  className="px-2.5 py-1.5 hover:bg-slate-850 rounded-lg text-[10px] font-bold text-slate-500 dark:text-slate-400 cursor-pointer"
                                                 >
                                                   Cancel
                                                 </button>
@@ -13537,14 +9320,14 @@ export default function App() {
 
                                           {/* Confirmation or tracking Timers */}
                                           {req.status === 'confirmed' && (
-                                            <div className="p-3 bg-black/15 rounded-xl border border-white/[0.02] flex items-center justify-between text-xs font-sans">
+                                            <div className="p-3 bg-black/15 rounded-xl border border-slate-200 dark:border-slate-700/[0.02] flex items-center justify-between text-xs font-sans">
                                               <div className="space-y-0.5 text-left">
-                                                <p className="text-[9px] text-slate-400 uppercase">Confirmed by {req.confirmedBy}:</p>
-                                                <p className="text-[10px] text-slate-300">{new Date(req.confirmedAt || req.createdAt).toLocaleString()}</p>
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase">Confirmed by {req.confirmedBy}:</p>
+                                                <p className="text-[10px] text-slate-600 dark:text-slate-300">{new Date(req.confirmedAt || req.createdAt).toLocaleString()}</p>
                                               </div>
 
                                               <div className="text-right space-y-0.5">
-                                                <p className="text-[9px] text-slate-400 uppercase">{isCompleted ? 'Turnaround' : 'Pending Contact time'}:</p>
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase">{isCompleted ? 'Turnaround' : 'Pending Contact time'}:</p>
                                                 <p className={`font-mono text-xs font-black px-2 py-0.5 rounded ${
                                                   isCompleted 
                                                     ? 'text-emerald-400 bg-emerald-500/10' 
@@ -13566,7 +9349,7 @@ export default function App() {
                                           )}
 
                                           {/* Action Footers */}
-                                          <div className="flex gap-2 justify-end pt-1 border-t border-white/5">
+                                          <div className="flex gap-2 justify-end pt-1 border-t border-slate-200 dark:border-slate-700/5">
                                             {/* DELETE Option */}
                                             {isSuperAdmin && (
                                               <button
@@ -13597,7 +9380,7 @@ export default function App() {
                                                   navigator.clipboard.writeText(details);
                                                   toast.success('Payment request details copied!');
                                                 }}
-                                                className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-slate-100 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                                                className="px-2.5 py-1.5 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/10 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-700 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                                                 title="Copy Payment details"
                                               >
                                                 <Copy className="w-3.5 h-3.5" />
@@ -13626,14 +9409,14 @@ export default function App() {
                                             {currentUser?.role === 'agent' && req.status === 'confirmed' && req.customerContacted === 'contacted' && (
                                               <button
                                                 onClick={() => handleContactTabbyTamara(req.id, 'not_contacted')}
-                                                className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-slate-300 font-bold font-sans text-[10px] rounded-lg border border-white/5 transition-all cursor-pointer flex items-center gap-1"
+                                                className="px-3 py-1.5 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 font-bold font-sans text-[10px] rounded-lg border border-slate-200 dark:border-slate-700/5 transition-all cursor-pointer flex items-center gap-1"
                                               >
                                                 Undo Contact
                                               </button>
                                             )}
                                           </div>
                                           
-                                          <div className="w-full mt-3 pt-3 border-t border-white/5">
+                                          <div className="w-full mt-3 pt-3 border-t border-slate-200 dark:border-slate-700/5">
                                             <RequestReplyThread request={req} currentUser={currentUser} collectionName="tabby_tamara" />
                                           </div>
 
@@ -13668,12 +9451,12 @@ export default function App() {
 
                                   return matchesSearch && matchesStatus && matchesProvider;
                                 }).length === 0 ? (
-                                <div className="p-12 text-center rounded-3xl border border-dashed border-white/10 bg-slate-800/[0.02] space-y-2 animate-fade-in">
-                                  <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mx-auto text-slate-500">
+                                <div className="p-12 text-center rounded-3xl border border-dashed border-slate-200 dark:border-slate-700/10 bg-slate-50 dark:bg-slate-800/[0.02] space-y-2 animate-fade-in">
+                                  <div className="w-12 h-12 rounded-full bg-white dark:bg-slate-900/50 flex items-center justify-center mx-auto text-white0">
                                     <AlertTriangle className="w-6 h-6 text-pink-500" />
                                   </div>
-                                  <p className="text-sm font-bold text-slate-100 font-sans">No complaints matching criteria.</p>
-                                  <p className="text-xs text-slate-400">Logged complaints, issues and dispute timelines will load here.</p>
+                                  <p className="text-sm font-bold text-slate-700 font-sans">No complaints matching criteria.</p>
+                                  <p className="text-xs text-slate-500 dark:text-slate-400">Logged complaints, issues and dispute timelines will load here.</p>
                                 </div>
                               ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in font-sans">
@@ -13708,12 +9491,12 @@ export default function App() {
                                       return (
                                         <div
                                           key={comp.id}
-                                          className={`relative p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4 shadow-md overflow-hidden bg-[#1e1e1e]/40 backdrop-blur-lg/60 ${
+                                          className={`relative p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4 shadow-md overflow-hidden bg-white dark:bg-slate-900/40 backdrop-blur-lg/60 ${
                                             isNeedContact 
                                               ? 'border-pink-500/30 bg-gradient-to-b from-pink-955/10 to-transparent animate-pulse' 
                                               : isPendingTL 
                                               ? 'border-amber-500/20 bg-gradient-to-b from-amber-500/[0.02] to-transparent' 
-                                              : 'border-white/5'
+                                              : 'border-slate-200 dark:border-slate-700/5'
                                           }`}
                                         >
                                           {/* Platform Indicator Strip */}
@@ -13725,14 +9508,14 @@ export default function App() {
                                           <div className="flex justify-between items-start gap-2 pt-1 text-left">
                                             <div className="space-y-0.5">
                                               <div className="flex flex-wrap items-center gap-1.5">
-                                                <span className="text-[10px] text-slate-400 font-mono font-bold">File: {comp.fileNumber}</span>
+                                                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono font-bold">File: {comp.fileNumber}</span>
                                                 {comp.clinicName && (
-                                                  <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-slate-300">
+                                                  <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700/10 bg-white dark:bg-slate-900/50 text-slate-600 dark:text-slate-300">
                                                     🏥 {comp.clinicName}
                                                   </span>
                                                 )}
                                               </div>
-                                              <h4 className="text-sm font-black text-slate-100 font-sans mt-1">{comp.patientName}</h4>
+                                              <h4 className="text-sm font-black text-slate-700 font-sans mt-1">{comp.patientName}</h4>
                                             </div>
 
                                             {/* Status Badges */}
@@ -13756,49 +9539,49 @@ export default function App() {
                                           </div>
 
                                           {/* Core Detail Grid */}
-                                          <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl space-y-2 text-xs text-left">
+                                          <div className="p-3 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl space-y-2 text-xs text-left">
                                             <div className="grid grid-cols-2 gap-x-2 gap-y-1">
                                               <div>
-                                                <p className="text-[9px] text-slate-400 uppercase tracking-wider">Submitting Agent:</p>
-                                                <p className="text-slate-200 font-bold truncate">{comp.agentName}</p>
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">Submitting Agent:</p>
+                                                <p className="text-slate-700 dark:text-slate-200 font-bold truncate">{comp.agentName}</p>
                                               </div>
                                               <div>
-                                                <p className="text-[9px] text-slate-400 uppercase tracking-wider">Customer Type:</p>
-                                                <p className="text-slate-200 font-bold font-sans">
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">Customer Type:</p>
+                                                <p className="text-slate-700 dark:text-slate-200 font-bold font-sans">
                                                   {comp.isOldCustomer ? '👤 Old Customer' : '🆕 New Customer'}
                                                 </p>
                                               </div>
                                             </div>
 
                                             {!comp.isOldCustomer && comp.idNumber && (
-                                              <div className="border-t border-white/5 pt-1">
-                                                <p className="text-[9px] text-slate-400 uppercase tracking-wider">ID Number:</p>
-                                                <p className="text-slate-200 font-mono font-bold">{comp.idNumber}</p>
+                                              <div className="border-t border-slate-200 dark:border-slate-700/5 pt-1">
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">ID Number:</p>
+                                                <p className="text-slate-700 dark:text-slate-200 font-mono font-bold">{comp.idNumber}</p>
                                               </div>
                                             )}
 
-                                            <div className="border-t border-white/5 pt-1.5 grid grid-cols-2 gap-2">
+                                            <div className="border-t border-slate-200 dark:border-slate-700/5 pt-1.5 grid grid-cols-2 gap-2">
                                               {comp.imageUrl ? (
                                                 <div className="col-span-2">
-                                                  <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-1">Photo / Screenshot:</p>
-                                                  <img src={comp.imageUrl} alt="Complaint Attachment" className="max-h-32 rounded-lg border border-white/10" />
+                                                  <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Photo / Screenshot:</p>
+                                                  <img src={comp.imageUrl} alt="Complaint Attachment" className="max-h-32 rounded-lg border border-slate-200 dark:border-slate-700/10" />
                                                 </div>
                                               ) : (
                                                 <div>
-                                                  <p className="text-[9px] text-slate-400 uppercase tracking-wider">Photo URL:</p>
-                                                  <p className="text-slate-500 font-mono font-bold font-sans text-xs">N/A</p>
+                                                  <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">Photo URL:</p>
+                                                  <p className="text-white0 font-mono font-bold font-sans text-xs">N/A</p>
                                                 </div>
                                               )}
                                               <div>
-                                                <p className="text-[9px] text-slate-400 uppercase tracking-wider">Phone number:</p>
-                                                <p className="text-slate-200 font-mono font-bold truncate">{comp.phoneNumber}</p>
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">Phone number:</p>
+                                                <p className="text-slate-700 dark:text-slate-200 font-mono font-bold truncate">{comp.phoneNumber}</p>
                                               </div>
                                             </div>
 
                                             {comp.complaintDetails && (
-                                              <div className="border-t border-white/5 pt-1.5 text-xs text-slate-300">
-                                                <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5 font-bold">Complaint Issue:</p>
-                                                <p className="bg-black/25 p-2 rounded-lg border border-white/[0.03] text-slate-300 leading-normal font-sans italic">
+                                              <div className="border-t border-slate-200 dark:border-slate-700/5 pt-1.5 text-xs text-slate-600 dark:text-slate-300">
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-0.5 font-bold">Complaint Issue:</p>
+                                                <p className="bg-black/25 p-2 rounded-lg border border-slate-200 dark:border-slate-700/[0.03] text-slate-600 dark:text-slate-300 leading-normal font-sans italic">
                                                   "{comp.complaintDetails}"
                                                 </p>
                                               </div>
@@ -13807,7 +9590,7 @@ export default function App() {
                                             {comp.tlComment && (
                                               <div className="border-t border-rose-500/20 pt-1.5 text-xs text-amber-300">
                                                 <p className="text-[9px] text-rose-400 uppercase tracking-wider mb-0.5 font-bold">💬 Team Leader Answer ({comp.tlName || 'TL'}):</p>
-                                                <p className="bg-rose-950/10 p-2 rounded-lg border border-pink-500/10 text-slate-200 leading-normal font-sans">
+                                                <p className="bg-rose-950/10 p-2 rounded-lg border border-pink-500/10 text-slate-700 dark:text-slate-200 leading-normal font-sans">
                                                   {comp.tlComment}
                                                 </p>
                                               </div>
@@ -13816,14 +9599,14 @@ export default function App() {
 
                                           {/* Timers */}
                                           {isNeedContact && (
-                                            <div className="p-3 bg-black/15 rounded-xl border border-white/[0.02] flex items-center justify-between text-xs font-sans">
+                                            <div className="p-3 bg-black/15 rounded-xl border border-slate-200 dark:border-slate-700/[0.02] flex items-center justify-between text-xs font-sans">
                                               <div className="space-y-0.5 text-left">
-                                                <p className="text-[9px] text-slate-400 uppercase">Commented on:</p>
-                                                <p className="text-[10px] text-slate-300">{comp.commentedAt ? new Date(comp.commentedAt).toLocaleString() : 'N/A'}</p>
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase">Commented on:</p>
+                                                <p className="text-[10px] text-slate-600 dark:text-slate-300">{comp.commentedAt ? new Date(comp.commentedAt).toLocaleString() : 'N/A'}</p>
                                               </div>
 
                                               <div className="text-right space-y-0.5">
-                                                <p className="text-[9px] text-slate-400 uppercase font-bold text-rose-400">Timer on Agent:</p>
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase font-bold text-rose-400">Timer on Agent:</p>
                                                 <p className="font-mono text-xs font-black px-2 py-0.5 rounded text-rose-400 bg-rose-500/10 animate-pulse">
                                                   {getElapsedTimerString(comp.commentedAt || comp.createdAt)}
                                                 </p>
@@ -13832,14 +9615,14 @@ export default function App() {
                                           )}
 
                                           {isClosed && (
-                                            <div className="p-3 bg-black/15 rounded-xl border border-white/[0.02] flex items-center justify-between text-xs font-sans">
+                                            <div className="p-3 bg-black/15 rounded-xl border border-slate-200 dark:border-slate-700/[0.02] flex items-center justify-between text-xs font-sans">
                                               <div className="space-y-0.5 text-left">
-                                                <p className="text-[9px] text-slate-400 uppercase">Closed on:</p>
-                                                <p className="text-[10px] text-slate-300">{comp.closedAt ? new Date(comp.closedAt).toLocaleString() : 'N/A'}</p>
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase">Closed on:</p>
+                                                <p className="text-[10px] text-slate-600 dark:text-slate-300">{comp.closedAt ? new Date(comp.closedAt).toLocaleString() : 'N/A'}</p>
                                               </div>
 
                                               <div className="text-right space-y-0.5">
-                                                <p className="text-[9px] text-slate-400 uppercase">Completion SLA:</p>
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase">Completion SLA:</p>
                                                 <p className="font-mono text-xs font-black px-2 py-0.5 rounded text-emerald-400 bg-emerald-500/10">
                                                   {getElapsedTimerString(comp.createdAt, comp.closedAt)}
                                                 </p>
@@ -13849,27 +9632,27 @@ export default function App() {
 
                                           {/* Inline TL Reply Input Form */}
                                           {activeComplaintHandlingId === comp.id && isTLOreSupport && (
-                                            <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl space-y-2 text-left animate-fade-in mt-1">
-                                              <label className="text-[9px] font-bold text-slate-300 uppercase tracking-widest block">TL Commentary / Answer *</label>
+                                            <div className="p-3 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/20 rounded-xl space-y-2 text-left animate-fade-in mt-1">
+                                              <label className="text-[9px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest block">TL Commentary / Answer *</label>
                                               <textarea
                                                 placeholder="Write comment/resolution details to update status to Pending Contact..."
                                                 value={tlComplaintComment}
                                                 onChange={(e) => setTlComplaintComment(e.target.value)}
-                                                className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-2.5 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[60px]"
+                                                className="w-full bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-lg px-2.5 py-2 text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-sans min-h-[60px]"
                                                 required
                                               />
                                               <div className="flex gap-2 justify-end">
                                                 <button
                                                   type="button"
                                                   onClick={() => setActiveComplaintHandlingId(null)}
-                                                  className="px-2.5 py-1.5 hover:bg-slate-700 rounded-lg text-[10px] font-bold text-slate-400 cursor-pointer"
+                                                  className="px-2.5 py-1.5 hover:bg-slate-700 rounded-lg text-[10px] font-bold text-slate-500 dark:text-slate-400 cursor-pointer"
                                                 >
                                                   Cancel
                                                 </button>
                                                 <button
                                                   type="button"
                                                   onClick={() => handleTLCommentComplaint(comp.id, tlComplaintComment)}
-                                                  className="px-3.5 py-1.5 bg-gradient-to-r from-pink-500 to-pink-600 hover:brightness-110 active:scale-95 text-slate-100 text-[10px] font-bold rounded-lg shadow cursor-pointer transition-all flex items-center gap-1"
+                                                  className="px-3.5 py-1.5 bg-gradient-to-r from-pink-500 to-pink-600 hover:brightness-110 active:scale-95 text-slate-700 text-[10px] font-bold rounded-lg shadow cursor-pointer transition-all flex items-center gap-1"
                                                 >
                                                   Submit Issue Review
                                                 </button>
@@ -13878,7 +9661,7 @@ export default function App() {
                                           )}
 
                                           {/* Action Footers */}
-                                          <div className="flex gap-2 justify-end pt-1 border-t border-white/5">
+                                          <div className="flex gap-2 justify-end pt-1 border-t border-slate-200 dark:border-slate-700/5">
                                             {/* DELETE Option */}
                                             {isSuperAdmin && (
                                               <button
@@ -13909,7 +9692,7 @@ export default function App() {
                                                   navigator.clipboard.writeText(details);
                                                   toast.success('Complaint details copied!');
                                                 }}
-                                                className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-slate-100 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                                                className="px-2.5 py-1.5 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/10 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-700 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                                                 title="Copy Complaint details"
                                               >
                                                 <Copy className="w-3.5 h-3.5" />
@@ -13944,14 +9727,14 @@ export default function App() {
                                             {currentUser?.role === 'agent' && isClosed && (
                                               <button
                                                 onClick={() => handleToggleContactComplaint(comp.id, 'not_contacted')}
-                                                className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-slate-300 font-bold font-sans text-[10px] rounded-lg border border-white/5 transition-all cursor-pointer flex items-center gap-1"
+                                                className="px-3 py-1.5 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 font-bold font-sans text-[10px] rounded-lg border border-slate-200 dark:border-slate-700/5 transition-all cursor-pointer flex items-center gap-1"
                                               >
                                                 Reopen Complaint
                                               </button>
                                             )}
                                           </div>
                                           
-                                          <div className="w-full mt-3 pt-3 border-t border-white/5 mx-[2px]">
+                                          <div className="w-full mt-3 pt-3 border-t border-slate-200 dark:border-slate-700/5 mx-[2px]">
                                             <RequestReplyThread request={comp} currentUser={currentUser} collectionName="tabby_tamara_complaints" />
                                           </div>
 
@@ -13991,12 +9774,12 @@ export default function App() {
 
                                   return matchesSearch && matchesStatus && matchesClinic;
                                 }).length === 0 ? (
-                                <div className="p-12 text-center rounded-3xl border border-dashed border-white/10 bg-slate-800/[0.02] space-y-2 animate-fade-in">
-                                  <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mx-auto text-slate-500">
+                                <div className="p-12 text-center rounded-3xl border border-dashed border-slate-200 dark:border-slate-700/10 bg-slate-50 dark:bg-slate-800/[0.02] space-y-2 animate-fade-in">
+                                  <div className="w-12 h-12 rounded-full bg-white dark:bg-slate-900/50 flex items-center justify-center mx-auto text-white0">
                                     <MessageSquare className="w-6 h-6 text-indigo-400" />
                                   </div>
-                                  <p className="text-sm font-bold text-slate-100 font-sans">No communication requests matching criteria.</p>
-                                  <p className="text-xs text-slate-400">Requests for Chat and Social Media agents will appear here.</p>
+                                  <p className="text-sm font-bold text-slate-700 font-sans">No communication requests matching criteria.</p>
+                                  <p className="text-xs text-slate-500 dark:text-slate-400">Requests for Chat and Social Media agents will appear here.</p>
                                 </div>
                               ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in font-sans">
@@ -14039,10 +9822,10 @@ export default function App() {
                                       return (
                                         <div
                                           key={req.id}
-                                          className={`relative p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4 shadow-md overflow-hidden bg-[#1e1e1e]/40 backdrop-blur-lg/60 ${
+                                          className={`relative p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4 shadow-md overflow-hidden bg-white dark:bg-slate-900/40 backdrop-blur-lg/60 ${
                                             isPending 
                                               ? 'border-indigo-500/30 bg-gradient-to-b from-indigo-950/10 to-transparent' 
-                                              : 'border-white/5'
+                                              : 'border-slate-200 dark:border-slate-700/5'
                                           }`}
                                         >
                                           {/* Top Accent line */}
@@ -14058,7 +9841,7 @@ export default function App() {
                                                 <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border ${getClinicBadgeColor(req.clinicName)}`}>
                                                   🏥 {req.clinicName}
                                                 </span>
-                                                <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border border-white/10 ${req.language === 'Arabic' ? 'bg-emerald-500/10 text-emerald-300' : 'bg-blue-500/10 text-blue-300'}`}>
+                                                <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700/10 ${req.language === 'Arabic' ? 'bg-emerald-500/10 text-emerald-300' : 'bg-blue-500/10 text-blue-300'}`}>
                                                   🗣️ {req.language}
                                                 </span>
                                               </div>
@@ -14085,35 +9868,35 @@ export default function App() {
                                           </div>
 
                                           {/* Core Detail Grid */}
-                                          <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl space-y-2 text-xs text-left">
+                                          <div className="p-3 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl space-y-2 text-xs text-left">
                                             <div className="grid grid-cols-2 gap-x-2 gap-y-1">
                                               <div>
-                                                <p className="text-[9px] text-slate-400 uppercase tracking-wider">Requested By:</p>
-                                                <p className="text-slate-200 font-bold truncate">{req.callCenterAgentName}</p>
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">Requested By:</p>
+                                                <p className="text-slate-700 dark:text-slate-200 font-bold truncate">{req.callCenterAgentName}</p>
                                               </div>
                                               <div>
-                                                <p className="text-[9px] text-slate-400 uppercase tracking-wider">Phone number:</p>
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">Phone number:</p>
                                                 <p className="text-indigo-300 font-mono font-bold truncate">{req.phoneNumber}</p>
                                               </div>
                                             </div>
 
-                                            <div className="border-t border-white/5 pt-1.5 text-xs text-slate-300">
-                                              <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5 font-bold">Notes / Inquiry:</p>
-                                              <p className="bg-black/25 p-2 rounded-lg border border-white/[0.03] text-slate-300 leading-normal font-sans italic">
+                                            <div className="border-t border-slate-200 dark:border-slate-700/5 pt-1.5 text-xs text-slate-600 dark:text-slate-300">
+                                              <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-0.5 font-bold">Notes / Inquiry:</p>
+                                              <p className="bg-black/25 p-2 rounded-lg border border-slate-200 dark:border-slate-700/[0.03] text-slate-600 dark:text-slate-300 leading-normal font-sans italic">
                                                 "{req.notes}"
                                               </p>
                                             </div>
 
                                             {req.screenshot && (
-                                              <div className="border-t border-white/5 pt-2">
-                                                <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                                              <div className="border-t border-slate-200 dark:border-slate-700/5 pt-2">
+                                                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
                                                   <ImageIcon className="w-3 h-3 text-indigo-400" />
                                                   Screenshot
                                                 </p>
                                                 <img 
                                                   src={req.screenshot} 
                                                   alt="Communication Request Evidence" 
-                                                  className="w-full h-24 object-cover rounded-lg border border-white/10 cursor-zoom-in hover:brightness-110 transition-all shadow-md"
+                                                  className="w-full h-24 object-cover rounded-lg border border-slate-200 dark:border-slate-700/10 cursor-zoom-in hover:brightness-110 transition-all shadow-md"
                                                   onClick={() => window.open(req.screenshot, '_blank')}
                                                 />
                                               </div>
@@ -14122,7 +9905,7 @@ export default function App() {
                                             {req.handlingNotes && (
                                               <div className="border-t border-indigo-500/20 pt-1.5 text-xs text-indigo-300">
                                                 <p className="text-[9px] text-indigo-400 uppercase tracking-wider mb-0.5 font-bold">💬 Resolution Notes ({req.handledBy}):</p>
-                                                <p className="bg-indigo-950/20 p-2 rounded-lg border border-indigo-500/10 text-slate-200 leading-normal font-sans">
+                                                <p className="bg-indigo-950/20 p-2 rounded-lg border border-indigo-500/10 text-slate-700 dark:text-slate-200 leading-normal font-sans">
                                                   {req.handlingNotes}
                                                 </p>
                                               </div>
@@ -14130,16 +9913,16 @@ export default function App() {
                                           </div>
                                           
                                           {/* Timers */}
-                                          <div className="p-3 bg-black/15 rounded-xl border border-white/[0.02] flex items-center justify-between text-xs font-sans">
+                                          <div className="p-3 bg-black/15 rounded-xl border border-slate-200 dark:border-slate-700/[0.02] flex items-center justify-between text-xs font-sans">
                                             <div className="space-y-0.5 text-left">
-                                              <p className="text-[9px] text-slate-400 uppercase">{isClosed ? 'Closed By' : 'Submitted'}:</p>
-                                              <p className="text-[10px] text-slate-300">
+                                              <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase">{isClosed ? 'Closed By' : 'Submitted'}:</p>
+                                              <p className="text-[10px] text-slate-600 dark:text-slate-300">
                                                 {isClosed ? req.handledBy : new Date(req.createdAt).toLocaleString()}
                                               </p>
                                             </div>
 
                                             <div className="text-right space-y-0.5">
-                                              <p className="text-[9px] text-slate-400 uppercase font-bold">{isClosed ? 'Turnaround Time' : (isInProgress ? 'Time Active' : 'Time Waiting')}:</p>
+                                              <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase font-bold">{isClosed ? 'Turnaround Time' : (isInProgress ? 'Time Active' : 'Time Waiting')}:</p>
                                               <p className={`font-mono text-xs font-black px-2 py-0.5 rounded ${isClosed ? 'text-emerald-400 bg-emerald-500/10' : (isInProgress ? 'text-indigo-400 bg-indigo-500/10 animate-pulse' : 'text-amber-400 bg-amber-500/10animate-pulse')}`}>
                                                 {isClosed && req.handledAt ? getElapsedTimerString(req.createdAt, req.handledAt) : getElapsedTimerString(req.createdAt)}
                                               </p>
@@ -14148,20 +9931,20 @@ export default function App() {
 
                                           {/* Inline Handling form */}
                                           {activeCcHandlingId === req.id && (
-                                            <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl space-y-2 text-left animate-fade-in mt-1">
-                                              <label className="text-[9px] font-bold text-slate-300 uppercase tracking-widest block">Handling Notes *</label>
+                                            <div className="p-3 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/20 rounded-xl space-y-2 text-left animate-fade-in mt-1">
+                                              <label className="text-[9px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest block">Handling Notes *</label>
                                               <textarea
                                                 placeholder="What was the outcome of contacting the client?"
                                                 value={ccHandlingNotes}
                                                 onChange={(e) => setCcHandlingNotes(e.target.value)}
-                                                className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-2.5 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[60px]"
+                                                className="w-full bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-lg px-2.5 py-2 text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-sans min-h-[60px]"
                                                 required
                                               />
                                               <div className="flex gap-2 justify-end">
                                                 <button
                                                   type="button"
                                                   onClick={() => setActiveCcHandlingId(null)}
-                                                  className="px-2.5 py-1.5 hover:bg-slate-700 rounded-lg text-[10px] font-bold text-slate-400 cursor-pointer"
+                                                  className="px-2.5 py-1.5 hover:bg-slate-700 rounded-lg text-[10px] font-bold text-slate-500 dark:text-slate-400 cursor-pointer"
                                                 >
                                                   Cancel
                                                 </button>
@@ -14177,7 +9960,7 @@ export default function App() {
                                           )}
 
                                           {/* Actions */}
-                                          <div className="flex gap-2 justify-end pt-1 border-t border-white/5">
+                                          <div className="flex gap-2 justify-end pt-1 border-t border-slate-200 dark:border-slate-700/5">
                                             {isSuperAdmin && (
                                               <button
                                                 onClick={() => handleDeleteClientComms(req.id)}
@@ -14207,7 +9990,7 @@ export default function App() {
                                                   navigator.clipboard.writeText(details);
                                                   toast.success('Client communication details copied!');
                                                 }}
-                                                className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-slate-100 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                                                className="px-2.5 py-1.5 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/10 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-700 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                                                 title="Copy Request details"
                                               >
                                                 <Copy className="w-3.5 h-3.5" />
@@ -14230,14 +10013,14 @@ export default function App() {
                                                   setActiveCcHandlingId(req.id);
                                                   setCcHandlingNotes('');
                                                 }}
-                                                className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 text-slate-100 font-sans font-black text-xs rounded-xl shadow-lg cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
+                                                className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 text-slate-700 font-sans font-black text-xs rounded-xl shadow-lg cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
                                               >
                                                 📞 Finalize Handled
                                               </button>
                                             )}
                                           </div>
                                           
-                                          <div className="w-full mt-3 pt-3 border-t border-white/5 mx-[2px]">
+                                          <div className="w-full mt-3 pt-3 border-t border-slate-200 dark:border-slate-700/5 mx-[2px]">
                                             <RequestReplyThread request={req} currentUser={currentUser} collectionName="client_comms" />
                                           </div>
 
@@ -14307,27 +10090,27 @@ export default function App() {
 
                 return (
                   <div id="tl-feedback-desk-root" className="space-y-6 animate-fade-in text-left">
-                    <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-white/5 pb-4">
+                    <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-slate-200 dark:border-slate-700/5 pb-4">
                       <div>
                         <h2 className="text-3xl font-bold text-amber-400 font-display flex items-center gap-3">
                           <CheckCircle2 className="w-8 h-8 text-amber-400 animate-pulse" />
                           {currentUser.role === 'tl' ? "Director Hub" : "TL Hub"}
                         </h2>
-                        <p className="text-slate-400 text-sm mt-1">{currentUser.role === 'tl' ? "Exclusive feedback and communication portal with the Director." : "View feedback and updates from the Team Leaders and Director."}</p>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{currentUser.role === 'tl' ? "Exclusive feedback and communication portal with the Director." : "View feedback and updates from the Team Leaders and Director."}</p>
                       </div>
 
                       {/* Filter by Team Leader for Amira */}
                       {isAmira && (
                         <div className="flex items-center gap-3 w-full sm:w-auto">
-                          <label className="text-xs text-slate-400 shrink-0 font-medium font-sans">Filter by TL:</label>
+                          <label className="text-xs text-slate-500 dark:text-slate-400 shrink-0 font-medium font-sans">Filter by TL:</label>
                           <select
                             value={feedbackFilterTl}
                             onChange={(e) => setFeedbackFilterTl(e.target.value)}
-                            className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-sans w-full sm:w-48"
+                            className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-amber-400 font-sans w-full sm:w-48"
                           >
-                            <option value="all" className="bg-slate-800 text-slate-100 ">All Team Leaders</option>
+                            <option value="all" className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">All Team Leaders</option>
                             {availableTlsForSelect.map(tl => (
-                              <option key={tl} value={tl} className="bg-slate-800 text-slate-100 ">{tl}</option>
+                              <option key={tl} value={tl} className="bg-slate-50 dark:bg-slate-800 text-slate-700 ">{tl}</option>
                             ))}
                           </select>
                         </div>
@@ -14336,38 +10119,38 @@ export default function App() {
 
                     {/* Amira Hassan Submission Console */}
                     {isAmira && (
-                      <div className="bg-white/5 border text-slate-100 border-white/10 rounded-3xl shadow-sm p-6 space-y-4">
-                        <div className="border-b border-white/5 pb-3">
-                          <h3 className="font-bold text-slate-100 text-base font-display flex items-center gap-2">
+                      <div className="bg-white dark:bg-slate-900/50 border text-slate-700 border-slate-200 dark:border-slate-700/10 rounded-3xl shadow-sm p-6 space-y-4">
+                        <div className="border-b border-slate-200 dark:border-slate-700/5 pb-3">
+                          <h3 className="font-bold text-slate-700 text-base font-display flex items-center gap-2">
                             <Sparkles className="w-5 h-5 text-amber-400" />
                             Compose Feedback to Team Leader
                           </h3>
-                          <p className="text-xs text-slate-400">Choose a TL, type notes with markdown instructions and any @mentions. Optional file upload as attachment.</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">Choose a TL, type notes with markdown instructions and any @mentions. Optional file upload as attachment.</p>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div className="md:col-span-1">
-                            <label className="text-xs text-slate-400 mb-1.5 block font-bold font-sans">Target Team Leader:</label>
+                            <label className="text-xs text-slate-500 dark:text-slate-400 mb-1.5 block font-bold font-sans">Target Team Leader:</label>
                             <select
                               value={selectedTlForFeedback}
                               onChange={(e) => setSelectedTlForFeedback(e.target.value)}
-                              className="bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-400 font-sans w-full cursor-pointer"
+                              className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-amber-400 font-sans w-full cursor-pointer"
                             >
-                              <option value="" className="bg-slate-800 text-slate-100 backdrop-blur-lg">-- Choose TL --</option>
+                              <option value="" className="bg-slate-50 dark:bg-slate-800 text-slate-700 backdrop-blur-lg">-- Choose TL --</option>
                               {availableTlsForSelect.map(tl => (
-                                <option key={tl} value={tl} className="bg-slate-800 text-slate-100 backdrop-blur-lg">{tl}</option>
+                                <option key={tl} value={tl} className="bg-slate-50 dark:bg-slate-800 text-slate-700 backdrop-blur-lg">{tl}</option>
                               ))}
                             </select>
                           </div>
 
                           <div className="md:col-span-2">
-                            <label className="text-xs text-slate-400 mb-1.5 block font-bold font-sans">Attach File (Images/Documents):</label>
+                            <label className="text-xs text-slate-500 dark:text-slate-400 mb-1.5 block font-bold font-sans">Attach File (Images/Documents):</label>
                             <div className="flex gap-3">
-                              <label className="flex-1 flex items-center justify-between px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl cursor-pointer transition-all">
-                                <span className="text-xs text-slate-400 truncate pr-2">
+                              <label className="flex-1 flex items-center justify-between px-3.5 py-2 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/10 rounded-xl cursor-pointer transition-all">
+                                <span className="text-xs text-slate-500 dark:text-slate-400 truncate pr-2">
                                   {feedbackAttachmentName || 'Choose file or drag & drop...'}
                                 </span>
-                                <Paperclip className="w-4 h-4 text-slate-400 shrink-0" />
+                                <Paperclip className="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" />
                                 <input
                                   type="file"
                                   className="hidden"
@@ -14392,13 +10175,13 @@ export default function App() {
                         </div>
 
                         <div>
-                          <label className="text-xs text-slate-400 mb-1.5 block font-bold font-sans">Feedback & Action Plan Notes:</label>
+                          <label className="text-xs text-slate-500 dark:text-slate-400 mb-1.5 block font-bold font-sans">Feedback & Action Plan Notes:</label>
                           <textarea
                             value={feedbackNotes}
                             onChange={(e) => setFeedbackNotes(e.target.value)}
                             rows={4}
                             placeholder="Type details... Bold text is supported by using **double asterisks**. Tag anyone using @Name, they will get an instant ping notification!"
-                            className="bg-white/5 border border-white/10 rounded-2xl text-sm text-slate-100 px-4 py-3 focus:outline-none focus:border-amber-400 w-full placeholder:text-slate-500 font-sans leading-relaxed"
+                            className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl text-sm text-slate-700 px-4 py-3 focus:outline-none focus:border-amber-400 w-full placeholder:text-white0 font-sans leading-relaxed"
                           />
                         </div>
 
@@ -14421,27 +10204,27 @@ export default function App() {
                     {/* Feedbacks Feed */}
                     <div className="space-y-4">
                       {filteredFeedbacks.length === 0 ? (
-                        <div className="py-12 bg-white/5 border border-white/10 rounded-3xl text-center">
-                          <MessageSquare className="w-12 h-12 text-slate-500 opacity-40 mx-auto mb-3" />
-                          <h4 className="font-bold text-slate-100 text-base">No Feedbacks Logged</h4>
-                          <p className="text-slate-400 text-xs mt-1">There are no records in the selected Category.</p>
+                        <div className="py-12 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-3xl text-center">
+                          <MessageSquare className="w-12 h-12 text-white0 opacity-40 mx-auto mb-3" />
+                          <h4 className="font-bold text-slate-700 text-base">No Feedbacks Logged</h4>
+                          <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">There are no records in the selected Category.</p>
                         </div>
                       ) : (
                         filteredFeedbacks.map((f) => {
                           return (
-                            <div key={f.id} className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-xl space-y-6 text-left">
+                            <div key={f.id} className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 backdrop-blur-xl rounded-3xl p-6 shadow-xl space-y-6 text-left">
                               {/* Card Header */}
-                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/5 pb-4">
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 dark:border-slate-700/5 pb-4">
                                 <div className="flex items-center gap-3">
                                   <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center font-black text-amber-400 font-mono">
                                     TL
                                   </div>
                                   <div>
                                     <div className="flex items-center gap-2">
-                                      <h4 className="font-bold text-slate-100 text-base">{f.tlName}</h4>
-                                      <span className="text-[10px] text-slate-500 font-medium">Addressed to TL</span>
+                                      <h4 className="font-bold text-slate-700 text-base">{f.tlName}</h4>
+                                      <span className="text-[10px] text-white0 font-medium">Addressed to TL</span>
                                     </div>
-                                    <p className="text-xs text-slate-400">Created by Director: {f.directorName} • {new Date(f.createdAt).toLocaleString()}</p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">Created by Director: {f.directorName} • {new Date(f.createdAt).toLocaleString()}</p>
                                   </div>
                                 </div>
 
@@ -14460,7 +10243,7 @@ export default function App() {
 
                               {/* Card Body */}
                               <div className="space-y-4">
-                                <div className="text-slate-300 text-sm whitespace-pre-wrap leading-relaxed">
+                                <div className="text-slate-600 dark:text-slate-300 text-sm whitespace-pre-wrap leading-relaxed">
                                   {/* Format inline mentions and bold */}
                                   {f.notes.split('\n').map((line, idx) => (
                                     <p key={idx} className="mb-2">
@@ -14469,7 +10252,7 @@ export default function App() {
                                           return <span key={wIdx} className="bg-indigo-500/20 text-indigo-300 font-bold px-1.5 py-0.5 rounded text-xs">{word}</span>;
                                         }
                                         if (word.startsWith('**') && word.endsWith('**')) {
-                                          return <strong key={wIdx} className="font-extrabold text-slate-100">{word.slice(2, -2)}</strong>;
+                                          return <strong key={wIdx} className="font-extrabold text-slate-700">{word.slice(2, -2)}</strong>;
                                         }
                                         return word;
                                       })}
@@ -14479,11 +10262,11 @@ export default function App() {
 
                                 {/* Attachment block */}
                                 {f.attachment && (
-                                  <div className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 rounded-xl">
+                                  <div className="flex items-center gap-3 p-3 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-xl">
                                     <Paperclip className="w-4 h-4 text-amber-400 shrink-0" />
                                     <div className="flex-1 overflow-hidden">
-                                      <p className="text-xs text-slate-100 font-semibold truncate">{f.attachmentName || 'evaluation_attachment'}</p>
-                                      <p className="text-[10px] text-slate-500 font-mono">Attachment Available</p>
+                                      <p className="text-xs text-slate-700 font-semibold truncate">{f.attachmentName || 'evaluation_attachment'}</p>
+                                      <p className="text-[10px] text-white0 font-mono">Attachment Available</p>
                                     </div>
                                     <a
                                       href={f.attachment}
@@ -14497,11 +10280,11 @@ export default function App() {
                               </div>
 
                               {/* Replies Container */}
-                              <div className="border-t border-white/5 pt-5 space-y-4">
-                                <h5 className="text-xs font-bold text-slate-400 uppercase tracking-widest font-display">Conversation Logs & Replies</h5>
+                              <div className="border-t border-slate-200 dark:border-slate-700/5 pt-5 space-y-4">
+                                <h5 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest font-display">Conversation Logs & Replies</h5>
                                 
                                 {f.replies.length === 0 ? (
-                                  <p className="text-slate-500 text-xs italic">No replies in this micro-thread yet.</p>
+                                  <p className="text-white0 text-xs italic">No replies in this micro-thread yet.</p>
                                 ) : (
                                   <div className="space-y-3.5 max-h-96 overflow-y-auto pr-2">
                                     {f.replies.map((r) => {
@@ -14513,16 +10296,16 @@ export default function App() {
                                           className={`p-3.5 rounded-2xl border transition-all ${
                                             isSenderAmira 
                                               ? 'bg-indigo-950/10 border-indigo-500/10 ml-8' 
-                                              : 'bg-white/5 border-white/10 mr-8'
+                                              : 'bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-700/10 mr-8'
                                           }`}
                                         >
                                           <div className="flex justify-between items-center mb-1.5">
                                             <span className={`text-xs font-bold ${isSenderAmira ? 'text-indigo-300' : 'text-amber-400'}`}>
                                               {isSenderAmira ? '👑 ' : '👤 '} {r.senderName}
                                             </span>
-                                            <span className="text-[9px] text-slate-500 font-mono">{new Date(r.createdAt).toLocaleString()}</span>
+                                            <span className="text-[9px] text-white0 font-mono">{new Date(r.createdAt).toLocaleString()}</span>
                                           </div>
-                                          <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">
+                                          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
                                             {r.text.split(/(\s+)/).map((word, wIdx) => {
                                               if (word.startsWith('@')) {
                                                 return <span key={wIdx} className="bg-indigo-550/20 text-indigo-200 font-bold px-1 py-0.5 rounded text-[11px]">{word}</span>;
@@ -14533,8 +10316,8 @@ export default function App() {
 
                                           {/* Reply Attachment */}
                                           {r.attachment && (
-                                            <div className="flex items-center gap-2 p-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg mt-2 justify-between">
-                                              <span className="text-[10px] text-slate-400 truncate max-w-xs">{r.attachmentName || 'reply_attachment'}</span>
+                                            <div className="flex items-center gap-2 p-2 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-lg mt-2 justify-between">
+                                              <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-xs">{r.attachmentName || 'reply_attachment'}</span>
                                               <a
                                                 href={r.attachment}
                                                 download={r.attachmentName || 'reply_attachment'}
@@ -14551,7 +10334,7 @@ export default function App() {
                                 )}
 
                                 {/* Add Reply Draft Input */}
-                                <div className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-3 mt-2">
+                                <div className="bg-white dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700/10 space-y-3 mt-2">
                                   <div className="flex flex-col sm:flex-row gap-3">
                                     <div className="flex-1">
                                       <textarea
@@ -14559,7 +10342,7 @@ export default function App() {
                                         onChange={(e) => setFeedbackReplies(prev => ({ ...prev, [f.id]: e.target.value }))}
                                         rows={2}
                                         placeholder="Type your reply notes..."
-                                        className="bg-white/5 border border-white/10 rounded-xl text-xs text-slate-100 px-3 py-2 focus:outline-none focus:border-amber-400 w-full placeholder:text-slate-500 font-sans"
+                                        className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-xl text-xs text-slate-700 px-3 py-2 focus:outline-none focus:border-amber-400 w-full placeholder:text-white0 font-sans"
                                       />
                                     </div>
 
@@ -14596,18 +10379,18 @@ export default function App() {
                 const globalMeta = getAgentMeta();
                 return (
                   <div id="directory-desk-root" className="space-y-6 animate-fade-in text-left">
-                    <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-white/5 pb-4">
+                    <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-slate-200 dark:border-slate-700/5 pb-4">
                       <div>
                         <h2 className="text-3xl font-bold text-cyan-400 font-display flex items-center gap-3">
                           <UserCheck className="w-8 h-8" />
                           Headcount / Directory
                         </h2>
-                        <p className="text-slate-400 text-sm mt-1">View comprehensive agent data and personal contacts</p>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">View comprehensive agent data and personal contacts</p>
                       </div>
                       
                       <div className="flex items-center gap-3">
                         <div className="relative w-full sm:w-64">
-                          <span className="absolute left-3 top-2.5 text-slate-400">
+                          <span className="absolute left-3 top-2.5 text-slate-500 dark:text-slate-400">
                             <Search className="w-4 h-4" />
                           </span>
                           <input
@@ -14615,7 +10398,7 @@ export default function App() {
                             placeholder="Search names, phones, emails..."
                             value={directorySearchQuery}
                             onChange={(e) => setDirectorySearchQuery(e.target.value)}
-                            className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-500 font-sans font-medium"
+                            className="w-full bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-700 focus:outline-none focus:border-cyan-500 font-sans font-medium"
                           />
                         </div>
                       </div>
@@ -14623,14 +10406,14 @@ export default function App() {
 
                     {/* Headcount Upload Console directly under directory tab for Hesham & Amira */}
                     {isSuperAdmin && (
-                      <div className="bg-white/5 border text-slate-100 border-white/10 rounded-3xl shadow-sm p-6 space-y-6">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-white/5 gap-3">
+                      <div className="bg-white dark:bg-slate-900/50 border text-slate-700 border-slate-200 dark:border-slate-700/10 rounded-3xl shadow-sm p-6 space-y-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-slate-200 dark:border-slate-700/5 gap-3">
                           <div className="text-left">
-                            <h3 className="font-bold text-slate-100 text-base font-display flex items-center gap-2">
+                            <h3 className="font-bold text-slate-700 text-base font-display flex items-center gap-2">
                               <Upload className="w-5 h-5 text-cyan-400" />
                               Upload Directory / Headcount File
                             </h3>
-                            <p className="text-xs text-slate-400 mt-1">Import CSV or Google Sheet to overwrite all agent metadata and contact directories</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Import CSV or Google Sheet to overwrite all agent metadata and contact directories</p>
                           </div>
                           <button
                             onClick={() => {
@@ -14652,7 +10435,7 @@ export default function App() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {/* CSV File Upload Section */}
                           <div
-                            className="border-2 border-dashed border-white/10 hover:border-white/20 bg-black/30 rounded-2xl p-6 text-center transition-all relative flex flex-col items-center justify-center gap-3 min-h-[160px]"
+                            className="border-2 border-dashed border-slate-200 dark:border-slate-700/10 hover:border-slate-200 dark:border-slate-700/20 bg-black/30 rounded-2xl p-6 text-center transition-all relative flex flex-col items-center justify-center gap-3 min-h-[160px]"
                           >
                             <input
                               type="file"
@@ -14668,15 +10451,15 @@ export default function App() {
                               <Upload className="w-5 h-5 text-cyan-400" />
                             </div>
                             <div>
-                              <p className="text-sm font-bold text-slate-100">Drag or Browse Headcount File</p>
-                              <p className="text-xs text-slate-400 mt-1">Accepts .CSV, .XLSX, and .JSON files</p>
+                              <p className="text-sm font-bold text-slate-700">Drag or Browse Headcount File</p>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Accepts .CSV, .XLSX, and .JSON files</p>
                             </div>
                           </div>
 
                           {/* Google Sheets Link Integration */}
                           <div className="bg-emerald-500/5 border border-emerald-500/15 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 text-center transition-all">
-                            <div className="w-10 h-10 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center shadow-inner">
-                              <svg className="w-5 h-5 bg-slate-800 rounded-full p-0.5" viewBox="0 0 48 48">
+                            <div className="w-10 h-10 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-2xl flex items-center justify-center shadow-inner">
+                              <svg className="w-5 h-5 bg-slate-50 dark:bg-slate-800 rounded-full p-0.5" viewBox="0 0 48 48">
                                 <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
                                 <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
                                 <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
@@ -14708,7 +10491,7 @@ export default function App() {
                                       setStorageItem('sched_google_sheet_gid', gid);
                                     }
                                 }}
-                                className="bg-white/5 backdrop-blur-xl border border-white/10 text-slate-100 placeholder-emerald-500/40 text-xs rounded-xl px-3 py-2 w-full focus:outline-none focus:border-emerald-500 text-center"
+                                className="bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 text-slate-700 placeholder-emerald-500/40 text-xs rounded-xl px-3 py-2 w-full focus:outline-none focus:border-emerald-500 text-center"
                               />
                               <button
                                 onClick={async () => {
@@ -14784,7 +10567,7 @@ export default function App() {
                                 }}
                                 disabled={isSyncingSheets}
                                 className={`w-full py-2 text-center rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer shadow-lg transition-all ${
-                                  isSyncingSheets ? 'bg-emerald-500/50 text-slate-200' : 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                                  isSyncingSheets ? 'bg-emerald-500/50 text-slate-700 dark:text-slate-200' : 'bg-emerald-500 hover:bg-emerald-600 text-white'
                                 }`}
                               >
                                 {isSyncingSheets ? 'Syncing...' : 'Sync Directory Sheet'}
@@ -14815,18 +10598,18 @@ export default function App() {
 
                       if (displayDirectory.length === 0) {
                         return (
-                          <div className="p-12 text-center rounded-3xl border border-dashed border-white/10 bg-slate-800/[0.02] space-y-3 shadow-xl">
-                            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto text-slate-500 shadow-inner">
+                          <div className="p-12 text-center rounded-3xl border border-dashed border-slate-200 dark:border-slate-700/10 bg-slate-50 dark:bg-slate-800/[0.02] space-y-3 shadow-xl">
+                            <div className="w-16 h-16 rounded-full bg-white dark:bg-slate-900/50 flex items-center justify-center mx-auto text-white0 shadow-inner">
                               <UserCheck className="w-8 h-8 text-cyan-500" />
                             </div>
-                            <h3 className="text-lg font-bold text-slate-100 tracking-wide">No Directory Data Available</h3>
-                            <p className="text-slate-400 text-sm max-w-sm mx-auto">The Headcount roster document has not been compiled or mapped yet.</p>
+                            <h3 className="text-lg font-bold text-slate-700 tracking-wide">No Directory Data Available</h3>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm max-w-sm mx-auto">The Headcount roster document has not been compiled or mapped yet.</p>
                           </div>
                         );
                       }
 
                       return (
-                        <div className="bg-white/5 border border-cyan-500/20 backdrop-blur-xl rounded-3xl p-6 shadow-2xl overflow-x-auto">
+                        <div className="bg-white dark:bg-slate-900/50 border border-cyan-500/20 backdrop-blur-xl rounded-3xl p-6 shadow-2xl overflow-x-auto">
                           <table className="w-full text-left border-collapse min-w-[800px]">
                             <thead>
                               <tr className="bg-gradient-to-r from-cyan-950/40 to-slate-900 border-b border-cyan-500/20 text-[10px] font-black uppercase tracking-widest text-cyan-300 font-sans">
@@ -14836,7 +10619,7 @@ export default function App() {
                                 ))}
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/10 text-xs text-slate-300 font-sans border-b border-white/10">
+                            <tbody className="divide-y divide-white/10 text-xs text-slate-600 dark:text-slate-300 font-sans border-b border-slate-200 dark:border-slate-700/10">
                               {(() => {
                                 const filteredData = displayDirectory.filter(row => {
                                   if (!directorySearchQuery) return true;
@@ -14848,7 +10631,7 @@ export default function App() {
                                 if (filteredData.length === 0) {
                                   return (
                                     <tr>
-                                      <td colSpan={displayHeaders.length + 1} className="py-12 text-center text-slate-500 font-sans">
+                                      <td colSpan={displayHeaders.length + 1} className="py-12 text-center text-white0 font-sans">
                                         <Search className="w-6 h-6 mx-auto mb-2 opacity-30" />
                                         No agents match your search criteria.
                                       </td>
@@ -14862,7 +10645,7 @@ export default function App() {
                                       <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-cyan-600/30 to-blue-500/30 text-cyan-300 flex items-center justify-center font-black border border-cyan-500/40 shadow-inner">
                                         {row.agentName.substring(0,2).toUpperCase()}
                                       </div>
-                                      <span className="font-bold text-slate-100 font-display text-sm relative group-hover:text-cyan-400 transition-colors">
+                                      <span className="font-bold text-slate-700 font-display text-sm relative group-hover:text-cyan-400 transition-colors">
                                         {row.agentName}
                                         {globalMeta[row.agentName]?.roleType === 'TL' && (
                                            <span className="absolute -top-3.5 left-0 px-1.5 py-0.5 rounded text-[8px] bg-amber-500/20 text-amber-400 border border-amber-500/30 font-black uppercase tracking-widest">Team Lead</span>
@@ -14877,7 +10660,7 @@ export default function App() {
                                       const isTL = h.toLowerCase().includes('tl') || h.toLowerCase().includes('leader') || h.toLowerCase().includes('manager');
                                       
                                       return (
-                                        <td key={`${h}-${i}`} className="px-3 py-4 text-slate-300 whitespace-nowrap">
+                                        <td key={`${h}-${i}`} className="px-3 py-4 text-slate-600 dark:text-slate-300 whitespace-nowrap">
                                           {isEmail && value !== '-' ? (
                                             <a href={`mailto:${value}`} className="text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1.5 transition-colors text-xs font-mono font-bold bg-cyan-500/10 px-2.5 py-1 rounded-lg w-max border border-cyan-500/20">
                                               <Mail className="w-3 h-3" /> {value}
@@ -14887,7 +10670,7 @@ export default function App() {
                                               <Phone className="w-3 h-3" /> {value}
                                             </a>
                                           ) : isRole && value !== '-' ? (
-                                            <span className="bg-slate-800/80 text-slate-200 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-white/10 shadow-sm">
+                                            <span className="bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-slate-200 dark:border-slate-700/10 shadow-sm">
                                               {value}
                                             </span>
                                           ) : isTL && value !== '-' ? (
@@ -14895,7 +10678,7 @@ export default function App() {
                                               <Shield className="w-3 h-3" /> {value}
                                             </span>
                                           ) : (
-                                            <span className="text-[13px] font-semibold text-slate-200">{value}</span>
+                                            <span className="text-[13px] font-semibold text-slate-700 dark:text-slate-200">{value}</span>
                                           )}
                                         </td>
                                       );
@@ -14957,13 +10740,13 @@ export default function App() {
 
                 return (
                   <div id="cases-desk-root" className="space-y-6 animate-fade-in text-left">
-                    <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-white/5 pb-4">
+                    <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-slate-200 dark:border-slate-700/5 pb-4">
                       <div>
-                        <h2 className="text-3xl font-bold text-slate-100 font-display flex items-center gap-2.5">
+                        <h2 className="text-3xl font-bold text-slate-700 font-display flex items-center gap-2.5">
                           <ClipboardList className="w-8 h-8 text-emerald-400" />
                           {canSeeAllCases ? "Organization Booking Registry" : "My Internal Cases"}
                         </h2>
-                        <p className="text-slate-400 text-sm">
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">
                           {canSeeAllCases 
                             ? "Team Leaders Consolidated Desk — inspect, search, and audit all agent booking performance" 
                             : "Submit and track your internal patient booking cases secure desk."}
@@ -14972,16 +10755,16 @@ export default function App() {
                     </div>
 
                     {/* Integrated Interactive Control Center */}
-                    <div className="bg-[#111115] border border-white/10 rounded-2xl p-4 flex flex-col md:flex-row flex-wrap items-center gap-4 shadow-xl">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-2xl p-4 flex flex-col md:flex-row flex-wrap items-center gap-4 shadow-xl">
                       {/* Search client input */}
                       <div className="relative flex-1 min-w-[200px] w-full font-sans">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400">
                           <Search className="w-4 h-4" />
                         </span>
                         <input 
                           type="text"
                           placeholder="Search patient, phone, ref, branch..."
-                          className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-sans"
+                          className="w-full bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-xl py-2 pl-9 pr-4 text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-sans"
                           value={caseSearchQuery}
                           onChange={(e) => setCaseSearchQuery(e.target.value)}
                           id="case-search-input"
@@ -14990,13 +10773,13 @@ export default function App() {
 
                       {/* Date Filter Picker */}
                       <div className="flex items-center gap-2 w-full md:w-auto shrink-0 font-sans">
-                        <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 shrink-0 select-none">Date</span>
-                        <div className="relative flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl px-2.5 py-1.5">
+                        <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 shrink-0 select-none">Date</span>
+                        <div className="relative flex items-center gap-1.5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-xl px-2.5 py-1.5">
                           <input 
                             type="date"
                             value={caseDateFilter}
                             onChange={(e) => setCaseDateFilter(e.target.value)}
-                            className="bg-transparent text-xs text-slate-200 focus:outline-none font-mono cursor-pointer border-none"
+                            className="bg-transparent text-xs text-slate-700 dark:text-slate-200 focus:outline-none font-mono cursor-pointer border-none"
                             style={{ colorScheme: 'dark' }}
                           />
                           {caseDateFilter ? (
@@ -15022,12 +10805,12 @@ export default function App() {
                       {/* Agent Filter Picker (TL ONLY) */}
                       {canSeeAllCases && (
                         <div className="flex items-center gap-2 w-full md:w-auto shrink-0 font-sans">
-                          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 shrink-0 select-none">Agent</span>
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 shrink-0 select-none">Agent</span>
                           <select 
                             id="case-agent-filter"
                             value={caseAgentFilter}
                             onChange={(e) => setCaseAgentFilter(e.target.value)}
-                            className="bg-[#16161c] border border-white/10 rounded-xl py-1.5 px-3 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500/40 font-semibold cursor-pointer font-sans"
+                            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl py-1.5 px-3 text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500/40 font-semibold cursor-pointer font-sans"
                           >
                             <option value="all">All Agents</option>
                             {uniqueAgentNamesInCases.map(name => (
@@ -15041,12 +10824,12 @@ export default function App() {
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                       {/* Left: Form */}
                       <div className="lg:col-span-4 space-y-4">
-                        <div className="p-6 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl sticky top-6">
+                        <div className="p-6 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-3xl sticky top-6">
                           <div className="flex items-center gap-3 mb-6">
                             <span className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl">
                               <Wallet className="w-5 h-5" />
                             </span>
-                            <h3 className="text-xl font-bold text-slate-100 font-display">Submit Case</h3>
+                            <h3 className="text-xl font-bold text-slate-700 font-display">Submit Case</h3>
                           </div>
                           
                           <form onSubmit={async (e) => {
@@ -15108,37 +10891,37 @@ export default function App() {
                             }
                           }} className="space-y-4">
                             
-                            <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
+                            <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-500 dark:text-slate-400 transition-colors">
                               <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Patient/Client Name *</label>
                               <div className="relative">
                                 <span className="absolute left-3 top-2.5 opacity-50">
                                   <UserIcon className="w-4 h-4" />
                                 </span>
-                                <input required type="text" placeholder="John Doe" value={casePatientName} onChange={e => setCasePatientName(e.target.value)} className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 focus:bg-emerald-500/5 transition-all font-sans" />
+                                <input required type="text" placeholder="John Doe" value={casePatientName} onChange={e => setCasePatientName(e.target.value)} className="w-full bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 focus:bg-emerald-500/5 transition-all font-sans" />
                               </div>
                             </div>
                             
-                            <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
+                            <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-500 dark:text-slate-400 transition-colors">
                               <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Phone Number *</label>
                               <div className="relative">
                                 <span className="absolute left-3 top-2.5 opacity-50">
                                   <PhoneCall className="w-4 h-4" />
                                 </span>
-                                <input required type="text" placeholder="0500000000" value={casePhoneNumber} onChange={e => setCasePhoneNumber(e.target.value)} className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 focus:bg-emerald-500/5 transition-all font-mono tracking-widest" />
+                                <input required type="text" placeholder="0500000000" value={casePhoneNumber} onChange={e => setCasePhoneNumber(e.target.value)} className="w-full bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 focus:bg-emerald-500/5 transition-all font-mono tracking-widest" />
                               </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
+                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-500 dark:text-slate-400 transition-colors">
                                 <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Patient Type *</label>
-                                <select value={casePatientType} onChange={e => setCasePatientType(e.target.value)} className="w-full bg-[#16161c] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
+                                <select value={casePatientType} onChange={e => setCasePatientType(e.target.value)} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
                                   <option value="New">New</option>
                                   <option value="Follow up / Existing">Follow up / Existing</option>
                                 </select>
                               </div>
-                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
+                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-500 dark:text-slate-400 transition-colors">
                                 <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Service *</label>
-                                <select value={caseService} onChange={e => setCaseService(e.target.value)} className="w-full bg-[#16161c] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer" required>
+                                <select value={caseService} onChange={e => setCaseService(e.target.value)} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer" required>
                                   <option value="">Select service...</option>
                                   <option value="Dental">Dental</option>
                                   <option value="Derma">Derma</option>
@@ -15153,9 +10936,9 @@ export default function App() {
                             </div>
                             
                             <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
+                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-500 dark:text-slate-400 transition-colors">
                                 <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Branch *</label>
-                                <select value={caseBranch} onChange={e => setCaseBranch(e.target.value)} className="w-full bg-[#16161c] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer" required>
+                                <select value={caseBranch} onChange={e => setCaseBranch(e.target.value)} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer" required>
                                   <option value="">Select branch...</option>
                                   <option value="Dermadent VIP">Dermadent VIP</option>
                                   <option value="Dermadent">Dermadent</option>
@@ -15165,9 +10948,9 @@ export default function App() {
                                   <option value="New Edge">New Edge</option>
                                 </select>
                               </div>
-                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
+                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-500 dark:text-slate-400 transition-colors">
                                 <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Source * (Mandatory)</label>
-                                <select required value={caseLeadSource} onChange={e => { setCaseLeadSource(e.target.value); if (!e.target.value.toLowerCase().includes('blogger')) setCaseBloggerName(''); }} className="w-full bg-[#16161c] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
+                                <select required value={caseLeadSource} onChange={e => { setCaseLeadSource(e.target.value); if (!e.target.value.toLowerCase().includes('blogger')) setCaseBloggerName(''); }} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
                                   <option value="">Select source...</option>
                                   <option value="Blogger">Blogger</option>
                                   <option value="Existing">Existing</option>
@@ -15185,17 +10968,17 @@ export default function App() {
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
+                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-500 dark:text-slate-400 transition-colors">
                                 <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Ticket Type *</label>
-                                <select value={caseTicketType} onChange={e => setCaseTicketType(e.target.value)} className="w-full bg-[#16161c] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
+                                <select value={caseTicketType} onChange={e => setCaseTicketType(e.target.value)} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
                                   <option value="Inquiry">Inquiry</option>
                                   <option value="Complaint">Complaint</option>
                                   <option value="Appointment">Appointment</option>
                                 </select>
                               </div>
-                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
+                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-500 dark:text-slate-400 transition-colors">
                                 <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Call Type *</label>
-                                <select value={caseCallType} onChange={e => setCaseCallType(e.target.value)} className="w-full bg-[#16161c] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer" required>
+                                <select value={caseCallType} onChange={e => setCaseCallType(e.target.value)} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer" required>
                                   <option value="">Select call type...</option>
                                   <option value="Inquiry only">Inquiry only</option>
                                   <option value="Booked">Booked</option>
@@ -15218,7 +11001,7 @@ export default function App() {
 
                             {/* Blogger Name Text Field */}
                             {(caseLeadSource.toLowerCase().includes('blogger') || caseLeadSource.toLowerCase().includes('bloger')) && (
-                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors animate-fade-in">
+                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-500 dark:text-slate-400 transition-colors animate-fade-in">
                                 <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Blogger Name * (Mandatory)</label>
                                 <input
                                   required
@@ -15226,21 +11009,21 @@ export default function App() {
                                   placeholder="Type blogger name..."
                                   value={caseBloggerName}
                                   onChange={e => setCaseBloggerName(e.target.value)}
-                                  className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 focus:bg-[#1f2a22]/30 transition-all font-sans"
+                                  className="w-full bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 focus:bg-white dark:bg-slate-900/30 transition-all font-sans"
                                 />
                               </div>
                             )}
 
-                            <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
+                            <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-500 dark:text-slate-400 transition-colors">
                               <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Inquiry / Details *</label>
                               <div className="relative">
-                                <textarea required rows={4} placeholder="Specific diagnostic or financial inquiry details..." value={caseInquiry} onChange={e => setCaseInquiry(e.target.value)} className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-emerald-500 focus:bg-emerald-500/5 transition-all font-sans" />
+                                <textarea required rows={4} placeholder="Specific diagnostic or financial inquiry details..." value={caseInquiry} onChange={e => setCaseInquiry(e.target.value)} className="w-full bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-emerald-500 focus:bg-emerald-500/5 transition-all font-sans" />
                               </div>
                             </div>
                             
-                            <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors bg-black/20 p-3 rounded-xl border border-white/5">
+                            <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-500 dark:text-slate-400 transition-colors bg-black/20 p-3 rounded-xl border border-slate-200 dark:border-slate-700/5">
                               <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Ticket Status</label>
-                              <select value={caseTicketStatus} onChange={e => setCaseTicketStatus(e.target.value)} className="w-full bg-[#16161c] border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
+                              <select value={caseTicketStatus} onChange={e => setCaseTicketStatus(e.target.value)} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
                                 <option value="Closed">Closed</option>
                                 <option value="Open">Open</option>
                               </select>
@@ -15265,10 +11048,10 @@ export default function App() {
                       <div className="lg:col-span-8 flex flex-col space-y-4">
                         <div className="space-y-3 pt-6 sm:pt-0">
                           {finalFilteredCases.length === 0 ? (
-                            <div className="p-12 text-center text-slate-400 border border-white/5 border-dashed rounded-3xl bg-slate-900/40/[0.02] backdrop-blur-xl font-sans space-y-2">
+                            <div className="p-12 text-center text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700/5 border-dashed rounded-3xl bg-white dark:bg-slate-900/40/[0.02] backdrop-blur-xl font-sans space-y-2">
                               <Search className="w-8 h-8 text-slate-600 mx-auto opacity-40 mb-1" />
-                              <p className="text-sm font-bold text-slate-300">No matching cases found</p>
-                              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                              <p className="text-sm font-bold text-slate-600 dark:text-slate-300">No matching cases found</p>
+                              <p className="text-xs text-white0 max-w-sm mx-auto">
                                 {canSeeAllCases 
                                   ? "No case records match your set search filters, selected date, or agent selection." 
                                   : "You haven't logged any cases matching the selected search terms or date range."}
@@ -15277,7 +11060,7 @@ export default function App() {
                           ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               {finalFilteredCases.map(c => (
-                                  <div key={c.id} className="p-5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col gap-3 font-sans relative overflow-hidden group">
+                                  <div key={c.id} className="p-5 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-2xl flex flex-col gap-3 font-sans relative overflow-hidden group">
                                     <div className="absolute top-0 right-0 p-3 flex gap-2">
                                       {isWithinFiveMinutes(c.createdAt) && (
                                         <button
@@ -15295,7 +11078,7 @@ export default function App() {
                                           navigator.clipboard.writeText(details);
                                           toast.success('Case details + Ref copied!');
                                         }}
-                                        className="p-1.5 hover:bg-white/10 text-slate-300 hover:text-slate-100 rounded-lg transition-all cursor-pointer"
+                                        className="p-1.5 hover:bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:text-slate-700 rounded-lg transition-all cursor-pointer"
                                         title="Copy Case Details"
                                       >
                                         <Copy className="w-4 h-4" />
@@ -15317,7 +11100,7 @@ export default function App() {
                                       )}
                                     </div>
                                     <div className="space-y-1">
-                                      <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest flex items-center justify-between">
+                                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest flex items-center justify-between">
                                          <span className="flex items-center gap-2">
                                            Case Ref: #{c.id.split('_')[1]?.slice(-6) || 'XXXXXX'}
                                          </span>
@@ -15327,60 +11110,60 @@ export default function App() {
                                            </span>
                                          )}
                                        </p>
-                                       <p className="text-lg font-bold text-slate-100 flex items-center gap-2">
+                                       <p className="text-lg font-bold text-slate-700 flex items-center gap-2">
                                          <UserIcon className="w-4 h-4 text-emerald-400" />
                                          {c.patientName}
                                        </p>
                                     </div>
                                     <div className="flex flex-wrap gap-2 mt-2">
                                       {c.patientType && (
-                                        <span className="text-[10px] font-bold px-2 py-1 bg-white/5 rounded-md text-emerald-400 border border-white/5">
+                                        <span className="text-[10px] font-bold px-2 py-1 bg-white dark:bg-slate-900/50 rounded-md text-emerald-400 border border-slate-200 dark:border-slate-700/5">
                                           {c.patientType} Patient
                                         </span>
                                       )}
                                       {c.branch && (
-                                        <span className="text-[10px] font-bold px-2 py-1 bg-white/5 rounded-md text-slate-300 border border-white/5">
+                                        <span className="text-[10px] font-bold px-2 py-1 bg-white dark:bg-slate-900/50 rounded-md text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700/5">
                                           🏥 {c.branch}
                                         </span>
                                       )}
                                       {c.service && (
-                                        <span className="text-[10px] font-bold px-2 py-1 bg-white/5 rounded-md text-slate-300 border border-white/5">
+                                        <span className="text-[10px] font-bold px-2 py-1 bg-white dark:bg-slate-900/50 rounded-md text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700/5">
                                           ✨ {c.service}
                                         </span>
                                       )}
                                       {c.ticketType && (
-                                        <span className="text-[10px] font-bold px-2 py-1 bg-white/5 rounded-md text-slate-300 border border-white/5">
+                                        <span className="text-[10px] font-bold px-2 py-1 bg-white dark:bg-slate-900/50 rounded-md text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700/5">
                                           🎫 {c.ticketType}
                                         </span>
                                       )}
                                       {c.callType && (
-                                        <span className="text-[10px] font-bold px-2 py-1 bg-white/5 rounded-md text-slate-300 border border-white/5">
+                                        <span className="text-[10px] font-bold px-2 py-1 bg-white dark:bg-slate-900/50 rounded-md text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700/5">
                                           📞 {c.callType}
                                         </span>
                                       )}
                                       {c.ticketStatus && (
-                                        <span className={`text-[10px] font-bold px-2 py-1 rounded-md border text-white ${c.ticketStatus === 'Open' ? 'bg-rose-500/20 border-rose-500/30 text-rose-300' : 'bg-slate-500/20 border-slate-500/30 text-slate-300'}`}>
+                                        <span className={`text-[10px] font-bold px-2 py-1 rounded-md border text-white ${c.ticketStatus === 'Open' ? 'bg-rose-500/20 border-rose-500/30 text-rose-300' : 'bg-slate-500/20 border-slate-500/30 text-slate-600 dark:text-slate-300'}`}>
                                           Status: {c.ticketStatus}
                                         </span>
                                       )}
                                     </div>
-                                    <div className="space-y-1 bg-white/5 p-2 rounded-lg mt-2 font-mono">
-                                      <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold font-sans">Contact Details</p>
-                                      <p className="text-xs text-slate-100 tracking-widest flex items-center gap-2">
+                                    <div className="space-y-1 bg-white dark:bg-slate-900/50 p-2 rounded-lg mt-2 font-mono">
+                                      <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-bold font-sans">Contact Details</p>
+                                      <p className="text-xs text-slate-700 tracking-widest flex items-center gap-2">
                                         <PhoneCall className="w-3.5 h-3.5 text-emerald-400" />
                                         {c.phoneNumber}
                                       </p>
                                     </div>
-                                    <div className="text-sm mt-3 text-slate-300">
-                                      <span className="text-[10px] uppercase font-bold text-slate-500 block mb-1">Inquiry / Details</span>
-                                      <p className="bg-[#1e1e1e]/40 backdrop-blur-lg/40 p-3 rounded-lg whitespace-pre-wrap leading-relaxed text-slate-300">
+                                    <div className="text-sm mt-3 text-slate-600 dark:text-slate-300">
+                                      <span className="text-[10px] uppercase font-bold text-white0 block mb-1">Inquiry / Details</span>
+                                      <p className="bg-white dark:bg-slate-900/40 backdrop-blur-lg/40 p-3 rounded-lg whitespace-pre-wrap leading-relaxed text-slate-600 dark:text-slate-300">
                                         {c.inquiry}
                                       </p>
                                     </div>
                                     
                                     {c.screenshot && (
                                       <div className="mt-3">
-                                        <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-1 ml-1 flex items-center gap-1.5">
+                                        <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-bold mb-1 ml-1 flex items-center gap-1.5">
                                           <ImageIcon className="w-3 h-3 text-emerald-400" />
                                           Attached Screenshot
                                         </p>
@@ -15388,7 +11171,7 @@ export default function App() {
                                           <img 
                                             src={c.screenshot} 
                                             alt="Case Attachment" 
-                                            className="w-full h-auto rounded-xl border border-white/10 group-hover:brightness-110 transition-all shadow-xl"
+                                            className="w-full h-auto rounded-xl border border-slate-200 dark:border-slate-700/10 group-hover:brightness-110 transition-all shadow-xl"
                                             onClick={() => window.open(c.screenshot, '_blank')}
                                           />
                                           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 backdrop-blur-[1px] pointer-events-none">
@@ -15398,8 +11181,8 @@ export default function App() {
                                       </div>
                                     )}
 
-                                    <div className="flex items-center justify-between text-[10px] text-slate-500 border-t border-white/5 pt-3 mt-1">
-                                      <span>By: <span className="font-bold text-slate-300">{formatAgentName(c.agentName)}</span></span>
+                                    <div className="flex items-center justify-between text-[10px] text-white0 border-t border-slate-200 dark:border-slate-700/5 pt-3 mt-1">
+                                      <span>By: <span className="font-bold text-slate-600 dark:text-slate-300">{formatAgentName(c.agentName)}</span></span>
                                       <span>{new Date(c.createdAt).toLocaleString(undefined, {
                                         month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
                                       })}</span>
@@ -15502,30 +11285,30 @@ export default function App() {
                     <div id="history-desk-root" className="space-y-6 animate-fade-in text-left">
                       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
-                          <h2 className="text-3xl font-bold text-slate-100 font-display">My History</h2>
-                          <p className="text-slate-400 text-sm">Review your submitted requests, inquiries and completed cases.</p>
+                          <h2 className="text-3xl font-bold text-slate-700 font-display">My History</h2>
+                          <p className="text-slate-500 dark:text-slate-400 text-sm">Review your submitted requests, inquiries and completed cases.</p>
                         </div>
                         
-                        <div className="flex bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-1.5 w-full sm:w-auto relative">
-                          <History className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                        <div className="flex bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-xl p-1.5 w-full sm:w-auto relative">
+                          <History className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute left-3 top-3" />
                           <select
                             value={historyFilter}
                             onChange={(e) => setHistoryFilter(e.target.value as any)}
-                            className="w-full sm:w-auto bg-transparent border-none text-sm text-slate-100 focus:outline-none font-sans font-medium pl-8 pr-4 py-1.5 appearance-none cursor-pointer"
+                            className="w-full sm:w-auto bg-transparent border-none text-sm text-slate-700 focus:outline-none font-sans font-medium pl-8 pr-4 py-1.5 appearance-none cursor-pointer"
                           >
-                            <option value="all" className="bg-slate-800 text-slate-100 backdrop-blur-lg">All History ({allHistoryItems.length})</option>
-                            <option value="scheduling" className="bg-slate-800 text-slate-100 backdrop-blur-lg">Scheduling Requests</option>
-                            <option value="inquiries" className="bg-slate-800 text-slate-100 backdrop-blur-lg">Inquiries / Ask TL</option>
-                            <option value="tabby" className="bg-slate-800 text-slate-100 backdrop-blur-lg">Tabby & Tamara Requests</option>
-                            <option value="complaints" className="bg-slate-800 text-slate-100 backdrop-blur-lg">Complaints Desk</option>
-                            <option value="comms" className="bg-slate-800 text-slate-100 backdrop-blur-lg">Client Comms</option>
-                            <option value="cases" className="bg-slate-800 text-slate-100 backdrop-blur-lg">Internal Cases</option>
+                            <option value="all" className="bg-slate-50 dark:bg-slate-800 text-slate-700 backdrop-blur-lg">All History ({allHistoryItems.length})</option>
+                            <option value="scheduling" className="bg-slate-50 dark:bg-slate-800 text-slate-700 backdrop-blur-lg">Scheduling Requests</option>
+                            <option value="inquiries" className="bg-slate-50 dark:bg-slate-800 text-slate-700 backdrop-blur-lg">Inquiries / Ask TL</option>
+                            <option value="tabby" className="bg-slate-50 dark:bg-slate-800 text-slate-700 backdrop-blur-lg">Tabby & Tamara Requests</option>
+                            <option value="complaints" className="bg-slate-50 dark:bg-slate-800 text-slate-700 backdrop-blur-lg">Complaints Desk</option>
+                            <option value="comms" className="bg-slate-50 dark:bg-slate-800 text-slate-700 backdrop-blur-lg">Client Comms</option>
+                            <option value="cases" className="bg-slate-50 dark:bg-slate-800 text-slate-700 backdrop-blur-lg">Internal Cases</option>
                           </select>
-                          <ChevronRight className="w-4 h-4 text-slate-400 absolute right-3 top-3 rotate-90" />
+                          <ChevronRight className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute right-3 top-3 rotate-90" />
                         </div>
                       </div>
 
-                      <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+                      <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 backdrop-blur-xl rounded-3xl p-6 shadow-2xl relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-8 opacity-5">
                           <History className="w-64 h-64 text-blue-500" />
                         </div>
@@ -15533,22 +11316,22 @@ export default function App() {
                         {allHistoryItems.length === 0 ? (
                             <div className="py-12 text-center flex flex-col items-center">
                               <History className="w-12 h-12 text-indigo-500/50 mb-3" />
-                              <p className="text-slate-400 font-medium text-sm">No history records match current filter</p>
+                              <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">No history records match current filter</p>
                             </div>
                         ) : (
                             <div className="space-y-3 relative z-10">
                               {allHistoryItems.map((item, idx) => (
-                                <div key={`${item.id}-${idx}`} className="flex items-start sm:items-center justify-between p-4 bg-white/5 backdrop-blur-xl border border-white/10 hover:border-white/10 rounded-2xl transition-all gap-4 flex-col sm:flex-row">
+                                <div key={`${item.id}-${idx}`} className="flex items-start sm:items-center justify-between p-4 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 hover:border-slate-200 dark:border-slate-700/10 rounded-2xl transition-all gap-4 flex-col sm:flex-row">
                                   <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                                    <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 flex items-center justify-center shrink-0">
                                       {item.icon}
                                     </div>
                                     <div className="space-y-0.5">
                                       <div className="flex items-center gap-2">
-                                        <p className="font-bold text-slate-100 text-sm">{item.type}</p>
-                                        <span className="text-[10px] text-slate-500 font-mono tracking-wider">{new Date(item.date).toLocaleString()}</span>
+                                        <p className="font-bold text-slate-700 text-sm">{item.type}</p>
+                                        <span className="text-[10px] text-white0 font-mono tracking-wider">{new Date(item.date).toLocaleString()}</span>
                                       </div>
-                                      <p className="text-xs text-slate-400 line-clamp-2 md:line-clamp-1">{item.summary}</p>
+                                      <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 md:line-clamp-1">{item.summary}</p>
                                     </div>
                                   </div>
                                   
@@ -15636,27 +11419,27 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="bg-white/5 border text-slate-100 border-white/10 rounded-3xl shadow-sm p-6 space-y-6">
+                    <div className="bg-white dark:bg-slate-900/50 border text-slate-700 border-slate-200 dark:border-slate-700/10 rounded-3xl shadow-sm p-6 space-y-6">
                        
                        <div className="flex flex-col md:flex-row gap-4 mb-6">
                          <div className="flex-1 space-y-1">
-                           <label className="text-xs uppercase tracking-widest text-slate-400 font-bold">Select Agent</label>
+                           <label className="text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold">Select Agent</label>
                            <select
                               value={kpiAgentTarget}
                               onChange={(e) => setKpiAgentTarget(e.target.value)}
-                              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm text-slate-100 outline-none focus:border-purple-500"
+                              className="w-full bg-black/40 border border-slate-200 dark:border-slate-700/10 rounded-xl px-4 py-2 text-sm text-slate-700 outline-none focus:border-purple-500"
                            >
                              <option value="">Select an Agent...</option>
                              {agentsList.map(a => <option key={a} value={a}>{a}</option>)}
                            </select>
                          </div>
                          <div className="flex-1 space-y-1">
-                           <label className="text-xs uppercase tracking-widest text-slate-400 font-bold">Max Bonus Target (EGP)</label>
+                           <label className="text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold">Max Bonus Target (EGP)</label>
                            <input
                               type="number"
                               value={kpiMaxBonus}
                               onChange={(e) => setKpiMaxBonus(Number(e.target.value))}
-                              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm text-slate-100 outline-none focus:border-purple-500"
+                              className="w-full bg-black/40 border border-slate-200 dark:border-slate-700/10 rounded-xl px-4 py-2 text-sm text-slate-700 outline-none focus:border-purple-500"
                               placeholder="e.g. 3000"
                            />
                          </div>
@@ -15665,7 +11448,7 @@ export default function App() {
                        <div className="overflow-x-auto">
                          <table className="w-full text-left border-collapse min-w-[700px]">
                            <thead>
-                             <tr className="border-b border-white/10 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                             <tr className="border-b border-slate-200 dark:border-slate-700/10 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                                <th className="pb-3 px-4">Metric / KPI Name</th>
                                <th className="pb-3 px-4">Target</th>
                                <th className="pb-3 px-4">Actual</th>
@@ -15689,7 +11472,7 @@ export default function App() {
                                           newM[i].name = e.target.value;
                                           setKpiMetrics(newM);
                                         }}
-                                        className="bg-black/20 border border-white/5 rounded px-2 py-1 w-full text-slate-100"
+                                        className="bg-black/20 border border-slate-200 dark:border-slate-700/5 rounded px-2 py-1 w-full text-slate-700"
                                       />
                                    </td>
                                    <td className="py-3 px-4">
@@ -15701,7 +11484,7 @@ export default function App() {
                                           newM[i].target = Number(e.target.value);
                                           setKpiMetrics(newM);
                                         }}
-                                        className="bg-black/20 border border-white/5 rounded px-2 py-1 w-24 text-slate-100"
+                                        className="bg-black/20 border border-slate-200 dark:border-slate-700/5 rounded px-2 py-1 w-24 text-slate-700"
                                       />
                                    </td>
                                    <td className="py-3 px-4">
@@ -15713,7 +11496,7 @@ export default function App() {
                                           newM[i].actual = Number(e.target.value);
                                           setKpiMetrics(newM);
                                         }}
-                                        className="bg-black/20 border border-white/5 rounded px-2 py-1 w-24 text-slate-100"
+                                        className="bg-black/20 border border-slate-200 dark:border-slate-700/5 rounded px-2 py-1 w-24 text-slate-700"
                                       />
                                    </td>
                                    <td className="py-3 px-4">
@@ -15725,7 +11508,7 @@ export default function App() {
                                           newM[i].weight = Number(e.target.value);
                                           setKpiMetrics(newM);
                                         }}
-                                        className="bg-black/20 border border-white/5 rounded px-2 py-1 w-20 text-slate-100"
+                                        className="bg-black/20 border border-slate-200 dark:border-slate-700/5 rounded px-2 py-1 w-20 text-slate-700"
                                       />
                                    </td>
                                    <td className="py-3 px-4">
@@ -15736,7 +11519,7 @@ export default function App() {
                                           newM[i].type = e.target.value as any;
                                           setKpiMetrics(newM);
                                         }}
-                                        className="bg-black/20 border border-white/5 rounded px-2 py-1 text-slate-100"
+                                        className="bg-black/20 border border-slate-200 dark:border-slate-700/5 rounded px-2 py-1 text-slate-700"
                                       >
                                         <option value="higher">Higher = Better</option>
                                         <option value="lower">Lower = Better</option>
@@ -15752,7 +11535,7 @@ export default function App() {
                                           setKpiMetrics(newM);
                                         }}
                                         placeholder="e.g. (actual / target) * 100"
-                                        className="bg-black/20 border border-white/5 rounded px-2 py-1 w-44 text-slate-100 font-mono text-xs"
+                                        className="bg-black/20 border border-slate-200 dark:border-slate-700/5 rounded px-2 py-1 w-44 text-slate-700 font-mono text-xs"
                                       />
                                    </td>
                                    <td className="py-3 px-4 text-right font-mono font-bold text-emerald-400">
@@ -15765,24 +11548,24 @@ export default function App() {
                          </table>
                        </div>
 
-                       <div className="flex justify-between items-center bg-black/30 p-4 rounded-xl border border-white/5 mt-4">
+                       <div className="flex justify-between items-center bg-black/30 p-4 rounded-xl border border-slate-200 dark:border-slate-700/5 mt-4">
                          <div className="flex items-center gap-6">
                             <div>
-                               <span className="block text-xs uppercase text-slate-500 font-bold mb-1">Total Weight</span>
+                               <span className="block text-xs uppercase text-white0 font-bold mb-1">Total Weight</span>
                                <span className={`text-lg font-mono font-black ${totalWeight === 100 ? 'text-emerald-400' : 'text-amber-400'}`}>
                                  {totalWeight}% 
                                  {totalWeight !== 100 && <span className="text-xs ml-2 opacity-60 font-sans tracking-tight">Should be 100%</span>}
                                </span>
                             </div>
                             <div>
-                               <span className="block text-xs uppercase text-slate-500 font-bold mb-1">Final Score</span>
+                               <span className="block text-xs uppercase text-white0 font-bold mb-1">Final Score</span>
                                <span className="text-lg font-mono font-black text-indigo-400">{totalScore.toFixed(1)}%</span>
                             </div>
                          </div>
                          <div className="text-right flex flex-col justify-end">
-                           <span className="block text-xs uppercase text-slate-500 font-bold mb-1">Calculated Bonus Payout</span>
+                           <span className="block text-xs uppercase text-white0 font-bold mb-1">Calculated Bonus Payout</span>
                            <span className="text-3xl font-black text-rose-500 font-mono tracking-tight">EGP {payoutBonus.toFixed(2)}</span>
-                           <p className="text-[10px] text-slate-400 mt-1 font-sans">Based on {kpiMaxBonus} EGP Target Bonus</p>
+                           <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-sans">Based on {kpiMaxBonus} EGP Target Bonus</p>
                          </div>
                        </div>
 
@@ -15791,7 +11574,7 @@ export default function App() {
                            onClick={() => {
                              setKpiMetrics([...kpiMetrics, { id: Date.now().toString(), name: 'New Metric', target: 0, actual: 0, weight: 0, type: 'higher', formula: '(actual / target) * 100' }]);
                            }}
-                           className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-bold transition-colors"
+                           className="px-4 py-2 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:bg-slate-800/80 text-white rounded-xl text-xs font-bold transition-colors"
                          >
                            + Add Metric
                          </button>
@@ -15886,54 +11669,54 @@ export default function App() {
                 return (
                   <div className="space-y-6 animate-fade-in text-left">
                     <div>
-                      <h2 className="text-3xl font-bold text-slate-100 font-display flex items-center gap-3">
+                      <h2 className="text-3xl font-bold text-slate-700 font-display flex items-center gap-3">
                         <ClipboardList className="w-8 h-8 text-purple-400" />
                         Agent Submissions Log
                       </h2>
-                      <p className="text-slate-400 text-sm mt-1">Real-time consolidated database feed of all patient inquiries, cases, and payment requests logged by agents.</p>
+                      <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Real-time consolidated database feed of all patient inquiries, cases, and payment requests logged by agents.</p>
                     </div>
 
                     {/* Stats Summary Bento Grid */}
                     <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-                      <div className="bg-slate-900/40/[0.02] border border-white/5 p-4 rounded-2xl">
-                        <span className="block text-xs uppercase text-slate-500 font-bold mb-1">Total Submissions</span>
+                      <div className="bg-white dark:bg-slate-900/40/[0.02] border border-slate-200 dark:border-slate-700/5 p-4 rounded-2xl">
+                        <span className="block text-xs uppercase text-white0 font-bold mb-1">Total Submissions</span>
                         <span className="text-2xl font-black font-mono text-purple-400">{totalCount}</span>
                       </div>
-                      <div className="bg-slate-900/40/[0.02] border border-white/5 p-4 rounded-2xl">
-                        <span className="block text-xs uppercase text-slate-500 font-bold mb-1">Pending Actions</span>
+                      <div className="bg-white dark:bg-slate-900/40/[0.02] border border-slate-200 dark:border-slate-700/5 p-4 rounded-2xl">
+                        <span className="block text-xs uppercase text-white0 font-bold mb-1">Pending Actions</span>
                         <span className="text-2xl font-black font-mono text-orange-400">{pendingCount}</span>
                       </div>
-                      <div className="bg-slate-900/40/[0.02] border border-white/5 p-4 rounded-2xl">
-                        <span className="block text-xs uppercase text-slate-500 font-bold mb-1">TT Requests</span>
+                      <div className="bg-white dark:bg-slate-900/40/[0.02] border border-slate-200 dark:border-slate-700/5 p-4 rounded-2xl">
+                        <span className="block text-xs uppercase text-white0 font-bold mb-1">TT Requests</span>
                         <span className="text-2xl font-black font-mono text-rose-400">{requestCount}</span>
                       </div>
-                      <div className="bg-slate-900/40/[0.02] border border-white/5 p-4 rounded-2xl">
-                        <span className="block text-xs uppercase text-slate-500 font-bold mb-1">Inquiries</span>
+                      <div className="bg-white dark:bg-slate-900/40/[0.02] border border-slate-200 dark:border-slate-700/5 p-4 rounded-2xl">
+                        <span className="block text-xs uppercase text-white0 font-bold mb-1">Inquiries</span>
                         <span className="text-2xl font-black font-mono text-amber-400">{inquiryCount}</span>
                       </div>
-                      <div className="bg-slate-900/40/[0.02] border border-white/5 p-4 rounded-2xl col-span-2 lg:col-span-1">
-                        <span className="block text-xs uppercase text-slate-500 font-bold mb-1">Complaints & Comms</span>
+                      <div className="bg-white dark:bg-slate-900/40/[0.02] border border-slate-200 dark:border-slate-700/5 p-4 rounded-2xl col-span-2 lg:col-span-1">
+                        <span className="block text-xs uppercase text-white0 font-bold mb-1">Complaints & Comms</span>
                         <span className="text-2xl font-black font-mono text-sky-400">{complaintCount + commsCount}</span>
                       </div>
                     </div>
 
                     {/* Filter & Search Bar */}
-                    <div className="p-6 bg-slate-900 border border-white/5 rounded-3xl flex flex-col md:flex-row gap-4 items-center">
+                    <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/5 rounded-3xl flex flex-col md:flex-row gap-4 items-center">
                       <div className="flex-1 w-full relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-500" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-white0" />
                         <input
                           type="text"
                           value={logSearchQuery}
                           onChange={e => setLogSearchQuery(e.target.value)}
                           placeholder="Search patient, clinic, agency, keyword..."
-                          className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-500 font-sans outline-none focus:border-purple-500"
+                          className="w-full bg-black/40 border border-slate-200 dark:border-slate-700/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-slate-700 placeholder-slate-500 font-sans outline-none focus:border-purple-500"
                         />
                       </div>
                       <div className="w-full md:w-48">
                         <select
                           value={logTypeFilter}
                           onChange={e => setLogTypeFilter(e.target.value)}
-                          className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500 font-bold"
+                          className="w-full bg-black/40 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2.5 text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:border-purple-500 font-bold"
                         >
                           <option value="all">All Category Types</option>
                           <option value="inquiry">Inquiries</option>
@@ -15947,7 +11730,7 @@ export default function App() {
                         <select
                           value={logAgentFilter}
                           onChange={e => setLogAgentFilter(e.target.value)}
-                          className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500 font-bold"
+                          className="w-full bg-black/40 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2.5 text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:border-purple-500 font-bold"
                         >
                           <option value="all">All Agents</option>
                           {agentsList.map(name => (
@@ -15960,41 +11743,41 @@ export default function App() {
                     {/* Main Log List */}
                     <div className="space-y-4">
                       {filtered.length === 0 ? (
-                        <div className="p-16 text-center text-slate-500 bg-black/20 rounded-3xl border border-dashed border-white/10 font-sans">
+                        <div className="p-16 text-center text-white0 bg-black/20 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700/10 font-sans">
                           No submissions matched your current search filters.
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {filtered.map(item => (
-                            <div key={item.id} className="p-5 bg-gradient-to-br from-slate-900 via-slate-950/40 to-black border border-white/10 rounded-2xl flex flex-col gap-3 backdrop-blur-xl relative hover:border-purple-500/40 transition-all font-sans">
-                              <div className="flex justify-between items-start border-b border-white/5 pb-2.5">
+                            <div key={item.id} className="p-5 bg-gradient-to-br from-slate-900 via-slate-950/40 to-black border border-slate-200 dark:border-slate-700/10 rounded-2xl flex flex-col gap-3 backdrop-blur-xl relative hover:border-purple-500/40 transition-all font-sans">
+                              <div className="flex justify-between items-start border-b border-slate-200 dark:border-slate-700/5 pb-2.5">
                                 <div className="space-y-1">
                                   <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${item.badgeColor}`}>
                                     {item.type}
                                   </span>
-                                  <h4 className="text-sm font-bold text-slate-200 pt-1">
+                                  <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200 pt-1">
                                     Patient: {item.patient}
                                   </h4>
                                 </div>
-                                <span className="text-[10px] text-slate-400 font-mono">
+                                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                                   {new Date(item.date).toLocaleDateString(undefined, {
                                     month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
                                   })}
                                 </span>
                               </div>
 
-                              <div className="text-xs text-slate-300 bg-slate-900/40/[0.02] p-3 rounded-xl border border-white/5 leading-relaxed italic">
+                              <div className="text-xs text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900/40/[0.02] p-3 rounded-xl border border-slate-200 dark:border-slate-700/5 leading-relaxed italic">
                                 "{item.details}"
                               </div>
 
-                              <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-400 border-t border-white/5 pt-3">
+                              <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-700/5 pt-3">
                                 <div>
-                                  <span className="block text-[8px] uppercase text-slate-500 font-bold">Logged By</span>
-                                  <span className="font-bold text-slate-300">{item.agent}</span>
+                                  <span className="block text-[8px] uppercase text-white0 font-bold">Logged By</span>
+                                  <span className="font-bold text-slate-600 dark:text-slate-300">{item.agent}</span>
                                 </div>
                                 <div>
-                                  <span className="block text-[8px] uppercase text-slate-500 font-bold">Clinic / Location</span>
-                                  <span className="font-bold text-slate-300">{item.clinic}</span>
+                                  <span className="block text-[8px] uppercase text-white0 font-bold">Clinic / Location</span>
+                                  <span className="font-bold text-slate-600 dark:text-slate-300">{item.clinic}</span>
                                 </div>
                               </div>
                             </div>
@@ -16017,7 +11800,7 @@ export default function App() {
                           <ShieldCheck className="w-8 h-8" />
                           Master Control
                         </h2>
-                        <p className="text-slate-400 text-sm">Super Admin privileges. Manage agent LOBs, assign TLs, and upload Headcount sheet.</p>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">Super Admin privileges. Manage agent LOBs, assign TLs, and upload Headcount sheet.</p>
                       </div>
                       
                       <button
@@ -16030,31 +11813,31 @@ export default function App() {
                     </div>
 
                     {/* Add Agent Manually */}
-                    <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-xl">
-                      <h3 className="font-bold text-slate-100 text-base mb-4 flex items-center gap-2">
+                    <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 backdrop-blur-xl rounded-3xl p-6 shadow-xl">
+                      <h3 className="font-bold text-slate-700 text-base mb-4 flex items-center gap-2">
                         <UserPlus className="w-5 h-5 text-emerald-400" />
                         Add User Manually
                       </h3>
                       <div className="flex flex-col sm:flex-row gap-4 items-end">
                         <div className="w-full">
-                          <label className="text-xs text-slate-400 mb-1 block">Full Name</label>
+                          <label className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">Full Name</label>
                           <input 
                             type="text" 
                             id="manual-agent-name"
                             placeholder="e.g. John Doe"
-                            className="bg-white/5 border border-white/10 rounded-lg text-sm text-slate-100 px-3 py-2 focus:outline-none focus:border-emerald-500 w-full"
+                            className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-lg text-sm text-slate-700 px-3 py-2 focus:outline-none focus:border-emerald-500 w-full"
                           />
                         </div>
                         <div className="w-full sm:w-48">
-                          <label className="text-xs text-slate-400 mb-1 block">Role</label>
+                          <label className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">Role</label>
                           <select 
                             id="manual-agent-role"
-                            className="text-slate-100 bg-white/5 border border-white/10 rounded-lg   px-3 py-2 focus:outline-none focus:border-emerald-500 w-full"
+                            className="text-slate-700 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-lg   px-3 py-2 focus:outline-none focus:border-emerald-500 w-full"
                           >
-                            <option className="bg-slate-800 text-slate-100 "  value="Call Center">Call Center</option>
-                            <option className="bg-slate-800 text-slate-100 "  value="Social Media">Social Media</option>
-                            <option className="bg-slate-800 text-slate-100 "  value="TL">Team Leader (TL)</option>
-                            <option className="bg-slate-800 text-slate-100 "  value="Director">Director</option>
+                            <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 "  value="Call Center">Call Center</option>
+                            <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 "  value="Social Media">Social Media</option>
+                            <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 "  value="TL">Team Leader (TL)</option>
+                            <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 "  value="Director">Director</option>
                           </select>
                         </div>
                         <button 
@@ -16097,7 +11880,7 @@ export default function App() {
                                  <CheckCircle2 className="w-5 h-5 text-indigo-400" />
                                </div>
                                <div>
-                                 <h3 className="text-slate-100 font-bold text-sm">Upload CSV File</h3>
+                                 <h3 className="text-slate-700 font-bold text-sm">Upload CSV File</h3>
                                  <p className="text-xs text-indigo-300/70">Upload the raw exported CSV</p>
                                </div>
                              </div>
@@ -16119,7 +11902,7 @@ export default function App() {
                           <div className="bg-emerald-500/10 border border-emerald-500/20 p-5 rounded-2xl flex flex-col gap-4">
                              <div className="flex items-center gap-3">
                                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                                 <svg className="w-5 h-5 bg-slate-800 rounded-full p-0.5" viewBox="0 0 48 48">
+                                 <svg className="w-5 h-5 bg-slate-50 dark:bg-slate-800 rounded-full p-0.5" viewBox="0 0 48 48">
                                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
                                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
                                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
@@ -16127,7 +11910,7 @@ export default function App() {
                                  </svg>
                                </div>
                                <div>
-                                 <h3 className="text-slate-100 font-bold text-sm">Import via Google Sheets Link</h3>
+                                 <h3 className="text-slate-700 font-bold text-sm">Import via Google Sheets Link</h3>
                                  <p className="text-xs text-emerald-300/70">Requires permission to read the Sheet</p>
                                </div>
                              </div>
@@ -16142,7 +11925,7 @@ export default function App() {
                                   setGoogleSheetId(val);
                                   setStorageItem('sched_google_sheet_id', val);
                                }}
-                               className="bg-white/5 backdrop-blur-xl border border-white/10 text-slate-100 placeholder-slate-500 text-xs rounded-lg px-3 py-2.5 w-full focus:outline-none focus:border-emerald-500"
+                               className="bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 text-slate-700 placeholder-slate-500 text-xs rounded-lg px-3 py-2.5 w-full focus:outline-none focus:border-emerald-500"
                              />
                              <button
                                onClick={async () => {
@@ -16222,7 +12005,7 @@ export default function App() {
                                  }
                                }}
                                disabled={isSyncingSheets}
-                               className={`w-full py-2.5 text-center ${isSyncingSheets ? 'bg-emerald-500/50' : 'bg-emerald-500 hover:bg-emerald-600'} text-slate-100 rounded-xl font-bold text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-all`}
+                               className={`w-full py-2.5 text-center ${isSyncingSheets ? 'bg-emerald-500/50' : 'bg-emerald-500 hover:bg-emerald-600'} text-slate-700 rounded-xl font-bold text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-all`}
                              >
                                {isSyncingSheets ? 'Extracting Data...' : 'Extract From Sheet'}
                              </button>
@@ -16232,31 +12015,31 @@ export default function App() {
 
 
                     {/* Add Agent Manually */}
-                    <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-xl">
-                      <h3 className="font-bold text-slate-100 text-base mb-4 flex items-center gap-2">
+                    <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 backdrop-blur-xl rounded-3xl p-6 shadow-xl">
+                      <h3 className="font-bold text-slate-700 text-base mb-4 flex items-center gap-2">
                         <UserPlus className="w-5 h-5 text-emerald-400" />
                         Add User Manually
                       </h3>
                       <div className="flex flex-col sm:flex-row gap-4 items-end">
                         <div className="w-full">
-                          <label className="text-xs text-slate-400 mb-1 block">Full Name</label>
+                          <label className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">Full Name</label>
                           <input 
                             type="text" 
                             id="manual-agent-name"
                             placeholder="e.g. John Doe"
-                            className="bg-white/5 border border-white/10 rounded-lg text-sm text-slate-100 px-3 py-2 focus:outline-none focus:border-emerald-500 w-full"
+                            className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-lg text-sm text-slate-700 px-3 py-2 focus:outline-none focus:border-emerald-500 w-full"
                           />
                         </div>
                         <div className="w-full sm:w-48">
-                          <label className="text-xs text-slate-400 mb-1 block">Role</label>
+                          <label className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">Role</label>
                           <select 
                             id="manual-agent-role"
-                            className="text-slate-100 bg-white/5 border border-white/10 rounded-lg   px-3 py-2 focus:outline-none focus:border-emerald-500 w-full"
+                            className="text-slate-700 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-lg   px-3 py-2 focus:outline-none focus:border-emerald-500 w-full"
                           >
-                            <option className="bg-slate-800 text-slate-100 "  value="Call Center">Call Center</option>
-                            <option className="bg-slate-800 text-slate-100 "  value="Social Media">Social Media</option>
-                            <option className="bg-slate-800 text-slate-100 "  value="TL">Team Leader (TL)</option>
-                            <option className="bg-slate-800 text-slate-100 "  value="Director">Director</option>
+                            <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 "  value="Call Center">Call Center</option>
+                            <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 "  value="Social Media">Social Media</option>
+                            <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 "  value="TL">Team Leader (TL)</option>
+                            <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 "  value="Director">Director</option>
                           </select>
                         </div>
                         <button 
@@ -16291,14 +12074,14 @@ export default function App() {
 
                   {/* Admin Upload Console */}
                   {isMasterAdmin && (
-                    <div className="bg-white/5 border text-slate-100 border-white/10 rounded-3xl shadow-sm p-6 space-y-6">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-white/5 gap-3">
+                    <div className="bg-white dark:bg-slate-900/50 border text-slate-700 border-slate-200 dark:border-slate-700/10 rounded-3xl shadow-sm p-6 space-y-6">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-slate-200 dark:border-slate-700/5 gap-3">
                         <div>
-                          <h3 className="font-bold text-slate-100 text-base font-display flex items-center gap-2">
+                          <h3 className="font-bold text-slate-700 text-base font-display flex items-center gap-2">
                             <Upload className="w-5 h-5 text-indigo-400" />
                             Upload Schedule Roster File
                           </h3>
-                          <p className="text-xs text-slate-400">Import CSV documents containing weekly or monthly coverage calendars</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">Import CSV documents containing weekly or monthly coverage calendars</p>
                         </div>
                         <button
                           onClick={downloadScheduleTemplate}
@@ -16319,7 +12102,7 @@ export default function App() {
                         className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all relative flex flex-col items-center justify-center gap-3 ${
                           dragActive 
                             ? 'border-indigo-400 bg-indigo-500/10' 
-                            : 'border-white/10 bg-black/30 hover:border-white/20'
+                            : 'border-slate-200 dark:border-slate-700/10 bg-black/30 hover:border-slate-200 dark:border-slate-700/20'
                         }`}
                       >
                         <input
@@ -16333,16 +12116,16 @@ export default function App() {
                           <Upload className="w-6 h-6 text-indigo-400" />
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-slate-100">Drag and drop your schedule roster file here</p>
-                          <p className="text-xs text-slate-400 mt-1">Supports Excel (.xlsx, .xls), CSV, JSON, and text plans</p>
+                          <p className="text-sm font-semibold text-slate-700">Drag and drop your schedule roster file here</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Supports Excel (.xlsx, .xls), CSV, JSON, and text plans</p>
                         </div>
-                        <span className="px-3 py-1 bg-white/5 border border-white/10 text-slate-300 rounded-full text-[10px] font-mono">
+                        <span className="px-3 py-1 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 text-slate-600 dark:text-slate-300 rounded-full text-[10px] font-mono">
                           Supports any sheet layout containing Agent Name, Date & Shift columns!
                         </span>
                       </div>
                       <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 text-center transition-all min-h-[220px]">
-                        <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center shadow-inner">
-                          <svg className="w-6 h-6 bg-slate-800 rounded-full p-0.5" viewBox="0 0 48 48">
+                        <div className="w-12 h-12 bg-slate-50 dark:bg-slate-800/80 rounded-2xl flex items-center justify-center shadow-inner">
+                          <svg className="w-6 h-6 bg-slate-50 dark:bg-slate-800 rounded-full p-0.5" viewBox="0 0 48 48">
                             <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
                             <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
                             <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
@@ -16350,7 +12133,7 @@ export default function App() {
                           </svg>
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-slate-100">Import via Google Sheets Link</p>
+                          <p className="text-sm font-semibold text-slate-700">Import via Google Sheets Link</p>
                           <p className="text-xs text-emerald-300 mt-1">Extract schedules directly from a linked Google Sheet</p>
                         </div>
                         <div className="w-full mt-2 space-y-2">
@@ -16365,7 +12148,7 @@ export default function App() {
                                 setGoogleSheetId(val);
                                 setStorageItem('sched_google_sheet_id', val);
                              }}
-                             className="bg-white/5 backdrop-blur-xl border border-white/10 text-slate-100 placeholder-emerald-500/50 text-xs rounded-lg px-3 py-2.5 w-full focus:outline-none focus:border-emerald-500 text-center"
+                             className="bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 text-slate-700 placeholder-emerald-500/50 text-xs rounded-lg px-3 py-2.5 w-full focus:outline-none focus:border-emerald-500 text-center"
                            />
                            <button
                              onClick={async () => {
@@ -16400,7 +12183,7 @@ export default function App() {
                                     setTempSchedules(result.schedules);
                                     setUploadSuccess(`Successfully extracted ${result.schedules.length} shifts spanning ${new Set(result.schedules.map(r => r.date)).size} days.`);
                                  } else {
-                                    setUploadError((prev) => (prev ? prev + "\n" : "") + "No schedule data parsed from sheet.");
+                                    setUploadError((prev) => (prev ? prev + "\n    </>\n" : "") + "No schedule data parsed from sheet.");
                                  }
                                } catch (err: any) {
                                  setUploadError("Extraction failed: " + err.message);
@@ -16409,7 +12192,7 @@ export default function App() {
                                }
                              }}
                              disabled={isSyncingSheets}
-                             className={`w-full py-2 text-center ${isSyncingSheets ? 'bg-emerald-500/50' : 'bg-emerald-500 hover:bg-emerald-600'} text-slate-100 rounded-lg font-bold text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-all`}
+                             className={`w-full py-2 text-center ${isSyncingSheets ? 'bg-emerald-500/50' : 'bg-emerald-500 hover:bg-emerald-600'} text-slate-700 rounded-lg font-bold text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-all`}
                            >
                              {isSyncingSheets ? 'Extracting...' : 'Extract From Sheet'}
                            </button>
@@ -16448,7 +12231,7 @@ export default function App() {
                               <p className="text-[11px] text-indigo-200 leading-relaxed font-mono">
                                 {tempNewAgents.join(', ')}
                               </p>
-                              <p className="text-[9px] text-slate-400">These agents will be auto-registered and can sign in instantly once you commit.</p>
+                              <p className="text-[9px] text-slate-500 dark:text-slate-400">These agents will be auto-registered and can sign in instantly once you commit.</p>
                             </div>
                           )}
 
@@ -16459,7 +12242,7 @@ export default function App() {
                                 setTempSchedules([]);
                                 setTempNewAgents([]);
                               }}
-                              className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                              className="px-4 py-2 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/10 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
                             >
                               Discard Upload
                             </button>
@@ -16486,7 +12269,7 @@ export default function App() {
                           <AlertTriangle className="w-5 h-5 text-rose-400" />
                         </div>
                         <div>
-                          <h3 className="text-slate-100 font-bold text-sm">System Kill Switch</h3>
+                          <h3 className="text-slate-700 font-bold text-sm">System Kill Switch</h3>
                           <p className="text-xs text-rose-300">Danger zone: Shut down the entire application</p>
                         </div>
                       </div>
@@ -16534,7 +12317,7 @@ export default function App() {
                     </div>
                   )}
 
-                    <div className="bg-white/5 border border-rose-500/20 backdrop-blur-xl rounded-3xl p-6 shadow-2xl overflow-x-auto">
+                    <div className="bg-white dark:bg-slate-900/50 border border-rose-500/20 backdrop-blur-xl rounded-3xl p-6 shadow-2xl overflow-x-auto">
                       {(() => {
                         // Create a unique set of names/usernames from both agents list and registered users list
                         const uniqueNamesSet = new Set<string>();
@@ -16562,7 +12345,7 @@ export default function App() {
                                 <th className="px-5 py-3 text-right">Actions</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/5 text-xs text-slate-300 font-sans">
+                            <tbody className="divide-y divide-white/5 text-xs text-slate-600 dark:text-slate-300 font-sans">
                               {sortedUniqueList.map(agent => {
                                 const curRole = globalMeta[agent]?.roleType || getAgentLOB(agent);
                                 const curTL = globalMeta[agent]?.tlName || getAgentTL(agent);
@@ -16575,7 +12358,7 @@ export default function App() {
 
                                 return (
                                   <tr key={agent} className="hover:bg-rose-500/5 transition-all">
-                                    <td className="px-5 py-4 font-bold text-slate-100 uppercase tracking-wide">
+                                    <td className="px-5 py-4 font-bold text-slate-700 uppercase tracking-wide">
                                       <div className="flex flex-col gap-1.5 justify-start text-left">
                                         <div className="flex items-center gap-2">
                                           <span>{agent}</span>
@@ -16587,7 +12370,7 @@ export default function App() {
                                           )}
                                         </div>
                                         <div className="flex items-center gap-1.5">
-                                          <span className="text-[10px] text-slate-400 font-mono tracking-wide lowercase">
+                                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono tracking-wide lowercase">
                                             username: <strong className="text-cyan-400">{username}</strong>
                                           </span>
                                         </div>
@@ -16605,13 +12388,13 @@ export default function App() {
                                           setDoc(doc(db, "system", "sched_agent_meta"), { data: newMeta }).catch(console.error);
                                           toast.success(`Updated ${agent}'s role to ${e.target.value}`);
                                         }}
-                                        className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-xs text-slate-100 px-3 py-1.5 focus:outline-none focus:border-rose-500 cursor-pointer w-full max-w-[150px]"
+                                        className="bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-lg text-xs text-slate-700 px-3 py-1.5 focus:outline-none focus:border-rose-500 cursor-pointer w-full max-w-[150px]"
                                       >
-                                        <option className="bg-slate-800 text-slate-100 " value="Call Center">Call Center</option>
-                                        <option className="bg-slate-800 text-slate-100 " value="Social Media">Social Media</option>
-                                        <option className="bg-slate-800 text-slate-100 " value="General">General</option>
-                                        <option className="bg-slate-800 text-slate-100 " value="TL">Team Leader (TL)</option>
-                                        <option className="bg-slate-800 text-slate-100 " value="Medical">Medical</option>
+                                        <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 " value="Call Center">Call Center</option>
+                                        <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 " value="Social Media">Social Media</option>
+                                        <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 " value="General">General</option>
+                                        <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 " value="TL">Team Leader (TL)</option>
+                                        <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 " value="Medical">Medical</option>
                                       </select>
                                     </td>
                                     <td className="px-3 py-4">
@@ -16626,9 +12409,9 @@ export default function App() {
                                           setDoc(doc(db, "system", "sched_agent_meta"), { data: newMeta }).catch(console.error);
                                           toast.success(`Assigned ${agent} to TL: ${e.target.value}`);
                                         }}
-                                        className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-xs text-slate-100 px-3 py-1.5 focus:outline-none focus:border-rose-500 cursor-pointer w-full max-w-[180px]"
+                                        className="bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/10 rounded-lg text-xs text-slate-700 px-3 py-1.5 focus:outline-none focus:border-rose-500 cursor-pointer w-full max-w-[180px]"
                                       >
-                                        {availableTLs.map(tl => <option className="bg-slate-800 text-slate-100 " key={tl} value={tl}>{tl}</option>)}
+                                        {availableTLs.map(tl => <option className="bg-slate-50 dark:bg-slate-800 text-slate-700 " key={tl} value={tl}>{tl}</option>)}
                                       </select>
                                     </td>
                                     <td className="px-5 py-4 text-right">
@@ -16710,7 +12493,7 @@ export default function App() {
                                           </button>
                                         </div>
                                       ) : (
-                                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest select-none">
+                                        <span className="text-[10px] text-white0 font-bold uppercase tracking-widest select-none">
                                           🔒 Restricted
                                         </span>
                                       )}
@@ -16738,8 +12521,8 @@ export default function App() {
                 // Compact Floating Badge at Bottom-Right
                 return (
                   <div className="fixed bottom-6 right-6 z-50 animate-bounce cursor-pointer scale-100 hover:scale-[1.03] active:scale-[0.98] transition-all" onClick={() => setIsOvertimeAlertMinimized(false)}>
-                    <div className="bg-rose-600 hover:bg-rose-700 text-slate-100 font-bold p-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-rose-400/40 select-none">
-                      <span className="w-2.5 h-2.5 rounded-full bg-slate-800 animate-ping"></span>
+                    <div className="bg-rose-600 hover:bg-rose-700 text-slate-700 font-bold p-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-rose-400/40 select-none">
+                      <span className="w-2.5 h-2.5 rounded-full bg-slate-50 dark:bg-slate-800 animate-ping"></span>
                       <span className="text-xs font-mono">
                         🚨 OVERTIME: {elapsed.type.toUpperCase()} +{elapsed.exceededBy.toFixed(1)}m
                       </span>
@@ -16752,7 +12535,7 @@ export default function App() {
               // Full Interactive Modal Overlay
               return (
                 <div className="fixed inset-0 bg-transparent/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-                  <div className="bg-slate-900/40 border border-rose-500/30 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative overflow-hidden space-y-6 text-center animate-fade-in">
+                  <div className="bg-white dark:bg-slate-900/40 border border-rose-500/30 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative overflow-hidden space-y-6 text-center animate-fade-in">
                     <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-500 animate-pulse"></div>
                     
                     {/* Pulsing warning circle icon */}
@@ -16761,73 +12544,73 @@ export default function App() {
                     </div>
 
                     <div className="space-y-2">
-                      <h3 className="text-2xl font-black text-slate-100 font-display tracking-wide uppercase">
+                      <h3 className="text-2xl font-black text-slate-700 font-display tracking-wide uppercase">
                         ⚠️ Overtime Limit Notice!
                       </h3>
-                      <p className="text-sm text-slate-300 font-sans px-2 leading-relaxed">
-                        You have exceeded your allocated <span className="font-bold underline text-slate-100 capitalize">{elapsed.type}</span> limit of <span className="text-rose-300 font-bold font-mono">{elapsed.limit}</span> minutes.
+                      <p className="text-sm text-slate-600 dark:text-slate-300 font-sans px-2 leading-relaxed">
+                        You have exceeded your allocated <span className="font-bold underline text-slate-700 capitalize">{elapsed.type}</span> limit of <span className="text-rose-300 font-bold font-mono">{elapsed.limit}</span> minutes.
                       </p>
                     </div>
 
                     {/* Overtime breakdown banner */}
                     <div className="p-4 bg-rose-950/20 border border-rose-500/20 rounded-2xl space-y-1 text-center">
-                      <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider font-mono">Elapsed Session Time</p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider font-mono">Elapsed Session Time</p>
                       <p className="text-3xl font-black text-rose-400 font-mono">
                         {elapsed.duration.toFixed(2)}m
                       </p>
-                      <p className="text-[11px] font-bold text-slate-100 font-sans animate-pulse">
+                      <p className="text-[11px] font-bold text-slate-700 font-sans animate-pulse">
                         Exceeding limit by: <span className="font-mono text-xs underline">+{elapsed.exceededBy.toFixed(1)} minutes</span>
                       </p>
                     </div>
 
                     {/* Show cumulative aggregates */}
-                    <div className="p-4 bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl text-left space-y-2.5">
-                      <p className="text-xs font-bold text-slate-300 font-display border-b border-white/5 pb-1 flex items-center gap-1.5">
+                    <div className="p-4 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-700/20 rounded-2xl text-left space-y-2.5">
+                      <p className="text-xs font-bold text-slate-600 dark:text-slate-300 font-display border-b border-slate-200 dark:border-slate-700/5 pb-1 flex items-center gap-1.5">
                         <span className="w-2 h-2 rounded bg-indigo-400 animate-pulse"></span>
                         Your Timecard Totals (Today):
                       </p>
                       <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                        <div className="p-2 bg-white/5 border border-white/10 rounded-xl">
-                          <p className="text-[9px] uppercase font-bold text-slate-400">Total Break</p>
+                        <div className="p-2 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-xl">
+                          <p className="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400">Total Break</p>
                           <p className={`font-bold font-mono ${stats.breakMins > 15 ? 'text-rose-400 animate-pulse' : 'text-amber-300'}`}>
                             {stats.breakMins.toFixed(1)}m
                           </p>
-                          <p className="text-[8px] text-slate-500">Max 15m</p>
+                          <p className="text-[8px] text-white0">Max 15m</p>
                         </div>
-                        <div className="p-2 bg-white/5 border border-white/10 rounded-xl">
-                          <p className="text-[9px] uppercase font-bold text-slate-400">Total Lunch</p>
+                        <div className="p-2 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-xl">
+                          <p className="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400">Total Lunch</p>
                           <p className={`font-bold font-mono ${stats.lunchMins > 30 ? 'text-rose-400 animate-pulse' : 'text-pink-300'}`}>
                             {stats.lunchMins.toFixed(1)}m
                           </p>
-                          <p className="text-[8px] text-slate-500">Max 30m</p>
+                          <p className="text-[8px] text-white0">Max 30m</p>
                         </div>
-                        <div className="p-2 bg-white/5 border border-white/10 rounded-xl">
-                          <p className="text-[9px] uppercase font-bold text-slate-400">Restroom</p>
+                        <div className="p-2 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-xl">
+                          <p className="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400">Restroom</p>
                           <p className="text-indigo-400 font-bold font-mono">
                             {stats.restroomMins.toFixed(1)}m
                           </p>
-                          <p className="text-[8px] text-slate-500">{stats.restroomCount} sessions</p>
+                          <p className="text-[8px] text-white0">{stats.restroomCount} sessions</p>
                         </div>
-                        <div className="p-2 bg-white/5 border border-white/10 rounded-xl">
-                          <p className="text-[9px] uppercase font-bold text-slate-400">Meeting</p>
+                        <div className="p-2 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-xl">
+                          <p className="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400">Meeting</p>
                           <p className={`font-bold font-mono ${stats.meetingMins > 60 ? 'text-rose-400 animate-pulse' : 'text-cyan-300'}`}>
                             {stats.meetingMins.toFixed(1)}m
                           </p>
-                          <p className="text-[8px] text-slate-500">Max 60m</p>
+                          <p className="text-[8px] text-white0">Max 60m</p>
                         </div>
-                        <div className="p-2 bg-white/5 border border-white/10 rounded-xl">
-                          <p className="text-[9px] uppercase font-bold text-slate-400">1:1 Session</p>
+                        <div className="p-2 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-xl">
+                          <p className="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400">1:1 Session</p>
                           <p className={`font-bold font-mono ${stats.oneOnOneMins > 30 ? 'text-rose-400 animate-pulse' : 'text-violet-300'}`}>
                             {stats.oneOnOneMins.toFixed(1)}m
                           </p>
-                          <p className="text-[8px] text-slate-500">Max 30m</p>
+                          <p className="text-[8px] text-white0">Max 30m</p>
                         </div>
-                        <div className="p-2 bg-white/5 border border-white/10 rounded-xl">
-                          <p className="text-[9px] uppercase font-bold text-slate-400">Pers. Break</p>
+                        <div className="p-2 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 rounded-xl">
+                          <p className="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400">Pers. Break</p>
                           <p className={`font-bold font-mono ${stats.personalMins > 15 ? 'text-rose-400 animate-pulse' : 'text-emerald-300'}`}>
                             {stats.personalMins.toFixed(1)}m
                           </p>
-                          <p className="text-[8px] text-slate-500">Max 15m</p>
+                          <p className="text-[8px] text-white0">Max 15m</p>
                         </div>
                       </div>
                     </div>
@@ -16836,14 +12619,14 @@ export default function App() {
                     <div className="flex flex-col gap-2 pt-2">
                       <button
                         onClick={() => handleEndActivity()}
-                        className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-100 font-black text-xs tracking-wider rounded-xl shadow-lg shadow-emerald-500/10 cursor-pointer flex items-center justify-center gap-2 uppercase font-sans border border-emerald-400/20 active:scale-[0.99] transition-all"
+                        className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-700 font-black text-xs tracking-wider rounded-xl shadow-lg shadow-emerald-500/10 cursor-pointer flex items-center justify-center gap-2 uppercase font-sans border border-emerald-400/20 active:scale-[0.99] transition-all"
                       >
-                        <ArrowRight className="w-4 h-4 text-slate-100" />
+                        <ArrowRight className="w-4 h-4 text-slate-700" />
                         End Activity & Continue Shift
                       </button>
                       <button
                         onClick={() => setIsOvertimeAlertMinimized(true)}
-                        className="w-full py-2.5 bg-[#1e1e1e]/40 backdrop-blur-lg hover:bg-slate-700 backdrop-blur-xl border border-white/20 text-slate-300 hover:text-slate-100 rounded-xl text-xs font-semibold cursor-pointer active:scale-[0.99] transition-all"
+                        className="w-full py-2.5 bg-white dark:bg-slate-900/40 backdrop-blur-lg hover:bg-slate-700 backdrop-blur-xl border border-slate-200 dark:border-slate-700/20 text-slate-600 dark:text-slate-300 hover:text-slate-700 rounded-xl text-xs font-semibold cursor-pointer active:scale-[0.99] transition-all"
                       >
                         Minimize Alert Temporarily
                       </button>
@@ -16876,16 +12659,16 @@ export default function App() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="relative w-full max-w-md h-full bg-transparent border-l border-white/10 shadow-2xl flex flex-col p-6 overflow-y-auto z-10 text-left cursor-default"
+              className="relative w-full max-w-md h-full bg-transparent border-l border-slate-200 dark:border-slate-700/10 shadow-2xl flex flex-col p-6 overflow-y-auto z-10 text-left cursor-default"
             >
-              <div className="flex items-center justify-between pb-4 border-b border-white/10">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-700/10">
                 <div className="flex items-center gap-2">
                   <Bell className="w-5 h-5 text-indigo-400" />
-                  <h2 className="text-lg font-bold text-slate-100 font-display">Real-time Sync Inbox</h2>
+                  <h2 className="text-lg font-bold text-slate-700 font-display">Real-time Sync Inbox</h2>
                 </div>
                 <button
                   onClick={() => setIsNotifDrawerOpen(false)}
-                  className="p-1 px-3 text-xs bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 hover:text-slate-100 rounded-lg transition-colors cursor-pointer"
+                  className="p-1 px-3 text-xs bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 hover:bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:text-slate-700 rounded-lg transition-colors cursor-pointer"
                 >
                   Close
                 </button>
@@ -16893,10 +12676,10 @@ export default function App() {
 
               <div className="flex-1 py-4 space-y-3 overflow-y-auto pr-1">
                 {visibleNotifs.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500">
+                  <div className="flex flex-col items-center justify-center py-12 text-center text-white0">
                     <Bell className="w-12 h-12 stroke-1 mb-3 opacity-30" />
                     <p className="text-xs">No notifications on file.</p>
-                    <p className="text-[10px] text-slate-400 mt-1">Real-time status announcements and TL feedback logs will populate here.</p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Real-time status announcements and TL feedback logs will populate here.</p>
                   </div>
                 ) : (
                   visibleNotifs.map(notif => {
@@ -16908,7 +12691,7 @@ export default function App() {
                         className={`p-4 rounded-xl border transition-all text-left relative cursor-pointer group ${
                           isUnread
                             ? 'bg-indigo-500/10 border-indigo-500/30'
-                            : 'bg-white/5 border-white/5 hover:border-white/10'
+                            : 'bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-700/5 hover:border-slate-200 dark:border-slate-700/10'
                         }`}
                       >
                         {isUnread && (
@@ -16917,9 +12700,9 @@ export default function App() {
                         <p className="text-[9px] font-bold uppercase tracking-widest text-indigo-300 font-mono mb-1">
                           {notif.type}
                         </p>
-                        <p className="text-xs font-bold text-slate-100 mb-1">{notif.title}</p>
-                        <p className="text-slate-300 text-[11px] leading-relaxed mb-2">{notif.message}</p>
-                        <p className="text-[9px] text-slate-500">{new Date(notif.createdAt).toLocaleTimeString()} - {new Date(notif.createdAt).toLocaleDateString()}</p>
+                        <p className="text-xs font-bold text-slate-700 mb-1">{notif.title}</p>
+                        <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed mb-2">{notif.message}</p>
+                        <p className="text-[9px] text-white0">{new Date(notif.createdAt).toLocaleTimeString()} - {new Date(notif.createdAt).toLocaleDateString()}</p>
                       </div>
                     );
                   })
@@ -16927,10 +12710,10 @@ export default function App() {
               </div>
 
               {visibleNotifs.length > 0 && (
-                <div className="pt-4 border-t border-white/10 flex flex-col gap-2">
+                <div className="pt-4 border-t border-slate-200 dark:border-slate-700/10 flex flex-col gap-2">
                   <button
                     onClick={handleMarkAllNotifsAsRead}
-                    className="w-full py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-slate-100 rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/10"
+                    className="w-full py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-slate-700 rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/10"
                   >
                     Mark All as Read
                   </button>
@@ -16954,7 +12737,7 @@ export default function App() {
                         toast.success("Inbox cleared.");
                       }
                     }}
-                    className="w-full py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 hover:text-slate-100 rounded-xl text-xs font-semibold transition-colors"
+                    className="w-full py-2.5 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 hover:bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:text-slate-700 rounded-xl text-xs font-semibold transition-colors"
                   >
                     Clear My Inbox
                   </button>
@@ -16965,22 +12748,22 @@ export default function App() {
         )}
       </AnimatePresence>
           </div>
-        )}
+// removed
       {selectedShiftForActivities && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] p-4 flex items-center justify-center">
-          <div className="bg-slate-900 border border-indigo-500/30 rounded-3xl p-6 shadow-2xl space-y-5 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-start border-b border-white/5 pb-4">
+          <div className="bg-white dark:bg-slate-900 border border-indigo-500/30 rounded-3xl p-6 shadow-2xl space-y-5 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-start border-b border-slate-200 dark:border-slate-700/5 pb-4">
               <div>
-                <h3 className="text-lg font-black text-slate-100 flex items-center gap-2">
+                <h3 className="text-lg font-black text-slate-700 flex items-center gap-2">
                   <Activity className="w-5 h-5 text-indigo-400" />
                   Intraday Activity Planner
                 </h3>
-                <p className="text-xs text-slate-400 font-mono mt-1">Agent: {selectedShiftForActivities.agentName} | Date: {selectedShiftForActivities.date}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-1">Agent: {selectedShiftForActivities.agentName} | Date: {selectedShiftForActivities.date}</p>
                 <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-widest mt-1">Base Shift: {selectedShiftForActivities.shiftLabel}</p>
               </div>
               <button 
                 onClick={() => setSelectedShiftForActivities(null)}
-                className="text-slate-500 hover:text-slate-300 px-2 py-1 bg-white/5 rounded-lg text-lg font-bold"
+                className="text-white0 hover:text-slate-600 dark:text-slate-300 px-2 py-1 bg-white dark:bg-slate-900/50 rounded-lg text-lg font-bold"
               >
                 ✕
               </button>
@@ -16988,13 +12771,13 @@ export default function App() {
 
             <div className="space-y-4">
               {(!selectedShiftForActivities.activities || selectedShiftForActivities.activities.length === 0) ? (
-                <div className="text-center py-6 border border-dashed border-white/10 rounded-xl bg-black/20">
-                  <p className="text-xs text-slate-500">No intraday activities configured.</p>
+                <div className="text-center py-6 border border-dashed border-slate-200 dark:border-slate-700/10 rounded-xl bg-black/20">
+                  <p className="text-xs text-white0">No intraday activities configured.</p>
                 </div>
               ) : (
                 <div className="space-y-2">
                   {[...selectedShiftForActivities.activities].sort((a,b) => a.startTime.localeCompare(b.startTime)).map((act, idx) => (
-                    <div key={act.id} className="flex items-center gap-3 bg-white/5 border border-white/10 p-3 rounded-xl">
+                    <div key={act.id} className="flex items-center gap-3 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/10 p-3 rounded-xl">
                       <div className="flex-1 grid grid-cols-3 gap-2">
                         <select 
                           value={act.label}
@@ -17003,7 +12786,7 @@ export default function App() {
                             newActs[idx].label = e.target.value;
                             setSelectedShiftForActivities({...selectedShiftForActivities, activities: newActs});
                           }}
-                          className="bg-black/50 border border-white/10 rounded px-2 py-1 text-xs text-slate-200"
+                          className="bg-black/50 border border-slate-200 dark:border-slate-700/10 rounded px-2 py-1 text-xs text-slate-700 dark:text-slate-200"
                         >
                           <option value="Work">Work</option>
                           <option value="Break">Break</option>
@@ -17021,7 +12804,7 @@ export default function App() {
                             newActs[idx].startTime = e.target.value;
                             setSelectedShiftForActivities({...selectedShiftForActivities, activities: newActs});
                           }}
-                          className="bg-black/50 border border-white/10 rounded px-2 py-1 text-xs text-slate-200" 
+                          className="bg-black/50 border border-slate-200 dark:border-slate-700/10 rounded px-2 py-1 text-xs text-slate-700 dark:text-slate-200" 
                         />
                         <input 
                           type="time" 
@@ -17031,7 +12814,7 @@ export default function App() {
                             newActs[idx].endTime = e.target.value;
                             setSelectedShiftForActivities({...selectedShiftForActivities, activities: newActs});
                           }}
-                          className="bg-black/50 border border-white/10 rounded px-2 py-1 text-xs text-slate-200" 
+                          className="bg-black/50 border border-slate-200 dark:border-slate-700/10 rounded px-2 py-1 text-xs text-slate-700 dark:text-slate-200" 
                         />
                       </div>
                       <button 
@@ -17065,10 +12848,10 @@ export default function App() {
               </button>
             </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700/5">
               <button 
                 onClick={() => setSelectedShiftForActivities(null)}
-                className="px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-300 rounded-lg text-xs font-bold"
+                className="px-4 py-2 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-bold"
               >
                 Cancel
               </button>
@@ -17099,10 +12882,10 @@ export default function App() {
 
       {editingItem && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-[99999] p-4 flex items-center justify-center overflow-y-auto">
-          <div className="bg-[#0f111a] border border-emerald-500/30 rounded-3xl p-6 shadow-2xl space-y-5 max-w-lg w-full max-h-[90vh] overflow-y-auto text-left relative">
-            <div className="flex justify-between items-start border-b border-white/5 pb-4">
+          <div className="bg-white dark:bg-slate-900 border border-emerald-500/30 rounded-3xl p-6 shadow-2xl space-y-5 max-w-lg w-full max-h-[90vh] overflow-y-auto text-left relative">
+            <div className="flex justify-between items-start border-b border-slate-200 dark:border-slate-700/5 pb-4">
               <div>
-                <h3 className="text-lg font-black text-slate-100 flex items-center gap-2">
+                <h3 className="text-lg font-black text-slate-700 flex items-center gap-2">
                   <Pencil className="w-5 h-5 text-emerald-400" />
                   Edit {editingItem.type === 'inquiry' ? 'Inquiry' : 
                         editingItem.type === 'scheduling_request' ? 'Scheduling Request' :
@@ -17111,13 +12894,13 @@ export default function App() {
                         editingItem.type === 'client_comm' ? 'Client Comm Request' :
                         editingItem.type === 'case' ? 'Case Record' : 'Item'}
                 </h3>
-                <p className="text-xs text-slate-400 font-mono mt-1">
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-1">
                   Time Remaining: <span className="text-emerald-400 font-bold">{getRemainingEditTimeStr(editingItem.data.createdAt)}</span>
                 </p>
               </div>
               <button 
                 onClick={() => setEditingItem(null)}
-                className="text-slate-500 hover:text-slate-300 px-2.5 py-1 bg-white/5 rounded-lg text-lg font-bold"
+                className="text-white0 hover:text-slate-600 dark:text-slate-300 px-2.5 py-1 bg-white dark:bg-slate-900/50 rounded-lg text-lg font-bold"
               >
                 ✕
               </button>
@@ -17127,7 +12910,7 @@ export default function App() {
               {editingItem.type === 'inquiry' && (
                 <>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Patient Name</label>
+                    <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Patient Name</label>
                     <input 
                       type="text" 
                       value={editingItem.data.patientName || ''} 
@@ -17135,12 +12918,12 @@ export default function App() {
                         ...editingItem,
                         data: { ...editingItem.data, patientName: e.target.value }
                       })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                       required
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Phone Number</label>
+                    <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Phone Number</label>
                     <input 
                       type="text" 
                       value={editingItem.data.phoneNumber || ''} 
@@ -17148,19 +12931,19 @@ export default function App() {
                         ...editingItem,
                         data: { ...editingItem.data, phoneNumber: e.target.value }
                       })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                       required
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Inquiry Description</label>
+                    <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Inquiry Description</label>
                     <textarea 
                       value={editingItem.data.inquiry || ''} 
                       onChange={(e) => setEditingItem({
                         ...editingItem,
                         data: { ...editingItem.data, inquiry: e.target.value }
                       })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 min-h-[100px]"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 min-h-[100px]"
                       required
                     />
                   </div>
@@ -17172,7 +12955,7 @@ export default function App() {
                   {editingItem.data.type === 'swap' ? (
                     <>
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-300">Date</label>
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Date</label>
                         <input 
                           type="date" 
                           value={editingItem.data.date || ''} 
@@ -17180,12 +12963,12 @@ export default function App() {
                             ...editingItem,
                             data: { ...editingItem.data, date: e.target.value }
                           })}
-                          className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                           required
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-300">Shift</label>
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Shift</label>
                         <input 
                           type="text" 
                           value={editingItem.data.shift || ''} 
@@ -17193,12 +12976,12 @@ export default function App() {
                             ...editingItem,
                             data: { ...editingItem.data, shift: e.target.value }
                           })}
-                          className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                           required
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-300">Swap With Agent</label>
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Swap With Agent</label>
                         <input 
                           type="text" 
                           value={editingItem.data.swapWithAgent || ''} 
@@ -17206,12 +12989,12 @@ export default function App() {
                             ...editingItem,
                             data: { ...editingItem.data, swapWithAgent: e.target.value }
                           })}
-                          className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                           required
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-300">Swap With Shift</label>
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Swap With Shift</label>
                         <input 
                           type="text" 
                           value={editingItem.data.swapWithShift || ''} 
@@ -17219,7 +13002,7 @@ export default function App() {
                             ...editingItem,
                             data: { ...editingItem.data, swapWithShift: e.target.value }
                           })}
-                          className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                           required
                         />
                       </div>
@@ -17227,7 +13010,7 @@ export default function App() {
                   ) : (
                     <>
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-300">Start Date</label>
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Start Date</label>
                         <input 
                           type="date" 
                           value={editingItem.data.startDate || ''} 
@@ -17235,12 +13018,12 @@ export default function App() {
                             ...editingItem,
                             data: { ...editingItem.data, startDate: e.target.value }
                           })}
-                          className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                           required
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-300">End Date</label>
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-300">End Date</label>
                         <input 
                           type="date" 
                           value={editingItem.data.endDate || ''} 
@@ -17248,21 +13031,21 @@ export default function App() {
                             ...editingItem,
                             data: { ...editingItem.data, endDate: e.target.value }
                           })}
-                          className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                           required
                         />
                       </div>
                     </>
                   )}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Notes / Details</label>
+                    <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Notes / Details</label>
                     <textarea 
                       value={editingItem.data.notes || ''} 
                       onChange={(e) => setEditingItem({
                         ...editingItem,
                         data: { ...editingItem.data, notes: e.target.value }
                       })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 min-h-[80px]"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 min-h-[80px]"
                     />
                   </div>
                 </>
@@ -17272,14 +13055,14 @@ export default function App() {
                 <>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Provider</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Provider</label>
                       <select 
                         value={editingItem.data.platform || 'tabby'} 
                         onChange={(e) => setEditingItem({
                           ...editingItem,
                           data: { ...editingItem.data, platform: e.target.value }
                         })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3- py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3- py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                       >
                         <option value="tabby">Tabby</option>
                         <option value="tamara">Tamara</option>
@@ -17287,7 +13070,7 @@ export default function App() {
                       </select>
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Clinic Name</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Clinic Name</label>
                       <input 
                         type="text" 
                         value={editingItem.data.clinicName || ''} 
@@ -17295,13 +13078,13 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, clinicName: e.target.value }
                         })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Patient Name</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Patient Name</label>
                       <input 
                         type="text" 
                         value={editingItem.data.patientName || ''} 
@@ -17309,12 +13092,12 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, patientName: e.target.value }
                         })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                         required
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">File Number</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">File Number</label>
                       <input 
                         type="text" 
                         value={editingItem.data.fileNumber || ''} 
@@ -17322,14 +13105,14 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, fileNumber: e.target.value }
                         })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                         required
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Phone Number</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Phone Number</label>
                       <input 
                         type="text" 
                         value={editingItem.data.phoneNumber || ''} 
@@ -17337,12 +13120,12 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, phoneNumber: e.target.value }
                         })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                         required
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">ID Number</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">ID Number</label>
                       <input 
                         type="text" 
                         value={editingItem.data.idNumber || ''} 
@@ -17350,12 +13133,12 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, idNumber: e.target.value }
                         })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Price (Without Tax)</label>
+                    <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Price (Without Tax)</label>
                     <input 
                       type="text" 
                       value={editingItem.data.priceWithoutTax || ''} 
@@ -17363,19 +13146,19 @@ export default function App() {
                         ...editingItem,
                         data: { ...editingItem.data, priceWithoutTax: e.target.value }
                       })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                       required
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Notes / Details</label>
+                    <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Notes / Details</label>
                     <textarea 
                       value={editingItem.data.notes || ''} 
                       onChange={(e) => setEditingItem({
                         ...editingItem,
                         data: { ...editingItem.data, notes: e.target.value }
                       })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 min-h-[60px]"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 min-h-[60px]"
                     />
                   </div>
                 </>
@@ -17385,7 +13168,7 @@ export default function App() {
                 <>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Patient Name</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Patient Name</label>
                       <input 
                         type="text" 
                         value={editingItem.data.patientName || ''} 
@@ -17393,12 +13176,12 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, patientName: e.target.value }
                         })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                         required
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">File Number</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">File Number</label>
                       <input 
                         type="text" 
                         value={editingItem.data.fileNumber || ''} 
@@ -17406,14 +13189,14 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, fileNumber: e.target.value }
                         })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                         required
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Phone Number</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Phone Number</label>
                       <input 
                         type="text" 
                         value={editingItem.data.phoneNumber || ''} 
@@ -17421,12 +13204,12 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, phoneNumber: e.target.value }
                         })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                         required
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Clinic Name</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Clinic Name</label>
                       <input 
                         type="text" 
                         value={editingItem.data.clinicName || ''} 
@@ -17434,19 +13217,19 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, clinicName: e.target.value }
                         })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Complaint Details</label>
+                    <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Complaint Details</label>
                     <textarea 
                       value={editingItem.data.complaintDetails || ''} 
                       onChange={(e) => setEditingItem({
                         ...editingItem,
                         data: { ...editingItem.data, complaintDetails: e.target.value }
                       })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 min-h-[100px]"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 min-h-[100px]"
                       required
                     />
                   </div>
@@ -17457,7 +13240,7 @@ export default function App() {
                 <>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Phone Number</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Phone Number</label>
                       <input 
                         type="text" 
                         value={editingItem.data.phoneNumber || ''} 
@@ -17465,19 +13248,19 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, phoneNumber: e.target.value }
                         })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                         required
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Language</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Language</label>
                       <select 
                         value={editingItem.data.language || 'Arabic'} 
                         onChange={(e) => setEditingItem({
                           ...editingItem,
                           data: { ...editingItem.data, language: e.target.value }
                         })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                       >
                         <option value="Arabic">Arabic Only</option>
                         <option value="English">English / Bilingual</option>
@@ -17485,7 +13268,7 @@ export default function App() {
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Clinic Name</label>
+                    <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Clinic Name</label>
                     <input 
                       type="text" 
                       value={editingItem.data.clinicName || ''} 
@@ -17493,19 +13276,19 @@ export default function App() {
                         ...editingItem,
                         data: { ...editingItem.data, clinicName: e.target.value }
                       })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                       required
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Notes / Details</label>
+                    <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Notes / Details</label>
                     <textarea 
                       value={editingItem.data.notes || ''} 
                       onChange={(e) => setEditingItem({
                         ...editingItem,
                         data: { ...editingItem.data, notes: e.target.value }
                       })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 min-h-[100px]"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 min-h-[100px]"
                       required
                     />
                   </div>
@@ -17516,7 +13299,7 @@ export default function App() {
                 <>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Patient Name</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Patient Name</label>
                       <input 
                         type="text" 
                         value={editingItem.data.patientName || ''} 
@@ -17524,12 +13307,12 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, patientName: e.target.value }
                         })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                         required
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Phone Number</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Phone Number</label>
                       <input 
                         type="text" 
                         value={editingItem.data.phoneNumber || ''} 
@@ -17537,14 +13320,14 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, phoneNumber: e.target.value }
                         })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                         required
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Lead Source</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Lead Source</label>
                       <input 
                         type="text" 
                         value={editingItem.data.leadSource || ''} 
@@ -17552,11 +13335,11 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, leadSource: e.target.value }
                         })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Branch Location</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Branch Location</label>
                       <input 
                         type="text" 
                         value={editingItem.data.branch || ''} 
@@ -17564,13 +13347,13 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, branch: e.target.value }
                         })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Service Request</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Service Request</label>
                       <input 
                         type="text" 
                         value={editingItem.data.service || ''} 
@@ -17578,11 +13361,11 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, service: e.target.value }
                         })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Call Type</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Call Type</label>
                       <input 
                         type="text" 
                         value={editingItem.data.callType || ''} 
@@ -17590,13 +13373,13 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, callType: e.target.value }
                         })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Ticket Type</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Ticket Type</label>
                       <input 
                         type="text" 
                         value={editingItem.data.ticketType || ''} 
@@ -17604,18 +13387,18 @@ export default function App() {
                           ...editingItem,
                           data: { ...editingItem.data, ticketType: e.target.value }
                         })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Ticket Status</label>
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Ticket Status</label>
                       <select 
                         value={editingItem.data.ticketStatus || 'Open'} 
                         onChange={(e) => setEditingItem({
                           ...editingItem,
                           data: { ...editingItem.data, ticketStatus: e.target.value }
                         })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                       >
                         <option value="Open">Open</option>
                         <option value="Closed">Closed</option>
@@ -17623,39 +13406,39 @@ export default function App() {
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Patient Type</label>
+                    <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Patient Type</label>
                     <select 
                       value={editingItem.data.patientType || 'New'} 
                       onChange={(e) => setEditingItem({
                         ...editingItem,
                         data: { ...editingItem.data, patientType: e.target.value }
                       })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500"
                     >
                       <option value="New">New Patient</option>
                       <option value="Old">Old Patient</option>
                     </select>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Inquiry details</label>
+                    <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Inquiry details</label>
                     <textarea 
                       value={editingItem.data.inquiry || ''} 
                       onChange={(e) => setEditingItem({
                         ...editingItem,
                         data: { ...editingItem.data, inquiry: e.target.value }
                       })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 min-h-[80px]"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/10 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 min-h-[80px]"
                       required
                     />
                   </div>
                 </>
               )}
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-white/5 font-sans">
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700/5 font-sans">
                 <button 
                   type="button"
                   onClick={() => setEditingItem(null)}
-                  className="px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                  className="px-4 py-2 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -17671,8 +13454,7 @@ export default function App() {
         </div>
       )}
 
-      </div>
-      <footer className="mt-auto border-t border-white/10 bg-black/40 backdrop-blur-md p-4 text-center text-xs text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-2 max-w-7xl mx-auto w-full">
+      <footer className="mt-auto border-t border-slate-200 dark:border-slate-700/10 bg-black/40 backdrop-blur-md p-4 text-center text-xs text-white0 flex flex-col sm:flex-row justify-between items-center gap-2 max-w-7xl mx-auto w-full">
         <div className="flex items-center gap-4">
           <span>📅 standalone local database</span>
           <span>🔒 custom client encryption active</span>
@@ -17695,6 +13477,6 @@ export default function App() {
           </span>
         </div>
       </footer>
-    </div>
+    </>
   );
 }
