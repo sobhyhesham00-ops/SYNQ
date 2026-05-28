@@ -7,8 +7,9 @@ const run = (file) => {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     // looking for setState in root level of react component rendering
-    if (line.match(/^\s+set[A-Z][a-zA-Z0-9]+\(/) && !line.includes('onClick') && !line.includes('onChange') && !line.includes('=>')) {
-       console.log(file + " : " + (i+1) + " -> " + line.trim());
+    // any set* that is indented exactly 2 spaces or 4 spaces could be suspect if we are inside a component
+    if (line.match(/^  set[A-Z]/)) {
+       console.log("SUSPECT RENDER LEVEL STATE: " + file + " : " + (i+1) + " -> " + line.trim());
     }
   }
 }

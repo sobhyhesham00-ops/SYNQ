@@ -1,0 +1,5 @@
+src/components/MetricsReport.tsx:286:        percentage: Math.round((count / totalMatches) * 100)
+src/components/MetricsReport.tsx:296:    const rate = Math.round((answered / total) * 100);
+src/components/MetricsReport.tsx:305:    const rate = Math.round((closed / total) * 100);
+src/components/MetricsReport.tsx:313:    const avgPrice = prices.length ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length) : 0;
+src/components/DashboardSummary.tsx:51:    ? Math.round((myQaScores.reduce((acc, s) => acc + (s.maxTotalScore > 0 ? (s.totalScore / s.maxTotalScore) : 0), 0) / myQaScores.length) * 100)

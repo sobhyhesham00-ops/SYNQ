@@ -9,19 +9,19 @@ import rateLimit from "express-rate-limit";
 import compression from "compression";
 
 // Firebase imports
-import { initializeApp, getApp, getApps } from 'firebase/app';
-import { 
-  getFirestore, 
-  collection, 
+import { initializeApp, getApp, getApps } from "firebase/app";
+import {
+  getFirestore,
+  collection,
   doc,
-  query, 
-  where, 
+  query,
+  where,
   getDocs,
   addDoc,
   setDoc,
-  updateDoc, 
-  Timestamp
-} from 'firebase/firestore';
+  updateDoc,
+  Timestamp,
+} from "firebase/firestore";
 
 // Import our new type-safe validators, loggers & config
 import { validateSchedules, validateMessage } from "./src/lib/validators";
@@ -32,13 +32,17 @@ const STARTUP_TIME = Date.now();
 
 // Circular Changelog Buffer for Realtime Sync
 const changelog: any[] = [];
-function pushChange(type: 'schedule' | 'profile', action: 'create' | 'update' | 'delete', data: any) {
+function pushChange(
+  type: "schedule" | "profile",
+  action: "create" | "update" | "delete",
+  data: any,
+) {
   const change = {
-    id: Math.random().toString(36).substring(2, 11) + '-' + Date.now(),
+    id: Math.random().toString(36).substring(2, 11) + "-" + Date.now(),
     type,
     action,
     data,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   };
   changelog.push(change);
   if (changelog.length > 100) {
@@ -53,42 +57,76 @@ let inMemorySchedules: any[] = [];
 let firebaseApp;
 let db: any = null;
 try {
-  let firebaseConfigPath = path.join(process.cwd(), 'config', 'firebase-applet-config.json');
+  let firebaseConfigPath = path.join(
+    process.cwd(),
+    "config",
+    "firebase-applet-config.json",
+  );
   if (!fs.existsSync(firebaseConfigPath)) {
-    firebaseConfigPath = path.join(process.cwd(), 'firebase-applet-config.json');
+    firebaseConfigPath = path.join(
+      process.cwd(),
+      "firebase-applet-config.json",
+    );
   }
 
   if (fs.existsSync(firebaseConfigPath)) {
-    const raw = fs.readFileSync(firebaseConfigPath, 'utf8');
+    const raw = fs.readFileSync(firebaseConfigPath, "utf8");
     const firebaseConfig = JSON.parse(raw);
-    firebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+    firebaseApp =
+      getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
     db = getFirestore(firebaseApp, firebaseConfig.firestoreDatabaseId);
-    logger.info('Firebase', 'Initialized successfully via ' + firebaseConfigPath);
+    logger.info(
+      "Firebase",
+      "Initialized successfully via " + firebaseConfigPath,
+    );
   } else {
-    logger.warn('Firebase', 'No config file found, continuing in offline/in-memory fallback mode');
+    logger.warn(
+      "Firebase",
+      "No config file found, continuing in offline/in-memory fallback mode",
+    );
   }
 } catch (err: any) {
-  logger.warn('Firebase', 'Initialization failed, continuing with in-memory store', err);
+  logger.warn(
+    "Firebase",
+    "Initialization failed, continuing with in-memory store",
+    err,
+  );
 }
 
 async function startServer() {
   const app = express();
-  app.set('trust proxy', 1);
+  app.set("trust proxy", 1);
   const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
   // STEP 5: Add Security Headers via Helmet
-  app.use(helmet({
-    contentSecurityPolicy: false,
-    crossOriginEmbedderPolicy: false,
-  }));
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
 
   // STEP 5: Add CORS with strictly bounded origin
-  app.use(cors({ 
-    origin: process.env.APP_URL || 'http://localhost:3000',
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-  }));
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        const allowedOrigins = [
+          process.env.APP_URL,
+          "http://localhost:3000",
+          "http://localhost:5173",
+        ].filter(Boolean); // Filter out undefined
+
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(null, false); // Block other origins quietly, or pass Error
+        }
+      },
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    }),
+  );
 
   // Add compression (gzip)
   app.use(compression());
@@ -97,44 +135,55 @@ async function startServer() {
   app.use(express.json({ limit: "15mb" }));
 
   // Request timeout (30 seconds)
-  app.use((req, res, next) => { 
-    req.setTimeout(30000); 
-    next(); 
+  app.use((req, res, next) => {
+    req.setTimeout(30000);
+    next();
   });
 
   // Request validation middleware for POST/PUT (must be JSON)
   app.use((req, res, next) => {
-    if (['POST', 'PUT'].includes(req.method)) {
-      if (!req.is('application/json')) {
-        return res.status(400).json({ error: 'Content-Type must be application/json' });
+    if (["POST", "PUT"].includes(req.method)) {
+      if (!req.is("application/json")) {
+        return res
+          .status(400)
+          .json({ error: "Content-Type must be application/json" });
       }
     }
     next();
   });
 
-  // Custom Security Headers
+  // Error logging and Request monitoring middleware
   app.use((req, res, next) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'DENY');
-    res.setHeader('X-XSS-Protection', '1; mode=block');
-    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-    res.removeHeader('X-Powered-By');
+    const start = Date.now();
+    res.on("finish", () => {
+      const duration = Date.now() - start;
+      if (req.originalUrl.startsWith("/api") || res.statusCode >= 400) {
+        logger.info(
+          "HTTP",
+          `${req.method} ${req.originalUrl} - ${res.statusCode} [${duration}ms]`,
+        );
+      }
+    });
     next();
   });
 
+  // Proceed to routes
+
   // Rate Limiting on API routes
-  const limiter = rateLimit({ 
-    windowMs: 60 * 1000, 
-    max: 30, 
-    message: 'Too many requests from this IP', 
-    standardHeaders: true, 
+  const limiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 30,
+    message: "Too many requests from this IP",
+    standardHeaders: true,
     legacyHeaders: false,
-    skip: (req) => process.env.NODE_ENV !== 'production' 
+    skip: (req) => process.env.NODE_ENV !== "production",
   });
-  app.use('/api/', limiter);
+  app.use("/api/", limiter);
 
   // Helper to safely extract text from a Gemini response
-  function safeText(response: Awaited<ReturnType<GoogleGenAI["models"]["generateContent"]>>): string {
+  function safeText(
+    response: Awaited<ReturnType<GoogleGenAI["models"]["generateContent"]>>,
+  ): string {
     try {
       return response.text ?? "";
     } catch {
@@ -153,32 +202,32 @@ async function startServer() {
   }
 
   // STEP 6: Health check endpoint (before Vite middleware)
-  app.get('/health', (req, res) => {
+  app.get("/health", (req, res) => {
     const key = process.env.GEMINI_API_KEY;
-    const isConfigured = !!key && key !== 'MY_GEMINI_API_KEY';
+    const isConfigured = !!key && key !== "MY_GEMINI_API_KEY";
     res.json({
-      status: 'healthy',
+      status: "healthy",
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       apiKeyConfigured: isConfigured,
-      version: '1.0.0',
-      environment: process.env.NODE_ENV || 'development'
+      version: "1.0.0",
+      environment: process.env.NODE_ENV || "development",
     });
   });
 
   // STEP 6: Status API endpoint
-  app.get('/api/status', (req, res) => {
+  app.get("/api/status", (req, res) => {
     const memory = process.memoryUsage();
     res.json({
-      status: 'ok',
+      status: "ok",
       timestamp: new Date().toISOString(),
       memory: {
-        heapUsed: Math.round(memory.heapUsed / 1024 / 1024) + 'MB',
-        heapTotal: Math.round(memory.heapTotal / 1024 / 1024) + 'MB'
+        heapUsed: Math.round(memory.heapUsed / 1024 / 1024) + "MB",
+        heapTotal: Math.round(memory.heapTotal / 1024 / 1024) + "MB",
       },
-      uptime: Math.round(process.uptime()) + 's',
+      uptime: Math.round(process.uptime()) + "s",
       node_version: process.version,
-      platform: process.platform
+      platform: process.platform,
     });
   });
 
@@ -187,21 +236,28 @@ async function startServer() {
     const startMs = Date.now();
     try {
       // Validate input - handle both direct array and nested schedules array
-      const payload = Array.isArray(req.body) ? req.body : (req.body.schedules || []);
+      const payload = Array.isArray(req.body)
+        ? req.body
+        : req.body.schedules || [];
       const validation = validateSchedules(payload);
       if (!validation.valid) {
-        return res.status(422).json({ error: 'Validation failed', details: validation.errors });
+        return res
+          .status(422)
+          .json({ error: "Validation failed", details: validation.errors });
       }
 
       const schedules = validation.data || [];
-      logger.info('Schedule', 'Request received', { schedulesCount: schedules.length });
+      logger.info("Schedule", "Request received", {
+        schedulesCount: schedules.length,
+      });
 
       const genai = getAI();
       if (!genai) {
         logger.warn("AI", "Analyze schedule requested but AI offline");
         return res.status(401).json({
           error: "API key validation failed",
-          message: "The Gemini API key is missing or invalid. Please configure it in settings."
+          message:
+            "The Gemini API key is missing or invalid. Please configure it in settings.",
         });
       }
 
@@ -243,19 +299,22 @@ Structure your response with elegant markdown:
 - **💡 Core WFM Recommendations**: Present 3 discrete, actionable, bulleted recommendations to optimize this scheduling cycle, improve restroom/lunch compliance, and support staff members on heavy duty days.
 `;
 
-      logger.info('Gemini', 'API call', { model: GEMINI_MODEL });
+      logger.info("Gemini", "API call", { model: GEMINI_MODEL });
       const response = await genai.ai.models.generateContent({
         model: GEMINI_MODEL,
         contents: prompt,
       });
 
-      const analysis = safeText(response) || "No response generated from the AI.";
-      logger.info('Schedule', 'Analysis complete', { duration: Date.now() - startMs + 'ms' });
+      const analysis =
+        safeText(response) || "No response generated from the AI.";
+      logger.info("Schedule", "Analysis complete", {
+        duration: Date.now() - startMs + "ms",
+      });
       return res.json({ analysis });
     } catch (err: any) {
-      logger.error('Schedule', 'Analysis error', err);
+      logger.error("Schedule", "Analysis error", err);
       return res.json({
-        analysis: `🧠 **AI Analysis Currently Unavailable**\n\nThe AI encountered an issue: ${err instanceof Error ? err.message : 'Unknown'}.\n\nYour portal remains fully operational as a standalone application. Please review schedules manually for coverage gaps.`,
+        analysis: `🧠 **AI Analysis Currently Unavailable**\n\nThe AI encountered an issue: ${err instanceof Error ? err.message : "Unknown"}.\n\nYour portal remains fully operational as a standalone application. Please review schedules manually for coverage gaps.`,
       });
     }
   });
@@ -266,41 +325,52 @@ Structure your response with elegant markdown:
     try {
       const validation = validateMessage(req.body.message);
       if (!validation.valid) {
-        return res.status(422).json({ error: 'Validation failed', details: validation.errors });
+        return res
+          .status(422)
+          .json({ error: "Validation failed", details: validation.errors });
       }
 
       const message = validation.data || "";
       const knowledgeContext = req.body.knowledgeContext;
 
-      logger.info('Chat', 'Message received', { length: message.length });
+      logger.info("Chat", "Message received", { length: message.length });
 
       const genai = getAI();
       if (!genai) {
         logger.warn("AI", "Chat requested but AI offline");
         return res.status(401).json({
           error: "API key validation failed",
-          message: "The Gemini API key is missing or invalid. Please configure it in settings."
+          message:
+            "The Gemini API key is missing or invalid. Please configure it in settings.",
         });
       }
 
       let prompt = `You are a helpful and polite WFM AI scheduling assistant embedded in a team portal.`;
-      if (knowledgeContext && typeof knowledgeContext === "string" && knowledgeContext.trim()) {
+      if (
+        knowledgeContext &&
+        typeof knowledgeContext === "string" &&
+        knowledgeContext.trim()
+      ) {
         prompt += `\n\nUse the following relevant Knowledge Base context to answer the user's query if it helps:\n${knowledgeContext}\n`;
       }
       prompt += `\nProvide a short, friendly, concise, and helpful response to this agent's query: "${message}"`;
 
-      logger.info('Gemini', 'Chat API call', { model: GEMINI_MODEL });
+      logger.info("Gemini", "Chat API call", { model: GEMINI_MODEL });
       const response = await genai.ai.models.generateContent({
         model: GEMINI_MODEL,
         contents: prompt,
       });
 
-      logger.info('Chat', 'Reply generated', { duration: Date.now() - startMs + 'ms' });
-      return res.json({ reply: safeText(response) || "No response generated." });
-    } catch (err: any) {
-      logger.error('Chat', 'Error', err);
+      logger.info("Chat", "Reply generated", {
+        duration: Date.now() - startMs + "ms",
+      });
       return res.json({
-        reply: `I encountered an issue connecting to the AI: ${err instanceof Error ? err.message : 'Unknown'}. Your portal functionality remains completely safe and fully standalone! 😊`,
+        reply: safeText(response) || "No response generated.",
+      });
+    } catch (err: any) {
+      logger.error("Chat", "Error", err);
+      return res.json({
+        reply: `I encountered an issue connecting to the AI: ${err instanceof Error ? err.message : "Unknown"}. Your portal functionality remains completely safe and fully standalone! 😊`,
       });
     }
   });
@@ -312,49 +382,67 @@ Structure your response with elegant markdown:
 
     for (const item of items) {
       try {
-        if (item.type === 'schedule') {
-          if (item.action === 'create') {
+        if (item.type === "schedule") {
+          if (item.action === "create") {
             const dataItem = item.data;
             if (db) {
-              await addDoc(collection(db, 'schedules'), {
+              await addDoc(collection(db, "schedules"), {
                 ...dataItem,
                 archived: false,
                 createdAt: Timestamp.now(),
-                updatedAt: Timestamp.now()
+                updatedAt: Timestamp.now(),
               });
             } else {
-              const newId = 'local-' + Date.now() + Math.random().toString(36).substring(2, 6);
-              inMemorySchedules.push({ id: newId, archived: false, ...dataItem });
+              const newId =
+                "local-" +
+                Date.now() +
+                Math.random().toString(36).substring(2, 6);
+              inMemorySchedules.push({
+                id: newId,
+                archived: false,
+                ...dataItem,
+              });
             }
-            pushChange('schedule', 'create', dataItem);
-          } else if (item.action === 'update') {
+            pushChange("schedule", "create", dataItem);
+          } else if (item.action === "update") {
             const dataItem = item.data;
             if (db) {
-              await setDoc(doc(db, 'schedules', dataItem.id), {
-                ...dataItem,
-                updatedAt: Timestamp.now()
-              }, { merge: true });
+              await setDoc(
+                doc(db, "schedules", dataItem.id),
+                {
+                  ...dataItem,
+                  updatedAt: Timestamp.now(),
+                },
+                { merge: true },
+              );
             } else {
-              inMemorySchedules = inMemorySchedules.map(s => s.id === dataItem.id ? { ...s, ...dataItem } : s);
+              inMemorySchedules = inMemorySchedules.map((s) =>
+                s.id === dataItem.id ? { ...s, ...dataItem } : s,
+              );
             }
-            pushChange('schedule', 'update', dataItem);
-          } else if (item.action === 'delete') {
+            pushChange("schedule", "update", dataItem);
+          } else if (item.action === "delete") {
             const id = item.data.id;
             if (db) {
-              await updateDoc(doc(db, 'schedules', id), {
+              await updateDoc(doc(db, "schedules", id), {
                 archived: true,
-                deletedAt: Timestamp.now()
+                deletedAt: Timestamp.now(),
               });
             } else {
-              inMemorySchedules = inMemorySchedules.map(s => s.id === id ? { ...s, archived: true } : s);
+              inMemorySchedules = inMemorySchedules.map((s) =>
+                s.id === id ? { ...s, archived: true } : s,
+              );
             }
-            pushChange('schedule', 'delete', { id });
+            pushChange("schedule", "delete", { id });
           }
         }
         results[item.id] = { success: true };
       } catch (err: any) {
-        logger.error('Sync', 'Failed processing sync item ' + item.id, err);
-        results[item.id] = { success: false, error: err.message || 'Processing failed' };
+        logger.error("Sync", "Failed processing sync item " + item.id, err);
+        results[item.id] = {
+          success: false,
+          error: err.message || "Processing failed",
+        };
       }
     }
 
@@ -367,104 +455,122 @@ Structure your response with elegant markdown:
   });
 
   // ─── API: SCHEDULES RESOURCE ENDPOINTS (STEP 9) ───────────────────────────
-  app.post('/api/schedules', async (req, res) => {
+  app.post("/api/schedules", async (req, res) => {
     try {
       const validation = validateSchedules([req.body]);
       if (!validation.valid) {
-        return res.status(422).json({ error: 'Validation failed', details: validation.errors });
+        return res
+          .status(422)
+          .json({ error: "Validation failed", details: validation.errors });
       }
-      
+
       const valItem = (validation.data || [])[0];
       const resItem = { ...valItem, archived: false };
 
       if (db) {
-        const docRef = await addDoc(collection(db, 'schedules'), {
+        const docRef = await addDoc(collection(db, "schedules"), {
           ...resItem,
           createdAt: Timestamp.now(),
-          updatedAt: Timestamp.now()
+          updatedAt: Timestamp.now(),
         });
         const saved = { id: docRef.id, ...resItem };
-        pushChange('schedule', 'create', saved);
+        pushChange("schedule", "create", saved);
         res.json(saved);
       } else {
-        const localId = 'local-' + Math.random().toString(36).substring(2, 9);
+        const localId = "local-" + Math.random().toString(36).substring(2, 9);
         const saved = { id: localId, ...resItem };
         inMemorySchedules.push(saved);
-        pushChange('schedule', 'create', saved);
+        pushChange("schedule", "create", saved);
         res.json(saved);
       }
     } catch (err: any) {
-      logger.error('Schedules', 'Create error', err);
-      res.status(500).json({ error: 'Failed to create' });
+      logger.error("Schedules", "Create error", err);
+      res.status(500).json({ error: "Failed to create" });
     }
   });
 
-  app.get('/api/schedules', async (req, res) => {
+  app.get("/api/schedules", async (req, res) => {
     try {
       if (db) {
-        const q = query(collection(db, 'schedules'), where('archived', '==', false));
+        const q = query(
+          collection(db, "schedules"),
+          where("archived", "==", false),
+        );
         const querySnapshot = await getDocs(q);
-        const schedules = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const schedules = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
         res.json({ schedules });
       } else {
-        res.json({ schedules: inMemorySchedules.filter(s => !s.archived) });
+        res.json({ schedules: inMemorySchedules.filter((s) => !s.archived) });
       }
     } catch (err: any) {
-      logger.error('Schedules', 'Fetch error', err);
-      res.status(500).json({ error: 'Failed to fetch' });
+      logger.error("Schedules", "Fetch error", err);
+      res.status(500).json({ error: "Failed to fetch" });
     }
   });
 
-  app.put('/api/schedules/:id', async (req, res) => {
+  app.put("/api/schedules/:id", async (req, res) => {
     try {
       const validation = validateSchedules([req.body]);
       if (!validation.valid) {
-        return res.status(422).json({ error: 'Validation failed', details: validation.errors });
+        return res
+          .status(422)
+          .json({ error: "Validation failed", details: validation.errors });
       }
-      
+
       const valItem = (validation.data || [])[0];
       const id = req.params.id;
 
       if (db) {
-        const ref = doc(db, 'schedules', id);
-        await setDoc(ref, { 
-          ...valItem, 
-          updatedAt: Timestamp.now() 
-        }, { merge: true });
+        const ref = doc(db, "schedules", id);
+        await setDoc(
+          ref,
+          {
+            ...valItem,
+            updatedAt: Timestamp.now(),
+          },
+          { merge: true },
+        );
         const updated = { id, ...valItem };
-        pushChange('schedule', 'update', updated);
+        pushChange("schedule", "update", updated);
         res.json(updated);
       } else {
-        inMemorySchedules = inMemorySchedules.map(s => s.id === id ? { ...s, ...valItem } : s);
+        inMemorySchedules = inMemorySchedules.map((s) =>
+          s.id === id ? { ...s, ...valItem } : s,
+        );
         const updated = { id, ...valItem };
-        pushChange('schedule', 'update', updated);
+        pushChange("schedule", "update", updated);
         res.json(updated);
       }
     } catch (err: any) {
-      logger.error('Schedules', 'Update error', err);
-      res.status(500).json({ error: 'Failed to update' });
+      logger.error("Schedules", "Update error", err);
+      res.status(500).json({ error: "Failed to update" });
     }
   });
 
-  app.delete('/api/schedules/:id', async (req, res) => {
+  app.delete("/api/schedules/:id", async (req, res) => {
     try {
       const id = req.params.id;
       if (db) {
-        const ref = doc(db, 'schedules', id);
-        await updateDoc(ref, { 
-          archived: true, 
-          deletedAt: Timestamp.now() 
+        const ref = doc(db, "schedules", id);
+        await updateDoc(ref, {
+          archived: true,
+          deletedAt: Timestamp.now(),
         });
-        pushChange('schedule', 'delete', { id });
+        pushChange("schedule", "delete", { id });
         res.json({ success: true });
       } else {
-        inMemorySchedules = inMemorySchedules.map(s => s.id === id ? { ...s, archived: true } : s);
-        pushChange('schedule', 'delete', { id });
+        inMemorySchedules = inMemorySchedules.map((s) =>
+          s.id === id ? { ...s, archived: true } : s,
+        );
+        pushChange("schedule", "delete", { id });
         res.json({ success: true });
       }
     } catch (err: any) {
-      logger.error('Schedules', 'Delete error', err);
-      res.status(500).json({ error: 'Failed to delete' });
+      logger.error("Schedules", "Delete error", err);
+      res.status(500).json({ error: "Failed to delete" });
     }
   });
 
@@ -473,11 +579,14 @@ Structure your response with elegant markdown:
     try {
       const { lat = "30.30", lng = "31.75" } = req.query;
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500); 
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
 
-      const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`, {
-        signal: controller.signal
-      });
+      const response = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`,
+        {
+          signal: controller.signal,
+        },
+      );
       clearTimeout(timeoutId);
 
       if (!response.ok) {
@@ -487,7 +596,9 @@ Structure your response with elegant markdown:
       res.json(data);
     } catch (err: any) {
       logger.warn("API", "Weather proxy used fallback");
-      res.status(502).json({ error: "Failed to fetch weather", is_fallback: true });
+      res
+        .status(502)
+        .json({ error: "Failed to fetch weather", is_fallback: true });
     }
   });
 
@@ -501,17 +612,40 @@ Structure your response with elegant markdown:
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    app.get('*', (req, res) => {
+    app.get("*", (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
   }
 
+  // Global Error Handling Middleware
+  app.use(
+    (
+      err: any,
+      req: express.Request,
+      res: express.Response,
+      next: express.NextFunction,
+    ) => {
+      logger.error(
+        "SERVER_ERROR",
+        `Unhandled error on ${req.method} ${req.url}`,
+        err,
+      );
+      res.status(err.status || 500).json({
+        error: "Internal Server Error",
+        message:
+          process.env.NODE_ENV === "development"
+            ? err.message
+            : "An unexpected error occurred",
+      });
+    },
+  );
+
   app.listen(PORT, "0.0.0.0", () => {
-    logger.info('Server', `Started on 0.0.0.0:${PORT}`);
+    logger.info("Server", `Started on 0.0.0.0:${PORT}`);
   });
 }
 
 startServer().catch((err) => {
-  logger.error('STARTUP', "Failed to start server", err);
+  logger.error("STARTUP", "Failed to start server", err);
   process.exit(1);
 });

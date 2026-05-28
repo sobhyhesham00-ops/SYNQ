@@ -283,7 +283,7 @@ export function MetricsReport({
       .map(([name, count]) => ({
         name,
         count,
-        percentage: Math.round((count / totalMatches) * 100)
+        percentage: totalMatches > 0 ? Math.round((count / totalMatches) * 100) : 0
       }))
       .sort((a, b) => b.count - a.count);
   }, [filteredInquiries]);
@@ -293,7 +293,7 @@ export function MetricsReport({
     const total = filteredInquiries.length || 1;
     const answered = filteredInquiries.filter(i => i.status === 'answered').length;
     const pending = filteredInquiries.filter(i => i.status === 'pending').length;
-    const rate = Math.round((answered / total) * 100);
+    const rate = total > 0 ? Math.round((answered / total) * 100) : 0;
     return { answered, pending, rate };
   }, [filteredInquiries]);
 
@@ -302,7 +302,7 @@ export function MetricsReport({
     const total = filteredCases.length || 1;
     const closed = filteredCases.filter(c => c.ticketStatus?.toLowerCase() === 'closed').length;
     const rest = filteredCases.length - closed;
-    const rate = Math.round((closed / total) * 100);
+    const rate = total > 0 ? Math.round((closed / total) * 100) : 0;
     return { closed, rest, rate };
   }, [filteredCases]);
 
@@ -310,7 +310,7 @@ export function MetricsReport({
   const fintechAnalysis = useMemo(() => {
     const total = filteredTTRequests.length || 1;
     const prices = filteredTTRequests.map(r => Number(r.priceWithoutTax || 0)).filter(p => !isNaN(p));
-    const avgPrice = prices.length ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length) : 0;
+    const avgPrice = prices.length ? Math.round(prices.reduce((a, b) => a + Number(b || 0), 0) / prices.length) : 0;
     const maxPrice = prices.length ? Math.max(...prices) : 0;
     return { avgPrice, maxPrice };
   }, [filteredTTRequests]);

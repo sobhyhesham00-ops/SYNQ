@@ -910,10 +910,10 @@ export const parseScheduleCSV = (
 
     let extractedTL = '';
     let processedName = rawName;
-    const tlMatch = processedName.match(/((.*?))/);
+    const tlMatch = processedName.match(/\((.*?)\)/);
     if (tlMatch) {
       extractedTL = tlMatch[1].trim();
-      processedName = processedName.replace(/((.*?))/g, '').trim();
+      processedName = processedName.replace(/\((.*?)\)/g, '').trim();
     }
     
     // eslint-disable-next-line

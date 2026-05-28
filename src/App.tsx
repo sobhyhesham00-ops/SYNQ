@@ -6411,9 +6411,9 @@ export default function App() {
                               return acc + actsSum;
                             }, 0);
 
-                          const xpScore = Math.floor(1000 + (resolvedCount * 75) + (workedMinsCalculated * 1.5));
-                          const agentLevel = isNaN(xpScore) ? 1 : Math.floor(xpScore / 1000);
-                          const levelProgress = isNaN(xpScore) ? 0 : (xpScore % 1000) / 10;
+                          const xpScore = Math.floor(1000 + (resolvedCount * 75) + (workedMinsCalculated * 1.5)) || 1000;
+                          const agentLevel = Math.floor(xpScore / 1000);
+                          const levelProgress = (xpScore % 1000) / 10;
 
                           const holdsGoldPunctuality = workedMinsCalculated > 120;
                           const isGrandmasterResovler = resolvedCount >= 25;
@@ -16334,6 +16334,7 @@ export default function App() {
                                        }
                                     });
                                     setTempNewAgents(newAgentsList);
+                                    setTempParsedMeta(result.parsedMeta);
                                     setTempSchedules(result.schedules);
                                     setUploadSuccess(`Successfully extracted ${result.schedules.length} shifts spanning ${new Set(result.schedules.map(r => r.date)).size} days.`);
                                  } else {
@@ -16395,6 +16396,7 @@ export default function App() {
                                 setUploadSuccess(null);
                                 setTempSchedules([]);
                                 setTempNewAgents([]);
+                                setTempParsedMeta({});
                               }}
                               className="px-4 py-2 bg-slate-900/50 hover:bg-slate-800/80 border border-slate-700/10 text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
                             >

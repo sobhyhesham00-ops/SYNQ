@@ -48,7 +48,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
     : qaScores;
   
   const avgQaScore = myQaScores.length > 0 
-    ? Math.round((myQaScores.reduce((acc, s) => acc + (s.maxTotalScore > 0 ? (s.totalScore / s.maxTotalScore) : 0), 0) / myQaScores.length) * 100)
+    ? Math.round((myQaScores.reduce((acc, s) => acc + (s.maxTotalScore > 0 && !isNaN(s.totalScore) && !isNaN(s.maxTotalScore) ? (s.totalScore / s.maxTotalScore) : 0), 0) / myQaScores.length) * 100)
     : null;
 
   const handleCardTrigger = (type: 'queue' | 'qa' | 'inquiry' | 'fintech', defaultTab: string) => {
