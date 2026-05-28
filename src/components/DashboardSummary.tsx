@@ -44,11 +44,15 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
 
   // For agents, show their own avg score, for TLs show team avg
   const myQaScores = isAgent 
-    ? qaScores.filter(s => s.agentName.toLowerCase() === currentUser.name.toLowerCase())
+    ? qaScores.filter(s => s.agentName?.toLowerCase() === currentUser.name?.toLowerCase())
     : qaScores;
   
   const avgQaScore = myQaScores.length > 0 
-    ? Math.round((myQaScores.reduce((acc, s) => acc + (s.maxTotalScore > 0 && !isNaN(s.totalScore) && !isNaN(s.maxTotalScore) ? (s.totalScore / s.maxTotalScore) : 0), 0) / myQaScores.length) * 100)
+    ? Math.round((myQaScores.reduce((acc, s) => {
+        const total = typeof s?.totalScore === 'number' && !isNaN(s.totalScore) ? s.totalScore : 0;
+        const max = typeof s?.maxTotalScore === 'number' && !isNaN(s.maxTotalScore) && s.maxTotalScore > 0 ? s.maxTotalScore : 0;
+        return acc + (max > 0 ? total / max : 0);
+      }, 0) / myQaScores.length) * 100)
     : null;
 
   const handleCardTrigger = (type: 'queue' | 'qa' | 'inquiry' | 'fintech', defaultTab: string) => {
@@ -198,7 +202,13 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
           <div>
             <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Requests & Queue Status</p>
             <div className="flex items-baseline gap-2">
-              <h3 className="text-3xl font-black text-slate-100">{(!isNaN(pendingRequestsCount + activeCasesCount) ? (pendingRequestsCount + activeCasesCount) : 0)}</h3>
+              <h3 className="text-3xl font-black text-slate-100">
+                {(() => {
+                  const reqCount = typeof pendingRequestsCount === 'number' && !isNaN(pendingRequestsCount) ? pendingRequestsCount : 0;
+                  const casCount = typeof activeCasesCount === 'number' && !isNaN(activeCasesCount) ? activeCasesCount : 0;
+                  return reqCount + casCount;
+                })()}
+              </h3>
               <span className="text-[10px] text-amber-400 font-bold uppercase tracking-widest">Inspect Live</span>
             </div>
             <p className="text-slate-400 text-xs mt-2 flex items-center gap-1.5 font-medium group-hover:text-amber-300">

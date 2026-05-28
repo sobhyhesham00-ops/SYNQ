@@ -842,6 +842,10 @@ export default function App() {
         return arr;
       });
       localStorage.setItem('sched_schedules', JSON.stringify(arr));
+      if (arr.length > 0) {
+        localStorage.removeItem('schedules_cleared_v1');
+        setIsSchedulesCleared(false);
+      }
     });
     let isAnnouncementsInitialized = false;
     const unsubAnnouncements = onSnapshot(collection(db, "announcements"), snap => {
@@ -1251,7 +1255,7 @@ export default function App() {
 
   // State to minimize the overtime modal popup
   const [isOvertimeAlertMinimized, setIsOvertimeAlertMinimized] = useState<boolean>(false);
-  const [lastActivityAlertId, setLastActivityAlertId] = useState<string | null>(null);
+  const lastActivityAlertIdRef = useRef<string | null>(null);
 
   const [soundEnabled, setSoundEnabled] = useState<boolean>(() => {
     return localStorage.getItem('sched_sound_enabled') !== 'false';
@@ -1322,17 +1326,17 @@ export default function App() {
     if (active && (active.status === 'break' || active.status === 'lunch')) {
       const currentAct = active.activities.find(a => !a.endTime && a.type === active.status);
       if (currentAct) {
-        if (currentAct.id !== lastActivityAlertId) {
-          setLastActivityAlertId(currentAct.id);
+        if (currentAct.id !== lastActivityAlertIdRef.current) {
+          lastActivityAlertIdRef.current = currentAct.id;
           setIsOvertimeAlertMinimized(false);
         }
       }
     } else {
-      if (lastActivityAlertId !== null) {
-        setLastActivityAlertId(null);
+      if (lastActivityAlertIdRef.current !== null) {
+        lastActivityAlertIdRef.current = null;
       }
     }
-  }, [timeLogs, currentUser, lastActivityAlertId]);
+  }, [timeLogs, currentUser]);
 
   // Requests database
   const [requests, setRequests] = useState<SchedulingRequest[]>(() => {
@@ -1667,7 +1671,7 @@ export default function App() {
         setStorageItem('sched_current_user', updated);
       }
     }
-  }, [currentUser, agentsList]);
+  }, [currentUser?.name, currentUser?.role]);
 
   // Calendar / Sync States
   const [isSyncingCalendar, setIsSyncingCalendar] = useState(false);
@@ -4610,6 +4614,7 @@ export default function App() {
     );
 
     // Register any new agents found
+    let finalAgentsToSync = agentsList;
     if (newAgentsList.length > 0) {
       const updatedAgents = [...agentsList];
       newAgentsList.forEach(a => {
@@ -4619,6 +4624,7 @@ export default function App() {
       });
       setAgentsList(updatedAgents);
       setStorageItem('sched_agents_list', updatedAgents);
+      finalAgentsToSync = updatedAgents;
     }
 
     const newMeta = { ...getAgentMeta() };
@@ -4634,7 +4640,7 @@ export default function App() {
     
     // Sync system docs to Firestore
     if (newAgentsList.length > 0) {
-      setDoc(doc(db, "system", "sched_agents_list"), { data: agentsList }).catch(e => console.error("Agents List Sync Error:", e));
+      setDoc(doc(db, "system", "sched_agents_list"), { data: finalAgentsToSync }).catch(e => console.error("Agents List Sync Error:", e));
     }
     setDoc(doc(db, "system", "sched_agent_meta"), { data: newMeta }).catch(e => console.error("Agent Meta Sync Error:", e));
     
@@ -5067,7 +5073,7 @@ export default function App() {
   };
 
   const visibleAgents = agentsList.filter(agentName => {
-    if (currentUser?.role === 'agent') {
+    if (currentUser?.role === 'agent' && !isRosterPublished) {
       return agentName?.toLowerCase() === currentUser?.name?.toLowerCase();
     }
     return !scheduleFilterAgent || agentName?.toLowerCase().includes(scheduleFilterAgent.toLowerCase());
@@ -11362,6 +11368,7 @@ export default function App() {
                               const val = e.target.checked;
                               setIsRosterPublished(val);
                               setStorageItem('sched_roster_published', val);
+                              setDoc(doc(db, "system", "sched_roster_published"), { data: val }).catch(e => console.error("Roster published sync error:", e));
                               if (val) {
                                 addSystemNotification(
                                   "✨ New Schedule Published!",
@@ -11590,7 +11597,7 @@ export default function App() {
                     </div>
                   </div>
 
-                  {false ? (
+                  {!isRosterPublished && currentUser.role === 'agent' ? (
                     <div className="space-y-6">
                       <div className="p-12 text-center rounded-3xl border border-dashed border-indigo-500/30 bg-slate-800/[0.02] space-y-4 shadow-xl text-left">
                         <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto text-indigo-400 shadow-inner">
