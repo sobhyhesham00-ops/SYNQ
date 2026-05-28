@@ -825,9 +825,9 @@ export const parseScheduleCSV = (
     const val = (raw || '').trim().toLowerCase();
     if (!val) return 'Off Day';
     if (['off', 'day off', 'leave', 'al', 'sl', 'vacation', 'sick', 'holiday', 'rest'].some(k => val === k)) return 'Off Day';
-    if (['morning', 'am', '07', '08', '07:00'].some(k => val.includes(k))) return 'Morning Shift';
-    if (['afternoon', 'pm', '12', '13', '14', 'afternoon shift'].some(k => val.includes(k))) return 'Afternoon Shift';
-    if (['night', 'evening', '19', '20', 'graveyard', 'night shift'].some(k => val.includes(k))) return 'Night Shift';
+    if (['morning', 'am', '07', '08', '07:00'].some(k => val.includes(k))) return '07:00 - 16:00';
+    if (['afternoon', 'pm', '12', '13', '14', 'afternoon shift'].some(k => val.includes(k))) return '13:00 - 22:00';
+    if (['night', 'evening', '19', '20', 'graveyard', 'night shift'].some(k => val.includes(k))) return '22:00 - 07:00';
     
     // eslint-disable-next-line
     //@ts-ignore

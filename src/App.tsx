@@ -1316,6 +1316,8 @@ export default function App() {
     currentUser?.name?.toLowerCase() === 's.hassan'
   ) : false;
 
+  const canManageRoster = isTLOreSupport || isSuperAdmin;
+
   // Monitor active activity to automatically pop up when they start a new active break or lunch or when it exceeds
   useEffect(() => {
     if (!currentUser) return;
@@ -11130,7 +11132,7 @@ export default function App() {
                       <p className="text-slate-400 text-sm mt-1">Browse shift coverage, find trade partners, and publish rosters</p>
                     </div>
 
-                    {isSuperAdmin && (
+                    {canManageRoster && (
                       <button
                         onClick={clearTargetSchedules}
                         className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 hover:border-rose-500/35 text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer self-stretch md:self-auto justify-center"
@@ -11142,7 +11144,7 @@ export default function App() {
                   </div>
 
                   {/* Unified Modern Roster Upload Console */}
-                  {isSuperAdmin && (
+                  {canManageRoster && (
                     <div className="bg-slate-900/50 border text-left border-slate-700/10 rounded-3xl p-8 shadow-sm space-y-8 animate-fade-in relative">
                       {isSyncingSheets && (
                         <div className="absolute inset-0 z-50 bg-slate-900/500 backdrop-blur-sm rounded-3xl flex items-center justify-center">
@@ -11341,7 +11343,7 @@ export default function App() {
 
 
                   {/* Roster Live Toggle Switch purely for Hesham & Amira */}
-                  {isSuperAdmin && (
+                  {canManageRoster && (
                     <div className="bg-gradient-to-r from-violet-500/15 via-indigo-500/10 to-blue-500/15 border border-indigo-500/30 rounded-3xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 shadow-xl">
                       <div className="space-y-1 text-left">
                         <div className="flex items-center gap-2">
@@ -11388,7 +11390,7 @@ export default function App() {
                   )}
 
                   {/* Manual Single-Shift Roster Submission Form */}
-                  {isSuperAdmin && (
+                  {canManageRoster && (
                     <div className="bg-slate-900/50 border border-slate-700/10 rounded-3xl shadow-sm text-slate-300 p-6 shadow-2xl space-y-5 text-left">
                       <div>
                         <h3 className="font-extrabold text-slate-300 text-base font-display flex items-center gap-2">
@@ -12154,9 +12156,9 @@ export default function App() {
                                         <td 
                                           key={dateStr} 
                                           onClick={() => {
-                                            if (isSuperAdmin && findShift) setSelectedShiftForActivities({...findShift});
+                                            if (canManageRoster && findShift) setSelectedShiftForActivities({...findShift});
                                           }}
-                                          className={`p-1 border-r border-slate-700/5 hover:bg-slate-700/40 transition-all relative group ${isSuperAdmin && findShift ? 'cursor-pointer hover:ring-1 ring-inset ring-indigo-500/50' : 'cursor-help'}`}
+                                          className={`p-1 border-r border-slate-700/5 hover:bg-slate-700/40 transition-all relative group ${canManageRoster && findShift ? 'cursor-pointer hover:ring-1 ring-inset ring-indigo-500/50' : 'cursor-help'}`}
                                         >
                                           <div className={`mx-auto rounded-lg px-2 py-2 text-center border text-[10px] font-bold ${style.bg} transition-all flex items-center justify-center gap-1 relative overflow-hidden`}>
                                             <span className="relative z-10">{style.display}</span>
@@ -12171,7 +12173,7 @@ export default function App() {
                                               </div>
                                             )}
                                           </div>
-                                          {(findShift?.shiftNotes || (findShift?.activities && findShift.activities.length > 0) || isSuperAdmin) && (
+                                          {(findShift?.shiftNotes || (findShift?.activities && findShift.activities.length > 0) || canManageRoster) && (
                                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block bg-slate-900 border border-indigo-400/40 text-slate-300 rounded-xl p-3 shadow-2xl z-50 text-[10px] leading-relaxed backdrop-blur-md">
                                               <p className="font-extrabold text-indigo-300 border-b border-indigo-400/20 pb-0.5 mb-1.5 flex items-center justify-between font-display">
                                                 <span>📌 Details</span>
@@ -12194,7 +12196,7 @@ export default function App() {
                                                 </div>
                                               )}
                                               
-                                              {isSuperAdmin && findShift && (
+                                              {canManageRoster && findShift && (
                                                 <p className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest text-center mt-2 bg-emerald-500/10 border border-emerald-500/20 py-0.5 rounded">
                                                   Click to edit intervals
                                                 </p>
@@ -12240,9 +12242,9 @@ export default function App() {
                                         <div 
                                           key={dateStr} 
                                           onClick={() => {
-                                            if (isSuperAdmin && findShift) setSelectedShiftForActivities({...findShift});
+                                            if (canManageRoster && findShift) setSelectedShiftForActivities({...findShift});
                                           }}
-                                          className={`p-2 bg-slate-900/50 border border-slate-700/5 rounded-xl flex flex-col justify-between items-stretch relative ${isSuperAdmin && findShift ? 'cursor-pointer hover:border-indigo-500/50' : ''}`}
+                                          className={`p-2 bg-slate-900/50 border border-slate-700/5 rounded-xl flex flex-col justify-between items-stretch relative ${canManageRoster && findShift ? 'cursor-pointer hover:border-indigo-500/50' : ''}`}
                                         >
                                           <span className="text-[9px] text-slate-400 font-medium mb-1 truncate block">{dayLabel}</span>
                                           <span className={`px-1.5 py-1 rounded border text-[9px] font-semibold text-center truncate block ${style.bg} relative overflow-hidden`}>
@@ -12272,7 +12274,7 @@ export default function App() {
                                               {findShift.activities.length > 2 && <span className="text-center text-[7px] mt-0.5 bg-slate-900/50 py-0.5 rounded">+{findShift.activities.length - 2} more</span>}
                                             </div>
                                           )}
-                                          {isSuperAdmin && findShift && (
+                                          {canManageRoster && findShift && (
                                             <div className="mt-2 text-center">
                                               <span className="text-[7px] text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-1 py-[1px] rounded border border-indigo-500/20">Edit Intraday</span>
                                             </div>
