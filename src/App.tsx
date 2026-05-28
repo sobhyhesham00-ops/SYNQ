@@ -2331,7 +2331,7 @@ export default function App() {
         setSchedulePageOffset(idealOffset);
       }
     }
-  }, [schedules.length, tempSchedules.length, scheduleViewMode, systemTime]);
+  }, [schedules.length, tempSchedules.length, scheduleViewMode, systemTime.getDate()]);
 
   
 
@@ -2351,7 +2351,7 @@ export default function App() {
     } else {
       setSwapWarning(null);
     }
-  }, [swapDate, swapShift, systemTime]);
+  }, [swapDate, swapShift, systemTime.getDate()]);
 
   // Trigger annual validation when raw inputs change
   useEffect(() => {
@@ -2365,7 +2365,7 @@ export default function App() {
     } else {
       setAnnualWarning(null);
     }
-  }, [annualStart, systemTime]);
+  }, [annualStart, systemTime.getDate()]);
 
   // Handle Login Check
   const handleLoginSubmit = (e: FormEvent) => {
