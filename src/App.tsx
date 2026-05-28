@@ -1,4 +1,5 @@
 import { MetricsReport } from './components/MetricsReport';
+import { SchedulingReports } from './components/SchedulingReports';
 import { ThemeToggle } from './components/ThemeToggle';
 import * as mammoth from 'mammoth';
 import React, { useState, useEffect, FormEvent, useRef, useMemo } from 'react';
@@ -746,46 +747,67 @@ export default function App() {
     const unsubInquiries = onSnapshot(collection(db, "inquiries"), snap => {
       const arr = snap.docs.map(d => d.data() as Inquiry);
       arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      setInquiries(arr);
+      setInquiries(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(arr)) return prev;
+        return arr;
+      });
       localStorage.setItem('sched_inquiries', JSON.stringify(arr));
     });
 
     const unsubQa = onSnapshot(collection(db, "qa_scores"), snap => {
       const arr = snap.docs.map(d => d.data() as QAScore);
       arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      setQaScores(arr);
+      setQaScores(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(arr)) return prev;
+        return arr;
+      });
       localStorage.setItem('sched_qa_scores', JSON.stringify(arr));
     });
 
     const unsubQATemplate = onSnapshot(doc(db, "system", "sched_qa_template"), snap => {
       if (snap.exists()) {
         const data = snap.data().data;
-        setQaTemplate(data);
+        setQaTemplate(prev => {
+          if (JSON.stringify(prev) === JSON.stringify(data)) return prev;
+          return data;
+        });
         localStorage.setItem('sched_qa_template', JSON.stringify(data));
       }
     });
     const unsubTT = onSnapshot(collection(db, "tt_requests"), snap => {
       const arr = snap.docs.map(d => d.data() as TabbyTamaraRequest);
       arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      setTabbyTamaraRequests(arr);
+      setTabbyTamaraRequests(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(arr)) return prev;
+        return arr;
+      });
       localStorage.setItem('sched_tabby_tamara', JSON.stringify(arr));
     });
     const unsubComp = onSnapshot(collection(db, "tt_complaints"), snap => {
       const arr = snap.docs.map(d => d.data() as TabbyTamaraComplaint);
       arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      setTabbyTamaraComplaints(arr);
+      setTabbyTamaraComplaints(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(arr)) return prev;
+        return arr;
+      });
       localStorage.setItem('sched_tt_complaints', JSON.stringify(arr));
     });
     const unsubComms = onSnapshot(collection(db, "client_comms"), snap => {
       const arr = snap.docs.map(d => d.data() as ClientCommunicationRequest);
       arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      setClientComms(arr);
+      setClientComms(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(arr)) return prev;
+        return arr;
+      });
       localStorage.setItem('sched_client_comms', JSON.stringify(arr));
     });
     const unsubReq = onSnapshot(collection(db, "scheduling_requests"), snap => {
       const arr = snap.docs.map(d => d.data() as SchedulingRequest);
       arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      setRequests(arr);
+      setRequests(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(arr)) return prev;
+        return arr;
+      });
       localStorage.setItem('sched_requests', JSON.stringify(arr));
     });
     const unsubTime = onSnapshot(collection(db, "timelogs"), snap => {
@@ -803,7 +825,10 @@ export default function App() {
         }
         return (b.id || '').localeCompare(a.id || '');
       });
-      setTimeLogs(arr);
+      setTimeLogs(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(arr)) return prev;
+        return arr;
+      });
       localStorage.setItem('sched_time_logs', JSON.stringify(arr));
     }, error => { if (error && error.code === 'resource-exhausted') return; 
       console.error('TimeLogs Sync Error:', error);
@@ -811,7 +836,10 @@ export default function App() {
     });
     const unsubSched = onSnapshot(collection(db, "schedules"), snap => {
       const arr = snap.docs.map(d => d.data() as ScheduledShift);
-      setFirestoreSchedules(arr);
+      setFirestoreSchedules(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(arr)) return prev;
+        return arr;
+      });
       localStorage.setItem('sched_schedules', JSON.stringify(arr));
     });
     let isAnnouncementsInitialized = false;
@@ -865,7 +893,10 @@ export default function App() {
         }
       }
 
-      setAnnouncements(arr);
+      setAnnouncements(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(arr)) return prev;
+        return arr;
+      });
       localStorage.setItem('sched_announcements', JSON.stringify(arr));
     }, error => { if (error && error.code === 'resource-exhausted') return; 
       console.error('Error in announcements snapshot listener:', error);
@@ -882,19 +913,28 @@ export default function App() {
     const unsubSupp = onSnapshot(doc(db, "system", "sched_support_assignments"), snap => {
       if (snap.exists()) {
         const data = snap.data().data;
-        setSupportAssignments(data);
+        setSupportAssignments(prev => {
+          if (JSON.stringify(prev) === JSON.stringify(data)) return prev;
+          return data;
+        });
         localStorage.setItem('sched_support_assignments', JSON.stringify(data));
       }
     });
     const unsubCases = onSnapshot(collection(db, "cases"), snap => {
       const arr = snap.docs.map(d => d.data() as CaseRecord);
       arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      setCases(arr);
+      setCases(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(arr)) return prev;
+        return arr;
+      });
       localStorage.setItem('sched_cases', JSON.stringify(arr));
     });
     const unsubOrders = onSnapshot(collection(db, "orders"), snap => {
       const arr = snap.docs.map(d => d.data() as Order);
-      setOrders(arr);
+      setOrders(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(arr)) return prev;
+        return arr;
+      });
       localStorage.setItem('sched_orders', JSON.stringify(arr));
     });
     const unsubAgents = onSnapshot(doc(db, "system", "sched_agents_list"), snap => {
@@ -903,21 +943,30 @@ export default function App() {
     const unsubMeta = onSnapshot(doc(db, "system", "sched_agent_meta"), snap => {
       if (snap.exists()) {
         const data = snap.data().data as Record<string, { roleType: string; tlName: string }>;
-        setAgentMeta(data);
+        setAgentMeta(prev => {
+          if (JSON.stringify(prev) === JSON.stringify(data)) return prev;
+          return data;
+        });
         localStorage.setItem('sched_agent_meta', JSON.stringify(data));
       }
     });
     const unsubDir = onSnapshot(doc(db, "system", "sched_agent_directory"), snap => {
       if (snap.exists()) {
         const data = snap.data().data as AgentDirectoryRow[];
-        setAgentDirectory(data);
+        setAgentDirectory(prev => {
+          if (JSON.stringify(prev) === JSON.stringify(data)) return prev;
+          return data;
+        });
         localStorage.setItem('sched_agent_directory', JSON.stringify(data));
       }
     });
     const unsubDirHeaders = onSnapshot(doc(db, "system", "sched_agent_directory_headers"), snap => {
       if (snap.exists()) {
         const data = snap.data().data as string[];
-        setDirectoryHeaders(data);
+        setDirectoryHeaders(prev => {
+          if (JSON.stringify(prev) === JSON.stringify(data)) return prev;
+          return data;
+        });
         localStorage.setItem('sched_agent_directory_headers', JSON.stringify(data));
       }
     });
@@ -933,7 +982,10 @@ export default function App() {
     const unsubCredentials = onSnapshot(doc(db, "system", "sched_credentials"), snap => {
       if (snap.exists()) {
         const data = snap.data().data || {};
-        setCredentials(data);
+        setCredentials(prev => {
+          if (JSON.stringify(prev) === JSON.stringify(data)) return prev;
+          return data;
+        });
         localStorage.setItem('sched_credentials', JSON.stringify(data));
       }
     });
@@ -941,7 +993,10 @@ export default function App() {
     const unsubLockedAccounts = onSnapshot(doc(db, "system", "sched_locked_accounts"), snap => {
       if (snap.exists()) {
         const data = snap.data().data || [];
-        setLockedAccounts(data);
+        setLockedAccounts(prev => {
+          if (JSON.stringify(prev) === JSON.stringify(data)) return prev;
+          return data;
+        });
         localStorage.setItem('sched_locked_accounts', JSON.stringify(data));
       }
     });
@@ -949,7 +1004,10 @@ export default function App() {
     const unsubFailedAttempts = onSnapshot(doc(db, "system", "sched_failed_attempts"), snap => {
       if (snap.exists()) {
         const data = snap.data().data || {};
-        setFailedAttempts(data);
+        setFailedAttempts(prev => {
+          if (JSON.stringify(prev) === JSON.stringify(data)) return prev;
+          return data;
+        });
         localStorage.setItem('sched_failed_attempts', JSON.stringify(data));
       }
     });
@@ -1005,14 +1063,20 @@ export default function App() {
         }
       }
 
-      setNotifications(arr);
+      setNotifications(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(arr)) return prev;
+        return arr;
+      });
       localStorage.setItem('sched_notifications', JSON.stringify(arr));
     });
 
     const unsubFeedbacks = onSnapshot(collection(db, "tl_feedbacks"), snap => {
       const arr = snap.docs.map(d => d.data() as TlFeedback);
       arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      setTlFeedbacks(arr);
+      setTlFeedbacks(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(arr)) return prev;
+        return arr;
+      });
       localStorage.setItem('sched_tl_feedbacks', JSON.stringify(arr));
     });
 
@@ -1039,20 +1103,29 @@ export default function App() {
 
     const unsubTodos = onSnapshot(collection(db, "todos"), snap => {
       const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      setTodos(data);
+      setTodos(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(data)) return prev;
+        return data;
+      });
       setStorageItem('agent_todos', data);
     });
 
     const unsubUsers = onSnapshot(collection(db, "users"), snap => {
       const dbUsers = snap.docs.map(d => ({ id: d.id, ...d.data() } as any));
-      setRegisteredUsers(dbUsers);
+      setRegisteredUsers(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(dbUsers)) return prev;
+        return dbUsers;
+      });
 
       // Optionally update currentUser if their document was updated
       setCurrentUser(prevUser => {
         if (!prevUser) return null;
         const liveUserInfo = dbUsers.find(u => u && u.name && prevUser && prevUser.name && u?.name?.toLowerCase() === prevUser.name.toLowerCase());
         if (liveUserInfo) {
-           return { ...prevUser, ...liveUserInfo };
+           const hasChanges = Object.keys(liveUserInfo).some(key => liveUserInfo[key] !== (prevUser as any)[key]);
+           if (hasChanges) {
+             return { ...prevUser, ...liveUserInfo };
+           }
         }
         return prevUser;
       });
@@ -1254,7 +1327,9 @@ export default function App() {
         }
       }
     } else {
-      setLastActivityAlertId(null);
+      if (lastActivityAlertId !== null) {
+        setLastActivityAlertId(null);
+      }
     }
   }, [timeLogs, currentUser, lastActivityAlertId]);
 
@@ -1295,7 +1370,10 @@ export default function App() {
     });
     
     const sortedList = Array.from(uniqueNames).sort();
-    setAgentsList(sortedList);
+    setAgentsList(prev => {
+      if (JSON.stringify(prev) === JSON.stringify(sortedList)) return prev;
+      return sortedList;
+    });
     setStorageItem('sched_agents_list', sortedList);
   }, [registeredUsers, agentDirectory]);
 
@@ -2150,11 +2228,17 @@ export default function App() {
   const [dashboardChartMetric, setDashboardChartMetric] = useState<'all' | 'inquiries' | 'fintech' | 'presence'>('all');
 
   // Initialize correct active tab based on role
+  const lastUserRef = useRef<string | null>(null);
   useEffect(() => {
     if (currentUser) {
-      setActiveTab('dashboard');
+      if (lastUserRef.current !== currentUser.name) {
+        lastUserRef.current = currentUser.name;
+        setActiveTab('dashboard');
+      }
+    } else {
+      lastUserRef.current = null;
     }
-  }, [currentUser]);
+  }, [currentUser?.name]);
 
   // Request Form States
   const [swapDate, setSwapDate] = useState('');
@@ -3504,12 +3588,13 @@ export default function App() {
       myLogsToday.forEach(log => {
         log.activities.forEach(act => {
           let duration = 0;
-          if (act.durationMinutes !== undefined) {
+          if (act.durationMinutes !== undefined && !isNaN(act.durationMinutes)) {
             duration = act.durationMinutes;
           } else if (!act.endTime) {
             // running!
-            const diffMs = currentTime.getTime() - new Date(act.startTime).getTime();
-            duration = diffMs / 1000 / 60;
+            const startMs = new Date(act.startTime).getTime();
+            const diffMs = !isNaN(startMs) ? currentTime.getTime() - startMs : 0;
+            duration = Math.max(0, diffMs / 1000 / 60);
           }
           
           if (act.type === 'break') totalBreakMins += duration;
@@ -3527,13 +3612,13 @@ export default function App() {
     return {
       clockIn: totalClockInStr,
       clockOut: totalClockOutStr,
-      breakMins: parseFloat(totalBreakMins.toFixed(2)),
-      lunchMins: parseFloat(totalLunchMins.toFixed(2)),
-      restroomMins: parseFloat(totalRestroomMins.toFixed(2)),
+      breakMins: parseFloat((isNaN(totalBreakMins) ? 0 : totalBreakMins).toFixed(2)),
+      lunchMins: parseFloat((isNaN(totalLunchMins) ? 0 : totalLunchMins).toFixed(2)),
+      restroomMins: parseFloat((isNaN(totalRestroomMins) ? 0 : totalRestroomMins).toFixed(2)),
       restroomCount,
-      meetingMins: parseFloat(totalMeetingMins.toFixed(2)),
-      oneOnOneMins: parseFloat(totalOneOnOneMins.toFixed(2)),
-      personalMins: parseFloat(totalPersonalMins.toFixed(2))
+      meetingMins: parseFloat((isNaN(totalMeetingMins) ? 0 : totalMeetingMins).toFixed(2)),
+      oneOnOneMins: parseFloat((isNaN(totalOneOnOneMins) ? 0 : totalOneOnOneMins).toFixed(2)),
+      personalMins: parseFloat((isNaN(totalPersonalMins) ? 0 : totalPersonalMins).toFixed(2))
     };
   };
 
@@ -3544,8 +3629,9 @@ export default function App() {
     const currentAct = active.activities.find(a => !a.endTime && a.type === active.status);
     if (!currentAct) return null;
 
-    const diffMs = currentTime.getTime() - new Date(currentAct.startTime).getTime();
-    const durationMins = diffMs / 1000 / 60;
+    const startMs = new Date(currentAct.startTime).getTime();
+    const diffMs = !isNaN(startMs) ? currentTime.getTime() - startMs : 0;
+    const durationMins = Math.max(0, diffMs / 1000 / 60);
     
     let limit = 0;
     if (active.status === 'break') limit = 15;
@@ -5279,18 +5365,18 @@ export default function App() {
                       hour12: true
                     })}
                   </p>
-                  {ramadanTemp !== null && (
-                    <div className="flex items-center gap-1 text-xs text-[#FCD34D] font-bold font-mono">
-                      {ramadanWeatherCode === 0 ? (
-                        <Sun className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                      ) : ramadanWeatherCode < 3 ? (
-                        <Sun className="w-3.5 h-3.5 text-amber-400" />
-                      ) : (
-                        <Cloudy className="w-3.5 h-3.5 text-slate-400" />
-                      )}
-                      <span>{ramadanTemp.toFixed(1)}°C</span>
-                    </div>
-                  )}
+                   {ramadanTemp !== null && !isNaN(ramadanTemp) && (
+                     <div className="flex items-center gap-1 text-xs text-[#FCD34D] font-bold font-mono">
+                       {ramadanWeatherCode === 0 ? (
+                         <Sun className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                       ) : ramadanWeatherCode < 3 ? (
+                         <Sun className="w-3.5 h-3.5 text-amber-400" />
+                       ) : (
+                         <Cloudy className="w-3.5 h-3.5 text-slate-400" />
+                       )}
+                       <span>{ramadanTemp.toFixed(1)}°C</span>
+                     </div>
+                   )}
                 </div>
                 
                 <div className="flex justify-between items-center text-[9px] text-slate-400 border-t border-slate-700/5 pt-1.5">
@@ -5534,6 +5620,7 @@ export default function App() {
                         {groupTitle("Workforce Management", "📅", "text-blue-600")}
                         {buildBtn("schedules", <Calendar className="w-4 h-4" />, "Schedules & Roster", "bg-blue-500/20 border-blue-500/30 text-blue-100")}
                         {buildBtn("overview", <UserCheck className="w-4 h-4" />, "Approvals & Leave Console", "bg-blue-500/20 border-blue-500/30 text-blue-100")}
+                        {buildBtn("scheduling-reports", <FileText className="w-4 h-4" />, "Scheduling Reports", "bg-blue-500/20 border-blue-500/30 text-blue-100")}
                         
                         {groupTitle("System Controls", "⚙️", "text-slate-400")}
                         {buildBtn("integrations", <Sparkles className="w-4 h-4 text-amber-400" />, "Integrations Hub", "bg-indigo-900/30 border-indigo-800")}
@@ -6780,15 +6867,17 @@ export default function App() {
                                   <div className="h-48 flex items-end justify-between gap-3 pt-6 relative border-b border-slate-700/10 px-2 select-none">
                                     {weeklyDataPoints.map((dp, idx) => {
                                       const barHeightPercent = (dp.total / peakWeeklyDayVolume) * 75;
+                                      const barHeight = !isNaN(barHeightPercent) ? Math.max(barHeightPercent, 4) : 4;
+                                      const hoursValue = !isNaN(dp.hours) ? dp.hours : 0;
                                       return (
                                         <div key={idx} className="flex-1 flex flex-col items-center group relative cursor-pointer">
                                           <div className="absolute -top-12 opacity-0 group-hover:opacity-100 bg-transparent border border-indigo-400 px-2 py-1 rounded text-[10px] text-slate-300 font-mono transition-opacity duration-200 z-10 font-bold whitespace-nowrap shadow-xl">
-                                            {dp.total} tasks | {dp.hours.toFixed(1)} hrs
+                                            {dp.total} tasks | {hoursValue.toFixed(1)} hrs
                                           </div>
 
                                           <div 
                                             className="w-full max-w-[28px] rounded-t-lg bg-gradient-to-t from-indigo-500/40 via-cyan-500/20 to-indigo-500/10 border border-indigo-500/30 group-hover:from-cyan-400 group-hover:to-pink-500 transition-all duration-300"
-                                            style={{ height: `${Math.max(barHeightPercent, 4)}%` }}
+                                            style={{ height: `${barHeight}%` }}
                                           />
 
                                           <span className="text-[9px] font-bold text-slate-400 font-sans tracking-tight mt-2 rotate-12 sm:rotate-0">
@@ -6816,7 +6905,7 @@ export default function App() {
                                       <div className="p-4 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-2xl">
                                         <span className="text-[10px] text-white0 uppercase tracking-widest font-black">Logged Clock Duration</span>
                                         <div className="flex items-baseline gap-2 mt-1">
-                                          <span className="text-3xl font-mono text-cyan-400 font-black">{totalWeeklyHours.toFixed(1)}</span>
+                                          <span className="text-3xl font-mono text-cyan-400 font-black">{(!isNaN(totalWeeklyHours) ? totalWeeklyHours : 0).toFixed(1)}</span>
                                           <span className="text-xs text-slate-400">Hours overall</span>
                                         </div>
                                       </div>
@@ -6824,7 +6913,7 @@ export default function App() {
                                   </div>
 
                                   <div className="border-t border-slate-700/5 mt-6 pt-4 text-xs text-slate-400 font-medium">
-                                    ✓ Average of <strong className="text-slate-300">{(totalWeeklyCount / 7).toFixed(1)}</strong> complete ticket conversions per shift day this week.
+                                    ✓ Average of <strong className="text-slate-300">{(!isNaN(totalWeeklyCount) ? (totalWeeklyCount / 7) : 0).toFixed(1)}</strong> complete ticket conversions per shift day this week.
                                   </div>
                                 </div>
                               </div>
@@ -8507,6 +8596,10 @@ export default function App() {
                   cases={cases}
                   timeLogs={timeLogs}
                 />
+              )}
+
+              {activeTab === 'scheduling-reports' && (
+                <SchedulingReports requests={requests} />
               )}
 
 

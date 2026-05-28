@@ -206,7 +206,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
           ) : (
             <div className="flex-1 overflow-y-auto pr-2 space-y-4">
               {myScores.map((score) => {
-                const percentage = (score.totalScore / score.maxTotalScore) * 100;
+                const percentage = score.maxTotalScore > 0 ? (score.totalScore / score.maxTotalScore) * 100 : 0;
                 let pctColor = "text-green-400";
                 if (percentage < 70) pctColor = "text-red-400";
                 else if (percentage < 85) pctColor = "text-amber-400";
