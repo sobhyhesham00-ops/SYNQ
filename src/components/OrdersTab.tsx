@@ -348,7 +348,7 @@ export function OrdersTab({
                       </div>
                       <div className="w-24">
                         <label className="text-[10px] text-slate-400 font-bold uppercase block mb-1">Cost</label>
-                        <input type="number" value={isNaN(newItemAmount) ? '' : newItemAmount} onChange={e=>setNewItemAmount(isNaN(Number(e.target.value)) ? 0 : Number(e.target.value))} placeholder="0.00" className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-200 outline-none" />
+                        <input type="number" value={newItemAmount === '' ? '' : newItemAmount} onChange={e=>setNewItemAmount(e.target.value === '' ? '' : (isNaN(Number(e.target.value)) ? 0 : Number(e.target.value)))} placeholder="0.00" className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-200 outline-none" />
                       </div>
                       <button onClick={handleAddItem} className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center justify-center h-[34px]">
                         Add

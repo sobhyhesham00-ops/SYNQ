@@ -6,6 +6,7 @@ import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
+  // envPrefix is implicitly VITE_ but can be customized if needed.
   const env = loadEnv(mode, process.cwd(), '');
   
   return {
@@ -19,16 +20,24 @@ export default defineConfig(({ mode }) => {
       'process.env': {}
     },
     build: {
-      sourcemap: mode !== 'production',
+      outDir: 'dist',
+      sourcemap: true, // true for debugging source maps in production/dev
       minify: 'terser',
       chunkSizeWarningLimit: 1000,
       rollupOptions: {
-        external: ['@google/genai'],
+        external: ['@google/genai'], // Assuming genai is used purely server-side
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              return 'vendor'; // Splitting dependencies into vendor chunk
+            }
+          }
+        }
       }
     },
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "."),
+        "@": path.resolve(__dirname, "./src"),
       },
     },
     server: {
@@ -38,6 +47,7 @@ export default defineConfig(({ mode }) => {
         "/api": {
           target: "http://localhost:3000",
           changeOrigin: true,
+          secure: false, // Useful if the backend has self-signed certs in dev
         },
       },
       // HMR is disabled in AI Studio via DISABLE_HMR env var.

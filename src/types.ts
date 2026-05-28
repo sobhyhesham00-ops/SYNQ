@@ -1,9 +1,11 @@
-export type Role = 'tl' | 'agent' | 'qa';
+export type Role = 'tl' | 'agent' | 'qa' | 'admin' | 'director';
 
 export interface User {
   id: string;
   name: string;
   role: Role;
+  email?: string;
+  phone?: string;
   password?: string; // Stored in plain text or simple local format as requested
   avatarUrl?: string;
   status?: string;
@@ -43,6 +45,7 @@ export interface SwapRequest {
   id: string;
   agentName: string;
   type: 'swap';
+  requestType?: 'swap'; // Alias for compatibility
   date: string; // Shift date (YYYY-MM-DD)
   shift: string; // Shift label
   swapWithAgent: string; // Agent name to swap with
@@ -63,6 +66,8 @@ export interface AnnualRequest {
   id: string;
   agentName: string;
   type: 'annual';
+  requestType?: 'annual'; // Alias for compatibility
+  date?: string; // Alias for compatibility
   startDate: string; // YYYY-MM-DD
   endDate: string; // YYYY-MM-DD (exclusive or inclusive, we'll make it inclusive)
   status: 'pending' | 'approved' | 'declined';
@@ -98,7 +103,7 @@ export interface Inquiry {
   photos: string[]; // Base64 data-urls or image urls
   links: string[]; // URLs
   createdAt: string; // ISO timestamp
-  status: 'submitted' | 'sent' | 'answered';
+  status: 'submitted' | 'sent' | 'answered' | 'pending';
   sentBy?: string;
   sentAt?: string;
   answer?: string;
@@ -145,8 +150,13 @@ export interface TabbyTamaraComplaint {
   imageUrl?: string;
   phoneNumber: string;
   complaintDetails: string;
+  text?: string;
+  orderStatus?: string;
   createdAt: string;
-  status: 'pending_tl' | 'need_contact' | 'closed';
+  status: 'pending_tl' | 'need_contact' | 'closed' | 'resolved' | 'closed_no_answer';
+  tlName?: string;
+  commentedAt?: string;
+  closedAt?: string;
   tlComment?: string;
   tlHandledAt?: string;
   tlHandledBy?: string;
@@ -161,11 +171,12 @@ export interface ClientCommunicationRequest {
   id: string;
   callCenterAgentName: string;
   clinicName: string;
+  patientName?: string;
   phoneNumber: string;
   language: 'Arabic' | 'English';
   notes: string;
   createdAt: string;
-  status: 'pending' | 'in_progress' | 'contacted';
+  status: 'pending' | 'in_progress' | 'contacted' | 'resolved' | 'closed_no_answer';
   openedBy?: string;
   openedAt?: string;
   handledBy?: string;
@@ -190,6 +201,7 @@ export interface CaseRecord {
   ticketType?: string;
   ticketStatus?: string;
   callType?: string;
+  status?: string;
   replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
 }
 
@@ -225,6 +237,8 @@ export interface TimeLog {
   clockOut?: string; // ISO string
   activities: ActivityRecord[];
   status: 'working' | 'break' | 'lunch' | 'restroom' | 'meeting' | 'one_on_one' | 'personal' | 'clocked_out' | 'day_off' | 'casual' | 'annual' | 'no_show';
+  totalMinutes?: number;
+  violations?: any[];
 }
 
 export interface AgentDirectoryRow {

@@ -170,7 +170,8 @@ import {
   FeedbackReply,
   QAScore,
   Announcement,
-  Order
+  Order,
+  Role
 } from './types';
 
 const STORAGE_KEYS = {
@@ -1659,7 +1660,7 @@ export default function App() {
 
   useEffect(() => {
     if (currentUser) {
-      const derivedRole = isQAName(currentUser.name) ? 'qa' : isTLName(currentUser.name) ? 'tl' : 'agent';
+      const derivedRole = (isQAName(currentUser.name) ? 'qa' : isTLName(currentUser.name) ? 'tl' : 'agent') as Role;
       if (currentUser.role !== derivedRole) {
         const updated = { ...currentUser, role: derivedRole };
         setCurrentUser(updated);
@@ -5553,7 +5554,7 @@ export default function App() {
                           setRequests([]);
                           setTimeLogs([]);
                           setSchedules([]);
-                          setSupportAssignments([]);
+                          setSupportAssignments({});
                           setCases([]);
                           setClientComms([]);
                           
@@ -6403,13 +6404,16 @@ export default function App() {
                           const workedMinsCalculated = timeLogs
                             .filter(log => log.agentName?.toLowerCase() === currentUser?.name?.toLowerCase())
                             .reduce((acc, log) => {
-                              const actsSum = log.activities.reduce((sum, act) => sum + (act.durationMinutes || 0), 0);
+                              const actsSum = log.activities?.reduce((sum, act) => {
+                                const dur = act.durationMinutes;
+                                return sum + (typeof dur === 'number' && !isNaN(dur) ? dur : 0);
+                              }, 0) || 0;
                               return acc + actsSum;
                             }, 0);
 
                           const xpScore = Math.floor(1000 + (resolvedCount * 75) + (workedMinsCalculated * 1.5));
-                          const agentLevel = Math.floor(xpScore / 1000);
-                          const levelProgress = (xpScore % 1000) / 10;
+                          const agentLevel = isNaN(xpScore) ? 1 : Math.floor(xpScore / 1000);
+                          const levelProgress = isNaN(xpScore) ? 0 : (xpScore % 1000) / 10;
 
                           const holdsGoldPunctuality = workedMinsCalculated > 120;
                           const isGrandmasterResovler = resolvedCount >= 25;
@@ -7299,11 +7303,14 @@ export default function App() {
                                 const workedMinsCalculated = timeLogs
                                   .filter(log => log.agentName?.toLowerCase() === aName?.toLowerCase())
                                   .reduce((acc, log) => {
-                                    const actsSum = log.activities.reduce((sum, act) => sum + (act.durationMinutes || 0), 0);
+                                    const actsSum = log.activities?.reduce((sum, act) => {
+                                      const dur = act.durationMinutes;
+                                      return sum + (typeof dur === 'number' && !isNaN(dur) ? dur : 0);
+                                    }, 0) || 0;
                                     return acc + actsSum;
                                   }, 0);
 
-                                const xpScore = Math.floor(1000 + (resolvedCount * 75) + (workedMinsCalculated * 1.5));
+                                const xpScore = Math.floor(1000 + (resolvedCount * 75) + (workedMinsCalculated * 1.5)) || 1000;
                                 return { name: aName, xp: xpScore, lob: getAgentLOB(aName) };
                               });
 

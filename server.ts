@@ -154,11 +154,13 @@ async function startServer() {
 
   // STEP 6: Health check endpoint (before Vite middleware)
   app.get('/health', (req, res) => {
+    const key = process.env.GEMINI_API_KEY;
+    const isConfigured = !!key && key !== 'MY_GEMINI_API_KEY';
     res.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      apiKeyConfigured: !!process.env.GEMINI_API_KEY,
+      apiKeyConfigured: isConfigured,
       version: '1.0.0',
       environment: process.env.NODE_ENV || 'development'
     });
@@ -184,8 +186,9 @@ async function startServer() {
   app.post("/api/analyze-schedule", async (req, res) => {
     const startMs = Date.now();
     try {
-      // Validate input
-      const validation = validateSchedules(req.body.schedules);
+      // Validate input - handle both direct array and nested schedules array
+      const payload = Array.isArray(req.body) ? req.body : (req.body.schedules || []);
+      const validation = validateSchedules(payload);
       if (!validation.valid) {
         return res.status(422).json({ error: 'Validation failed', details: validation.errors });
       }
@@ -196,9 +199,9 @@ async function startServer() {
       const genai = getAI();
       if (!genai) {
         logger.warn("AI", "Analyze schedule requested but AI offline");
-        return res.json({
-          analysis:
-            "🧠 **AI Analysis Offline**\n\nThe Gemini API key is not configured. Your scheduling portal is fully operational as a standalone application — review schedules manually for coverage gaps.",
+        return res.status(401).json({
+          error: "API key validation failed",
+          message: "The Gemini API key is missing or invalid. Please configure it in settings."
         });
       }
 
@@ -274,9 +277,9 @@ Structure your response with elegant markdown:
       const genai = getAI();
       if (!genai) {
         logger.warn("AI", "Chat requested but AI offline");
-        return res.json({
-          reply:
-            "I'm currently offline (API key not configured), but your portal is fully functional as a standalone app! You can manage schedules, requests, and cases without me. 😊",
+        return res.status(401).json({
+          error: "API key validation failed",
+          message: "The Gemini API key is missing or invalid. Please configure it in settings."
         });
       }
 
