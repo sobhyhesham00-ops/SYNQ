@@ -8165,7 +8165,7 @@ export default function App() {
 
                         <div className="flex justify-between items-center text-xs bg-black/20 p-2.5 rounded-xl border border-slate-700/5 font-sans">
                           <span className="text-slate-400">Total processed today:</span>
-                          <span className="font-bold text-slate-300 font-mono">{queueStats.processedToday} inquiries</span>
+                          <span className="font-bold text-slate-300 font-mono">{isNaN(queueStats.processedToday) ? 0 : queueStats.processedToday} inquiries</span>
                         </div>
                       </div>
 
@@ -8181,15 +8181,15 @@ export default function App() {
                         <div className="grid grid-cols-3 gap-2.5">
                           <div className="bg-black/30 p-2.5 rounded-xl border border-slate-700/5 text-center">
                             <p className="text-[9px] text-slate-400 font-bold uppercase font-sans">Active Calls</p>
-                            <p className="text-lg font-black text-rose-450 font-mono mt-0.5 animate-pulse">{queueStats.activeCalls}</p>
+                            <p className="text-lg font-black text-rose-450 font-mono mt-0.5 animate-pulse">{isNaN(queueStats.activeCalls) ? 0 : queueStats.activeCalls}</p>
                           </div>
                           <div className="bg-black/30 p-2.5 rounded-xl border border-slate-700/5 text-center">
                             <p className="text-[9px] text-slate-400 font-bold uppercase font-sans">Hold Time</p>
-                            <p className="text-lg font-black text-amber-300 font-mono mt-0.5">{queueStats.holdTime}s</p>
+                            <p className="text-lg font-black text-amber-300 font-mono mt-0.5">{isNaN(queueStats.holdTime) ? 0 : queueStats.holdTime}s</p>
                           </div>
                           <div className="bg-black/30 p-2.5 rounded-xl border border-slate-700/5 text-center">
                             <p className="text-[9px] text-slate-400 font-bold uppercase font-sans">Tasks open</p>
-                            <p className="text-lg font-black text-[#22d3ee] font-mono mt-0.5">{queueStats.waitingTasks}</p>
+                            <p className="text-lg font-black text-[#22d3ee] font-mono mt-0.5">{isNaN(queueStats.waitingTasks) ? 0 : queueStats.waitingTasks}</p>
                           </div>
                         </div>
 

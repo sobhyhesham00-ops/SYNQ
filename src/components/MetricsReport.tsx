@@ -734,11 +734,11 @@ export function MetricsReport({
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Average Cart Price:</span>
-                    <span className="text-white font-bold">{fintechAnalysis.avgPrice} EUR</span>
+                    <span className="text-white font-bold">{isNaN(fintechAnalysis.avgPrice) ? 0 : fintechAnalysis.avgPrice} EUR</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Max Cart Price:</span>
-                    <span className="text-white font-bold">{fintechAnalysis.maxPrice} EUR</span>
+                    <span className="text-white font-bold">{isNaN(fintechAnalysis.maxPrice) ? 0 : fintechAnalysis.maxPrice} EUR</span>
                   </div>
                 </div>
               )}

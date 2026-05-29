@@ -212,7 +212,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
               <span className="text-[10px] text-amber-400 font-bold uppercase tracking-widest">Inspect Live</span>
             </div>
             <p className="text-slate-400 text-xs mt-2 flex items-center gap-1.5 font-medium group-hover:text-amber-300">
-              <MessageSquare className="w-3 h-3" /> {pendingRequestsCount} Pending Requests
+              <MessageSquare className="w-3 h-3" /> {typeof pendingRequestsCount === 'number' && !isNaN(pendingRequestsCount) ? pendingRequestsCount : 0} Pending Requests
             </p>
           </div>
         </motion.div>
@@ -260,7 +260,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
           <div>
             <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Clinic Inquiries Support</p>
             <div className="flex items-baseline gap-2">
-              <h3 className="text-3xl font-black text-pink-400">{inquiriesCount}</h3>
+              <h3 className="text-3xl font-black text-pink-400">{typeof inquiriesCount === 'number' && !isNaN(inquiriesCount) ? inquiriesCount : 0}</h3>
               <span className="text-[10px] text-pink-400 font-bold uppercase tracking-widest">Inspect Live</span>
             </div>
             <p className="text-slate-400 text-xs mt-2 flex items-center gap-1.5 font-medium group-hover:text-pink-300">
@@ -285,7 +285,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
           <div>
             <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Tabby / Tamara Desk</p>
             <div className="flex items-baseline gap-2">
-              <h3 className="text-3xl font-black text-cyan-400">{ttRequestsCount}</h3>
+              <h3 className="text-3xl font-black text-cyan-400">{typeof ttRequestsCount === 'number' && !isNaN(ttRequestsCount) ? ttRequestsCount : 0}</h3>
               <span className="text-[10px] text-cyan-400 font-bold uppercase tracking-widest">Inspect Live</span>
             </div>
             <p className="text-slate-400 text-xs mt-2 flex items-center gap-1.5 font-medium group-hover:text-cyan-300">
