@@ -1,5 +1,6 @@
 import { MetricsReport } from './components/MetricsReport';
 import { SchedulingReports } from './components/SchedulingReports';
+import { SchedulesRoster } from './components/SchedulesRoster';
 import { ThemeToggle } from './components/ThemeToggle';
 import * as mammoth from 'mammoth';
 import React, { useState, useEffect, FormEvent, useRef, useMemo } from 'react';
@@ -126,6 +127,7 @@ import {
   generateTextReport,
   formatDateNice,
   getInitialSchedules,
+  getStandardActivitiesForShift,
   parseScheduleCSV,
   evaluateKpiFormula,
   parseAgentDirectoryCSV,
@@ -2291,6 +2293,8 @@ export default function App() {
   const [heatmapAfternoonTarget, setHeatmapAfternoonTarget] = useState<number>(() => getStorageItem('heatmap_afternoon_target', 2));
   const [heatmapNightTarget, setHeatmapNightTarget] = useState<number>(() => getStorageItem('heatmap_night_target', 1));
   const [heatmapConfigureOpen, setHeatmapConfigureOpen] = useState<boolean>(false);
+  const [scheduleSubTab, setScheduleSubTab] = useState<'calendar' | 'timeline' | 'importer' | 'p2p_market'>('calendar');
+  const [activeTimelineDate, setActiveTimelineDate] = useState<string>('');
 
   const [directoryHeaders, setDirectoryHeaders] = useState<string[]>(() => {
     return getStorageItem<string[]>('sched_agent_directory_headers', []);
@@ -3347,6 +3351,49 @@ export default function App() {
       } catch (err: any) {
         console.error("Purging Firestore schedules failed: ", err);
         toast.error('Failed to clear database schedules.');
+      }
+    }
+  };
+
+  const rebuildSmartRoster = async () => {
+    const doubleCheck = window.confirm('This will completely clear the current schedules and rebuild a premium, conflict-free 30-day rotation roster populated with automated break timelines for all support agents. Proceed?');
+    if (doubleCheck) {
+      setIsSyncingSheets(true);
+      try {
+        setSchedules([]);
+        setStorageItem('sched_schedules', []);
+        
+        const snap = await getDocs(collection(db, "schedules"));
+        const deleteBatch = writeBatch(db);
+        snap.docs.forEach(doc => {
+          deleteBatch.delete(doc.ref);
+        });
+        await deleteBatch.commit();
+
+        const targets = agentsList.length > 0 ? agentsList : INITIAL_AGENTS;
+        const newRoster = getInitialSchedules(clock || new Date(), targets);
+        
+        setSchedules(newRoster);
+        setStorageItem('sched_schedules', newRoster);
+
+        // Batch save to firestore in chunks of 450 items because firestore allows max 500 items per batch
+        const chunkSize = 450;
+        for (let idx = 0; idx < newRoster.length; idx += chunkSize) {
+          const chunk = newRoster.slice(idx, idx + chunkSize);
+          const saveBatch = writeBatch(db);
+          chunk.forEach(shift => {
+            const docRef = doc(db, "schedules", shift.id);
+            saveBatch.set(docRef, shift);
+          });
+          await saveBatch.commit();
+        }
+
+        toast.success("✨ Premium 30-Day Rotation Roster Rebuilt Successfully!");
+      } catch (err: any) {
+        console.error("Rebuilding roster failed: ", err);
+        toast.error("Failed to compile and rebuild smart roster.");
+      } finally {
+        setIsSyncingSheets(false);
       }
     }
   };
@@ -11111,1484 +11158,93 @@ export default function App() {
                           );
                         })()}
                       </div>
-                    </>
-                      );
-                    }
-                  })()}
-                </div>
-              )}
-
-              {/* Schedules View & Upload Panel */}
+                   {/* Schedules View & Upload Panel */}
               {activeTab === 'schedules' && (
-                <div id="schedules-view-root" className="space-y-6 animate-fade-in">
-                  
-                  {/* Title Header */}
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                      <h2 className="text-3xl font-black text-transparent bg-gradient-to-r from-blue-300 via-indigo-200 to-pink-300 bg-clip-text font-display flex items-center gap-3">
-                        <Calendar className="w-8 h-8 text-indigo-400" />
-                        Agent Schedule Roster
-                      </h2>
-                      <p className="text-slate-400 text-sm mt-1">Browse shift coverage, find trade partners, and publish rosters</p>
-                    </div>
-
-                    {canManageRoster && (
-                      <button
-                        onClick={clearTargetSchedules}
-                        className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 hover:border-rose-500/35 text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer self-stretch md:self-auto justify-center"
-                      >
-                        <XCircle className="w-4 h-4 text-rose-400" />
-                        Clear Current Roster
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Unified Modern Roster Upload Console */}
-                  {canManageRoster && (
-                    <div className="bg-slate-900/50 border text-left border-slate-700/10 rounded-3xl p-8 shadow-sm space-y-8 animate-fade-in relative">
-                      {isSyncingSheets && (
-                        <div className="absolute inset-0 z-50 bg-slate-900/500 backdrop-blur-sm rounded-3xl flex items-center justify-center">
-                           <div className="p-4 bg-slate-900/40 shadow-xl rounded-2xl flex items-center gap-3 border border-gray-100">
-                             <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                             <span className="text-sm font-bold text-slate-300">Uploading and Processing Roster...</span>
-                           </div>
-                        </div>
-                      )}
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 pb-5 gap-4">
-                        <div>
-                          <h3 className="font-bold text-slate-300 text-lg flex items-center gap-2">
-                            <Upload className="w-5 h-5 text-indigo-500" />
-                            Schedule Roster Upload
-                          </h3>
-                          <p className="text-sm text-slate-400 mt-1">
-                            Upload a spreadsheet containing agent shifts. Supports <b>.xlsx, .xls, .csv</b>
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <button
-                            onClick={downloadScheduleTemplate}
-                            className="px-4 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-slate-300 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2"
-                          >
-                            <Download className="w-4 h-4 text-slate-400" />
-                            Download Template
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {/* Box 1: File Uploader Card */}
-                        <div
-                          onDragEnter={handleDrag}
-                          onDragLeave={handleDrag}
-                          onDragOver={handleDrag}
-                          onDrop={handleDrop}
-                          className={`relative border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center text-center transition-all bg-gray-50 ${dragActive ? 'border-indigo-400 bg-indigo-50' : 'border-gray-300 hover:border-gray-400'}`}
-                        >
-                          <input
-                            type="file"
-                            accept=".xlsx,.xls,.csv,.txt,.json"
-                            onChange={(e) => {
-                                setIsSyncingSheets(true);
-                                setTimeout(() => {
-                                    handleScheduleFileChange(e);
-                                    setIsSyncingSheets(false);
-                                }, 500); // Fake small delay to show progress state
-                            }}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                          />
-                          <div className="w-16 h-16 bg-slate-900/40 shadow-sm border border-gray-100 rounded-full flex items-center justify-center mb-4 text-indigo-500 group-hover:scale-105 transition-transform">
-                            <Upload className="w-8 h-8" />
-                          </div>
-                          <h4 className="text-slate-300 font-bold text-base">Drag & drop your file here</h4>
-                          <p className="text-slate-400 text-sm mt-1">or click to browse from your computer</p>
-                          <p className="text-xs text-gray-400 mt-4 leading-relaxed max-w-xs mx-auto">
-                            Requires Agent Name, Date, and Shift columns. Missing agents will be auto-registered.
-                          </p>
-                        </div>
-
-                        {/* Box 2: Google Sheets URL Import */}
-                        <div className="border border-gray-200 bg-slate-900/40 shadow-sm rounded-2xl p-8 flex flex-col items-center justify-center text-center">
-                          <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
-                            <svg className="w-6 h-6" viewBox="0 0 48 48">
-                              <path fill="#34A853" d="M41.5 8h-35C4 8 2 10 2 12.5v23C2 38 4 40 6.5 40h35c2.5 0 4.5-2 4.5-4.5v-23C46 10 44 8 41.5 8z"></path>
-                              <path fill="#188038" d="M31.5 8h-25v32h25V8z"></path>
-                              <path fill="#E8F0FE" d="M36 15.5h6v4h-6v-4zM36 24h6v4h-6v-4zM8 15.5h5v4H8v-4zM8 24h5v4H8v-4z"></path>
-                            </svg>
-                          </div>
-                          <h4 className="font-bold text-slate-300">Import via Google Sheets</h4>
-                          <p className="text-xs text-slate-400 mt-1 mb-4 max-w-[200px] mx-auto">Automatically sync live roster from Google Workspace.</p>
-                          <div className="w-full flex space-x-2 relative group">
-                            <input
-                              type="text"
-                              value={googleSheetId}
-                              onChange={(e) => {
-                                let val = e.target.value;
-                                const match = val.match(/\/d\/([a-zA-Z0-9-_]+)/);
-                                if (match) val = match[1];
-                                setGoogleSheetId(val);
-                                setStorageItem('sched_google_sheet_id', val);
-                              }}
-                              placeholder="Paste Sheets URL..."
-                              className="flex-1 bg-slate-900/40 border border-gray-300 text-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm"
-                            />
-                            <button
-                              onClick={async () => {
-                                if (!googleSheetId) {
-                                  toast.error("Please provide a valid Google Sheet ID or URL.");
-                                  return;
-                                }
-                                try {
-                                  setIsSyncingSheets(true);
-                                  setUploadError(null);
-                                  setUploadSuccess(null);
-                                  
-                                  const text = await fetchGoogleSheetCSV(googleSheetId, '0');
-                                  const result = parseScheduleCSV(text, agentsList);
-                                  
-                                  if (result.errors.length > 0) {
-                                     setUploadError(result.errors.join('\n'));
-                                  }
-                                  if (result.schedules.length > 0) {
-                                    setTempSchedules(result.schedules);
-                                    setTempNewAgents(result.newAgents || []);
-                                    setUploadSuccess("Successfully extracted shifts.");
-                                  } else {
-                                     setUploadError((prev) => (prev ? prev + "\n" : "") + "No schedule data found.");
-                                  }
-                                } catch (err) {
-                                  setUploadError("Extraction failed: " + err.message);
-                                } finally {
-                                  setIsSyncingSheets(false);
-                                }
-                              }}
-                              disabled={isSyncingSheets}
-                              className="px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-lg transition-colors whitespace-nowrap shadow-sm disabled:opacity-50"
-                            >
-                              {isSyncingSheets ? 'Syncing...' : 'Sync Data'}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Display Data Summary Block */}
-                      {(tempSchedules.length > 0 || uploadError) && (
-                        <div className="border border-gray-200 bg-slate-900/40 rounded-2xl shadow-sm overflow-hidden flex flex-col pt-2 mt-8">
-                            <div className="px-6 py-4 flex items-center justify-between border-b border-gray-100 bg-gray-50/50">
-                                <div>
-                                    <h4 className="font-bold text-slate-300 flex items-center gap-2">
-                                        <Calendar className="w-5 h-5 text-indigo-500" /> Upload Preview Summary
-                                    </h4>
-                                    <p className="text-xs text-slate-400 mt-1">Review validation and any mapping errors before saving.</p>
-                                </div>
-                                {tempSchedules.length > 0 && (
-                                   <div className="flex gap-3">
-                                        <button onClick={() => { setTempSchedules([]); setUploadError(null); setUploadSuccess(null); }} className="px-4 py-2 border border-gray-300 text-slate-300 bg-slate-900/40 hover:bg-gray-50 rounded-xl text-sm font-semibold transition-colors">Discard</button>
-                                        <button onClick={commitSchedules} className="px-5 py-2 bg-emerald-600 text-white shadow-md shadow-emerald-500/20 hover:bg-emerald-700 rounded-xl text-sm font-bold flex items-center gap-2 transition-all">
-                                            <CheckCircle2 className="w-4 h-4" /> Save Schedule ({tempSchedules.length} items)
-                                        </button>
-                                   </div>
-                                )}
-                            </div>
-
-                            {/* Show Error Rows */}
-                            {uploadError && (
-                                <div className="bg-red-900/50 p-4 border-b border-red-100">
-                                    <h5 className="text-red-800 font-bold text-sm flex items-center gap-2 mb-2">
-                                        <AlertTriangle className="w-4 h-4"/> Parsing Errors
-                                    </h5>
-                                    <ul className="list-disc pl-5 text-xs text-red-600 font-mono space-y-1 max-h-48 overflow-y-auto custom-scrollbar pr-4">
-                                        {uploadError.split('\n').filter(Boolean).map((err, i) => (
-                                            <li key={i}>{err}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-
-                            {/* Show Summary Table */}
-                            {tempSchedules.length > 0 && (
-                                <div className="max-h-80 overflow-y-auto">
-                                    <table className="w-full text-left border-collapse text-sm">
-                                        <thead className="bg-slate-900 sticky top-0 border-b border-gray-200">
-                                            <tr>
-                                                <th className="p-3 pl-6 font-semibold text-slate-300">Agent</th>
-                                                <th className="p-3 font-semibold text-slate-300">Date</th>
-                                                <th className="p-3 font-semibold text-slate-300">Shift Mapped To</th>
-                                                <th className="p-3 pr-6 font-semibold text-slate-300 text-right">Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-100">
-                                            {tempSchedules.slice(0, 100).map((row, idx) => (
-                                                <tr key={idx} className="hover:bg-gray-50">
-                                                    <td className="p-3 pl-6 font-medium text-slate-300">{row.agentName}</td>
-                                                    <td className="p-3 text-slate-400 font-mono">{row.date}</td>
-                                                    <td className="p-3"><span className="px-2 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-md text-xs">{row.shiftLabel}</span></td>
-                                                    <td className="p-3 pr-6 text-right">
-                                                        <span className="text-emerald-600 text-xs font-semibold flex items-center justify-end gap-1"><span className="w-3 h-3 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px]">✓</span> Valid</span>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                    {tempSchedules.length > 100 && (
-                                        <div className="p-4 text-center text-xs text-slate-400 bg-gray-50 border-t border-gray-100">
-                                            Showing top 100 entries out of {tempSchedules.length}.
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-
-                  {/* Roster Live Toggle Switch purely for Hesham & Amira */}
-                  {canManageRoster && (
-                    <div className="bg-gradient-to-r from-violet-500/15 via-indigo-500/10 to-blue-500/15 border border-indigo-500/30 rounded-3xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 shadow-xl">
-                      <div className="space-y-1 text-left">
-                        <div className="flex items-center gap-2">
-                          <span className={`w-3 h-3 rounded-full ${isRosterPublished ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
-                          <h3 className="text-sm font-black text-slate-300 uppercase tracking-wider font-display">Schedule Roster Release Status</h3>
-                        </div>
-                        <p className="text-xs text-slate-300">
-                          {isRosterPublished 
-                            ? "Published & Released: Standard agents are allowed to view the complete schedule roster and trigger shift swap requests."
-                            : "Draft Mode: Full schedule calendar views are restricted to Team Leaders & Administration. Agents see custom draft shift card previews only."
-                          }
-                        </p>
-                      </div>
-                      
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs font-black uppercase text-slate-400 font-mono">
-                          {isRosterPublished ? '🟢 Published' : '🟡 Draft Only'}
-                        </span>
-                        <label className="relative inline-flex items-center cursor-pointer select-none">
-                          <input 
-                            type="checkbox" 
-                            checked={isRosterPublished}
-                            onChange={(e) => {
-                              const val = e.target.checked;
-                              setIsRosterPublished(val);
-                              setStorageItem('sched_roster_published', val);
-                              setDoc(doc(db, "system", "sched_roster_published"), { data: val }).catch(e => console.error("Roster published sync error:", e));
-                              if (val) {
-                                addSystemNotification(
-                                  "✨ New Schedule Published!",
-                                  `The direct schedule roster has been published by ${currentUser?.name || 'Leadership'}! You can now view your active shifts in the Schedules tab and request shift swaps.`,
-                                  "schedule",
-                                  "all"
-                                );
-                              }
-                              toast.success(`Schedule Roster ${val ? 'PUBLISHED & ACTIVE' : 'RETURNED TO DRAFT MODE'}!`);
-                            }}
-                            className="sr-only peer"
-                          />
-                          <div className="w-14 h-7 bg-slate-900/50 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-slate-800 after:border-slate-700 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-600 border border-slate-700/10"></div>
-                        </label>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Manual Single-Shift Roster Submission Form */}
-                  {canManageRoster && (
-                    <div className="bg-slate-900/50 border border-slate-700/10 rounded-3xl shadow-sm text-slate-300 p-6 shadow-2xl space-y-5 text-left">
-                      <div>
-                        <h3 className="font-extrabold text-slate-300 text-base font-display flex items-center gap-2">
-                          <PlusCircle className="w-5 h-5 text-indigo-400" />
-                          Individual Shift Assignment Submitter
-                        </h3>
-                        <p className="text-xs text-slate-400 mt-0.5">Manually program, assign, or override individual agent shift allocations with custom Notes</p>
-                      </div>
-
-                      <form onSubmit={handleManualRosterSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                        <div className="md:col-span-1 space-y-1.5 font-sans">
-                          <label className="text-[10px] text-slate-400 font-extrabold uppercase font-sans">1. Choose Agent</label>
-                          <select
-                            value={manualRosterAgent}
-                            onChange={(e) => setManualRosterAgent(e.target.value)}
-                            className="w-full px-3 py-2.5 bg-black/45 border border-slate-700/10 rounded-xl text-xs text-slate-300 outline-none cursor-pointer focus:border-indigo-500 font-sans"
-                          >
-                            <option className="bg-slate-800 text-slate-100 "  value="">-- Choose Agent --</option>
-                            {agentsList.map(name => (
-                              <option className="bg-slate-800 text-slate-100 " key={name} value={name}>
-                                {name} ({getAgentLOB(name)})
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div className="md:col-span-1 space-y-1.5">
-                          <label className="text-[10px] text-slate-400 font-extrabold uppercase font-sans">2. Coverage Date</label>
-                          <input
-                            type="date"
-                            value={manualRosterDate}
-                            onChange={(e) => setManualRosterDate(e.target.value)}
-                            className="w-full px-3 py-1.5 bg-black/45 border border-slate-700/10 rounded-xl text-xs text-slate-300 outline-none focus:border-indigo-500 h-[42px]"
-                          />
-                        </div>
-
-                        <div className="md:col-span-1 space-y-1.5 font-sans">
-                          <label className="text-[10px] text-slate-400 font-extrabold uppercase font-sans">3. Schedule Shift</label>
-                          <select
-                            value={manualRosterShift}
-                            onChange={(e) => setManualRosterShift(e.target.value)}
-                            className="w-full px-3 py-2.5 bg-black/45 border border-slate-700/10 rounded-xl text-xs text-slate-300 outline-none cursor-pointer focus:border-indigo-500 font-sans"
-                          >
-                            {SHIFTS.map(s => (
-                              <option className="bg-slate-800 text-slate-100 " key={s.id} value={s.label}>
-                                {s.display} ({s.label})
-                              </option>
-                            ))}
-                            <option className="bg-slate-800 text-slate-100 " value="Off">Rest Day (Off Day)</option>
-                          </select>
-                        </div>
-
-                        <div className="md:col-span-1 block">
-                          <button
-                            type="submit"
-                            className="w-full h-[42px] bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-500/20 cursor-pointer hover:scale-[1.02]"
-                          >
-                            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                            Submit Roster Shift
-                          </button>
-                        </div>
-
-                        {/* Shift Notes Field spanning full width */}
-                        <div className="md:col-span-4 space-y-1.5">
-                          <label className="text-[10px] text-slate-400 font-extrabold uppercase font-sans">4. Roster Shift Notes (Saves to Shift details)</label>
-                          <input
-                            type="text"
-                            placeholder="e.g. Approved temporary schedule override / Direct management assignment / Shift Notes..."
-                            value={manualRosterNotes}
-                            onChange={(e) => setManualRosterNotes(e.target.value)}
-                            className="w-full px-4 py-2.5 bg-black/45 border border-slate-700/10 rounded-xl text-xs text-slate-300 placeholder-slate-500 outline-none focus:border-indigo-500"
-                          />
-                        </div>
-                      </form>
-                    </div>
-                  )}
-
-
-                  {/* Informative coverage card indicators */}
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                    <div className="p-4 bg-slate-900/50 border border-slate-700/10 rounded-2xl backdrop-blur-sm">
-                      <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Active Scheduled Days</p>
-                      <p className="text-2xl font-black text-slate-300">
-                        {allScheduleDates.length} Days Covered
-                      </p>
-                      <p className="text-[10px] text-indigo-300 mt-1">
-                        {allScheduleDates.length > 0 
-                          ? `${formatDateNice(allScheduleDates[0])} to ${formatDateNice(allScheduleDates[allScheduleDates.length - 1])}`
-                          : 'Roster empty, using default rotation window'
-                        }
-                      </p>
-                    </div>
-
-                    <div className="p-4 bg-slate-900/50 border border-slate-700/10 rounded-2xl backdrop-blur-sm">
-                      <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Coverage Scope</p>
-                      <p className="text-2xl font-black text-slate-300">
-                        {schedules.length} Assigned Shifts
-                      </p>
-                      <p className="text-[10px] text-emerald-300 mt-1">
-                        Supporting standard rotation & manual uploads
-                      </p>
-                    </div>
-
-                    <div className="p-4 bg-slate-900/50 border border-slate-700/10 rounded-2xl backdrop-blur-sm">
-                      <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1 font-mono">My Upcoming Shift</p>
-                      {currentUser.role === 'agent' ? (
-                        (() => {
-                          const todayStr = getLocalISOString(systemTime);
-                          const myShiftsArr = schedules.filter(s => s.agentName?.toLowerCase() === currentUser?.name?.toLowerCase() && s.date >= todayStr);
-                          if (myShiftsArr.length > 0) {
-                            return (
-                              <>
-                                <p className="text-2xl font-black text-indigo-300 truncate">
-                                  {myShiftsArr[0].shiftLabel}
-                                </p>
-                                <p className="text-[10px] text-indigo-200 mt-1">
-                                  Next on: {formatDateNice(myShiftsArr[0].date)}
-                                </p>
-                              </>
-                            );
-                          }
-                          return (
-                            <>
-                              <p className="text-2xl font-black text-slate-400">Rest / No Shift</p>
-                              <p className="text-[10px] text-white0 mt-1">No upcoming scheduled shifts found</p>
-                            </>
-                          );
-                        })()
-                      ) : (
-                        <>
-                          <p className="text-2xl font-black text-amber-300">TL Supervision</p>
-                          <p className="text-[10px] text-slate-400 mt-1">Roster upload and override controls enabled</p>
-                        </>
-                      )}
-                    </div>
-
-                    <div className="p-4 bg-indigo-950/20 border border-indigo-500/20 rounded-2xl backdrop-blur-sm relative overflow-hidden">
-                      <div className="flex justify-between items-center mb-1.5">
-                        <p className="text-[10px] uppercase tracking-widest text-indigo-300 font-bold font-mono">Sync & Queue Engine</p>
-                        {forceOffline ? (
-                          <span className="px-1 py-0.5 rounded bg-amber-500/10 border border-amber-500/25 text-[7px] text-amber-400 font-black">OFFLINE</span>
-                        ) : (
-                          <span className="px-1 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/25 text-[7px] text-emerald-400 font-black tracking-widest">REALTIME</span>
-                        )}
-                      </div>
-                      
-                      <div className="space-y-1">
-                        <div className="flex justify-between items-center text-[11px]">
-                          <span className="text-slate-300">Pending Writes:</span>
-                          <span className={`font-mono font-black text-xs ${syncStatus.pending > 0 ? 'text-amber-400 animate-pulse' : 'text-slate-400'}`}>
-                            {syncStatus.pending}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center text-[11px]">
-                          <span className="text-slate-300">Syncs / Fails:</span>
-                          <span className="font-mono text-slate-400 font-bold">
-                            {syncStatus.synced} / <span className="text-red-400">{syncStatus.failed}</span>
-                          </span>
-                        </div>
-
-                        {syncError && (
-                          <p className="text-[8px] text-red-400 font-mono truncate leading-none mt-0.5 pt-0.5 border-t border-red-500/5">
-                            ⚠️ {syncError}
-                          </p>
-                        )}
-
-                        <div className="grid grid-cols-2 gap-1.5 mt-2 pt-1.5 border-t border-slate-700/5">
-                          <button
-                            onClick={() => {
-                              const nextMode = !forceOffline;
-                              setForceOffline(nextMode);
-                              toast.info(nextMode ? "Forced Offline Mode Active 🔌" : "Online Synchronization Active 📡");
-                            }}
-                            className={`py-1 px-1.5 rounded-lg text-[8px] font-black cursor-pointer text-center select-none uppercase transition-all ${
-                              forceOffline 
-                                ? 'bg-amber-600/20 hover:bg-amber-600/35 text-amber-200 border border-amber-500/30' 
-                                : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/5'
-                            }`}
-                          >
-                            {forceOffline ? "Go Online" : "Go Offline"}
-                          </button>
-                          
-                          <button
-                            onClick={async () => {
-                              if (forceOffline) {
-                                toast.error("Cannot sync: offline mode is active. Go online first!");
-                                return;
-                              }
-                              toast.promise(syncEngine.processPending(), {
-                                loading: 'Synchronizing team database...',
-                                success: 'Roster synced successfully!',
-                                error: 'Sync failed: network connection issue'
-                              });
-                            }}
-                            disabled={syncStatus.pending === 0}
-                            className={`py-1 px-1.5 rounded-lg text-[8px] font-black uppercase text-center cursor-pointer transition-all ${
-                              syncStatus.pending > 0 
-                                ? 'bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white shadow-lg shadow-indigo-900/10' 
-                                : 'bg-slate-900 text-slate-400 border border-slate-700/5 cursor-not-allowed'
-                            }`}
-                          >
-                            Sync Queue
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {!isRosterPublished && currentUser.role === 'agent' ? (
-                    <div className="space-y-6">
-                      <div className="p-12 text-center rounded-3xl border border-dashed border-indigo-500/30 bg-slate-800/[0.02] space-y-4 shadow-xl text-left">
-                        <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto text-indigo-400 shadow-inner">
-                          <Shield className="w-8 h-8" />
-                        </div>
-                        <div className="space-y-2 text-center">
-                          <h3 className="text-xl font-bold text-slate-300 tracking-wide font-display">Schedule Roster Draft Status</h3>
-                          <p className="text-slate-400 text-sm max-w-md mx-auto">
-                            The collective team schedule roster is currently under construction and edit by administration. Once released, the complete calendar tracker and trading capabilities will become active.
-                          </p>
-                        </div>
-                        <div className="flex justify-center">
-                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-amber-500/10 border border-amber-500/25 text-amber-300 font-bold uppercase text-[9px] tracking-wider font-mono mx-auto">
-                            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></span>
-                            Roster Draft Stage
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Display personalized preview list */}
-                      <div className="bg-slate-900/50 border border-slate-700/10 rounded-3xl p-6 shadow-xl space-y-4 text-left">
-                        <div className="border-b border-slate-700/5 pb-3">
-                          <h4 className="text-sm font-black text-indigo-300 uppercase tracking-widest font-mono">My Shift Coverage Preview</h4>
-                          <p className="text-xs text-slate-400 mt-1">Below are your upcoming assigned shifts as current in the administrator blueprint:</p>
-                        </div>
-
-                        {(() => {
-                          const todayStr = getLocalISOString(systemTime);
-                          const myShiftsArr = schedules.filter(s => s.agentName?.toLowerCase() === currentUser?.name?.toLowerCase() && s.date >= todayStr);
-                          if (myShiftsArr.length === 0) {
-                            return (
-                              <div className="py-6 text-center text-xs text-white0 italic">
-                                No upcoming scheduled shifts match your account name in this draft revision.
-                              </div>
-                            );
-                          }
-                          return (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                              {myShiftsArr.map(shift => {
-                                const style = getShiftBadgeStyle(shift.shiftLabel);
-                                return (
-                                  <div key={shift.id} className="p-4 bg-slate-800/[0.02] border border-slate-700/5 rounded-2xl flex items-center justify-between shadow">
-                                    <div>
-                                      <p className="text-[10px] text-slate-400 font-mono font-medium">{formatDateNice(shift.date)}</p>
-                                      <p className="text-xs font-bold text-slate-300 mt-1 uppercase tracking-wide">{shift.agentName}</p>
-                                    </div>
-                                    <span className={`px-2 py-0.5 text-[10px] font-black rounded border uppercase tracking-wider ${style.bg}`}>
-                                      {style.display}
-                                    </span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      {/* Search, Filter, & Navigation Toolbar */}
-                      <div className="p-4 bg-slate-900/50 border border-slate-700/10 rounded-3xl flex flex-col sm:flex-row justify-between items-center gap-4 shadow-md">
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-                      {/* Search bar */}
-                      <input
-                        type="text"
-                        placeholder="Filter by Agent Name..."
-                        value={scheduleFilterAgent}
-                        onChange={(e) => setScheduleFilterAgent(e.target.value)}
-                        className="px-4 py-2 bg-black/45 hover:bg-slate-700 backdrop-blur-xl border border-slate-700/10 focus:border-indigo-500/85 focus:ring-1 focus:ring-indigo-500 rounded-xl text-xs text-slate-300 placeholder-slate-400 outline-none transition-all w-full sm:w-64"
-                      />
-
-                      {/* View Mode */}
-                      <div className="flex rounded-xl bg-black/45 p-1 border border-slate-700/5">
-                        <button
-                          onClick={() => {
-                            setScheduleViewMode('week');
-                            setSchedulePageOffset(0);
-                          }}
-                          className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                            scheduleViewMode === 'week' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-300'
-                          }`}
-                        >
-                          Week
-                        </button>
-                        <button
-                          onClick={() => {
-                            setScheduleViewMode('fortnight');
-                            setSchedulePageOffset(0);
-                          }}
-                          className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                            scheduleViewMode === 'fortnight' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-300'
-                          }`}
-                        >
-                          2-Weeks
-                        </button>
-                        <button
-                          onClick={() => {
-                            setScheduleViewMode('month');
-                            setSchedulePageOffset(0);
-                          }}
-                          className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                            scheduleViewMode === 'month' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-300'
-                          }`}
-                        >
-                          Full Month
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Horizontal Paging Actions */}
-                    <div className="flex items-center gap-2 self-stretch sm:self-auto justify-between sm:justify-end">
-                      <span className="text-[11px] text-slate-400 font-medium">
-                        Showing offsets: {safeOffset + 1} - {Math.min(safeOffset + displayDaysCount, baseDatesList.length)} of {baseDatesList.length} dates
-                      </span>
-                      <div className="flex gap-2">
-                        <button
-                          disabled={safeOffset === 0}
-                          onClick={() => setSchedulePageOffset(prev => Math.max(0, prev - displayDaysCount))}
-                          className="px-3 py-1.5 bg-slate-900/50 hover:bg-slate-800/80 border border-slate-700/10 text-slate-300 disabled:opacity-30 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                        >
-                          &larr; Prev
-                        </button>
-                        <button
-                          disabled={safeOffset + displayDaysCount >= baseDatesList.length}
-                          onClick={() => setSchedulePageOffset(prev => Math.min(baseDatesList.length - displayDaysCount, prev + displayDaysCount))}
-                          className="px-3 py-1.5 bg-slate-900/50 hover:bg-slate-800/80 border border-slate-700/10 text-slate-300 disabled:opacity-30 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                        >
-                          Next &rarr;
-                        </button>
-                      </div>
-
-                          {currentUser.role === 'agent' && (
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={syncShiftsToGoogleCalendar}
-                                disabled={isSyncingCalendar}
-                                className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-indigo-600/20"
-                                title="Sync with Google Calendar"
-                              >
-                                {isSyncingCalendar ? (
-                                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                                ) : (
-                                  <Calendar className="w-3.5 h-3.5" />
-                                )}
-                                Sync Google
-                              </button>
-                              <button
-                                onClick={downloadShiftsICS}
-                                className="px-4 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-slate-700/20"
-                                title="Download .ics for Outlook/Apple Calendar"
-                              >
-                                <Download className="w-3.5 h-3.5" />
-                                Save Other
-                              </button>
-                            </div>
-                          )}
-                    </div>
-                  </div>
-
-
-
-                  {/* Active Schedule visual Matrix grid */}
-                  <div className="bg-slate-900/50 border border-slate-700/10 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
-                    <div className="flex justify-between items-center pb-2 border-b border-slate-700/5">
-                      <h3 className="font-bold text-slate-300 text-base font-display"> Roster Coverage Planner</h3>
-                      <span className="text-[10px] text-indigo-300 font-mono flex items-center gap-1.5 font-bold uppercase">
-                        <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span> Active Database
-                      </span>
-                    </div>
-
-                    {schedules.length === 0 ? (
-                      <div className="text-center py-16 text-slate-400 space-y-3">
-                        <Calendar className="w-12 h-12 mx-auto text-indigo-400 opacity-40 animate-pulse" />
-                        <div>
-                          <p className="font-bold text-slate-300 text-base">Active schedule roster is empty</p>
-                          <p className="text-xs text-slate-400 max-w-md mx-auto mt-1">
-                            {currentUser.role === 'tl'
-                              ? 'Please compile and upload a CSV weekly or monthly schedule file using the drag-and-drop panel above.'
-                              : 'A Team Leader has not loaded the schedule roster yet. Initial dummy rotation is turned off.'
-                            }
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        {/* Coverage Heatmap Gradient Section */}
-                        {(() => {
-                          const getCoverageForDate = (dateStr: string) => {
-                            const dayShifts = schedules.filter(s => s.date === dateStr);
-                            
-                            const morningAgents = dayShifts.filter(s => {
-                              const norm = s.shiftLabel.toLowerCase();
-                              return norm.includes('07:00') || norm.includes('morning');
-                            }).map(s => s.agentName);
-                            
-                            const afternoonAgents = dayShifts.filter(s => {
-                              const norm = s.shiftLabel.toLowerCase();
-                              return norm.includes('13:00') || norm.includes('afternoon');
-                            }).map(s => s.agentName);
-                            
-                            const nightAgents = dayShifts.filter(s => {
-                              const norm = s.shiftLabel.toLowerCase();
-                              return norm.includes('22:00') || norm.includes('night');
-                            }).map(s => s.agentName);
-
-                            const totalCount = morningAgents.length + afternoonAgents.length + nightAgents.length;
-                            const totalTarget = heatmapMorningTarget + heatmapAfternoonTarget + heatmapNightTarget;
-
-                            return {
-                              morning: { count: morningAgents.length, target: heatmapMorningTarget, agents: morningAgents },
-                              afternoon: { count: afternoonAgents.length, target: heatmapAfternoonTarget, agents: afternoonAgents },
-                              night: { count: nightAgents.length, target: heatmapNightTarget, agents: nightAgents },
-                              total: { count: totalCount, target: totalTarget, agents: [...morningAgents, ...afternoonAgents, ...nightAgents] }
-                            };
-                          };
-
-                          return (
-                            <div className="bg-slate-900/85 border border-indigo-500/25 rounded-3xl p-5 space-y-4 mb-6 text-left shadow-2xl relative overflow-hidden backdrop-blur-xl">
-                              <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
-                              <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
-
-                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-700/5 pb-3">
-                                <div className="space-y-1">
-                                  <h4 className="text-sm font-black text-slate-300 flex items-center gap-2 font-display">
-                                    <span className="flex h-2.5 w-2.5 relative">
-                                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                                    </span>
-                                    Roster Coverage Heatmap Analytics
-                                  </h4>
-                                  <p className="text-[11px] text-slate-400 font-sans">
-                                    Live shift coverage matrix compared against custom targets. Hover on individual cells to inspect scheduled agents.
-                                  </p>
-                                </div>
-
-                                <button
-                                  type="button"
-                                  onClick={() => setHeatmapConfigureOpen(!heatmapConfigureOpen)}
-                                  className="px-3.5 py-1.5 bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/25 text-indigo-300 rounded-xl text-[10px] uppercase font-black tracking-widest transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto"
-                                >
-                                  <Sliders className="w-3.5 h-3.5" />
-                                  {heatmapConfigureOpen ? 'Hide Staffing Targets' : 'Configure Staffing Targets'}
-                                </button>
-                              </div>
-
-                              {/* Interactive Target Configurator Panel */}
-                              {heatmapConfigureOpen && (
-                                <div className="p-4 bg-slate-900/40 rounded-2xl border border-slate-700/5 grid grid-cols-1 sm:grid-cols-3 gap-5 text-left transition-all">
-                                  <div className="space-y-2">
-                                    <label className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
-                                      🌅 Morning Shift Target (07-16)
-                                    </label>
-                                    <div className="flex items-center gap-2">
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          const val = Math.max(1, heatmapMorningTarget - 1);
-                                          setHeatmapMorningTarget(val);
-                                          setStorageItem('heatmap_morning_target', val);
-                                        }}
-                                        className="w-8 h-8 bg-slate-900/50 hover:bg-slate-800/80 active:scale-95 text-slate-300 font-bold rounded-lg border border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
-                                      >
-                                        -
-                                      </button>
-                                      <span className="w-10 text-center font-bold text-slate-300 text-sm font-mono">
-                                        {heatmapMorningTarget}
-                                      </span>
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          const val = heatmapMorningTarget + 1;
-                                          setHeatmapMorningTarget(val);
-                                          setStorageItem('heatmap_morning_target', val);
-                                        }}
-                                        className="w-8 h-8 bg-slate-900/50 hover:bg-slate-800/80 active:scale-95 text-slate-300 font-bold rounded-lg border border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
-                                      >
-                                        +
-                                      </button>
-                                    </div>
-                                    <p className="text-[8.5px] text-white0 font-sans">Ideal working agents on clock</p>
-                                  </div>
-
-                                  <div className="space-y-2">
-                                    <label className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
-                                      ☀️ Afternoon Shift Target (13-22)
-                                    </label>
-                                    <div className="flex items-center gap-2">
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          const val = Math.max(1, heatmapAfternoonTarget - 1);
-                                          setHeatmapAfternoonTarget(val);
-                                          setStorageItem('heatmap_afternoon_target', val);
-                                        }}
-                                        className="w-8 h-8 bg-slate-900/50 hover:bg-slate-800/80 active:scale-95 text-slate-300 font-bold rounded-lg border border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
-                                      >
-                                        -
-                                      </button>
-                                      <span className="w-10 text-center font-bold text-slate-300 text-sm font-mono">
-                                        {heatmapAfternoonTarget}
-                                      </span>
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          const val = heatmapAfternoonTarget + 1;
-                                          setHeatmapAfternoonTarget(val);
-                                          setStorageItem('heatmap_afternoon_target', val);
-                                        }}
-                                        className="w-8 h-8 bg-slate-900/50 hover:bg-slate-800/80 active:scale-95 text-slate-300 font-bold rounded-lg border border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
-                                      >
-                                        +
-                                      </button>
-                                    </div>
-                                    <p className="text-[8.5px] text-white0 font-sans">Ideal working agents on clock</p>
-                                  </div>
-
-                                  <div className="space-y-2">
-                                    <label className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
-                                      🌙 Night Shift Target (22-07)
-                                    </label>
-                                    <div className="flex items-center gap-2">
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          const val = Math.max(1, heatmapNightTarget - 1);
-                                          setHeatmapNightTarget(val);
-                                          setStorageItem('heatmap_night_target', val);
-                                        }}
-                                        className="w-8 h-8 bg-slate-900/50 hover:bg-slate-800/80 active:scale-95 text-slate-300 font-bold rounded-lg border border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
-                                      >
-                                        -
-                                      </button>
-                                      <span className="w-10 text-center font-bold text-slate-300 text-sm font-mono">
-                                        {heatmapNightTarget}
-                                      </span>
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          const val = heatmapNightTarget + 1;
-                                          setHeatmapNightTarget(val);
-                                          setStorageItem('heatmap_night_target', val);
-                                        }}
-                                        className="w-8 h-8 bg-slate-900/50 hover:bg-slate-800/80 active:scale-95 text-slate-300 font-bold rounded-lg border border-slate-700/10 transition-all flex items-center justify-center cursor-pointer"
-                                      >
-                                        +
-                                      </button>
-                                    </div>
-                                    <p className="text-[8.5px] text-white0 font-sans">Ideal working agents on clock</p>
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Heatmap Grid Matrix */}
-                              <div className="overflow-x-auto pb-1 rounded-xl">
-                                <div className="min-w-[850px] space-y-2">
-                                  {/* Header row containing Dates */}
-                                  <div className="flex">
-                                    <div className="w-44 shrink-0 flex items-center pl-3 text-[10px] font-black uppercase text-indigo-300 tracking-wider font-display border-r border-slate-700/5">
-                                      Shift vs Date
-                                    </div>
-                                    <div className="flex-1 flex gap-1.5 pl-3">
-                                      {activeDisplayDates.map(dateStr => {
-                                        const d = new Date(dateStr);
-                                        const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' });
-                                        const dayNum = d.getDate();
-                                        return (
-                                          <div key={dateStr} className="flex-1 text-center bg-slate-900/30 py-1.5 rounded-xl border border-slate-700/5 shadow-sm">
-                                            <p className="text-[9px] text-indigo-300 uppercase font-black tracking-wider leading-none">{dayLabel}</p>
-                                            <p className="text-xs font-black text-slate-200 mt-1">{dayNum}</p>
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-
-                                  {/* Matrix rows */}
-                                  {[
-                                    { key: 'morning', label: '🌅 Morning Shift', target: heatmapMorningTarget, term: 'M' },
-                                    { key: 'afternoon', label: '☀️ Afternoon Shift', target: heatmapAfternoonTarget, term: 'A' },
-                                    { key: 'night', label: '🌙 Night Shift', target: heatmapNightTarget, term: 'N' },
-                                    { key: 'total', label: '📊 Total Staff', target: heatmapMorningTarget + heatmapAfternoonTarget + heatmapNightTarget, term: 'All' }
-                                  ].map(row => {
-                                    return (
-                                      <div key={row.key} className="flex items-stretch">
-                                        {/* Left Row Title & Header */}
-                                        <div className="w-44 shrink-0 flex flex-col justify-center text-left pl-3 py-1 bg-slate-900/30 border-r border-slate-700/5 rounded-l-xl select-none">
-                                          <p className="text-xs font-black text-slate-200 font-display">{row.label}</p>
-                                          <p className="text-[8px] text-indigo-200/60 font-medium">Target: {row.target} Agent{row.target !== 1 ? 's' : ''}</p>
-                                        </div>
-
-                                        {/* Heatmap Cell Grids */}
-                                        <div className="flex-1 flex gap-1.5 pl-3">
-                                          {activeDisplayDates.map(dateStr => {
-                                            // @ts-ignore
-                                            const coverage = getCoverageForDate(dateStr)[row.key];
-                                            const count = coverage.count;
-                                            const target = row.target;
-                                            const ratio = count / target;
-
-                                            // Decide color gradient classes
-                                            let cellStyle = "bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 shadow-inner";
-                                            let statusText = "Critically Understaffed";
-
-                                            if (ratio >= 1.0) {
-                                              cellStyle = "bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 shadow-sm shadow-emerald-500/5";
-                                              statusText = "Optimal Staffing";
-                                            } else if (ratio >= 0.5) {
-                                              cellStyle = "bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30";
-                                              statusText = "Sufficient";
-                                            } else if (ratio > 0.0) {
-                                              cellStyle = "bg-orange-500/15 hover:bg-orange-500/25 text-orange-300 border border-orange-500/30";
-                                              statusText = "Understaffed";
-                                            }
-
-                                            return (
-                                              <div
-                                                key={dateStr}
-                                                className={`flex-1 min-h-[44px] relative group flex flex-col items-center justify-center rounded-xl transition-all select-none duration-150 cursor-help ${cellStyle}`}
-                                              >
-                                                <span className="text-[11px] font-extrabold tracking-tight">{count}/{target}</span>
-                                                <span className="text-[7.5px] uppercase tracking-widest leading-none font-bold opacity-60 mt-0.5">{row.term}</span>
-
-                                                {/* Tooltip listing agents */}
-                                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 hidden group-hover:block bg-slate-950 border border-indigo-500/30 text-slate-300 rounded-xl p-3 shadow-2xl z-50 text-[10px] leading-relaxed backdrop-blur-md">
-                                                  <p className="font-extrabold text-indigo-300 border-b border-indigo-500/20 pb-0.5 mb-1.5 flex items-center justify-between">
-                                                    <span>📋 Coverage Details</span>
-                                                    <span className="text-[8px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.2 rounded font-mono uppercase tracking-widest">{row.term}</span>
-                                                  </p>
-                                                  
-                                                  <p className="text-slate-400 text-[9px] mb-1 font-sans">{statusText} ({count} of {target} agents scheduled)</p>
-                                                  <p className="text-white0 text-[8.5px] uppercase tracking-wider font-extrabold pb-0.5 border-b border-slate-700/5 mt-2">Active Agents:</p>
-                                                  {coverage.agents.length === 0 ? (
-                                                    <p className="text-slate-400 italic mt-1 font-mono">No agents scheduled</p>
-                                                  ) : (
-                                                    <div className="max-h-24 overflow-y-auto mt-1 space-y-0.5 font-mono">
-                                                      {coverage.agents.map((name: string, idx2: number) => (
-                                                        <div key={idx2} className="flex items-center gap-1 text-slate-300">
-                                                          <span className="text-emerald-400">●</span>
-                                                          <span className="font-bold">{name}</span>
-                                                          <span className="text-[8px] text-white0">({getAgentLOB(name)})</span>
-                                                        </div>
-                                                      ))}
-                                                    </div>
-                                                  )}
-                                                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-950"></div>
-                                                </div>
-                                              </div>
-                                            );
-                                          })}
-                                        </div>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-
-                              {/* Quick Stats Insights Bar & Legend */}
-                              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-3 border-t border-slate-700/5 text-[10px] text-slate-400">
-                                {/* Heatmap Legend */}
-                                <div className="flex flex-wrap gap-3 items-center">
-                                  <span className="font-bold text-slate-300">Keys:</span>
-                                  <span className="flex items-center gap-1">
-                                    <span className="w-2.5 h-2.5 rounded bg-emerald-500/20 border border-emerald-500/40 inline-block text-[7px] text-center font-bold">✓</span>
-                                    Optimal (100%+)
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <span className="w-2.5 h-2.5 rounded bg-amber-500/15 border border-amber-500/35 inline-block text-[7px] text-center font-bold">!</span>
-                                    Sufficient (50%+)
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <span className="w-2.5 h-2.5 rounded bg-orange-500/15 border border-orange-500/35 inline-block text-[7px] text-center font-bold">⚠</span>
-                                    Understaffed (&lt;50%)
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <span className="w-2.5 h-2.5 rounded bg-rose-500/10 border border-rose-500/30 inline-block text-[7px] text-center font-bold">✗</span>
-                                    0 Coverage
-                                  </span>
-                                </div>
-
-                                {/* Automated Warning Alert ticker */}
-                                {(() => {
-                                  const understaffedEntries: { date: string; label: string }[] = [];
-                                  activeDisplayDates.forEach(d => {
-                                    const cov = getCoverageForDate(d);
-                                    if (cov.morning.count < cov.morning.target) understaffedEntries.push({ date: d, label: 'Morning' });
-                                    if (cov.afternoon.count < cov.afternoon.target) understaffedEntries.push({ date: d, label: 'Afternoon' });
-                                    if (cov.night.count < cov.night.target) understaffedEntries.push({ date: d, label: 'Night' });
-                                  });
-
-                                  if (understaffedEntries.length === 0) {
-                                    return (
-                                      <span className="text-emerald-400 font-bold flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-lg font-sans">
-                                        ✓ Optimal Coverage Across Display Horizon
-                                      </span>
-                                    );
-                                  }
-
-                                  return (
-                                    <span className="text-amber-400 font-bold flex items-center gap-1 bg-amber-500/5 border border-amber-500/15 px-2.5 py-1 rounded-xl max-w-sm truncate text-left font-sans" title={understaffedEntries.map(e => `${formatDateNice(e.date)} (${e.label})`).join(', ')}>
-                                      ⚠️ Understaffed on {understaffedEntries.length} shift{understaffedEntries.length > 1 ? 's' : ''}! ({formatDateNice(understaffedEntries[0].date)}: {understaffedEntries[0].label})
-                                    </span>
-                                  );
-                                })()}
-                              </div>
-                            </div>
-                          );
-                        })()}
-
-                        {/* Desktop Matrix Grid View */}
-                        <div className="hidden lg:block overflow-x-auto border border-slate-700/5 rounded-2xl bg-black/45">
-                          <table className="w-full text-left border-collapse table-fixed min-w-[800px]">
-                            <thead>
-                              <tr className="bg-slate-900/50 border-b border-slate-700/5">
-                                <th className="px-5 py-3.5 text-xs font-bold text-slate-200 w-52 font-display bg-slate-900/40 backdrop-blur-lg border-r border-slate-700/5 shadow-md sticky left-0 z-10">
-                                  Agent Name
-                                </th>
-                                {activeDisplayDates.map(dateStr => {
-                                  // Parse date
-                                  const d = new Date(dateStr);
-                                  const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
-                                  const dayNum = d.getDate();
-                                  const monthName = d.toLocaleDateString('en-US', { month: 'short' });
-                                  return (
-                                    <th key={dateStr} className="px-3 py-3 text-center border-r border-slate-700/5 min-w-[90px]">
-                                      <p className="text-[10px] text-indigo-300 uppercase font-bold tracking-wider">{dayName}</p>
-                                      <p className="text-base font-black text-slate-300">{dayNum}</p>
-                                      <p className="text-[9px] text-slate-400">{monthName}</p>
-                                    </th>
-                                  );
-                                })}
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {visibleAgents.length === 0 ? (
-                                <tr>
-                                  <td colSpan={activeDisplayDates.length + 1} className="text-center py-8 text-xs text-slate-400 italic">
-                                    No agents match your filter criteria.
-                                  </td>
-                                </tr>
-                              ) : (
-                                visibleAgents.map(agentName => (
-                                  <tr key={agentName} className="border-b border-slate-700/5 hover:bg-slate-700 transition-all">
-                                    <td className="px-5 py-3 text-xs font-bold text-slate-300 font-sans bg-slate-900/40 backdrop-blur-lg border-r border-slate-700/5 shadow-sm sticky left-0 z-10 truncate min-w-[140px]">
-                                      {agentName}
-                                      <span className="block text-[8px] text-slate-400 font-normal lowercase tracking-wide font-sans">{getAgentLOB(agentName)}</span>
-                                    </td>
-                                    {activeDisplayDates.map(dateStr => {
-                                      const findShift = schedules.find(s => s && s.agentName && s.agentName?.toLowerCase() === (agentName || '').toLowerCase() && s.date === dateStr);
-                                      const userProfile = registeredUsers.find(u => u && u.name && u?.name?.toLowerCase() === (agentName || '').toLowerCase());
-                                      const profileShift = userProfile?.assignedShifts?.[dateStr];
-                                      const label = findShift ? findShift.shiftLabel : (profileShift || 'Not Scheduled');
-                                      const style = getShiftBadgeStyle(label);
-                                      return (
-                                        <td 
-                                          key={dateStr} 
-                                          onClick={() => {
-                                            if (canManageRoster && findShift) setSelectedShiftForActivities({...findShift});
-                                          }}
-                                          className={`p-1 border-r border-slate-700/5 hover:bg-slate-700/40 transition-all relative group ${canManageRoster && findShift ? 'cursor-pointer hover:ring-1 ring-inset ring-indigo-500/50' : 'cursor-help'}`}
-                                        >
-                                          <div className={`mx-auto rounded-lg px-2 py-2 text-center border text-[10px] font-bold ${style.bg} transition-all flex items-center justify-center gap-1 relative overflow-hidden`}>
-                                            <span className="relative z-10">{style.display}</span>
-                                            {findShift?.shiftNotes && (
-                                              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shrink-0 relative z-10" />
-                                            )}
-                                            {findShift?.activities && findShift.activities.length > 0 && (
-                                              <div className="absolute bottom-0 left-0 right-0 h-1 flex bg-slate-900/40">
-                                                {findShift.activities.map((a, i) => (
-                                                  <div key={i} className={`flex-1 h-full ${a.label === 'Break' ? 'bg-amber-400' : a.label === 'Lunch' ? 'bg-orange-500' : typeof a.label === 'string' && a.label.includes('Meeting') ? 'bg-indigo-500' : 'bg-cyan-500'}`} title={a.label} />
-                                                ))}
-                                              </div>
-                                            )}
-                                          </div>
-                                          {(findShift?.shiftNotes || (findShift?.activities && findShift.activities.length > 0) || canManageRoster) && (
-                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block bg-slate-900 border border-indigo-400/40 text-slate-300 rounded-xl p-3 shadow-2xl z-50 text-[10px] leading-relaxed backdrop-blur-md">
-                                              <p className="font-extrabold text-indigo-300 border-b border-indigo-400/20 pb-0.5 mb-1.5 flex items-center justify-between font-display">
-                                                <span>📌 Details</span>
-                                                <span className="text-slate-400 font-mono scale-75">{dateStr}</span>
-                                              </p>
-                                              
-                                              {findShift?.shiftNotes && (
-                                                <p className="text-slate-300 font-sans break-words mb-2 italic">"{findShift.shiftNotes}"</p>
-                                              )}
-                                              
-                                              {findShift?.activities && findShift.activities.length > 0 && (
-                                                <div className="space-y-1 mb-2">
-                                                  <p className="text-[9px] font-bold uppercase text-white0 tracking-wider">Intraday Timeline:</p>
-                                                  {[...findShift.activities].sort((a,b)=>a.startTime.localeCompare(b.startTime)).map((act, i) => (
-                                                    <div key={i} className="flex items-center gap-1.5 justify-between bg-black/40 px-1.5 py-0.5 rounded border border-slate-700/5">
-                                                       <span className="font-mono text-[9px] text-indigo-200">{act.startTime}-{act.endTime}</span>
-                                                       <span className="font-bold text-slate-300 truncate">{act.label}</span>
-                                                    </div>
-                                                  ))}
-                                                </div>
-                                              )}
-                                              
-                                              {canManageRoster && findShift && (
-                                                <p className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest text-center mt-2 bg-emerald-500/10 border border-emerald-500/20 py-0.5 rounded">
-                                                  Click to edit intervals
-                                                </p>
-                                              )}
-                                              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-indigo-400/40"></div>
-                                            </div>
-                                          )}
-                                        </td>
-                                      );
-                                    })}
-                                  </tr>
-                                ))
-                              )}
-                            </tbody>
-                          </table>
-                        </div>
-
-                        {/* Mobile Grid Layout list of cards */}
-                        <div className="block lg:hidden space-y-4">
-                          {visibleAgents.length === 0 ? (
-                            <p className="text-center py-8 text-xs text-slate-400 italic">No agents match your filter criteria.</p>
-                          ) : (
-                            visibleAgents.map(agentName => {
-                              const agentShifts = schedules.filter(s => s && s.agentName && s.agentName?.toLowerCase() === (agentName || '').toLowerCase() && activeDisplayDates.includes(s.date));
-                              return (
-                                <div key={agentName} className="p-4 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-2xl space-y-2">
-                                  <p className="text-xs font-bold text-slate-300 border-b border-slate-700/5 pb-1 font-display flex justify-between items-center">
-                                    <span>{agentName}</span>
-                                    <span className="text-[9px] text-slate-400 font-normal lowercase tracking-wide bg-slate-900/50 border border-slate-700/5 px-1.5 py-0.5 rounded-lg">{getAgentLOB(agentName)}</span>
-                                  </p>
-                                  <div className="grid grid-cols-2 xs:grid-cols-3 gap-2">
-                                    {activeDisplayDates.map(dateStr => {
-                                      const d = new Date(dateStr);
-                                      const dayLabel = `${d.toLocaleDateString('en-US', { weekday: 'short' })} ${d.getDate()} ${d.toLocaleDateString('en-US', { month: 'short' })}`;
-
-                                      const findShift = agentShifts.find(s => s.date === dateStr);
-                                      const userProfile = registeredUsers.find(u => u && u.name && u?.name?.toLowerCase() === (agentName || '').toLowerCase());
-                                      const profileShift = userProfile?.assignedShifts?.[dateStr];
-                                      const label = findShift ? findShift.shiftLabel : (profileShift || 'Not Scheduled');
-                                      const style = getShiftBadgeStyle(label);
-
-                                      return (
-                                        <div 
-                                          key={dateStr} 
-                                          onClick={() => {
-                                            if (canManageRoster && findShift) setSelectedShiftForActivities({...findShift});
-                                          }}
-                                          className={`p-2 bg-slate-900/50 border border-slate-700/5 rounded-xl flex flex-col justify-between items-stretch relative ${canManageRoster && findShift ? 'cursor-pointer hover:border-indigo-500/50' : ''}`}
-                                        >
-                                          <span className="text-[9px] text-slate-400 font-medium mb-1 truncate block">{dayLabel}</span>
-                                          <span className={`px-1.5 py-1 rounded border text-[9px] font-semibold text-center truncate block ${style.bg} relative overflow-hidden`}>
-                                            <span className="relative z-10">{style.display}</span>
-                                            {findShift?.activities && findShift.activities.length > 0 && (
-                                              <div className="absolute bottom-0 left-0 right-0 h-1 flex bg-slate-900/40 opacity-70">
-                                                {findShift.activities.map((a, i) => (
-                                                  <div key={i} className={`flex-1 h-full ${a.label === 'Break' ? 'bg-amber-400' : a.label === 'Lunch' ? 'bg-orange-500' : typeof a.label === 'string' && a.label.includes('Meeting') ? 'bg-indigo-500' : 'bg-cyan-500'}`} />
-                                                ))}
-                                              </div>
-                                            )}
-                                          </span>
-                                          {findShift?.shiftNotes && (
-                                            <div className="mt-1.5 border-t border-slate-700/5 pt-1 text-[9px] text-indigo-300 font-sans italic break-words flex items-start gap-1 leading-normal text-left">
-                                              <span className="shrink-0 text-[10px]">📝</span>
-                                              <span>{findShift.shiftNotes}</span>
-                                            </div>
-                                          )}
-                                          {findShift?.activities && findShift.activities.length > 0 && (
-                                            <div className="mt-1.5 border-t border-slate-700/5 pt-1 text-[8px] text-slate-400 font-sans flex flex-col gap-0.5">
-                                              {[...findShift.activities].sort((a,b)=>a.startTime.localeCompare(b.startTime)).slice(0, 2).map((act, i) => (
-                                                <div key={i} className="flex justify-between">
-                                                  <span className="font-mono text-white0">{act.startTime}</span>
-                                                  <span className="truncate ml-1">{act.label}</span>
-                                                </div>
-                                              ))}
-                                              {findShift.activities.length > 2 && <span className="text-center text-[7px] mt-0.5 bg-slate-900/50 py-0.5 rounded">+{findShift.activities.length - 2} more</span>}
-                                            </div>
-                                          )}
-                                          {canManageRoster && findShift && (
-                                            <div className="mt-2 text-center">
-                                              <span className="text-[7px] text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-1 py-[1px] rounded border border-indigo-500/20">Edit Intraday</span>
-                                            </div>
-                                          )}
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                </div>
-                              );
-                            })
-                          )}
-                        </div>
-
-                        {/* Shift legend details */}
-                        <div className="flex flex-wrap justify-start gap-4 text-[10px] text-slate-400 pt-2 border-t border-slate-700/5">
-                          <span className="flex items-center gap-1.5">
-                            <span className="w-2.5 h-2.5 rounded bg-emerald-500/20 border border-emerald-500/40 block"></span>
-                            Morning Shift: 07:00 - 16:00
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <span className="w-2.5 h-2.5 rounded bg-amber-500/20 border border-amber-500/40 block"></span>
-                            Afternoon Shift: 13:00 - 22:00
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <span className="w-2.5 h-2.5 rounded bg-indigo-500/20 border border-indigo-500/40 block"></span>
-                            Night Shift: 22:00 - 07:00
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <span className="w-2.5 h-2.5 rounded bg-slate-900/50 border border-slate-700/10 block"></span>
-                            Off Day (Rest Day)
-                          </span>
-                        </div>
-                      </>
-                    )}
-                    </div>
-
-                    {/* P2P Shift Swap Trade Market & Trade Hub */}
-                    <div className="bg-slate-900/50 border border-slate-700/10 rounded-3xl shadow-sm text-slate-300 p-5 sm:p-6 shadow-2xl space-y-6 mt-6">
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-700/5 pb-4">
-                        <div>
-                          <h3 className="font-extrabold text-transparent bg-gradient-to-r from-blue-300 via-indigo-200 to-cyan-300 bg-clip-text text-lg font-display flex items-center gap-2">
-                            <GitPullRequest className="w-5 h-5 text-indigo-400 rotate-90" />
-                            P2P Shift Exchange Board
-                          </h3>
-                          <p className="text-xs text-slate-400 mt-0.5 font-sans">Teammates can directly declare trading availability, find coverage, or swap assignments within LOBs</p>
-                        </div>
-                        <div className="flex bg-black/35 rounded-xl p-1 border border-slate-700/5 text-[9px] font-black uppercase text-indigo-300 tracking-wider">
-                          Peer To Peer Market
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                        {/* Interactive Trade Listing Launcher Form */}
-                        <div className="bg-slate-800/[0.01] p-5 border border-slate-700/5 rounded-2xl space-y-4 text-left">
-                          <div>
-                            <p className="text-xs font-black text-rose-450 uppercase tracking-widest">Publish Open Trade Offer</p>
-                            <p className="text-[11px] text-slate-400 mt-0.5 font-sans">Offer up one of your scheduled shifts for peer coverage</p>
-                          </div>
-
-                          <div className="space-y-3.5">
-                            {/* Selected Date */}
-                            <div className="space-y-1">
-                              <label className="text-[10px] text-slate-400 font-bold uppercase font-sans">1. Select Your Shift Event</label>
-                              {(() => {
-                                // Get my upcoming schedules
-                                const todayISO = getLocalISOString(systemTime);
-                                const myShedList = schedules
-                                  .filter(s => s.agentName?.toLowerCase() === currentUser?.name?.toLowerCase() && s.date >= todayISO)
-                                  .sort((a, b) => a.date.localeCompare(b.date));
-                                if (myShedList.length === 0) {
-                                  return (
-                                    <div className="p-2 bg-rose-500/5 border border-rose-500/10 rounded-xl text-[10px] text-rose-300">
-                                      No upcoming shifts found in your schedule.
-                                    </div>
-                                  );
-                                }
-                                return (
-                                  <select
-                                    value={p2pSelectedDate}
-                                    onChange={(e) => setP2pSelectedDate(e.target.value)}
-                                    className="w-full px-3 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-xs text-slate-300 outline-none cursor-pointer"
-                                  >
-                                    <option className="bg-slate-800 text-slate-100 "  value="">-- Choose Assigned Date --</option>
-                                    {myShedList.map(s => (
-                                      <option className="bg-slate-800 text-slate-100 "  key={s.id} value={s.date}>
-                                        {formatDateNice(s.date)} (Your Duty: {s.shiftLabel})
-                                      </option>
-                                    ))}
-                                  </select>
-                                );
-                              })()}
-                            </div>
-
-                            {/* Target Partner Agent */}
-                            <div className="space-y-1">
-                              <label className="text-[10px] text-slate-400 font-bold uppercase font-sans">2. Targeted Trading Partner</label>
-                              <select
-                                value={p2pTargetAgent}
-                                onChange={(e) => setP2pTargetAgent(e.target.value)}
-                                className="w-full px-3 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-xs text-slate-300 outline-none cursor-pointer"
-                              >
-                                <option className="bg-slate-800 text-slate-100 "  value="">-- Let Any Peer in LOB Grab It --</option>
-                                {agentsList
-                                  .filter(a => a?.toLowerCase() !== currentUser?.name?.toLowerCase() && getAgentLOB(a) === getAgentLOB(currentUser.name))
-                                  .map(aName => (
-                                    <option className="bg-slate-800 text-slate-100 "  key={aName} value={aName}>
-                                      {aName} ({getAgentLOB(aName)})
-                                    </option>
-                                  ))}
-                              </select>
-                              <p className="text-[9px] text-[#22d3ee] font-medium leading-relaxed mt-0.5 font-sans">
-                                * LOB filter active: Showing agents sharing your department ({getAgentLOB(currentUser.name)})
-                              </p>
-                            </div>
-
-                            {/* Target Shift */}
-                            <div className="space-y-1">
-                              <label className="text-[10px] text-slate-400 font-bold uppercase font-sans">3. Shift You Want to Gain</label>
-                              <select
-                                value={p2pTargetShift}
-                                onChange={(e) => setP2pTargetShift(e.target.value)}
-                                className="w-full px-3 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-xs text-slate-300 outline-none cursor-pointer"
-                              >
-                                {SHIFTS.map(s => (
-                                  <option className="bg-slate-800 text-slate-100 "  key={s.id} value={s.label}>
-                                    {s.display} ({s.label})
-                                  </option>
-                                ))}
-                                <option className="bg-slate-800 text-slate-100 "  value="Off">Rest Day (Off Day)</option>
-                              </select>
-                            </div>
-
-                            {/* Notes */}
-                            <div className="space-y-1">
-                              <label className="text-[10px] text-slate-400 font-bold uppercase font-sans">4. Optional Offer Description</label>
-                              <input
-                                type="text"
-                                placeholder="I have a doctor appt / Need early shift..."
-                                value={p2pNotes}
-                                onChange={(e) => setP2pNotes(e.target.value)}
-                                className="w-full px-3 py-2 bg-slate-900/50 backdrop-blur-xl border border-slate-700/10 rounded-xl text-xs text-slate-300 placeholder-slate-500 outline-none"
-                              />
-                            </div>
-
-                            <button
-                              onClick={() => {
-                                if (!p2pSelectedDate) {
-                                  toast.error("Please select an assigned shift event first!");
-                                  return;
-                                }
-
-                                const myShift = schedules.find(s => s.agentName?.toLowerCase() === currentUser?.name?.toLowerCase() && s.date === p2pSelectedDate);
-                                const myShiftLabel = myShift ? myShift.shiftLabel : 'Off';
-
-                                const newReq: SwapRequest = {
-                                  id: 'req_' + Date.now(),
-                                  agentName: currentUser.name,
-                                  type: 'swap',
-                                  date: p2pSelectedDate,
-                                  shift: myShiftLabel,
-                                  swapWithAgent: p2pTargetAgent || 'Any Qualified Partner',
-                                  swapWithShift: p2pTargetShift,
-                                  status: p2pTargetAgent ? 'pending_partner' : 'pending',
-                                  createdAt: new Date().toISOString(),
-                                  notes: p2pNotes || "P2P open trade offer published from roster board",
-                                  ruleViolation: false
-                                };
-
-                                const check = validateSwapRequest(p2pSelectedDate, myShiftLabel, new Date());
-                                if (!check.isValid) {
-                                  newReq.ruleViolation = true;
-                                  newReq.violationMessage = check.message;
-                                }
-
-                                const updatedRequests = [newReq, ...requests];
-                                setRequests(updatedRequests);
-                                setStorageItem('sched_requests', updatedRequests);
-
-                                toast.success("Successfully published shift trade listing to board!");
-                                setP2pSelectedDate('');
-                                setP2pTargetAgent('');
-                                setP2pNotes('');
-                              }}
-                              className="w-full py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white font-extrabold text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer font-sans"
-                            >
-                              <PlusCircle className="w-4 h-4 text-slate-300" />
-                              Publish Trade Offer
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Available Trades Board Listings */}
-                        <div className="xl:col-span-2 bg-slate-900 p-5 border border-slate-700/5 rounded-2xl flex flex-col justify-between space-y-4 font-sans">
-                          <div className="text-left font-sans">
-                            <p className="text-xs font-black text-[#22d3ee] uppercase tracking-widest font-sans">Available Trades Board Listings</p>
-                            <p className="text-[11px] text-slate-400 mt-0.5 font-sans">Review peer postings, accept direct proposals, or review status</p>
-                          </div>
-
-                          <div className="border border-slate-700/5 rounded-xl bg-black/40 overflow-hidden text-left h-72 overflow-y-auto">
-                            {(() => {
-                              const swapRequests = requests.filter(r => r.type === 'swap') as SwapRequest[];
-                              if (swapRequests.length === 0) {
-                                return (
-                                  <div className="flex flex-col items-center justify-center h-full text-slate-400 py-12 text-xs space-y-2 italic font-sans animate-pulse">
-                                    <GitPullRequest className="w-8 h-8 text-indigo-400/40" />
-                                    <span>No active trade proposals loaded on board</span>
-                                  </div>
-                                );
-                              }
-                              return (
-                                <table className="w-full text-xs font-sans">
-                                  <thead className="bg-slate-900 text-slate-400 text-[10px] font-bold uppercase tracking-wider sticky top-0 border-b border-slate-700/5 font-sans">
-                                    <tr>
-                                      <th className="px-4 py-3 text-left">Agent Offering</th>
-                                      <th className="px-4 py-3 text-left">Shift Date</th>
-                                      <th className="px-4 py-3 text-left">Offering Shift</th>
-                                      <th className="px-4 py-3 text-left">Targeting Partner</th>
-                                      <th className="px-4 py-3 text-left">Status</th>
-                                      <th className="px-4 py-3 text-right">Offer Action</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-white/5 font-sans">
-                                    {swapRequests.map(req => {
-                                      const isTargetedToMe = req.swapWithAgent.toLowerCase() === currentUser?.name?.toLowerCase() || req.swapWithAgent === 'Any Qualified Partner';
-                                      const isMyListing = req.agentName?.toLowerCase() === currentUser?.name?.toLowerCase();
-
-                                      return (
-                                        <tr key={req.id} className="hover:bg-slate-800/[0.02] transition-colors">
-                                          <td className="px-4 py-3.5 font-bold text-slate-300">
-                                            {req.agentName}
-                                            <span className="block text-[8px] text-slate-400 font-normal lowercase">{getAgentLOB(req.agentName)}</span>
-                                          </td>
-                                          <td className="px-4 py-3.5 text-slate-300">{formatDateNice(req.date)}</td>
-                                          <td className="px-4 py-3.5 font-mono text-indigo-300 font-semibold">{req.shift}</td>
-                                          <td className="px-4 py-3.5 text-slate-350">
-                                            {req.swapWithAgent}
-                                            <span className="block text-[8px] text-indigo-300 font-bold lowercase">Wants: {req.swapWithShift}</span>
-                                          </td>
-                                          <td className="px-4 py-3.5">
-                                            {req.status === 'pending_partner' ? (
-                                              <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                                                Negotiation P2P
-                                              </span>
-                                            ) : req.status === 'pending' ? (
-                                              <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-                                                Awaiting TL
-                                              </span>
-                                            ) : req.status === 'approved' ? (
-                                              <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                                Approved
-                                              </span>
-                                            ) : (
-                                              <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-slate-900/50 text-slate-400 border border-slate-700/5">
-                                                {req.status}
-                                              </span>
-                                            )}
-                                          </td>
-                                          <td className="px-4 py-3.5 text-right font-sans">
-                                            {req.status === 'pending_partner' && isTargetedToMe && !isMyListing ? (
-                                              <div className="flex justify-end gap-1.5 font-sans">
-                                                <button
-                                                  onClick={() => {
-                                                    handlePartnerDecision(req.id, true);
-                                                    toast.success("Accepted P2P trade request! It has been submitted to TL queue.");
-                                                  }}
-                                                  className="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded text-[10px] font-bold transition-all cursor-pointer font-sans"
-                                                >
-                                                  Accept
-                                                </button>
-                                                <button
-                                                  onClick={() => {
-                                                    handlePartnerDecision(req.id, false);
-                                                    toast.info("Declined custom trade request.");
-                                                  }}
-                                                  className="px-2 py-1 bg-slate-900/50 hover:bg-rose-500/20 hover:text-rose-400 text-slate-300 rounded text-[10px] font-bold transition-all border border-slate-700/5 cursor-pointer font-sans"
-                                                >
-                                                  Reject
-                                                </button>
-                                              </div>
-                                            ) : isMyListing ? (
-                                              <button
-                                                onClick={() => {
-                                                  const filtered = requests.filter(r => r.id !== req.id);
-                                                  setRequests(filtered);
-                                                  setStorageItem('sched_requests', filtered);
-                                                  toast.info("Deleted your trade offer listing.");
-                                                }}
-                                                className="px-2 py-1 bg-rose-500/10 hover:bg-rose-500 border border-rose-500/20 text-rose-300 hover:text-white rounded text-[10px] font-bold transition-all cursor-pointer font-sans"
-                                              >
-                                                Rescind
-                                              </button>
-                                            ) : (
-                                              <span className="text-[10px] text-white0 italic font-sans">No action</span>
-                                            )}
-                                          </td>
-                                        </tr>
-                                      );
-                                    })}
-                                  </tbody>
-                                </table>
-                              );
-                            })()}
-                          </div>
-
-                          <div className="text-[10px] text-white0 italic text-left font-sans">
-                            * Shift trading matches rule parameters including 24-hour advance submission limit. All swaps route to Operations Leader once peers approve.
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    </>
-                  )}
-                </div>
+                <SchedulesRoster
+                  schedules={schedules}
+                  setSchedules={setSchedules}
+                  requests={requests}
+                  setRequests={setRequests}
+                  agentsList={agentsList}
+                  currentUser={currentUser}
+                  rebuildSmartRoster={rebuildSmartRoster}
+                  clearTargetSchedules={clearTargetSchedules}
+                  googleSheetId={googleSheetId}
+                  setGoogleSheetId={setGoogleSheetId}
+                  dragActive={dragActive}
+                  setDragActive={setDragActive}
+                  isSyncingSheets={isSyncingSheets}
+                  setIsSyncingSheets={setIsSyncingSheets}
+                  uploadError={uploadError}
+                  setUploadError={setUploadError}
+                  uploadSuccess={uploadSuccess}
+                  setUploadSuccess={setUploadSuccess}
+                  tempSchedules={tempSchedules}
+                  setTempSchedules={setTempSchedules}
+                  tempNewAgents={tempNewAgents}
+                  setTempNewAgents={setTempNewAgents}
+                  tempParsedMeta={tempParsedMeta}
+                  setTempParsedMeta={setTempParsedMeta}
+                  commitSchedules={commitSchedules}
+                  isRosterPublished={isRosterPublished}
+                  setIsRosterPublished={setIsRosterPublished}
+                  scheduleViewMode={scheduleViewMode}
+                  setScheduleViewMode={setScheduleViewMode}
+                  scheduleFilterAgent={scheduleFilterAgent}
+                  setScheduleFilterAgent={setScheduleFilterAgent}
+                  schedulePageOffset={schedulePageOffset}
+                  setSchedulePageOffset={setSchedulePageOffset}
+                  heatmapMorningTarget={heatmapMorningTarget}
+                  setHeatmapMorningTarget={setHeatmapMorningTarget}
+                  heatmapAfternoonTarget={heatmapAfternoonTarget}
+                  setHeatmapAfternoonTarget={setHeatmapAfternoonTarget}
+                  heatmapNightTarget={heatmapNightTarget}
+                  setHeatmapNightTarget={setHeatmapNightTarget}
+                  heatmapConfigureOpen={heatmapConfigureOpen}
+                  setHeatmapConfigureOpen={setHeatmapConfigureOpen}
+                  baseDatesList={baseDatesList}
+                  safeOffset={safeOffset}
+                  displayDaysCount={displayDaysCount}
+                  activeDisplayDates={activeDisplayDates}
+                  visibleAgents={visibleAgents}
+                  getAgentLOB={getAgentLOB}
+                  registeredUsers={registeredUsers}
+                  setSelectedShiftForActivities={setSelectedShiftForActivities}
+                  syncShiftsToGoogleCalendar={syncShiftsToGoogleCalendar}
+                  downloadShiftsICS={downloadShiftsICS}
+                  isSyncingCalendar={isSyncingCalendar}
+                  downloadScheduleTemplate={downloadScheduleTemplate}
+                  handleScheduleFileChange={handleScheduleFileChange}
+                  fetchGoogleSheetCSV={fetchGoogleSheetCSV}
+                  parseScheduleCSV={parseScheduleCSV}
+                  forceOffline={forceOffline}
+                  setForceOffline={setForceOffline}
+                  syncStatus={syncStatus}
+                  syncEngine={syncEngine}
+                  p2pSelectedDate={p2pSelectedDate}
+                  setP2pSelectedDate={setP2pSelectedDate}
+                  p2pTargetAgent={p2pTargetAgent}
+                  setP2pTargetAgent={setP2pTargetAgent}
+                  p2pTargetShift={p2pTargetShift}
+                  setP2pTargetShift={setP2pTargetShift}
+                  p2pNotes={p2pNotes}
+                  setP2pNotes={setP2pNotes}
+                  validateSwapRequest={validateSwapRequest}
+                  handlePartnerDecision={handlePartnerDecision}
+                  manualRosterAgent={manualRosterAgent}
+                  setManualRosterAgent={setManualRosterAgent}
+                  manualRosterDate={manualRosterDate}
+                  setManualRosterDate={setManualRosterDate}
+                  manualRosterShift={manualRosterShift}
+                  setManualRosterShift={setManualRosterShift}
+                  manualRosterNotes={manualRosterNotes}
+                  setManualRosterNotes={setManualRosterNotes}
+                  handleManualRosterSubmit={handleManualRosterSubmit}
+                  systemTime={systemTime}
+                  db={db}
+                  getShiftBadgeStyle={getShiftBadgeStyle}
+                  addSystemNotification={addSystemNotification}
+                />
               )}
 
               {/* Tabby & Tamara Desk Panel, Complaints Desk Panel, & Client Comms Panel - Using the same root component but filtering locally */}
@@ -16933,6 +15589,79 @@ export default function App() {
                 ✕
               </button>
             </div>
+
+            {/* Shift Notes and Base Shift dropdown if canManageRoster */}
+            {canManageRoster ? (
+              <div className="bg-slate-950/45 p-4 rounded-2xl border border-slate-800/60 space-y-4 text-left">
+                <p className="text-[10px] font-extrabold uppercase text-indigo-300 tracking-wider">🛠️ Base Shift & Notes Override (Admin / TL)</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[9px] text-slate-400 font-bold uppercase">Assign Shift Hours</label>
+                    <select
+                      value={selectedShiftForActivities.shiftLabel}
+                      onChange={(e) => {
+                        const newLabel = e.target.value;
+                        const defaultActivities = getStandardActivitiesForShift(newLabel, selectedShiftForActivities.date, selectedShiftForActivities.agentName);
+                        setSelectedShiftForActivities({
+                          ...selectedShiftForActivities,
+                          shiftLabel: newLabel,
+                          activities: defaultActivities
+                        });
+                        toast.info(`Assigned ${newLabel} & loaded default break intervals!`);
+                      }}
+                      className="w-full bg-slate-900 border border-slate-700/30 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500/50"
+                    >
+                      <option className="bg-slate-800 text-slate-100" value="07:00 - 16:00">🌅 Morning (07:00 - 16:00)</option>
+                      <option className="bg-slate-800 text-slate-100" value="13:00 - 22:00">☀️ Afternoon (13:00 - 22:00)</option>
+                      <option className="bg-slate-800 text-slate-100" value="22:00 - 07:00">🌙 Night (22:00 - 07:00)</option>
+                      <option className="bg-slate-800 text-slate-100" value="Off">💤 Off / Rest Day</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] text-slate-400 font-bold uppercase">Incident Notes</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Training, medical, approved swap"
+                      value={selectedShiftForActivities.shiftNotes || ''}
+                      onChange={(e) => {
+                        setSelectedShiftForActivities({
+                          ...selectedShiftForActivities,
+                          shiftNotes: e.target.value
+                        });
+                      }}
+                      className="w-full bg-slate-900 border border-slate-700/30 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/50"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-between items-center gap-2 pt-1 flex-wrap sm:flex-nowrap">
+                  <span className="text-[8.5px] text-slate-400 leading-tight">Selecting a new shift auto-generates balanced meal times instantly.</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const defaultActivities = getStandardActivitiesForShift(selectedShiftForActivities.shiftLabel, selectedShiftForActivities.date, selectedShiftForActivities.agentName);
+                      setSelectedShiftForActivities({
+                        ...selectedShiftForActivities,
+                        activities: defaultActivities
+                      });
+                      toast.success("Applied fresh timeline patterns!");
+                    }}
+                    className="shrink-0 text-[9px] font-black text-indigo-400 hover:text-indigo-300 bg-indigo-500/5 hover:bg-indigo-500/10 border border-indigo-500/20 px-2 py-1 rounded-lg transition-all"
+                  >
+                    ⚡ Reset to Suggested Breaks
+                  </button>
+                </div>
+              </div>
+            ) : (
+              selectedShiftForActivities.shiftNotes && (
+                <div className="bg-amber-500/5 border border-amber-500/10 p-3.5 rounded-2xl text-left text-xs text-slate-300 flex items-start gap-2.5">
+                  <span className="text-base select-none leading-none">📌</span>
+                  <div>
+                    <p className="font-extrabold text-amber-400 text-[9px] uppercase tracking-wider">Supervisor Notes</p>
+                    <p className="mt-1 text-slate-300 italic">"{selectedShiftForActivities.shiftNotes}"</p>
+                  </div>
+                </div>
+              )
+            )}
 
             <div className="space-y-4">
               {(!selectedShiftForActivities.activities || selectedShiftForActivities.activities.length === 0) ? (

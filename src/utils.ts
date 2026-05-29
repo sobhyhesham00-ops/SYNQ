@@ -1,4 +1,4 @@
-import { SchedulingRequest, SHIFTS, TEAM_LEADERS, INITIAL_AGENTS, SwapRequest, AnnualRequest, ScheduledShift, AGENT_LOBS, Inquiry, TimeLog, AgentDirectoryRow, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, CaseRecord, SystemNotification, Order } from './types';
+import { SchedulingRequest, SHIFTS, TEAM_LEADERS, INITIAL_AGENTS, SwapRequest, AnnualRequest, ScheduledShift, AGENT_LOBS, Inquiry, TimeLog, AgentDirectoryRow, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, CaseRecord, SystemNotification, Order, DailyActivity } from './types';
 
 // Simple client-side storage helpers
 import { db } from './firebase';
@@ -549,6 +549,74 @@ export const generateTextReport = (
   return lines.join('\n');
 };
 
+// Generate a customized list of intraday activities for standard shifts (lunch, breaks, and training)
+export const getStandardActivitiesForShift = (shiftLabel: string, dateStr: string, agentName: string): DailyActivity[] => {
+  const norm = (shiftLabel || '').toLowerCase();
+  const day = new Date(dateStr).getDay();
+  // Safe simple seed based on agent name length & date day
+  const seed = (agentName.length + day) % 3;
+
+  if (norm.includes('07:00') || norm.includes('morning')) {
+    const break1Start = seed === 0 ? '09:30' : seed === 1 ? '09:45' : '10:00';
+    const break1End = seed === 0 ? '09:45' : seed === 1 ? '10:00' : '10:15';
+    const lunchStart = seed === 0 ? '11:45' : seed === 1 ? '12:00' : '12:30';
+    const lunchEnd = seed === 0 ? '12:45' : seed === 1 ? '13:00' : '13:30';
+    const break2Start = seed === 0 ? '14:30' : seed === 1 ? '14:45' : '15:00';
+    const break2End = seed === 0 ? '14:45' : seed === 1 ? '15:00' : '15:15';
+
+    const acts: DailyActivity[] = [
+      { id: `act_${dateStr}_${agentName}_b1`, label: 'Break', startTime: break1Start, endTime: break1End },
+      { id: `act_${dateStr}_${agentName}_lu`, label: 'Lunch', startTime: lunchStart, endTime: lunchEnd },
+      { id: `act_${dateStr}_${agentName}_b2`, label: 'Break', startTime: break2Start, endTime: break2End },
+    ];
+
+    // Tuesdays and Thursdays can have a 30-minute coaching session
+    if (day === 2 || day === 4) {
+      acts.push({ id: `act_${dateStr}_${agentName}_co`, label: 'Coaching', startTime: '15:15', endTime: '15:45' });
+    }
+    return acts;
+  }
+
+  if (norm.includes('13:00') || norm.includes('afternoon')) {
+    const break1Start = seed === 0 ? '15:00' : seed === 1 ? '15:15' : '15:30';
+    const break1End = seed === 0 ? '15:15' : seed === 1 ? '15:30' : '15:45';
+    const lunchStart = seed === 0 ? '17:00' : seed === 1 ? '17:30' : '18:00';
+    const lunchEnd = seed === 0 ? '18:00' : seed === 1 ? '18:30' : '19:00';
+    const break2Start = seed === 0 ? '20:00' : seed === 1 ? '20:15' : '20:30';
+    const break2End = seed === 0 ? '20:15' : seed === 1 ? '20:30' : '20:45';
+
+    const acts: DailyActivity[] = [
+      { id: `act_${dateStr}_${agentName}_b1`, label: 'Break', startTime: break1Start, endTime: break1End },
+      { id: `act_${dateStr}_${agentName}_lu`, label: 'Lunch', startTime: lunchStart, endTime: lunchEnd },
+      { id: `act_${dateStr}_${agentName}_b2`, label: 'Break', startTime: break2Start, endTime: break2End },
+    ];
+
+    // Wednesdays can have a team meeting
+    if (day === 3) {
+      acts.push({ id: `act_${dateStr}_${agentName}_me`, label: 'Meeting', startTime: '16:00', endTime: '16:30' });
+    }
+    return acts;
+  }
+
+  if (norm.includes('22:00') || norm.includes('night')) {
+    const break1Start = seed === 0 ? '00:00' : seed === 1 ? '00:15' : '00:30';
+    const break1End = seed === 0 ? '00:15' : seed === 1 ? '00:30' : '00:45';
+    const lunchStart = seed === 0 ? '02:00' : seed === 1 ? '02:30' : '03:00';
+    const lunchEnd = seed === 0 ? '02:00' : seed === 1 ? '03:30' : '04:00';
+    const break2Start = seed === 0 ? '05:00' : seed === 1 ? '05:15' : '05:30';
+    const break2End = seed === 0 ? '05:15' : seed === 1 ? '05:30' : '05:45';
+
+    const acts: DailyActivity[] = [
+      { id: `act_${dateStr}_${agentName}_b1`, label: 'Break', startTime: break1Start, endTime: break1End },
+      { id: `act_${dateStr}_${agentName}_lu`, label: 'Lunch', startTime: lunchStart, endTime: lunchEnd },
+      { id: `act_${dateStr}_${agentName}_b2`, label: 'Break', startTime: break2Start, endTime: break2End },
+    ];
+    return acts;
+  }
+
+  return [];
+};
+
 // Generate initial schedules for agents over a 30-day window
 export const getInitialSchedules = (currentTime: Date, agents: string[]): ScheduledShift[] => {
   const list: ScheduledShift[] = [];
@@ -570,11 +638,13 @@ export const getInitialSchedules = (currentTime: Date, agents: string[]): Schedu
       // 0 = Morning, 1 = Afternoon, 2 = Night, 3 = Rest Day (Off)
       const patternIdx = (i + agentIdx) % 4;
       if (patternIdx < 3) {
+        const selectedShift = shiftLabels[patternIdx];
         list.push({
           id: `sch_${dateStr}_${agentIdx}`,
           agentName: agent,
           date: dateStr,
-          shiftLabel: shiftLabels[patternIdx]
+          shiftLabel: selectedShift,
+          activities: getStandardActivitiesForShift(selectedShift, dateStr, agent)
         });
       }
     });
