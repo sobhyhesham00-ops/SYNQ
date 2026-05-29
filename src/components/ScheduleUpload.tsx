@@ -1,132 +1,119 @@
-import React, { useState } from 'react';
-import { Upload, FileText, CheckCircle2, AlertTriangle, X } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { Upload, AlertCircle, CheckCircle } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import Papa from 'papaparse';
 
-export interface ScheduleUploadProps {
-  onUploadSuccess: (data: any[]) => void;
-  onClose: () => void;
-}
-
-export function ScheduleUpload({ onUploadSuccess, onClose }: ScheduleUploadProps) {
-  const [isHovering, setIsHovering] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
-  const [error, setError] = useState<string | null>(null);
+export function ScheduleUpload() {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsHovering(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsHovering(false);
-  };
-
-  const processFile = async (selectedFile: File) => {
-    setFile(selectedFile);
-    setError(null);
-    setLoading(true);
-
+  const processData = async (data: any[]) => {
     try {
-      const extension = selectedFile.name.split('.').pop()?.toLowerCase();
-      if (!extension || !['csv', 'xlsx', 'xls'].includes(extension)) {
-        throw new Error('Please upload a valid CSV or Excel file.');
+      setLoading(true);
+      setError(null);
+      setSuccess(null);
+      
+      const payload = { schedules: data };
+
+      const res = await fetch('/api/analyze-schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to upload schedule');
       }
 
-      const data = await selectedFile.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
-      const json = XLSX.utils.sheet_to_json(worksheet);
-
-      if (json.length === 0) {
-        throw new Error('The uploaded file is empty.');
-      }
-
-      onUploadSuccess(json);
+      setSuccess('Schedule uploaded and analyzed successfully!');
     } catch (err: any) {
-      setError(err.message || 'Failed to process file.');
+      setError(err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsHovering(false);
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile) {
-      processFile(droppedFile);
-    }
-  };
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (!file) return;
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      processFile(e.target.files[0]);
+    if (file.name.endsWith('.csv')) {
+      Papa.parse(file, {
+        header: true,
+        complete: (results) => processData(results.data),
+        error: (err) => setError(`CSV Parse Error: ${err.message}`)
+      });
+    } else if (file.name.endsWith('.xlsx')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target?.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+          processData(jsonData);
+        } catch (err: any) {
+          setError(`Excel Parse Error: ${err.message}`);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      setError('Unsupported file type. Please upload CSV or XLSX.');
     }
-  };
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'text/csv': ['.csv'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
+    },
+    maxFiles: 1
+  });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
-      <div className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-fade-in relative">
-        <button 
-          onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors bg-slate-800 hover:bg-slate-700 p-1 rounded-full cursor-pointer"
-        >
-          <X className="w-5 h-5" />
-        </button>
-        
-        <div className="p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0 border border-indigo-500/20">
-              <Upload className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold tracking-tight text-white">Upload Schedule</h2>
-              <p className="text-xs text-slate-400">Support formats: CSV, XLSX, XLS</p>
-            </div>
-          </div>
-
-          <div 
-            className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center transition-all cursor-pointer relative ${
-              isHovering ? 'border-indigo-500 bg-indigo-500/10' : 'border-slate-700 hover:border-slate-500 bg-slate-950/50'
-            }`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-          >
-            <input 
-              type="file" 
-              accept=".csv, .xlsx, .xls"
-              onChange={handleFileChange}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            />
-            
-            {loading ? (
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-500"></div>
-            ) : file && !error ? (
-              <div className="flex flex-col items-center text-emerald-400">
-                <CheckCircle2 className="w-12 h-12 mb-3" />
-                <span className="font-semibold">{file.name}</span>
-                <span className="text-xs opacity-75 mt-1">Processed successfully</span>
-              </div>
-            ) : (
-              <>
-                <FileText className={`w-12 h-12 mb-4 ${isHovering ? 'text-indigo-400' : 'text-slate-500'}`} />
-                <p className="font-semibold text-slate-200 mb-1">Drag and drop file here</p>
-                <p className="text-xs text-slate-400">or click to browse from your computer</p>
-              </>
-            )}
-          </div>
-
-          {error && (
-            <div className="mt-4 p-3 bg-red-950/50 border border-red-500/20 rounded-lg flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-              <p className="text-xs text-red-300 font-medium">{error}</p>
-            </div>
-          )}
-        </div>
+    <div className="max-w-3xl mx-auto p-6">
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Upload Schedule</h1>
+      
+      <div 
+        {...getRootProps()} 
+        className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors
+          ${isDragActive ? 'border-blue-500 bg-blue-50 dark:bg-gray-800' : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600'}
+        `}
+      >
+        <input {...getInputProps()} />
+        <Upload className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
+        <p className="text-lg text-gray-600 dark:text-gray-300">
+          {isDragActive ? 'Drop file here...' : 'Drag & drop a CSV or Excel file here'}
+        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+          or click to select a file
+        </p>
       </div>
+
+      {loading && (
+        <div className="mt-6 flex items-center justify-center text-blue-600 dark:text-blue-400">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-current mr-3"></div>
+          Analyzing schedule...
+        </div>
+      )}
+
+      {error && (
+        <div className="mt-6 p-4 bg-red-50 dark:bg-red-900/20 rounded-md flex items-start">
+          <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 mr-3" />
+          <p className="text-red-700 dark:text-red-400">{error}</p>
+        </div>
+      )}
+
+      {success && (
+        <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-md flex items-start">
+          <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 mr-3" />
+          <p className="text-green-700 dark:text-green-400">{success}</p>
+        </div>
+      )}
     </div>
   );
 }

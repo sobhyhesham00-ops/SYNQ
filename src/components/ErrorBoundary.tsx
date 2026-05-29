@@ -1,4 +1,5 @@
 import React, { ErrorInfo, ReactNode } from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 interface Props {
   children?: ReactNode;
@@ -6,75 +7,47 @@ interface Props {
 
 interface State {
   hasError: boolean;
-  error: Error | null;
-  errorInfo: any;
+  error?: Error;
 }
 
-export class ErrorBoundary extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    (this as any).state = {
-      hasError: false,
-      error: null,
-      errorInfo: null
-    };
+class ErrorBoundary extends React.Component<Props, State> {
+  public state: State = {
+    hasError: false
+  };
+
+  public static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
-    (this as any).setState({
-      hasError: true,
-      error,
-      errorInfo
-    });
+    console.error('Uncaught error:', error, errorInfo);
   }
 
   public render() {
-    const state = (this as any).state as State;
-    if (state.hasError) {
-      const isDev = typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production';
-
+    if (this.state.hasError) {
       return (
-        <div id="error-boundary-container" className="min-h-screen flex items-center justify-center bg-slate-950 p-6 text-slate-100">
-          <div className="w-full max-w-lg bg-slate-900 border border-red-500/30 rounded-xl p-6 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-red-600" />
-            
-            <div className="flex items-center gap-3 mb-4">
-              <span className="p-2 rounded-lg bg-red-500/10 text-red-500 text-lg">⚠️</span>
-              <h2 className="text-xl font-semibold tracking-tight text-white">Something went wrong</h2>
+        <div className="min-h-[400px] flex items-center justify-center p-6">
+          <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center border border-gray-200 dark:border-gray-700">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900/30 mb-6">
+              <AlertTriangle className="h-8 w-8 text-red-600 dark:text-red-500" />
             </div>
-            
-            <p className="text-sm text-slate-300 mb-4 leading-relaxed">
-              We encountered an unexpected error and the application had to crash.
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Something went wrong</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              {this.state.error?.message || 'An unexpected error occurred in this component.'}
             </p>
-
-            {state.error && (
-              <div className="bg-slate-950/60 rounded-lg p-4 font-mono text-xs text-red-400 mb-6 max-h-48 overflow-auto border border-red-950">
-                <div className="font-bold underline mb-1">Error: {state.error.message}</div>
-                {isDev && state.errorInfo && (
-                  <pre className="mt-2 text-[10px] text-slate-400 leading-normal whitespace-pre-wrap">
-                    {state.error.stack}
-                    {"\n\nComponent Stack:\n"}
-                    {state.errorInfo.componentStack}
-                  </pre>
-                )}
-              </div>
-            )}
-
             <button
-              id="reload-app-button"
-              onClick={() => window.location.reload()}
-              className="w-full py-2.5 px-4 bg-red-600 hover:bg-red-500 active:bg-red-700 text-white rounded-lg font-medium text-sm transition-colors cursor-pointer shadow-lg shadow-red-900/10 focus:outline-none"
+              onClick={() => this.setState({ hasError: false })}
+              className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
             >
-              Reload Application
+              Try again
             </button>
           </div>
         </div>
       );
     }
 
-    return (this as any).props.children;
+    return this.props.children;
   }
 }
 
-export default ErrorBoundary;
+export { ErrorBoundary };
