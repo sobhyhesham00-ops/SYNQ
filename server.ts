@@ -8,23 +8,10 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  // 7. Log requests to console
-  app.use((req, res, next) => {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-    next();
-  });
-
-  // 5. Proper CORS headers for localhost:5173 (dev) and localhost:3000 (prod)
-  const allowedOrigins = ["http://localhost:5173", "http://localhost:3000"];
+  // 5. Proper CORS headers
   app.use(
     cors({
-      origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error("Not allowed by CORS"));
-        }
-      },
+      origin: true,
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     })
@@ -63,7 +50,7 @@ async function startServer() {
       const prompt = `Analyze this scheduling data and provide insights:\n\n${JSON.stringify(schedules, null, 2)}`;
       
       const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
+        model: "gemini-1.5-flash",
         contents: prompt,
       });
 
@@ -86,7 +73,7 @@ async function startServer() {
       const prompt = `System Context: You are a scheduling assistant.\nEvent Context: ${JSON.stringify(context || {})}\nUser Message: ${message}`;
       
       const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
+        model: "gemini-1.5-flash",
         contents: prompt,
       });
 
