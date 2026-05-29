@@ -11158,6 +11158,12 @@ export default function App() {
                           );
                         })()}
                       </div>
+                    </>
+                  );
+                }
+              })()}
+            </div>
+          )}
                    {/* Schedules View & Upload Panel */}
               {activeTab === 'schedules' && (
                 <SchedulesRoster

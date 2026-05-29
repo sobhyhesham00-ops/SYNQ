@@ -4,7 +4,7 @@ import {
   Upload, Download, RefreshCw, GitPullRequest, Sliders, ChevronRight, 
   PlusCircle, Users, Activity, Lock, HelpCircle, Shield, SlidersHorizontal
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { doc, setDoc } from 'firebase/firestore';
 
 // Define Props Interface
@@ -1537,7 +1537,7 @@ export const SchedulesRoster: React.FC<SchedulesRosterProps> = ({
                               setUploadSuccess("Successfully extracted shifts.");
                               toast.success("Spreadsheet data parsed! Review preview draft below.");
                             } else {
-                              setUploadError((prev) => (prev ? prev + "\n" : "") + "No schedule data found.");
+                              setUploadError((uploadError ? uploadError + "\n" : "") + "No schedule data found.");
                             }
                           } catch (err: any) {
                             setUploadError("Extraction failed: " + err.message);
