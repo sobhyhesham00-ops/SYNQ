@@ -71,7 +71,7 @@ ${scheduleData}
 Structure your response evaluating coverage peak and lows, shift balance, and WFM recommendations.`;
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-2.0-flash",
         contents: prompt,
       });
 
@@ -95,7 +95,7 @@ Structure your response evaluating coverage peak and lows, shift balance, and WF
       }
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-2.0-flash",
         contents: `You are a helpful and polite WFM AI scheduling assistant. Respond to this user query: "${message}"`,
       });
 

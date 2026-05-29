@@ -28,17 +28,5 @@ export default defineConfig(({ mode }) => {
         "@": path.resolve(__dirname, "./src"),
       },
     },
-    server: {
-      port: 5173,
-      hmr: process.env.DISABLE_HMR === 'true' ? false : true,
-      proxy: {
-        // Proxy API requests to the Express backend running on port 3000
-        "/api": {
-          target: "http://localhost:3000",
-          changeOrigin: true,
-          secure: false,
-        },
-      },
-    },
   };
 });
