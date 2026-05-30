@@ -1,0 +1,39 @@
+1365:{Math.random().toString(36).substr(2, 5)}
+1425:{Math.random().toString(36).substring(2, 7)}
+1472:{Math.random().toString(36).substring(2, 7)}
+1723:{Math.random().toString(36).substr(2, 5)}
+1740:{Math.random().toString(36).substr(2, 5)}
+1776:{Math.random().toString(36).substr(2, 5)}
+1812:{Math.random().toString(36).substr(2, 5)}
+2594:{!isNaN(Math.floor(elapsed.duration)) ? Math.floor(elapsed.duration) : 0}
+2604:{!isNaN(Math.floor(elapsed.duration)) ? Math.floor(elapsed.duration) : 0}
+3145:{Math.random()}
+3446:{Math.random().toString(36).substr(2, 9)}
+6366:{!isNaN(Math.round(100 - levelProgress)) ? Math.round(100 - levelProgress) : 0}
+6560:{!isNaN(Math.round(myDailySuccessRate)) ? Math.round(myDailySuccessRate) : 0}
+6685:{!isNaN(Math.round(restroomMins)) ? Math.round(restroomMins) : 0}
+6700:{!isNaN(Math.round(breakMins + lunchMins)) ? Math.round(breakMins + lunchMins) : 0}
+6797:{Math.max(barHeightPercent, 4)}
+6953:{Math.min((myMonthlyTotalCount / 120) * 100, 100)}
+7280:{!isNaN(Math.round(operationsScore)) ? Math.round(operationsScore) : 0}
+7301:{!isNaN(Math.round(resolutionRate)) ? Math.round(resolutionRate) : 0}
+7317:{!isNaN(Math.round(avgResTimeMin)) ? Math.round(avgResTimeMin) : 0}
+7332:{!isNaN(Math.round(fintechRate)) ? Math.round(fintechRate) : 0}
+7363:{Math.round((closedComplaints.length / opComplaints.length) * 100)}
+7394:{Math.round((contactedComms.length / opComms.length) * 100)}
+7576:{Math.max(pt.x - 7, 0)}
+7871:{Math.round(minutesWorked / 10) / 6}
+7932:{Math.min((pendingSwapsCount / (requests.length || 1)) * 100, 100)}
+7943:{Math.min((pendingAnnualsCount / (requests.length || 1)) * 100, 100)}
+7954:{Math.min((totalApprovedThisMonth / (requests.length || 1)) * 100, 100)}
+7965:{Math.min((totalViolationsCount / (requests.length || 1)) * 100, 100)}
+9516:{Math.round(doc.size / 1024) || 1}
+9556:{Math.round(currentKbDoc.size / 1024) || 1}
+9601:{!isNaN(Math.round(currentKbDoc.size / 1024)) ? Math.round(currentKbDoc.size / 1024) : 0}
+10238:{!isNaN(Math.round(progressPercentage)) ? Math.round(progressPercentage) : 0}
+11728:{Math.min(100, (stats.breakMins / 15) * 100)}
+11744:{Math.min(100, (stats.lunchMins / 30) * 100)}
+12311:{Math.min(safeOffset + displayDaysCount, baseDatesList.length)}
+12316:{() => setSchedulePageOffset(prev => Math.max(0, prev - displayDaysCount))}
+12323:{() => setSchedulePageOffset(prev => Math.min(baseDatesList.length - displayDaysCount, prev + displayDaysCount))}
+17733:{Math.random().toString(36).substr(2,9)}

@@ -1,8 +1,0 @@
-{
-  "name": "Synq",
-  "description": "A high-performance glassmorphic real-time team synchronization and scheduling portal with integrated headcount, time logging, and support desk.",
-  "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
-}

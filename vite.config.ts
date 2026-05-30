@@ -1,32 +1,28 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig } from "vite";
 
-export default defineConfig(({ mode }) => {
-  // Load local and environment variables
-  const env = loadEnv(mode, process.cwd(), '');
-  
+export default defineConfig(() => {
   return {
-    plugins: [
-      react(),
-      tailwindcss()
-    ],
-    build: {
-      outDir: 'dist',
-      sourcemap: true,
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            vendor: ['react', 'react-dom']
-          }
-        }
-      }
-    },
+    plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "./src"),
+        "@": path.resolve(__dirname, "."),
       },
+    },
+    server: {
+      port: 5173,
+      // FIX: Proxy /api/* to the Express backend running on port 3000.
+      proxy: {
+        "/api": {
+          target: "http://localhost:3000",
+          changeOrigin: true,
+        },
+      },
+      // HMR is disabled in AI Studio via DISABLE_HMR env var.
+      hmr: process.env.DISABLE_HMR !== "true",
+      watch: process.env.DISABLE_HMR === "true" ? null : {},
     },
   };
 });

@@ -39,7 +39,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
 
   const handleUpdateQuestion = (idx: number, field: 'text' | 'maxScore', val: any) => {
     const updated = [...localQuestions];
-    updated[idx] = { ...updated[idx], [field]: field === 'maxScore' ? (isNaN(Number(val)) ? 0 : Number(val)) : val };
+    updated[idx] = { ...updated[idx], [field]: field === 'maxScore' ? Number(val) : val };
     setLocalQuestions(updated);
   };
 
@@ -58,8 +58,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
   const isEditor = currentUser.role === 'qa' || currentUser.name.toLowerCase() === 'hesham sobhy';
 
   const handleScoreChange = (qId: string, val: string) => {
-    const v = Number(val);
-    setScores(prev => ({ ...prev, [qId]: isNaN(v) ? 0 : v }));
+    setScores(prev => ({ ...prev, [qId]: Number(val) }));
   };
 
   const calculateTotal = (): number => {
@@ -179,7 +178,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                   <input
                     type="number"
                     min={1}
-                    value={isNaN(q.maxScore) ? '' : q.maxScore}
+                    value={q.maxScore}
                     onChange={(e) => handleUpdateQuestion(idx, 'maxScore', e.target.value)}
                     className="w-20 text-center bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-green-400 font-bold outline-none focus:border-green-500"
                   />
@@ -206,7 +205,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
           ) : (
             <div className="flex-1 overflow-y-auto pr-2 space-y-4">
               {myScores.map((score) => {
-                const percentage = score.maxTotalScore > 0 ? (score.totalScore / score.maxTotalScore) * 100 : 0;
+                const percentage = (score.totalScore / score.maxTotalScore) * 100;
                 let pctColor = "text-green-400";
                 if (percentage < 70) pctColor = "text-red-400";
                 else if (percentage < 85) pctColor = "text-amber-400";
@@ -236,7 +235,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                       
                       <div className="flex items-center gap-4">
                         <div className="bg-slate-900 border border-white/10 rounded-xl px-4 py-2 flex flex-col items-center min-w-[100px]">
-                          <div className={`text-xl font-black ${pctColor}`}>{score.totalScore}<span className="text-xs text-slate-500">/{score.maxTotalScore}</span></div>
+                          <div className={`text-xl font-black ${pctColor}`}>{!isNaN(Number(score.totalScore)) ? Number(score.totalScore) : 0}<span className="text-xs text-slate-500">/{!isNaN(Number(score.maxTotalScore)) ? Number(score.maxTotalScore) : 0}</span></div>
                         </div>
                         <Search className={`w-5 h-5 text-slate-500 transition-transform ${isExpanded ? 'rotate-90 text-slate-300' : ''}`} />
                       </div>
@@ -334,7 +333,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                       type="number"
                       min={0}
                       max={q.maxScore}
-                      value={scores[q.id] === undefined || isNaN(scores[q.id]) ? '' : scores[q.id]}
+                      value={scores[q.id] ?? ''}
                       onChange={(e) => handleScoreChange(q.id, e.target.value)}
                       required
                       placeholder="0"
@@ -361,7 +360,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
             <div className="mb-4 sm:mb-0">
               <span className="text-sm text-slate-400">Calculated Final Score: </span>
               <span className="text-xl font-black text-green-400 ml-2">
-                {calculateTotal()} <span className="text-sm text-slate-500">/ {calculateMax()}</span>
+                {!isNaN(Number(calculateTotal())) ? Number(calculateTotal()) : 0} <span className="text-sm text-slate-500">/ {!isNaN(Number(calculateMax())) ? Number(calculateMax()) : 0}</span>
               </span>
             </div>
             

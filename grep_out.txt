@@ -1,284 +1,271 @@
-5:import React, { useState, useEffect, FormEvent, useRef, useMemo } from 'react';
-6-import { motion, AnimatePresence } from 'motion/react';
-7-import { doc, onSnapshot as originalOnSnapshot, collection, setDoc, updateDoc, deleteDoc, query, getDocs, writeBatch, disableNetwork } from 'firebase/firestore';
-8-import { db, initAuth, googleSignIn, getAccessToken, logout } from './firebase';
-9-
-10-
-11-// Intercept onSnapshot to handle quota exceeded errors and stop retries
-12-const onSnapshot = (...args: any[]): any => {
-13-  if (args.length >= 2 && typeof args[1] === 'function') {
-14-    const errorObserver = typeof args[2] === 'function' ? args[2] : undefined;
-15-    const newErrorHandler = (err: any) => {
---
-509:  useEffect(() => {
-510-    if (!startTime) return;
-511-    const update = () => {
-512-      const ms = Date.now() - new Date(startTime).getTime();
-513-      if (ms < 0) { setElapsed('0m 0s'); return; }
-514-      const h = Math.floor(ms / 3600000);
-515-      const m = Math.floor((ms % 3600000) / 60000);
-516-      const s = Math.floor((ms % 60000) / 1000);
-517-      setElapsed(`${h > 0 ? h + 'h ' : ''}${m}m ${s}s`);
-518-    };
-519-    update();
---
-532:  useEffect(() => {
-533-    localStorage.setItem('sync_force_offline', String(forceOffline));
-534-    if (forceOffline) {
-535-      syncEngine.destroy();
-536-    } else {
-537-      syncEngine.processPending();
-538-    }
-539-  }, [forceOffline, syncEngine]);
-540-
-541-  // Current local time context of the user's PC (synced and showing in the main page)
-542-  const [systemTime, setSystemTime] = useState<Date>(new Date());
---
-622:  useEffect(() => {
-623-    const timer = setInterval(() => {
-624-      const now = new Date();
-625-      setCurrentTime(now);
-626-      setSystemTime(now);
-627-    }, 1000);
-628-    return () => clearInterval(timer);
-629-  }, []);
-630-
-631:  useEffect(() => {
-632-    const fetchWeather = async () => {
-633-      try {
-634-        const cached = localStorage.getItem('sched_ramadan_weather_cache');
-635-        if (cached) {
-636-          const parsed = JSON.parse(cached);
-637-          if (Date.now() - parsed.timestamp < 30 * 60 * 1000) {
-638-            setRamadanTemp(parsed.temp);
-639-            setRamadanWeatherCode(parsed.code);
-640-            return;
-641-          }
---
-678:  useEffect(() => {
-679-    const unsubscribe = initAuth(
-680-      (user, token) => {
-681-        setGoogleUser(user);
-682-        setGoogleToken(token);
-683-        setNeedsGoogleAuth(false);
-684-      },
-685-      () => setNeedsGoogleAuth(true)
-686-    );
-687-    return () => unsubscribe();
-688-  }, []);
---
-720:  useEffect(() => {
-721-    // 0. Auto-unlock explicitly incorrect admins to fix legacy locking bugs
-722-    try {
-723-      const getCreds = localStorage.getItem('sched_locked_accounts');
-724-      if (getCreds) {
-725-        let arr = JSON.parse(getCreds) as string[];
-726-        const filtered = arr.filter(name => !name.includes('amira.hassan') && !name.includes('hesham.sobhy') && !name.includes('hesso.sobhy'));
-727-        if (filtered.length !== arr.length) {
-728-          localStorage.setItem('sched_locked_accounts', JSON.stringify(filtered));
-729-          setDoc(doc(db, "system", "sched_locked_accounts"), { data: filtered }).catch(e => console.error(e));
-730-        }
---
-1185:  useEffect(() => {
-1186-    const mql = window.matchMedia('(display-mode: standalone)');
-1187-    const handler = (e: MediaQueryListEvent) => setIsInstalled(e.matches);
-1188-    mql.addEventListener('change', handler);
-1189-    return () => mql.removeEventListener('change', handler);
-1190-  }, []);
-1191-
-1192-  const [needsGoogleAuth, setNeedsGoogleAuth] = useState(false);
-1193-  const [googleToken, setGoogleToken] = useState<string | null>(null);
-1194-  const [googleUser, setGoogleUser] = useState<any>(null);
-1195-  const [isLoggingInGoogle, setIsLoggingInGoogle] = useState(false);
---
-1215:  useEffect(() => {
-1216-    currentUserRef.current = currentUser;
-1217-    if (currentUser) {
-1218-      setStorageItem('sched_current_user', currentUser);
-1219-    } else {
-1220-      localStorage.removeItem('sched_current_user');
-1221-    }
-1222-  }, [currentUser]);
-1223-
-1224-  const isMasterAdmin = currentUser ? (
-1225-    currentUser?.name?.toLowerCase() === 'hesham sobhy' || 
---
-1260:  useEffect(() => {
-1261-    soundEnabledRef.current = soundEnabled;
-1262-    localStorage.setItem('sched_sound_enabled', soundEnabled ? 'true' : 'false');
-1263-  }, [soundEnabled]);
-1264-
-1265-  const triggerNotificationAlert = () => {
-1266-    if (soundEnabledRef.current) {
-1267-      try {
-1268-        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-1269-        const osc = ctx.createOscillator();
-1270-        const gain = ctx.createGain();
---
-1298:  useEffect(() => {
-1299-    supportAssignmentsRef.current = supportAssignments;
-1300-  }, [supportAssignments]);
-1301-
-1302-  const isTLOreSupport = currentUser ? (currentUser.role === 'tl' || currentUser.role === 'qa' || !!supportAssignments[currentUser.name] || isTLName(currentUser.name)) : false;
-1303-  const isSuperAdmin = currentUser ? (
-1304-    currentUser?.name?.toLowerCase() === 'hesham sobhy' || 
-1305-    currentUser?.name?.toLowerCase() === 'h.sobhy' || 
-1306-    currentUser?.name?.toLowerCase() === 'hesso' || 
-1307-    currentUser?.name?.toLowerCase() === 'amira' || 
-1308-    currentUser?.name?.toLowerCase() === 'amira hassan' ||
---
-1316:  useEffect(() => {
-1317-    if (!currentUser) return;
-1318-    const active = timeLogs.find(log => 
-1319-      log.agentName?.toLowerCase() === currentUser?.name?.toLowerCase() && 
-1320-      log.status !== 'clocked_out'
-1321-    );
-1322-    if (active && (active.status === 'break' || active.status === 'lunch')) {
-1323-      const currentAct = active.activities.find(a => !a.endTime && a.type === active.status);
-1324-      if (currentAct) {
-1325-        if (currentAct.id !== lastActivityAlertId) {
-1326-          setLastActivityAlertId(currentAct.id);
---
-1353:  useEffect(() => {
-1354-    const uniqueNames = new Set<string>();
-1355-    
-1356-    // 1. Initial agents fallback
-1357-    INITIAL_AGENTS.forEach(a => uniqueNames.add(capitalizeName(a)));
-1358-    
-1359-    // 2. Registered users from Firestore
-1360-    registeredUsers.forEach(u => {
-1361-      if (u && u.name) {
-1362-        uniqueNames.add(capitalizeName(u.name));
-1363-      }
---
-1397:  useEffect(() => {
-1398-    const handleBeforeInstallPrompt = (e: Event) => {
-1399-      e.preventDefault();
-1400-      setDeferredPrompt(e);
-1401-      setShowInstallBtn(true);
-1402-    };
-1403-
-1404-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-1405-
-1406-    if (window.matchMedia('(display-mode: standalone)').matches) {
-1407-      setShowInstallBtn(false);
---
-1661:  useEffect(() => {
-1662-    if (currentUser) {
-1663-      const derivedRole = (isQAName(currentUser.name) ? 'qa' : isTLName(currentUser.name) ? 'tl' : 'agent') as Role;
-1664-      if (currentUser.role !== derivedRole) {
-1665-        const updated = { ...currentUser, role: derivedRole };
-1666-        setCurrentUser(updated);
-1667-        setStorageItem('sched_current_user', updated);
-1668-      }
-1669-    }
-1670-  }, [currentUser, agentsList]);
-1671-
---
-1698:  useEffect(() => {
-1699-    try {
-1700-      localStorage.setItem(STORAGE_KEYS.knowledgeBase, JSON.stringify(knowledgeBaseDocuments));
-1701-    } catch (e) {
-1702-      toast.error('Local database storage is full. Please delete some documents to free up space.');
-1703-    }
-1704-  }, [knowledgeBaseDocuments]);
-1705-  
-1706-  // Knowledge Base States and Helpers
-1707-  const [selectedKbDocId, setSelectedKbDocId] = useState<string | null>(null);
-1708-  const [searchQueryKb, setSearchQueryKb] = useState<string>('');
---
-1957:  useEffect(() => {
-1958-    localStorage.setItem(STORAGE_KEYS.schedules, JSON.stringify(uploadedSchedules));
-1959-  }, [uploadedSchedules]);
-1960-
-1961-  const clock = systemTime;
-1962-  const schedules = useMemo(() => {
-1963-    if (isSchedulesCleared) {
-1964-      return [];
-1965-    }
-1966-    if (uploadedSchedules.length > 0) {
-1967-      return uploadedSchedules;
---
-2233:  useEffect(() => {
-2234-    if (currentUser) {
-2235-      if (lastUserRef.current !== currentUser.name) {
-2236-        lastUserRef.current = currentUser.name;
-2237-        setActiveTab('dashboard');
-2238-      }
-2239-    } else {
-2240-      lastUserRef.current = null;
-2241-    }
-2242-  }, [currentUser?.name]);
-2243-
---
-2294:  useEffect(() => {
-2295-    // Priority: If we just uploaded tempSchedules, focus on that context
-2296-    const sourceData = tempSchedules.length > 0 ? tempSchedules : schedules;
-2297-    const list = Array.from(new Set(sourceData.map(p => p.date))).sort() as string[];
-2298-    
-2299-    const resolvedDates = list.length > 0 ? list : Array.from({ length: 30 }, (_, i) => {
-2300-      const d = new Date(systemTime);
-2301-      d.setDate(d.getDate() - 5 + i);
-2302-      return getLocalISOString(d);
-2303-    });
-2304-
---
-2343:  useEffect(() => {
-2344-    if (swapDate) {
-2345-      const result = validateSwapRequest(swapDate, swapShift, systemTime);
-2346-      if (!result.isValid) {
-2347-        setSwapWarning(result.message || 'Violation detected');
-2348-      } else {
-2349-        setSwapWarning(null);
-2350-      }
-2351-    } else {
-2352-      setSwapWarning(null);
-2353-    }
---
-2357:  useEffect(() => {
-2358-    if (annualStart) {
-2359-      const result = validateAnnualRequest(annualStart, systemTime);
-2360-      if (!result.isValid) {
-2361-        setAnnualWarning(result.message || 'Violation detected');
-2362-      } else {
-2363-        setAnnualWarning(null);
-2364-      }
-2365-    } else {
-2366-      setAnnualWarning(null);
-2367-    }
---
-2617:  useEffect(() => {
-2618-    if (!currentUser) return;
-2619-    
-2620-    const handleInteraction = () => {
-2621-      setLastUserInteraction(Date.now());
-2622-    };
-2623-
-2624-    window.addEventListener('mousemove', handleInteraction);
-2625-    window.addEventListener('keydown', handleInteraction);
-2626-    window.addEventListener('click', handleInteraction);
-2627-    window.addEventListener('scroll', handleInteraction);
---
-2639:  useEffect(() => {
-2640-    if (!currentUser) return;
-2641-    const interval = setInterval(() => {
-2642-      const diffMs = Date.now() - lastUserInteraction;
-2643-      if (diffMs >= 3600000) { // 1 hour inactivity
-2644-        handleSignOut();
-2645-        toast.error("You have been signed out due to 1 hour of inactivity. Please sign in again.");
-2646-      }
-2647-    }, 10000); // Check every 10 seconds
-2648-    return () => clearInterval(interval);
-2649-  }, [currentUser, lastUserInteraction]);
---
-2659:  useEffect(() => {
-2660-    if (!currentUser) return;
-2661-    
-2662-    // Check for exceeding break / lunch / restroom / meeting / one_on_one / personal
-2663-    agentsList.forEach(agent => {
-2664-      const elapsed = getActiveActivityElapsed(agent);
-2665-      if (elapsed && elapsed.exceeded) {
-2666-        const notifKey = `${elapsed.id}_${elapsed.type}`;
-2667-        if (!notifiedOverstaysRef.current[notifKey]) {
-2668-          // Register as notified
-2669-          notifiedOverstaysRef.current[notifKey] = true;
+258:  const lp = clinic.toLowerCase();
+941:                               (curUser && latest.targetAgent.toLowerCase() === curUser.name.toLowerCase());
+943:            if (!isTargeted && latest.targetAgent.toLowerCase().startsWith('team:')) {
+944:              const teamTLName = latest.targetAgent.split(':')[1]?.toLowerCase() || '';
+945:              const curUserTL = getAgentTL(currentUserRef.current.name).toLowerCase();
+946:              const curUserName = currentUserRef.current.name.toLowerCase();
+950:            const isAnnouncementNotification = latest.title.toLowerCase().includes('announcement') || latest.title.toLowerCase().includes('broadcast');
+1011:        const liveUserInfo = dbUsers.find(u => u && u.name && prevUser && prevUser.name && u.name.toLowerCase() === prevUser.name.toLowerCase());
+1124:    currentUser.name.toLowerCase() === 'hesham sobhy' || 
+1125:    currentUser.name.toLowerCase() === 'h.sobhy' || 
+1126:    currentUser.name.toLowerCase() === 'hesso' || 
+1127:    currentUser.name.toLowerCase() === 'amira' || 
+1128:    currentUser.name.toLowerCase() === 'amira hassan' ||
+1129:    currentUser.name.toLowerCase() === 'a.hassan'
+1203:    currentUser.name.toLowerCase() === 'hesham sobhy' || 
+1204:    currentUser.name.toLowerCase() === 'h.sobhy' || 
+1205:    currentUser.name.toLowerCase() === 'hesso' || 
+1206:    currentUser.name.toLowerCase() === 'amira' || 
+1207:    currentUser.name.toLowerCase() === 'amira hassan' ||
+1208:    currentUser.name.toLowerCase() === 'a.hassan' ||
+1209:    currentUser.name.toLowerCase() === 'shymaa hassan' ||
+1210:    currentUser.name.toLowerCase() === 'shaymaa hassan' ||
+1211:    currentUser.name.toLowerCase() === 's.hassan'
+1218:      log.agentName.toLowerCase() === currentUser.name.toLowerCase() && 
+1373:      const mentionToken = `@${name.toLowerCase()}`;
+1374:      if (text.toLowerCase().includes(mentionToken) && name.toLowerCase() !== sourceAuthorName.toLowerCase()) {
+1454:          const isDirector = currentUser.name.toLowerCase() === 'amira hassan';
+1476:      const isDirector = currentUser.name.toLowerCase() === 'amira hassan';
+1502:    return notif.targetAgent.toLowerCase() === currentUser.name.toLowerCase();
+1514:                        n.targetAgent.toLowerCase() === currentUser.name.toLowerCase();
+1641:    const extension = file.name.split('.').pop()?.toLowerCase() || '';
+1793:    const q = searchQueryKb.toLowerCase();
+1795:      String(d.name || '').toLowerCase().includes(q) || 
+1796:      (!d.isBinary && d.content && String(d.content).toLowerCase().includes(q))
+2285:    const formattedUsername = trimmedInput.toLowerCase();
+2295:      (matchedFullName && matchedFullName.toLowerCase() === 'hesham sobhy') || 
+2296:      (matchedFullName && matchedFullName.toLowerCase() === 'amira hassan');
+2386:    setDoc(doc(db, "users", correspondingFullName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()), authenticatedUser).catch(console.error);
+2389:    if (userRole === 'agent' && !agentsList.some(a => a.toLowerCase() === formattedUsername || a.toLowerCase() === correspondingFullName.toLowerCase() || getUsernameFromFullName(a) === formattedUsername)) {
+2398:        const ln = l.agentName.toLowerCase();
+2399:        return (ln === formattedUsername || ln === correspondingFullName.toLowerCase()) && l.date === todayStr && !l.clockOut;
+2426:    const trimmedInput = loginName.trim().toLowerCase().replace(/\s+/g, '');
+2464:    setDoc(doc(db, "users", correspondingFullName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()), authenticatedUser).catch(e => console.error("User doc sync error:", e));
+2466:    if (userRole === 'agent' && !agentsList.some(a => a.toLowerCase() === finalName || a.toLowerCase() === correspondingFullName.toLowerCase() || getUsernameFromFullName(a) === finalName)) {
+2475:        const ln = l.agentName.toLowerCase();
+2476:        return (ln === finalName || ln === correspondingFullName.toLowerCase()) && l.date === todayStr && !l.clockOut;
+2626:            log.agentName.toLowerCase() === agent.toLowerCase() && 
+2828:        if (swapReq.swapWithAgent.toLowerCase() === currentUser.name.toLowerCase() && swapReq.status === 'pending_partner') {
+3407:           const lh = h.toLowerCase().trim();
+3411:           const lh = h.toLowerCase().trim();
+3536:      log.agentName.toLowerCase() === agentName.toLowerCase() && 
+3544:      log.agentName.toLowerCase() === agentName.toLowerCase() && 
+3552:      l.agentName.toLowerCase() === agentName.toLowerCase() && 
+4490:    const myShifts = schedules.filter(s => s.agentName.toLowerCase() === currentUser.name.toLowerCase());
+4545:        s.agentName.toLowerCase() === newShift.agentName.toLowerCase() && 
+4564:      const userDocId = s.agentName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+4588:        if (!updatedAgents.some(ea => ea.toLowerCase() === a.toLowerCase())) {
+4705:        s.agentName.toLowerCase() === currentUser?.name.toLowerCase() && 
+4896:            if (!activeAgentsForCSV.some(a => a.toLowerCase() === log.agentName.toLowerCase())) {
+4978:    const matchesSearch = req.agentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+4979:                          (req.type === 'swap' && (req as SwapRequest).swapWithAgent.toLowerCase().includes(searchQuery.toLowerCase()));
+5001:        (r as SwapRequest).swapWithAgent.toLowerCase() === currentUser.name.toLowerCase()
+5022:    const norm = label.toLowerCase();
+5043:      return agentName.toLowerCase() === currentUser.name.toLowerCase();
+5045:    return !scheduleFilterAgent || agentName.toLowerCase().includes(scheduleFilterAgent.toLowerCase());
+5071:                     const correctAdminPass = creds['h.sobhy'] || creds['Hesham Sobhy'] || creds['h.sobhy'.toLowerCase()];
+5099:                   const correctAdminPass = creds['h.sobhy'] || creds['Hesham Sobhy'] || creds['h.sobhy'.toLowerCase()];
+5114:                const correctAdminPass = creds['h.sobhy'] || creds['Hesham Sobhy'] || creds['h.sobhy'.toLowerCase()];
+5174:                      Password of your choice will be associated with the username <span className="font-semibold text-blue-300">"{loginName.toLowerCase()}"</span>. Record this password for future sign-ins.
+5181:                      {loginName.toLowerCase()}
+5451:                          const userDocId = currentUser.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+5468:                          const userDocId = currentUser.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+5689:                        s.agentName.toLowerCase() === currentUser.name.toLowerCase() && 
+5698:                        c.agentName.toLowerCase() === currentUser.name.toLowerCase() &&
+5702:                        currentUser.role === 'tl' || i.agentName.toLowerCase() === currentUser.name.toLowerCase()
+5705:                        currentUser.role === 'tl' || i.agentName.toLowerCase() === currentUser.name.toLowerCase()
+5776:              {currentUser.role === 'agent' && inquiries.some(i => i.agentName.toLowerCase() === currentUser.name.toLowerCase() && (i.status === 'sent' || i.status === 'answered') && !i.seenByAgent) && (
+5779:                    .filter(i => i.agentName.toLowerCase() === currentUser.name.toLowerCase() && (i.status === 'sent' || i.status === 'answered') && !i.seenByAgent)
+5823:              {currentUser.role === 'agent' && tabbyTamaraRequests.some(r => r.agentName.toLowerCase() === currentUser.name.toLowerCase() && r.status === 'confirmed' && r.customerContacted === 'not_contacted') && (
+5826:                    .filter(r => r.agentName.toLowerCase() === currentUser.name.toLowerCase() && r.status === 'confirmed' && r.customerContacted === 'not_contacted')
+5868:              {currentUser.role === 'agent' && tabbyTamaraComplaints.some(c => c.agentName.toLowerCase() === currentUser.name.toLowerCase() && c.status === 'need_contact') && (
+5871:                    .filter(c => c.agentName.toLowerCase() === currentUser.name.toLowerCase() && c.status === 'need_contact')
+5989:                                setDoc(doc(db, "users", currentUser.name.toLowerCase().replace(/[^a-z0-9]/g, '')), { ...updated, lastUpdated: Date.now() }, { merge: true }).catch(console.error);
+6018:                                  setDoc(doc(db, "users", currentUser.name.toLowerCase().replace(/[^a-z0-9]/g, '')), { ...updated, lastUpdated: Date.now() }, { merge: true }).catch(console.error);
+6033:                                  setDoc(doc(db, "users", currentUser.name.toLowerCase().replace(/[^a-z0-9]/g, '')), { ...updated, lastUpdated: Date.now() }, { merge: true }).catch(console.error);
+6230:                    if (currentUser.role === 'tl' || currentUser.name.toLowerCase() === 'hesham sobhy' || currentUser.name.toLowerCase() === 'amira hassan' || currentUser.name.toLowerCase() === 'shaymaa hassan') return true;
+6231:                    return agentName.toLowerCase() === currentUser.name.toLowerCase();
+6375:                          const myInquiries = inquiries.filter(i => i.agentName.toLowerCase() === currentUser.name.toLowerCase());
+6376:                          const myFintech = tabbyTamaraRequests.filter(r => r.agentName.toLowerCase() === currentUser.name.toLowerCase());
+6377:                          const myComms = clientComms.filter(c => (c.callCenterAgentName?.toLowerCase() === currentUser.name.toLowerCase() || c.handledBy?.toLowerCase() === currentUser.name.toLowerCase()));
+6378:                          const myCases = cases.filter(c => c.agentName.toLowerCase() === currentUser.name.toLowerCase());
+6387:                            .filter(log => log.agentName.toLowerCase() === currentUser.name.toLowerCase())
+6487:                          const myDailyInq = inquiries.filter(i => i.agentName.toLowerCase() === currentUser.name.toLowerCase() && isInOpDay(i.createdAt));
+6488:                          const myDailyFin = tabbyTamaraRequests.filter(r => r.agentName.toLowerCase() === currentUser.name.toLowerCase() && isInOpDay(r.createdAt));
+6489:                          const myDailyComp = tabbyTamaraComplaints.filter(c => c.agentName.toLowerCase() === currentUser.name.toLowerCase() && isInOpDay(c.createdAt));
+6490:                          const myDailyCom = clientComms.filter(c => (c.callCenterAgentName?.toLowerCase() === currentUser.name.toLowerCase() || c.handledBy?.toLowerCase() === currentUser.name.toLowerCase()) && isInOpDay(c.createdAt));
+6491:                          const myDailyCas = cases.filter(c => c.agentName.toLowerCase() === currentUser.name.toLowerCase() && isInOpDay(c.createdAt));
+6525:                              const sched = schedules.find(s => s.agentName.toLowerCase() === currentUser.name.toLowerCase() && s.date === selectedDashboardDate);
+6796:                            const inq = inquiries.filter(i => i.agentName.toLowerCase() === currentUser.name.toLowerCase() && isInDayRange(i.createdAt)).length;
+6797:                            const fin = tabbyTamaraRequests.filter(r => r.agentName.toLowerCase() === currentUser.name.toLowerCase() && isInDayRange(r.createdAt)).length;
+6798:                            const comp = tabbyTamaraComplaints.filter(c => c.agentName.toLowerCase() === currentUser.name.toLowerCase() && isInDayRange(c.createdAt)).length;
+6799:                            const comm = clientComms.filter(c => (c.callCenterAgentName?.toLowerCase() === currentUser.name.toLowerCase() || c.handledBy?.toLowerCase() === currentUser.name.toLowerCase()) && isInDayRange(c.createdAt)).length;
+6800:                            const cas = cases.filter(c => c.agentName.toLowerCase() === currentUser.name.toLowerCase() && isInDayRange(c.createdAt)).length;
+6909:                          const monthlyInq = inquiries.filter(i => i.agentName.toLowerCase() === currentUser.name.toLowerCase() && i.createdAt && new Date(i.createdAt).getTime() >= startOfLimitMs);
+6910:                          const monthlyFin = tabbyTamaraRequests.filter(r => r.agentName.toLowerCase() === currentUser.name.toLowerCase() && r.createdAt && new Date(r.createdAt).getTime() >= startOfLimitMs);
+6911:                          const monthlyComp = tabbyTamaraComplaints.filter(c => c.agentName.toLowerCase() === currentUser.name.toLowerCase() && c.createdAt && new Date(c.createdAt).getTime() >= startOfLimitMs);
+6912:                          const monthlyCom = clientComms.filter(c => (c.callCenterAgentName?.toLowerCase() === currentUser.name.toLowerCase() || c.handledBy?.toLowerCase() === currentUser.name.toLowerCase()) && c.createdAt && new Date(c.createdAt).getTime() >= startOfLimitMs);
+6913:                          const monthlyCas = cases.filter(c => c.agentName.toLowerCase() === currentUser.name.toLowerCase() && c.createdAt && new Date(c.createdAt).getTime() >= startOfLimitMs);
+6917:                          const myMonthlyLogs = timeLogs.filter(log => log.agentName.toLowerCase() === currentUser.name.toLowerCase() && log.clockIn && new Date(log.clockIn).getTime() >= startOfLimitMs);
+6924:                            const sched = schedules.find(s => s.agentName.toLowerCase() === currentUser.name.toLowerCase() && s.date === dateStr);
+7192:                              const myInquiries = inquiries.filter(i => i.agentName.toLowerCase() === aName.toLowerCase());
+7193:                              const myFintech = tabbyTamaraRequests.filter(r => r.agentName.toLowerCase() === aName.toLowerCase());
+7194:                              const myComms = clientComms.filter(c => (c.callCenterAgentName?.toLowerCase() === aName.toLowerCase() || c.handledBy?.toLowerCase() === aName.toLowerCase()));
+7195:                              const myCases = cases.filter(c => c.agentName.toLowerCase() === aName.toLowerCase());
+7204:                                .filter(log => log.agentName.toLowerCase() === aName.toLowerCase())
+7268:                                const myInquiries = inquiries.filter(i => i.agentName.toLowerCase() === aName.toLowerCase());
+7269:                                const myFintech = tabbyTamaraRequests.filter(r => r.agentName.toLowerCase() === aName.toLowerCase());
+7270:                                const myComms = clientComms.filter(c => (c.callCenterAgentName?.toLowerCase() === aName.toLowerCase() || c.handledBy?.toLowerCase() === aName.toLowerCase()));
+7271:                                const myCases = cases.filter(c => c.agentName.toLowerCase() === aName.toLowerCase());
+7280:                                  .filter(log => log.agentName.toLowerCase() === aName.toLowerCase())
+7692:                                return lob.toLowerCase().includes('social');
+7697:                                return lob.toLowerCase().includes('call') || lob.toLowerCase().includes('phone');
+7757:                            const scheduledAgentNames = new Set(scheduledForDay.map(s => s.agentName.toLowerCase()));
+7761:                              scheduledAgentNames.has(log.agentName.toLowerCase()) && 
+7767:                              const log = opTimeLogs.find(l => l.agentName.toLowerCase() === s.agentName.toLowerCase());
+8161:                            const activeLog = timeLogs.find(log => log.agentName.toLowerCase() === aName.toLowerCase() && !log.clockOut);
+9714:                                      download={currentKbDoc.name.toLowerCase().endsWith('.pdf') ? `${currentKbDoc.name}.txt` : currentKbDoc.name}
+10007:                              {inquiries.filter(i => i.agentName.toLowerCase() === currentUser.name.toLowerCase()).length}
+10014:                          {inquiries.filter(i => i.agentName.toLowerCase() === currentUser.name.toLowerCase()).length === 0 ? (
+10021:                              .filter(i => i.agentName.toLowerCase() === currentUser.name.toLowerCase())
+10327:                                  ⚠️ Overtime! You have exceeded your allocated {conf.limit}-minute {conf.name.toLowerCase()} limit.
+10554:                          const myLogs = timeLogs.filter(l => l.agentName.toLowerCase() === currentUser.name.toLowerCase());
+10727:                          const count = inquiries.filter(i => (i.clinicName || '').toLowerCase() === clin.key.toLowerCase()).length;
+10790:                          const matchesSearch = i.agentName.toLowerCase().includes(inquirySearchQuery.toLowerCase()) || 
+10791:                                                i.text.toLowerCase().includes(inquirySearchQuery.toLowerCase()) ||
+10792:                                                getAgentLOB(i.agentName).toLowerCase().includes(inquirySearchQuery.toLowerCase()) ||
+10793:                                                (i.clinicName && i.clinicName.toLowerCase().includes(inquirySearchQuery.toLowerCase())) ||
+10794:                                                (i.answer && i.answer.toLowerCase().includes(inquirySearchQuery.toLowerCase()));
+10803:                        const matchesSearch = i.agentName.toLowerCase().includes(inquirySearchQuery.toLowerCase()) || 
+10804:                                              i.text.toLowerCase().includes(inquirySearchQuery.toLowerCase()) ||
+10805:                                              getAgentLOB(i.agentName).toLowerCase().includes(inquirySearchQuery.toLowerCase()) ||
+10806:                                              (i.clinicName && i.clinicName.toLowerCase().includes(inquirySearchQuery.toLowerCase())) ||
+10807:                                              (i.answer && i.answer.toLowerCase().includes(inquirySearchQuery.toLowerCase()));
+10818:                            const matchesSearch = i.agentName.toLowerCase().includes(inquirySearchQuery.toLowerCase()) || 
+10819:                                                  i.text.toLowerCase().includes(inquirySearchQuery.toLowerCase()) ||
+10820:                                                  getAgentLOB(i.agentName).toLowerCase().includes(inquirySearchQuery.toLowerCase()) ||
+10821:                                                  (i.clinicName && i.clinicName.toLowerCase().includes(inquirySearchQuery.toLowerCase())) ||
+10822:                                                  (i.answer && i.answer.toLowerCase().includes(inquirySearchQuery.toLowerCase()));
+11128:                            if (!activeAgentsForUI.some(a => a.toLowerCase() === log.agentName.toLowerCase())) {
+11273:                          filteredAgents = filteredAgents.filter(a => a.toLowerCase().includes(rtmSearch.toLowerCase()));
+11550:                            const alreadyListed = agentViolations.find(v => v.type.toLowerCase() === activeElapsed.type.toLowerCase() || (v.type === '1:1 Session' && activeElapsed.type === 'one_on_one') || (v.type === 'Personal Break' && activeElapsed.type === 'personal'));
+11753:                            const matchesSearch = entry.name.toLowerCase().includes(tlSearchQuery.toLowerCase());
+12173:                                     const oldAgentsSet = new Set(agentsList.map(a => a.toLowerCase()));
+12175:                                        if (!oldAgentsSet.has(s.agentName.toLowerCase()) && !newAgentsList.some(n => n.toLowerCase() === s.agentName.toLowerCase())) {
+12437:                          const myShiftsArr = schedules.filter(s => s.agentName.toLowerCase() === currentUser.name.toLowerCase() && s.date >= todayStr);
+12495:                          const myShiftsArr = schedules.filter(s => s.agentName.toLowerCase() === currentUser.name.toLowerCase() && s.date >= todayStr);
+12658:                              const norm = s.shiftLabel.toLowerCase();
+12663:                              const norm = s.shiftLabel.toLowerCase();
+12668:                              const norm = s.shiftLabel.toLowerCase();
+13014:                                      const findShift = schedules.find(s => s && s.agentName && s.agentName.toLowerCase() === (agentName || '').toLowerCase() && s.date === dateStr);
+13015:                                      const userProfile = registeredUsers.find(u => u && u.name && u.name.toLowerCase() === (agentName || '').toLowerCase());
+13087:                              const agentShifts = schedules.filter(s => s && s.agentName && s.agentName.toLowerCase() === (agentName || '').toLowerCase() && activeDisplayDates.includes(s.date));
+13100:                                      const userProfile = registeredUsers.find(u => u && u.name && u.name.toLowerCase() === (agentName || '').toLowerCase());
+13210:                                  .filter(s => s.agentName.toLowerCase() === currentUser.name.toLowerCase() && s.date >= todayISO)
+13246:                                  .filter(a => a.toLowerCase() !== currentUser.name.toLowerCase() && getAgentLOB(a) === getAgentLOB(currentUser.name))
+13294:                                const myShift = schedules.find(s => s.agentName.toLowerCase() === currentUser.name.toLowerCase() && s.date === p2pSelectedDate);
+13366:                                      const isTargetedToMe = req.swapWithAgent.toLowerCase() === currentUser.name.toLowerCase() || req.swapWithAgent === 'Any Qualified Partner';
+13367:                                      const isMyListing = req.agentName.toLowerCase() === currentUser.name.toLowerCase();
+13500:                            : tabbyTamaraRequests.filter(r => r.agentName.toLowerCase() === currentUser.name.toLowerCase()).length
+13511:                            : tabbyTamaraRequests.filter(r => r.agentName.toLowerCase() === currentUser.name.toLowerCase() && r.status === 'not_confirmed').length
+13522:                            : tabbyTamaraRequests.filter(r => r.agentName.toLowerCase() === currentUser.name.toLowerCase() && r.status === 'confirmed' && r.customerContacted === 'not_contacted').length
+13533:                            : tabbyTamaraRequests.filter(r => r.agentName.toLowerCase() === currentUser.name.toLowerCase() && r.customerContacted === 'contacted').length
+13547:                            : tabbyTamaraComplaints.filter(c => c.agentName.toLowerCase() === currentUser.name.toLowerCase()).length
+13558:                            : tabbyTamaraComplaints.filter(c => c.agentName.toLowerCase() === currentUser.name.toLowerCase() && c.status === 'pending_tl').length
+13569:                            : tabbyTamaraComplaints.filter(c => c.agentName.toLowerCase() === currentUser.name.toLowerCase() && c.status === 'need_contact').length
+13580:                            : tabbyTamaraComplaints.filter(c => c.agentName.toLowerCase() === currentUser.name.toLowerCase() && c.status === 'closed').length
+13593:                            : clientComms.filter(c => c.callCenterAgentName.toLowerCase() === currentUser.name.toLowerCase() || c.handledBy?.toLowerCase() === currentUser.name.toLowerCase()).length
+13604:                            : clientComms.filter(c => (c.callCenterAgentName.toLowerCase() === currentUser.name.toLowerCase() || c.handledBy?.toLowerCase() === currentUser.name.toLowerCase()) && c.status === 'pending').length
+14163:                                  const isMyRequest = r.agentName.toLowerCase() === currentUser?.name.toLowerCase();
+14167:                                    r.patientName.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14168:                                    r.fileNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14169:                                    r.phoneNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14170:                                    r.agentName.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14171:                                    (r.idNumber && r.idNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()));
+14196:                                      const isMyRequest = r.agentName.toLowerCase() === currentUser?.name.toLowerCase();
+14200:                                        r.patientName.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14201:                                        r.fileNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14202:                                        r.phoneNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14203:                                        r.agentName.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14204:                                        (r.idNumber && r.idNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()));
+14596:                                  const isMyComplaint = c.agentName.toLowerCase() === currentUser?.name.toLowerCase();
+14600:                                    c.patientName.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14601:                                    c.fileNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14602:                                    c.phoneNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14603:                                    c.agentName.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14604:                                    (c.idNumber && c.idNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()));
+14613:                                    tcFilterClinic === 'all' || (c.clinicName && c.clinicName.toLowerCase() === tcFilterClinic.toLowerCase());
+14628:                                      const isMyComplaint = c.agentName.toLowerCase() === currentUser?.name.toLowerCase();
+14632:                                        c.patientName.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14633:                                        c.fileNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14634:                                        c.phoneNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14635:                                        c.agentName.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14636:                                        (c.idNumber && c.idNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()));
+14645:                                        tcFilterClinic === 'all' || (c.clinicName && c.clinicName.toLowerCase() === tcFilterClinic.toLowerCase());
+14918:                                    (c.callCenterAgentName || '').toLowerCase() === (currentUser?.name || '').toLowerCase() || 
+14919:                                    c.handledBy?.toLowerCase() === currentUser?.name.toLowerCase() ||
+14920:                                    c.openedBy?.toLowerCase() === currentUser?.name.toLowerCase();
+14926:                                    c.clinicName.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14927:                                    c.phoneNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14928:                                    c.callCenterAgentName.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14929:                                    (c.handledBy && c.handledBy.toLowerCase().includes(ttSearchQuery.toLowerCase()));
+14936:                                  const matchesClinic = tcFilterClinic === 'all' || c.clinicName.toLowerCase() === tcFilterClinic.toLowerCase();
+14955:                                        (c.callCenterAgentName || '').toLowerCase() === (currentUser?.name || '').toLowerCase() || 
+14956:                                        c.handledBy?.toLowerCase() === currentUser?.name.toLowerCase() ||
+14957:                                        c.openedBy?.toLowerCase() === currentUser?.name.toLowerCase();
+14962:                                        c.clinicName.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14963:                                        c.phoneNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14964:                                        c.callCenterAgentName.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+14965:                                        (c.handledBy && c.handledBy.toLowerCase().includes(ttSearchQuery.toLowerCase()));
+14972:                                      const matchesClinic = tcFilterClinic === 'all' || c.clinicName.toLowerCase() === tcFilterClinic.toLowerCase();
+15210:                const isAmira = currentUser?.name.toLowerCase() === 'amira hassan';
+15214:                    return f.tlName.toLowerCase() === currentUser?.name.toLowerCase();
+15218:                    return f.tlName.toLowerCase() === feedbackFilterTl.toLowerCase();
+15223:                const availableTlsForSelect = TEAM_LEADERS.filter(name => name.toLowerCase() !== 'amira hassan');
+15454:                                      const isSenderAmira = r.senderName.toLowerCase() === 'amira hassan';
+15690:                                           const lh = h.toLowerCase().trim();
+15694:                                           const lh = h.toLowerCase().trim();
+15746:                      const dirNames = new Set(displayDirectory.map(r => r.agentName.toLowerCase()));
+15748:                        if (!dirNames.has(aName.toLowerCase())) {
+15789:                                  const q = directorySearchQuery.toLowerCase();
+15790:                                  if (row.agentName.toLowerCase().includes(q)) return true;
+15791:                                  return Object.values(row.data).some(val => typeof val === 'string' && val.toLowerCase().includes(q));
+15820:                                      const isEmail = h.toLowerCase().includes('email');
+15821:                                      const isPhone = h.toLowerCase().includes('phone') || h.toLowerCase().includes('mobile') || h.toLowerCase().includes('number');
+15822:                                      const isRole = h.toLowerCase().includes('role') || h.toLowerCase().includes('lob');
+15823:                                      const isTL = h.toLowerCase().includes('tl') || h.toLowerCase().includes('leader') || h.toLowerCase().includes('manager');
+15870:                    return String(c.agentName || '').toLowerCase() === currentUser?.name.toLowerCase();
+15883:                  const query = caseSearchQuery.trim().toLowerCase();
+15885:                    String(c.patientName || '').toLowerCase().includes(query) ||
+15887:                    String(c.id || '').toLowerCase().includes(query) ||
+15888:                    String(c.agentName || '').toLowerCase().includes(query) ||
+15889:                    (c.inquiry && String(c.inquiry).toLowerCase().includes(query)) ||
+15890:                    (c.branch && String(c.branch).toLowerCase().includes(query)) ||
+15891:                    (c.service && String(c.service).toLowerCase().includes(query)) ||
+15892:                    (c.leadSource && String(c.leadSource).toLowerCase().includes(query))
+15899:                  const matchesAgent = !canSeeAllCases || caseAgentFilter === 'all' || String(c.agentName || '').toLowerCase() === caseAgentFilter.toLowerCase();
+15980:                              <option key={name} value={name.toLowerCase()}>{formatAgentName(name)}</option>
+16007:                              const finalLeadSource = (caseLeadSource.toLowerCase().includes('blogger') || caseLeadSource.toLowerCase().includes('bloger')) && caseBloggerName
+16116:                                <select required value={caseLeadSource} onChange={e => { setCaseLeadSource(e.target.value); if (!e.target.value.toLowerCase().includes('blogger')) setCaseBloggerName(''); }} className="w-full bg-[#16161c] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
+16166:                            {(caseLeadSource.toLowerCase().includes('blogger') || caseLeadSource.toLowerCase().includes('bloger')) && (
+16821:                  const agentMatch = logAgentFilter === 'all' || item.agent.toLowerCase() === logAgentFilter.toLowerCase();
+16822:                  const typeMatch = logTypeFilter === 'all' || item.type.toLowerCase() === logTypeFilter.toLowerCase();
+16824:                  const queryLower = logSearchQuery.toLowerCase().trim();
+16826:                    item.agent.toLowerCase().includes(queryLower) ||
+16827:                    item.patient.toLowerCase().includes(queryLower) ||
+16828:                    item.clinic.toLowerCase().includes(queryLower) ||
+16829:                    item.details.toLowerCase().includes(queryLower) ||
+16830:                    item.type.toLowerCase().includes(queryLower);
+17029:                            if (agentsList.map(a => a.toLowerCase()).includes(name.toLowerCase())) {
+17140:                                          const lh = h.toLowerCase().trim();
+17144:                                          const lh = h.toLowerCase().trim();
+17231:                            if (agentsList.map(a => a.toLowerCase()).includes(name.toLowerCase())) {
+17353:                                    const oldAgentsSet = new Set(agentsList.map(a => a.toLowerCase()));
+17355:                                       if (!oldAgentsSet.has(s.agentName.toLowerCase()) && !newAgentsList.some(n => n.toLowerCase() === s.agentName.toLowerCase())) {
+17530:                                const username = getUsernameFromFullName(agent) || agent.toLowerCase();
+17532:                                                 lockedAccounts.includes(username.toLowerCase()) ||
+17534:                                                 lockedAccounts.includes(agent.toLowerCase());
+17602:                                                  const userKey2 = agent.toLowerCase();
+17604:                                                  const userKey4 = username.toLowerCase();
+17634:                                                const userKey2 = agent.toLowerCase();
+17636:                                                const userKey4 = username.toLowerCase();

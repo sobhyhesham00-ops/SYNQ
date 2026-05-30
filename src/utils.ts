@@ -1,4 +1,4 @@
-import { SchedulingRequest, SHIFTS, TEAM_LEADERS, INITIAL_AGENTS, SwapRequest, AnnualRequest, ScheduledShift, AGENT_LOBS, Inquiry, TimeLog, AgentDirectoryRow, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, CaseRecord, SystemNotification, Order, DailyActivity } from './types';
+import { SchedulingRequest, SHIFTS, TEAM_LEADERS, INITIAL_AGENTS, SwapRequest, AnnualRequest, ScheduledShift, AGENT_LOBS, Inquiry, TimeLog, AgentDirectoryRow, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, CaseRecord, SystemNotification, Order } from './types';
 
 // Simple client-side storage helpers
 import { db } from './firebase';
@@ -549,74 +549,6 @@ export const generateTextReport = (
   return lines.join('\n');
 };
 
-// Generate a customized list of intraday activities for standard shifts (lunch, breaks, and training)
-export const getStandardActivitiesForShift = (shiftLabel: string, dateStr: string, agentName: string): DailyActivity[] => {
-  const norm = (shiftLabel || '').toLowerCase();
-  const day = new Date(dateStr).getDay();
-  // Safe simple seed based on agent name length & date day
-  const seed = (agentName.length + day) % 3;
-
-  if (norm.includes('07:00') || norm.includes('morning')) {
-    const break1Start = seed === 0 ? '09:30' : seed === 1 ? '09:45' : '10:00';
-    const break1End = seed === 0 ? '09:45' : seed === 1 ? '10:00' : '10:15';
-    const lunchStart = seed === 0 ? '11:45' : seed === 1 ? '12:00' : '12:30';
-    const lunchEnd = seed === 0 ? '12:45' : seed === 1 ? '13:00' : '13:30';
-    const break2Start = seed === 0 ? '14:30' : seed === 1 ? '14:45' : '15:00';
-    const break2End = seed === 0 ? '14:45' : seed === 1 ? '15:00' : '15:15';
-
-    const acts: DailyActivity[] = [
-      { id: `act_${dateStr}_${agentName}_b1`, label: 'Break', startTime: break1Start, endTime: break1End },
-      { id: `act_${dateStr}_${agentName}_lu`, label: 'Lunch', startTime: lunchStart, endTime: lunchEnd },
-      { id: `act_${dateStr}_${agentName}_b2`, label: 'Break', startTime: break2Start, endTime: break2End },
-    ];
-
-    // Tuesdays and Thursdays can have a 30-minute coaching session
-    if (day === 2 || day === 4) {
-      acts.push({ id: `act_${dateStr}_${agentName}_co`, label: 'Coaching', startTime: '15:15', endTime: '15:45' });
-    }
-    return acts;
-  }
-
-  if (norm.includes('13:00') || norm.includes('afternoon')) {
-    const break1Start = seed === 0 ? '15:00' : seed === 1 ? '15:15' : '15:30';
-    const break1End = seed === 0 ? '15:15' : seed === 1 ? '15:30' : '15:45';
-    const lunchStart = seed === 0 ? '17:00' : seed === 1 ? '17:30' : '18:00';
-    const lunchEnd = seed === 0 ? '18:00' : seed === 1 ? '18:30' : '19:00';
-    const break2Start = seed === 0 ? '20:00' : seed === 1 ? '20:15' : '20:30';
-    const break2End = seed === 0 ? '20:15' : seed === 1 ? '20:30' : '20:45';
-
-    const acts: DailyActivity[] = [
-      { id: `act_${dateStr}_${agentName}_b1`, label: 'Break', startTime: break1Start, endTime: break1End },
-      { id: `act_${dateStr}_${agentName}_lu`, label: 'Lunch', startTime: lunchStart, endTime: lunchEnd },
-      { id: `act_${dateStr}_${agentName}_b2`, label: 'Break', startTime: break2Start, endTime: break2End },
-    ];
-
-    // Wednesdays can have a team meeting
-    if (day === 3) {
-      acts.push({ id: `act_${dateStr}_${agentName}_me`, label: 'Meeting', startTime: '16:00', endTime: '16:30' });
-    }
-    return acts;
-  }
-
-  if (norm.includes('22:00') || norm.includes('night')) {
-    const break1Start = seed === 0 ? '00:00' : seed === 1 ? '00:15' : '00:30';
-    const break1End = seed === 0 ? '00:15' : seed === 1 ? '00:30' : '00:45';
-    const lunchStart = seed === 0 ? '02:00' : seed === 1 ? '02:30' : '03:00';
-    const lunchEnd = seed === 0 ? '02:00' : seed === 1 ? '03:30' : '04:00';
-    const break2Start = seed === 0 ? '05:00' : seed === 1 ? '05:15' : '05:30';
-    const break2End = seed === 0 ? '05:15' : seed === 1 ? '05:30' : '05:45';
-
-    const acts: DailyActivity[] = [
-      { id: `act_${dateStr}_${agentName}_b1`, label: 'Break', startTime: break1Start, endTime: break1End },
-      { id: `act_${dateStr}_${agentName}_lu`, label: 'Lunch', startTime: lunchStart, endTime: lunchEnd },
-      { id: `act_${dateStr}_${agentName}_b2`, label: 'Break', startTime: break2Start, endTime: break2End },
-    ];
-    return acts;
-  }
-
-  return [];
-};
-
 // Generate initial schedules for agents over a 30-day window
 export const getInitialSchedules = (currentTime: Date, agents: string[]): ScheduledShift[] => {
   const list: ScheduledShift[] = [];
@@ -638,13 +570,11 @@ export const getInitialSchedules = (currentTime: Date, agents: string[]): Schedu
       // 0 = Morning, 1 = Afternoon, 2 = Night, 3 = Rest Day (Off)
       const patternIdx = (i + agentIdx) % 4;
       if (patternIdx < 3) {
-        const selectedShift = shiftLabels[patternIdx];
         list.push({
           id: `sch_${dateStr}_${agentIdx}`,
           agentName: agent,
           date: dateStr,
-          shiftLabel: selectedShift,
-          activities: getStandardActivitiesForShift(selectedShift, dateStr, agent)
+          shiftLabel: shiftLabels[patternIdx]
         });
       }
     });
@@ -895,9 +825,9 @@ export const parseScheduleCSV = (
     const val = (raw || '').trim().toLowerCase();
     if (!val) return 'Off Day';
     if (['off', 'day off', 'leave', 'al', 'sl', 'vacation', 'sick', 'holiday', 'rest'].some(k => val === k)) return 'Off Day';
-    if (['morning', 'am', '07', '08', '07:00'].some(k => val.includes(k))) return '07:00 - 16:00';
-    if (['afternoon', 'pm', '12', '13', '14', 'afternoon shift'].some(k => val.includes(k))) return '13:00 - 22:00';
-    if (['night', 'evening', '19', '20', 'graveyard', 'night shift'].some(k => val.includes(k))) return '22:00 - 07:00';
+    if (['morning', 'am', '07', '08', '07:00'].some(k => val.includes(k))) return 'Morning Shift';
+    if (['afternoon', 'pm', '12', '13', '14', 'afternoon shift'].some(k => val.includes(k))) return 'Afternoon Shift';
+    if (['night', 'evening', '19', '20', 'graveyard', 'night shift'].some(k => val.includes(k))) return 'Night Shift';
     
     // eslint-disable-next-line
     //@ts-ignore
@@ -980,10 +910,10 @@ export const parseScheduleCSV = (
 
     let extractedTL = '';
     let processedName = rawName;
-    const tlMatch = processedName.match(/\((.*?)\)/);
+    const tlMatch = processedName.match(/((.*?))/);
     if (tlMatch) {
       extractedTL = tlMatch[1].trim();
-      processedName = processedName.replace(/\((.*?)\)/g, '').trim();
+      processedName = processedName.replace(/((.*?))/g, '').trim();
     }
     
     // eslint-disable-next-line
@@ -1042,78 +972,6 @@ export const parseScheduleCSV = (
          date: formattedDate,
          shiftLabel
        });
-    }
-  }
-
-  if (schedules.length === 0) {
-    // Advanced Unstructured Fallback Parser: parses free-text files, list of schedules, raw bullet logs, inline schedules
-    const lines = cleanCSV.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
-    let activeAgentName = '';
-    
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const lowerLine = line.toLowerCase();
-      
-      // Skip irrelevant headers or system/total lines
-      if (lowerLine.includes('total') || lowerLine.includes('legend') || lowerLine.includes('summary') || lowerLine.includes('readme')) {
-        continue;
-      }
-      
-      // A. Check if line contains a known agent name
-      let foundExistingAgent = '';
-      for (const exAgent of existingAgents) {
-        if (exAgent && exAgent.trim() && lowerLine.includes(exAgent.toLowerCase())) {
-          foundExistingAgent = exAgent;
-          break;
-        }
-      }
-      
-      // B. Look for any date components
-      let foundDate = parseTargetDate(line);
-      if (!foundDate) {
-        // Search inside words/tokens divided by colons, semicolons, tabs, spaces, slashes
-        const tokens = line.split(/[\s,;:|\t]+/).map(t => t.trim()).filter(Boolean);
-        for (const token of tokens) {
-          const d = parseTargetDate(token);
-          if (d) {
-            foundDate = d;
-            break;
-          }
-        }
-      }
-      
-      // C. Match standard Shift labels
-      let shiftLabel = '';
-      if (lowerLine.includes('morning') || lowerLine.includes('am') || lowerLine.includes('07:') || lowerLine.includes('08:')) {
-        shiftLabel = '07:00 - 16:00';
-      } else if (lowerLine.includes('afternoon') || lowerLine.includes('pm') || lowerLine.includes('13:') || lowerLine.includes('14:')) {
-        shiftLabel = '13:00 - 22:00';
-      } else if (lowerLine.includes('night') || lowerLine.includes('evening') || lowerLine.includes('22:') || lowerLine.includes('19:') || lowerLine.includes('20:')) {
-        shiftLabel = '22:00 - 07:00';
-      } else if (lowerLine.includes('off') || lowerLine.includes('leave') || lowerLine.includes('al') || lowerLine.includes('rest') || lowerLine.includes('sl') || lowerLine.includes('vacation')) {
-        shiftLabel = 'Off Day';
-      }
-
-      // Check for structured pairing
-      if (foundExistingAgent && !foundDate) {
-        activeAgentName = foundExistingAgent;
-      } else if (!foundExistingAgent && !foundDate) {
-        // Name check: If a line matches Name formatting like "Hesham Sobhy"
-        if (/^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+$/.test(line)) {
-          activeAgentName = line;
-          newAgentsSet.add(line);
-        }
-      }
-      
-      const agentToUse = foundExistingAgent || activeAgentName;
-      if (agentToUse && foundDate) {
-        schedules.push({
-          id: `sch_up_fb_${Date.now()}_lines_${i}_${Math.floor(Math.random() * 1000)}`,
-          agentName: agentToUse,
-          date: foundDate,
-          shiftLabel: shiftLabel || '07:00 - 16:00'
-        });
-      }
     }
   }
 

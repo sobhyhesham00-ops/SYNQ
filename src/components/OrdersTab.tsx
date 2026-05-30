@@ -264,7 +264,7 @@ export function OrdersTab({
                  </div>
                  <div className="flex justify-between items-center bg-black/30 p-2 rounded-lg border border-white/5">
                    <span className="text-slate-400">Top Spender:</span>
-                   <span className="font-bold text-emerald-400">{stats.topSpender || 'N/A'} <span className="text-slate-500 text-[10px]">({stats.spenderAmount.toFixed(0)} AED)</span></span>
+                   <span className="font-bold text-emerald-400">{stats.topSpender || 'N/A'} <span className="text-slate-500 text-[10px]">({!isNaN(stats.spenderAmount) ? stats.spenderAmount.toFixed(0) : 0} AED)</span></span>
                  </div>
                </div>
             </div>
@@ -309,7 +309,7 @@ export function OrdersTab({
                     <div className="bg-black/40 border border-white/10 p-3 rounded-xl flex items-center justify-between">
                        <span className="text-[10px] text-slate-400 font-bold uppercase">Delivery</span>
                        {activeOrder.status === 'open' && activeOrder.makerName === currentUser.name ? (
-                         <input type="number" value={isNaN(activeOrder.deliveryFee) ? '' : activeOrder.deliveryFee} onChange={e=>handleUpdateFees('deliveryFee', isNaN(Number(e.target.value)) ? 0 : Number(e.target.value))} className="w-16 bg-slate-800 text-right text-sm px-2 py-1 rounded text-slate-200 outline-none" min={0}/>
+                         <input type="number" value={activeOrder.deliveryFee} onChange={e=>handleUpdateFees('deliveryFee', Number(e.target.value))} className="w-16 bg-slate-800 text-right text-sm px-2 py-1 rounded text-slate-200 outline-none" min={0}/>
                        ) : (
                          <span className="text-sm text-slate-200 font-mono">{activeOrder.deliveryFee}</span>
                        )}
@@ -317,7 +317,7 @@ export function OrdersTab({
                     <div className="bg-black/40 border border-white/10 p-3 rounded-xl flex items-center justify-between">
                        <span className="text-[10px] text-slate-400 font-bold uppercase">Tax</span>
                        {activeOrder.status === 'open' && activeOrder.makerName === currentUser.name ? (
-                         <input type="number" value={isNaN(activeOrder.tax) ? '' : activeOrder.tax} onChange={e=>handleUpdateFees('tax', isNaN(Number(e.target.value)) ? 0 : Number(e.target.value))} className="w-16 bg-slate-800 text-right text-sm px-2 py-1 rounded text-slate-200 outline-none" min={0}/>
+                         <input type="number" value={activeOrder.tax} onChange={e=>handleUpdateFees('tax', Number(e.target.value))} className="w-16 bg-slate-800 text-right text-sm px-2 py-1 rounded text-slate-200 outline-none" min={0}/>
                        ) : (
                          <span className="text-sm text-slate-200 font-mono">{activeOrder.tax}</span>
                        )}
@@ -325,7 +325,7 @@ export function OrdersTab({
                     <div className="bg-black/40 border border-white/10 p-3 rounded-xl flex items-center justify-between">
                        <span className="text-[10px] text-fuchsia-400 font-bold uppercase">Discount</span>
                        {activeOrder.status === 'open' && activeOrder.makerName === currentUser.name ? (
-                         <input type="number" value={isNaN(activeOrder.discount) ? '' : activeOrder.discount} onChange={e=>handleUpdateFees('discount', isNaN(Number(e.target.value)) ? 0 : Number(e.target.value))} className="w-16 bg-slate-800 text-right text-sm px-2 py-1 rounded text-fuchsia-300 outline-none" min={0}/>
+                         <input type="number" value={activeOrder.discount} onChange={e=>handleUpdateFees('discount', Number(e.target.value))} className="w-16 bg-slate-800 text-right text-sm px-2 py-1 rounded text-fuchsia-300 outline-none" min={0}/>
                        ) : (
                          <span className="text-sm text-fuchsia-300 font-mono">{activeOrder.discount}</span>
                        )}
@@ -348,7 +348,7 @@ export function OrdersTab({
                       </div>
                       <div className="w-24">
                         <label className="text-[10px] text-slate-400 font-bold uppercase block mb-1">Cost</label>
-                        <input type="number" value={newItemAmount === '' ? '' : newItemAmount} onChange={e=>setNewItemAmount(e.target.value === '' ? '' : (isNaN(Number(e.target.value)) ? 0 : Number(e.target.value)))} placeholder="0.00" className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-200 outline-none" />
+                        <input type="number" value={newItemAmount} onChange={e=>setNewItemAmount(Number(e.target.value))} placeholder="0.00" className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-200 outline-none" />
                       </div>
                       <button onClick={handleAddItem} className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center justify-center h-[34px]">
                         Add
@@ -358,7 +358,7 @@ export function OrdersTab({
 
                   {/* Members List Matrix */}
                   <div className="space-y-3">
-                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest border-b border-white/10 pb-2">Order Matrix & Splits (Total: {activeOrder.members.reduce((acc, m) => acc + m.finalAmount, 0).toFixed(2)} AED)</p>
+                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest border-b border-white/10 pb-2">Order Matrix & Splits (Total: {!isNaN(activeOrder.members.reduce((acc, m) => acc + m.finalAmount, 0)) ? activeOrder.members.reduce((acc, m) => acc + m.finalAmount, 0).toFixed(2) : 0} AED)</p>
                      
                      {activeOrder.members.length === 0 ? (
                        <p className="text-slate-500 text-sm italic">No items added yet.</p>
