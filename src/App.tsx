@@ -5720,7 +5720,7 @@ export default function App() {
               )}
 
               {/* Client Comm Queue Notification for TLs and Chat Agents */}
-              {((currentUser.role === 'tl' || getAgentLOB(currentUser.name) === 'Social Media')) && clientComms.some(c => c.status === 'pending') && (
+              {((currentUser.role === 'tl' || getAgentLOB(currentUser.name) !== 'Call Center')) && clientComms.some(c => c.status === 'pending') && (
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -13615,7 +13615,7 @@ export default function App() {
                                 Submit Communication Request
                               </h3>
                               <p className="text-xs text-slate-400 leading-normal text-left">
-                                Submit a request for Chat or Social Media agents to contact a client and follow up.
+                                Submit a request for any non-Call Center agent to contact a client and follow up.
                               </p>
 
                               <form onSubmit={handleSubmitClientComms} className="space-y-4 pt-2 text-left">
@@ -14574,15 +14574,15 @@ export default function App() {
                               {clientComms
                                 .filter(c => {
                                   const userLOB = getAgentLOB(currentUser?.name || '');
-                                  const isChatAgent = userLOB === 'Social Media' || userLOB === 'Chat';
+                                  const isHandlingAgent = userLOB !== 'Call Center';
                                   
                                   const isRelevantToMe = 
                                     (c.callCenterAgentName || '').toLowerCase() === (currentUser?.name || '').toLowerCase() || 
                                     c.handledBy?.toLowerCase() === currentUser?.name?.toLowerCase() ||
                                     c.openedBy?.toLowerCase() === currentUser?.name?.toLowerCase();
                                   
-                                  // Management and support see all. Chat agents see all pending requests to take them.
-                                  if (!isTLOreSupport && !isRelevantToMe && !(isChatAgent && c.status === 'pending')) return false;
+                                  // Management and support see all. Handling agents see all pending requests to take them.
+                                  if (!isTLOreSupport && !isRelevantToMe && !(isHandlingAgent && c.status === 'pending')) return false;
 
                                   const matchesSearch = 
                                     c.clinicName?.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
@@ -14604,21 +14604,21 @@ export default function App() {
                                     <MessageSquare className="w-6 h-6 text-indigo-400" />
                                   </div>
                                   <p className="text-sm font-bold text-slate-100 font-sans">No communication requests matching criteria.</p>
-                                  <p className="text-xs text-slate-400">Requests for Chat and Social Media agents will appear here.</p>
+                                  <p className="text-xs text-slate-400">Requests for all non-Call Center agents will appear here.</p>
                                 </div>
                               ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in font-sans">
                                   {clientComms
                                     .filter(c => {
                                       const userLOB = getAgentLOB(currentUser?.name || '');
-                                      const isChatAgent = userLOB === 'Social Media' || userLOB === 'Chat';
+                                      const isHandlingAgent = userLOB !== 'Call Center';
 
                                       const isRelevantToMe = 
                                         (c.callCenterAgentName || '').toLowerCase() === (currentUser?.name || '').toLowerCase() || 
                                         c.handledBy?.toLowerCase() === currentUser?.name?.toLowerCase() ||
                                         c.openedBy?.toLowerCase() === currentUser?.name?.toLowerCase();
                                       
-                                      if (!isTLOreSupport && !isRelevantToMe && !(isChatAgent && c.status === 'pending')) return false;
+                                      if (!isTLOreSupport && !isRelevantToMe && !(isHandlingAgent && c.status === 'pending')) return false;
 
                                       const matchesSearch = 
                                         c.clinicName?.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
@@ -14640,8 +14640,8 @@ export default function App() {
                                       const isInProgress = req.status === 'in_progress';
                                       const isClosed = req.status === 'contacted';
                                       const userLOB = getAgentLOB(currentUser?.name || '');
-                                      const isChatAgent = userLOB === 'Social Media' || userLOB === 'Chat';
-                                      const canTakeRequest = isPending && isChatAgent;
+                                      const isHandlingAgent = userLOB !== 'Call Center';
+                                      const canTakeRequest = isPending && isHandlingAgent;
                                       const canProcessRequest = isInProgress && (!req.openedBy || req.openedBy === currentUser?.name);
 
                                       return (
