@@ -1252,4 +1252,63 @@ export const evaluateKpiFormula = (formula: string, actual: number, target: numb
   return 0;
 };
 
+// Compress base64 images using HTML Canvas to prevent Firestore size limit errors
+export const compressImage = (base64Str: string, maxDimension = 800, quality = 0.6): Promise<string> => {
+  return new Promise((resolve) => {
+    if (!base64Str) {
+      resolve('');
+      return;
+    }
+    // If already very small (e.g. less than 150KB), don't process it to save time
+    if (base64Str.length < 150000) {
+      resolve(base64Str);
+      return;
+    }
+    // Only compress actual images
+    if (!base64Str.startsWith('data:image/')) {
+      resolve(base64Str);
+      return;
+    }
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = base64Str;
+    img.onload = () => {
+      try {
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressed = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressed);
+        } else {
+          resolve(base64Str);
+        }
+      } catch (err) {
+        console.error("Error compressing image:", err);
+        resolve(base64Str);
+      }
+    };
+    img.onerror = () => {
+      resolve(base64Str);
+    };
+  });
+};
+
+
 

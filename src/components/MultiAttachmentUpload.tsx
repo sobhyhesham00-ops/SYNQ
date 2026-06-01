@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, Camera, X, ImageIcon } from 'lucide-react';
 import { ScreenshotUpload } from './ScreenshotUpload'; // Optional: reuse existing single-photo if needed, but we will make it independent
+import { compressImage } from '../utils';
 
 interface MultiAttachmentUploadProps {
   photos: string[];
@@ -36,38 +37,32 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
   const handlePhotoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    
-    Array.from(files).forEach((file: any) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          onPhotosChange([...photos, event.target!.result as string]); // Need to use a callback approach or rely on latest `photos`. Actually, let's fix the stale closure properly.
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    handleMultipleFiles(files);
   };
 
   // We handle multiple files by tracking an array of pending loads so we don't overwrite
   const handleMultipleFiles = (files: FileList | null) => {
     if (!files || files.length === 0) return;
     
-    const newPhotos: string[] = [];
-    let loadedCount = 0;
     const filesArray = Array.from(files);
-
-    filesArray.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          newPhotos.push(event.target.result as string);
-        }
-        loadedCount++;
-        if (loadedCount === filesArray.length) {
-           onPhotosChange([...photos, ...newPhotos]);
-        }
-      };
-      reader.readAsDataURL(file);
+    Promise.all(filesArray.map(file => {
+      return new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          if (event.target?.result) {
+            const compressed = await compressImage(event.target.result as string);
+            resolve(compressed);
+          } else {
+            resolve('');
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    })).then(newCompressedPhotos => {
+      const filtered = newCompressedPhotos.filter(Boolean);
+      if (filtered.length > 0) {
+        onPhotosChange([...photos, ...filtered]);
+      }
     });
   };
 
@@ -77,7 +72,6 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
   
   const handlePaste = (e: React.ClipboardEvent) => {
     const items = e.clipboardData.items;
-    let foundImages = false;
     const filesArray: File[] = [];
     for (let i = 0; i < items.length; i++) {
         if (items[i].type.indexOf('image') !== -1) {
@@ -87,24 +81,28 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
     }
 
     if (filesArray.length > 0) {
-        foundImages = true;
-        const newPhotos: string[] = [];
-        let loadedCount = 0;
-        filesArray.forEach((file) => {
+        Promise.all(filesArray.map(file => {
+          return new Promise<string>((resolve) => {
             const reader = new FileReader();
-            reader.onload = (event) => {
-                if (event.target?.result) {
-                    newPhotos.push(event.target.result as string);
-                }
-                loadedCount++;
-                if (loadedCount === filesArray.length) {
-                    onPhotosChange([...photos, ...newPhotos]);
-                }
+            reader.onload = async (event) => {
+              if (event.target?.result) {
+                const compressed = await compressImage(event.target.result as string);
+                resolve(compressed);
+              } else {
+                resolve('');
+              }
             };
             reader.readAsDataURL(file);
+          });
+        })).then(newCompressedPhotos => {
+          const filtered = newCompressedPhotos.filter(Boolean);
+          if (filtered.length > 0) {
+            onPhotosChange([...photos, ...filtered]);
+          }
         });
     }
   };
+
 
   return (
     <div className="space-y-4" onPaste={handlePaste}>

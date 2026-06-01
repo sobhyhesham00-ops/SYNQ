@@ -1,5 +1,6 @@
 import React from 'react';
 import { Camera, X, Clipboard, Image as ImageIcon } from 'lucide-react';
+import { compressImage } from '../utils';
 
 interface ScreenshotUploadProps {
   screenshot: string | null;
@@ -16,8 +17,10 @@ export const ScreenshotUpload: React.FC<ScreenshotUploadProps> = ({
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       const reader = new FileReader();
-      reader.onload = (event) => {
-        onScreenshotChange(event.target?.result as string);
+      reader.onload = async (event) => {
+        const raw = event.target?.result as string;
+        const compressed = await compressImage(raw);
+        onScreenshotChange(compressed);
       };
       reader.readAsDataURL(file);
     }
@@ -30,14 +33,17 @@ export const ScreenshotUpload: React.FC<ScreenshotUploadProps> = ({
         const file = items[i].getAsFile();
         if (file) {
           const reader = new FileReader();
-          reader.onload = (event) => {
-            onScreenshotChange(event.target?.result as string);
+          reader.onload = async (event) => {
+            const raw = event.target?.result as string;
+            const compressed = await compressImage(raw);
+            onScreenshotChange(compressed);
           };
           reader.readAsDataURL(file);
         }
       }
     }
   };
+
 
   return (
     <div className="space-y-2">

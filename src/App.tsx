@@ -128,7 +128,8 @@ import {
   getLocalTimeZone,
   normalizeName,
   getUsernameFromFullName,
-  findAgentByUsername
+  findAgentByUsername,
+  compressImage
 } from './utils';
 import {
   SchedulingRequest,
@@ -2079,9 +2080,11 @@ ${pageText}
         const file = items[i].getAsFile();
         if (file) {
           const reader = new FileReader();
-          reader.onload = (event) => {
-            setActiveScreenshot(event.target?.result as string);
-            toast.success('Screenshot captured from clipboard!');
+          reader.onload = async (event) => {
+            const raw = event.target?.result as string;
+            const compressed = await compressImage(raw);
+            setActiveScreenshot(compressed);
+            toast.success('Screenshot captured and optimized!');
           };
           reader.readAsDataURL(file);
         }
@@ -2093,8 +2096,10 @@ ${pageText}
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       const reader = new FileReader();
-      reader.onload = (event) => {
-        setActiveScreenshot(event.target?.result as string);
+      reader.onload = async (event) => {
+        const raw = event.target?.result as string;
+        const compressed = await compressImage(raw);
+        setActiveScreenshot(compressed);
       };
       reader.readAsDataURL(file);
     }
@@ -5536,6 +5541,38 @@ ${ttNotes}` : autoNote;
                   )}
 
                   <button
+                    onClick={async () => {
+                      toast.loading("Updating app and flushing caches...");
+                      if ('caches' in window) {
+                         try {
+                           const names = await caches.keys();
+                           for (let name of names) await caches.delete(name);
+                         } catch (e) {
+                           console.error("Cache flush error", e);
+                         }
+                      }
+                      
+                      if (isTLOreSupport) {
+                        try {
+                          const newVer = CURRENT_APP_VERSION + 1;
+                          await setDoc(doc(db, "system", "app_version"), { version: newVer }, { merge: true });
+                          toast.success(`Broadcasting system update (Version ${newVer})...`);
+                        } catch (err) {
+                          console.error("Failed to propagate global version", err);
+                        }
+                      }
+                      
+                      setTimeout(() => {
+                        window.location.reload();
+                      }, 1000);
+                    }}
+                    className="w-full px-3 py-2 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/20 hover:to-teal-500/20 border border-emerald-500/25 text-emerald-300 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-2"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5 animate-pulse" />
+                    Update App (Force Sync)
+                  </button>
+
+                  <button
                     id="signout-button"
                     onClick={handleSignOut}
                     className="w-full px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/10 text-rose-300 rounded-lg text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-2"
@@ -6017,9 +6054,10 @@ ${ttNotes}` : autoNote;
                           <input type="file" accept="image/*" className="hidden" onChange={(e) => {
                             if (e.target.files && e.target.files[0]) {
                               const reader = new FileReader();
-                              reader.onload = (ev) => {
-                                const newUrl = ev.target?.result as string;
-                                const updated = { ...currentUser, avatarUrl: newUrl };
+                              reader.onload = async (ev) => {
+                                const raw = ev.target?.result as string;
+                                const compressedUrl = await compressImage(raw, 500, 0.6); // smaller profile photo is perfect
+                                const updated = { ...currentUser, avatarUrl: compressedUrl };
                                 setCurrentUser(updated);
                                 setStorageItem('sched_current_user', updated);
                                 setDoc(doc(db, "users", currentUser?.name?.toLowerCase().replace(/[^a-z0-9]/g, '')), { ...updated, lastUpdated: Date.now() }, { merge: true }).catch(console.error);
@@ -9857,7 +9895,8 @@ Notes: ${a.notes || 'None'}`;
                           >
                             <option value="" className="bg-slate-800 text-slate-100 ">-- Select Clinic * --</option>
                             <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
-                            <option value="onetouch" className="bg-slate-800 text-slate-100 ">One Touch</option>
+                            <option value="onetouch_mo3tred" className="bg-slate-800 text-slate-100 ">One Touch Mo3tred</option>
+                                  <option value="onetouch_merkhnya" className="bg-slate-800 text-slate-100 ">One Touch Merkhnya</option>
                             <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
                             <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
                           </select>
@@ -10775,7 +10814,8 @@ Notes: ${a.notes || 'None'}`;
                       <div className="grid grid-cols-1 md:grid-cols-5 gap-3.5 pt-2">
                         {[
                           { key: 'dermadent', display: 'Dermadent', color: 'from-blue-400 to-indigo-500', textCol: 'text-blue-300' },
-                          { key: 'onetouch', display: 'One Touch', color: 'from-teal-400 to-emerald-500', textCol: 'text-emerald-300' },
+                          { key: 'onetouch_mo3tred', display: 'One Touch Mo3tred', color: 'from-teal-400 to-emerald-500', textCol: 'text-emerald-300' },
+                          { key: 'onetouch_merkhnya', display: 'One Touch Merkhnya', color: 'from-cyan-400 to-cyan-500', textCol: 'text-cyan-300' },
                           { key: 'welltouch', display: 'WellTouch', color: 'from-pink-500 to-rose-500', textCol: 'text-rose-300' },
                           { key: 'newedge', display: 'New Edge', color: 'from-amber-400 to-orange-500', textCol: 'text-amber-300' }
                         ].map((clin) => {
@@ -13467,7 +13507,8 @@ _ ${inq.answer || 'No answer yet'} _`;
                                 >
                                   <option value="" className="bg-slate-800 text-slate-100 ">Select a Clinic</option>
                                   <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
-                                  <option value="onetouch" className="bg-slate-800 text-slate-100 ">One Touch</option>
+                                  <option value="onetouch_mo3tred" className="bg-slate-800 text-slate-100 ">One Touch Mo3tred</option>
+                                  <option value="onetouch_merkhnya" className="bg-slate-800 text-slate-100 ">One Touch Merkhnya</option>
                                   <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
                                   <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
                                 </select>
@@ -13598,7 +13639,8 @@ _ ${inq.answer || 'No answer yet'} _`;
                                 >
                                   <option value="" className="bg-slate-800 text-slate-100 ">Select a Clinic</option>
                                   <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
-                                  <option value="onetouch" className="bg-slate-800 text-slate-100 ">One Touch</option>
+                                  <option value="onetouch_mo3tred" className="bg-slate-800 text-slate-100 ">One Touch Mo3tred</option>
+                                  <option value="onetouch_merkhnya" className="bg-slate-800 text-slate-100 ">One Touch Merkhnya</option>
                                   <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
                                   <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
                                 </select>
@@ -13658,7 +13700,8 @@ _ ${inq.answer || 'No answer yet'} _`;
                                   >
                                     <option value="" className="bg-slate-800 text-slate-100 ">Select a Clinic</option>
                                     <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
-                                    <option value="onetouch" className="bg-slate-800 text-slate-100 ">One Touch</option>
+                                    <option value="onetouch_mo3tred" className="bg-slate-800 text-slate-100 ">One Touch Mo3tred</option>
+                                  <option value="onetouch_merkhnya" className="bg-slate-800 text-slate-100 ">One Touch Merkhnya</option>
                                     <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
                                     <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
                                   </select>
@@ -13818,7 +13861,8 @@ _ ${inq.answer || 'No answer yet'} _`;
                             >
                               <option value="all" className="bg-slate-800 text-slate-100 ">All Clinics</option>
                               <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
-                              <option value="onetouch" className="bg-slate-800 text-slate-100 ">One Touch</option>
+                              <option value="onetouch_mo3tred" className="bg-slate-800 text-slate-100 ">One Touch Mo3tred</option>
+                                  <option value="onetouch_merkhnya" className="bg-slate-800 text-slate-100 ">One Touch Merkhnya</option>
                               <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
                               <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
                             </select>
