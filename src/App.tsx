@@ -2,13 +2,12 @@ import { ScheduleUpload } from './components/ScheduleUpload';
 import * as mammoth from 'mammoth';
 import React, { useState, useEffect, FormEvent, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { doc, onSnapshot, collection, setDoc, updateDoc, deleteDoc, query, getDocs, writeBatch, disableNetwork, where, orderBy } from 'firebase/firestore';
+import { doc, onSnapshot as firestoreOnSnapshot, collection, setDoc, updateDoc, deleteDoc, query, getDocs, writeBatch, disableNetwork, where, orderBy } from 'firebase/firestore';
 import { db, initAuth, googleSignIn, getAccessToken, logout } from './firebase';
 
 
 // Intercept onSnapshot to handle quota exceeded errors and stop retries
-const originalOnSnapshot = onSnapshot;
-const customOnSnapshot = (...args: any[]): any => {
+const onSnapshot = (...args: any[]): any => {
   if (args.length >= 2 && typeof args[1] === 'function') {
     const errorObserver = typeof args[2] === 'function' ? args[2] : undefined;
     const newErrorHandler = (err: any) => {
@@ -25,7 +24,7 @@ const customOnSnapshot = (...args: any[]): any => {
         args.splice(2, 0, newErrorHandler);
     }
   }
-  return (originalOnSnapshot as any)(...args);
+  return (firestoreOnSnapshot as any)(...args);
 };
 import {
   Calendar,
@@ -796,7 +795,7 @@ export default function App() {
     });
     const unsubSched = onSnapshot(collection(db, "schedules"), snap => {
       const arr = snap.docs.map(d => d.data() as ScheduledShift);
-      setFirestoreSchedules(arr);
+      setSchedules(arr);
       localStorage.setItem('sched_schedules', JSON.stringify(arr));
     });
     let isAnnouncementsInitialized = false;
@@ -944,7 +943,32 @@ export default function App() {
       const arr = snap.docs.map(d => d.data() as SystemNotification);
       arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
       
-      const latest = arr[0];
+      const filteredArr = arr.filter(notif => {
+        if (!currentUserRef.current) return true;
+        
+        const curUser = currentUserRef.current;
+        const curSupport = supportAssignmentsRef.current;
+        const isUserTLOrSupport = curUser ? (
+          curUser.role === 'tl' || 
+          curUser.role === 'qa' || 
+          isTLName(curUser.name) || 
+          (curSupport && !!curSupport[curUser.name])
+        ) : false;
+
+        let isTargeted = notif.targetAgent === 'all' || 
+                           (isUserTLOrSupport && notif.targetAgent === 'tl') ||
+                           (curUser && notif.targetAgent.toLowerCase() === curUser.name.toLowerCase());
+                           
+        if (!isTargeted && notif.targetAgent.toLowerCase().startsWith('team:')) {
+          const teamTLName = notif.targetAgent.split(':')[1]?.toLowerCase() || '';
+          const curUserTL = getAgentTL(curUser.name).toLowerCase();
+          const curUserName = curUser.name.toLowerCase();
+          isTargeted = (curUserName === teamTLName) || (curUserTL === teamTLName);
+        }
+        return isTargeted;
+      });
+
+      const latest = filteredArr[0];
       if (latest) {
         if (!isNotifsInitialized) {
           isNotifsInitialized = true;
@@ -954,29 +978,9 @@ export default function App() {
           if (latest.id !== lastNotifiedNotifId) {
             localStorage.setItem('sched_last_notified_notif_id', latest.id);
             
-            const curUser = currentUserRef.current;
-            const curSupport = supportAssignmentsRef.current;
-            const isUserTLOrSupport = curUser ? (
-              curUser.role === 'tl' || 
-              curUser.role === 'qa' || 
-              isTLName(curUser.name) || 
-              (curSupport && !!curSupport[curUser.name])
-            ) : false;
-
-            let isTargeted = latest.targetAgent === 'all' || 
-                               (isUserTLOrSupport && latest.targetAgent === 'tl') ||
-                               (curUser && latest.targetAgent.toLowerCase() === curUser.name.toLowerCase());
-                               
-            if (!isTargeted && latest.targetAgent.toLowerCase().startsWith('team:')) {
-              const teamTLName = latest.targetAgent.split(':')[1]?.toLowerCase() || '';
-              const curUserTL = getAgentTL(currentUserRef.current.name).toLowerCase();
-              const curUserName = currentUserRef.current.name.toLowerCase();
-              isTargeted = (curUserName === teamTLName) || (curUserTL === teamTLName);
-            }
-
             const isAnnouncementNotification = latest.title.toLowerCase().includes('announcement') || latest.title.toLowerCase().includes('broadcast');
 
-            if (isTargeted && !isAnnouncementNotification) {
+            if (!isAnnouncementNotification) {
               triggerNotificationAlert();
               toast.info(
                 <div className="flex flex-col gap-1 text-left">
@@ -990,8 +994,8 @@ export default function App() {
         }
       }
 
-      setNotifications(arr);
-      localStorage.setItem('sched_notifications', JSON.stringify(arr));
+      setNotifications(filteredArr);
+      localStorage.setItem('sched_notifications', JSON.stringify(filteredArr));
     });
 
     const unsubFeedbacks = onSnapshot(collection(db, "tl_feedbacks"), snap => {
