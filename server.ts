@@ -112,7 +112,10 @@ async function startServer() {
     // FIX #9: Pass the server instance to Vite so HMR websocket works on the same port.
     // Without this, Vite runs a separate WS server and HMR can silently fail.
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: { 
+        middlewareMode: true,
+        hmr: process.env.DISABLE_HMR === "true" ? false : undefined,
+      },
       appType: "spa",
     });
     app.use(vite.middlewares);

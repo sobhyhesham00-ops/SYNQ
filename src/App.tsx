@@ -720,7 +720,6 @@ export default function App() {
       if (e.key === 'sched_tt_complaints' && e.newValue) setTabbyTamaraComplaints(JSON.parse(e.newValue));
       if (e.key === 'sched_requests' && e.newValue) setRequests(JSON.parse(e.newValue));
       if (e.key === 'sched_time_logs' && e.newValue) setTimeLogs(JSON.parse(e.newValue));
-      if (e.key === 'sched_schedules' && e.newValue) setSchedules(JSON.parse(e.newValue));
       if (e.key === 'sched_support_assignments' && e.newValue) setSupportAssignments(JSON.parse(e.newValue));
       if (e.key === 'sched_announcements' && e.newValue) setAnnouncements(JSON.parse(e.newValue));
     };
@@ -1091,7 +1090,6 @@ export default function App() {
       (snapshot) => {
         const data = snapshot.docs.map(d => d.data() as ScheduledShift);
         setSchedules(data);
-        localStorage.setItem('sched_schedules', JSON.stringify(data));
       },
       (error) => {
         console.error("Schedules Real-time Sync Error:", error);
@@ -1134,7 +1132,6 @@ export default function App() {
         }
 
         setNotifications(arr);
-        localStorage.setItem('sched_notifications', JSON.stringify(arr));
       },
       (error) => {
         console.error("Notifications Real-time Sync Error:", error);
@@ -1147,7 +1144,6 @@ export default function App() {
       (snapshot) => {
         const data = snapshot.docs.map(d => d.data() as Order);
         setOrders(data);
-        localStorage.setItem('sched_orders', JSON.stringify(data));
       },
       (error) => {
         console.error("Orders Real-time Sync Error:", error);
@@ -1160,7 +1156,6 @@ export default function App() {
       (snapshot) => {
         const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         setTodos(data);
-        setStorageItem('agent_todos', data);
       },
       (error) => {
         console.error("Todos Real-time Sync Error:", error);
@@ -1335,9 +1330,7 @@ export default function App() {
     return getStorageItem<boolean>('sched_roster_published', false);
   });
 
-  const [notifications, setNotifications] = useState<SystemNotification[]>(() => {
-    return getStorageItem<SystemNotification[]>('sched_notifications', []);
-  });
+  const [notifications, setNotifications] = useState<SystemNotification[]>([]);
   const [isNotifDrawerOpen, setIsNotifDrawerOpen] = useState(false);
 
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -1382,7 +1375,7 @@ export default function App() {
   const [dashboardSearchTeam, setDashboardSearchTeam] = useState<string>('');
   const [rtmSearch, setRtmSearch] = useState<string>('');
   const [rtmSelectedAgent, setRtmSelectedAgent] = useState<string | null>(null);
-  const [todos, setTodos] = useState<any[]>(() => getStorageItem('agent_todos', []));
+  const [todos, setTodos] = useState<any[]>([]);
   const [todoFilter, setTodoFilter] = useState<'All' | 'Work' | 'Personal' | 'Urgent'>('All');
 
   const addSystemNotification = (
@@ -1402,10 +1395,9 @@ export default function App() {
       seenByUsers: [],
       userId: currentUser?.id || "all"
     };
-    // Sync to state & local store which forwards to firestore
+    // Sync to state which forwards to firestore
     setNotifications(prev => {
       const updated = [newNotif, ...prev];
-      localStorage.setItem('sched_notifications', JSON.stringify(updated));
       return updated;
     });
     
@@ -1578,7 +1570,6 @@ export default function App() {
       return n;
     });
     setNotifications(updated);
-    localStorage.setItem('sched_notifications', JSON.stringify(updated));
     toast.success("All notifications marked as read!");
   };
 
@@ -1596,7 +1587,6 @@ export default function App() {
       return n;
     });
     setNotifications(updated);
-    localStorage.setItem('sched_notifications', JSON.stringify(updated));
   };
 
   useEffect(() => {
@@ -1890,9 +1880,7 @@ export default function App() {
     return localStorage.getItem('schedules_cleared_v1') === 'true';
   });
 
-  const [firestoreSchedules, setFirestoreSchedules] = useState<ScheduledShift[]>(() =>
-    readStoredJson<ScheduledShift[]>('sched_schedules', [])
-  );
+  const [firestoreSchedules, setFirestoreSchedules] = useState<ScheduledShift[]>([]);
 
 
   const clock = systemTime;
@@ -1973,9 +1961,7 @@ export default function App() {
     return getStorageItem<Announcement[]>('sched_announcements', []);
   });
 
-  const [orders, setOrders] = useState<Order[]>(() => {
-    return getStorageItem<Order[]>('sched_orders', []);
-  });
+  const [orders, setOrders] = useState<Order[]>([]);
 
   const latestAnnouncementIdRef = useRef<string | null>(null);
 
@@ -3311,7 +3297,6 @@ export default function App() {
     if (doubleCheck) {
       try {
         setSchedules([]);
-        setStorageItem('sched_schedules', []);
         
         // Also query and delete all docs under the 'schedules' collection in Firestore
         const snap = await getDocs(collection(db, "schedules"));
@@ -3346,7 +3331,6 @@ export default function App() {
         
         if (parsed.schedules.length > 0) {
           setSchedules(parsed.schedules);
-          setStorageItem('sched_schedules', parsed.schedules);
           
           const batch = writeBatch(db);
           parsed.schedules.forEach(s => {
@@ -4562,7 +4546,6 @@ export default function App() {
 
     // Save schedules
     setSchedules(mergedSchedules);
-    setStorageItem('sched_schedules', mergedSchedules);
 
     // Sync to Firestore (only the ones we changed/added)
     targetSchedules.forEach(s => {
@@ -17699,7 +17682,6 @@ export default function App() {
                     mergedSchedules.push(selectedShiftForActivities);
                   }
                   setSchedules(mergedSchedules);
-                  setStorageItem('sched_schedules', mergedSchedules);
                   setDoc(doc(db, "schedules", selectedShiftForActivities.id), selectedShiftForActivities).catch(e => console.error("Write Error:", e));
                   
                   setSelectedShiftForActivities(null);
