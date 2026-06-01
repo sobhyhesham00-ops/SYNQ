@@ -1375,7 +1375,7 @@ export default function App() {
     // Sync to state & local store which forwards to firestore
     setNotifications(prev => {
       const updated = [newNotif, ...prev];
-      setStorageItem('sched_notifications', updated);
+      localStorage.setItem('sched_notifications', JSON.stringify(updated));
       return updated;
     });
     
@@ -1548,7 +1548,7 @@ export default function App() {
       return n;
     });
     setNotifications(updated);
-    setStorageItem('sched_notifications', updated);
+    localStorage.setItem('sched_notifications', JSON.stringify(updated));
     toast.success("All notifications marked as read!");
   };
 
@@ -1566,7 +1566,7 @@ export default function App() {
       return n;
     });
     setNotifications(updated);
-    setStorageItem('sched_notifications', updated);
+    localStorage.setItem('sched_notifications', JSON.stringify(updated));
   };
 
   useEffect(() => {
@@ -2617,7 +2617,7 @@ export default function App() {
     
     if (overstaysUpdated) {
       setNotifiedOverstays(newNotifiedOverstays);
-      setStorageItem('sched_notified_overstays', newNotifiedOverstays);
+      localStorage.setItem('sched_notified_overstays', JSON.stringify(newNotifiedOverstays));
     }
 
     // Check for shifts absences
@@ -2678,7 +2678,7 @@ export default function App() {
     
     if (absencesUpdated) {
       setNotifiedAbsences(newNotifiedAbsences);
-      setStorageItem('sched_notified_absences', newNotifiedAbsences);
+      localStorage.setItem('sched_notified_absences', JSON.stringify(newNotifiedAbsences));
     }
 
   }, [currentTime, timeLogs, schedules, agentsList, currentUser, notifiedOverstays, notifiedAbsences]);

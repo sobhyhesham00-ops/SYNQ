@@ -32,48 +32,16 @@ const getCollectionName = (key: string) => {
 
 export const setStorageItem = <T>(key: string, value: T): void => {
   try {
-    const oldStr = localStorage.getItem(key);
-    const oldValue = oldStr ? JSON.parse(oldStr) : undefined;
-    
     localStorage.setItem(key, JSON.stringify(value));
     
     // Asynchronous mirror to Firestore (non-blocking, item-level delta sync)
     if (key.startsWith('sched_')) {
       const colName = getCollectionName(key);
       
-      // If this matches a supported collection and is an array of objects
-      if (colName && Array.isArray(value)) {
-        if (value.length > 0 && typeof value[0] === 'object' && 'id' in value[0]) {
-           const oldMap = new Map();
-           if (Array.isArray(oldValue)) {
-               oldValue.forEach(item => { if (item && typeof item === 'object' && item.id) oldMap.set(item.id, item); });
-           }
-           
-           value.forEach(item => {
-               if (item && typeof item === 'object' && item.id) {
-                   const oldItem = oldMap.get(item.id);
-                   if (!oldItem || JSON.stringify(oldItem) !== JSON.stringify(item)) {
-                       const cleanItem = JSON.parse(JSON.stringify(item));
-                       setDoc(doc(db, colName, item.id), cleanItem).catch(err => console.error("Firestore sync error:", err));
-                   }
-                   oldMap.delete(item.id);
-               }
-           });
-           
-           // Any items remaining in the local old array were deleted!
-           oldMap.forEach(item => {
-               deleteDoc(doc(db, colName, item.id)).catch(err => console.error("Firestore delete error:", err));
-           });
-           
-        } else if (value.length === 0 && Array.isArray(oldValue)) {
-           // Array was explicitly cleared (Factory Reset)
-           oldValue.forEach(item => {
-               if (item && typeof item === 'object' && item.id) {
-                   deleteDoc(doc(db, colName, item.id)).catch(err => console.error("Firestore delete error:", err));
-               }
-           });
-        }
-      } else {
+      // Do not duplicate array synchronization here! 
+      // App.tsx independently performs setDoc, updateDoc, and deleteDoc 
+      // on individual items to avoid recursive max-backoff quotas.
+      if (!colName || !Array.isArray(value)) {
         // Fallback for settings or config (e.g. system/sched_support_assignments)
         const cleanValue = JSON.parse(JSON.stringify(value));
         setDoc(doc(db, "system", key), { data: cleanValue }).catch(err => {
