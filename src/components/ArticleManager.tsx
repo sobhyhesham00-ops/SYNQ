@@ -5,25 +5,7 @@ import { collection, onSnapshot as originalOnSnapshot, addDoc, deleteDoc, doc, u
 import { db } from '../firebase';
 
 
-const onSnapshot = (...args: any[]): any => {
-  if (args.length >= 2 && typeof args[1] === 'function') {
-    const errorObserver = typeof args[2] === 'function' ? args[2] : undefined;
-    const newErrorHandler = (err: any) => {
-      if (err.code === 'resource-exhausted' || err.message.includes('Quota exceeded')) {
-        console.warn('[Firestore Interceptor] Quota Exceeded! Error:', err);
-      } 
-      if (errorObserver) {
-        errorObserver(err);
-      }
-    };
-    if (typeof args[2] === 'function') {
-        args[2] = newErrorHandler;
-    } else {
-        args.splice(2, 0, newErrorHandler);
-    }
-  }
-  return (originalOnSnapshot as any)(...args);
-};
+const onSnapshot = originalOnSnapshot;
 
 import { toast } from 'sonner';
 

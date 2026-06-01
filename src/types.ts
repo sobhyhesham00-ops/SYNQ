@@ -57,6 +57,8 @@ export interface SwapRequest {
   ruleViolation?: boolean;
   violationMessage?: string;
   screenshot?: string; // Base64 screenshot
+  photos?: string[];
+  links?: string[];
   replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
 }
 
@@ -74,6 +76,8 @@ export interface AnnualRequest {
   ruleViolation?: boolean;
   violationMessage?: string;
   screenshot?: string; // Base64 screenshot
+  photos?: string[];
+  links?: string[];
   replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
 }
 
@@ -131,6 +135,8 @@ export interface TabbyTamaraRequest {
   paymentLink?: string;
   agentContactNotes?: string;
   paymentScreenshot?: string;
+  photos?: string[];
+  links?: string[];
   tlNotes?: string;
   tlLinks?: string;
   replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
@@ -155,6 +161,8 @@ export interface TabbyTamaraComplaint {
   contactedAt?: string;
   clinicName: string;
   screenshot?: string; // Optional field for attachment screenshot
+  photos?: string[];
+  links?: string[];
   replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
   tlName?: string;
   commentedAt?: string;
@@ -177,6 +185,8 @@ export interface ClientCommunicationRequest {
   handledAt?: string;
   handlingNotes?: string;
   screenshot?: string; // Base64 screenshot
+  photos?: string[];
+  links?: string[];
   replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
   patientName?: string;
 }
@@ -196,6 +206,8 @@ export interface CaseRecord {
   ticketType?: string;
   ticketStatus?: string;
   callType?: string;
+  photos?: string[];
+  links?: string[];
   replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
   status?: string;
 }

@@ -149,6 +149,13 @@ export function PatientSearchHub({
                           ))}
                         </div>
                       )}
+                      {inq.links && inq.links.length > 0 && (
+                        <div className="flex gap-2 flex-wrap mt-1">
+                          {inq.links.map((link, idx) => (
+                            <a key={idx} href={link} target="_blank" rel="noreferrer" className="text-[10px] text-amber-400 underline truncate max-w-[150px] bg-amber-500/10 px-2 py-1 rounded">{link}</a>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -169,11 +176,25 @@ export function PatientSearchHub({
                       <div className="text-slate-200 text-sm">
                         {cc.notes}
                       </div>
-                      {cc.screenshot && (
-                        <div className="mt-2">
-                          <button onClick={() => setViewerImage(cc.screenshot!)} className="focus:outline-none">
-                            <img src={cc.screenshot} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-sky-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
-                          </button>
+                      {((cc.photos && cc.photos.length > 0) || cc.screenshot) && (
+                        <div className="flex gap-2 flex-wrap mt-2">
+                          {cc.screenshot && (
+                            <button onClick={() => setViewerImage(cc.screenshot!)} className="focus:outline-none">
+                              <img src={cc.screenshot} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-sky-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
+                            </button>
+                          )}
+                          {cc.photos?.map((p, idx) => (
+                            <button key={idx} onClick={() => setViewerImage(p)} className="focus:outline-none">
+                              <img src={p} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-sky-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {cc.links && cc.links.length > 0 && (
+                        <div className="flex gap-2 flex-wrap mt-1">
+                          {cc.links.map((link, idx) => (
+                            <a key={idx} href={link} target="_blank" rel="noreferrer" className="text-[10px] text-sky-400 underline truncate max-w-[150px] bg-sky-500/10 px-2 py-1 rounded">{link}</a>
+                          ))}
                         </div>
                       )}
                     </div>
@@ -197,11 +218,25 @@ export function PatientSearchHub({
                          <span className="font-bold uppercase text-xs px-2 py-1 bg-black/30 rounded">{tt.platform}</span>
                          <span className="font-mono text-rose-300">{tt.priceWithoutTax ? 'SAR ' + tt.priceWithoutTax : ''}</span>
                       </div>
-                      {tt.paymentScreenshot && (
-                        <div className="mt-2">
-                          <button onClick={() => setViewerImage(tt.paymentScreenshot!)} className="focus:outline-none">
-                            <img src={tt.paymentScreenshot} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-rose-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
-                          </button>
+                      {((tt.photos && tt.photos.length > 0) || tt.paymentScreenshot) && (
+                        <div className="flex gap-2 flex-wrap mt-2">
+                          {tt.paymentScreenshot && (
+                            <button onClick={() => setViewerImage(tt.paymentScreenshot!)} className="focus:outline-none">
+                              <img src={tt.paymentScreenshot} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-rose-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
+                            </button>
+                          )}
+                          {tt.photos?.map((p, idx) => (
+                            <button key={idx} onClick={() => setViewerImage(p)} className="focus:outline-none">
+                              <img src={p} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-rose-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {tt.links && tt.links.length > 0 && (
+                        <div className="flex gap-2 flex-wrap mt-1">
+                          {tt.links.map((link, idx) => (
+                            <a key={idx} href={link} target="_blank" rel="noreferrer" className="text-[10px] text-rose-400 underline truncate max-w-[150px] bg-rose-500/10 px-2 py-1 rounded">{link}</a>
+                          ))}
                         </div>
                       )}
                     </div>
@@ -224,11 +259,25 @@ export function PatientSearchHub({
                       <div className="text-slate-200 text-sm">
                         {c.inquiry}
                       </div>
-                      {c.screenshot && (
-                        <div className="mt-2">
-                          <button onClick={() => setViewerImage(c.screenshot!)} className="focus:outline-none">
-                            <img src={c.screenshot} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-orange-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
-                          </button>
+                      {((c.photos && c.photos.length > 0) || c.screenshot) && (
+                        <div className="flex gap-2 flex-wrap mt-2">
+                          {c.screenshot && (
+                            <button onClick={() => setViewerImage(c.screenshot!)} className="focus:outline-none">
+                              <img src={c.screenshot} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-orange-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
+                            </button>
+                          )}
+                          {c.photos?.map((p, idx) => (
+                            <button key={idx} onClick={() => setViewerImage(p)} className="focus:outline-none">
+                              <img src={p} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-orange-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {c.links && c.links.length > 0 && (
+                        <div className="flex gap-2 flex-wrap mt-1">
+                          {c.links.map((link, idx) => (
+                            <a key={idx} href={link} target="_blank" rel="noreferrer" className="text-[10px] text-orange-400 underline truncate max-w-[150px] bg-orange-500/10 px-2 py-1 rounded">{link}</a>
+                          ))}
                         </div>
                       )}
                     </div>
@@ -251,11 +300,25 @@ export function PatientSearchHub({
                       <div className="text-slate-200 text-sm bg-black/20 p-2 rounded">
                         {c.complaintDetails}
                       </div>
-                      {c.imageUrl && (
-                        <div className="mt-2">
-                          <button onClick={() => setViewerImage(c.imageUrl!)} className="focus:outline-none">
-                            <img src={c.imageUrl} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-red-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
-                          </button>
+                      {((c.photos && c.photos.length > 0) || c.imageUrl) && (
+                        <div className="flex gap-2 flex-wrap mt-2">
+                          {c.imageUrl && (
+                            <button onClick={() => setViewerImage(c.imageUrl!)} className="focus:outline-none">
+                              <img src={c.imageUrl} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-red-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
+                            </button>
+                          )}
+                          {c.photos?.map((p, idx) => (
+                            <button key={idx} onClick={() => setViewerImage(p)} className="focus:outline-none">
+                              <img src={p} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-red-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {c.links && c.links.length > 0 && (
+                        <div className="flex gap-2 flex-wrap mt-1">
+                          {c.links.map((link, idx) => (
+                            <a key={idx} href={link} target="_blank" rel="noreferrer" className="text-[10px] text-red-400 underline truncate max-w-[150px] bg-red-500/10 px-2 py-1 rounded">{link}</a>
+                          ))}
                         </div>
                       )}
                     </div>

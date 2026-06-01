@@ -6,27 +6,8 @@ import { doc, onSnapshot as firestoreOnSnapshot, collection, setDoc, updateDoc, 
 import { db, initAuth, googleSignIn, getAccessToken, logout } from './firebase';
 
 
-// Intercept onSnapshot to handle quota exceeded errors and stop retries
-const onSnapshot = (...args: any[]): any => {
-  if (args.length >= 2 && typeof args[1] === 'function') {
-    const errorObserver = typeof args[2] === 'function' ? args[2] : undefined;
-    const newErrorHandler = (err: any) => {
-      if (err.code === 'resource-exhausted' || (err.message && err.message.includes('Quota exceeded'))) {
-        console.warn('[Firestore Interceptor] Quota Exceeded! Error:', err);
-        // disableNetwork(db).catch(console.error); // Removed to allow syncing to resume if quota opens up
-      } 
-      if (errorObserver) {
-        errorObserver(err);
-      }
-    };
-    if (typeof args[2] === 'function') {
-        args[2] = newErrorHandler;
-    } else {
-        args.splice(2, 0, newErrorHandler);
-    }
-  }
-  return (firestoreOnSnapshot as any)(...args);
-};
+// Intercept removed
+const onSnapshot = firestoreOnSnapshot;
 import {
   Calendar,
   Users,
@@ -105,6 +86,8 @@ import { MessagingSystem } from './components/MessagingSystem';
 import { DataVault } from './components/DataVault';
 import { IntegrationsManager } from './components/IntegrationsManager';
 import { ScreenshotUpload } from './components/ScreenshotUpload';
+import { MultiAttachmentUpload } from './components/MultiAttachmentUpload';
+import { AttachmentsDisplay } from './components/AttachmentsDisplay';
 import { DashboardSummary } from './components/DashboardSummary';
 import { QAScorecards } from './components/QAScorecards';
 import { PatientSearchHub } from './components/PatientSearchHub';
@@ -284,8 +267,7 @@ const getClinicBadgeColor = (clinic: string) => {
   if (!clinic) return 'bg-white/5 text-slate-300 border-white/10';
   const lp = clinic.toLowerCase();
   if (lp.includes('dermadent')) return 'bg-blue-500/10 text-blue-300 border-blue-500/20';
-  if (lp.includes('onetouch1')) return 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20';
-  if (lp.includes('onetouch2')) return 'bg-violet-500/10 text-violet-300 border-violet-500/20';
+  if (lp.includes('onetouch')) return 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20';
   if (lp.includes('welltouch')) return 'bg-rose-500/10 text-rose-300 border-rose-500/20';
   if (lp.includes('newedge')) return 'bg-amber-500/10 text-amber-300 border-amber-500/20';
   return 'bg-white/5 text-slate-300 border-white/10';
@@ -1724,7 +1706,10 @@ export default function App() {
               const page = await pdf.getPage(i);
               const textContent = await page.getTextContent();
               const pageText = textContent.items.map((item: any) => item.str).join(' ');
-              fullText += `--- Page ${i} ---\n${pageText}\n\n`;
+              fullText += `--- Page ${i} ---
+${pageText}
+
+`;
             }
             extractedText = fullText.trim() || 'No searchable text content found in PDF.';
             toast.success(`Extracted ${pdf.numPages} pages from PDF!`, { id: 'pdf-load' });
@@ -2084,6 +2069,8 @@ export default function App() {
 
   // Unified Screenshot Upload State
   const [activeScreenshot, setActiveScreenshot] = useState<string | null>(null);
+  const [activePhotos, setActivePhotos] = useState<string[]>([]);
+  const [activeLinks, setActiveLinks] = useState<string[]>([]);
 
   const handleScreenshotPaste = (e: React.ClipboardEvent) => {
     const items = e.clipboardData.items;
@@ -2150,6 +2137,8 @@ export default function App() {
   const [swapTargetShift, setSwapTargetShift] = useState(SHIFTS[1].label);
   const [swapNotes, setSwapNotes] = useState('');
   const [swapScreenshot, setSwapScreenshot] = useState<string | null>(null);
+  const [swapPhotos, setSwapPhotos] = useState<string[]>([]);
+  const [swapLinks, setSwapLinks] = useState<string[]>([]);
 
   // P2P Trade Form States
   const [p2pSelectedDate, setP2pSelectedDate] = useState('');
@@ -2157,6 +2146,8 @@ export default function App() {
   const [p2pTargetShift, setP2pTargetShift] = useState(SHIFTS[1].label);
   const [p2pNotes, setP2pNotes] = useState('');
   const [p2pScreenshot, setP2pScreenshot] = useState<string | null>(null);
+  const [p2pPhotos, setP2pPhotos] = useState<string[]>([]);
+  const [p2pLinks, setP2pLinks] = useState<string[]>([]);
 
   // Manual Roster Submission Form States
   const [manualRosterAgent, setManualRosterAgent] = useState('');
@@ -2169,6 +2160,8 @@ export default function App() {
   const [annualEnd, setAnnualEnd] = useState('');
   const [annualNotes, setAnnualNotes] = useState('');
   const [annualScreenshot, setAnnualScreenshot] = useState<string | null>(null);
+  const [annualPhotos, setAnnualPhotos] = useState<string[]>([]);
+  const [annualLinks, setAnnualLinks] = useState<string[]>([]);
 
   // Report Period Selection State
   const [reportPeriod, setReportPeriod] = useState<'day' | 'week' | 'month' | 'year'>('month');
@@ -2714,7 +2707,10 @@ export default function App() {
     const myLOB = getAgentLOB(name);
     const targetLOB = getAgentLOB(swapTargetAgent);
     if (myLOB !== targetLOB) {
-      toast.error(`Cannot request swap: Swap requests are strictly permitted only between agents of the same LOB.\n\nYour LOB: ${myLOB}\n${swapTargetAgent}'s LOB: ${targetLOB}`);
+      toast.error(`Cannot request swap: Swap requests are strictly permitted only between agents of the same LOB.
+
+Your LOB: ${myLOB}
+${swapTargetAgent}'s LOB: ${targetLOB}`);
       return;
     }
 
@@ -2739,12 +2735,14 @@ export default function App() {
         status: 'pending_partner',
         createdAt: new Date().toISOString(),
         notes: swapNotes,
-        screenshot: swapScreenshot ? swapScreenshot : undefined
+        screenshot: swapScreenshot ? swapScreenshot : undefined, photos: swapPhotos, links: swapLinks
       };
 
-      const updated = [newRequest, ...requests];
-      setRequests(updated);
-      setStorageItem('sched_requests', updated);
+      setRequests(prev => {
+        const updated = [newRequest, ...prev];
+        setStorageItem('sched_requests', updated);
+        return updated;
+      });
 
       // Sync to Firestore
       await setDoc(doc(db, "scheduling_requests", newRequest.id), newRequest);
@@ -2759,7 +2757,7 @@ export default function App() {
       // Reset form
       setSwapDate('');
       setSwapNotes('');
-      setSwapScreenshot(null);
+      setSwapScreenshot(null); setSwapPhotos([]); setSwapLinks([]);
       setSwapShift(SHIFTS[0].label);
       setSwapTargetAgent('');
       setSwapTargetShift(SHIFTS[1].label);
@@ -2814,12 +2812,14 @@ export default function App() {
         status: 'pending',
         createdAt: new Date().toISOString(),
         notes: annualNotes,
-        screenshot: annualScreenshot ? annualScreenshot : undefined
+        screenshot: annualScreenshot ? annualScreenshot : undefined, photos: annualPhotos, links: annualLinks
       };
 
-      const updated = [newRequest, ...requests];
-      setRequests(updated);
-      setStorageItem('sched_requests', updated);
+      setRequests(prev => {
+        const updated = [newRequest, ...prev];
+        setStorageItem('sched_requests', updated);
+        return updated;
+      });
 
       // Sync to Firestore
       await setDoc(doc(db, "scheduling_requests", newRequest.id), newRequest);
@@ -2835,7 +2835,7 @@ export default function App() {
       setAnnualStart('');
       setAnnualEnd('');
       setAnnualNotes('');
-      setAnnualScreenshot(null);
+      setAnnualScreenshot(null); setAnnualPhotos([]); setAnnualLinks([]);
 
       setSubmissionConfirmation({
         title: "Annual Leave Filed! ✈️",
@@ -3084,8 +3084,9 @@ export default function App() {
   };
 
   const downloadRtmLiveMetricsDigest = () => {
-    let digest = `RTM Live Attendance Digest - ${new Date().toLocaleString()}\n`;
-    digest += "=================================================\n\n";
+    let digest = `RTM Live Attendance Digest - ${new Date().toLocaleString()}
+`;
+    digest += "=================================================\\n\\n";
     
     const working: string[] = [];
     const breaks: string[] = [];
@@ -3111,16 +3112,24 @@ export default function App() {
         }
     });
 
-    digest += `Active Staff Count: ${agentsList.length - offlines.length}\n`;
+    digest += `Active Staff Count: ${agentsList.length - offlines.length}
+`;
     digest += "-------------------------------------------------\n";
 
-    digest += `Working: ${working.join(', ') || 'None'}\n`;
-    digest += `On Break: ${breaks.join(', ') || 'None'}\n`;
-    digest += `On Lunch: ${lunches.join(', ') || 'None'}\n`;
-    digest += `Restroom: ${restrooms.join(', ') || 'None'}\n`;
-    digest += `Meeting: ${meetings.join(', ') || 'None'}\n`;
-    digest += `1:1 Session: ${oneOnOne.join(', ') || 'None'}\n`;
-    digest += `Offline: ${offlines.join(', ') || 'None'}\n`;
+    digest += `Working: ${working.join(', ') || 'None'}
+`;
+    digest += `On Break: ${breaks.join(', ') || 'None'}
+`;
+    digest += `On Lunch: ${lunches.join(', ') || 'None'}
+`;
+    digest += `Restroom: ${restrooms.join(', ') || 'None'}
+`;
+    digest += `Meeting: ${meetings.join(', ') || 'None'}
+`;
+    digest += `1:1 Session: ${oneOnOne.join(', ') || 'None'}
+`;
+    digest += `Offline: ${offlines.join(', ') || 'None'}
+`;
 
     const blob = new Blob([digest], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -3246,7 +3255,9 @@ export default function App() {
           
           const result = parseScheduleCSV(csvText, agentsList);
           if (result.errors.length > 0) {
-            setUploadError(`Parsed with warnings/errors: \n${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `\n...and ${result.errors.length - 5} more errors` : ''}`);
+            setUploadError(`Parsed with warnings/errors: 
+${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
+...and ${result.errors.length - 5} more errors` : ''}`);
           }
           
           if (result.schedules.length === 0) {
@@ -3983,9 +3994,11 @@ export default function App() {
         seenByAgent: false
       };
 
-      const updated = [newInquiry, ...inquiries];
-      setInquiries(updated);
-      setStorageItem('sched_inquiries', updated);
+      setInquiries(prev => {
+        const updated = [newInquiry, ...prev];
+        setStorageItem('sched_inquiries', updated);
+        return updated;
+      });
 
       // Sync to Firestore
       await setDoc(doc(db, "inquiries", newInquiry.id), newInquiry);
@@ -4167,7 +4180,9 @@ export default function App() {
     try {
       const calculatedPrice = ttPriceWithoutTax && !isNaN(Number(ttPriceWithoutTax)) ? (Number(ttPriceWithoutTax) * 1.05).toFixed(2) : '-';
       const autoNote = `[5% added to price. Final: SAR ${calculatedPrice}]`;
-      const finalNotes = ttNotes ? `${autoNote}\n\n${ttNotes}` : autoNote;
+      const finalNotes = ttNotes ? `${autoNote}
+
+${ttNotes}` : autoNote;
 
       const newRequest: TabbyTamaraRequest = {
         id: 'tt_' + Math.random().toString(36).substr(2, 9),
@@ -4186,12 +4201,14 @@ export default function App() {
         confirmedBy: undefined,
         platform: ttPlatform,
         clinicName: ttClinicName,
-        paymentScreenshot: activeScreenshot || undefined
+        paymentScreenshot: activeScreenshot || undefined, photos: activePhotos, links: activeLinks
       };
 
-      const updated = [newRequest, ...tabbyTamaraRequests];
-      setTabbyTamaraRequests(updated);
-      setStorageItem('sched_tabby_tamara', updated);
+      setTabbyTamaraRequests(prev => {
+        const updated = [newRequest, ...prev];
+        setStorageItem('sched_tabby_tamara', updated);
+        return updated;
+      });
 
       // Sync to Firestore
       await setDoc(doc(db, "tt_requests", newRequest.id), newRequest);
@@ -4205,7 +4222,7 @@ export default function App() {
       setTtPriceWithoutTax('');
       setTtPhoneNumber('');
       setTtNotes('');
-      setActiveScreenshot(null);
+      setActiveScreenshot(null); setActivePhotos([]); setActiveLinks([]);
 
       addSystemNotification(`💳 New ${ttPlatform.toUpperCase()} Request`, `${currentUser.name} submitted a new request for ${ttPatientName} (${ttPhoneNumber})`, 'general', 'tl');
 
@@ -4330,7 +4347,7 @@ export default function App() {
         fileNumber: tcFileNumber,
         isOldCustomer: tcIsOldCustomer,
         idNumber: !tcIsOldCustomer ? tcIdNumber : undefined,
-        imageUrl: activeScreenshot || tcImageUrl,
+        imageUrl: activeScreenshot || tcImageUrl, photos: activePhotos, links: activeLinks,
         phoneNumber: tcPhoneNumber,
         complaintDetails: tcComplaintDetails,
         createdAt: new Date().toISOString(),
@@ -4339,9 +4356,11 @@ export default function App() {
         clinicName: tcClinicName
       };
 
-      const updated = [newComplaint, ...tabbyTamaraComplaints];
-      setTabbyTamaraComplaints(updated);
-      setStorageItem('sched_tt_complaints', updated);
+      setTabbyTamaraComplaints(prev => {
+        const updated = [newComplaint, ...prev];
+        setStorageItem('sched_tt_complaints', updated);
+        return updated;
+      });
       
       // Sync to Firestore
       await setDoc(doc(db, "tt_complaints", newComplaint.id), newComplaint);
@@ -4355,7 +4374,7 @@ export default function App() {
       setTcImageUrl('');
       setTcPhoneNumber('');
       setTcComplaintDetails('');
-      setActiveScreenshot(null);
+      setActiveScreenshot(null); setActivePhotos([]); setActiveLinks([]);
 
       addSystemNotification(`⚠️ New Complaint`, `${currentUser.name} submitted a new complaint for ${tcPatientName} (${tcPhoneNumber})`, 'general', 'tl');
 
@@ -4395,12 +4414,14 @@ export default function App() {
         notes: ccNotes,
         createdAt: new Date().toISOString(),
         status: 'pending',
-        screenshot: activeScreenshot || undefined
+        screenshot: activeScreenshot || undefined, photos: activePhotos, links: activeLinks
       };
 
-      const updated = [newComm, ...clientComms];
-      setClientComms(updated);
-      setStorageItem('sched_client_comms', updated);
+      setClientComms(prev => {
+        const updated = [newComm, ...prev];
+        setStorageItem('sched_client_comms', updated);
+        return updated;
+      });
       
       // Sync to Firestore
       await setDoc(doc(db, "client_comms", newComm.id), newComm);
@@ -4410,7 +4431,7 @@ export default function App() {
       setCcPhoneNumber('');
       setCcLanguage('Arabic');
       setCcNotes('');
-      setActiveScreenshot(null);
+      setActiveScreenshot(null); setActivePhotos([]); setActiveLinks([]);
 
       addSystemNotification(`💬 New Client Comm Request`, `New request submitted for phone: ${ccPhoneNumber}`, 'general', 'tl');
 
@@ -4509,18 +4530,22 @@ export default function App() {
         }
         const endTimeStr = endTime.replace(':', '') + '00';
 
-        icsContent += "BEGIN:VEVENT\n";
-        icsContent += `DTSTART;TZID=${localTZ}:${startDate}T${startTimeStr}\n`;
-        icsContent += `DTEND;TZID=${localTZ}:${endDate}T${endTimeStr}\n`;
-        icsContent += `SUMMARY:Work: ${shift.shiftLabel}\n`;
-        icsContent += `DESCRIPTION:Synq Portal Work Shift\n`;
-        icsContent += "END:VEVENT\n";
+        icsContent += "BEGIN:VEVENT\\n";
+        icsContent += `DTSTART;TZID=${localTZ}:${startDate}T${startTimeStr}
+`;
+        icsContent += `DTEND;TZID=${localTZ}:${endDate}T${endTimeStr}
+`;
+        icsContent += `SUMMARY:Work: ${shift.shiftLabel}
+`;
+        icsContent += `DESCRIPTION:Synq Portal Work Shift
+`;
+        icsContent += "END:VEVENT\\n";
       } catch (e) {
          console.warn("Skipping malformed shift for ICS export", shift);
       }
     });
 
-    icsContent += "END:VCALENDAR";
+    icsContent += "END:VCALENDAR\\n";
 
     const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -4895,7 +4920,7 @@ export default function App() {
   };
 
   const handleCopyCSVReport = () => {
-    let csv = "Agent Name,Status,Clock In,Clock Out,Total Break (mins),Total Lunch (mins),Total Restroom (mins),Restroom Sessions,Team Meeting (mins),1:1 Session (mins),Personal Break (mins),Today's Compliance\n";
+    let csv = "Agent Name,Status,Clock In,Clock Out,Total Break (mins),Total Lunch (mins),Total Restroom (mins),Restroom Sessions,Team Meeting (mins),1:1 Session (mins),Personal Break (mins),Today's Compliance\\n";
     
     let activeAgentsForCSV = [...agentsList];
     timeLogs.forEach(log => {
@@ -4929,7 +4954,8 @@ export default function App() {
       const clockInVal = stats.clockIn ? new Date(stats.clockIn).toLocaleTimeString() : 'N/A';
       const clockOutVal = stats.clockOut ? new Date(stats.clockOut).toLocaleTimeString() : 'N/A';
 
-      csv += `"${agent}","${statusText}","${clockInVal}","${clockOutVal}",${stats.breakMins.toFixed(1)},${stats.lunchMins.toFixed(1)},${stats.restroomMins.toFixed(1)},${stats.restroomCount},${stats.meetingMins.toFixed(1)},${stats.oneOnOneMins.toFixed(1)},${stats.personalMins.toFixed(1)},"${compliance}"\n`;
+      csv += `"${agent}","${statusText}","${clockInVal}","${clockOutVal}",${stats.breakMins.toFixed(1)},${stats.lunchMins.toFixed(1)},${stats.restroomMins.toFixed(1)},${stats.restroomCount},${stats.meetingMins.toFixed(1)},${stats.oneOnOneMins.toFixed(1)},${stats.personalMins.toFixed(1)},"${compliance}"
+`;
     });
 
     navigator.clipboard.writeText(csv);
@@ -8369,10 +8395,19 @@ export default function App() {
                                           let details = '';
                                           if (req.type === 'swap') {
                                             const s = req as SwapRequest;
-                                            details = `Request Type: Shift Swap\nAgent Name: ${s.agentName}\nSwap Date: ${s.date}\nShift: ${s.shift}\nSwap Partner Name: ${s.swapWithAgent}\nNotes: ${s.notes || 'None'}`;
+                                            details = `Request Type: Shift Swap
+Agent Name: ${s.agentName}
+Swap Date: ${s.date}
+Shift: ${s.shift}
+Swap Partner Name: ${s.swapWithAgent}
+Notes: ${s.notes || 'None'}`;
                                           } else {
                                             const a = req as AnnualRequest;
-                                            details = `Request Type: Annual Leave\nAgent Name: ${a.agentName}\nStart Date: ${a.startDate}\nEnd Date: ${a.endDate}\nNotes: ${a.notes || 'None'}`;
+                                            details = `Request Type: Annual Leave
+Agent Name: ${a.agentName}
+Start Date: ${a.startDate}
+End Date: ${a.endDate}
+Notes: ${a.notes || 'None'}`;
                                           }
                                           navigator.clipboard.writeText(details);
                                           toast.success('Approval request details copied!');
@@ -8507,7 +8542,9 @@ export default function App() {
                                         </p>
                                       </div>
                                     )}
-                                    {req.screenshot && (
+                                    <AttachmentsDisplay photos={req.photos} links={req.links} />
+<AttachmentsDisplay photos={req.photos} links={req.links} />
+{req.screenshot && (
                                       <div className="mt-2">
                                         <a href={req.screenshot} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded text-[10px] font-bold border border-indigo-500/20 transition-colors">
                                           <ImageIcon className="w-3 h-3" />
@@ -9144,11 +9181,7 @@ export default function App() {
                         </div>
 
                         <div className="pt-2">
-                          <ScreenshotUpload 
-                            screenshot={swapScreenshot} 
-                            onScreenshotChange={setSwapScreenshot} 
-                            label="Optional Attachment"
-                          />
+                          <MultiAttachmentUpload photos={swapPhotos} links={swapLinks} onPhotosChange={setSwapPhotos} onLinksChange={setSwapLinks} photosLabel="Optional Attachment" />
                         </div>
 
                         {/* Interactive Warning Message Display */}
@@ -9231,11 +9264,7 @@ export default function App() {
                         </div>
 
                         <div className="pt-2">
-                          <ScreenshotUpload 
-                            screenshot={annualScreenshot} 
-                            onScreenshotChange={setAnnualScreenshot} 
-                            label="Optional Attachment"
-                          />
+                          <MultiAttachmentUpload photos={annualPhotos} links={annualLinks} onPhotosChange={setAnnualPhotos} onLinksChange={setAnnualLinks} photosLabel="Optional Attachment" />
                         </div>
 
                         {/* Interactive Warning Message Display */}
@@ -9335,7 +9364,9 @@ export default function App() {
                                       </p>
                                     )}
 
-                                    {req.screenshot && (
+                                    <AttachmentsDisplay photos={req.photos} links={req.links} />
+<AttachmentsDisplay photos={req.photos} links={req.links} />
+{req.screenshot && (
                                       <div className="mt-2 text-left">
                                         <a href={req.screenshot} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-lg text-[10px] font-bold tracking-wider transition-colors border border-indigo-500/20">
                                           <ImageIcon className="w-3.5 h-3.5" />
@@ -9823,8 +9854,7 @@ export default function App() {
                           >
                             <option value="" className="bg-slate-800 text-slate-100 ">-- Select Clinic * --</option>
                             <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
-                            <option value="onetouch1" className="bg-slate-800 text-slate-100 ">One Touch 1 AlMu'tarid</option>
-                            <option value="onetouch2" className="bg-slate-800 text-slate-100 ">One Touch 2 Markhaniya</option>
+                            <option value="onetouch" className="bg-slate-800 text-slate-100 ">One Touch</option>
                             <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
                             <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
                           </select>
@@ -10742,8 +10772,7 @@ export default function App() {
                       <div className="grid grid-cols-1 md:grid-cols-5 gap-3.5 pt-2">
                         {[
                           { key: 'dermadent', display: 'Dermadent', color: 'from-blue-400 to-indigo-500', textCol: 'text-blue-300' },
-                          { key: 'onetouch1', display: 'One Touch 1 AlMu\'tarid', color: 'from-teal-400 to-emerald-500', textCol: 'text-emerald-300' },
-                          { key: 'onetouch2', display: 'One Touch 2 Markhaniya', color: 'from-cyan-400 to-blue-500', textCol: 'text-blue-300' },
+                          { key: 'onetouch', display: 'One Touch', color: 'from-teal-400 to-emerald-500', textCol: 'text-emerald-300' },
                           { key: 'welltouch', display: 'WellTouch', color: 'from-pink-500 to-rose-500', textCol: 'text-rose-300' },
                           { key: 'newedge', display: 'New Edge', color: 'from-amber-400 to-orange-500', textCol: 'text-amber-300' }
                         ].map((clin) => {
@@ -10902,7 +10931,12 @@ export default function App() {
                                   <div className="flex items-center gap-2">
                                     <button
                                       onClick={() => {
-                                        const details = `*Agent Name:* ${inq.agentName}\n*Clinic:* ${inq.clinicName || 'N/A'}\n*Inquiry:*\n_ ${inq.text} _\n*Answer:*\n_ ${inq.answer || 'No answer yet'} _`;
+                                        const details = `*Agent Name:* ${inq.agentName}
+*Clinic:* ${inq.clinicName || 'N/A'}
+*Inquiry:*
+_ ${inq.text} _
+*Answer:*
+_ ${inq.answer || 'No answer yet'} _`;
                                         navigator.clipboard.writeText(details);
                                         toast.success('Inquiry details copied!');
                                       }}
@@ -12942,11 +12976,7 @@ export default function App() {
                             </div>
                             
                             <div className="pt-2">
-                              <ScreenshotUpload 
-                                screenshot={p2pScreenshot} 
-                                onScreenshotChange={setP2pScreenshot} 
-                                label="Optional Attachment"
-                              />
+                              <MultiAttachmentUpload photos={p2pPhotos} links={p2pLinks} onPhotosChange={setP2pPhotos} onLinksChange={setP2pLinks} photosLabel="Optional Attachment" />
                             </div>
 
                             <button
@@ -12970,7 +13000,7 @@ export default function App() {
                                   status: p2pTargetAgent ? 'pending_partner' : 'pending',
                                   createdAt: new Date().toISOString(),
                                   notes: p2pNotes || "P2P open trade offer published from roster board",
-                                  screenshot: p2pScreenshot ? p2pScreenshot : undefined,
+                                  screenshot: p2pScreenshot ? p2pScreenshot : undefined, photos: p2pPhotos, links: p2pLinks,
                                   ruleViolation: false
                                 };
 
@@ -12989,7 +13019,7 @@ export default function App() {
                                 setP2pSelectedDate('');
                                 setP2pTargetAgent('');
                                 setP2pNotes('');
-                                setP2pScreenshot(null);
+                                setP2pScreenshot(null); setP2pPhotos([]); setP2pLinks([]);
                               }}
                               className="w-full py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white font-extrabold text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer font-sans"
                             >
@@ -13434,8 +13464,7 @@ export default function App() {
                                 >
                                   <option value="" className="bg-slate-800 text-slate-100 ">Select a Clinic</option>
                                   <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
-                                  <option value="onetouch1" className="bg-slate-800 text-slate-100 ">One Touch 1 AlMu'tarid</option>
-                                  <option value="onetouch2" className="bg-slate-800 text-slate-100 ">One Touch 2 Markhaniya</option>
+                                  <option value="onetouch" className="bg-slate-800 text-slate-100 ">One Touch</option>
                                   <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
                                   <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
                                 </select>
@@ -13452,11 +13481,7 @@ export default function App() {
                                 />
                               </div>
 
-                              <ScreenshotUpload 
-                                screenshot={activeScreenshot}
-                                onScreenshotChange={setActiveScreenshot}
-                                label="Payment / Identity Screenshot"
-                              />
+                              <MultiAttachmentUpload photos={activePhotos} links={activeLinks} onPhotosChange={setActivePhotos} onLinksChange={setActiveLinks} photosLabel="Payment / Identity Photos" />
 
                               <button
                                 type="submit"
@@ -13544,11 +13569,7 @@ export default function App() {
                               </div>
 
                               {/* Photo / Screenshot */}
-                              <ScreenshotUpload 
-                                screenshot={activeScreenshot}
-                                onScreenshotChange={setActiveScreenshot}
-                                label="Complaint Evidence / Screenshot"
-                              />
+                              <MultiAttachmentUpload photos={activePhotos} links={activeLinks} onPhotosChange={setActivePhotos} onLinksChange={setActiveLinks} photosLabel="Complaint Evidence" />
 
                               {/* Phone Number */}
                               <div className="space-y-1.5 text-left">
@@ -13574,8 +13595,7 @@ export default function App() {
                                 >
                                   <option value="" className="bg-slate-800 text-slate-100 ">Select a Clinic</option>
                                   <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
-                                  <option value="onetouch1" className="bg-slate-800 text-slate-100 ">One Touch 1 AlMu'tarid</option>
-                                  <option value="onetouch2" className="bg-slate-800 text-slate-100 ">One Touch 2 Markhaniya</option>
+                                  <option value="onetouch" className="bg-slate-800 text-slate-100 ">One Touch</option>
                                   <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
                                   <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
                                 </select>
@@ -13635,8 +13655,7 @@ export default function App() {
                                   >
                                     <option value="" className="bg-slate-800 text-slate-100 ">Select a Clinic</option>
                                     <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
-                                    <option value="onetouch1" className="bg-slate-800 text-slate-100 ">One Touch 1 AlMu'tarid</option>
-                                    <option value="onetouch2" className="bg-slate-800 text-slate-100 ">One Touch 2 Markhaniya</option>
+                                    <option value="onetouch" className="bg-slate-800 text-slate-100 ">One Touch</option>
                                     <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
                                     <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
                                   </select>
@@ -13696,11 +13715,7 @@ export default function App() {
                                   />
                                 </div>
 
-                                <ScreenshotUpload 
-                                  screenshot={activeScreenshot}
-                                  onScreenshotChange={setActiveScreenshot}
-                                  label="Customer Inquiry Screenshot"
-                                />
+                                <MultiAttachmentUpload photos={activePhotos} links={activeLinks} onPhotosChange={setActivePhotos} onLinksChange={setActiveLinks} photosLabel="Customer Inquiry Screenshot" />
 
                                 <button
                                   type="submit"
@@ -13800,8 +13815,7 @@ export default function App() {
                             >
                               <option value="all" className="bg-slate-800 text-slate-100 ">All Clinics</option>
                               <option value="dermadent" className="bg-slate-800 text-slate-100 ">Dermadent</option>
-                              <option value="onetouch1" className="bg-slate-800 text-slate-100 ">One Touch 1 AlMu'tarid</option>
-                              <option value="onetouch2" className="bg-slate-800 text-slate-100 ">One Touch 2 Markhaniya</option>
+                              <option value="onetouch" className="bg-slate-800 text-slate-100 ">One Touch</option>
                               <option value="welltouch" className="bg-slate-800 text-slate-100 ">WellTouch</option>
                               <option value="newedge" className="bg-slate-800 text-slate-100 ">New Edge</option>
                             </select>
@@ -13991,7 +14005,8 @@ export default function App() {
                                               </div>
                                             )}
 
-                                            {req.paymentScreenshot && (
+                                            <AttachmentsDisplay photos={req.photos} links={req.links} />
+{req.paymentScreenshot && (
                                               <div className="border-t border-white/5 pt-2">
                                                 <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
                                                   <ImageIcon className="w-3 h-3 text-indigo-400" />
@@ -14206,7 +14221,14 @@ export default function App() {
                                             {isTLOreSupport && (
                                               <button
                                                 onClick={() => {
-                                                  const details = `*Platform:* ${req.platform}\n*File Number:* ${req.fileNumber || 'N/A'}\n*Patient Name:* ${req.patientName}\n*ID/ID Number:* ${req.idNumber || 'N/A'}\n*Phone Number:* ${req.phoneNumber}\n*Price (Without Tax):* SAR ${req.priceWithoutTax}\n*Notes:*\n_ ${req.notes || 'None'} _`;
+                                                  const details = `*Platform:* ${req.platform}
+*File Number:* ${req.fileNumber || 'N/A'}
+*Patient Name:* ${req.patientName}
+*ID/ID Number:* ${req.idNumber || 'N/A'}
+*Phone Number:* ${req.phoneNumber}
+*Price (Without Tax):* SAR ${req.priceWithoutTax}
+*Notes:*
+_ ${req.notes || 'None'} _`;
                                                   navigator.clipboard.writeText(details);
                                                   toast.success('Payment request details copied!');
                                                 }}
@@ -14391,7 +14413,8 @@ export default function App() {
                                             )}
 
                                             <div className="border-t border-white/5 pt-1.5 grid grid-cols-2 gap-2">
-                                              {comp.imageUrl ? (
+                                              <AttachmentsDisplay photos={comp.photos} links={comp.links} />
+{comp.imageUrl ? (
                                                 <div className="col-span-2">
                                                   <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-1">Photo / Screenshot:</p>
                                                   <img src={comp.imageUrl} alt="Complaint Attachment" className="max-h-32 rounded-lg border border-white/10" />
@@ -14518,7 +14541,14 @@ export default function App() {
                                             {isTLOreSupport && (
                                               <button
                                                 onClick={() => {
-                                                  const details = `*Complaint ID:* ${comp.id}\n*Patient Name:* ${comp.patientName}\n*File Number:* ${comp.fileNumber || 'N/A'}\n*Phone Number:* ${comp.phoneNumber}\n*Complaint Text:*\n_ ${comp.text} _\n*TL Comment:*\n_ ${comp.tlComment || 'No comment yet'} _`;
+                                                  const details = `*Complaint ID:* ${comp.id}
+*Patient Name:* ${comp.patientName}
+*File Number:* ${comp.fileNumber || 'N/A'}
+*Phone Number:* ${comp.phoneNumber}
+*Complaint Text:*
+_ ${comp.text} _
+*TL Comment:*
+_ ${comp.tlComment || 'No comment yet'} _`;
                                                   navigator.clipboard.writeText(details);
                                                   toast.success('Complaint details copied!');
                                                 }}
@@ -14717,7 +14747,9 @@ export default function App() {
                                               </p>
                                             </div>
 
-                                            {req.screenshot && (
+                                            <AttachmentsDisplay photos={req.photos} links={req.links} />
+<AttachmentsDisplay photos={req.photos} links={req.links} />
+{req.screenshot && (
                                               <div className="border-t border-white/5 pt-2">
                                                 <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
                                                   <ImageIcon className="w-3 h-3 text-indigo-400" />
@@ -14816,7 +14848,15 @@ export default function App() {
                                             {isTLOreSupport && (
                                               <button
                                                 onClick={() => {
-                                                  const details = `*Call Center Request ID:* ${req.id}\n*Requested By:* ${req.callCenterAgentName}\n*Clinic:* ${req.clinicName}\n*Language:* ${req.language}\n*Phone Number:* ${req.phoneNumber}\n*Notes:*\n_ ${req.notes} _\n*Resolution Notes:*\n_ ${req.handlingNotes || 'Pending response'} _`;
+                                                  const details = `*Call Center Request ID:* ${req.id}
+*Requested By:* ${req.callCenterAgentName}
+*Clinic:* ${req.clinicName}
+*Language:* ${req.language}
+*Phone Number:* ${req.phoneNumber}
+*Notes:*
+_ ${req.notes} _
+*Resolution Notes:*
+_ ${req.handlingNotes || 'Pending response'} _`;
                                                   navigator.clipboard.writeText(details);
                                                   toast.success('Client communication details copied!');
                                                 }}
@@ -15248,3058 +15288,70 @@ export default function App() {
                           <button
                             onClick={() => {
                               const csvContent = "Agent Name,Email,Phone,LOB,LOB Team,Role,Team Leader\nJohn Doe,john@example.com,555-0199,Chat,Support,agent,Amira Hassan\nJane Smith,jane@example.com,555-0122,Social Media,Moderator,tl,Hesham Sobhy";
-                              const blob = new Blob([csvContent], { type: 'text/csv' });
-                              const url = window.URL.createObjectURL(blob);
-                              const a = document.createElement('a');
-                              a.href = url;
-                              a.download = 'headcount_directory_template.csv';
-                              a.click();
+                              const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                              const link = document.createElement('a');
+                              link.href = URL.createObjectURL(blob);
+                              link.download = 'headcount_template.csv';
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
                             }}
-                            className="px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/15 border border-cyan-500/20 text-cyan-300 rounded-lg text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all"
+                            className="px-4 py-2 bg-white/5 hover:bg-white/10 text-xs font-bold text-slate-300 rounded-xl transition-all border border-white/10 shadow-sm"
                           >
-                            <Download className="w-3.5 h-3.5" />
-                            Download Templates
+                            Download Template CSV
                           </button>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {/* CSV File Upload Section */}
-                          <div
-                            className="border-2 border-dashed border-white/10 hover:border-white/20 bg-black/30 rounded-2xl p-6 text-center transition-all relative flex flex-col items-center justify-center gap-3 min-h-[160px]"
-                          >
-                            <input
-                              type="file"
-                              accept=".csv,.xlsx,.json,.xls"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (!file) return;
-                                handleDirectoryFile(file);
-                              }}
-                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                            />
-                            <div className="w-10 h-10 bg-cyan-500/10 border border-cyan-500/25 rounded-2xl flex items-center justify-center">
-                              <Upload className="w-5 h-5 text-cyan-400" />
-                            </div>
-                            <div>
-                              <p className="text-sm font-bold text-slate-100">Drag or Browse Headcount File</p>
-                              <p className="text-xs text-slate-400 mt-1">Accepts .CSV, .XLSX, and .JSON files</p>
-                            </div>
-                          </div>
-
-                          {/* Google Sheets Link Integration */}
-                          <div className="bg-emerald-500/5 border border-emerald-500/15 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 text-center transition-all">
-                            <div className="w-10 h-10 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center shadow-inner">
-                              <svg className="w-5 h-5 bg-slate-800 rounded-full p-0.5" viewBox="0 0 48 48">
-                                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
-                              </svg>
-                            </div>
-                            <div className="w-full space-y-2">
-                              <input
-                                type="text"
-                                placeholder="Paste Google Sheets URL or Document ID..."
-                                value={googleSheetId}
-                                onChange={(e) => {
-                                    let val = e.target.value;
-                                    const idMatch = val.match(/\/d\/([a-zA-Z0-9-_]+)/);
-                                    const gidMatch = val.match(/gid=([0-9]+)/);
-                                    
-                                    if (idMatch) {
-                                      const id = idMatch[1];
-                                      setGoogleSheetId(id);
-                                      setStorageItem('sched_google_sheet_id', id);
-                                    } else {
-                                      setGoogleSheetId(val);
-                                      setStorageItem('sched_google_sheet_id', val);
-                                    }
-
-                                    if (gidMatch) {
-                                      const gid = gidMatch[1];
-                                      setGoogleSheetGid(gid);
-                                      setStorageItem('sched_google_sheet_gid', gid);
-                                    }
-                                }}
-                                className="bg-white/5 backdrop-blur-xl border border-white/10 text-slate-100 placeholder-emerald-500/40 text-xs rounded-xl px-3 py-2 w-full focus:outline-none focus:border-emerald-500 text-center"
-                              />
-                              <button
-                                onClick={async () => {
-                                  if (!googleSheetId) {
-                                     toast.error("Please provide a valid Google Sheet ID or URL.");
-                                     return;
-                                  }
-                                  try {
-                                    setIsSyncingSheets(true);
-                                    const csvText = await fetchGoogleSheetCSV(googleSheetId, googleSheetGid);
-                                    if (!csvText || csvText.trim().length === 0) {
-                                       throw new Error("No data found in the sheet.");
-                                    }
-                                    const result = parseAgentDirectoryCSV(csvText);
-                                    if (result.errors.length > 0) {
-                                       toast.error(`Warnings: ${result.errors.slice(0, 3).join(', ')}`);
-                                    }
-                                    if (result.directory.length > 0) {
-                                       setAgentDirectory(result.directory);
-                                       setDirectoryHeaders(result.headers);
-                                       setStorageItem('sched_agent_directory', result.directory);
-                                       setStorageItem('sched_agent_directory_headers', result.headers);
-                                       
-                                       const allKnown = new Set(agentsList);
-                                       result.directory.forEach(a => allKnown.add(a.agentName));
-                                       const updatedList = Array.from(allKnown);
-                                       setAgentsList(updatedList);
-                                       setStorageItem('sched_agents_list', updatedList);
-
-                                       const newMeta = { ...getAgentMeta() };
-                                       let hasMetaUpdate = false;
-                                       const tlHeader = result.headers.find(h => {
-                                           const lh = h.toLowerCase().trim();
-                                           return lh === 'tl' || lh === 'team leader' || lh.includes('manager') || lh.includes('supervisor') || lh.includes('lead') || lh === 'tl name';
-                                       });
-                                       const roleHeader = result.headers.find(h => {
-                                           const lh = h.toLowerCase().trim();
-                                           return lh === 'role' || lh === 'lob' || lh.includes('account') || lh.includes('designation') || lh.includes('job title') || lh.includes('department') || lh.includes('function') || lh.includes('business');
-                                       });
-                                       if (tlHeader || roleHeader) {
-                                           result.directory.forEach(a => {
-                                               let updated = false;
-                                               if (!newMeta[a.agentName]) newMeta[a.agentName] = { roleType: '', tlName: '' };
-                                               if (tlHeader && a.data[tlHeader]) {
-                                                   const val = a.data[tlHeader].trim();
-                                                   if (val) {
-                                                       newMeta[a.agentName].tlName = val;
-                                                       updated = true;
-                                                   }
-                                               }
-                                               if (roleHeader && a.data[roleHeader]) {
-                                                   const val = a.data[roleHeader].trim();
-                                                   if (val) {
-                                                       newMeta[a.agentName].roleType = val;
-                                                       updated = true;
-                                                   }
-                                               }
-                                               if (updated) hasMetaUpdate = true;
-                                           });
-                                           if (hasMetaUpdate) {
-                                               setStorageItem('sched_agent_meta', newMeta);
-                                           }
-                                        }
-                                       toast.success(`Excel extraction applied! Directory has ${result.directory.length} agents.`);
-                                    } else {
-                                       toast.error('No agent data parsed from sheet.');
-                                    }
-                                  } catch (err: any) {
-                                    toast.error("Extraction failed: " + err.message);
-                                  } finally {
-                                    setIsSyncingSheets(false);
-                                  }
-                                }}
-                                disabled={isSyncingSheets}
-                                className={`w-full py-2 text-center rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer shadow-lg transition-all ${
-                                  isSyncingSheets ? 'bg-emerald-500/50 text-slate-200' : 'bg-emerald-500 hover:bg-emerald-600 text-white'
-                                }`}
-                              >
-                                {isSyncingSheets ? 'Syncing...' : 'Sync Directory Sheet'}
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {(() => {
-                      const displayDirectory = [...agentDirectory];
-                      const dirNames = new Set(displayDirectory.map(r => r.agentName?.toLowerCase()));
-                      agentsList.forEach(aName => {
-                        if (!dirNames.has(aName?.toLowerCase())) {
-                           displayDirectory.push({
-                              id: 'syn_' + Math.random().toString(36),
-                              agentName: aName,
-                              data: {
-                                'Role': globalMeta[aName]?.roleType || '-',
-                                'Team Leader': globalMeta[aName]?.tlName || '-',
-                              }
-                           });
-                        }
-                      });
-                      
-                      const displayHeaders = directoryHeaders.length > 0 ? directoryHeaders : ['Role', 'Team Leader'];
-
-                      if (displayDirectory.length === 0) {
-                        return (
-                          <div className="p-12 text-center rounded-3xl border border-dashed border-white/10 bg-slate-800/[0.02] space-y-3 shadow-xl">
-                            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto text-slate-500 shadow-inner">
-                              <UserCheck className="w-8 h-8 text-cyan-500" />
-                            </div>
-                            <h3 className="text-lg font-bold text-slate-100 tracking-wide">No Directory Data Available</h3>
-                            <p className="text-slate-400 text-sm max-w-sm mx-auto">The Headcount roster document has not been compiled or mapped yet.</p>
-                          </div>
-                        );
-                      }
-
-                      return (
-                        <div className="bg-white/5 border border-cyan-500/20 backdrop-blur-xl rounded-3xl p-6 shadow-2xl overflow-x-auto">
-                          <table className="w-full text-left border-collapse min-w-[800px]">
-                            <thead>
-                              <tr className="bg-gradient-to-r from-cyan-950/40 to-slate-900 border-b border-cyan-500/20 text-[10px] font-black uppercase tracking-widest text-cyan-300 font-sans">
-                                <th className="px-5 py-4 rounded-tl-2xl whitespace-nowrap">Agent Name</th>
-                                {displayHeaders.map((h, i) => (
-                                  <th key={`${h}-${i}`} className="px-3 py-4 whitespace-nowrap">{h}</th>
-                                ))}
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/10 text-xs text-slate-300 font-sans border-b border-white/10">
-                              {(() => {
-                                const filteredData = displayDirectory.filter(row => {
-                                  if (!directorySearchQuery) return true;
-                                  const q = directorySearchQuery.toLowerCase();
-                                  if (row.agentName?.toLowerCase().includes(q)) return true;
-                                  return Object.values(row.data).some(val => typeof val === 'string' && val.toLowerCase().includes(q));
-                                });
-
-                                if (filteredData.length === 0) {
-                                  return (
-                                    <tr>
-                                      <td colSpan={displayHeaders.length + 1} className="py-12 text-center text-slate-500 font-sans">
-                                        <Search className="w-6 h-6 mx-auto mb-2 opacity-30" />
-                                        No agents match your search criteria.
-                                      </td>
-                                    </tr>
-                                  );
-                                }
-
-                                return filteredData.sort((a,b) => a.agentName.localeCompare(b.agentName)).map(row => (
-                                  <tr key={row.id} className="hover:bg-cyan-500/10 transition-colors group">
-                                    <td className="px-5 py-4 whitespace-nowrap flex items-center gap-3">
-                                      <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-cyan-600/30 to-blue-500/30 text-cyan-300 flex items-center justify-center font-black border border-cyan-500/40 shadow-inner">
-                                        {row.agentName.substring(0,2).toUpperCase()}
-                                      </div>
-                                      <span className="font-bold text-slate-100 font-display text-sm relative group-hover:text-cyan-400 transition-colors">
-                                        {row.agentName}
-                                        {globalMeta[row.agentName]?.roleType === 'TL' && (
-                                           <span className="absolute -top-3.5 left-0 px-1.5 py-0.5 rounded text-[8px] bg-amber-500/20 text-amber-400 border border-amber-500/30 font-black uppercase tracking-widest">Team Lead</span>
-                                        )}
-                                      </span>
-                                    </td>
-                                    {displayHeaders.map((h, i) => {
-                                      const value = row.data[h] || '-';
-                                      const isEmail = h.toLowerCase().includes('email');
-                                      const isPhone = h.toLowerCase().includes('phone') || h.toLowerCase().includes('mobile') || h.toLowerCase().includes('number');
-                                      const isRole = h.toLowerCase().includes('role') || h.toLowerCase().includes('lob');
-                                      const isTL = h.toLowerCase().includes('tl') || h.toLowerCase().includes('leader') || h.toLowerCase().includes('manager');
-                                      
-                                      return (
-                                        <td key={`${h}-${i}`} className="px-3 py-4 text-slate-300 whitespace-nowrap">
-                                          {isEmail && value !== '-' ? (
-                                            <a href={`mailto:${value}`} className="text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1.5 transition-colors text-xs font-mono font-bold bg-cyan-500/10 px-2.5 py-1 rounded-lg w-max border border-cyan-500/20">
-                                              <Mail className="w-3 h-3" /> {value}
-                                            </a>
-                                          ) : isPhone && value !== '-' ? (
-                                            <a href={`tel:${value}`} className="text-emerald-400 hover:text-emerald-300 hover:underline flex items-center gap-1.5 transition-colors text-xs font-mono font-bold bg-emerald-500/10 px-2.5 py-1 rounded-lg w-max border border-emerald-500/20">
-                                              <Phone className="w-3 h-3" /> {value}
-                                            </a>
-                                          ) : isRole && value !== '-' ? (
-                                            <span className="bg-slate-800/80 text-slate-200 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-white/10 shadow-sm">
-                                              {value}
-                                            </span>
-                                          ) : isTL && value !== '-' ? (
-                                            <span className="text-amber-400/90 font-bold text-xs flex items-center gap-1.5">
-                                              <Shield className="w-3 h-3" /> {value}
-                                            </span>
-                                          ) : (
-                                            <span className="text-[13px] font-semibold text-slate-200">{value}</span>
-                                          )}
-                                        </td>
-                                      );
-                                    })}
-                                  </tr>
-                                ));
-                              })()}
-                            </tbody>
-                          </table>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                );
-              })()}
-
-              {/* Internal Cases Full-Page Panel */}
-              {activeTab === 'cases' && (() => {
-                const canSeeAllCases = isTLOreSupport || isSuperAdmin;
-
-                // SECURE MANDATE:
-                // Normal agents see ONLY their own cases.
-                // TLs can see everything but "per day" by default, and can filter dates name agent anything.
-                const securedCases = cases.filter((c: any) => {
-                  if (!canSeeAllCases) {
-                    return String(c.agentName || '').toLowerCase() === currentUser?.name?.toLowerCase();
-                  }
-                  return true;
-                });
-
-                // Compute unique list of agent names from all cases to populate TL dropdown
-                const uniqueAgentNamesInCases = Array.from(new Set(cases.map((c: any) => String(c.agentName || ''))))
-                  .map(String)
-                  .filter(name => name && name.trim().length > 0)
-                  .sort();
-
-                // Compute final filtered cases list
-                const finalFilteredCases = securedCases.filter((c: any) => {
-                  const query = caseSearchQuery.trim().toLowerCase();
-                  const matchesSearch = !query || (
-                    String(c.patientName || '').toLowerCase().includes(query) ||
-                    (c.phoneNumber && String(c.phoneNumber).includes(query)) ||
-                    String(c.id || '').toLowerCase().includes(query) ||
-                    String(c.agentName || '').toLowerCase().includes(query) ||
-                    (c.inquiry && String(c.inquiry).toLowerCase().includes(query)) ||
-                    (c.branch && String(c.branch).toLowerCase().includes(query)) ||
-                    (c.service && String(c.service).toLowerCase().includes(query)) ||
-                    (c.leadSource && String(c.leadSource).toLowerCase().includes(query))
-                  );
-
-                  // Date match
-                  const matchesDate = !caseDateFilter || String(c.createdAt || '').startsWith(caseDateFilter);
-
-                  // Agent match (only TLs can filter other agents, normal agents are secured anyway)
-                  const matchesAgent = !canSeeAllCases || caseAgentFilter === 'all' || String(c.agentName || '').toLowerCase() === caseAgentFilter.toLowerCase();
-
-                  return matchesSearch && matchesDate && matchesAgent;
-                });
-
-                return (
-                  <div id="cases-desk-root" className="space-y-6 animate-fade-in text-left">
-                    <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-white/5 pb-4">
-                      <div>
-                        <h2 className="text-3xl font-bold text-slate-100 font-display flex items-center gap-2.5">
-                          <ClipboardList className="w-8 h-8 text-emerald-400" />
-                          {canSeeAllCases ? "Organization Booking Registry" : "My Internal Cases"}
-                        </h2>
-                        <p className="text-slate-400 text-sm">
-                          {canSeeAllCases 
-                            ? "Team Leaders Consolidated Desk — inspect, search, and audit all agent booking performance" 
-                            : "Submit and track your internal patient booking cases secure desk."}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Integrated Interactive Control Center */}
-                    <div className="bg-[#111115] border border-white/10 rounded-2xl p-4 flex flex-col md:flex-row flex-wrap items-center gap-4 shadow-xl">
-                      {/* Search client input */}
-                      <div className="relative flex-1 min-w-[200px] w-full font-sans">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                          <Search className="w-4 h-4" />
-                        </span>
-                        <input 
-                          type="text"
-                          placeholder="Search patient, phone, ref, branch..."
-                          className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-sans"
-                          value={caseSearchQuery}
-                          onChange={(e) => setCaseSearchQuery(e.target.value)}
-                          id="case-search-input"
-                        />
-                      </div>
-
-                      {/* Date Filter Picker */}
-                      <div className="flex items-center gap-2 w-full md:w-auto shrink-0 font-sans">
-                        <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 shrink-0 select-none">Date</span>
-                        <div className="relative flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl px-2.5 py-1.5">
-                          <input 
-                            type="date"
-                            value={caseDateFilter}
-                            onChange={(e) => setCaseDateFilter(e.target.value)}
-                            className="bg-transparent text-xs text-slate-200 focus:outline-none font-mono cursor-pointer border-none"
-                            style={{ colorScheme: 'dark' }}
-                          />
-                          {caseDateFilter ? (
-                            <button 
-                              onClick={() => setCaseDateFilter('')}
-                              className="text-[10px] font-bold text-rose-400 hover:text-rose-300 px-1 hover:bg-rose-500/10 rounded whitespace-nowrap transition-colors"
-                              title="Clear Date Filter (Show All Days)"
-                            >
-                              Show All
-                            </button>
-                          ) : (
-                            <button 
-                              onClick={() => setCaseDateFilter(getLocalISOString())}
-                              className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300 px-1 hover:bg-emerald-500/10 rounded whitespace-nowrap transition-colors"
-                              title="Set Date to Today"
-                            >
-                              Today
-                            </button>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Agent Filter Picker (TL ONLY) */}
-                      {canSeeAllCases && (
-                        <div className="flex items-center gap-2 w-full md:w-auto shrink-0 font-sans">
-                          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 shrink-0 select-none">Agent</span>
-                          <select 
-                            id="case-agent-filter"
-                            value={caseAgentFilter}
-                            onChange={(e) => setCaseAgentFilter(e.target.value)}
-                            className="bg-[#16161c] border border-white/10 rounded-xl py-1.5 px-3 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500/40 font-semibold cursor-pointer font-sans"
-                          >
-                            <option value="all">All Agents</option>
-                            {uniqueAgentNamesInCases.map(name => (
-                              <option key={name} value={name.toLowerCase()}>{formatAgentName(name)}</option>
-                            ))}
-                          </select>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                      {/* Left: Form */}
-                      <div className="lg:col-span-4 space-y-4">
-                        <div className="p-6 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl sticky top-6">
-                          <div className="flex items-center gap-3 mb-6">
-                            <span className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl">
-                              <Wallet className="w-5 h-5" />
-                            </span>
-                            <h3 className="text-xl font-bold text-slate-100 font-display">Submit Case</h3>
-                          </div>
-                          
-                          <form onSubmit={async (e) => {
-                            e.preventDefault();
-                            if (isFormSubmitting) return;
-                            if (!currentUser || !casePatientName || !casePhoneNumber || !caseInquiry || !caseLeadSource) {
-                              toast.error("Please fill in all mandatory fields including Lead Source.");
-                              return;
-                            }
-                            setIsFormSubmitting(true);
-                            try {
-                              const finalLeadSource = (caseLeadSource.toLowerCase().includes('blogger') || caseLeadSource.toLowerCase().includes('bloger')) && caseBloggerName
-                                ? `${caseLeadSource} (${caseBloggerName})`
-                                : caseLeadSource;
-
-                              const newCase = {
-                                id: 'case_' + Date.now(),
-                                agentName: currentUser.name,
-                                patientName: casePatientName,
-                                phoneNumber: casePhoneNumber,
-                                inquiry: caseInquiry,
-                                leadSource: finalLeadSource,
-                                createdAt: new Date().toISOString(),
-                                screenshot: activeScreenshot || undefined
-                              };
-                              const updated = [newCase, ...cases];
-                              setCases(updated);
-                              setStorageItem('sched_cases', updated);
-                              
-                              // Sync to Firestore
-                              await setDoc(doc(db, "cases", newCase.id), newCase);
-                              
-                              setCasePatientName('');
-                              setCasePhoneNumber('');
-                              setCaseInquiry('');
-                              setCaseLeadSource('');
-                              setCaseBloggerName('');
-                              setActiveScreenshot(null);
-                              setCaseBranch('');
-                              setCaseService('');
-                              setCaseCallType('');
-                              setCaseTicketStatus('Closed');
-                              setCasePatientType('New');
-                              setCaseTicketType('Inquiry');
-                              
-                              addSystemNotification(`📋 New Case Logged`, `${currentUser.name} submitted a new case for ${casePatientName} (${casePhoneNumber})`, 'general', 'tl');
-                              
-                              setSubmissionConfirmation({
-                                title: "Case Successfully Filed! 📋",
-                                message: `The case entry has been added successfully to the patient history registry. Duplicity block holds.`,
-                                type: 'case',
-                                referenceId: newCase.id
-                              });
-                            } catch (err) {
-                              console.error(err);
-                              toast.error("Error submitting case. Please try again.");
-                            } finally {
-                              setIsFormSubmitting(false);
-                            }
-                          }} className="space-y-4">
-                            
-                            <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
-                              <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Patient/Client Name *</label>
-                              <div className="relative">
-                                <span className="absolute left-3 top-2.5 opacity-50">
-                                  <UserIcon className="w-4 h-4" />
-                                </span>
-                                <input required type="text" placeholder="John Doe" value={casePatientName} onChange={e => setCasePatientName(e.target.value)} className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 focus:bg-emerald-500/5 transition-all font-sans" />
-                              </div>
-                            </div>
-                            
-                            <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
-                              <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Phone Number *</label>
-                              <div className="relative">
-                                <span className="absolute left-3 top-2.5 opacity-50">
-                                  <PhoneCall className="w-4 h-4" />
-                                </span>
-                                <input required type="text" placeholder="0500000000" value={casePhoneNumber} onChange={e => setCasePhoneNumber(e.target.value)} className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 focus:bg-emerald-500/5 transition-all font-mono tracking-widest" />
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
-                                <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Patient Type *</label>
-                                <select value={casePatientType} onChange={e => setCasePatientType(e.target.value)} className="w-full bg-[#16161c] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
-                                  <option value="New">New</option>
-                                  <option value="Follow up / Existing">Follow up / Existing</option>
-                                </select>
-                              </div>
-                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
-                                <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Service *</label>
-                                <select value={caseService} onChange={e => setCaseService(e.target.value)} className="w-full bg-[#16161c] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer" required>
-                                  <option value="">Select service...</option>
-                                  <option value="Dental">Dental</option>
-                                  <option value="Derma">Derma</option>
-                                  <option value="Facial">Facial</option>
-                                  <option value="Hijama">Hijama</option>
-                                  <option value="Laser">Laser</option>
-                                  <option value="Plastic Surgery">Plastic Surgery</option>
-                                  <option value="Slimming">Slimming</option>
-                                  <option value="Other">Other</option>
-                                </select>
-                              </div>
-                            </div>
-                            
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
-                                <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Branch *</label>
-                                <select value={caseBranch} onChange={e => setCaseBranch(e.target.value)} className="w-full bg-[#16161c] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer" required>
-                                  <option value="">Select branch...</option>
-                                  <option value="Dermadent VIP">Dermadent VIP</option>
-                                  <option value="Dermadent">Dermadent</option>
-                                  <option value="One Touch 1 AlMu'tarid">One Touch 1 AlMu'tarid</option>
-                                  <option value="One Touch 2 Markhaniya">One Touch 2 Markhaniya</option>
-                                  <option value="WellTouch">WellTouch</option>
-                                  <option value="New Edge">New Edge</option>
-                                </select>
-                              </div>
-                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
-                                <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Source * (Mandatory)</label>
-                                <select required value={caseLeadSource} onChange={e => { setCaseLeadSource(e.target.value); if (!e.target.value.toLowerCase().includes('blogger')) setCaseBloggerName(''); }} className="w-full bg-[#16161c] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
-                                  <option value="">Select source...</option>
-                                  <option value="Blogger">Blogger</option>
-                                  <option value="Existing">Existing</option>
-                                  <option value="Google map">Google map</option>
-                                  <option value="Instagram">Instagram</option>
-                                  <option value="SMS">SMS</option>
-                                  <option value="Snap Chat">Snap Chat</option>
-                                  <option value="TikTok">TikTok</option>
-                                  <option value="Whats app">Whats app</option>
-                                  <option value="facebook">facebook</option>
-                                  <option value="location">location</option>
-                                  <option value="referral">referral</option>
-                                </select>
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
-                                <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Ticket Type *</label>
-                                <select value={caseTicketType} onChange={e => setCaseTicketType(e.target.value)} className="w-full bg-[#16161c] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
-                                  <option value="Inquiry">Inquiry</option>
-                                  <option value="Complaint">Complaint</option>
-                                  <option value="Appointment">Appointment</option>
-                                </select>
-                              </div>
-                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
-                                <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Call Type *</label>
-                                <select value={caseCallType} onChange={e => setCaseCallType(e.target.value)} className="w-full bg-[#16161c] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer" required>
-                                  <option value="">Select call type...</option>
-                                  <option value="Inquiry only">Inquiry only</option>
-                                  <option value="Booked">Booked</option>
-                                  <option value="Call dropped / hang up">Call dropped / hang up</option>
-                                  <option value="Cancel">Cancel</option>
-                                  <option value="Complain">Complain</option>
-                                  <option value="Customer said he will call Back">Customer said he will call Back</option>
-                                  <option value="Customer said that he booked">Customer said that he booked</option>
-                                  <option value="Didnt book / expensive">Didnt book / expensive</option>
-                                  <option value="Job Application">Job Application</option>
-                                  <option value="Long Distance">Long Distance</option>
-                                  <option value="Reschedule">Reschedule</option>
-                                  <option value="Silent Chat">Silent Chat</option>
-                                  <option value="Want to be contacted through What's app">Want to be contacted through What's app</option>
-                                  <option value="Want to be contacted through calls">Want to be contacted through calls</option>
-                                  <option value="Wrong Audience">Wrong Audience</option>
-                                </select>
-                              </div>
-                            </div>
-
-                            {/* Blogger Name Text Field */}
-                            {(caseLeadSource.toLowerCase().includes('blogger') || caseLeadSource.toLowerCase().includes('bloger')) && (
-                              <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors animate-fade-in">
-                                <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Blogger Name * (Mandatory)</label>
-                                <input
-                                  required
-                                  type="text"
-                                  placeholder="Type blogger name..."
-                                  value={caseBloggerName}
-                                  onChange={e => setCaseBloggerName(e.target.value)}
-                                  className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 focus:bg-[#1f2a22]/30 transition-all font-sans"
-                                />
-                              </div>
-                            )}
-
-                            <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors">
-                              <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Inquiry / Details *</label>
-                              <div className="relative">
-                                <textarea required rows={4} placeholder="Specific diagnostic or financial inquiry details..." value={caseInquiry} onChange={e => setCaseInquiry(e.target.value)} className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-emerald-500 focus:bg-emerald-500/5 transition-all font-sans" />
-                              </div>
-                            </div>
-                            
-                            <div className="space-y-1.5 focus-within:text-emerald-400 text-slate-400 transition-colors bg-black/20 p-3 rounded-xl border border-white/5">
-                              <label className="text-[10px] font-bold uppercase tracking-widest block font-sans">Ticket Status</label>
-                              <select value={caseTicketStatus} onChange={e => setCaseTicketStatus(e.target.value)} className="w-full bg-[#16161c] border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-sans cursor-pointer">
-                                <option value="Closed">Closed</option>
-                                <option value="Open">Open</option>
-                              </select>
-                              <p className="text-[10px] opacity-60">Default is closed — open it if still in progress</p>
-                            </div>
-
-                            <ScreenshotUpload 
-                              screenshot={activeScreenshot}
-                              onScreenshotChange={setActiveScreenshot}
-                              label="Evidence / Screenshot"
-                            />
-                            
-                            <button type="submit" className="w-full py-2.5 px-4 bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-bold font-sans text-sm rounded-xl shadow-lg shadow-emerald-500/20 active:scale-95 transition-all flex items-center justify-center gap-2">
-                              <Send className="w-4 h-4" />
-                              Log My Case
-                            </button>
-                          </form>
-                        </div>
-                      </div>
-
-                      {/* Right: Feed */}
-                      <div className="lg:col-span-8 flex flex-col space-y-4">
-                        <div className="space-y-3 pt-6 sm:pt-0">
-                          {finalFilteredCases.length === 0 ? (
-                            <div className="p-12 text-center text-slate-400 border border-white/5 border-dashed rounded-3xl bg-slate-900/40/[0.02] backdrop-blur-xl font-sans space-y-2">
-                              <Search className="w-8 h-8 text-slate-600 mx-auto opacity-40 mb-1" />
-                              <p className="text-sm font-bold text-slate-300">No matching cases found</p>
-                              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                                {canSeeAllCases 
-                                  ? "No case records match your set search filters, selected date, or agent selection." 
-                                  : "You haven't logged any cases matching the selected search terms or date range."}
-                              </p>
-                            </div>
-                          ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              {finalFilteredCases.map(c => (
-                                  <div key={c.id} className="p-5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col gap-3 font-sans relative overflow-hidden group">
-                                    <div className="absolute top-0 right-0 p-3 flex gap-2">
-                                      {isWithinFiveMinutes(c.createdAt) && (
-                                        <button
-                                          onClick={() => setEditingItem({ type: 'case', id: c.id, data: { ...c } })}
-                                          className="p-1.5 hover:bg-emerald-500/20 text-emerald-400 rounded-lg transition-all cursor-pointer flex items-center gap-1"
-                                          title={`Edit case (${getRemainingEditTimeStr(c.createdAt)})`}
-                                        >
-                                          <Pencil className="w-4 h-4" />
-                                        </button>
-                                      )}
-                                      <button
-                                        onClick={() => {
-                                          const ref = c.id.split('_')[1];
-                                          const details = `*Case Ref:* #${ref}\n*Patient Name:* ${c.patientName}\n*Phone Number:* ${c.phoneNumber}\n*Source:* ${c.leadSource || 'N/A'}\n*Branch:* ${c.branch || 'N/A'}\n*Service:* ${c.service || 'N/A'}\n*Call Type:* ${c.callType || 'N/A'}\n*Inquiry:*\n_ ${c.inquiry} _`;
-                                          navigator.clipboard.writeText(details);
-                                          toast.success('Case details + Ref copied!');
-                                        }}
-                                        className="p-1.5 hover:bg-white/10 text-slate-300 hover:text-slate-100 rounded-lg transition-all cursor-pointer"
-                                        title="Copy Case Details"
-                                      >
-                                        <Copy className="w-4 h-4" />
-                                      </button>
-                                      {isSuperAdmin && (
-                                        <button
-                                          onClick={() => {
-                                            if (!window.confirm('Are you sure you want to delete this case?')) return;
-                                            const updated = cases.filter(item => item.id !== c.id);
-                                             deleteDoc(doc(db, "cases", c.id)).catch(e => console.error("Case Delete Error:", e));
-                                            setCases(updated);
-                                            setStorageItem('sched_cases', updated);
-                                          }}
-                                          className="p-1.5 hover:bg-rose-500/20 text-rose-400 rounded-lg transition-all"
-                                          title="Delete Case"
-                                        >
-                                          <Trash2 className="w-4 h-4" />
-                                        </button>
-                                      )}
-                                    </div>
-                                    <div className="space-y-1">
-                                      <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest flex items-center justify-between">
-                                         <span className="flex items-center gap-2">
-                                           Case Ref: #{c.id.split('_')[1]?.slice(-6) || 'XXXXXX'}
-                                         </span>
-                                         {c.leadSource && (
-                                           <span className="text-[9px] cursor-default font-extrabold uppercase tracking-widest bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 px-2 py-0.5 rounded-full select-none normal-case font-display italic">
-                                             📢 {c.leadSource}
-                                           </span>
-                                         )}
-                                       </p>
-                                       <p className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                                         <UserIcon className="w-4 h-4 text-emerald-400" />
-                                         {c.patientName}
-                                       </p>
-                                    </div>
-                                    <div className="flex flex-wrap gap-2 mt-2">
-                                      {c.patientType && (
-                                        <span className="text-[10px] font-bold px-2 py-1 bg-white/5 rounded-md text-emerald-400 border border-white/5">
-                                          {c.patientType} Patient
-                                        </span>
-                                      )}
-                                      {c.branch && (
-                                        <span className="text-[10px] font-bold px-2 py-1 bg-white/5 rounded-md text-slate-300 border border-white/5">
-                                          🏥 {c.branch}
-                                        </span>
-                                      )}
-                                      {c.service && (
-                                        <span className="text-[10px] font-bold px-2 py-1 bg-white/5 rounded-md text-slate-300 border border-white/5">
-                                          ✨ {c.service}
-                                        </span>
-                                      )}
-                                      {c.ticketType && (
-                                        <span className="text-[10px] font-bold px-2 py-1 bg-white/5 rounded-md text-slate-300 border border-white/5">
-                                          🎫 {c.ticketType}
-                                        </span>
-                                      )}
-                                      {c.callType && (
-                                        <span className="text-[10px] font-bold px-2 py-1 bg-white/5 rounded-md text-slate-300 border border-white/5">
-                                          📞 {c.callType}
-                                        </span>
-                                      )}
-                                      {c.ticketStatus && (
-                                        <span className={`text-[10px] font-bold px-2 py-1 rounded-md border text-white ${c.ticketStatus === 'Open' ? 'bg-rose-500/20 border-rose-500/30 text-rose-300' : 'bg-slate-500/20 border-slate-500/30 text-slate-300'}`}>
-                                          Status: {c.ticketStatus}
-                                        </span>
-                                      )}
-                                    </div>
-                                    <div className="space-y-1 bg-white/5 p-2 rounded-lg mt-2 font-mono">
-                                      <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold font-sans">Contact Details</p>
-                                      <p className="text-xs text-slate-100 tracking-widest flex items-center gap-2">
-                                        <PhoneCall className="w-3.5 h-3.5 text-emerald-400" />
-                                        {c.phoneNumber}
-                                      </p>
-                                    </div>
-                                    <div className="text-sm mt-3 text-slate-300">
-                                      <span className="text-[10px] uppercase font-bold text-slate-500 block mb-1">Inquiry / Details</span>
-                                      <p className="bg-[#1e1e1e]/40 backdrop-blur-lg/40 p-3 rounded-lg whitespace-pre-wrap leading-relaxed text-slate-300">
-                                        {c.inquiry}
-                                      </p>
-                                    </div>
-                                    
-                                    {c.screenshot && (
-                                      <div className="mt-3">
-                                        <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-1 ml-1 flex items-center gap-1.5">
-                                          <ImageIcon className="w-3 h-3 text-emerald-400" />
-                                          Attached Screenshot
-                                        </p>
-                                        <div className="relative group cursor-zoom-in">
-                                          <img 
-                                            src={c.screenshot} 
-                                            alt="Case Attachment" 
-                                            className="w-full h-auto rounded-xl border border-white/10 group-hover:brightness-110 transition-all shadow-xl"
-                                            onClick={() => window.open(c.screenshot, '_blank')}
-                                          />
-                                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 backdrop-blur-[1px] pointer-events-none">
-                                            <span className="bg-emerald-500 text-slate-950 text-[10px] font-bold px-3 py-1 rounded-full shadow-lg">Click to View Full Size</span>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    )}
-
-                                    <div className="flex items-center justify-between text-[10px] text-slate-500 border-t border-white/5 pt-3 mt-1">
-                                      <span>By: <span className="font-bold text-slate-300">{formatAgentName(c.agentName)}</span></span>
-                                      <span>{new Date(c.createdAt).toLocaleString(undefined, {
-                                        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                                      })}</span>
-                                    </div>
-                                    <div className="w-full mt-2 mx-[1px]">
-                                      <RequestReplyThread request={c} currentUser={currentUser} collectionName="cases" />
-                                    </div>
-                                  </div>
-                                ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* History Full-Page Panel */}
-              {activeTab === 'history' && currentUser && (() => {
-                  // Aggregate history items
-                  const allHistoryItems: any[] = [];
-                  if (historyFilter === 'all' || historyFilter === 'scheduling') {
-                     requests.filter(r => r.agentName === currentUser.name).forEach(r => {
-                        allHistoryItems.push({
-                           id: r.id,
-                           type: r.type === 'swap' ? 'Swap Request' : 'Annual Leave',
-                           date: r.createdAt,
-                           summary: r.type === 'swap' ? `Swap with ${r.swapWithAgent} on ${(r as SwapRequest).date}` : `Leave from ${(r as AnnualRequest).startDate} to ${(r as AnnualRequest).endDate}`,
-                           status: r.status,
-                           icon: <Calendar className="w-4 h-4 text-blue-400" />
-                        });
-                     });
-                  }
-                  if (historyFilter === 'all' || historyFilter === 'inquiries') {
-                     inquiries.filter(i => i.agentName === currentUser.name).forEach(i => {
-                        allHistoryItems.push({
-                           id: i.id,
-                           type: 'Inquiry',
-                           date: i.createdAt,
-                           summary: i.text,
-                           status: i.status === 'answered' ? 'approved' : (i.status === 'sent' ? 'pending' : 'pending'),
-                           icon: <HelpCircle className="w-4 h-4 text-purple-400" />
-                        });
-                     });
-                  }
-                  if (historyFilter === 'all' || historyFilter === 'tabby') {
-                     tabbyTamaraRequests.filter(r => r.agentName === currentUser.name).forEach(r => {
-                        allHistoryItems.push({
-                           id: r.id,
-                           type: 'Tabby/Tamara',
-                           date: r.createdAt,
-                           summary: `Patient: ${r.patientName}`,
-                           status: r.status === 'confirmed' ? 'approved' : 'pending',
-                           icon: <Wallet className="w-4 h-4 text-amber-400" />
-                        });
-                     });
-                  }
-                  if (historyFilter === 'all' || historyFilter === 'complaints') {
-                     tabbyTamaraComplaints.filter(c => c.agentName === currentUser.name).forEach(c => {
-                        allHistoryItems.push({
-                           id: c.id,
-                           type: 'Complaint',
-                           date: c.createdAt,
-                           summary: `Patient: ${c.patientName}`,
-                           status: c.status === 'closed' ? 'approved' : 'pending',
-                           icon: <AlertTriangle className="w-4 h-4 text-rose-400" />
-                        });
-                     });
-                  }
-                  if (historyFilter === 'all' || historyFilter === 'comms') {
-                     clientComms.filter(c => c.callCenterAgentName === currentUser.name || c.handledBy === currentUser.name).forEach(c => {
-                        allHistoryItems.push({
-                           id: c.id,
-                           type: 'Client Comms',
-                           date: c.createdAt,
-                           summary: `Clinic: ${c.clinicName} • Phone: ${c.phoneNumber}`,
-                           status: c.status === 'contacted' ? 'approved' : 'pending',
-                           icon: <MessageCircle className="w-4 h-4 text-indigo-400" />
-                        });
-                     });
-                  }
-                  if (historyFilter === 'all' || historyFilter === 'cases') {
-                     cases.filter(c => c.agentName === currentUser.name).forEach(c => {
-                        allHistoryItems.push({
-                           id: c.id,
-                           type: 'Internal Case',
-                           date: c.createdAt,
-                           summary: `Patient: ${c.patientName} • Inquiry: ${c.inquiry.substring(0, 30)}...`,
-                           status: 'approved',
-                           icon: <FileText className="w-4 h-4 text-emerald-400" />
-                        });
-                     });
-                  }
-
-                  // Sort by date desc
-                  allHistoryItems.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-                  return (
-                    <div id="history-desk-root" className="space-y-6 animate-fade-in text-left">
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div>
-                          <h2 className="text-3xl font-bold text-slate-100 font-display">My History</h2>
-                          <p className="text-slate-400 text-sm">Review your submitted requests, inquiries and completed cases.</p>
                         </div>
                         
-                        <div className="flex bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-1.5 w-full sm:w-auto relative">
-                          <History className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                          <select
-                            value={historyFilter}
-                            onChange={(e) => setHistoryFilter(e.target.value as any)}
-                            className="w-full sm:w-auto bg-transparent border-none text-sm text-slate-100 focus:outline-none font-sans font-medium pl-8 pr-4 py-1.5 appearance-none cursor-pointer"
-                          >
-                            <option value="all" className="bg-slate-800 text-slate-100 backdrop-blur-lg">All History ({allHistoryItems.length})</option>
-                            <option value="scheduling" className="bg-slate-800 text-slate-100 backdrop-blur-lg">Scheduling Requests</option>
-                            <option value="inquiries" className="bg-slate-800 text-slate-100 backdrop-blur-lg">Inquiries / Ask TL</option>
-                            <option value="tabby" className="bg-slate-800 text-slate-100 backdrop-blur-lg">Tabby & Tamara Requests</option>
-                            <option value="complaints" className="bg-slate-800 text-slate-100 backdrop-blur-lg">Complaints Desk</option>
-                            <option value="comms" className="bg-slate-800 text-slate-100 backdrop-blur-lg">Client Comms</option>
-                            <option value="cases" className="bg-slate-800 text-slate-100 backdrop-blur-lg">Internal Cases</option>
-                          </select>
-                          <ChevronRight className="w-4 h-4 text-slate-400 absolute right-3 top-3 rotate-90" />
-                        </div>
                       </div>
-
-                      <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-2xl relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-8 opacity-5">
-                          <History className="w-64 h-64 text-blue-500" />
-                        </div>
-
-                        {allHistoryItems.length === 0 ? (
-                            <div className="py-12 text-center flex flex-col items-center">
-                              <History className="w-12 h-12 text-indigo-500/50 mb-3" />
-                              <p className="text-slate-400 font-medium text-sm">No history records match current filter</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-3 relative z-10">
-                              {allHistoryItems.map((item, idx) => (
-                                <div key={`${item.id}-${idx}`} className="flex items-start sm:items-center justify-between p-4 bg-white/5 backdrop-blur-xl border border-white/10 hover:border-white/10 rounded-2xl transition-all gap-4 flex-col sm:flex-row">
-                                  <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                                      {item.icon}
-                                    </div>
-                                    <div className="space-y-0.5">
-                                      <div className="flex items-center gap-2">
-                                        <p className="font-bold text-slate-100 text-sm">{item.type}</p>
-                                        <span className="text-[10px] text-slate-500 font-mono tracking-wider">{new Date(item.date).toLocaleString()}</span>
-                                      </div>
-                                      <p className="text-xs text-slate-400 line-clamp-2 md:line-clamp-1">{item.summary}</p>
-                                    </div>
-                                  </div>
-                                  
-                                  <div className="shrink-0">
-                                    {item.status === 'approved' && (
-                                      <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                                        Resolved / Approved
-                                      </span>
-                                    )}
-                                    {item.status === 'pending' && (
-                                      <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-                                        Pending
-                                      </span>
-                                    )}
-                                    {item.status === 'declined' && (
-                                      <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg">
-                                        Declined
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-              })()}
-
-              {activeTab === 'qa-scorecard' && currentUser && (
-                <QAScorecards 
-                  currentUser={currentUser}
-                  qaScores={qaScores}
-                  agentsList={agentsList}
-                  qaTemplate={qaTemplate}
-                  onUpdateQATemplate={(newTemplate) => {
-                    setQaTemplate(newTemplate);
-                    setStorageItem('sched_qa_template', newTemplate);
-                    setDoc(doc(db, "system", "sched_qa_template"), { data: newTemplate }).catch(console.error);
-                  }}
-                  addSystemNotification={addSystemNotification}
-                  onSubmitScore={(score) => {
-                    const newScores = [score, ...qaScores];
-                    setQaScores(newScores);
-                    setStorageItem('sched_qa_scores', newScores);
-                    setDoc(doc(db, "qa_scores", score.id), score).catch(e => console.error("QA Save Error:", e));
-                  }}
-                />
-              )}
-
-              {activeTab === 'kpi-calculator' && (isTLOreSupport || isMasterAdmin) && (() => {
-                
-                const calculateAchievement = (metric: typeof kpiMetrics[0]) => {
-                  if (metric.formula && metric.formula.trim()) {
-                    return evaluateKpiFormula(metric.formula, metric.actual, metric.target);
-                  }
-                  if (metric.target === 0) return 0;
-                  if (metric.type === 'higher') {
-                    return Math.min(100, Math.max(0, (metric.actual / metric.target) * 100));
-                  } else {
-                    return Math.min(100, Math.max(0, (metric.target / metric.actual) * 100)); // simple inverse
-                  }
-                };
-
-                const totalWeight = kpiMetrics.reduce((sum, m) => sum + m.weight, 0);
-                
-                let totalScore = 0;
-                if (totalWeight > 0) {
-                  totalScore = kpiMetrics.reduce((sum, metric) => {
-                    return sum + (calculateAchievement(metric) * (metric.weight / totalWeight));
-                  }, 0);
-                }
-
-                const payoutBonus = (totalScore / 100) * kpiMaxBonus;
-
-                return (
-                  <div className="space-y-6 animate-fade-in text-left">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                      <div>
-                        <h2 className="text-3xl font-bold text-purple-400 font-display flex items-center gap-3">
-                          <Calculator className="w-8 h-8" />
-                          KPIs Bonus Calculator
-                        </h2>
-                        <p className="text-purple-300/70 text-sm">Target vs Actual Performance Payout Calculation in EGP</p>
-                      </div>
-                    </div>
-
-                    <div className="bg-white/5 border text-slate-100 border-white/10 rounded-3xl shadow-sm p-6 space-y-6">
-                       
-                       <div className="flex flex-col md:flex-row gap-4 mb-6">
-                         <div className="flex-1 space-y-1">
-                           <label className="text-xs uppercase tracking-widest text-slate-400 font-bold">Select Agent</label>
-                           <select
-                              value={kpiAgentTarget}
-                              onChange={(e) => setKpiAgentTarget(e.target.value)}
-                              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm text-slate-100 outline-none focus:border-purple-500"
-                           >
-                             <option value="">Select an Agent...</option>
-                             {agentsList.map(a => <option key={a} value={a}>{a}</option>)}
-                           </select>
-                         </div>
-                         <div className="flex-1 space-y-1">
-                           <label className="text-xs uppercase tracking-widest text-slate-400 font-bold">Max Bonus Target (EGP)</label>
-                           <input
-                              type="number"
-                              value={kpiMaxBonus}
-                              onChange={(e) => setKpiMaxBonus(Number(e.target.value))}
-                              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm text-slate-100 outline-none focus:border-purple-500"
-                              placeholder="e.g. 3000"
-                           />
-                         </div>
-                       </div>
-
-                       <div className="overflow-x-auto">
-                         <table className="w-full text-left border-collapse min-w-[700px]">
-                           <thead>
-                             <tr className="border-b border-white/10 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                               <th className="pb-3 px-4">Metric / KPI Name</th>
-                               <th className="pb-3 px-4">Target</th>
-                               <th className="pb-3 px-4">Actual</th>
-                               <th className="pb-3 px-4">Weight (%)</th>
-                               <th className="pb-3 px-4">Type</th>
-                               <th className="pb-3 px-4">Equation / Formula</th>
-                               <th className="pb-3 px-4 text-right">Achievement</th>
-                             </tr>
-                           </thead>
-                           <tbody className="divide-y divide-white/5">
-                             {kpiMetrics.map((metric, i) => {
-                               const ach = calculateAchievement(metric);
-                               return (
-                                 <tr key={metric.id} className="text-sm">
-                                   <td className="py-3 px-4">
-                                      <input 
-                                        type="text"
-                                        value={metric.name}
-                                        onChange={e => {
-                                          const newM = [...kpiMetrics];
-                                          newM[i].name = e.target.value;
-                                          setKpiMetrics(newM);
-                                        }}
-                                        className="bg-black/20 border border-white/5 rounded px-2 py-1 w-full text-slate-100"
-                                      />
-                                   </td>
-                                   <td className="py-3 px-4">
-                                      <input 
-                                        type="number"
-                                        value={metric.target}
-                                        onChange={e => {
-                                          const newM = [...kpiMetrics];
-                                          newM[i].target = Number(e.target.value);
-                                          setKpiMetrics(newM);
-                                        }}
-                                        className="bg-black/20 border border-white/5 rounded px-2 py-1 w-24 text-slate-100"
-                                      />
-                                   </td>
-                                   <td className="py-3 px-4">
-                                      <input 
-                                        type="number"
-                                        value={metric.actual}
-                                        onChange={e => {
-                                          const newM = [...kpiMetrics];
-                                          newM[i].actual = Number(e.target.value);
-                                          setKpiMetrics(newM);
-                                        }}
-                                        className="bg-black/20 border border-white/5 rounded px-2 py-1 w-24 text-slate-100"
-                                      />
-                                   </td>
-                                   <td className="py-3 px-4">
-                                      <input 
-                                        type="number"
-                                        value={metric.weight}
-                                        onChange={e => {
-                                          const newM = [...kpiMetrics];
-                                          newM[i].weight = Number(e.target.value);
-                                          setKpiMetrics(newM);
-                                        }}
-                                        className="bg-black/20 border border-white/5 rounded px-2 py-1 w-20 text-slate-100"
-                                      />
-                                   </td>
-                                   <td className="py-3 px-4">
-                                      <select 
-                                        value={metric.type}
-                                        onChange={e => {
-                                          const newM = [...kpiMetrics];
-                                          newM[i].type = e.target.value as any;
-                                          setKpiMetrics(newM);
-                                        }}
-                                        className="bg-black/20 border border-white/5 rounded px-2 py-1 text-slate-100"
-                                      >
-                                        <option value="higher">Higher = Better</option>
-                                        <option value="lower">Lower = Better</option>
-                                      </select>
-                                   </td>
-                                   <td className="py-3 px-4">
-                                      <input 
-                                        type="text"
-                                        value={metric.formula || ''}
-                                        onChange={e => {
-                                          const newM = [...kpiMetrics];
-                                          newM[i].formula = e.target.value;
-                                          setKpiMetrics(newM);
-                                        }}
-                                        placeholder="e.g. (actual / target) * 100"
-                                        className="bg-black/20 border border-white/5 rounded px-2 py-1 w-44 text-slate-100 font-mono text-xs"
-                                      />
-                                   </td>
-                                   <td className="py-3 px-4 text-right font-mono font-bold text-emerald-400">
-                                     {ach.toFixed(1)}                                   </td>
-                                 </tr>
-                               );
-                             })}
-                           </tbody>
-                         </table>
-                       </div>
-
-                       <div className="flex justify-between items-center bg-black/30 p-4 rounded-xl border border-white/5 mt-4">
-                         <div className="flex items-center gap-6">
-                            <div>
-                               <span className="block text-xs uppercase text-slate-500 font-bold mb-1">Total Weight</span>
-                               <span className={`text-lg font-mono font-black ${totalWeight === 100 ? 'text-emerald-400' : 'text-amber-400'}`}>
-                                 {totalWeight}% 
-                                 {totalWeight !== 100 && <span className="text-xs ml-2 opacity-60 font-sans tracking-tight">Should be 100%</span>}
-                               </span>
-                            </div>
-                            <div>
-                               <span className="block text-xs uppercase text-slate-500 font-bold mb-1">Final Score</span>
-                               <span className="text-lg font-mono font-black text-indigo-400">{totalScore.toFixed(1)}</span>
-                            </div>
-                         </div>
-                         <div className="text-right flex flex-col justify-end">
-                           <span className="block text-xs uppercase text-slate-500 font-bold mb-1">Calculated Bonus Payout</span>
-                           <span className="text-3xl font-black text-rose-500 font-mono tracking-tight">EGP {payoutBonus.toFixed(2)}</span>
-                           <p className="text-[10px] text-slate-400 mt-1 font-sans">Based on {kpiMaxBonus} EGP Target Bonus</p>
-                         </div>
-                       </div>
-
-                       <div className="flex gap-3 justify-end pt-4">
-                         <button
-                           onClick={() => {
-                             setKpiMetrics([...kpiMetrics, { id: Date.now().toString(), name: 'New Metric', target: 0, actual: 0, weight: 0, type: 'higher', formula: '(actual / target) * 100' }]);
-                           }}
-                           className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-bold transition-colors"
-                         >
-                           + Add Metric
-                         </button>
-                       </div>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {activeTab === 'submissions-log' && (isTLOreSupport || isMasterAdmin) && (() => {
-                // Compile all interactive records
-                const items: any[] = [];
-                inquiries.forEach(i => items.push({
-                  id: i.id,
-                  type: 'Inquiry',
-                  category: 'General',
-                  agent: i.agentName,
-                  patient: 'N/A',
-                  clinic: i.clinicName || 'N/A',
-                  date: i.createdAt,
-                  details: i.text,
-                  status: i.status || 'sent',
-                  badgeColor: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
-                  raw: i
-                }));
-                tabbyTamaraRequests.forEach(r => items.push({
-                  id: r.id,
-                  type: 'TT Request',
-                  category: r.platform || 'Tabby/Tamara',
-                  agent: r.agentName,
-                  patient: r.patientName,
-                  clinic: r.clinicName || 'N/A',
-                  date: r.createdAt,
-                  details: `Amount: SAR ${r.priceWithoutTax || 'N/A'}`,
-                  status: r.status || 'confirmed',
-                  badgeColor: 'bg-rose-500/10 text-rose-300 border-rose-500/20',
-                  raw: r
-                }));
-                tabbyTamaraComplaints.forEach(c => items.push({
-                  id: c.id,
-                  type: 'Complaint',
-                  category: 'Fintech',
-                  agent: c.agentName,
-                  patient: c.patientName,
-                  clinic: c.clinicName || 'N/A',
-                  date: c.createdAt,
-                  details: c.complaintDetails,
-                  status: c.status || 'pending',
-                  badgeColor: 'bg-red-500/10 text-red-300 border-red-500/20',
-                  raw: c
-                }));
-                clientComms.forEach(cc => items.push({
-                  id: cc.id,
-                  type: 'Client Comm',
-                  category: 'Call Center',
-                  agent: cc.callCenterAgentName,
-                  patient: cc.patientName || 'N/A',
-                  clinic: cc.clinicName || 'N/A',
-                  date: cc.createdAt,
-                  details: cc.notes,
-                  status: cc.status || 'contacted',
-                  badgeColor: 'bg-sky-500/10 text-sky-300 border-sky-500/20',
-                  raw: cc
-                }));
-                // Apply Filters
-                const filtered = items.filter(item => {
-                  const agentMatch = logAgentFilter === 'all' || item.agent.toLowerCase() === logAgentFilter.toLowerCase();
-                  let typeMatch = false; if (logTypeFilter === 'pending') { typeMatch = item.status.toLowerCase() === 'pending'; } else { typeMatch = logTypeFilter === 'all' || item.type.toLowerCase() === logTypeFilter.toLowerCase(); }
-                  
-                  const queryLower = logSearchQuery.toLowerCase().trim();
-                  const searchMatch = !queryLower || 
-                    item.agent.toLowerCase().includes(queryLower) ||
-                    item.patient.toLowerCase().includes(queryLower) ||
-                    item.clinic.toLowerCase().includes(queryLower) ||
-                    item.details.toLowerCase().includes(queryLower) ||
-                    item.type.toLowerCase().includes(queryLower);
-
-                  return agentMatch && typeMatch && searchMatch;
-                });
-
-                // Sort: Newest submissions first
-                filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-                // Key metrics counts
-                const totalCount = filtered.length;
-                const inquiryCount = filtered.filter(f => f.type === 'Inquiry').length;
-                const requestCount = filtered.filter(f => f.type === 'TT Request').length;
-                const complaintCount = filtered.filter(f => f.type === 'Complaint').length;
-                const commsCount = filtered.filter(f => f.type === 'Client Comm').length;
-                const pendingCount = filtered.filter(f => f.status.toLowerCase() === 'pending').length;
-
-                return (
-                  <div className="space-y-6 animate-fade-in text-left">
-                    <div>
-                      <h2 className="text-3xl font-bold text-slate-100 font-display flex items-center gap-3">
-                        <ClipboardList className="w-8 h-8 text-purple-400" />
-                        Agent Submissions Log
-                      </h2>
-                      <p className="text-slate-400 text-sm mt-1">Real-time consolidated database feed of all patient inquiries, cases, and payment requests logged by agents.</p>
-                    </div>
-
-                    {/* Stats Summary Bento Grid */}
-                    <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-                      <div className="bg-slate-900/40/[0.02] border border-white/5 p-4 rounded-2xl">
-                        <span className="block text-xs uppercase text-slate-500 font-bold mb-1">Total Submissions</span>
-                        <span className="text-2xl font-black font-mono text-purple-400">{totalCount}</span>
-                      </div>
-                      <div className="bg-slate-900/40/[0.02] border border-white/5 p-4 rounded-2xl">
-                        <span className="block text-xs uppercase text-slate-500 font-bold mb-1">Pending Actions</span>
-                        <span className="text-2xl font-black font-mono text-orange-400">{pendingCount}</span>
-                      </div>
-                      <div className="bg-slate-900/40/[0.02] border border-white/5 p-4 rounded-2xl">
-                        <span className="block text-xs uppercase text-slate-500 font-bold mb-1">TT Requests</span>
-                        <span className="text-2xl font-black font-mono text-rose-400">{requestCount}</span>
-                      </div>
-                      <div className="bg-slate-900/40/[0.02] border border-white/5 p-4 rounded-2xl">
-                        <span className="block text-xs uppercase text-slate-500 font-bold mb-1">Inquiries</span>
-                        <span className="text-2xl font-black font-mono text-amber-400">{inquiryCount}</span>
-                      </div>
-                      <div className="bg-slate-900/40/[0.02] border border-white/5 p-4 rounded-2xl col-span-2 lg:col-span-1">
-                        <span className="block text-xs uppercase text-slate-500 font-bold mb-1">Complaints & Comms</span>
-                        <span className="text-2xl font-black font-mono text-sky-400">{complaintCount + commsCount}</span>
-                      </div>
-                    </div>
-
-                    {/* Filter & Search Bar */}
-                    <div className="p-6 bg-slate-900 border border-white/5 rounded-3xl flex flex-col md:flex-row gap-4 items-center">
-                      <div className="flex-1 w-full relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-500" />
-                        <input
-                          type="text"
-                          value={logSearchQuery}
-                          onChange={e => setLogSearchQuery(e.target.value)}
-                          placeholder="Search patient, clinic, agency, keyword..."
-                          className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-500 font-sans outline-none focus:border-purple-500"
-                        />
-                      </div>
-                      <div className="w-full md:w-48">
-                        <select
-                          value={logTypeFilter}
-                          onChange={e => setLogTypeFilter(e.target.value)}
-                          className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500 font-bold"
-                        >
-                          <option value="all">All Category Types</option>
-                          <option value="inquiry">Inquiries</option>
-                          <option value="tt request">TT Requests</option>
-                          <option value="complaint">Complaints</option>
-                          <option value="client comm">Client Comms</option>
-                          <option value="pending">Pending Queue (All items)</option>
-                        </select>
-                      </div>
-                      <div className="w-full md:w-48">
-                        <select
-                          value={logAgentFilter}
-                          onChange={e => setLogAgentFilter(e.target.value)}
-                          className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500 font-bold"
-                        >
-                          <option value="all">All Agents</option>
-                          {agentsList.map(name => (
-                            <option key={name} value={name}>{name}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* Main Log List */}
-                    <div className="space-y-4">
-                      {filtered.length === 0 ? (
-                        <div className="p-16 text-center text-slate-500 bg-black/20 rounded-3xl border border-dashed border-white/10 font-sans">
-                          No submissions matched your current search filters.
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {filtered.map(item => (
-                            <div key={item.id} className="p-5 bg-gradient-to-br from-slate-900 via-slate-950/40 to-black border border-white/10 rounded-2xl flex flex-col gap-3 backdrop-blur-xl relative hover:border-purple-500/40 transition-all font-sans">
-                              <div className="flex justify-between items-start border-b border-white/5 pb-2.5">
-                                <div className="space-y-1">
-                                  <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${item.badgeColor}`}>
-                                    {item.type}
-                                  </span>
-                                  <h4 className="text-sm font-bold text-slate-200 pt-1">
-                                    Patient: {item.patient}
-                                  </h4>
-                                </div>
-                                <span className="text-[10px] text-slate-400 font-mono">
-                                  {new Date(item.date).toLocaleString(undefined, {
-                                    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                                  })}
-                                </span>
-                              </div>
-
-                              <div className="text-xs text-slate-300 bg-slate-900/40/[0.02] p-3 rounded-xl border border-white/5 leading-relaxed italic">
-                                "{item.details}"
-                              </div>
-
-                              <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-400 border-t border-white/5 pt-3">
-                                <div>
-                                  <span className="block text-[8px] uppercase text-slate-500 font-bold">Logged By</span>
-                                  <span className="font-bold text-slate-300">{item.agent}</span>
-                                </div>
-                                <div>
-                                  <span className="block text-[8px] uppercase text-slate-500 font-bold">Clinic / Location</span>
-                                  <span className="font-bold text-slate-300">{item.clinic}</span>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {activeTab === 'admin' && isMasterAdmin && (() => {
-                const globalMeta = getAgentMeta();
-                const availableTLs = ['Unassigned', ...agentsList.filter(a => globalMeta[a]?.roleType === 'TL' || isTLName(a) || a === 'Hesham Sobhy')];
-                return (
-                  <div id="master-admin-root" className="space-y-6 animate-fade-in text-left">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                      <div>
-                        <h2 className="text-3xl font-bold text-rose-500 font-display flex items-center gap-3">
-                          <ShieldCheck className="w-8 h-8" />
-                          Master Control
-                        </h2>
-                        <p className="text-slate-400 text-sm">Super Admin privileges. Manage agent LOBs, assign TLs, and upload Headcount sheet.</p>
-                      </div>
-                      
-                      <button
-                        onClick={handleExportCloudBackup}
-                        className="px-4 py-2.5 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-300 rounded-xl text-sm font-bold flex items-center justify-center gap-2 cursor-pointer transition-all shadow-lg shadow-emerald-500/10"
-                      >
-                        <Download className="w-4 h-4" />
-                        Export Cloud Backup (JSON)
-                      </button>
-                    </div>
-
-                    {/* Add Agent Manually */}
-                    <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-xl">
-                      <h3 className="font-bold text-slate-100 text-base mb-4 flex items-center gap-2">
-                        <UserPlus className="w-5 h-5 text-emerald-400" />
-                        Add User Manually
-                      </h3>
-                      <div className="flex flex-col sm:flex-row gap-4 items-end">
-                        <div className="w-full">
-                          <label className="text-xs text-slate-400 mb-1 block">Full Name</label>
-                          <input 
-                            type="text" 
-                            id="manual-agent-name"
-                            placeholder="e.g. John Doe"
-                            className="bg-white/5 border border-white/10 rounded-lg text-sm text-slate-100 px-3 py-2 focus:outline-none focus:border-emerald-500 w-full"
-                          />
-                        </div>
-                        <div className="w-full sm:w-48">
-                          <label className="text-xs text-slate-400 mb-1 block">Role</label>
-                          <select 
-                            id="manual-agent-role"
-                            className="text-slate-100 bg-white/5 border border-white/10 rounded-lg   px-3 py-2 focus:outline-none focus:border-emerald-500 w-full"
-                          >
-                            <option className="bg-slate-800 text-slate-100 "  value="Call Center">Call Center</option>
-                            <option className="bg-slate-800 text-slate-100 "  value="Social Media">Social Media</option>
-                            <option className="bg-slate-800 text-slate-100 "  value="TL">Team Leader (TL)</option>
-                            <option className="bg-slate-800 text-slate-100 "  value="Director">Director</option>
-                          </select>
-                        </div>
-                        <button 
-                          onClick={() => {
-                            const nameInput = document.getElementById('manual-agent-name') as HTMLInputElement;
-                            const roleInput = document.getElementById('manual-agent-role') as HTMLSelectElement;
-                            if (!nameInput || !roleInput) return;
-                            const name = nameInput.value.trim();
-                            const role = roleInput.value;
-                            if (!name) return toast.error("Please enter a name.");
-                            
-                            if (agentsList.map(a => a?.toLowerCase()).includes(name.toLowerCase())) {
-                               return toast.error("User already exists!");
-                            }
-                            const updatedList = [...agentsList, name];
-                            setAgentsList(updatedList);
-                            setStorageItem('sched_agents_list', updatedList);
-                            
-                            const newMeta = { ...getAgentMeta() };
-                            newMeta[name] = { roleType: role, tlName: 'Unassigned' };
-                            setStorageItem('sched_agent_meta', newMeta);
-                            
-                            nameInput.value = '';
-                            toast.success(`Added ${name} as ${role}.`);
-                          }}
-                          className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold shadow-lg shadow-emerald-500/20 whitespace-nowrap transition-all"
-                        >
-                          Add User
-                        </button>
-                      </div>
-                    </div>
-
-
-                    {/* Admin Headcount Upload Control */}
-                    {isMasterAdmin && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="bg-indigo-500/10 border border-indigo-500/20 p-5 rounded-2xl flex flex-col gap-4">
-                             <div className="flex items-center gap-3">
-                               <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
-                                 <CheckCircle2 className="w-5 h-5 text-indigo-400" />
-                               </div>
-                               <div>
-                                 <h3 className="text-slate-100 font-bold text-sm">Upload CSV File</h3>
-                                 <p className="text-xs text-indigo-300/70">Upload the raw exported CSV</p>
-                               </div>
-                             </div>
-                             <label className="w-full text-center px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-indigo-500/20 transition-all block">
-                                Upload CSV File
-                                <input
-                                  type="file"
-                                  accept=".csv,.xlsx,.json,.xls"
-                                  className="hidden"
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (!file) return;
-                                    handleDirectoryFile(file);
-                                  }}
-                                />
-                             </label>
-                          </div>
-                          
-                          <div className="bg-emerald-500/10 border border-emerald-500/20 p-5 rounded-2xl flex flex-col gap-4">
-                             <div className="flex items-center gap-3">
-                               <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                                 <svg className="w-5 h-5 bg-slate-800 rounded-full p-0.5" viewBox="0 0 48 48">
-                                   <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                                   <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                                   <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                                   <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
-                                 </svg>
-                               </div>
-                               <div>
-                                 <h3 className="text-slate-100 font-bold text-sm">Import via Google Sheets Link</h3>
-                                 <p className="text-xs text-emerald-300/70">Requires permission to read the Sheet</p>
-                               </div>
-                             </div>
-                             <input
-                               type="text"
-                               placeholder="Paste Google Sheets Link..."
-                               value={googleSheetId}
-                               onChange={(e) => {
-                                  let val = e.target.value;
-                                  const match = val.match(/\/d\/([a-zA-Z0-9-_]+)/);
-                                  if (match) val = match[1];
-                                  setGoogleSheetId(val);
-                                  setStorageItem('sched_google_sheet_id', val);
-                               }}
-                               className="bg-white/5 backdrop-blur-xl border border-white/10 text-slate-100 placeholder-slate-500 text-xs rounded-lg px-3 py-2.5 w-full focus:outline-none focus:border-emerald-500"
-                             />
-                             <button
-                               onClick={async () => {
-                                 if (!googleSheetId) return toast.error("Please provide a Google Sheets Link.");
-                                 
-                                 setIsSyncingSheets(true);
-                                 try {
-                                   const csvText = await fetchGoogleSheetCSV(googleSheetId, googleSheetGid);
-                                   
-                                   if (!csvText || csvText.trim().length === 0) {
-                                      throw new Error("No data found in the sheet.");
-                                   }
-                                   
-                                   const result = parseAgentDirectoryCSV(csvText);
-                                   if (result.errors.length > 0) {
-                                      toast.error(`Warnings: ${result.errors.slice(0, 3).join(', ')}`);
-                                   }
-                                   if (result.directory.length > 0) {
-                                      setAgentDirectory(result.directory);
-                                      setDirectoryHeaders(result.headers);
-                                      setStorageItem('sched_agent_directory', result.directory);
-                                      setStorageItem('sched_agent_directory_headers', result.headers);
-                                      
-                                      // Make sure any newly found agents are implicitly registered for future login!
-                                      const allKnown = new Set(agentsList);
-                                      result.directory.forEach(a => allKnown.add(a.agentName));
-                                      const updatedList = Array.from(allKnown);
-                                      setAgentsList(updatedList);
-                                      setStorageItem('sched_agents_list', updatedList);
-  
-                                      // Check for TL and Role columns
-                                      const newMeta = { ...getAgentMeta() };
-                                      let hasMetaUpdate = false;
-                                      const tlHeader = result.headers.find(h => {
-                                          const lh = h.toLowerCase().trim();
-                                          return lh === 'tl' || lh === 'team leader' || lh.includes('manager');
-                                      });
-                                      const roleHeader = result.headers.find(h => {
-                                          const lh = h.toLowerCase().trim();
-                                          return lh === 'role' || lh === 'lob' || lh.includes('account');
-                                      });
-                                      
-                                      if (tlHeader || roleHeader) {
-                                          result.directory.forEach(a => {
-                                              let updated = false;
-                                              if (!newMeta[a.agentName]) newMeta[a.agentName] = { roleType: '', tlName: '' };
-                                              
-                                              if (tlHeader && a.data[tlHeader]) {
-                                                  const val = a.data[tlHeader].trim();
-                                                  if (val) {
-                                                      newMeta[a.agentName].tlName = val;
-                                                      updated = true;
-                                                  }
-                                              }
-                                              if (roleHeader && a.data[roleHeader]) {
-                                                  const val = a.data[roleHeader].trim();
-                                                  if (val) {
-                                                      newMeta[a.agentName].roleType = val;
-                                                      updated = true;
-                                                  }
-                                              }
-                                              if (updated) hasMetaUpdate = true;
-                                          });
-                                          if (hasMetaUpdate) {
-                                              setStorageItem('sched_agent_meta', newMeta);
-                                          }
-                                      }
-  
-                                      toast.success(`Successfully extracted ${result.directory.length} agents from Google Sheet!`);
-                                   } else {
-                                      toast.error('No agent data could be extracted.');
-                                   }
-                                 } catch (err: any) {
-                                   toast.error("Extraction failed: " + err.message);
-                                 } finally {
-                                   setIsSyncingSheets(false);
-                                 }
-                               }}
-                               disabled={isSyncingSheets}
-                               className={`w-full py-2.5 text-center ${isSyncingSheets ? 'bg-emerald-500/50' : 'bg-emerald-500 hover:bg-emerald-600'} text-slate-100 rounded-xl font-bold text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-all`}
-                             >
-                               {isSyncingSheets ? 'Extracting Data...' : 'Extract From Sheet'}
-                             </button>
-                          </div>
-                        </div>
                     )}
-
-
-                    {/* Add Agent Manually */}
-                    <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-xl">
-                      <h3 className="font-bold text-slate-100 text-base mb-4 flex items-center gap-2">
-                        <UserPlus className="w-5 h-5 text-emerald-400" />
-                        Add User Manually
-                      </h3>
-                      <div className="flex flex-col sm:flex-row gap-4 items-end">
-                        <div className="w-full">
-                          <label className="text-xs text-slate-400 mb-1 block">Full Name</label>
-                          <input 
-                            type="text" 
-                            id="manual-agent-name"
-                            placeholder="e.g. John Doe"
-                            className="bg-white/5 border border-white/10 rounded-lg text-sm text-slate-100 px-3 py-2 focus:outline-none focus:border-emerald-500 w-full"
-                          />
-                        </div>
-                        <div className="w-full sm:w-48">
-                          <label className="text-xs text-slate-400 mb-1 block">Role</label>
-                          <select 
-                            id="manual-agent-role"
-                            className="text-slate-100 bg-white/5 border border-white/10 rounded-lg   px-3 py-2 focus:outline-none focus:border-emerald-500 w-full"
-                          >
-                            <option className="bg-slate-800 text-slate-100 "  value="Call Center">Call Center</option>
-                            <option className="bg-slate-800 text-slate-100 "  value="Social Media">Social Media</option>
-                            <option className="bg-slate-800 text-slate-100 "  value="TL">Team Leader (TL)</option>
-                            <option className="bg-slate-800 text-slate-100 "  value="Director">Director</option>
-                          </select>
-                        </div>
-                        <button 
-                          onClick={() => {
-                            const nameInput = document.getElementById('manual-agent-name') as HTMLInputElement;
-                            const roleInput = document.getElementById('manual-agent-role') as HTMLSelectElement;
-                            if (!nameInput || !roleInput) return;
-                            const name = nameInput.value.trim();
-                            const role = roleInput.value;
-                            if (!name) return toast.error("Please enter a name.");
-                            
-                            if (agentsList.map(a => a?.toLowerCase()).includes(name.toLowerCase())) {
-                               return toast.error("User already exists!");
-                            }
-                            const updatedList = [...agentsList, name];
-                            setAgentsList(updatedList);
-                            setStorageItem('sched_agents_list', updatedList);
-                            
-                            const newMeta = { ...getAgentMeta() };
-                            newMeta[name] = { roleType: role, tlName: 'Unassigned' };
-                            setStorageItem('sched_agent_meta', newMeta);
-                            
-                            nameInput.value = '';
-                            toast.success(`Added ${name} as ${role}.`);
-                          }}
-                          className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold shadow-lg shadow-emerald-500/20 whitespace-nowrap transition-all"
-                        >
-                          Add User
-                        </button>
-                      </div>
-                    </div>
-
-                  {/* Admin Upload Console */}
-                  {isMasterAdmin && (
-                    <div className="bg-white/5 border text-slate-100 border-white/10 rounded-3xl shadow-sm p-6 space-y-6">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-white/5 gap-3">
-                        <div>
-                          <h3 className="font-bold text-slate-100 text-base font-display flex items-center gap-2">
-                            <Upload className="w-5 h-5 text-indigo-400" />
-                            Upload Schedule Roster File
-                          </h3>
-                          <p className="text-xs text-slate-400">Import CSV documents containing weekly or monthly coverage calendars</p>
-                        </div>
-                        <button
-                          onClick={downloadScheduleTemplate}
-                          className="px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/15 border border-indigo-500/20 text-indigo-300 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                          Download CSV Template
-                        </button>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-{/* Drag & Drop Board */}
-                      <div
-                        onDragEnter={handleDrag}
-                        onDragLeave={handleDrag}
-                        onDragOver={handleDrag}
-                        onDrop={handleDrop}
-                        className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all relative flex flex-col items-center justify-center gap-3 ${
-                          dragActive 
-                            ? 'border-indigo-400 bg-indigo-500/10' 
-                            : 'border-white/10 bg-black/30 hover:border-white/20'
-                        }`}
-                      >
-                        <input
-                          id="csv-file-selector"
-                          type="file"
-                          accept=".xlsx,.xls,.csv,.txt,.json"
-                          onChange={handleScheduleFileChange}
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        />
-                        <div className="w-12 h-12 bg-indigo-500/10 border border-indigo-500/25 rounded-2xl flex items-center justify-center">
-                          <Upload className="w-6 h-6 text-indigo-400" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-slate-100">Drag and drop your schedule roster file here</p>
-                          <p className="text-xs text-slate-400 mt-1">Supports Excel (.xlsx, .xls), CSV, JSON, and text plans</p>
-                        </div>
-                        <span className="px-3 py-1 bg-white/5 border border-white/10 text-slate-300 rounded-full text-[10px] font-mono">
-                          Supports any sheet layout containing Agent Name, Date & Shift columns!
-                        </span>
-                      </div>
-                      <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 text-center transition-all min-h-[220px]">
-                        <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center shadow-inner">
-                          <svg className="w-6 h-6 bg-slate-800 rounded-full p-0.5" viewBox="0 0 48 48">
-                            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
-                          </svg>
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-slate-100">Import via Google Sheets Link</p>
-                          <p className="text-xs text-emerald-300 mt-1">Extract schedules directly from a linked Google Sheet</p>
-                        </div>
-                        <div className="w-full mt-2 space-y-2">
-                           <input
-                             type="text"
-                             placeholder="Paste Google Sheets Link..."
-                             value={googleSheetId}
-                             onChange={(e) => {
-                                let val = e.target.value;
-                                const match = val.match(/\/d\/([a-zA-Z0-9-_]+)/);
-                                if (match) val = match[1];
-                                setGoogleSheetId(val);
-                                setStorageItem('sched_google_sheet_id', val);
-                             }}
-                             className="bg-white/5 backdrop-blur-xl border border-white/10 text-slate-100 placeholder-emerald-500/50 text-xs rounded-lg px-3 py-2.5 w-full focus:outline-none focus:border-emerald-500 text-center"
-                           />
-                           <button
-                             onClick={async () => {
-                               if (!googleSheetId) {
-                                  toast.error("Please provide a valid Google Sheet ID or URL.");
-                                  return;
-                               }
-                               try {
-                                 setIsSyncingSheets(true);
-                                 setUploadError(null);
-                                 setUploadSuccess(null);
-                                 
-                                 const csvText = await fetchGoogleSheetCSV(googleSheetId, googleSheetGid);
-                                 
-                                 if (!csvText || csvText.trim().length === 0) {
-                                    throw new Error("No data found in the sheet.");
-                                 }
-                                 
-                                 const result = parseScheduleCSV(csvText, agentsList);
-                                 if (result.errors.length > 0) {
-                                    setUploadError(result.errors.join('\n'));
-                                 }
-                                 if (result.schedules.length > 0) {
-                                    const newAgentsList: string[] = [];
-                                    const oldAgentsSet = new Set(agentsList.map(a => a?.toLowerCase()));
-                                    result.schedules.forEach(s => {
-                                       if (!oldAgentsSet.has(s.agentName?.toLowerCase()) && !newAgentsList.some(n => n?.toLowerCase() === s.agentName?.toLowerCase())) {
-                                          newAgentsList.push(s.agentName);
-                                       }
-                                    });
-                                    setTempNewAgents(newAgentsList);
-                                    setTempSchedules(result.schedules);
-                                    setUploadSuccess(`Successfully extracted ${result.schedules.length} shifts spanning ${new Set(result.schedules.map(r => r.date)).size} days.`);
-                                 } else {
-                                    setUploadError((prev) => (prev ? prev + "\n" : "") + "No schedule data parsed from sheet.");
-                                 }
-                               } catch (err: any) {
-                                 setUploadError("Extraction failed: " + err.message);
-                               } finally {
-                                 setIsSyncingSheets(false);
-                               }
-                             }}
-                             disabled={isSyncingSheets}
-                             className={`w-full py-2 text-center ${isSyncingSheets ? 'bg-emerald-500/50' : 'bg-emerald-500 hover:bg-emerald-600'} text-slate-100 rounded-lg font-bold text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-all`}
-                           >
-                             {isSyncingSheets ? 'Extracting...' : 'Extract From Sheet'}
-                           </button>
-                        </div>
-                      </div>
-</div>
-
-                      {/* Feedback Panel */}
-                      {uploadError && (
-                        <div className="p-4 bg-rose-500/10 border border-rose-500/15 rounded-2xl flex items-start gap-2.5">
-                          <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
-                          <div>
-                            <p className="text-xs font-bold text-rose-300">Roster file parsing warnings/errors:</p>
-                            <pre className="text-[10px] font-mono text-rose-200 mt-1 whitespace-pre-wrap max-h-32 overflow-y-auto leading-normal">
-                              {uploadError}
-                            </pre>
-                          </div>
-                        </div>
-                      )}
-
-                      {uploadSuccess && (
-                        <div className="p-4 bg-emerald-500/10 border border-emerald-500/15 rounded-2xl space-y-3">
-                          <div className="flex items-start gap-2.5">
-                            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-                            <div>
-                              <p className="text-xs font-bold text-emerald-300">Successfully interpreted schedule roster contents!</p>
-                              <p className="text-[11px] text-emerald-100 mt-1">{uploadSuccess}</p>
-                            </div>
-                          </div>
-
-                          {tempNewAgents.length > 0 && (
-                            <div className="p-3 bg-black/20 rounded-xl space-y-1">
-                              <p className="text-xs font-bold text-indigo-300 flex items-center gap-1">
-                                <UserPlus className="w-3.5 h-3.5" /> Newly Registered Agents Detected ({tempNewAgents.length}):
-                              </p>
-                              <p className="text-[11px] text-indigo-200 leading-relaxed font-mono">
-                                {tempNewAgents.join(', ')}
-                              </p>
-                              <p className="text-[9px] text-slate-400">These agents will be auto-registered and can sign in instantly once you commit.</p>
-                            </div>
-                          )}
-
-                          <div className="flex justify-end gap-3 pt-2">
-                            <button
-                              onClick={() => {
-                                setUploadSuccess(null);
-                                setTempSchedules([]);
-                                setTempNewAgents([]);
-                              }}
-                              className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
-                            >
-                              Discard Upload
-                            </button>
-                            <button
-                              onClick={commitSchedules}
-                              className="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/20 font-display"
-                            >
-                              <CheckCircle2 className="w-4 h-4" />
-                              Save & Set Active Schedule
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-
-
-                  {/* Kill Switch (Hesham Only) */}
-                  {currentUser?.name === 'Hesham Sobhy' && (
-                    <div className="bg-rose-500/10 border border-rose-500/20 p-5 rounded-2xl flex flex-col gap-4 mt-8">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-rose-500/20 flex items-center justify-center border border-rose-500/30">
-                          <AlertTriangle className="w-5 h-5 text-rose-400" />
-                        </div>
-                        <div>
-                          <h3 className="text-slate-100 font-bold text-sm">System Kill Switch</h3>
-                          <p className="text-xs text-rose-300">Danger zone: Shut down the entire application</p>
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <div className="relative">
-                          <input 
-                            type={showKillSwitchPassword ? "text" : "password"} 
-                            placeholder="Enter your password to confirm"
-                            value={killSwitchPassword} 
-                            onChange={e => setKillSwitchPassword(e.target.value)}
-                            className="w-full pl-3 pr-10 py-2 bg-black/40 border border-rose-500/30 text-rose-100 rounded-xl text-xs outline-none focus:border-rose-500" 
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowKillSwitchPassword(!showKillSwitchPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-rose-400 hover:text-rose-300 transition-colors"
-                            tabIndex={-1}
-                          >
-                            {showKillSwitchPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                          </button>
-                        </div>
-                        <input 
-                          type="text" 
-                          placeholder="Security Check: Favorite car?"
-                          value={killSwitchCar} 
-                          onChange={e => setKillSwitchCar(e.target.value)}
-                          className="w-full px-3 py-2 bg-black/40 border border-rose-500/30 text-rose-100 rounded-xl text-xs outline-none focus:border-rose-500" 
-                        />
-                        <button 
-                          onClick={() => {
-                            if (killSwitchPassword === credentials['Hesham Sobhy'] && killSwitchCar === 'BMW') {
-                              setDoc(doc(db, "system", "app_status"), { isKilled: true, killedAt: new Date().toISOString() }, {merge: true});
-                              setIsAppKilled(true);
-                              setKillSwitchPassword('');
-                              setKillSwitchCar('');
-                              toast.success("Application has been shut down.");
-                            } else {
-                               toast.error("Incorrect password or security answer.");
-                            }
-                          }}
-                          className="w-full text-center px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-rose-500/20 transition-all">
-                          EXECUTE SHUTDOWN
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                    <div className="bg-white/5 border border-rose-500/20 backdrop-blur-xl rounded-3xl p-6 shadow-2xl overflow-x-auto">
-                      {(() => {
-                        // Create a unique set of names/usernames from both agents list and registered users list
-                        const uniqueNamesSet = new Set<string>();
-
-                        agentsList.forEach(a => {
-                          if (a) uniqueNamesSet.add(capitalizeName(a.trim()));
-                        });
-
-                        registeredUsers.forEach(u => {
-                          if (u && u.name) {
-                            const resolvedName = findAgentByUsername(u.name, agentsList) || u.name;
-                            uniqueNamesSet.add(capitalizeName(resolvedName.trim()));
-                          }
-                        });
-
-                        const sortedUniqueList = Array.from(uniqueNamesSet).sort((a, b) => a.localeCompare(b));
-
-                        return (
-                          <table className="w-full text-left border-collapse min-w-[700px]">
-                            <thead>
-                              <tr className="bg-rose-500/10 border-b border-rose-500/20 text-[10px] font-black uppercase tracking-widest text-rose-300 font-sans">
-                                <th className="px-5 py-3 rounded-tl-xl">Account / Username (Total: {sortedUniqueList.length})</th>
-                                <th className="px-3 py-3">Account LOB Role</th>
-                                <th className="px-3 py-3">Assigned TL</th>
-                                <th className="px-5 py-3 text-right">Actions</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5 text-xs text-slate-300 font-sans">
-                              {sortedUniqueList.map(agent => {
-                                const curRole = globalMeta[agent]?.roleType || getAgentLOB(agent);
-                                const curTL = globalMeta[agent]?.tlName || getAgentTL(agent);
-                                
-                                const username = getUsernameFromFullName(agent) || agent.toLowerCase();
-                                const isLocked = lockedAccounts.includes(username) || 
-                                                 lockedAccounts.includes(username.toLowerCase()) ||
-                                                 lockedAccounts.includes(agent) || 
-                                                 lockedAccounts.includes(agent.toLowerCase());
-
-                                return (
-                                  <tr key={agent} className="hover:bg-rose-500/5 transition-all">
-                                    <td className="px-5 py-4 font-bold text-slate-100 uppercase tracking-wide">
-                                      <div className="flex flex-col gap-1.5 justify-start text-left">
-                                        <div className="flex items-center gap-2">
-                                          <span>{agent}</span>
-                                          {isLocked && (
-                                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-500/10 border border-rose-500/20 text-rose-400 animate-pulse">
-                                              <Lock className="w-3 h-3 text-rose-400" />
-                                              LOCKED
-                                            </span>
-                                          )}
-                                        </div>
-                                        <div className="flex items-center gap-1.5">
-                                          <span className="text-[10px] text-slate-400 font-mono tracking-wide lowercase">
-                                            username: <strong className="text-cyan-400">{username}</strong>
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </td>
-                                    <td className="px-3 py-4">
-                                      <select
-                                        value={curRole}
-                                        onChange={(e) => {
-                                          const newMeta = { ...getAgentMeta() };
-                                          if (!newMeta[agent]) newMeta[agent] = { roleType: '', tlName: '' };
-                                          newMeta[agent].roleType = e.target.value;
-                                          setStorageItem('sched_agent_meta', newMeta);
-                                          setAgentMeta(newMeta);
-                                          setDoc(doc(db, "system", "sched_agent_meta"), { data: newMeta }).catch(console.error);
-                                          toast.success(`Updated ${agent}'s role to ${e.target.value}`);
-                                        }}
-                                        className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-xs text-slate-100 px-3 py-1.5 focus:outline-none focus:border-rose-500 cursor-pointer w-full max-w-[150px]"
-                                      >
-                                        <option className="bg-slate-800 text-slate-100 " value="Call Center">Call Center</option>
-                                        <option className="bg-slate-800 text-slate-100 " value="Social Media">Social Media</option>
-                                        <option className="bg-slate-800 text-slate-100 " value="General">General</option>
-                                        <option className="bg-slate-800 text-slate-100 " value="TL">Team Leader (TL)</option>
-                                        <option className="bg-slate-800 text-slate-100 " value="Medical">Medical</option>
-                                      </select>
-                                    </td>
-                                    <td className="px-3 py-4">
-                                      <select
-                                        value={curTL}
-                                        onChange={(e) => {
-                                          const newMeta = { ...getAgentMeta() };
-                                          if (!newMeta[agent]) newMeta[agent] = { roleType: '', tlName: '' };
-                                          newMeta[agent].tlName = e.target.value;
-                                          setStorageItem('sched_agent_meta', newMeta);
-                                          setAgentMeta(newMeta);
-                                          setDoc(doc(db, "system", "sched_agent_meta"), { data: newMeta }).catch(console.error);
-                                          toast.success(`Assigned ${agent} to TL: ${e.target.value}`);
-                                        }}
-                                        className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-xs text-slate-100 px-3 py-1.5 focus:outline-none focus:border-rose-500 cursor-pointer w-full max-w-[180px]"
-                                      >
-                                        {availableTLs.map(tl => <option className="bg-slate-800 text-slate-100 " key={tl} value={tl}>{tl}</option>)}
-                                      </select>
-                                    </td>
-                                    <td className="px-5 py-4 text-right">
-                                      {isMasterAdmin ? (
-                                        <div className="flex items-center justify-end gap-2 text-right">
-                                          {isLocked && (
-                                            <button
-                                              onClick={() => {
-                                                if (confirm(`Unlock account for ${agent}?`)) {
-                                                  const userKey1 = agent;
-                                                  const userKey2 = agent.toLowerCase();
-                                                  const userKey3 = username;
-                                                  const userKey4 = username.toLowerCase();
-
-                                                  const updatedLocked = lockedAccounts.filter(a => 
-                                                    a !== userKey1 && a !== userKey2 && a !== userKey3 && a !== userKey4
-                                                  );
-                                                  setLockedAccounts(updatedLocked);
-                                                  setStorageItem('sched_locked_accounts', updatedLocked);
-                                                  setDoc(doc(db, "system", "sched_locked_accounts"), { data: updatedLocked }).catch(console.error);
-
-                                                  const updatedAttempts = { ...failedAttempts };
-                                                  delete updatedAttempts[userKey1];
-                                                  delete updatedAttempts[userKey2];
-                                                  delete updatedAttempts[userKey3];
-                                                  delete updatedAttempts[userKey4];
-                                                  setFailedAttempts(updatedAttempts);
-                                                  setStorageItem('sched_failed_attempts', updatedAttempts);
-                                                  setDoc(doc(db, "system", "sched_failed_attempts"), { data: updatedAttempts }).catch(console.error);
-
-                                                  toast.success(`Account for ${agent} has been unlocked!`);
-                                                }
-                                              }}
-                                              className="px-2.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
-                                            >
-                                              Unlock
-                                            </button>
-                                          )}
-                                          <button
-                                            onClick={() => {
-                                              if (confirm(`Are you sure you want to reset password for ${agent}?`)) {
-                                                const userKey1 = agent;
-                                                const userKey2 = agent.toLowerCase();
-                                                const userKey3 = username;
-                                                const userKey4 = username.toLowerCase();
-
-                                                const creds = { ...credentials };
-                                                delete creds[userKey1];
-                                                delete creds[userKey2];
-                                                delete creds[userKey3];
-                                                delete creds[userKey4];
-                                                setStorageItem('sched_credentials', creds);
-                                                setCredentials(creds);
-                                                setDoc(doc(db, "system", "sched_credentials"), { data: creds }).catch(console.error);
-
-                                                // Also unlock just in case
-                                                const updatedLocked = lockedAccounts.filter(a => 
-                                                  a !== userKey1 && a !== userKey2 && a !== userKey3 && a !== userKey4
-                                                );
-                                                setLockedAccounts(updatedLocked);
-                                                setStorageItem('sched_locked_accounts', updatedLocked);
-                                                setDoc(doc(db, "system", "sched_locked_accounts"), { data: updatedLocked }).catch(console.error);
-
-                                                const updatedAttempts = { ...failedAttempts };
-                                                delete updatedAttempts[userKey1];
-                                                delete updatedAttempts[userKey2];
-                                                delete updatedAttempts[userKey3];
-                                                delete updatedAttempts[userKey4];
-                                                setFailedAttempts(updatedAttempts);
-                                                setStorageItem('sched_failed_attempts', updatedAttempts);
-                                                setDoc(doc(db, "system", "sched_failed_attempts"), { data: updatedAttempts }).catch(console.error);
-
-                                                toast.success(`Password for ${agent} has been wiped and account unlocked!`);
-                                              }
-                                            }}
-                                            className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded border-rose-500/30 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
-                                          >
-                                            Reset Pass
-                                          </button>
-                                        </div>
-                                      ) : (
-                                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest select-none">
-                                          🔒 Restricted
-                                        </span>
-                                      )}
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                );
-              })()}
-
-            {/* Overtime Popup Alerts / Floating warnings */}
-            {currentUser && currentUser.role === 'agent' && (() => {
-              const elapsed = getActiveActivityElapsed(currentUser.name);
-              if (!elapsed || !elapsed.exceeded) return null;
-
-              const stats = getAgentTodayStats(currentUser.name);
-
-              if (isOvertimeAlertMinimized) {
-                // Compact Floating Badge at Bottom-Right
-                return (
-                  <div className="fixed bottom-6 right-6 z-50 animate-bounce cursor-pointer scale-100 hover:scale-[1.03] active:scale-[0.98] transition-all" onClick={() => setIsOvertimeAlertMinimized(false)}>
-                    <div className="bg-rose-600 hover:bg-rose-700 text-slate-100 font-bold p-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-rose-400/40 select-none">
-                      <span className="w-2.5 h-2.5 rounded-full bg-slate-800 animate-ping"></span>
-                      <span className="text-xs font-mono">
-                        🚨 OVERTIME: {elapsed.type.toUpperCase()} +{elapsed.exceededBy.toFixed(1)}                      </span>
-                      <span className="text-[10px] bg-black/30 px-2 py-0.5 rounded-lg">Expand &rarr;</span>
-                    </div>
-                  </div>
-                );
-              }
-
-              // Full Interactive Modal Overlay
-              return (
-                <div className="fixed inset-0 bg-transparent/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-                  <div className="bg-slate-900/40 border border-rose-500/30 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative overflow-hidden space-y-6 text-center animate-fade-in">
-                    <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-500 animate-pulse"></div>
                     
-                    {/* Pulsing warning circle icon */}
-                    <div className="w-16 h-16 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-full flex items-center justify-center mx-auto animate-pulse">
-                      <Coffee className="w-8 h-8" />
-                    </div>
-
-                    <div className="space-y-2">
-                      <h3 className="text-2xl font-black text-slate-100 font-display tracking-wide uppercase">
-                        ⚠️ Overtime Limit Notice!
-                      </h3>
-                      <p className="text-sm text-slate-300 font-sans px-2 leading-relaxed">
-                        You have exceeded your allocated <span className="font-bold underline text-slate-100 capitalize">{elapsed.type}</span> limit of <span className="text-rose-300 font-bold font-mono">{elapsed.limit}</span> minutes.
-                      </p>
-                    </div>
-
-                    {/* Overtime breakdown banner */}
-                    <div className="p-4 bg-rose-950/20 border border-rose-500/20 rounded-2xl space-y-1 text-center">
-                      <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider font-mono">Elapsed Session Time</p>
-                      <p className="text-3xl font-black text-rose-400 font-mono">
-                        {elapsed.duration.toFixed(2)}                      </p>
-                      <p className="text-[11px] font-bold text-slate-100 font-sans animate-pulse">
-                        Exceeding limit by: <span className="font-mono text-xs underline">+{elapsed.exceededBy.toFixed(1)}inutes</span>
-                      </p>
-                    </div>
-
-                    {/* Show cumulative aggregates */}
-                    <div className="p-4 bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl text-left space-y-2.5">
-                      <p className="text-xs font-bold text-slate-300 font-display border-b border-white/5 pb-1 flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded bg-indigo-400 animate-pulse"></span>
-                        Your Timecard Totals (Today):
-                      </p>
-                      <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                        <div className="p-2 bg-white/5 border border-white/10 rounded-xl">
-                          <p className="text-[9px] uppercase font-bold text-slate-400">Total Break</p>
-                          <p className={`font-bold font-mono ${stats.breakMins > 15 ? 'text-rose-400 animate-pulse' : 'text-amber-300'}`}>
-                            {stats.breakMins.toFixed(1)}                          </p>
-                          <p className="text-[8px] text-slate-500">Max 15m</p>
+                    <div className="bg-white/5 border border-white/10 rounded-3xl p-6 shadow-sm overflow-x-auto">
+                      <table className="w-full text-left text-xs text-slate-300 whitespace-nowrap">
+                        <thead className="text-slate-400 bg-white/5 text-[10px] uppercase font-bold tracking-wider">
+                          <tr>
+                            <th className="p-4 rounded-l-xl">Agent Name</th>
+                            <th className="p-4">Email</th>
+                            <th className="p-4">Phone</th>
+                            <th className="p-4">LOB</th>
+                            <th className="p-4">LOB Team</th>
+                            <th className="p-4">Role</th>
+                            <th className="p-4 rounded-r-xl">Team Leader</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5 font-medium">
+                          {registeredUsers.filter(m => {
+                            if (!directorySearchQuery) return true;
+                            const q = directorySearchQuery.toLowerCase();
+                            return m.name.toLowerCase().includes(q) || (m.email && m.email.toLowerCase().includes(q)) || (m.phone && m.phone.includes(q));
+                          }).map((meta, idx) => (
+                            <tr key={idx} className="hover:bg-white/5 transition-all">
+                              <td className="p-4 text-slate-100 font-bold">{meta.name}</td>
+                              <td className="p-4">{meta.email || '-'}</td>
+                              <td className="p-4">{meta.phone || '-'}</td>
+                              <td className="p-4"><span className="bg-slate-800 text-slate-300 px-2 py-1 rounded-lg bg-opacity-40">{meta.lob || '-'}</span></td>
+                              <td className="p-4">{meta.lobTeam || '-'}</td>
+                              <td className="p-4"><span className="bg-amber-950/30 text-amber-500 font-bold py-1 px-3 rounded-lg">{meta.role === 'tl' ? 'TL' : 'Agent'}</span></td>
+                              <td className="p-4 text-cyan-300 font-bold">{meta.teamLeader || '-'}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      {registeredUsers.length === 0 && (
+                        <div className="text-center p-8 text-slate-500 font-medium font-sans">
+                          No directory data active. Please upload a headcount file.
                         </div>
-                        <div className="p-2 bg-white/5 border border-white/10 rounded-xl">
-                          <p className="text-[9px] uppercase font-bold text-slate-400">Total Lunch</p>
-                          <p className={`font-bold font-mono ${stats.lunchMins > 30 ? 'text-rose-400 animate-pulse' : 'text-pink-300'}`}>
-                            {stats.lunchMins.toFixed(1)}                          </p>
-                          <p className="text-[8px] text-slate-500">Max 30m</p>
-                        </div>
-                        <div className="p-2 bg-white/5 border border-white/10 rounded-xl">
-                          <p className="text-[9px] uppercase font-bold text-slate-400">Restroom</p>
-                          <p className="text-indigo-400 font-bold font-mono">
-                            {stats.restroomMins.toFixed(1)}                          </p>
-                          <p className="text-[8px] text-slate-500">{stats.restroomCount} sessions</p>
-                        </div>
-                        <div className="p-2 bg-white/5 border border-white/10 rounded-xl">
-                          <p className="text-[9px] uppercase font-bold text-slate-400">Meeting</p>
-                          <p className={`font-bold font-mono ${stats.meetingMins > 60 ? 'text-rose-400 animate-pulse' : 'text-cyan-300'}`}>
-                            {stats.meetingMins.toFixed(1)}                          </p>
-                          <p className="text-[8px] text-slate-500">Max 60m</p>
-                        </div>
-                        <div className="p-2 bg-white/5 border border-white/10 rounded-xl">
-                          <p className="text-[9px] uppercase font-bold text-slate-400">1:1 Session</p>
-                          <p className={`font-bold font-mono ${stats.oneOnOneMins > 30 ? 'text-rose-400 animate-pulse' : 'text-violet-300'}`}>
-                            {stats.oneOnOneMins.toFixed(1)}m
-                          </p>
-                          <p className="text-[8px] text-slate-500">Max 30m</p>
-                        </div>
-                        <div className="p-2 bg-white/5 border border-white/10 rounded-xl">
-                          <p className="text-[9px] uppercase font-bold text-slate-400">Pers. Break</p>
-                          <p className={`font-bold font-mono ${stats.personalMins > 15 ? 'text-rose-400 animate-pulse' : 'text-emerald-300'}`}>
-                            {stats.personalMins.toFixed(1)}m
-                          </p>
-                          <p className="text-[8px] text-slate-500">Max 15m</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex flex-col gap-2 pt-2">
-                      <button
-                        onClick={() => handleEndActivity()}
-                        className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-100 font-black text-xs tracking-wider rounded-xl shadow-lg shadow-emerald-500/10 cursor-pointer flex items-center justify-center gap-2 uppercase font-sans border border-emerald-400/20 active:scale-[0.99] transition-all"
-                      >
-                        <ArrowRight className="w-4 h-4 text-slate-100" />
-                        End Activity & Continue Shift
-                      </button>
-                      <button
-                        onClick={() => setIsOvertimeAlertMinimized(true)}
-                        className="w-full py-2.5 bg-[#1e1e1e]/40 backdrop-blur-lg hover:bg-slate-700 backdrop-blur-xl border border-white/20 text-slate-300 hover:text-slate-100 rounded-xl text-xs font-semibold cursor-pointer active:scale-[0.99] transition-all"
-                      >
-                        Minimize Alert Temporarily
-                      </button>
+                      )}
                     </div>
                   </div>
-                </div>
-              );
-            })()}
-            
+                );
+              })()}
             </motion.div>
-          </AnimatePresence>
-        </main>
-
-      {/* Dynamic Sliding Notification Drawer */}
-      <AnimatePresence>
-        {isNotifDrawerOpen && (
-          <div className="fixed inset-0 z-50 flex justify-end">
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsNotifDrawerOpen(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            />
-
-            {/* Drawer Body */}
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="relative w-full max-w-md h-full bg-transparent border-l border-white/10 shadow-2xl flex flex-col p-6 overflow-y-auto z-10 text-left cursor-default"
-            >
-              <div className="flex items-center justify-between pb-4 border-b border-white/10">
-                <div className="flex items-center gap-2">
-                  <Bell className="w-5 h-5 text-indigo-400" />
-                  <h2 className="text-lg font-bold text-slate-100 font-display">Real-time Sync Inbox</h2>
-                </div>
-                <button
-                  onClick={() => setIsNotifDrawerOpen(false)}
-                  className="p-1 px-3 text-xs bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 hover:text-slate-100 rounded-lg transition-colors cursor-pointer"
-                >
-                  Close
-                </button>
-              </div>
-
-              <div className="flex-1 py-4 space-y-3 overflow-y-auto pr-1">
-                {visibleNotifs.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500">
-                    <Bell className="w-12 h-12 stroke-1 mb-3 opacity-30" />
-                    <p className="text-xs">No notifications on file.</p>
-                    <p className="text-[10px] text-slate-400 mt-1">Real-time status announcements and TL feedback logs will populate here.</p>
-                  </div>
-                ) : (
-                  visibleNotifs.map(notif => {
-                    const isUnread = !notif.seenByUsers || !notif.seenByUsers.includes(currentUser?.name || '');
-                    return (
-                      <div
-                        key={notif.id}
-                        onClick={() => handleMarkSingleNotifAsRead(notif.id)}
-                        className={`p-4 rounded-xl border transition-all text-left relative cursor-pointer group ${
-                          isUnread
-                            ? 'bg-indigo-500/10 border-indigo-500/30'
-                            : 'bg-white/5 border-white/5 hover:border-white/10'
-                        }`}
-                      >
-                        {isUnread && (
-                          <span className="absolute top-4 right-4 w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
-                        )}
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-indigo-300 font-mono mb-1">
-                          {notif.type}
-                        </p>
-                        <p className="text-xs font-bold text-slate-100 mb-1">{notif.title}</p>
-                        <p className="text-slate-300 text-[11px] leading-relaxed mb-2">{notif.message}</p>
-                        <p className="text-[9px] text-slate-500">{new Date(notif.createdAt).toLocaleTimeString()} - {new Date(notif.createdAt).toLocaleDateString()}</p>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-
-              {visibleNotifs.length > 0 && (
-                <div className="pt-4 border-t border-white/10 flex flex-col gap-2">
-                  <button
-                    onClick={handleMarkAllNotifsAsRead}
-                    className="w-full py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-slate-100 rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/10"
-                  >
-                    Mark All as Read
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (window.confirm("Clear notifications?")) {
-                        if (!currentUser) return;
-                        
-                        visibleNotifs.forEach(n => {
-                          const clearedSet = new Set(n.clearedByUsers || []);
-                          clearedSet.add(currentUser.name);
-                          
-                          const updatedNotif = { ...n, clearedByUsers: Array.from(clearedSet) };
-                          updateDoc(doc(db, "notifications", n.id), { clearedByUsers: updatedNotif.clearedByUsers })
-                            .catch(e => console.error("Error clearing notification:", e));
-                            
-                          // Update local state early for responsiveness
-                          setNotifications(prev => prev.map(pn => pn.id === n.id ? updatedNotif : pn));
-                        });
-                        
-                        toast.success("Inbox cleared.");
-                      }
-                    }}
-                    className="w-full py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 hover:text-slate-100 rounded-xl text-xs font-semibold transition-colors"
-                  >
-                    Clear My Inbox
-                  </button>
-                </div>
-              )}
-            </motion.div>
+                        </AnimatePresence>
+            </main>
           </div>
         )}
-      </AnimatePresence>
-          </div>
-        )}
-      {selectedShiftForActivities && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] p-4 flex items-center justify-center">
-          <div className="bg-slate-900 border border-indigo-500/30 rounded-3xl p-6 shadow-2xl space-y-5 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-start border-b border-white/5 pb-4">
-              <div>
-                <h3 className="text-lg font-black text-slate-100 flex items-center gap-2">
-                  <Activity className="w-5 h-5 text-indigo-400" />
-                  Intraday Activity Planner
-                </h3>
-                <p className="text-xs text-slate-400 font-mono mt-1">Agent: {selectedShiftForActivities.agentName} | Date: {selectedShiftForActivities.date}</p>
-                <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-widest mt-1">Base Shift: {selectedShiftForActivities.shiftLabel}</p>
-              </div>
-              <button 
-                onClick={() => setSelectedShiftForActivities(null)}
-                className="text-slate-500 hover:text-slate-300 px-2 py-1 bg-white/5 rounded-lg text-lg font-bold"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {(!selectedShiftForActivities.activities || selectedShiftForActivities.activities.length === 0) ? (
-                <div className="text-center py-6 border border-dashed border-white/10 rounded-xl bg-black/20">
-                  <p className="text-xs text-slate-500">No intraday activities configured.</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {[...selectedShiftForActivities.activities].sort((a,b) => a.startTime.localeCompare(b.startTime)).map((act, idx) => (
-                    <div key={act.id} className="flex items-center gap-3 bg-white/5 border border-white/10 p-3 rounded-xl">
-                      <div className="flex-1 grid grid-cols-3 gap-2">
-                        <select 
-                          value={act.label}
-                          onChange={(e) => {
-                            const newActs = [...(selectedShiftForActivities.activities || [])];
-                            newActs[idx].label = e.target.value;
-                            setSelectedShiftForActivities({...selectedShiftForActivities, activities: newActs});
-                          }}
-                          className="bg-black/50 border border-white/10 rounded px-2 py-1 text-xs text-slate-200"
-                        >
-                          <option value="Work">Work</option>
-                          <option value="Break">Break</option>
-                          <option value="Lunch">Lunch</option>
-                          <option value="Meeting">Meeting</option>
-                          <option value="Coaching">Coaching</option>
-                          <option value="Training">Training</option>
-                          <option value="Project">Project</option>
-                        </select>
-                        <input 
-                          type="time" 
-                          value={act.startTime}
-                          onChange={(e) => {
-                            const newActs = [...(selectedShiftForActivities.activities || [])];
-                            newActs[idx].startTime = e.target.value;
-                            setSelectedShiftForActivities({...selectedShiftForActivities, activities: newActs});
-                          }}
-                          className="bg-black/50 border border-white/10 rounded px-2 py-1 text-xs text-slate-200" 
-                        />
-                        <input 
-                          type="time" 
-                          value={act.endTime}
-                          onChange={(e) => {
-                            const newActs = [...(selectedShiftForActivities.activities || [])];
-                            newActs[idx].endTime = e.target.value;
-                            setSelectedShiftForActivities({...selectedShiftForActivities, activities: newActs});
-                          }}
-                          className="bg-black/50 border border-white/10 rounded px-2 py-1 text-xs text-slate-200" 
-                        />
-                      </div>
-                      <button 
-                        onClick={() => {
-                           const newActs = selectedShiftForActivities.activities!.filter(a => a.id !== act.id);
-                           setSelectedShiftForActivities({...selectedShiftForActivities, activities: newActs});
-                        }}
-                        className="text-rose-400 hover:text-rose-300 bg-rose-500/10 p-1.5 rounded"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <button
-                onClick={() => {
-                  const newActs = [...(selectedShiftForActivities.activities || [])];
-                  newActs.push({
-                    id: `act_${Date.now()}_${Math.random().toString(36).substr(2,9)}`,
-                    label: 'Break',
-                    startTime: '12:00',
-                    endTime: '12:30'
-                  });
-                  setSelectedShiftForActivities({...selectedShiftForActivities, activities: newActs});
-                }}
-                className="w-full py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 border-dashed rounded-xl text-xs font-bold transition-all flex justify-center items-center gap-2"
-              >
-                <PlusCircle className="w-4 h-4" /> Add Activity Interval
-              </button>
-            </div>
-
-            <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
-              <button 
-                onClick={() => setSelectedShiftForActivities(null)}
-                className="px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-300 rounded-lg text-xs font-bold"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={() => {
-                  const mergedSchedules = [...schedules];
-                  const existingIdx = mergedSchedules.findIndex(s => s.id === selectedShiftForActivities.id);
-                  if (existingIdx !== -1) {
-                    mergedSchedules[existingIdx] = selectedShiftForActivities;
-                  } else {
-                    mergedSchedules.push(selectedShiftForActivities);
-                  }
-                  setSchedules(mergedSchedules);
-                  setDoc(doc(db, "schedules", selectedShiftForActivities.id), selectedShiftForActivities).catch(e => console.error("Write Error:", e));
-                  
-                  setSelectedShiftForActivities(null);
-                  toast.success("Intraday Schedule Updated Successfully!");
-                }}
-                className="px-6 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-900 rounded-lg text-xs font-black shadow-lg shadow-emerald-500/20"
-              >
-                Save Timeline
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {editingItem && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-[99999] p-4 flex items-center justify-center overflow-y-auto">
-          <div className="bg-[#0f111a] border border-emerald-500/30 rounded-3xl p-6 shadow-2xl space-y-5 max-w-lg w-full max-h-[90vh] overflow-y-auto text-left relative">
-            <div className="flex justify-between items-start border-b border-white/5 pb-4">
-              <div>
-                <h3 className="text-lg font-black text-slate-100 flex items-center gap-2">
-                  <Pencil className="w-5 h-5 text-emerald-400" />
-                  Edit {editingItem.type === 'inquiry' ? 'Inquiry' : 
-                        editingItem.type === 'scheduling_request' ? 'Scheduling Request' :
-                        editingItem.type === 'tt_request' ? 'Fintech Installment Request' :
-                        editingItem.type === 'tt_complaint' ? 'Fintech Dispute / Complaint' :
-                        editingItem.type === 'client_comm' ? 'Client Comm Request' :
-                        editingItem.type === 'case' ? 'Case Record' : 'Item'}
-                </h3>
-                <p className="text-xs text-slate-400 font-mono mt-1">
-                  Time Remaining: <span className="text-emerald-400 font-bold">{getRemainingEditTimeStr(editingItem.data.createdAt)}</span>
-                </p>
-              </div>
-              <button 
-                onClick={() => setEditingItem(null)}
-                className="text-slate-500 hover:text-slate-300 px-2.5 py-1 bg-white/5 rounded-lg text-lg font-bold"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleEditSave} className="space-y-4">
-              {editingItem.type === 'inquiry' && (
-                <>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Patient Name</label>
-                    <input 
-                      type="text" 
-                      value={editingItem.data.patientName || ''} 
-                      onChange={(e) => setEditingItem({
-                        ...editingItem,
-                        data: { ...editingItem.data, patientName: e.target.value }
-                      })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Phone Number</label>
-                    <input 
-                      type="text" 
-                      value={editingItem.data.phoneNumber || ''} 
-                      onChange={(e) => setEditingItem({
-                        ...editingItem,
-                        data: { ...editingItem.data, phoneNumber: e.target.value }
-                      })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Inquiry Description</label>
-                    <textarea 
-                      value={editingItem.data.inquiry || ''} 
-                      onChange={(e) => setEditingItem({
-                        ...editingItem,
-                        data: { ...editingItem.data, inquiry: e.target.value }
-                      })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 min-h-[100px]"
-                      required
-                    />
-                  </div>
-                </>
-              )}
-
-              {editingItem.type === 'scheduling_request' && (
-                <>
-                  {editingItem.data.type === 'swap' ? (
-                    <>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-300">Date</label>
-                        <input 
-                          type="date" 
-                          value={editingItem.data.date || ''} 
-                          onChange={(e) => setEditingItem({
-                            ...editingItem,
-                            data: { ...editingItem.data, date: e.target.value }
-                          })}
-                          className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-300">Shift</label>
-                        <input 
-                          type="text" 
-                          value={editingItem.data.shift || ''} 
-                          onChange={(e) => setEditingItem({
-                            ...editingItem,
-                            data: { ...editingItem.data, shift: e.target.value }
-                          })}
-                          className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-300">Swap With Agent</label>
-                        <input 
-                          type="text" 
-                          value={editingItem.data.swapWithAgent || ''} 
-                          onChange={(e) => setEditingItem({
-                            ...editingItem,
-                            data: { ...editingItem.data, swapWithAgent: e.target.value }
-                          })}
-                          className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-300">Swap With Shift</label>
-                        <input 
-                          type="text" 
-                          value={editingItem.data.swapWithShift || ''} 
-                          onChange={(e) => setEditingItem({
-                            ...editingItem,
-                            data: { ...editingItem.data, swapWithShift: e.target.value }
-                          })}
-                          className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                          required
-                        />
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-300">Start Date</label>
-                        <input 
-                          type="date" 
-                          value={editingItem.data.startDate || ''} 
-                          onChange={(e) => setEditingItem({
-                            ...editingItem,
-                            data: { ...editingItem.data, startDate: e.target.value }
-                          })}
-                          className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-300">End Date</label>
-                        <input 
-                          type="date" 
-                          value={editingItem.data.endDate || ''} 
-                          onChange={(e) => setEditingItem({
-                            ...editingItem,
-                            data: { ...editingItem.data, endDate: e.target.value }
-                          })}
-                          className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                          required
-                        />
-                      </div>
-                    </>
-                  )}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Notes / Details</label>
-                    <textarea 
-                      value={editingItem.data.notes || ''} 
-                      onChange={(e) => setEditingItem({
-                        ...editingItem,
-                        data: { ...editingItem.data, notes: e.target.value }
-                      })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 min-h-[80px]"
-                    />
-                  </div>
-                </>
-              )}
-
-              {editingItem.type === 'tt_request' && (
-                <>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Provider</label>
-                      <select 
-                        value={editingItem.data.platform || 'tabby'} 
-                        onChange={(e) => setEditingItem({
-                          ...editingItem,
-                          data: { ...editingItem.data, platform: e.target.value }
-                        })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3- py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                      >
-                        <option value="tabby">Tabby</option>
-                        <option value="tamara">Tamara</option>
-                        <option value="one_time_payment">One-Time Payment</option>
-                      </select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Clinic Name</label>
-                      <input 
-                        type="text" 
-                        value={editingItem.data.clinicName || ''} 
-                        onChange={(e) => setEditingItem({
-                          ...editingItem,
-                          data: { ...editingItem.data, clinicName: e.target.value }
-                        })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Patient Name</label>
-                      <input 
-                        type="text" 
-                        value={editingItem.data.patientName || ''} 
-                        onChange={(e) => setEditingItem({
-                          ...editingItem,
-                          data: { ...editingItem.data, patientName: e.target.value }
-                        })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">File Number</label>
-                      <input 
-                        type="text" 
-                        value={editingItem.data.fileNumber || ''} 
-                        onChange={(e) => setEditingItem({
-                          ...editingItem,
-                          data: { ...editingItem.data, fileNumber: e.target.value }
-                        })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Phone Number</label>
-                      <input 
-                        type="text" 
-                        value={editingItem.data.phoneNumber || ''} 
-                        onChange={(e) => setEditingItem({
-                          ...editingItem,
-                          data: { ...editingItem.data, phoneNumber: e.target.value }
-                        })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">ID Number</label>
-                      <input 
-                        type="text" 
-                        value={editingItem.data.idNumber || ''} 
-                        onChange={(e) => setEditingItem({
-                          ...editingItem,
-                          data: { ...editingItem.data, idNumber: e.target.value }
-                        })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Price (Without Tax)</label>
-                    <input 
-                      type="text" 
-                      value={editingItem.data.priceWithoutTax || ''} 
-                      onChange={(e) => setEditingItem({
-                        ...editingItem,
-                        data: { ...editingItem.data, priceWithoutTax: e.target.value }
-                      })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Notes / Details</label>
-                    <textarea 
-                      value={editingItem.data.notes || ''} 
-                      onChange={(e) => setEditingItem({
-                        ...editingItem,
-                        data: { ...editingItem.data, notes: e.target.value }
-                      })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 min-h-[60px]"
-                    />
-                  </div>
-                </>
-              )}
-
-              {editingItem.type === 'tt_complaint' && (
-                <>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Patient Name</label>
-                      <input 
-                        type="text" 
-                        value={editingItem.data.patientName || ''} 
-                        onChange={(e) => setEditingItem({
-                          ...editingItem,
-                          data: { ...editingItem.data, patientName: e.target.value }
-                        })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">File Number</label>
-                      <input 
-                        type="text" 
-                        value={editingItem.data.fileNumber || ''} 
-                        onChange={(e) => setEditingItem({
-                          ...editingItem,
-                          data: { ...editingItem.data, fileNumber: e.target.value }
-                        })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Phone Number</label>
-                      <input 
-                        type="text" 
-                        value={editingItem.data.phoneNumber || ''} 
-                        onChange={(e) => setEditingItem({
-                          ...editingItem,
-                          data: { ...editingItem.data, phoneNumber: e.target.value }
-                        })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Clinic Name</label>
-                      <input 
-                        type="text" 
-                        value={editingItem.data.clinicName || ''} 
-                        onChange={(e) => setEditingItem({
-                          ...editingItem,
-                          data: { ...editingItem.data, clinicName: e.target.value }
-                        })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Complaint Details</label>
-                    <textarea 
-                      value={editingItem.data.complaintDetails || ''} 
-                      onChange={(e) => setEditingItem({
-                        ...editingItem,
-                        data: { ...editingItem.data, complaintDetails: e.target.value }
-                      })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 min-h-[100px]"
-                      required
-                    />
-                  </div>
-                </>
-              )}
-
-              {editingItem.type === 'client_comm' && (
-                <>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Phone Number</label>
-                      <input 
-                        type="text" 
-                        value={editingItem.data.phoneNumber || ''} 
-                        onChange={(e) => setEditingItem({
-                          ...editingItem,
-                          data: { ...editingItem.data, phoneNumber: e.target.value }
-                        })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Language</label>
-                      <select 
-                        value={editingItem.data.language || 'Arabic'} 
-                        onChange={(e) => setEditingItem({
-                          ...editingItem,
-                          data: { ...editingItem.data, language: e.target.value }
-                        })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                      >
-                        <option value="Arabic">Arabic Only</option>
-                        <option value="English">English / Bilingual</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Clinic Name</label>
-                    <input 
-                      type="text" 
-                      value={editingItem.data.clinicName || ''} 
-                      onChange={(e) => setEditingItem({
-                        ...editingItem,
-                        data: { ...editingItem.data, clinicName: e.target.value }
-                      })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Notes / Details</label>
-                    <textarea 
-                      value={editingItem.data.notes || ''} 
-                      onChange={(e) => setEditingItem({
-                        ...editingItem,
-                        data: { ...editingItem.data, notes: e.target.value }
-                      })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 min-h-[100px]"
-                      required
-                    />
-                  </div>
-                </>
-              )}
-
-              {editingItem.type === 'case' && (
-                <>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Patient Name</label>
-                      <input 
-                        type="text" 
-                        value={editingItem.data.patientName || ''} 
-                        onChange={(e) => setEditingItem({
-                          ...editingItem,
-                          data: { ...editingItem.data, patientName: e.target.value }
-                        })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Phone Number</label>
-                      <input 
-                        type="text" 
-                        value={editingItem.data.phoneNumber || ''} 
-                        onChange={(e) => setEditingItem({
-                          ...editingItem,
-                          data: { ...editingItem.data, phoneNumber: e.target.value }
-                        })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Lead Source</label>
-                      <input 
-                        type="text" 
-                        value={editingItem.data.leadSource || ''} 
-                        onChange={(e) => setEditingItem({
-                          ...editingItem,
-                          data: { ...editingItem.data, leadSource: e.target.value }
-                        })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Branch Location</label>
-                      <input 
-                        type="text" 
-                        value={editingItem.data.branch || ''} 
-                        onChange={(e) => setEditingItem({
-                          ...editingItem,
-                          data: { ...editingItem.data, branch: e.target.value }
-                        })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Service Request</label>
-                      <input 
-                        type="text" 
-                        value={editingItem.data.service || ''} 
-                        onChange={(e) => setEditingItem({
-                          ...editingItem,
-                          data: { ...editingItem.data, service: e.target.value }
-                        })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Call Type</label>
-                      <input 
-                        type="text" 
-                        value={editingItem.data.callType || ''} 
-                        onChange={(e) => setEditingItem({
-                          ...editingItem,
-                          data: { ...editingItem.data, callType: e.target.value }
-                        })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Ticket Type</label>
-                      <input 
-                        type="text" 
-                        value={editingItem.data.ticketType || ''} 
-                        onChange={(e) => setEditingItem({
-                          ...editingItem,
-                          data: { ...editingItem.data, ticketType: e.target.value }
-                        })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300">Ticket Status</label>
-                      <select 
-                        value={editingItem.data.ticketStatus || 'Open'} 
-                        onChange={(e) => setEditingItem({
-                          ...editingItem,
-                          data: { ...editingItem.data, ticketStatus: e.target.value }
-                        })}
-                        className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                      >
-                        <option value="Open">Open</option>
-                        <option value="Closed">Closed</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Patient Type</label>
-                    <select 
-                      value={editingItem.data.patientType || 'New'} 
-                      onChange={(e) => setEditingItem({
-                        ...editingItem,
-                        data: { ...editingItem.data, patientType: e.target.value }
-                      })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                    >
-                      <option value="New">New Patient</option>
-                      <option value="Old">Old Patient</option>
-                    </select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300">Inquiry details</label>
-                    <textarea 
-                      value={editingItem.data.inquiry || ''} 
-                      onChange={(e) => setEditingItem({
-                        ...editingItem,
-                        data: { ...editingItem.data, inquiry: e.target.value }
-                      })}
-                      className="w-full bg-[#161622] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 min-h-[80px]"
-                      required
-                    />
-                  </div>
-                </>
-              )}
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-white/5 font-sans">
-                <button 
-                  type="button"
-                  onClick={() => setEditingItem(null)}
-                  className="px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit"
-                  className="px-6 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-900 rounded-xl text-[11px] font-black tracking-wide shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
-                >
-                  Save Edited Changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
       </div>
-      <footer className="mt-auto border-t border-white/10 bg-black/40 backdrop-blur-md p-4 text-center text-xs text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-2 max-w-7xl mx-auto w-full">
-        <div className="flex items-center gap-4">
-          <span>📅 standalone local database</span>
-          <span>🔒 custom client encryption active</span>
-          <span className="flex items-center gap-2">
-            🚀 version {CURRENT_APP_VERSION}.0
-            <button 
-              onClick={() => {
-                toast.loading("Refetching system build...");
-                if ('caches' in window) {
-                   caches.keys().then((names) => {
-                       for (let name of names) caches.delete(name);
-                   });
-                }
-                setTimeout(() => window.location.reload(), 1000);
-              }}
-              className="ml-2 px-2 py-0.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[8px] font-black uppercase tracking-tighter transition-all active:scale-95 cursor-pointer"
-            >
-              Update App
-            </button>
-          </span>
-        </div>
-      </footer>
     </div>
   );
 }
+
