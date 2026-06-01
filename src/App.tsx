@@ -2,12 +2,13 @@ import { ScheduleUpload } from './components/ScheduleUpload';
 import * as mammoth from 'mammoth';
 import React, { useState, useEffect, FormEvent, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { doc, onSnapshot as originalOnSnapshot, collection, setDoc, updateDoc, deleteDoc, query, getDocs, writeBatch, disableNetwork, where, orderBy } from 'firebase/firestore';
+import { doc, onSnapshot, collection, setDoc, updateDoc, deleteDoc, query, getDocs, writeBatch, disableNetwork, where, orderBy } from 'firebase/firestore';
 import { db, initAuth, googleSignIn, getAccessToken, logout } from './firebase';
 
 
 // Intercept onSnapshot to handle quota exceeded errors and stop retries
-const onSnapshot = (...args: any[]): any => {
+const originalOnSnapshot = onSnapshot;
+const customOnSnapshot = (...args: any[]): any => {
   if (args.length >= 2 && typeof args[1] === 'function') {
     const errorObserver = typeof args[2] === 'function' ? args[2] : undefined;
     const newErrorHandler = (err: any) => {
