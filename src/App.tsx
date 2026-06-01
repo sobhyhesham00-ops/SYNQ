@@ -793,11 +793,7 @@ export default function App() {
       console.error('TimeLogs Sync Error:', error);
       toast.error('Sync error on timelogs. They may not appear updated.');
     });
-    const unsubSched = onSnapshot(collection(db, "schedules"), snap => {
-      const arr = snap.docs.map(d => d.data() as ScheduledShift);
-      setSchedules(arr);
-      localStorage.setItem('sched_schedules', JSON.stringify(arr));
-    });
+    const unsubSched = () => {};
     let isAnnouncementsInitialized = false;
     const unsubAnnouncements = onSnapshot(collection(db, "announcements"), snap => {
       console.log('Got announcement snapshot, document size:', snap.size);
@@ -876,11 +872,7 @@ export default function App() {
       setCases(arr);
       localStorage.setItem('sched_cases', JSON.stringify(arr));
     });
-    const unsubOrders = onSnapshot(collection(db, "orders"), snap => {
-      const arr = snap.docs.map(d => d.data() as Order);
-      setOrders(arr);
-      localStorage.setItem('sched_orders', JSON.stringify(arr));
-    });
+    const unsubOrders = () => {};
     const unsubAgents = onSnapshot(doc(db, "system", "sched_agents_list"), snap => {
       // Intentionally empty or minimal - we prefer the dynamic list from unsubUsers/directory
     });
@@ -938,65 +930,7 @@ export default function App() {
       }
     });
 
-    let isNotifsInitialized = false;
-    const unsubNotifs = onSnapshot(collection(db, "notifications"), snap => {
-      const arr = snap.docs.map(d => d.data() as SystemNotification);
-      arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      
-      const filteredArr = arr.filter(notif => {
-        if (!currentUserRef.current) return true;
-        
-        const curUser = currentUserRef.current;
-        const curSupport = supportAssignmentsRef.current;
-        const isUserTLOrSupport = curUser ? (
-          curUser.role === 'tl' || 
-          curUser.role === 'qa' || 
-          isTLName(curUser.name) || 
-          (curSupport && !!curSupport[curUser.name])
-        ) : false;
-
-        let isTargeted = notif.targetAgent === 'all' || 
-                           (isUserTLOrSupport && notif.targetAgent === 'tl') ||
-                           (curUser && notif.targetAgent.toLowerCase() === curUser.name.toLowerCase());
-                           
-        if (!isTargeted && notif.targetAgent.toLowerCase().startsWith('team:')) {
-          const teamTLName = notif.targetAgent.split(':')[1]?.toLowerCase() || '';
-          const curUserTL = getAgentTL(curUser.name).toLowerCase();
-          const curUserName = curUser.name.toLowerCase();
-          isTargeted = (curUserName === teamTLName) || (curUserTL === teamTLName);
-        }
-        return isTargeted;
-      });
-
-      const latest = filteredArr[0];
-      if (latest) {
-        if (!isNotifsInitialized) {
-          isNotifsInitialized = true;
-          localStorage.setItem('sched_last_notified_notif_id', latest.id);
-        } else if (currentUserRef.current) {
-          const lastNotifiedNotifId = localStorage.getItem('sched_last_notified_notif_id') || '';
-          if (latest.id !== lastNotifiedNotifId) {
-            localStorage.setItem('sched_last_notified_notif_id', latest.id);
-            
-            const isAnnouncementNotification = latest.title.toLowerCase().includes('announcement') || latest.title.toLowerCase().includes('broadcast');
-
-            if (!isAnnouncementNotification) {
-              triggerNotificationAlert();
-              toast.info(
-                <div className="flex flex-col gap-1 text-left">
-                  <span className="font-bold text-sm text-indigo-400">🔔 {latest.title}</span>
-                  <span className="text-xs text-slate-200 line-clamp-2">{latest.message}</span>
-                </div>,
-                { duration: 8000 }
-              );
-            }
-          }
-        }
-      }
-
-      setNotifications(filteredArr);
-      localStorage.setItem('sched_notifications', JSON.stringify(filteredArr));
-    });
+    const unsubNotifs = () => {};
 
     const unsubFeedbacks = onSnapshot(collection(db, "tl_feedbacks"), snap => {
       const arr = snap.docs.map(d => d.data() as TlFeedback);
@@ -1026,11 +960,7 @@ export default function App() {
       }
     });
 
-    const unsubTodos = onSnapshot(collection(db, "todos"), snap => {
-      const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      setTodos(data);
-      setStorageItem('agent_todos', data);
-    });
+    const unsubTodos = () => {};
 
     const unsubUsers = onSnapshot(collection(db, "users"), snap => {
       const dbUsers = snap.docs.map(d => ({ id: d.id, ...d.data() } as any));
@@ -1149,6 +1079,100 @@ export default function App() {
     } else {
       localStorage.removeItem('sched_current_user');
     }
+  }, [currentUser]);
+
+  // Real-time Firestore Sync with [currentUser] dependency for Schedules, Notifications, Orders, and Todos as requested
+  useEffect(() => {
+    if (!currentUser || !currentUser.id) return;
+
+    // 1. Schedules Real-time Sync
+    const unsubSched = onSnapshot(
+      collection(db, "schedules"),
+      (snapshot) => {
+        const data = snapshot.docs.map(d => d.data() as ScheduledShift);
+        setSchedules(data);
+        localStorage.setItem('sched_schedules', JSON.stringify(data));
+      },
+      (error) => {
+        console.error("Schedules Real-time Sync Error:", error);
+      }
+    );
+
+    // 2. Notifications Real-time Sync
+    const qNotifs = query(collection(db, "notifications"), where("userId", "==", currentUser.id));
+    let isNotifsInitialized = false;
+    const unsubNotifs = onSnapshot(
+      qNotifs,
+      (snapshot) => {
+        const arr = snapshot.docs.map(d => d.data() as SystemNotification);
+        arr.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+        
+        const latest = arr[0];
+        if (latest) {
+          if (!isNotifsInitialized) {
+            isNotifsInitialized = true;
+            localStorage.setItem('sched_last_notified_notif_id', latest.id);
+          } else {
+            const lastNotifiedNotifId = localStorage.getItem('sched_last_notified_notif_id') || '';
+            if (latest.id !== lastNotifiedNotifId) {
+              localStorage.setItem('sched_last_notified_notif_id', latest.id);
+              
+              const isAnnouncementNotification = latest.title.toLowerCase().includes('announcement') || latest.title.toLowerCase().includes('broadcast');
+
+              if (!isAnnouncementNotification) {
+                triggerNotificationAlert();
+                toast.info(
+                  <div className="flex flex-col gap-1 text-left">
+                    <span className="font-bold text-sm text-indigo-400">🔔 {latest.title}</span>
+                    <span className="text-xs text-slate-200 line-clamp-2">{latest.message}</span>
+                  </div>,
+                  { duration: 8000 }
+                );
+              }
+            }
+          }
+        }
+
+        setNotifications(arr);
+        localStorage.setItem('sched_notifications', JSON.stringify(arr));
+      },
+      (error) => {
+        console.error("Notifications Real-time Sync Error:", error);
+      }
+    );
+
+    // 3. Orders/Requests Real-time Sync
+    const unsubOrders = onSnapshot(
+      collection(db, "orders"),
+      (snapshot) => {
+        const data = snapshot.docs.map(d => d.data() as Order);
+        setOrders(data);
+        localStorage.setItem('sched_orders', JSON.stringify(data));
+      },
+      (error) => {
+        console.error("Orders Real-time Sync Error:", error);
+      }
+    );
+
+    // 4. Todos Real-time Alignment Sync
+    const unsubTodos = onSnapshot(
+      collection(db, "todos"),
+      (snapshot) => {
+        const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        setTodos(data);
+        setStorageItem('agent_todos', data);
+      },
+      (error) => {
+        console.error("Todos Real-time Sync Error:", error);
+      }
+    );
+
+    return () => {
+      unsubSched();
+      unsubNotifs();
+      unsubOrders();
+      unsubTodos();
+    };
   }, [currentUser]);
 
   const isMasterAdmin = currentUser ? (
@@ -1375,7 +1399,8 @@ export default function App() {
       type,
       targetAgent,
       createdAt: new Date().toISOString(),
-      seenByUsers: []
+      seenByUsers: [],
+      userId: currentUser?.id || "all"
     };
     // Sync to state & local store which forwards to firestore
     setNotifications(prev => {

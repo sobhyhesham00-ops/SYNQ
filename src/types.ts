@@ -347,6 +347,7 @@ export interface SystemNotification {
   createdAt: string; // ISO string
   seenByUsers?: string[]; // list of names who have seen it
   clearedByUsers?: string[]; // list of names who have cleared/deleted it from their inbox
+  userId?: string; // specific user ID for real-time querying filter
 }
 
 export interface FeedbackReply {
