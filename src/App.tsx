@@ -12,9 +12,10 @@ const onSnapshot = (...args: any[]): any => {
     const errorObserver = typeof args[2] === 'function' ? args[2] : undefined;
     const newErrorHandler = (err: any) => {
       if (err.code === 'resource-exhausted' || (err.message && err.message.includes('Quota exceeded'))) {
-        console.warn('[Firestore Interceptor] Quota Exceeded! Disabling network to stop retries and use offline cache.');
-        disableNetwork(db).catch(console.error);
-      } else if (errorObserver) {
+        console.warn('[Firestore Interceptor] Quota Exceeded! Error:', err);
+        // disableNetwork(db).catch(console.error); // Removed to allow syncing to resume if quota opens up
+      } 
+      if (errorObserver) {
         errorObserver(err);
       }
     };
