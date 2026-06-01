@@ -2,7 +2,7 @@ import { ScheduleUpload } from './components/ScheduleUpload';
 import * as mammoth from 'mammoth';
 import React, { useState, useEffect, FormEvent, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { doc, onSnapshot as originalOnSnapshot, collection, setDoc, updateDoc, deleteDoc, query, getDocs, writeBatch, disableNetwork } from 'firebase/firestore';
+import { doc, onSnapshot as originalOnSnapshot, collection, setDoc, updateDoc, deleteDoc, query, getDocs, writeBatch, disableNetwork, where, orderBy } from 'firebase/firestore';
 import { db, initAuth, googleSignIn, getAccessToken, logout } from './firebase';
 
 
@@ -1599,11 +1599,7 @@ export default function App() {
     ]);
   });
 
-  // Schedules database (loaded or uploaded per week or per month)
-  const [uploadedSchedules, setUploadedSchedules] = useState<ScheduledShift[]>(() =>
-    readStoredJson<ScheduledShift[]>(STORAGE_KEYS.schedules, [])
-  );
-  
+
   // Knowledge Base database and states
   const [knowledgeBaseDocuments, setKnowledgeBaseDocuments] = useState<any[]>(() =>
     readStoredJson<any[]>(STORAGE_KEYS.knowledgeBase, [])
@@ -1868,38 +1864,20 @@ export default function App() {
     readStoredJson<ScheduledShift[]>('sched_schedules', [])
   );
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.schedules, JSON.stringify(uploadedSchedules));
-  }, [uploadedSchedules]);
 
   const clock = systemTime;
   const schedules = useMemo(() => {
     if (isSchedulesCleared) {
       return [];
     }
-    if (uploadedSchedules.length > 0) {
-      return uploadedSchedules;
-    }
     if (firestoreSchedules.length > 0) {
       return firestoreSchedules;
     }
     return getInitialSchedules(clock, INITIAL_AGENTS);
-  }, [uploadedSchedules, firestoreSchedules, clock, isSchedulesCleared]);
+  }, [firestoreSchedules, clock, isSchedulesCleared]);
 
   const setSchedules = (val: ScheduledShift[] | ((prev: ScheduledShift[]) => ScheduledShift[])) => {
     if (typeof val === 'function') {
-      setUploadedSchedules(prev => {
-        const fallback = prev.length > 0 ? prev : getInitialSchedules(clock, INITIAL_AGENTS);
-        const res = val(fallback);
-        if (res.length > 0) {
-          localStorage.removeItem('schedules_cleared_v1');
-          setIsSchedulesCleared(false);
-        } else {
-          localStorage.setItem('schedules_cleared_v1', 'true');
-          setIsSchedulesCleared(true);
-        }
-        return res;
-      });
       setFirestoreSchedules(prev => {
         const fallback = prev.length > 0 ? prev : getInitialSchedules(clock, INITIAL_AGENTS);
         const res = val(fallback);
@@ -1913,7 +1891,6 @@ export default function App() {
         return res;
       });
     } else {
-      setUploadedSchedules(val);
       setFirestoreSchedules(val);
       if (val.length > 0) {
         localStorage.removeItem('schedules_cleared_v1');
@@ -3340,6 +3317,13 @@ export default function App() {
         if (parsed.schedules.length > 0) {
           setSchedules(parsed.schedules);
           setStorageItem('sched_schedules', parsed.schedules);
+          
+          const batch = writeBatch(db);
+          parsed.schedules.forEach(s => {
+            batch.set(doc(db, "schedules", s.id), s);
+          });
+          batch.commit().catch(e => console.error("Batch schedules sync error:", e));
+          
           setRosterUploadSuccess(`${parsed.schedules.length} shifts successfully imported.`);
           toast.success(`${parsed.schedules.length} shifts imported`);
 
@@ -3372,10 +3356,8 @@ export default function App() {
   };
 
   const handleClearUploadedSchedules = () => {
-    setUploadedSchedules([]);
     setRosterUploadSuccess(null);
     setRosterUploadErrors([]);
-    localStorage.removeItem(STORAGE_KEYS.schedules);
     toast.success("Uploaded schedule cleared. Demo schedule restored.");
   };
 
@@ -12982,6 +12964,7 @@ export default function App() {
                                 const updatedRequests = [newReq, ...requests];
                                 setRequests(updatedRequests);
                                 setStorageItem('sched_requests', updatedRequests);
+                                setDoc(doc(db, "scheduling_requests", newReq.id), newReq).catch(console.error);
 
                                 toast.success("Successfully published shift trade listing to board!");
                                 setP2pSelectedDate('');
@@ -13091,6 +13074,7 @@ export default function App() {
                                                   const filtered = requests.filter(r => r.id !== req.id);
                                                   setRequests(filtered);
                                                   setStorageItem('sched_requests', filtered);
+                                                  deleteDoc(doc(db, "scheduling_requests", req.id)).catch(console.error);
                                                   toast.info("Deleted your trade offer listing.");
                                                 }}
                                                 className="px-2 py-1 bg-rose-500/10 hover:bg-rose-500 border border-rose-500/20 text-rose-300 hover:text-white rounded text-[10px] font-bold transition-all cursor-pointer font-sans"
