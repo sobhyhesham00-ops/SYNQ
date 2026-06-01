@@ -4184,25 +4184,26 @@ ${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
 
 ${ttNotes}` : autoNote;
 
-      const newRequest: TabbyTamaraRequest = {
+      const newRequest: any = {
         id: 'tt_' + Math.random().toString(36).substr(2, 9),
         agentName: currentUser.name,
         patientName: ttPatientName,
         fileNumber: ttFileNumber,
         isOldCustomer: ttIsOldCustomer,
-        idNumber: !ttIsOldCustomer ? ttIdNumber : undefined,
+        idNumber: !ttIsOldCustomer ? ttIdNumber : null,
         priceWithoutTax: ttPriceWithoutTax,
         phoneNumber: ttPhoneNumber,
         notes: finalNotes,
         createdAt: new Date().toISOString(),
         status: 'not_confirmed',
         customerContacted: 'not_contacted',
-        confirmedAt: undefined,
-        confirmedBy: undefined,
+        
+        
         platform: ttPlatform,
         clinicName: ttClinicName,
-        paymentScreenshot: activeScreenshot || undefined, photos: activePhotos, links: activeLinks
+        paymentScreenshot: activeScreenshot || null, photos: activePhotos, links: activeLinks
       };
+      Object.keys(newRequest).forEach(k => newRequest[k] === undefined && delete newRequest[k]);
 
       setTabbyTamaraRequests(prev => {
         const updated = [newRequest, ...prev];
@@ -4235,7 +4236,7 @@ ${ttNotes}` : autoNote;
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
       console.error(err);
-      toast.error("An error occurred while submitting fintech request. Please try again.");
+      toast.error("Fintech error: " + (err.message || err));
     } finally {
       setIsFormSubmitting(false);
     }
@@ -4256,8 +4257,8 @@ ${ttNotes}` : autoNote;
           status: status,
           confirmedAt: new Date().toISOString(),
           confirmedBy: currentUser.name,
-          paymentLink: paymentLink || undefined,
-          tlNotes: tlNotes || undefined,
+          paymentLink: paymentLink || null,
+          tlNotes: tlNotes || null,
           tlLinks: tlLinks || undefined
         };
         // Sync to Firestore
@@ -4340,13 +4341,13 @@ ${ttNotes}` : autoNote;
 
     setIsFormSubmitting(true);
     try {
-      const newComplaint: TabbyTamaraComplaint = {
+      const newComplaint: any = {
         id: 'tc_' + Math.random().toString(36).substr(2, 9),
         agentName: currentUser.name,
         patientName: tcPatientName,
         fileNumber: tcFileNumber,
         isOldCustomer: tcIsOldCustomer,
-        idNumber: !tcIsOldCustomer ? tcIdNumber : undefined,
+        idNumber: !tcIsOldCustomer ? tcIdNumber : null,
         imageUrl: activeScreenshot || tcImageUrl, photos: activePhotos, links: activeLinks,
         phoneNumber: tcPhoneNumber,
         complaintDetails: tcComplaintDetails,
@@ -4355,6 +4356,7 @@ ${ttNotes}` : autoNote;
         customerContacted: 'not_contacted',
         clinicName: tcClinicName
       };
+      Object.keys(newComplaint).forEach(k => newComplaint[k] === undefined && delete newComplaint[k]);
 
       setTabbyTamaraComplaints(prev => {
         const updated = [newComplaint, ...prev];
@@ -4405,7 +4407,7 @@ ${ttNotes}` : autoNote;
 
     setIsFormSubmitting(true);
     try {
-      const newComm: ClientCommunicationRequest = {
+      const newComm: any = {
         id: 'cc_' + Math.random().toString(36).substr(2, 9),
         callCenterAgentName: currentUser.name,
         clinicName: ccClinicName,
@@ -4414,8 +4416,9 @@ ${ttNotes}` : autoNote;
         notes: ccNotes,
         createdAt: new Date().toISOString(),
         status: 'pending',
-        screenshot: activeScreenshot || undefined, photos: activePhotos, links: activeLinks
+        screenshot: activeScreenshot || null, photos: activePhotos, links: activeLinks
       };
+      Object.keys(newComm).forEach(k => newComm[k] === undefined && delete newComm[k]);
 
       setClientComms(prev => {
         const updated = [newComm, ...prev];
