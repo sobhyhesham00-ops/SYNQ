@@ -10,6 +10,7 @@ export interface User {
   statusNote?: string;
   bio?: string;
   dailyUpdate?: string;
+  email?: string;
 }
 
 export interface QAQuestion {
@@ -155,6 +156,10 @@ export interface TabbyTamaraComplaint {
   clinicName: string;
   screenshot?: string; // Optional field for attachment screenshot
   replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
+  tlName?: string;
+  commentedAt?: string;
+  closedAt?: string;
+  text?: string;
 }
 
 export interface ClientCommunicationRequest {
@@ -173,6 +178,7 @@ export interface ClientCommunicationRequest {
   handlingNotes?: string;
   screenshot?: string; // Base64 screenshot
   replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
+  patientName?: string;
 }
 
 export interface CaseRecord {
@@ -191,6 +197,7 @@ export interface CaseRecord {
   ticketStatus?: string;
   callType?: string;
   replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
+  status?: string;
 }
 
 export interface DailyActivity {

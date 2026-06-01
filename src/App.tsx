@@ -154,6 +154,7 @@ import {
   INITIAL_AGENTS,
   SHIFTS,
   User,
+  Role,
   ScheduledShift,
   TimeLog,
   ActivityRecord,
@@ -1379,9 +1380,7 @@ export default function App() {
     });
     
     // Auto-sync real-time to firestore
-    try {
-      setDoc(doc(db, "notifications", newNotif.id), newNotif).catch(e=>console.error("Notif Error", e));
-    } catch(e) {}
+    setDoc(doc(db, "notifications", newNotif.id), newNotif).catch(e => console.error("Notif sync error:", e));
   };
 
   const handleMentionsInText = (text: string, contextTitle: string, sourceAuthorName: string) => {
@@ -1543,7 +1542,7 @@ export default function App() {
         seenSet.add(currentUser.name);
         const updatedNotif = { ...n, seenByUsers: Array.from(seenSet) };
         // Sync to Firestore
-        setDoc(doc(db, "notifications", n.id), updatedNotif).catch(e => console.error("Mark All Read Error:", e));
+        updateDoc(doc(db, "notifications", n.id), { seenByUsers: updatedNotif.seenByUsers }).catch(e => console.error("Mark All Read Error:", e));
         return updatedNotif;
       }
       return n;
@@ -1561,7 +1560,7 @@ export default function App() {
         seenSet.add(currentUser.name);
         const updatedNotif = { ...n, seenByUsers: Array.from(seenSet) };
         // Sync to Firestore
-        setDoc(doc(db, "notifications", n.id), updatedNotif).catch(e => console.error("Mark Single Read Error:", e));
+        updateDoc(doc(db, "notifications", n.id), { seenByUsers: updatedNotif.seenByUsers }).catch(e => console.error("Mark Single Read Error:", e));
         return updatedNotif;
       }
       return n;
@@ -1572,9 +1571,9 @@ export default function App() {
 
   useEffect(() => {
     if (currentUser) {
-      const derivedRole = isQAName(currentUser.name) ? 'qa' : isTLName(currentUser.name) ? 'tl' : 'agent';
+      const derivedRole = (isQAName(currentUser.name) ? 'qa' : isTLName(currentUser.name) ? 'tl' : 'agent') as Role;
       if (currentUser.role !== derivedRole) {
-        const updated = { ...currentUser, role: derivedRole };
+        const updated: User = { ...currentUser, role: derivedRole };
         setCurrentUser(updated);
         setStorageItem('sched_current_user', updated);
       }
@@ -2156,12 +2155,14 @@ export default function App() {
   const [swapTargetAgent, setSwapTargetAgent] = useState('');
   const [swapTargetShift, setSwapTargetShift] = useState(SHIFTS[1].label);
   const [swapNotes, setSwapNotes] = useState('');
+  const [swapScreenshot, setSwapScreenshot] = useState<string | null>(null);
 
   // P2P Trade Form States
   const [p2pSelectedDate, setP2pSelectedDate] = useState('');
   const [p2pTargetAgent, setP2pTargetAgent] = useState('');
   const [p2pTargetShift, setP2pTargetShift] = useState(SHIFTS[1].label);
   const [p2pNotes, setP2pNotes] = useState('');
+  const [p2pScreenshot, setP2pScreenshot] = useState<string | null>(null);
 
   // Manual Roster Submission Form States
   const [manualRosterAgent, setManualRosterAgent] = useState('');
@@ -2173,6 +2174,7 @@ export default function App() {
   const [annualStart, setAnnualStart] = useState('');
   const [annualEnd, setAnnualEnd] = useState('');
   const [annualNotes, setAnnualNotes] = useState('');
+  const [annualScreenshot, setAnnualScreenshot] = useState<string | null>(null);
 
   // Report Period Selection State
   const [reportPeriod, setReportPeriod] = useState<'day' | 'week' | 'month' | 'year'>('month');
@@ -2607,8 +2609,6 @@ export default function App() {
             targetNotifUser,
             `overstay_tl_${notifKey}`
           );
-          
-          toast.warning(`[Compliance Alert] ${formatAgentName(agent)} exceeded ${readableType} limit!`);
         }
       }
     });
@@ -2659,9 +2659,9 @@ export default function App() {
               `❌ Absence Warning: ${formatAgentName(agent)} did not clock in`,
               `Agent ${formatAgentName(agent)} was scheduled for shift ${shiftLabel} today starting at ${startHourStr}, but has failed to clock in within 30 minutes of shift commencement.`,
               "absence",
-              targetNotifUser
+              targetNotifUser,
+              `absence_tl_${notifKey}`
             );
-            toast.error(`[Shift Alert] ${formatAgentName(agent)} is absent for today's shift!`);
           }
         }
       }
@@ -2730,7 +2730,8 @@ export default function App() {
         swapWithShift: swapTargetShift,
         status: 'pending_partner',
         createdAt: new Date().toISOString(),
-        notes: swapNotes
+        notes: swapNotes,
+        screenshot: swapScreenshot ? swapScreenshot : undefined
       };
 
       const updated = [newRequest, ...requests];
@@ -2750,6 +2751,7 @@ export default function App() {
       // Reset form
       setSwapDate('');
       setSwapNotes('');
+      setSwapScreenshot(null);
 
       setSubmissionConfirmation({
         title: "Swap Filed Successfully! 🔄",
@@ -2800,7 +2802,8 @@ export default function App() {
         endDate: annualEnd,
         status: 'pending',
         createdAt: new Date().toISOString(),
-        notes: annualNotes
+        notes: annualNotes,
+        screenshot: annualScreenshot ? annualScreenshot : undefined
       };
 
       const updated = [newRequest, ...requests];
@@ -2821,6 +2824,7 @@ export default function App() {
       setAnnualStart('');
       setAnnualEnd('');
       setAnnualNotes('');
+      setAnnualScreenshot(null);
 
       setSubmissionConfirmation({
         title: "Annual Leave Filed! ✈️",
@@ -3063,6 +3067,55 @@ export default function App() {
     const link = document.createElement('a');
     link.href = url;
     link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const downloadRtmLiveMetricsDigest = () => {
+    let digest = `RTM Live Attendance Digest - ${new Date().toLocaleString()}\n`;
+    digest += "=================================================\n\n";
+    
+    const working: string[] = [];
+    const breaks: string[] = [];
+    const lunches: string[] = [];
+    const restrooms: string[] = [];
+    const meetings: string[] = [];
+    const oneOnOne: string[] = [];
+    const offlines: string[] = [];
+    
+    agentsList.forEach(aName => {
+        const log = timeLogs.find(l => l.agentName?.toLowerCase() === aName.toLowerCase() && !l.clockOut);
+        if(!log) {
+            offlines.push(aName);
+        } else {
+            if(log.status === 'working') working.push(aName);
+            else if(log.status === 'break') breaks.push(aName);
+            else if(log.status === 'lunch') lunches.push(aName);
+            else if(log.status === 'restroom') restrooms.push(aName);
+            else if(log.status === 'meeting') meetings.push(aName);
+            else if(log.status === 'one_on_one') oneOnOne.push(aName);
+            else if((log.status as string) === 'offline') offlines.push(aName);
+            else working.push(aName);
+        }
+    });
+
+    digest += `Active Staff Count: ${agentsList.length - offlines.length}\n`;
+    digest += "-------------------------------------------------\n";
+
+    digest += `Working: ${working.join(', ') || 'None'}\n`;
+    digest += `On Break: ${breaks.join(', ') || 'None'}\n`;
+    digest += `On Lunch: ${lunches.join(', ') || 'None'}\n`;
+    digest += `Restroom: ${restrooms.join(', ') || 'None'}\n`;
+    digest += `Meeting: ${meetings.join(', ') || 'None'}\n`;
+    digest += `1:1 Session: ${oneOnOne.join(', ') || 'None'}\n`;
+    digest += `Offline: ${offlines.join(', ') || 'None'}\n`;
+
+    const blob = new Blob([digest], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `RTM_Digest_${getLocalISOString()}.txt`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -3628,7 +3681,8 @@ export default function App() {
           updatedActivities = updatedActivities.map(act => {
             if (!act.endTime && act.type === previousStatus) {
               const diffMs = new Date(nowStr).getTime() - new Date(act.startTime).getTime();
-              const diffMins = parseFloat((diffMs / 1000 / 60).toFixed(2));
+              let diffMins = parseFloat((diffMs / 1000 / 60).toFixed(2));
+            if (isNaN(diffMins)) diffMins = 0;
               return {
                 ...act,
                 endTime: nowStr,
@@ -3683,7 +3737,8 @@ export default function App() {
         const updatedActivities = log.activities.map(act => {
           if (!act.endTime && act.type === currentType) {
             const diffMs = new Date(endTimeStr).getTime() - new Date(act.startTime).getTime();
-            const diffMins = parseFloat((diffMs / 1000 / 60).toFixed(2));
+            let diffMins = parseFloat((diffMs / 1000 / 60).toFixed(2));
+            if (isNaN(diffMins)) diffMins = 0;
             return {
               ...act,
               endTime: endTimeStr,
@@ -3745,7 +3800,8 @@ export default function App() {
         const updatedActivities = log.activities.map(act => {
           if (!act.endTime) {
             const diffMs = new Date(endTimeStr).getTime() - new Date(act.startTime).getTime();
-            const diffMins = parseFloat((diffMs / 1000 / 60).toFixed(2));
+            let diffMins = parseFloat((diffMs / 1000 / 60).toFixed(2));
+            if (isNaN(diffMins)) diffMins = 0;
             return {
               ...act,
               endTime: endTimeStr,
@@ -4598,8 +4654,8 @@ export default function App() {
     const data = requests.map(r => ({
       ID: r.id,
       Agent: r.agentName,
-      Type: r.requestType,
-      Date: r.date,
+      Type: r.type,
+      Date: r.type === 'swap' ? r.date : `${r.startDate} to ${r.endDate}`,
       Status: r.status,
       Submitted: r.createdAt
     }));
@@ -4616,8 +4672,8 @@ export default function App() {
       Date: log.date,
       'Clock In': log.clockIn,
       'Clock Out': log.clockOut,
-      'Total Minutes': log.totalMinutes,
-      Violations: log.violations.join(', ')
+      'Total Minutes': (log as any).totalMinutes || 0,
+      Violations: ((log as any).violations || []).join(', ')
     }));
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
@@ -5284,7 +5340,7 @@ export default function App() {
                       ) : (
                         <Cloudy className="w-3.5 h-3.5 text-slate-400" />
                       )}
-                      <span>{ramadanTemp.toFixed(1)}°C</span>
+                      <span>{ramadanTemp.toFixed(1)}</span>
                     </div>
                   )}
                 </div>
@@ -5421,9 +5477,9 @@ export default function App() {
                   )}
 
                   {showInstallBtn && (
-                    currentUser.role === 'tl' || 
-                    currentUser.role === 'admin' || 
-                    currentUser.role === 'director' || 
+                    (currentUser.role as string) === 'tl' || 
+                    (currentUser.role as string) === 'admin' || 
+                    (currentUser.role as string) === 'director' || 
                     (currentUser.role === 'agent' && !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
                   ) && (
                     <button
@@ -5469,7 +5525,7 @@ export default function App() {
                           setRequests([]);
                           setTimeLogs([]);
                           setSchedules([]);
-                          setSupportAssignments([]);
+                          setSupportAssignments({});
                           setCases([]);
                           setClientComms([]);
                           
@@ -6178,10 +6234,10 @@ export default function App() {
                   const fintechRate = opFintech.length ? Math.round((confirmedFintech.length / opFintech.length) * 100) : 100;
                   
                   const opComplaints = tabbyTamaraComplaints.filter(c => isInOpDay(c.createdAt) && isAllowedToView(c.agentName));
-                  const closedComplaints = opComplaints.filter(i => i.status === 'resolved' || i.status === 'closed');
+                  const closedComplaints = opComplaints.filter(i => (i.status as string) === 'resolved' || i.status === 'closed');
                   
                   const opComms = clientComms.filter(c => isInOpDay(c.createdAt) && isAllowedToView(c.callCenterAgentName || ''));
-                  const contactedComms = opComms.filter(i => i.status === 'contacted' || i.status === 'resolved' || i.status === 'closed_no_answer');
+                  const contactedComms = opComms.filter(i => i.status === 'contacted' || (i.status as string) === 'resolved' || (i.status as string) === 'closed_no_answer');
                   
                   const opCases = cases.filter(c => isInOpDay(c.createdAt) && isAllowedToView(c.agentName));
                   
@@ -6790,7 +6846,7 @@ export default function App() {
                                       return (
                                         <div key={idx} className="flex-1 flex flex-col items-center group relative cursor-pointer">
                                           <div className="absolute -top-12 opacity-0 group-hover:opacity-100 bg-transparent border border-indigo-400 px-2 py-1 rounded text-[10px] text-slate-100 font-mono transition-opacity duration-200 z-10 font-bold whitespace-nowrap shadow-xl">
-                                            {dp.total} tasks | {dp.hours.toFixed(1)} hrs
+                                            {dp.total} tasks | {dp.hours.toFixed(1)}rs
                                           </div>
 
                                           <div 
@@ -8436,6 +8492,14 @@ export default function App() {
                                         </p>
                                       </div>
                                     )}
+                                    {req.screenshot && (
+                                      <div className="mt-2">
+                                        <a href={req.screenshot} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded text-[10px] font-bold border border-indigo-500/20 transition-colors">
+                                          <ImageIcon className="w-3 h-3" />
+                                          View Image
+                                        </a>
+                                      </div>
+                                    )}
                                   </td>
                                   <td className="px-6 py-4 text-xs font-mono text-slate-400">
                                     {new Date(req.createdAt).toLocaleString()}
@@ -9064,6 +9128,14 @@ export default function App() {
                           ></textarea>
                         </div>
 
+                        <div className="pt-2">
+                          <ScreenshotUpload 
+                            screenshot={swapScreenshot} 
+                            onScreenshotChange={setSwapScreenshot} 
+                            label="Optional Attachment"
+                          />
+                        </div>
+
                         {/* Interactive Warning Message Display */}
                         {swapWarning && (
                           <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-300 rounded-xl text-xs flex items-center gap-2.5">
@@ -9141,6 +9213,14 @@ export default function App() {
                             value={annualNotes}
                             onChange={(e) => setAnnualNotes(e.target.value)}
                           ></textarea>
+                        </div>
+
+                        <div className="pt-2">
+                          <ScreenshotUpload 
+                            screenshot={annualScreenshot} 
+                            onScreenshotChange={setAnnualScreenshot} 
+                            label="Optional Attachment"
+                          />
                         </div>
 
                         {/* Interactive Warning Message Display */}
@@ -9238,6 +9318,15 @@ export default function App() {
                                       <p className="text-slate-400 text-xs italic mt-1 font-sans">
                                         " {req.notes} "
                                       </p>
+                                    )}
+
+                                    {req.screenshot && (
+                                      <div className="mt-2 text-left">
+                                        <a href={req.screenshot} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-lg text-[10px] font-bold tracking-wider transition-colors border border-indigo-500/20">
+                                          <ImageIcon className="w-3.5 h-3.5" />
+                                          View Attachment
+                                        </a>
+                                      </div>
                                     )}
                                   </div>
                                 </div>
@@ -9514,7 +9603,7 @@ export default function App() {
                                     <div className="flex items-center gap-2 mt-1 text-[10px] text-slate-400">
                                       <span className="uppercase font-mono font-bold text-cyan-400/80">{doc.type}</span>
                                       <span>•</span>
-                                      <span>{Math.round(doc.size / 1024) || 1} KB</span>
+                                      <span>{Math.round(doc.size / 1024) || 1}B</span>
                                       <span>•</span>
                                       <span>{new Date(doc.uploadedAt).toLocaleDateString()}</span>
                                     </div>
@@ -9554,7 +9643,7 @@ export default function App() {
                                     {currentKbDoc.type} File
                                   </span>
                                   <span>•</span>
-                                  <span>{Math.round(currentKbDoc.size / 1024) || 1} KB</span>
+                                  <span>{Math.round(currentKbDoc.size / 1024) || 1}B</span>
                                   <span>•</span>
                                   <span>Uploaded at {new Date(currentKbDoc.uploadedAt).toLocaleString()}</span>
                                 </div>
@@ -10418,19 +10507,19 @@ export default function App() {
                               <div className="flex justify-between py-1.5 border-b border-white/5">
                                 <span className="text-slate-400 font-medium">Total Breaks:</span>
                                 <span className={`font-bold font-mono ${stats.breakMins > 15 ? 'text-rose-400 animate-pulse' : 'text-amber-300'}`}>
-                                  {stats.breakMins.toFixed(2)} mins used / 15m max
+                                  {stats.breakMins.toFixed(2)}ins used / 15m max
                                 </span>
                               </div>
                               <div className="flex justify-between py-1.5 border-b border-white/5">
                                 <span className="text-slate-400 font-medium">Total Lunch:</span>
                                 <span className={`font-bold font-mono ${stats.lunchMins > 30 ? 'text-rose-400 animate-pulse' : 'text-pink-300'}`}>
-                                  {stats.lunchMins.toFixed(2)} mins used / 30m max
+                                  {stats.lunchMins.toFixed(2)}ins used / 30m max
                                 </span>
                               </div>
                               <div className="flex justify-between py-1.5 border-b border-white/5">
                                 <span className="text-slate-400 font-medium">Restroom Total:</span>
                                 <span className="font-bold text-indigo-300 font-mono">
-                                  {stats.restroomMins.toFixed(2)} mins used
+                                  {stats.restroomMins.toFixed(2)}ins used
                                 </span>
                               </div>
                               <div className="flex justify-between py-1.5 border-b border-white/5">
@@ -10442,19 +10531,19 @@ export default function App() {
                               <div className="flex justify-between py-1.5 border-b border-white/5">
                                 <span className="text-slate-400 font-medium">Team Meeting:</span>
                                 <span className={`font-bold font-mono ${stats.meetingMins > 60 ? 'text-rose-400 animate-pulse' : 'text-cyan-300'}`}>
-                                  {stats.meetingMins.toFixed(2)} mins used / 60m max
+                                  {stats.meetingMins.toFixed(2)}ins used / 60m max
                                 </span>
                               </div>
                               <div className="flex justify-between py-1.5 border-b border-white/5">
                                 <span className="text-slate-400 font-medium">1:1 Session:</span>
                                 <span className={`font-bold font-mono ${stats.oneOnOneMins > 30 ? 'text-rose-400 animate-pulse' : 'text-violet-300'}`}>
-                                  {stats.oneOnOneMins.toFixed(2)} mins used / 30m max
+                                  {stats.oneOnOneMins.toFixed(2)}ins used / 30m max
                                 </span>
                               </div>
                               <div className="flex justify-between py-1.5">
                                 <span className="text-slate-400 font-medium">Personal Break:</span>
                                 <span className={`font-bold font-mono ${stats.personalMins > 15 ? 'text-rose-400 animate-pulse' : 'text-emerald-300'}`}>
-                                  {stats.personalMins.toFixed(2)} mins used / 15m max
+                                  {stats.personalMins.toFixed(2)}ins used / 15m max
                                 </span>
                               </div>
                             </div>
@@ -10498,7 +10587,7 @@ export default function App() {
                                             <p key={act.id} className="text-slate-400">
                                               &bull; <span className="font-medium capitalize text-slate-300 font-sans">{act.type}</span>:&nbsp;
                                               {new Date(act.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} to {act.endTime ? new Date(act.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'now'}
-                                              {act.durationMinutes !== undefined && <span className="text-indigo-300 font-mono font-bold"> ({act.durationMinutes}m)</span>}
+                                              {act.durationMinutes !== undefined && <span className="text-indigo-300 font-mono font-bold"> ({isNaN(act.durationMinutes as any) ? '-' : act.durationMinutes}m)</span>}
                                             </p>
                                           ))}
                                         </div>
@@ -10655,7 +10744,7 @@ export default function App() {
                               <div className="mt-4">
                                 <div className="flex justify-between items-center text-[9px] text-slate-500 font-bold mb-1">
                                   <span>Ratio</span>
-                                  <span className={clin.textCol}>{pct.toFixed(0)}%</span>
+                                  <span className={clin.textCol}>{pct.toFixed(0)}</span>
                                 </div>
                                 <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
                                   <div
@@ -11154,12 +11243,12 @@ export default function App() {
                                   </td>
                                   <td className="px-3 py-3 font-mono">{stats.clockIn ? new Date(stats.clockIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}</td>
                                   <td className="px-3 py-3 font-mono">{stats.clockOut ? new Date(stats.clockOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : (stats.clockIn ? 'Active Running' : '--:--')}</td>
-                                  <td className="px-3 py-3 font-mono">{stats.breakMins.toFixed(1)} m</td>
-                                  <td className="px-3 py-3 font-mono">{stats.lunchMins.toFixed(1)} m</td>
-                                  <td className="px-4 py-3 font-mono">{stats.restroomMins.toFixed(1)} m ({stats.restroomCount}x)</td>
-                                  <td className="px-3 py-3 font-mono text-cyan-400">{stats.meetingMins.toFixed(1)} m</td>
-                                  <td className="px-3 py-3 font-mono text-violet-400">{stats.oneOnOneMins.toFixed(1)} m</td>
-                                  <td className="px-3 py-3 font-mono text-emerald-400">{stats.personalMins.toFixed(1)} m</td>
+                                  <td className="px-3 py-3 font-mono">{stats.breakMins.toFixed(1)}</td>
+                                  <td className="px-3 py-3 font-mono">{stats.lunchMins.toFixed(1)}</td>
+                                  <td className="px-4 py-3 font-mono">{stats.restroomMins.toFixed(1)} ({stats.restroomCount}x)</td>
+                                  <td className="px-3 py-3 font-mono text-cyan-400">{stats.meetingMins.toFixed(1)}</td>
+                                  <td className="px-3 py-3 font-mono text-violet-400">{stats.oneOnOneMins.toFixed(1)}</td>
+                                  <td className="px-3 py-3 font-mono text-emerald-400">{stats.personalMins.toFixed(1)}</td>
                                   <td className="px-4 py-3 text-right font-semibold">
                                     <span className={compliance.startsWith('✅') ? 'text-emerald-400' : 'text-rose-400 animate-pulse'}>
                                       {compliance}
@@ -11510,12 +11599,12 @@ export default function App() {
                                                 {violation.type} Limit:
                                               </span>
                                               <span className="text-rose-400 font-mono font-black">
-                                                +{violation.exceededBy.toFixed(1)}m Over
+                                                +{violation.exceededBy.toFixed(1)}Over
                                               </span>
                                             </div>
                                             <div className="flex justify-between text-[9px] text-slate-400 mt-0.5">
                                               <span>Allotted: {violation.limit}m</span>
-                                              <span className="font-mono">Logged: {violation.actual.toFixed(1)}m</span>
+                                              <span className="font-mono">Logged: {violation.actual.toFixed(1)}</span>
                                             </div>
                                           </div>
                                         ))}
@@ -11719,7 +11808,7 @@ export default function App() {
                                         <td className="px-4 py-4 space-y-1">
                                           <div className="flex justify-between text-[10px] font-mono">
                                             <span className={stats.breakMins > 15 ? 'text-rose-400 font-bold' : 'text-slate-300'}>
-                                              {stats.breakMins.toFixed(1)} mins
+                                              {stats.breakMins.toFixed(1)}ins
                                             </span>
                                             <span className="text-slate-500">of 15m</span>
                                           </div>
@@ -11735,7 +11824,7 @@ export default function App() {
                                         <td className="px-4 py-4 space-y-1">
                                           <div className="flex justify-between text-[10px] font-mono">
                                             <span className={stats.lunchMins > 30 ? 'text-rose-400 font-bold' : 'text-slate-300'}>
-                                              {stats.lunchMins.toFixed(1)} mins
+                                              {stats.lunchMins.toFixed(1)}ins
                                             </span>
                                             <span className="text-slate-500">of 30m</span>
                                           </div>
@@ -11749,7 +11838,7 @@ export default function App() {
 
                                         {/* Restroom */}
                                         <td className="px-4 py-4 leading-normal">
-                                          <p className="text-indigo-300 font-semibold font-mono">{stats.restroomMins.toFixed(1)} mins</p>
+                                          <p className="text-indigo-300 font-semibold font-mono">{stats.restroomMins.toFixed(1)}ins</p>
                                           <p className="text-[10px] text-slate-500 font-sans">{stats.restroomCount} sessions logged</p>
                                         </td>
 
@@ -12129,7 +12218,7 @@ export default function App() {
                     {/* Horizontal Paging Actions */}
                     <div className="flex items-center gap-2 self-stretch sm:self-auto justify-between sm:justify-end">
                       <span className="text-[11px] text-slate-400 font-medium">
-                        Showing offsets: {safeOffset + 1} - {Math.min(safeOffset + displayDaysCount, baseDatesList.length)} of {baseDatesList.length} dates
+                        Showing offsets: {safeOffset + 1} {Math.min(safeOffset + displayDaysCount, baseDatesList.length)}f {baseDatesList.length} dates
                       </span>
                       <div className="flex gap-2">
                         <button
@@ -12836,6 +12925,14 @@ export default function App() {
                                 className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 outline-none"
                               />
                             </div>
+                            
+                            <div className="pt-2">
+                              <ScreenshotUpload 
+                                screenshot={p2pScreenshot} 
+                                onScreenshotChange={setP2pScreenshot} 
+                                label="Optional Attachment"
+                              />
+                            </div>
 
                             <button
                               onClick={() => {
@@ -12858,6 +12955,7 @@ export default function App() {
                                   status: p2pTargetAgent ? 'pending_partner' : 'pending',
                                   createdAt: new Date().toISOString(),
                                   notes: p2pNotes || "P2P open trade offer published from roster board",
+                                  screenshot: p2pScreenshot ? p2pScreenshot : undefined,
                                   ruleViolation: false
                                 };
 
@@ -12875,6 +12973,7 @@ export default function App() {
                                 setP2pSelectedDate('');
                                 setP2pTargetAgent('');
                                 setP2pNotes('');
+                                setP2pScreenshot(null);
                               }}
                               className="w-full py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white font-extrabold text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer font-sans"
                             >
@@ -13250,8 +13349,7 @@ export default function App() {
                                 </div>
                                 {ttPriceWithoutTax && !isNaN(Number(ttPriceWithoutTax)) && (
                                   <p className="text-[10px] text-indigo-300 font-medium">
-                                    * Note: 5% automatically added on this price. Total: SAR {(Number(ttPriceWithoutTax) * 1.05).toFixed(2)}
-                                  </p>
+                                    * Note: 5% automatically added on this price. Total: SAR {(Number(ttPriceWithoutTax) * 1.05).toFixed(2)}                                 </p>
                                 )}
                               </div>
 
@@ -13947,8 +14045,7 @@ export default function App() {
                                                           className="px-2.5 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer"
                                                         >
                                                           <ExternalLink className="w-3 h-3" />
-                                                          Link {idx + 1}
-                                                        </a>
+                                                          Link {idx + 1}                                                       </a>
                                                         <button
                                                           onClick={() => {
                                                             navigator.clipboard.writeText(trimmed);
@@ -16255,8 +16352,7 @@ export default function App() {
                                       />
                                    </td>
                                    <td className="py-3 px-4 text-right font-mono font-bold text-emerald-400">
-                                     {ach.toFixed(1)}%
-                                   </td>
+                                     {ach.toFixed(1)}                                   </td>
                                  </tr>
                                );
                              })}
@@ -16275,7 +16371,7 @@ export default function App() {
                             </div>
                             <div>
                                <span className="block text-xs uppercase text-slate-500 font-bold mb-1">Final Score</span>
-                               <span className="text-lg font-mono font-black text-indigo-400">{totalScore.toFixed(1)}%</span>
+                               <span className="text-lg font-mono font-black text-indigo-400">{totalScore.toFixed(1)}</span>
                             </div>
                          </div>
                          <div className="text-right flex flex-col justify-end">
@@ -17240,8 +17336,7 @@ export default function App() {
                     <div className="bg-rose-600 hover:bg-rose-700 text-slate-100 font-bold p-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-rose-400/40 select-none">
                       <span className="w-2.5 h-2.5 rounded-full bg-slate-800 animate-ping"></span>
                       <span className="text-xs font-mono">
-                        🚨 OVERTIME: {elapsed.type.toUpperCase()} +{elapsed.exceededBy.toFixed(1)}m
-                      </span>
+                        🚨 OVERTIME: {elapsed.type.toUpperCase()} +{elapsed.exceededBy.toFixed(1)}                      </span>
                       <span className="text-[10px] bg-black/30 px-2 py-0.5 rounded-lg">Expand &rarr;</span>
                     </div>
                   </div>
@@ -17272,10 +17367,9 @@ export default function App() {
                     <div className="p-4 bg-rose-950/20 border border-rose-500/20 rounded-2xl space-y-1 text-center">
                       <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider font-mono">Elapsed Session Time</p>
                       <p className="text-3xl font-black text-rose-400 font-mono">
-                        {elapsed.duration.toFixed(2)}m
-                      </p>
+                        {elapsed.duration.toFixed(2)}                      </p>
                       <p className="text-[11px] font-bold text-slate-100 font-sans animate-pulse">
-                        Exceeding limit by: <span className="font-mono text-xs underline">+{elapsed.exceededBy.toFixed(1)} minutes</span>
+                        Exceeding limit by: <span className="font-mono text-xs underline">+{elapsed.exceededBy.toFixed(1)}inutes</span>
                       </p>
                     </div>
 
@@ -17289,29 +17383,25 @@ export default function App() {
                         <div className="p-2 bg-white/5 border border-white/10 rounded-xl">
                           <p className="text-[9px] uppercase font-bold text-slate-400">Total Break</p>
                           <p className={`font-bold font-mono ${stats.breakMins > 15 ? 'text-rose-400 animate-pulse' : 'text-amber-300'}`}>
-                            {stats.breakMins.toFixed(1)}m
-                          </p>
+                            {stats.breakMins.toFixed(1)}                          </p>
                           <p className="text-[8px] text-slate-500">Max 15m</p>
                         </div>
                         <div className="p-2 bg-white/5 border border-white/10 rounded-xl">
                           <p className="text-[9px] uppercase font-bold text-slate-400">Total Lunch</p>
                           <p className={`font-bold font-mono ${stats.lunchMins > 30 ? 'text-rose-400 animate-pulse' : 'text-pink-300'}`}>
-                            {stats.lunchMins.toFixed(1)}m
-                          </p>
+                            {stats.lunchMins.toFixed(1)}                          </p>
                           <p className="text-[8px] text-slate-500">Max 30m</p>
                         </div>
                         <div className="p-2 bg-white/5 border border-white/10 rounded-xl">
                           <p className="text-[9px] uppercase font-bold text-slate-400">Restroom</p>
                           <p className="text-indigo-400 font-bold font-mono">
-                            {stats.restroomMins.toFixed(1)}m
-                          </p>
+                            {stats.restroomMins.toFixed(1)}                          </p>
                           <p className="text-[8px] text-slate-500">{stats.restroomCount} sessions</p>
                         </div>
                         <div className="p-2 bg-white/5 border border-white/10 rounded-xl">
                           <p className="text-[9px] uppercase font-bold text-slate-400">Meeting</p>
                           <p className={`font-bold font-mono ${stats.meetingMins > 60 ? 'text-rose-400 animate-pulse' : 'text-cyan-300'}`}>
-                            {stats.meetingMins.toFixed(1)}m
-                          </p>
+                            {stats.meetingMins.toFixed(1)}                          </p>
                           <p className="text-[8px] text-slate-500">Max 60m</p>
                         </div>
                         <div className="p-2 bg-white/5 border border-white/10 rounded-xl">

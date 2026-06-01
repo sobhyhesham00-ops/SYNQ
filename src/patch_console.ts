@@ -10,7 +10,7 @@ console.error = (...args) => {
       return 'Unknown';
     }
   }).join(' ');
-  if (msg.includes('Quota exceeded') || msg.includes('resource-exhausted')) return;
+  if (msg.includes('Quota exceeded') || msg.includes('resource-exhausted') || msg.includes('update time that is in the future')) return;
   originalConsoleError(...args);
 };
 
@@ -26,6 +26,6 @@ console.warn = (...args) => {
       return 'Unknown';
     }
   }).join(' ');
-  if (msg.includes('Using maximum backoff delay')) return;
+  if (msg.includes('Using maximum backoff delay') || msg.includes('update time that is in the future')) return;
   originalConsoleWarn(...args);
 };

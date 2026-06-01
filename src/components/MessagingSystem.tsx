@@ -355,7 +355,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
 
   // Aggregate channels for Segment views
   const listItems = useMemo(() => {
-    const cList = [
+    const cList: any[] = [
       { id: 'all', type: 'channel', label: 'Global broadcast', subtitle: 'Public sync room', color: 'from-blue-500 to-indigo-500', icon: '🌐' },
       { id: 'tl', type: 'channel', label: 'TL & Support channel', subtitle: 'Restricted group chat', color: 'from-amber-500 to-orange-500', icon: '🛡️' }
     ];

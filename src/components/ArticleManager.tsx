@@ -59,12 +59,12 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
   const [content, setContent] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   
-  const isTL = currentUser.role === 'tl' || currentUser.role === 'admin' || currentUser.role === 'director' || currentUser.role === 'qa';
+  const isTL = (currentUser.role as string) === 'tl' || (currentUser.role as string) === 'admin' || (currentUser.role as string) === 'director' || currentUser.role === 'qa';
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "articles"), (snap) => {
-      const docs = snap.docs.map(d => ({ id: d.id, ...d.data() } as Article));
-      const filtered = docs.filter(a => a.category === category).sort((a, b) => b.createdAt - a.createdAt);
+    const unsub = onSnapshot(collection(db, "articles"), (snap: any) => {
+      const docs = snap.docs.map((d: any) => ({ id: d.id, ...d.data() } as Article));
+      const filtered = docs.filter((a: any) => a.category === category).sort((a: any, b: any) => b.createdAt - a.createdAt);
       setArticles(filtered);
       if (filtered.length > 0 && !selectedArticleId) {
         setSelectedArticleId(filtered[0].id);
