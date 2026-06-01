@@ -2570,16 +2570,18 @@ export default function App() {
   useEffect(() => {
     if (!currentUser) return;
     
+    let overstaysUpdated = false;
+    const newNotifiedOverstays = { ...notifiedOverstays };
+    
     // Check for exceeding break / lunch / restroom / meeting / one_on_one / personal
     agentsList.forEach(agent => {
       const elapsed = getActiveActivityElapsed(agent);
       if (elapsed && elapsed.exceeded) {
         const notifKey = `${elapsed.id}_${elapsed.type}`;
-        if (!notifiedOverstays[notifKey]) {
+        if (!newNotifiedOverstays[notifKey]) {
           // Register as notified
-          const updated = { ...notifiedOverstays, [notifKey]: true };
-          setNotifiedOverstays(updated);
-          setStorageItem('sched_notified_overstays', updated);
+          newNotifiedOverstays[notifKey] = true;
+          overstaysUpdated = true;
 
           const labelMap: Record<string, string> = {
             break: 'Break',
@@ -2612,17 +2614,25 @@ export default function App() {
         }
       }
     });
+    
+    if (overstaysUpdated) {
+      setNotifiedOverstays(newNotifiedOverstays);
+      setStorageItem('sched_notified_overstays', newNotifiedOverstays);
+    }
 
     // Check for shifts absences
     const todayStr = getLocalISOString();
     const todaySchedules = schedules.filter(s => s.date === todayStr);
+    
+    let absencesUpdated = false;
+    const newNotifiedAbsences = { ...notifiedAbsences };
 
     todaySchedules.forEach(sched => {
       const agent = sched.agentName;
       const shiftLabel = sched.shiftLabel; // e.g., "07:00 - 16:00" or "22:00 - 07:00"
       
       const notifKey = `${todayStr}_${agent}_${shiftLabel}`;
-      if (!notifiedAbsences[notifKey]) {
+      if (!newNotifiedAbsences[notifKey]) {
         // Extract start hour
         const startHourStr = shiftLabel.split('-')[0].trim(); // "07:00"
         const parts = startHourStr.split(':');
@@ -2649,9 +2659,8 @@ export default function App() {
 
           if (!hasClockInToday) {
             // Register as notified
-            const updated = { ...notifiedAbsences, [notifKey]: true };
-            setNotifiedAbsences(updated);
-            setStorageItem('sched_notified_absences', updated);
+            newNotifiedAbsences[notifKey] = true;
+            absencesUpdated = true;
 
             const assignedTL = getAgentTL(agent);
             const targetNotifUser = assignedTL !== 'Unassigned' ? assignedTL : 'tl';
@@ -2666,6 +2675,11 @@ export default function App() {
         }
       }
     });
+    
+    if (absencesUpdated) {
+      setNotifiedAbsences(newNotifiedAbsences);
+      setStorageItem('sched_notified_absences', newNotifiedAbsences);
+    }
 
   }, [currentTime, timeLogs, schedules, agentsList, currentUser, notifiedOverstays, notifiedAbsences]);
 
