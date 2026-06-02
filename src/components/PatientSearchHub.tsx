@@ -216,7 +216,7 @@ export function PatientSearchHub({
                       </div>
                       <div className="flex justify-between text-sm text-slate-200 mt-1">
                          <span className="font-bold uppercase text-xs px-2 py-1 bg-black/30 rounded">{tt.platform}</span>
-                         <span className="font-mono text-rose-300">{tt.priceWithoutTax ? 'SAR ' + tt.priceWithoutTax : ''}</span>
+                         <span className="font-mono text-rose-300">{tt.priceWithoutTax ? 'AED ' + tt.priceWithoutTax : ''}</span>
                       </div>
                       {((tt.photos && tt.photos.length > 0) || tt.paymentScreenshot) && (
                         <div className="flex gap-2 flex-wrap mt-2">

@@ -4294,7 +4294,7 @@ ${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
     setIsFormSubmitting(true);
     try {
       const calculatedPrice = ttPriceWithoutTax && !isNaN(Number(ttPriceWithoutTax)) ? (Number(ttPriceWithoutTax) * 1.05).toFixed(2) : '-';
-      const autoNote = `[5% added to price. Final: SAR ${calculatedPrice}]`;
+      const autoNote = `[5% added to price. Final: AED ${calculatedPrice}]`;
       const finalNotes = ttNotes ? `${autoNote}
 
 ${ttNotes}` : autoNote;
@@ -6186,9 +6186,14 @@ ${ttNotes}` : autoNote;
                         <div className="mt-4 flex flex-wrap gap-2 justify-center sm:justify-start">
                            <button 
                              onClick={() => {
-                               const newPhone = window.prompt("Enter your personal phone number:", "");
-                               if (newPhone !== null) {
-                                  const updated = { ...currentUser, phone: newPhone };
+                               const rawPhone = window.prompt("Enter your personal phone number (e.g. 50XXXXXXX):", "");
+                               if (rawPhone !== null) {
+                                  let finalPhone = rawPhone.trim();
+                                  if (finalPhone && !finalPhone.startsWith('+971 ')) {
+                                    finalPhone = '+971 ' + finalPhone.replace(/\D/g, '').replace(/^(971|00971|0)/, '');
+                                  }
+                                  if (finalPhone === '+971 ') finalPhone = '';
+                                  const updated = { ...currentUser, phone: finalPhone };
                                   setCurrentUser(updated);
                                   setStorageItem('sched_current_user', updated);
                                   setDoc(doc(db, "users", currentUser?.name?.toLowerCase().replace(/[^a-z0-9]/g, '')), { ...updated, lastUpdated: Date.now() }, { merge: true }).catch(console.error);
@@ -9672,11 +9677,19 @@ Notes: ${a.notes || 'None'}`;
                           </label>
                           <input
                             type="tel"
-                            placeholder="+966 5x xxx xxxx (Optional)"
+                            placeholder="+971 5XXXXXXXX (Optional)"
                             value={inquiryPhoneNumber}
-                            onChange={(e) => setInquiryPhoneNumber(e.target.value)}
+                            onChange={(e) => {
+                              let val = e.target.value;
+                              if (val && !val.startsWith('+971 ')) {
+                                val = '+971 ' + val.replace(/\D/g, '').replace(/^(971|00971|0)/, '');
+                              }
+                              if (val === '+971 ') val = '';
+                              setInquiryPhoneNumber(val);
+                            }}
                             className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-mono"
                           />
+                          <p className="text-[10px] text-slate-400 mt-1">* Please enter the number starting from 5 (e.g., 501234567)</p>
                         </div>
 
                         {/* Inquiry text details with English or Arabic typing toggles */}
@@ -13300,7 +13313,7 @@ _ ${inq.answer || 'No answer yet'} _`;
                               <div className="space-y-1.5 text-left">
                                 <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">Price *</label>
                                 <div className="relative">
-                                  <span className="absolute left-[13px] top-[11.5px] text-xs font-bold text-slate-400 font-mono">SAR</span>
+                                  <span className="absolute left-[13px] top-[11.5px] text-xs font-bold text-slate-400 font-mono">AED</span>
                                   <input
                                     type="text"
                                     placeholder="0.00"
@@ -13312,7 +13325,7 @@ _ ${inq.answer || 'No answer yet'} _`;
                                 </div>
                                 {ttPriceWithoutTax && !isNaN(Number(ttPriceWithoutTax)) && (
                                   <p className="text-[10px] text-indigo-300 font-medium">
-                                    * Note: 5% automatically added on this price. Total: SAR {(Number(ttPriceWithoutTax) * 1.05).toFixed(2)}                                 </p>
+                                    * Note: 5% automatically added on this price. Total: AED {(Number(ttPriceWithoutTax) * 1.05).toFixed(2)}                                 </p>
                                 )}
                               </div>
 
@@ -13321,12 +13334,20 @@ _ ${inq.answer || 'No answer yet'} _`;
                                 <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-mono">Phone Number *</label>
                                 <input
                                   type="tel"
-                                  placeholder="+966 5x xxx xxxx"
+                                  placeholder="+971 5XXXXXXXX"
                                   value={ttPhoneNumber}
-                                  onChange={(e) => setTtPhoneNumber(e.target.value)}
+                                  onChange={(e) => {
+                                    let val = e.target.value;
+                                    if (val && !val.startsWith('+971 ')) {
+                                      val = '+971 ' + val.replace(/\D/g, '').replace(/^(971|00971|0)/, '');
+                                    }
+                                    if (val === '+971 ') val = '';
+                                    setTtPhoneNumber(val);
+                                  }}
                                   className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
                                   required
                                 />
+                                <p className="text-[10px] text-slate-400 mt-1">* Please enter the number starting from 5 (e.g., 501234567)</p>
                               </div>
 
                               {/* Platform selector */}
@@ -13493,12 +13514,20 @@ _ ${inq.answer || 'No answer yet'} _`;
                                 <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-mono">Phone Number *</label>
                                 <input
                                   type="tel"
-                                  placeholder="+966 5x xxx xxxx"
+                                  placeholder="+971 5XXXXXXXX"
                                   value={tcPhoneNumber}
-                                  onChange={(e) => setTcPhoneNumber(e.target.value)}
+                                  onChange={(e) => {
+                                    let val = e.target.value;
+                                    if (val && !val.startsWith('+971 ')) {
+                                      val = '+971 ' + val.replace(/\D/g, '').replace(/^(971|00971|0)/, '');
+                                    }
+                                    if (val === '+971 ') val = '';
+                                    setTcPhoneNumber(val);
+                                  }}
                                   className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-mono"
                                   required
                                 />
+                                <p className="text-[10px] text-slate-400 mt-1">* Please enter the number starting from 5 (e.g., 501234567)</p>
                               </div>
 
                               <div className="space-y-1 sm:col-span-2">
@@ -13585,12 +13614,20 @@ _ ${inq.answer || 'No answer yet'} _`;
                                   <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-mono">Phone Number *</label>
                                   <input
                                     type="tel"
-                                    placeholder="+966 5x xxx xxxx"
+                                    placeholder="+971 5XXXXXXXX"
                                     value={ccPhoneNumber}
-                                    onChange={(e) => setCcPhoneNumber(e.target.value)}
+                                    onChange={(e) => {
+                                      let val = e.target.value;
+                                      if (val && !val.startsWith('+971 ')) {
+                                        val = '+971 ' + val.replace(/\D/g, '').replace(/^(971|00971|0)/, '');
+                                      }
+                                      if (val === '+971 ') val = '';
+                                      setCcPhoneNumber(val);
+                                    }}
                                     className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
                                     required
                                   />
+                                  <p className="text-[10px] text-slate-400 mt-1">* Please enter the number starting from 5 (e.g., 501234567)</p>
                                 </div>
 
                                 {/* Language */}
@@ -13910,7 +13947,7 @@ _ ${inq.answer || 'No answer yet'} _`;
                                               <div>
                                                 <p className="text-[9px] text-slate-400 uppercase tracking-wider">Price:</p>
                                                 <p className="text-emerald-400 font-mono font-extrabold font-sans text-xs">
-                                                  SAR {req.priceWithoutTax} <span className="text-[10px] text-indigo-400 font-medium ml-1">({!isNaN(Number(req.priceWithoutTax)) ? (Number(req.priceWithoutTax) * 1.05).toFixed(2) : '-'})</span>
+                                                  AED {req.priceWithoutTax} <span className="text-[10px] text-indigo-400 font-medium ml-1">({!isNaN(Number(req.priceWithoutTax)) ? (Number(req.priceWithoutTax) * 1.05).toFixed(2) : '-'})</span>
                                                 </p>
                                               </div>
                                               <div>
@@ -14146,7 +14183,7 @@ _ ${inq.answer || 'No answer yet'} _`;
 *Patient Name:* ${req.patientName}
 *ID/ID Number:* ${req.idNumber || 'N/A'}
 *Phone Number:* ${req.phoneNumber}
-*Price (Without Tax):* SAR ${req.priceWithoutTax}
+*Price (Without Tax):* AED ${req.priceWithoutTax}
 *Notes:*
 _ ${req.notes || 'None'} _`;
                                                   navigator.clipboard.writeText(details);
