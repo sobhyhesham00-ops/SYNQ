@@ -14128,16 +14128,14 @@ _ ${inq.answer || 'No answer yet'} _`;
                                                 <p className="text-[10px] text-slate-300">{new Date(req.confirmedAt || req.createdAt).toLocaleString()}</p>
                                               </div>
 
-                                              <div className="text-right space-y-0.5">
-                                                <p className="text-[9px] text-slate-400 uppercase">{isCompleted ? 'Turnaround' : 'Pending Contact time'}:</p>
-                                                <p className={`font-mono text-xs font-black px-2 py-0.5 rounded ${
-                                                  isCompleted 
-                                                    ? 'text-emerald-400 bg-emerald-500/10' 
-                                                    : 'text-rose-400 bg-rose-500/10 animate-pulse'
-                                                }`}>
-                                                  {getElapsedTimerString(req.confirmedAt || req.createdAt, req.contactedAt)}
-                                                </p>
-                                              </div>
+                                              {isCompleted && (
+                                                <div className="text-right space-y-0.5">
+                                                  <p className="text-[9px] text-slate-400 uppercase">Turnaround:</p>
+                                                  <p className="font-mono text-xs font-black px-2 py-0.5 rounded text-emerald-400 bg-emerald-500/10">
+                                                    {getElapsedTimerString(req.confirmedAt || req.createdAt, req.contactedAt)}
+                                                  </p>
+                                                </div>
+                                              )}
                                             </div>
                                           )}
 
