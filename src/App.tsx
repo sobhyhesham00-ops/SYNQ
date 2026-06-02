@@ -2080,6 +2080,8 @@ ${pageText}
     { id: '3', name: 'Adherence (%)', target: 95, actual: 98, weight: 30, type: 'higher', formula: '(actual / target) * 100' }
   ]);
   const [inquirySearchQuery, setInquirySearchQuery] = useState('');
+  const [globalInquirySearch, setGlobalInquirySearch] = useState('');
+  const [agentInquiryView, setAgentInquiryView] = useState<'my' | 'global'>('my');
   const [inquiryStatusFilter, setInquiryStatusFilter] = useState('');
   const [logAgentFilter, setLogAgentFilter] = useState('all');
   const [logTypeFilter, setLogTypeFilter] = useState('all');
@@ -9851,6 +9853,25 @@ Notes: ${a.notes || 'None'}`;
 
                     {/* Inquiry Logs and Progress (Right Side / Col Span 2) */}
                     <div className="lg:col-span-2 space-y-4">
+                      
+                      {/* View Toggles */}
+                      <div className="flex bg-white/5 border border-white/10 p-1.5 rounded-xl text-sm font-bold flex-wrap">
+                        <button
+                          onClick={() => setAgentInquiryView('my')}
+                          className={`flex-1 py-2.5 rounded-lg transition-all ${agentInquiryView === 'my' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}
+                        >
+                          My Submission Timeline
+                        </button>
+                        <button
+                          onClick={() => setAgentInquiryView('global')}
+                          className={`flex-1 py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 ${agentInquiryView === 'global' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'}`}
+                        >
+                          <Search className="w-4 h-4" />
+                          Global Inquiry History
+                        </button>
+                      </div>
+
+                      {agentInquiryView === 'my' && (
                       <div className="p-5 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/5 pb-4 mb-4">
                           <div>
@@ -10036,6 +10057,94 @@ Notes: ${a.notes || 'None'}`;
                           )}
                         </div>
                       </div>
+                      )}
+
+                      {agentInquiryView === 'global' && (
+                        <div className="p-5 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl animate-fade-in">
+                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/5 pb-4 mb-4">
+                            <div>
+                              <h3 className="text-base font-bold text-slate-100 font-display">Global Inquiries Knowledge Base</h3>
+                              <p className="text-xs text-slate-400">Search through all historical TL answers and resolved inquiries.</p>
+                            </div>
+                          </div>
+                          
+                          <div className="mb-4 bg-black/20 p-1.5 rounded-xl border border-white/10 flex items-center">
+                            <Search className="w-4 h-4 text-slate-500 ml-3 mr-2 shrink-0" />
+                            <input
+                              type="text"
+                              placeholder="Search by phone, clinic, agent name, or text... (e.g. +9665)"
+                              value={globalInquirySearch}
+                              onChange={(e) => setGlobalInquirySearch(e.target.value)}
+                              className="w-full bg-transparent text-sm text-slate-100 focus:outline-none placeholder-slate-600 font-mono py-2"
+                            />
+                            {globalInquirySearch && (
+                              <button onClick={() => setGlobalInquirySearch('')} className="p-2 hover:bg-white/10 rounded-lg text-slate-400">
+                                <X className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="space-y-4 max-h-[600px] overflow-y-auto pr-1">
+                            {(() => {
+                              const searchVal = globalInquirySearch.toLowerCase().trim();
+                              const results = searchVal ? inquiries.filter(i => {
+                                const phoneMatch = i.phoneNumber && i.phoneNumber.toLowerCase().includes(searchVal);
+                                const textMatch = i.text && i.text.toLowerCase().includes(searchVal);
+                                const cxMatch = i.clinicName && i.clinicName.toLowerCase().includes(searchVal);
+                                const agentMatch = i.agentName && i.agentName.toLowerCase().includes(searchVal);
+                                const answerMatch = i.answer && i.answer.toLowerCase().includes(searchVal);
+                                return phoneMatch || textMatch || cxMatch || agentMatch || answerMatch;
+                              }) : [];
+
+                              if (!searchVal) {
+                                return (
+                                  <div className="text-center py-12">
+                                    <Search className="w-12 h-12 text-slate-500 mx-auto mb-2.5 opacity-50" />
+                                    <p className="text-xs text-slate-400 font-mono">Type in the search box to find past answered inquiries.</p>
+                                  </div>
+                                );
+                              }
+
+                              if (results.length === 0) {
+                                return (
+                                  <div className="text-center py-12">
+                                    <p className="text-xs text-slate-400 font-mono italic">No inquiries found matching that query.</p>
+                                  </div>
+                                );
+                              }
+
+                              return results.map(inq => (
+                                <div key={inq.id} className="p-4 bg-black/20 border border-white/5 rounded-2xl hover:border-indigo-500/30 transition-all font-sans text-left space-y-3">
+                                  <div className="flex flex-wrap gap-2 items-center justify-between text-[10px] pb-2 border-b border-white/5">
+                                    <div className="flex items-center gap-2">
+                                      <span className="bg-slate-800 text-slate-300 font-bold px-2 py-0.5 rounded-lg border border-slate-700">👤 {inq.agentName}</span>
+                                      {inq.clinicName && <span className="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2.5 py-0.5 rounded-lg">🏥 {inq.clinicName}</span>}
+                                      {inq.phoneNumber && <span className="bg-sky-500/10 text-sky-300 border border-sky-500/20 px-2.5 py-0.5 rounded-lg font-mono tracking-wider">📞 {inq.phoneNumber}</span>}
+                                    </div>
+                                    <span className="text-slate-500">{new Date(inq.createdAt).toLocaleString()}</span>
+                                  </div>
+                                  
+                                  <p className="text-xs text-slate-300 whitespace-pre-wrap leading-relaxed">
+                                    {inq.text}
+                                  </p>
+
+                                  {inq.status === 'answered' && inq.answer && (
+                                    <div className="mt-3 p-3 bg-emerald-500/10 border-l-2 border-emerald-500/50 rounded-r-xl space-y-1 text-left">
+                                      <p className="text-[10px] font-mono font-bold text-emerald-400 mb-1 flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> TL RESOLUTION: {inq.answeredBy || 'Leader'}</p>
+                                      <p className="text-xs text-emerald-200">{inq.answer}</p>
+                                    </div>
+                                  )}
+                                  {inq.status === 'sent' && (
+                                    <div className="mt-3 p-2 bg-orange-500/10 border-l-2 border-orange-500/50 rounded-r-xl">
+                                      <p className="text-[10px] font-mono text-orange-400">⏳ Escalated to client. Awaiting response.</p>
+                                    </div>
+                                  )}
+                                </div>
+                              ));
+                            })()}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -10647,7 +10756,8 @@ Notes: ${a.notes || 'None'}`;
                                                 i.text.toLowerCase().includes(inquirySearchQuery.toLowerCase()) ||
                                                 getAgentLOB(i.agentName).toLowerCase().includes(inquirySearchQuery.toLowerCase()) ||
                                                 (i.clinicName && i.clinicName.toLowerCase().includes(inquirySearchQuery.toLowerCase())) ||
-                                                (i.answer && i.answer.toLowerCase().includes(inquirySearchQuery.toLowerCase()));
+                                                (i.answer && i.answer.toLowerCase().includes(inquirySearchQuery.toLowerCase())) ||
+                                                (i.phoneNumber && i.phoneNumber.toLowerCase().includes(inquirySearchQuery.toLowerCase()));
                           const matchesStatus = inquiryStatusFilter === '' || i.status === inquiryStatusFilter;
                           return matchesSearch && matchesStatus;
                         }).length
@@ -10660,7 +10770,8 @@ Notes: ${a.notes || 'None'}`;
                                               i.text.toLowerCase().includes(inquirySearchQuery.toLowerCase()) ||
                                               getAgentLOB(i.agentName).toLowerCase().includes(inquirySearchQuery.toLowerCase()) ||
                                               (i.clinicName && i.clinicName.toLowerCase().includes(inquirySearchQuery.toLowerCase())) ||
-                                              (i.answer && i.answer.toLowerCase().includes(inquirySearchQuery.toLowerCase()));
+                                              (i.answer && i.answer.toLowerCase().includes(inquirySearchQuery.toLowerCase())) ||
+                                              (i.phoneNumber && i.phoneNumber.toLowerCase().includes(inquirySearchQuery.toLowerCase()));
                         const matchesStatus = inquiryStatusFilter === '' || i.status === inquiryStatusFilter;
                         return matchesSearch && matchesStatus;
                       }).length === 0 ? (
@@ -10675,7 +10786,8 @@ Notes: ${a.notes || 'None'}`;
                                                   i.text.toLowerCase().includes(inquirySearchQuery.toLowerCase()) ||
                                                   getAgentLOB(i.agentName).toLowerCase().includes(inquirySearchQuery.toLowerCase()) ||
                                                   (i.clinicName && i.clinicName.toLowerCase().includes(inquirySearchQuery.toLowerCase())) ||
-                                                  (i.answer && i.answer.toLowerCase().includes(inquirySearchQuery.toLowerCase()));
+                                                  (i.answer && i.answer.toLowerCase().includes(inquirySearchQuery.toLowerCase())) ||
+                                                  (i.phoneNumber && i.phoneNumber.toLowerCase().includes(inquirySearchQuery.toLowerCase()));
                             const matchesStatus = inquiryStatusFilter === '' || i.status === inquiryStatusFilter;
                             return matchesSearch && matchesStatus;
                           })

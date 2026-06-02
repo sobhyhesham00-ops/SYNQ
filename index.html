@@ -1,6 +1,33 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script>
+      const originalConsoleError = console.error;
+      console.error = function(...args) {
+        const msg = args.join(' ');
+        if (msg.includes('WebSocket') || msg.includes('websocket') || msg.includes('failed to connect')) {
+          return;
+        }
+        originalConsoleError.apply(console, args);
+      };
+      
+      window.addEventListener('error', function(event) {
+        if (event && event.message && (event.message.includes('WebSocket') || event.message.includes('websocket') || event.message.includes('failed to connect'))) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }, true);
+      
+      window.addEventListener('unhandledrejection', function(event) {
+        if (event && event.reason) {
+          const r = String(event.reason);
+          if (r.includes('WebSocket') || r.includes('websocket') || r.includes('failed to connect')) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+        }
+      }, true);
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SYNQ - Operational Portal</title>
