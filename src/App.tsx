@@ -15170,6 +15170,7 @@ _ ${req.handlingNotes || 'Pending response'} _`;
                         <thead className="text-slate-400 bg-white/5 text-[10px] uppercase font-bold tracking-wider">
                           <tr>
                             <th className="p-4 rounded-l-xl">Agent Name</th>
+                            <th className="p-4">App Username</th>
                             <th className="p-4">Email</th>
                             <th className="p-4">Phone</th>
                             <th className="p-4">LOB</th>
@@ -15182,10 +15183,14 @@ _ ${req.handlingNotes || 'Pending response'} _`;
                           {registeredUsers.filter(m => {
                             if (!directorySearchQuery) return true;
                             const q = directorySearchQuery.toLowerCase();
-                            return m.name.toLowerCase().includes(q) || (m.email && m.email.toLowerCase().includes(q)) || (m.phone && m.phone.includes(q));
+                            return m.name.toLowerCase().includes(q) || 
+                              (m.email && m.email.toLowerCase().includes(q)) || 
+                              (m.phone && m.phone.includes(q)) ||
+                              getUsernameFromFullName(m.name).toLowerCase().includes(q);
                           }).map((meta, idx) => (
                             <tr key={idx} className="hover:bg-white/5 transition-all">
                               <td className="p-4 text-slate-100 font-bold">{meta.name}</td>
+                              <td className="p-4 text-cyan-400 font-black font-mono">{getUsernameFromFullName(meta.name)}</td>
                               <td className="p-4">{meta.email || '-'}</td>
                               <td className="p-4">{meta.phone || '-'}</td>
                               <td className="p-4"><span className="bg-slate-800 text-slate-300 px-2 py-1 rounded-lg bg-opacity-40">{meta.lob || '-'}</span></td>

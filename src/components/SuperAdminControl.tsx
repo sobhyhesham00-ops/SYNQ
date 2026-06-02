@@ -21,6 +21,7 @@ import {
 import { doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { toast } from 'sonner';
+import { getUsernameFromFullName } from '../utils';
 
 interface UserProfile {
   id: string;
@@ -276,7 +277,8 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
       (u.email || '').toLowerCase().includes(q) ||
       (u.role || '').toLowerCase().includes(q) ||
       (u.lob || '').toLowerCase().includes(q) ||
-      (u.teamLeader || '').toLowerCase().includes(q)
+      (u.teamLeader || '').toLowerCase().includes(q) ||
+      getUsernameFromFullName(u.name).toLowerCase().includes(q)
     );
   });
 
@@ -579,6 +581,9 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                             <div>
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className="font-bold text-slate-100 text-sm whitespace-nowrap">{user.name}</span>
+                                <span className="text-[10px] bg-cyan-950/40 text-cyan-400 px-2.5 py-0.5 rounded-lg border border-cyan-500/20 font-mono font-bold" title="App Username for Login">
+                                  {getUsernameFromFullName(user.name)}
+                                </span>
                                 <span className={`text-[9px] px-2 py-0.5 rounded-full border font-black uppercase tracking-wider ${
                                   user.role === 'tl' 
                                     ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-300' 
