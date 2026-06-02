@@ -10,7 +10,14 @@ console.error = (...args) => {
       return 'Unknown';
     }
   }).join(' ');
-  if (msg.includes('Quota exceeded') || msg.includes('resource-exhausted') || msg.includes('update time that is in the future')) return;
+  if (
+    msg.includes('Quota exceeded') || 
+    msg.includes('resource-exhausted') || 
+    msg.includes('update time that is in the future') ||
+    msg.includes('failed to connect to websocket') ||
+    msg.includes('WebSocket') ||
+    msg.includes('websocket')
+  ) return;
   originalConsoleError(...args);
 };
 
@@ -26,6 +33,35 @@ console.warn = (...args) => {
       return 'Unknown';
     }
   }).join(' ');
-  if (msg.includes('Using maximum backoff delay') || msg.includes('update time that is in the future')) return;
+  if (
+    msg.includes('Using maximum backoff delay') || 
+    msg.includes('update time that is in the future') ||
+    msg.includes('failed to connect to websocket') ||
+    msg.includes('WebSocket') ||
+    msg.includes('websocket')
+  ) return;
   originalConsoleWarn(...args);
 };
+
+// Also suppress WebSocket-related global uncaught errors to prevent error overlays or crash logs
+window.addEventListener('error', (event) => {
+  if (event && event.message && (
+    event.message.includes('WebSocket') || 
+    event.message.includes('websocket') || 
+    event.message.includes('failed to connect')
+  )) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+}, true);
+
+window.addEventListener('unhandledrejection', (event) => {
+  if (event && event.reason) {
+    const reasonStr = String(event.reason);
+    if (reasonStr.includes('WebSocket') || reasonStr.includes('websocket') || reasonStr.includes('failed to connect')) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }
+}, true);
+
