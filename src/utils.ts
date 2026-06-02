@@ -805,16 +805,19 @@ export const parseScheduleCSV = (
     return 'Off Day';
   };
 
-  const isAgentHeaderCol = (h: string): boolean => {
-    const s = h.trim().toLowerCase();
+  const isAgentHeaderCol = (h?: string): boolean => {
+    if (!h) return false;
+    const s = String(h).trim().toLowerCase();
     return ['agent name', 'agent', 'name', 'employee', 'staff', 'employee name', 'no.'].includes(s) || s.includes('employee') || s.includes('agent');
   };
-  const isDateHeaderCol = (h: string): boolean => {
-    const s = h.trim().toLowerCase();
+  const isDateHeaderCol = (h?: string): boolean => {
+    if (!h) return false;
+    const s = String(h).trim().toLowerCase();
     return ['date', 'day', 'week', 'shift date', 'schedule'].includes(s);
   };
-  const isShiftHeaderCol = (h: string): boolean => {
-    const s = h.trim().toLowerCase();
+  const isShiftHeaderCol = (h?: string): boolean => {
+    if (!h) return false;
+    const s = String(h).trim().toLowerCase();
     return ['shift', 'schedule', 'type', 'slot', 'time', 'shift time'].includes(s);
   };
 
@@ -826,7 +829,7 @@ export const parseScheduleCSV = (
 
   for (let i = 0; i < parsedRows.length; i++) {
     const row = parsedRows[i];
-    const cleanRow = row.map(h => h.trim().toLowerCase().replace(/^["']|["']$/g, ''));
+    const cleanRow = row.map(h => h ? String(h).trim().toLowerCase().replace(/^["']|["']$/g, '') : '');
     const tempNameIdx = cleanRow.findIndex(h => h && isAgentHeaderCol(h));
     
     if (tempNameIdx !== -1) {
@@ -850,7 +853,7 @@ export const parseScheduleCSV = (
 
   if (headerRowIndex === -1) {
     headerRowIndex = 0; 
-    const firstRow = parsedRows[0].map(h => h.trim().toLowerCase().replace(/^["']|["']$/g, ''));
+    const firstRow = parsedRows[0].map(h => h ? String(h).trim().toLowerCase().replace(/^["']|["']$/g, '') : '');
     if (firstRow.some(h => parseTargetDate(h))) {
        isMatrixFormat = true;
        nameIdx = 0; 
@@ -868,7 +871,7 @@ export const parseScheduleCSV = (
     if (row.length === 0 || row.every(c => !c)) continue; 
 
     const lineNum = idx + 1;
-    let rawName = (row[nameIdx] || '').trim();
+    let rawName = String(row[nameIdx] || '').trim();
 
     if (!rawName) {
       continue;
@@ -878,10 +881,10 @@ export const parseScheduleCSV = (
 
     let extractedTL = '';
     let processedName = rawName;
-    const tlMatch = processedName.match(/((.*?))/);
+    const tlMatch = processedName.match(/\((.*?)\)/);
     if (tlMatch) {
-      extractedTL = tlMatch[1].trim();
-      processedName = processedName.replace(/((.*?))/g, '').trim();
+      extractedTL = String(tlMatch[1] || '').trim();
+      processedName = processedName.replace(/\((.*?)\)/g, '').trim();
     }
     
     // eslint-disable-next-line
@@ -903,7 +906,7 @@ export const parseScheduleCSV = (
            const formattedDate = parseTargetDate(dateHeader);
            if (!formattedDate) continue; 
            
-           const rawShift = (row[col] || '').trim();
+           const rawShift = String(row[col] || '').trim();
            if (!rawShift) continue;
 
            const shiftLabel = mapShiftValue(rawShift);
@@ -915,8 +918,8 @@ export const parseScheduleCSV = (
            });
        }
     } else {
-       const rawDate = (row[dateIdx] || '').trim();
-       const rawShift = (row[shiftIdx] || '').trim();
+       const rawDate = String(row[dateIdx] || '').trim();
+       const rawShift = String(row[shiftIdx] || '').trim();
 
        if (!rawDate && !rawShift) continue; 
 
