@@ -85,6 +85,7 @@ import { ErrorBoundary } from './ErrorBoundary';
 import { MessagingSystem } from './components/MessagingSystem';
 import { DataVault } from './components/DataVault';
 import { IntegrationsManager } from './components/IntegrationsManager';
+import { SuperAdminControl } from './components/SuperAdminControl';
 import { ScreenshotUpload } from './components/ScreenshotUpload';
 import { MultiAttachmentUpload } from './components/MultiAttachmentUpload';
 import { AttachmentsDisplay } from './components/AttachmentsDisplay';
@@ -485,7 +486,7 @@ const getGreetingAndQuote = (userName: string, currentTime: Date) => {
   return { greet, quote };
 };
 
-const CURRENT_APP_VERSION = 2; // Increment this to trigger auto-reload across all clients
+const CURRENT_APP_VERSION = 3; // Increment this to trigger auto-reload across all clients
 
 const ActiveTimer = ({ startTime }: { startTime: string }) => {
   const [elapsed, setElapsed] = useState('');
@@ -928,15 +929,22 @@ export default function App() {
         if (CURRENT_APP_VERSION > remoteVersion) {
             setDoc(doc(db, "system", "app_version"), { version: CURRENT_APP_VERSION }, { merge: true }).catch(console.error);
         } else if (remoteVersion > CURRENT_APP_VERSION) {
-            toast.loading("A new system update was published! Refreshing to apply...");
-            setTimeout(() => {
-                if ('caches' in window) {
-                   caches.keys().then((names) => {
-                       for (let name of names) caches.delete(name);
-                   });
-                }
-                window.location.reload();
-            }, 3000);
+            // Safeguard against infinite reload loops
+            const key = `reloaded_for_version_${remoteVersion}`;
+            if (!sessionStorage.getItem(key)) {
+                sessionStorage.setItem(key, "true");
+                toast.loading("A new system update was published! Refreshing to apply...");
+                setTimeout(() => {
+                    if ('caches' in window) {
+                       caches.keys().then((names) => {
+                           for (let name of names) caches.delete(name);
+                       }).catch(e => console.error("Cache flush on reload error:", e));
+                    }
+                    window.location.reload();
+                }, 3000);
+            } else {
+                console.warn(`Already attempted reload for version ${remoteVersion}, but local bundle version is still ${CURRENT_APP_VERSION}. Suppressing loop to let user open the app.`);
+            }
         }
       } else {
         setDoc(doc(db, "system", "app_version"), { version: CURRENT_APP_VERSION }).catch(console.error);
@@ -1232,7 +1240,6 @@ export default function App() {
     supportAssignmentsRef.current = supportAssignments;
   }, [supportAssignments]);
 
-  const isTLOreSupport = currentUser ? (currentUser.role === 'tl' || currentUser.role === 'qa' || !!supportAssignments[currentUser.name] || isTLName(currentUser.name)) : false;
   const isSuperAdmin = currentUser ? (
     currentUser?.name?.toLowerCase() === 'hesham sobhy' || 
     currentUser?.name?.toLowerCase() === 'h.sobhy' || 
@@ -1242,8 +1249,11 @@ export default function App() {
     currentUser?.name?.toLowerCase() === 'a.hassan' ||
     currentUser?.name?.toLowerCase() === 'shymaa hassan' ||
     currentUser?.name?.toLowerCase() === 'shaymaa hassan' ||
-    currentUser?.name?.toLowerCase() === 's.hassan'
+    currentUser?.name?.toLowerCase() === 's.hassan' ||
+    currentUser?.email?.toLowerCase() === 'sobhyhesham00@gmail.com'
   ) : false;
+
+  const isTLOreSupport = currentUser ? (currentUser.role === 'tl' || currentUser.role === 'qa' || !!supportAssignments[currentUser.name] || isTLName(currentUser.name) || isSuperAdmin) : false;
 
   // Monitor active activity to automatically pop up when they start a new active break or lunch or when it exceeds
   useEffect(() => {
@@ -3404,11 +3414,16 @@ ${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
        setStorageItem('sched_agent_directory', result.directory);
        setStorageItem('sched_agent_directory_headers', result.headers);
        
+       // Write to Firestore system docs
+       setDoc(doc(db, "system", "sched_agent_directory"), { data: result.directory }).catch(console.error);
+       setDoc(doc(db, "system", "sched_agent_directory_headers"), { data: result.headers }).catch(console.error);
+
        const allKnown = new Set(agentsList);
        result.directory.forEach(a => allKnown.add(a.agentName));
        const updatedList = Array.from(allKnown);
        setAgentsList(updatedList);
        setStorageItem('sched_agents_list', updatedList);
+       setDoc(doc(db, "system", "sched_agents_list"), { data: updatedList }).catch(console.error);
 
        const newMeta = { ...getAgentMeta() };
        let hasMetaUpdate = false;
@@ -3425,15 +3440,15 @@ ${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
            result.directory.forEach(a => {
                let updated = false;
                if (!newMeta[a.agentName]) newMeta[a.agentName] = { roleType: '', tlName: '' };
-               if (tlHeader && a.data[tlHeader]) {
-                   const val = a.data[tlHeader].trim();
+               if (tlHeader && a.data[tlHeader] !== undefined && a.data[tlHeader] !== null) {
+                   const val = String(a.data[tlHeader]).trim();
                    if (val) {
                        newMeta[a.agentName].tlName = val;
                        updated = true;
                    }
                }
-               if (roleHeader && a.data[roleHeader]) {
-                   const val = a.data[roleHeader].trim();
+               if (roleHeader && a.data[roleHeader] !== undefined && a.data[roleHeader] !== null) {
+                   const val = String(a.data[roleHeader]).trim();
                    if (val) {
                        newMeta[a.agentName].roleType = val;
                        updated = true;
@@ -3443,9 +3458,95 @@ ${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
            });
            if (hasMetaUpdate) {
                setStorageItem('sched_agent_meta', newMeta);
+               setDoc(doc(db, "system", "sched_agent_meta"), { data: newMeta }).catch(console.error);
            }
        }
-       toast.success(`Successfully loaded ${result.directory.length} directory records!`);
+
+       // Sync individuals into the users collection as real registeredUsers profiles with smart headers
+       result.directory.forEach(a => {
+           const userDocId = a.agentName ? String(a.agentName).trim().toLowerCase().replace(/[^a-z0-9]/g, '') : '';
+           if (userDocId) {
+               const emailVal = (() => {
+                   for (const k of Object.keys(a.data)) {
+                       const lk = k.toLowerCase().trim().replace(/[\s_-]+/g, '');
+                       if (['email', 'mail', 'corpemail', 'corporateemail', 'address'].some(key => lk.includes(key) || key.includes(lk))) {
+                           return a.data[k] !== undefined && a.data[k] !== null ? String(a.data[k]).trim() : '';
+                       }
+                   }
+                   return '';
+               })();
+               const phoneVal = (() => {
+                   for (const k of Object.keys(a.data)) {
+                       const lk = k.toLowerCase().trim().replace(/[\s_-]+/g, '');
+                       if (['phone', 'mobile', 'tel', 'contact', 'number', 'phonenumber'].some(key => lk.includes(key) || key.includes(lk))) {
+                           return a.data[k] !== undefined && a.data[k] !== null ? String(a.data[k]).trim() : '';
+                       }
+                   }
+                   return '';
+               })();
+               const lobVal = (() => {
+                   for (const k of Object.keys(a.data)) {
+                       const lk = k.toLowerCase().trim().replace(/[\s_-]+/g, '');
+                       if (['lob', 'lineofbusiness', 'channel', 'queue', 'department', 'function'].some(key => lk.includes(key) || key.includes(lk))) {
+                           return a.data[k] !== undefined && a.data[k] !== null ? String(a.data[k]).trim() : '';
+                       }
+                   }
+                   return '';
+               })();
+               const lobTeamVal = (() => {
+                   for (const k of Object.keys(a.data)) {
+                       const lk = k.toLowerCase().trim().replace(/[\s_-]+/g, '');
+                       if (['lobteam', 'team', 'group', 'teamname', 'subteam'].some(key => lk.includes(key) || key.includes(lk))) {
+                           return a.data[k] !== undefined && a.data[k] !== null ? String(a.data[k]).trim() : '';
+                       }
+                   }
+                   return '';
+               })();
+               const rawRole = (() => {
+                   for (const k of Object.keys(a.data)) {
+                       const lk = k.toLowerCase().trim().replace(/[\s_-]+/g, '');
+                       if (['role', 'designation', 'jobtitle', 'title', 'position'].some(key => lk.includes(key) || key.includes(lk))) {
+                           return a.data[k] !== undefined && a.data[k] !== null ? String(a.data[k]).trim() : '';
+                         }
+                    }
+                    return '';
+                })();
+               const teamLeaderVal = (() => {
+                   for (const k of Object.keys(a.data)) {
+                       const lk = k.toLowerCase().trim().replace(/[\s_-]+/g, '');
+                       if (['teamleader', 'tl', 'supervisor', 'leader', 'manager', 'lead', 'tlname'].some(key => lk.includes(key) || key.includes(lk))) {
+                           return a.data[k] !== undefined && a.data[k] !== null ? String(a.data[k]).trim() : '';
+                       }
+                   }
+                   return '';
+               })();
+
+               let roleVal: 'agent' | 'tl' | 'qa' = 'agent';
+               const rl = rawRole.toLowerCase();
+               if (rl.includes('tl') || rl.includes('leader') || rl.includes('lead') || rl.includes('supervisor') || rl.includes('manager')) {
+                   roleVal = 'tl';
+               } else if (rl.includes('qa') || rl.includes('quality') || rl.includes('analyst')) {
+                   roleVal = 'qa';
+               }
+
+               const userProfile = {
+                   id: `usr_import_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+                   name: a.agentName,
+                   role: roleVal,
+                   email: emailVal || undefined,
+                   phone: phoneVal || undefined,
+                   lob: lobVal || undefined,
+                   lobTeam: lobTeamVal || undefined,
+                   teamLeader: teamLeaderVal || undefined
+               };
+
+               setDoc(doc(db, "users", userDocId), userProfile, { merge: true }).catch(err => {
+                   console.error("Failed to import user profile:", err);
+               });
+           }
+       });
+
+       toast.success(`Successfully loaded and synchronized ${result.directory.length} directory records!`);
     } else {
        throw new Error("No directory entries parsed.");
     }
@@ -5684,7 +5785,7 @@ ${ttNotes}` : autoNote;
                         {buildBtn("orders", <ShoppingBag className="w-4 h-4 text-fuchsia-400" />, "Team Orders & Food", "bg-fuchsia-500/20 border-fuchsia-500/30 text-fuchsia-100")}
                         {buildBtn("knowledge", <Book className="w-4 h-4 text-cyan-400" />, "Knowledge Base", "bg-cyan-500/20 border-cyan-500/30 text-cyan-100")}
                         {buildBtn("offers", <Tag className="w-4 h-4 text-emerald-400" />, "Offers", "bg-emerald-500/20 border-emerald-500/30 text-emerald-100")}
-                        {isMasterAdmin && buildBtn("admin", <ShieldCheck className="w-4 h-4 text-rose-600" />, "Super Admin Control", "bg-rose-900 border-rose-800")}
+                        {isSuperAdmin && buildBtn("admin", <ShieldCheck className="w-4 h-4 text-rose-600" />, "Super Admin Control", "bg-rose-900 border-rose-800")}
                       </>
                      );
                   } else {
@@ -13893,10 +13994,10 @@ _ ${inq.answer || 'No answer yet'} _`;
                                   if (!isTLOreSupport && !isMyRequest) return false;
 
                                   const matchesSearch = 
-                                    r.patientName.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
-                                    r.fileNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
-                                    r.phoneNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
-                                    r.agentName?.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+                                    (r.patientName || '').toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+                                    (r.fileNumber || '').toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+                                    (r.phoneNumber || '').toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+                                    (r.agentName || '').toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
                                     (r.idNumber && r.idNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()));
 
                                   const matchesStatus = 
@@ -13926,10 +14027,10 @@ _ ${inq.answer || 'No answer yet'} _`;
                                       if (!isTLOreSupport && !isMyRequest) return false;
 
                                       const matchesSearch = 
-                                        r.patientName.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
-                                        r.fileNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
-                                        r.phoneNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
-                                        r.agentName?.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+                                        (r.patientName || '').toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+                                        (r.fileNumber || '').toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+                                        (r.phoneNumber || '').toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+                                        (r.agentName || '').toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
                                         (r.idNumber && r.idNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()));
 
                                       const matchesStatus = 
@@ -14333,10 +14434,10 @@ _ ${req.notes || 'None'} _`;
                                   if (!isTLOreSupport && !isMyComplaint) return false;
 
                                   const matchesSearch = 
-                                    c.patientName.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
-                                    c.fileNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
-                                    c.phoneNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
-                                    c.agentName?.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+                                    (c.patientName || '').toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+                                    (c.fileNumber || '').toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+                                    (c.phoneNumber || '').toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+                                    (c.agentName || '').toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
                                     (c.idNumber && c.idNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()));
 
                                   const matchesStatus = 
@@ -14365,10 +14466,10 @@ _ ${req.notes || 'None'} _`;
                                       if (!isTLOreSupport && !isMyComplaint) return false;
 
                                       const matchesSearch = 
-                                        c.patientName.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
-                                        c.fileNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
-                                        c.phoneNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
-                                        c.agentName?.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+                                        (c.patientName || '').toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+                                        (c.fileNumber || '').toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+                                        (c.phoneNumber || '').toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+                                        (c.agentName || '').toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
                                         (c.idNumber && c.idNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()));
 
                                       const matchesStatus = 
@@ -14668,7 +14769,7 @@ _ ${comp.tlComment || 'No comment yet'} _`;
 
                                   const matchesSearch = 
                                     c.clinicName?.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
-                                    c.phoneNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+                                    (c.phoneNumber || '').toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
                                     c.callCenterAgentName?.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
                                     (c.handledBy && c.handledBy.toLowerCase().includes(ttSearchQuery.toLowerCase()));
 
@@ -14704,7 +14805,7 @@ _ ${comp.tlComment || 'No comment yet'} _`;
 
                                       const matchesSearch = 
                                         c.clinicName?.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
-                                        c.phoneNumber.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
+                                        (c.phoneNumber || '').toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
                                         c.callCenterAgentName?.toLowerCase().includes(ttSearchQuery.toLowerCase()) ||
                                         (c.handledBy && c.handledBy.toLowerCase().includes(ttSearchQuery.toLowerCase()));
 
@@ -14965,11 +15066,11 @@ _ ${req.handlingNotes || 'Pending response'} _`;
                 const filteredFeedbacks = tlFeedbacks.filter(f => {
                   // If logged-in user is TL, they only see feedbacks addressed to them
                   if (!isAmira) {
-                    return f.tlName.toLowerCase() === currentUser?.name?.toLowerCase();
+                    return (f.tlName || '').toLowerCase() === currentUser?.name?.toLowerCase();
                   }
                   // Amira can filter by TL name
                   if (feedbackFilterTl !== 'all') {
-                    return f.tlName.toLowerCase() === feedbackFilterTl.toLowerCase();
+                    return (f.tlName || '').toLowerCase() === feedbackFilterTl.toLowerCase();
                   }
                   return true;
                 });
@@ -15205,7 +15306,7 @@ _ ${req.handlingNotes || 'Pending response'} _`;
                                 ) : (
                                   <div className="space-y-3.5 max-h-96 overflow-y-auto pr-2">
                                     {f.replies.map((r) => {
-                                      const isSenderAmira = r.senderName.toLowerCase() === 'amira hassan';
+                                      const isSenderAmira = (r.senderName || '').toLowerCase() === 'amira hassan';
 
                                       return (
                                         <div 
@@ -15291,6 +15392,19 @@ _ ${req.handlingNotes || 'Pending response'} _`;
                 );
               })()}
 
+              {/* Super Admin Control Panel */}
+              {activeTab === 'admin' && (
+                <SuperAdminControl
+                  currentUser={currentUser}
+                  registeredUsers={registeredUsers}
+                  credentials={credentials}
+                  lockedAccounts={lockedAccounts}
+                  failedAttempts={failedAttempts}
+                  onResetAllData={handleResetAllData}
+                  TRIGGER_CURRENT_APP_VERSION={CURRENT_APP_VERSION}
+                />
+              )}
+
               {/* Headcount / Directory Panel */}
               {activeTab === 'directory' && (() => {
                 const globalMeta = getAgentMeta();
@@ -15323,14 +15437,14 @@ _ ${req.handlingNotes || 'Pending response'} _`;
 
                     {/* Headcount Upload Console directly under directory tab for Hesham & Amira */}
                     {isSuperAdmin && (
-                      <div className="bg-white/5 border text-slate-100 border-white/10 rounded-3xl shadow-sm p-6 space-y-6">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-white/5 gap-3">
+                      <div className="bg-white/5 border text-slate-100 border-white/10 rounded-3xl shadow-sm p-6 space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-white/5 gap-3">
                           <div className="text-left">
                             <h3 className="font-bold text-slate-100 text-base font-display flex items-center gap-2">
                               <Upload className="w-5 h-5 text-cyan-400" />
                               Upload Directory / Headcount File
                             </h3>
-                            <p className="text-xs text-slate-400 mt-1">Import CSV or Google Sheet to overwrite all agent metadata and contact directories</p>
+                            <p className="text-xs text-slate-400 mt-1">Import any CSV, TSV, JSON, or Excel (.xlsx, .xls) spreadsheet to sync or overwrite agent profiles</p>
                           </div>
                           <button
                             onClick={() => {
@@ -15343,12 +15457,51 @@ _ ${req.handlingNotes || 'Pending response'} _`;
                               link.click();
                               document.body.removeChild(link);
                             }}
-                            className="px-4 py-2 bg-white/5 hover:bg-white/10 text-xs font-bold text-slate-300 rounded-xl transition-all border border-white/10 shadow-sm"
+                            className="px-4 py-2 bg-white/5 hover:bg-white/10 text-xs font-bold text-slate-300 rounded-xl transition-all border border-white/10 shadow-sm cursor-pointer"
                           >
-                            Download Template CSV
+                            Download Sample CSV
                           </button>
                         </div>
-                        
+
+                        {/* Drag and Drop File Zone */}
+                        <div 
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            e.currentTarget.classList.add('border-cyan-500', 'bg-cyan-500/5');
+                          }}
+                          onDragLeave={(e) => {
+                            e.preventDefault();
+                            e.currentTarget.classList.remove('border-cyan-500', 'bg-cyan-500/5');
+                          }}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            e.currentTarget.classList.remove('border-cyan-500', 'bg-cyan-500/5');
+                            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                              handleDirectoryFile(e.dataTransfer.files[0]);
+                            }
+                          }}
+                          className="border-2 border-dashed border-white/10 hover:border-cyan-500/50 rounded-2xl p-8 text-center transition-all bg-black/10 flex flex-col items-center justify-center gap-3 cursor-pointer group"
+                          onClick={() => document.getElementById('headcount-file-uploader')?.click()}
+                        >
+                          <input 
+                            type="file" 
+                            id="headcount-file-uploader" 
+                            className="hidden" 
+                            accept=".csv,.xlsx,.xls,.tsv,.txt,.json"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                handleDirectoryFile(e.target.files[0]);
+                              }
+                            }}
+                          />
+                          <div className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <FileSpreadsheet className="w-6 h-6" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-200">Drag & drop your headcount file here, or <span className="text-cyan-400 group-hover:underline">browse</span></p>
+                            <p className="text-[10px] text-slate-500 mt-1 uppercase font-mono tracking-wider">Supports XLSX, XLS, CSV, TSV, TXT, JSON</p>
+                          </div>
+                        </div>
                       </div>
                     )}
                     
