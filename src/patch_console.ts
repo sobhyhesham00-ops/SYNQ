@@ -43,6 +43,32 @@ console.warn = (...args) => {
   originalConsoleWarn(...args);
 };
 
+const originalConsoleLog = console.log;
+console.log = (...args) => {
+  const msg = args.map(a => {
+    try {
+      if (typeof a === 'string') return a;
+      if (typeof a === 'object' && a !== null) return JSON.stringify(a);
+      return String(a);
+    } catch { return 'Unknown'; }
+  }).join(' ');
+  if (msg.includes('WebSocket') || msg.includes('websocket')) return;
+  originalConsoleLog(...args);
+};
+
+const originalConsoleInfo = console.info;
+console.info = (...args) => {
+  const msg = args.map(a => {
+    try {
+      if (typeof a === 'string') return a;
+      if (typeof a === 'object' && a !== null) return JSON.stringify(a);
+      return String(a);
+    } catch { return 'Unknown'; }
+  }).join(' ');
+  if (msg.includes('WebSocket') || msg.includes('websocket')) return;
+  originalConsoleInfo(...args);
+};
+
 // Also suppress WebSocket-related global uncaught errors to prevent error overlays or crash logs
 window.addEventListener('error', (event) => {
   if (event && event.message && (

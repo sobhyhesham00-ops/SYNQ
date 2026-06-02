@@ -4,6 +4,63 @@ import { SchedulingRequest, SHIFTS, TEAM_LEADERS, INITIAL_AGENTS, SwapRequest, A
 import { db } from './firebase';
 import { doc, setDoc, deleteDoc } from 'firebase/firestore';
 
+export const compressPastedImage = (base64Str: string, maxWidth = 1024, quality = 0.7): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.src = base64Str;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) { resolve(base64Str); return; }
+
+      let width = img.width;
+      let height = img.height;
+      if (width > maxWidth) {
+        height = Math.round((height * maxWidth) / width);
+        width = maxWidth;
+      }
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => resolve(base64Str);
+  });
+};
+
+export const handleGlobalImagePaste = (e: React.ClipboardEvent, photos: string[], setPhotos: (photos: string[]) => void) => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  const filesArray: File[] = [];
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].type.indexOf('image') !== -1) {
+      const file = items[i].getAsFile();
+      if (file) filesArray.push(file);
+    }
+  }
+  if (filesArray.length > 0) {
+    Promise.all(filesArray.map(file => {
+      return new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          if (event.target?.result) {
+            const compressed = await compressPastedImage(event.target.result as string);
+            resolve(compressed);
+          } else {
+            resolve('');
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    })).then(newCompressedPhotos => {
+      const filtered = newCompressedPhotos.filter(Boolean);
+      if (filtered.length > 0) {
+        setPhotos([...photos, ...filtered]);
+      }
+    });
+  }
+};
+
 export const getStorageItem = <T>(key: string, defaultValue: T): T => {
   try {
     const item = localStorage.getItem(key);

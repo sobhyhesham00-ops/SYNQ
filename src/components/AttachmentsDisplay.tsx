@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExternalLink, Copy } from 'lucide-react';
+import { ExternalLink, Copy, Download } from 'lucide-react';
 
 interface AttachmentsDisplayProps {
   photos?: string[];
@@ -16,20 +16,34 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({ photos, 
     <div className="space-y-3 mt-3 border-t border-white/5 pt-3">
       {/* Display Photos */}
       {hasPhotos && (
-        <div className="space-y-1">
+        <div className="space-y-2">
           <span className="text-[10px] text-slate-400 font-mono block">Attached Screenshots ({photos.length}):</span>
           <div className="flex flex-wrap gap-2">
             {photos.map((photo, pIdx) => (
-              <a
-                key={pIdx}
-                href={photo}
-                target="_blank"
-                rel="noreferrer"
-                className="block w-20 h-20 rounded-lg overflow-hidden border border-white/10 hover:border-indigo-500 transition-all bg-black/55 shrink-0"
-                title="View Image"
-              >
-                <img referrerPolicy="no-referrer" src={photo} alt="screenshot" className="w-full h-full object-cover" />
-              </a>
+              <div key={pIdx} className="relative group/photo shrink-0 w-full max-w-sm">
+                <a
+                  href={photo}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block w-full rounded-lg overflow-hidden border border-white/10 group-hover/photo:border-indigo-500 transition-all bg-black/55"
+                  title="View Full Image"
+                >
+                  <img referrerPolicy="no-referrer" src={photo} alt="screenshot" className="w-full h-auto object-contain max-h-[300px]" />
+                </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const a = document.createElement('a');
+                    a.href = photo;
+                    a.download = `attachment-${pIdx + 1}.jpg`;
+                    a.click();
+                  }}
+                  className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-black text-white rounded-md opacity-0 group-hover/photo:opacity-100 transition-opacity backdrop-blur-sm border border-white/20"
+                  title="Download Image"
+                >
+                  <Download className="w-4 h-4" />
+                </button>
+              </div>
             ))}
           </div>
         </div>

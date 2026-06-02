@@ -254,6 +254,13 @@ body.theme-light .bg-amber-500\/15 {
   background-color: rgba(217, 119, 6, 0.08) !important;
 }
 
+/* Suppress Vite Error Overlay */
+vite-error-overlay {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 @keyframes global-ring-jump {
   0% { transform: translateY(0); }
   25% { transform: translateY(-5px) scale(1.1); }

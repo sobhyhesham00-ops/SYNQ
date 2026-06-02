@@ -4,11 +4,34 @@
     <script>
       const originalConsoleError = console.error;
       console.error = function(...args) {
-        const msg = args.join(' ');
+        const msg = args.map(a => {
+          try {
+            if (typeof a === 'string') return a;
+            if (a instanceof Error) return a.message;
+            if (typeof a === 'object') return JSON.stringify(a);
+            return String(a);
+          } catch(e) { return 'Unknown'; }
+        }).join(' ');
         if (msg.includes('WebSocket') || msg.includes('websocket') || msg.includes('failed to connect')) {
           return;
         }
         originalConsoleError.apply(console, args);
+      };
+      
+      const originalConsoleLog = console.log;
+      console.log = function(...args) {
+        const msg = args.map(a => {
+          try {
+            if (typeof a === 'string') return a;
+            if (a instanceof Error) return a.message;
+            if (typeof a === 'object') return JSON.stringify(a);
+            return String(a);
+          } catch(e) { return 'Unknown'; }
+        }).join(' ');
+        if (msg.includes('WebSocket') || msg.includes('websocket') || msg.includes('failed to connect')) {
+          return;
+        }
+        originalConsoleLog.apply(console, args);
       };
       
       window.addEventListener('error', function(event) {
