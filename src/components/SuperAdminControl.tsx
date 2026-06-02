@@ -574,7 +574,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                             <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs ${
                               user.role === 'tl' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-slate-700/20 text-slate-300'
                             }`}>
-                              {user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                              {String(user.name || '').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
                             </div>
                             <div>
                               <div className="flex items-center gap-1.5 flex-wrap">

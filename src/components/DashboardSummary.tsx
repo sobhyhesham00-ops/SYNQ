@@ -133,7 +133,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
               </div>
               <div>
                 <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em]">Operational Overview</p>
-                <h2 className="text-2xl font-black text-white tracking-tight">Salam, {currentUser.name.split(' ')[0]}</h2>
+                <h2 className="text-2xl font-black text-white tracking-tight">Salam, {(currentUser?.name || '').split(' ')[0]}</h2>
               </div>
             </div>
             <p className="text-indigo-100/80 text-sm max-w-md leading-relaxed mt-4">

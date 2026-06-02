@@ -5566,7 +5566,7 @@ ${ttNotes}` : autoNote;
                 <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center font-black text-sm text-slate-100">
-                      {currentUser.name.split(' ').map(n => n[0]).join('')}
+                      {(currentUser?.name || '').split(' ').map(n => n[0]).join('')}
                     </div>
                     <div className="overflow-hidden">
                       <p className="text-xs font-bold text-slate-100 truncate">{formatAgentName(currentUser.name)}</p>
@@ -10696,7 +10696,7 @@ Notes: ${a.notes || 'None'}`;
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-2.5">
                                   <div className="flex items-center gap-3">
                                     <div className="w-8.5 h-8.5 bg-indigo-500 rounded-full flex items-center justify-center font-bold text-white text-xs shadow">
-                                      {inq.agentName.split(' ').map(n => n[0]).join('')}
+                                      {(inq.agentName || '').split(' ').map(n => n[0]).join('')}
                                     </div>
                                     <div>
                                       <div className="flex items-center gap-2 flex-wrap">

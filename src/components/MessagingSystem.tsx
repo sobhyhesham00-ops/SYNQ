@@ -85,10 +85,11 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
 
   // Helper to get friendly label
   const getRecipientLabel = () => {
+    if (!selectedRecipient) return 'Inbox 📧';
     if (selectedRecipient === 'all') return 'Global Broadcast 🌐';
     if (selectedRecipient === 'tl') return 'TL & Support Sync 🛡️';
     if (selectedRecipient.startsWith('team:')) {
-      const tl = selectedRecipient.split(':')[1];
+      const tl = String(selectedRecipient || '').split(':')[1] || '';
       return tl === currentUser.name ? 'My Sub-Team 👥' : `${tl}'s Team 👥`;
     }
     return selectedRecipient;
@@ -136,7 +137,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
         
         // Team channel
         if (rName.startsWith('team:')) {
-          const teamTL = m.receiverName.split(':')[1].toLowerCase();
+          const teamTL = String(m.receiverName || '').split(':')[1]?.toLowerCase() || '';
           if (curName === teamTL) return true;
           if ((userTL || '').toLowerCase() === teamTL) return true;
           return false;
