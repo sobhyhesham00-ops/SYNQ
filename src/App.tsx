@@ -1249,11 +1249,10 @@ export default function App() {
     currentUser?.name?.toLowerCase() === 'a.hassan' ||
     currentUser?.name?.toLowerCase() === 'shymaa hassan' ||
     currentUser?.name?.toLowerCase() === 'shaymaa hassan' ||
-    currentUser?.name?.toLowerCase() === 's.hassan' ||
-    currentUser?.email?.toLowerCase() === 'sobhyhesham00@gmail.com'
+    currentUser?.name?.toLowerCase() === 's.hassan'
   ) : false;
 
-  const isTLOreSupport = currentUser ? (currentUser.role === 'tl' || currentUser.role === 'qa' || !!supportAssignments[currentUser.name] || isTLName(currentUser.name) || isSuperAdmin) : false;
+  const isTLOreSupport = currentUser ? (currentUser.role === 'tl' || currentUser.role === 'qa' || !!supportAssignments[currentUser.name] || isTLName(currentUser.name)) : false;
 
   // Monitor active activity to automatically pop up when they start a new active break or lunch or when it exceeds
   useEffect(() => {
@@ -3428,11 +3427,11 @@ ${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
        const newMeta = { ...getAgentMeta() };
        let hasMetaUpdate = false;
        const tlHeader = result.headers.find(h => {
-           const lh = h.toLowerCase().trim();
+           const lh = h ? String(h).toLowerCase().trim() : ' ';
            return lh === 'tl' || lh === 'team leader' || lh.includes('manager') || lh.includes('supervisor') || lh.includes('lead') || lh === 'tl name';
        });
        const roleHeader = result.headers.find(h => {
-           const lh = h.toLowerCase().trim();
+           const lh = h ? String(h).toLowerCase().trim() : ' ';
            return lh === 'role' || lh === 'lob' || lh.includes('account') || lh.includes('designation') || lh.includes('job title') || lh.includes('department') || lh.includes('function') || lh.includes('business');
        });
        
@@ -5758,7 +5757,6 @@ ${ttNotes}` : autoNote;
                         {groupTitle("Operations & Triage", "📋", "text-teal-600")}
                         {buildBtn("tl-announcements", <Bell className="w-4 h-4 text-yellow-400" />, "TL Announcements", "bg-yellow-500/20 border-yellow-500/30 text-yellow-100")}
                         {buildBtn("client-search", <Search className="w-4 h-4 text-cyan-400" />, "Patient Search Hub", "bg-cyan-500/20 border-cyan-500/30 text-cyan-100")}
-                        {buildBtn("chat", <MessageCircle className="w-4 h-4 text-pink-500" />, "Live Team Chat", "bg-pink-500/20 border-pink-500/30 text-pink-100")}
                         {buildBtn("inquiries", <HelpCircle className="w-4 h-4 text-amber-500" />, "General Inquiries", "bg-amber-500/20 border-amber-500/30 text-amber-100")}
                         {buildBtn("tabby-tamara", <Wallet className="w-4 h-4 text-rose-500" />, "Tabby & Tamara Requests", "bg-rose-500/20 border-rose-500/30 text-rose-100")}
                         {buildBtn("complaints", <AlertTriangle className="w-4 h-4 text-red-500" />, "Complaints", "bg-red-500/20 border-red-500/30 text-red-100")}
@@ -5782,9 +5780,6 @@ ${ttNotes}` : autoNote;
                         {buildBtn("tl-feedback", <MessageCircle className="w-4 h-4 text-pink-500" />, "Director Hub", "bg-pink-500/20 border-pink-500/30 text-pink-100")}
                         {buildBtn("qa-scorecard", <CheckCircle2 className="w-4 h-4 text-green-500" />, "QA Scorecards", "bg-green-500/20 border-green-500/30 text-green-100")}
                         {buildBtn("kpi-calculator", <Calculator className="w-4 h-4 text-purple-400" />, "KPIs Calculator", "bg-purple-500/20 border-purple-500/30 text-purple-100")}
-                        {buildBtn("orders", <ShoppingBag className="w-4 h-4 text-fuchsia-400" />, "Team Orders & Food", "bg-fuchsia-500/20 border-fuchsia-500/30 text-fuchsia-100")}
-                        {buildBtn("knowledge", <Book className="w-4 h-4 text-cyan-400" />, "Knowledge Base", "bg-cyan-500/20 border-cyan-500/30 text-cyan-100")}
-                        {buildBtn("offers", <Tag className="w-4 h-4 text-emerald-400" />, "Offers", "bg-emerald-500/20 border-emerald-500/30 text-emerald-100")}
                         {isSuperAdmin && buildBtn("admin", <ShieldCheck className="w-4 h-4 text-rose-600" />, "Super Admin Control", "bg-rose-900 border-rose-800")}
                       </>
                      );
@@ -5794,7 +5789,6 @@ ${ttNotes}` : autoNote;
                         {groupTitle("Operations & Triage", "📋", "text-teal-600")}
                         {buildBtn("tl-announcements", <Bell className="w-4 h-4 text-yellow-400" />, "Updates & Announcements", "bg-yellow-500/20 border-yellow-500/30 text-yellow-100")}
                         {buildBtn("client-search", <Search className="w-4 h-4 text-cyan-400" />, "Patient Search Hub", "bg-cyan-500/20 border-cyan-500/30 text-cyan-100")}
-                        {buildBtn("chat", <MessageCircle className="w-4 h-4 text-pink-500" />, "Live Team Chat", "bg-pink-500/20 border-pink-500/30 text-pink-100")}
                         {buildBtn("inquiries", <HelpCircle className="w-4 h-4 text-amber-500" />, "General Inquiries", "bg-amber-500/20 border-amber-500/30 text-amber-100")}
                         {buildBtn("tabby-tamara", <Wallet className="w-4 h-4 text-rose-500" />, "Tabby & Tamara Requests", "bg-rose-500/20 border-rose-500/30 text-rose-100")}
                         {buildBtn("complaints", <AlertTriangle className="w-4 h-4 text-red-500" />, "Complaints", "bg-red-500/20 border-red-500/30 text-red-100")}
@@ -5813,11 +5807,8 @@ ${ttNotes}` : autoNote;
                         {buildBtn("my-requests", <GitPullRequest className="w-4 h-4" />, "My Swap & Leave Requests", "bg-blue-500/20 border-blue-500/30 text-blue-100")}
 
                         {groupTitle("Shared Goodies", "☕", "text-fuchsia-400")}
-                        {buildBtn("orders", <ShoppingBag className="w-4 h-4 text-fuchsia-400" />, "Team Orders & Food", "bg-fuchsia-500/20 border-fuchsia-500/30 text-fuchsia-100")}
-                        {buildBtn("knowledge", <Book className="w-4 h-4 text-cyan-400" />, "Knowledge Base", "bg-cyan-500/20 border-cyan-500/30 text-cyan-100")}
-                        {buildBtn("offers", <Tag className="w-4 h-4 text-emerald-400" />, "Offers", "bg-emerald-500/20 border-emerald-500/30 text-emerald-100")}
-
                         {buildBtn("tl-feedback", <MessageCircle className="w-4 h-4 text-pink-500" />, "TL Hub", "bg-pink-500/20 border-pink-500/30 text-pink-100")}
+                        {isSuperAdmin && buildBtn("admin", <ShieldCheck className="w-4 h-4 text-rose-600" />, "Super Admin Control", "bg-rose-900 border-rose-800")}
                       </>
                      );
                   }

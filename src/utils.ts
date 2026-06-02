@@ -611,7 +611,7 @@ export const parseAgentDirectoryCSV = (
   for (let i = 0; i < Math.min(parsedLines.length, 20); i++) {
     const row = parsedLines[i];
     const foundIdx = row.findIndex(h => {
-      const l = h?.toLowerCase().trim();
+      const l = h ? String(h).toLowerCase().trim() : '';
       return l === 'agent' || l === 'name' || l === 'employee' || l === 'user' || 
              l.includes('agent name') || l.includes('employee name') || l.includes('full name') ||
              l === 'who' || l === 'member' || l.includes('staff');
@@ -628,7 +628,7 @@ export const parseAgentDirectoryCSV = (
       for (let i = 0; i < Math.min(parsedLines.length, 20); i++) {
         const row = parsedLines[i];
         const foundIdx = row.findIndex(h => {
-          const l = h?.toLowerCase().trim();
+          const l = h ? String(h).toLowerCase().trim() : '';
           return l.includes('name') || l.includes('agent') || l.includes('employee') || l.includes('user') || l.includes('member');
         });
         if (foundIdx !== -1) {
@@ -654,7 +654,7 @@ export const parseAgentDirectoryCSV = (
     const rawName = row[nameIdx] || '';
     
     // Filter out common "junk" or "total" rows
-    const nameLower = rawName?.toLowerCase().trim();
+    const nameLower = String(rawName).toLowerCase().trim();
     if (!rawName || 
         nameLower.includes('total') || 
         nameLower.includes('count') || 
