@@ -1,4 +1,6 @@
 import { ScheduleUpload } from "./components/ScheduleUpload";
+import { AgentRequestsLogs } from "./components/AgentRequestsLogs";
+import { NotificationDrawer } from "./components/NotificationDrawer";
 import * as mammoth from "mammoth";
 import React, { useState, useEffect, FormEvent, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -13771,244 +13773,18 @@ Notes: ${a.notes || "None"}`;
                   {/* Agent Portal: Request History Logs (Only Agent) */}
                   {currentUser.role === "agent" &&
                     activeTab === "my-requests" && (
-                      <div className="space-y-6">
-                        <div>
-                          <h2 className="text-3xl font-bold text-slate-100 font-display">
-                            My Submission Logs
-                          </h2>
-                          <p className="text-slate-400 text-sm">
-                            Review status, comments and feedback on your
-                            submissions
-                          </p>
-                        </div>
-
-                        <div className="bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl p-6 shadow-xl space-y-4">
-                          <div className="flex justify-between items-center pb-2 border-b border-white/10">
-                            <h4 className="font-bold text-slate-100 text-base">
-                              Your Requests Logs
-                            </h4>
-                            <p className="text-xs text-slate-400 font-mono">
-                              Real-time status tracking
-                            </p>
-                          </div>
-
-                          <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
-                            {requests.filter(
-                              (r) => r.agentName === currentUser?.name,
-                            ).length === 0 ? (
-                              <div className="text-center py-12 text-slate-400 space-y-2">
-                                <ClipboardList className="w-10 h-10 mx-auto text-indigo-400 opacity-50" />
-                                <p>
-                                  You haven't submitted any scheduling requests
-                                  yet.
-                                </p>
-                              </div>
-                            ) : (
-                              requests
-                                .filter(
-                                  (r) => r.agentName === currentUser?.name,
-                                )
-                                .map((req) => {
-                                  const isSwap = req.type === "swap";
-                                  return (
-                                    <div
-                                      key={req.id}
-                                      className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col md:flex-row flex-wrap justify-between items-start md:items-center gap-4 hover:border-white/10 transition-all"
-                                    >
-                                      <div className="space-y-2 flex-grow min-w-[300px]">
-                                        <div className="flex items-center gap-2">
-                                          {isSwap ? (
-                                            <span className="px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 text-blue-300 rounded text-[10px] font-bold uppercase tracking-wider">
-                                              Shift Swap Request
-                                            </span>
-                                          ) : (
-                                            <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 rounded text-[10px] font-bold uppercase tracking-wider">
-                                              Annual Leave Request
-                                            </span>
-                                          )}
-                                          <span className="text-[10px] text-slate-400 font-mono">
-                                            Submitted:{" "}
-                                            {new Date(
-                                              req.createdAt,
-                                            ).toLocaleString()}
-                                          </span>
-                                        </div>
-
-                                        <div className="space-y-0.5">
-                                          {isSwap ? (
-                                            <p className="text-sm font-bold text-slate-100">
-                                              Swap shift for{" "}
-                                              <span className="text-indigo-300">
-                                                {formatDateNice(
-                                                  (req as SwapRequest).date,
-                                                )}
-                                              </span>
-                                            </p>
-                                          ) : (
-                                            <p className="text-sm font-bold text-slate-100">
-                                              Leave duration:{" "}
-                                              <span className="text-emerald-300">
-                                                {formatDateNice(
-                                                  (req as AnnualRequest)
-                                                    .startDate,
-                                                )}
-                                              </span>{" "}
-                                              to{" "}
-                                              <span className="text-emerald-300">
-                                                {formatDateNice(
-                                                  (req as AnnualRequest)
-                                                    .endDate,
-                                                )}
-                                              </span>
-                                            </p>
-                                          )}
-
-                                          {isSwap && (
-                                            <p className="text-xs text-slate-300">
-                                              Your Shift:{" "}
-                                              <span className="font-semibold">
-                                                {(req as SwapRequest).shift}
-                                              </span>{" "}
-                                              / Swap with Partner:{" "}
-                                              <span className="font-semibold text-slate-100">
-                                                {
-                                                  (req as SwapRequest)
-                                                    .swapWithAgent
-                                                }
-                                              </span>{" "}
-                                              &bull; Shift:{" "}
-                                              <span className="font-semibold">
-                                                {
-                                                  (req as SwapRequest)
-                                                    .swapWithShift
-                                                }
-                                              </span>
-                                            </p>
-                                          )}
-
-                                          {req.notes && (
-                                            <p className="text-slate-400 text-xs italic mt-1 font-sans">
-                                              " {req.notes} "
-                                            </p>
-                                          )}
-
-                                          <AttachmentsDisplay
-                                            photos={[
-                                              ...(req.photos || []),
-                                              ...(req.screenshot
-                                                ? [req.screenshot]
-                                                : []),
-                                            ]}
-                                            links={req.links}
-                                          />
-                                        </div>
-                                      </div>
-
-                                      <div className="flex flex-col items-end gap-2 self-stretch md:self-auto border-t md:border-t-0 border-white/5 pt-3 md:pt-0">
-                                        {req.status === "pending_partner" ? (
-                                          <div className="flex items-center gap-2">
-                                            <span className="px-2 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 rounded-md text-xs font-bold flex items-center gap-1 animate-pulse">
-                                              <Clock className="w-3.5 h-3.5" />{" "}
-                                              Awaiting partner decision
-                                            </span>
-                                            <button
-                                              onClick={() =>
-                                                handleCancelRequest(req.id)
-                                              }
-                                              className="text-xs font-bold text-rose-400 hover:text-rose-300 hover:underline px-2 py-1 bg-rose-500/10 rounded-lg cursor-pointer"
-                                            >
-                                              Cancel Request
-                                            </button>
-                                          </div>
-                                        ) : req.status === "pending" ? (
-                                          <div className="flex items-center gap-2">
-                                            <span className="px-2 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded-md text-xs font-bold flex items-center gap-1 animate-pulse">
-                                              <Clock className="w-3.5 h-3.5" />{" "}
-                                              Pending TL approval
-                                            </span>
-                                            <button
-                                              onClick={() =>
-                                                handleCancelRequest(req.id)
-                                              }
-                                              className="text-xs font-bold text-rose-400 hover:text-rose-300 hover:underline px-2 py-1 bg-rose-500/10 rounded-lg cursor-pointer"
-                                            >
-                                              Cancel Request
-                                            </button>
-                                          </div>
-                                        ) : req.status === "approved" ? (
-                                          <div className="text-right">
-                                            <span className="px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 rounded-md text-xs font-bold flex items-center justify-end gap-1">
-                                              <CheckCircle2 className="w-3.5 h-3.5" />{" "}
-                                              Approved
-                                            </span>
-                                            <p className="text-[10px] text-slate-400 mt-1">
-                                              Actioned by Leader {req.actionBy}
-                                            </p>
-                                          </div>
-                                        ) : req.status ===
-                                          "declined_by_partner" ? (
-                                          <div className="text-right">
-                                            <span className="px-2 py-1 bg-rose-500/10 border border-rose-500/20 text-rose-300 rounded-md text-xs font-bold flex items-center justify-end gap-1">
-                                              <XCircle className="w-3.5 h-3.5" />{" "}
-                                              Declined by Partner
-                                            </span>
-                                            <p className="text-[10px] text-slate-400 mt-1">
-                                              Partner refused swap agreement
-                                            </p>
-                                          </div>
-                                        ) : (
-                                          <div className="text-right">
-                                            <span className="px-2 py-1 bg-rose-500/10 border border-rose-500/20 text-rose-300 rounded-md text-xs font-bold flex items-center justify-end gap-1">
-                                              <XCircle className="w-3.5 h-3.5" />{" "}
-                                              Declined by TL
-                                            </span>
-                                            {req.ruleViolation && (
-                                              <p className="text-[9px] text-rose-400 mt-1 max-w-[150px] leading-tight">
-                                                ⚠️ Reason:{" "}
-                                                {req.violationMessage}
-                                              </p>
-                                            )}
-                                            <p className="text-[10px] text-slate-400 mt-0.5">
-                                              Actioned by Leader {req.actionBy}
-                                            </p>
-                                          </div>
-                                        )}
-
-                                        {isWithinFiveMinutes(req.createdAt) && (
-                                          <button
-                                            onClick={() =>
-                                              setEditingItem({
-                                                type: "scheduling_request",
-                                                id: req.id,
-                                                data: { ...req },
-                                              })
-                                            }
-                                            className="text-xs font-bold text-emerald-400 hover:text-emerald-300 hover:underline px-2 py-1 bg-emerald-500/10 rounded-lg cursor-pointer flex items-center gap-1 shrink-0 mt-1"
-                                            title={`Edit request (${getRemainingEditTimeStr(req.createdAt)})`}
-                                          >
-                                            <Pencil className="w-3.5 h-3.5" />{" "}
-                                            Edit (
-                                            {getRemainingEditTimeStr(
-                                              req.createdAt,
-                                            )}
-                                            )
-                                          </button>
-                                        )}
-                                      </div>
-                                      <div className="w-full mt-2 pt-2 border-t border-white/5 md:w-full md:block basis-full">
-                                        <RequestReplyThread
-                                          request={req}
-                                          currentUser={currentUser}
-                                          collectionName="requests"
-                                        />
-                                      </div>
-                                    </div>
-                                  );
-                                })
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                      <AgentRequestsLogs
+                        currentUser={currentUser}
+                        requests={requests}
+                        inquiries={inquiries}
+                        tabbyTamaraRequests={tabbyTamaraRequests}
+                        complaints={tabbyTamaraComplaints}
+                        clientComms={clientComms}
+                        isWithinFiveMinutes={isWithinFiveMinutes}
+                        getRemainingEditTimeStr={getRemainingEditTimeStr}
+                        setEditingItem={setEditingItem}
+                        handleCancelRequest={handleCancelRequest}
+                      />
                     )}
 
                   {/* Agent Inquiries Desk */}
@@ -23519,6 +23295,14 @@ _ ${req.handlingNotes || "Pending response"} _`;
           </div>
         )}
       </div>
+      <NotificationDrawer 
+        isOpen={isNotifDrawerOpen} 
+        onClose={() => setIsNotifDrawerOpen(false)} 
+        visibleNotifs={visibleNotifs} 
+        currentUser={currentUser} 
+        handleMarkAllNotifsAsRead={handleMarkAllNotifsAsRead} 
+        handleMarkSingleNotifAsRead={handleMarkSingleNotifAsRead} 
+      />
     </div>
   );
 }
