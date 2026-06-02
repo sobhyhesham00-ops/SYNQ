@@ -10,7 +10,7 @@ export const AIChatWidget = () => {
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim()) return;
+    if (!String(message || '').trim()) return;
 
     const userMsg = message;
     setMessage('');
@@ -107,7 +107,7 @@ export const AIChatWidget = () => {
               />
               <button 
                 type="submit" 
-                disabled={!message.trim() || isTyping}
+                disabled={!String(message || '').trim() || isTyping}
                 className="absolute right-1.5 top-1.5 p-1.5 bg-indigo-600 hover:bg-indigo-500 rounded-full text-white transition-colors disabled:opacity-50 disabled:hover:bg-indigo-600"
               >
                 <Send className="w-3.5 h-3.5" />

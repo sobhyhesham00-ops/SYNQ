@@ -85,7 +85,7 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
   };
 
   const handleSave = async () => {
-    if (!title.trim()) {
+    if (!String(title || '').trim()) {
       toast.error('Article title is required.');
       return;
     }

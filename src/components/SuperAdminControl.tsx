@@ -78,12 +78,12 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   const [editTL, setEditTL] = useState('');
 
   const normalizeUsername = (name: string) => {
-    return name.trim().toLowerCase().replace(/\s+/g, '');
+    return String(name || '').trim().toLowerCase().replace(/\s+/g, '');
   };
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newUserName.trim()) {
+    if (!String(newUserName || '').trim()) {
       toast.error('Name is required!');
       return;
     }
@@ -91,13 +91,13 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
     const docId = newUserName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
     const newUser: UserProfile = {
       id: `usr_${Date.now()}`,
-      name: newUserName.trim(),
+      name: String(newUserName || '').trim(),
       role: newUserRole,
-      email: newUserEmail.trim() || undefined,
-      phone: newUserPhone.trim() || undefined,
-      lob: newUserLob.trim() || undefined,
-      lobTeam: newUserTeam.trim() || undefined,
-      teamLeader: newUserTL.trim() || undefined
+      email: String(newUserEmail || '').trim() || undefined,
+      phone: String(newUserPhone || '').trim() || undefined,
+      lob: String(newUserLob || '').trim() || undefined,
+      lobTeam: String(newUserTeam || '').trim() || undefined,
+      teamLeader: String(newUserTL || '').trim() || undefined
     };
 
     try {
@@ -134,11 +134,11 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
     const updatedUser = {
       ...user,
       role: editRole,
-      email: editEmail.trim() || undefined,
-      phone: editPhone.trim() || undefined,
-      lob: editLob.trim() || undefined,
-      lobTeam: editTeam.trim() || undefined,
-      teamLeader: editTL.trim() || undefined
+      email: String(editEmail || '').trim() || undefined,
+      phone: String(editPhone || '').trim() || undefined,
+      lob: String(editLob || '').trim() || undefined,
+      lobTeam: String(editTeam || '').trim() || undefined,
+      teamLeader: String(editTL || '').trim() || undefined
     };
 
     try {
@@ -152,13 +152,13 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   };
 
   const handleSetPassword = async (userName: string) => {
-    if (!newPasswordValue.trim()) {
+    if (!String(newPasswordValue || '').trim()) {
       toast.error('Password cannot be empty!');
       return;
     }
 
     const usernameKey = normalizeUsername(userName);
-    const updatedCreds = { ...credentials, [usernameKey]: newPasswordValue.trim() };
+    const updatedCreds = { ...credentials, [usernameKey]: String(newPasswordValue || '').trim() };
 
     try {
       await setDoc(doc(db, "system", "sched_credentials"), { data: updatedCreds });

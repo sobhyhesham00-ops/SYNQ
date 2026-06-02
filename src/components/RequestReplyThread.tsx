@@ -38,7 +38,7 @@ export function RequestReplyThread({
 
   const handleReply = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!text.trim() && !screenshotPreview) return;
+    if (!String(text || '').trim() && !screenshotPreview) return;
 
     const newReply = {
       id: `rpl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -148,7 +148,7 @@ export function RequestReplyThread({
              placeholder="Reply or add notes..."
            />
            
-           <button type="submit" disabled={!text.trim() && !screenshotPreview} className="w-10 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white flex items-center justify-center transition-colors">
+           <button type="submit" disabled={!String(text || '').trim() && !screenshotPreview} className="w-10 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white flex items-center justify-center transition-colors">
              <Send className="w-4 h-4" />
            </button>
          </div>

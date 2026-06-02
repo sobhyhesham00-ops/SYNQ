@@ -36,16 +36,16 @@ export function PatientSearchHub({
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchQuery.trim()) return;
+    if (!String(searchQuery || '').trim()) return;
     setHasSearched(true);
   };
 
   const cleanPhone = (phone: string | undefined) => phone?.replace(/\D/g, '') || '';
   const phoneQuery = cleanPhone(searchQuery);
-  const textQuery = searchQuery.trim().toLowerCase();
+  const textQuery = String(searchQuery || '').trim().toLowerCase();
 
   const isMatch = (item: any) => {
-    if (!searchQuery.trim()) return false;
+    if (!String(searchQuery || '').trim()) return false;
     if (phoneQuery && item.phoneNumber && cleanPhone(item.phoneNumber).includes(phoneQuery)) return true;
     if (item.clinicName && item.clinicName.toLowerCase().includes(textQuery)) return true;
     if (item.patientName && item.patientName.toLowerCase().includes(textQuery)) return true;
@@ -90,7 +90,7 @@ export function PatientSearchHub({
           />
           <button
             type="submit"
-            disabled={!searchQuery.trim()}
+            disabled={!String(searchQuery || '').trim()}
             className="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white font-bold rounded-xl transition-all shadow-lg shadow-cyan-900/20 flex items-center gap-2"
           >
             <Search className="w-4 h-4" />
@@ -99,7 +99,7 @@ export function PatientSearchHub({
         </form>
       </div>
 
-      {hasSearched && searchQuery.trim() && (
+      {hasSearched && String(searchQuery || '').trim() && (
         <div className="space-y-6">
           <div className="flex items-center gap-4 py-2 border-b border-white/10">
             <h3 className="text-xl font-bold text-slate-200">

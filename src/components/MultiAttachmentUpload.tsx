@@ -21,8 +21,8 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
   const [tempLinkInput, setTempLinkInput] = useState('');
 
   const handleAddLink = () => {
-    if (!tempLinkInput.trim()) return;
-    let url = tempLinkInput.trim();
+    if (!String(tempLinkInput || '').trim()) return;
+    let url = String(tempLinkInput || '').trim();
     if (!/^https?:\/\//i.test(url)) {
       url = 'https://' + url;
     }

@@ -37,7 +37,7 @@ export function AnnouncementsTab({
 
   const handlePost = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim()) return;
+    if (!String(message || '').trim()) return;
 
     const newAnn: Announcement = {
       id: `ann_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,

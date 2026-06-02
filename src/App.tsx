@@ -202,7 +202,7 @@ const renderMarkdownText = (text: string) => {
           return <h2 key={idx} className="text-lg font-black text-slate-100 mt-6">{line.replace('# ', '')}</h2>;
         }
         // Bullet points
-        if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
+        if (String(line || '').trim().startsWith('- ') || String(line || '').trim().startsWith('* ')) {
           const stripped = line.replace(/^\s*[-*]\s+/, '');
           return (
             <div key={idx} className="flex items-start gap-2 ml-4 my-1.5" style={{ minWidth: 0 }}>
@@ -214,7 +214,7 @@ const renderMarkdownText = (text: string) => {
           );
         }
         // General text
-        if (line.trim().length > 0) {
+        if (String(line || '').trim().length > 0) {
           return <p key={idx} className="text-slate-300 text-xs my-1">{parseBoldText(line)}</p>;
         }
         return <div key={idx} className="h-1" />;
@@ -237,7 +237,7 @@ async function fetchGoogleSheetCSV(sheetId: string, gid: string = '0'): Promise<
       const res = await fetch(url);
       if (res.ok) {
         const text = await res.text();
-        if (text && text.trim().length > 0 && !text.includes('<!DOCTYPE html>')) {
+        if (text && String(text || '').trim().length > 0 && !text.includes('<!DOCTYPE html>')) {
           return text;
         }
       }
@@ -253,7 +253,7 @@ async function fetchGoogleSheetCSV(sheetId: string, gid: string = '0'): Promise<
       const res = await fetch(proxyUrl);
       if (res.ok) {
         const text = await res.text();
-        if (text && text.trim().length > 0 && !text.includes('<!DOCTYPE html>')) {
+        if (text && String(text || '').trim().length > 0 && !text.includes('<!DOCTYPE html>')) {
           return text;
         }
       }
@@ -1240,6 +1240,7 @@ export default function App() {
     supportAssignmentsRef.current = supportAssignments;
   }, [supportAssignments]);
 
+  // Add explicit checks for role-based super admin logic as requested to fix tab not showing
   const isSuperAdmin = currentUser ? (
     currentUser?.name?.toLowerCase() === 'hesham sobhy' || 
     currentUser?.name?.toLowerCase() === 'h.sobhy' || 
@@ -1250,7 +1251,13 @@ export default function App() {
     currentUser?.name?.toLowerCase() === 'shymaa hassan' ||
     currentUser?.name?.toLowerCase() === 'shaymaa hassan' ||
     currentUser?.name?.toLowerCase() === 's.hassan' ||
-    currentUser?.email?.toLowerCase() === 'sobhyhesham00@gmail.com'
+    currentUser?.name?.toLowerCase() === 'sobhyhesham00@gmail.com' ||
+    currentUser?.name?.toLowerCase() === 'admin' ||
+    currentUser?.name?.toLowerCase() === 'superadmin' ||
+    currentUser?.email?.toLowerCase() === 'sobhyhesham00@gmail.com' ||
+    (currentUser?.role as string) === 'admin' ||
+    (currentUser?.role as string) === 'superadmin' ||
+    (currentUser?.role as string) === 'director'
   ) : false;
 
   const isTLOreSupport = currentUser ? (currentUser.role === 'tl' || currentUser.role === 'qa' || !!supportAssignments[currentUser.name] || isTLName(currentUser.name)) : false;
@@ -1432,7 +1439,7 @@ export default function App() {
       toast.error("Please select a Team Leader.");
       return;
     }
-    if (!notes.trim()) {
+    if (!String(notes || '').trim()) {
       toast.error("Please enter feedback notes.");
       return;
     }
@@ -1476,7 +1483,7 @@ export default function App() {
   };
 
   const replyToTlFeedback = (feedbackId: string, text: string, attachment?: string, attachmentName?: string) => {
-    if (!text.trim()) {
+    if (!String(text || '').trim()) {
       toast.error("Please write a reply message.");
       return;
     }
@@ -1634,7 +1641,7 @@ export default function App() {
   const [kbAiAnswer, setKbAiAnswer] = useState<string>('');
 
   const handleKbAiQuery = async () => {
-    if (!searchQueryKb.trim()) {
+    if (!String(searchQueryKb || '').trim()) {
       toast.error('Please enter a query to ask the AI.');
       return;
     }
@@ -1722,7 +1729,7 @@ ${pageText}
 
 `;
             }
-            extractedText = fullText.trim() || 'No searchable text content found in PDF.';
+            extractedText = String(fullText || '').trim() || 'No searchable text content found in PDF.';
             toast.success(`Extracted ${pdf.numPages} pages from PDF!`, { id: 'pdf-load' });
           } catch (pdfErr: any) {
             console.error(pdfErr);
@@ -1859,7 +1866,7 @@ ${pageText}
   };
 
   const filteredKbDocs = useMemo(() => {
-    if (!searchQueryKb.trim()) return knowledgeBaseDocuments;
+    if (!String(searchQueryKb || '').trim()) return knowledgeBaseDocuments;
     const q = searchQueryKb.toLowerCase();
     return knowledgeBaseDocuments.filter(d => 
       String(d.name || '').toLowerCase().includes(q) || 
@@ -2285,7 +2292,7 @@ ${pageText}
     e.preventDefault();
     setLoginError('');
 
-    const trimmedInput = loginName.trim().replace(/\s+/g, '');
+    const trimmedInput = String(loginName || '').trim().replace(/\s+/g, '');
     if (!trimmedInput) {
       setLoginError('Please enter your username.');
       return;
@@ -2444,7 +2451,7 @@ ${pageText}
 
   // Complete Password Creation for first usage
   const handleRegisterConfirm = () => {
-    const trimmedInput = loginName.trim().toLowerCase().replace(/\s+/g, '');
+    const trimmedInput = String(loginName || '').trim().toLowerCase().replace(/\s+/g, '');
     const matchedFullName = findAgentByUsername(trimmedInput, agentsList);
     const finalName = trimmedInput;
     const correspondingFullName = matchedFullName || finalName;
@@ -3264,7 +3271,7 @@ ${swapTargetAgent}'s LOB: ${targetLOB}`);
           const firstSheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[firstSheetName];
           const csvText = XLSX.utils.sheet_to_csv(worksheet);
-          if (!csvText || !csvText.trim()) {
+          if (!csvText || !String(csvText || '').trim()) {
             throw new Error("Could not extract sheet content.");
           }
           
@@ -3375,8 +3382,8 @@ ${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
           if (parsed.newAgents && parsed.newAgents.length > 0) {
             const allKnown = new Set(agentsList);
             parsed.newAgents.forEach(a => {
-              if (a && a.trim()) {
-                allKnown.add(a.trim());
+              if (a && String(a || '').trim()) {
+                allKnown.add(String(a || '').trim());
               }
             });
             const updatedList = Array.from(allKnown);
@@ -3589,7 +3596,7 @@ ${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
         const csvText = XLSX.utils.sheet_to_csv(worksheet);
-        if (!csvText || !csvText.trim()) throw new Error("Could not extract sheet content.");
+        if (!csvText || !String(csvText || '').trim()) throw new Error("Could not extract sheet content.");
         
         const result = parseAgentDirectoryCSV(csvText);
         handleParsedDirectory(result);
@@ -3632,7 +3639,7 @@ ${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
       agentName: manualRosterAgent,
       date: manualRosterDate,
       shiftLabel: manualRosterShift,
-      shiftNotes: manualRosterNotes.trim() || undefined,
+      shiftNotes: String(manualRosterNotes || '').trim() || undefined,
     };
 
     commitSchedulesManual([newShift], [], {});
@@ -4032,8 +4039,8 @@ ${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
 
   // Inquiry Submission and Processing System
   const handleAddPhotoUrl = () => {
-    if (!tempPhotoUrlInput.trim()) return;
-    setInquiryPhotos([...inquiryPhotos, tempPhotoUrlInput.trim()]);
+    if (!String(tempPhotoUrlInput || '').trim()) return;
+    setInquiryPhotos([...inquiryPhotos, String(tempPhotoUrlInput || '').trim()]);
     setTempPhotoUrlInput('');
   };
 
@@ -4042,8 +4049,8 @@ ${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
   };
 
   const handleAddLink = () => {
-    if (!tempLinkInput.trim()) return;
-    let url = tempLinkInput.trim();
+    if (!String(tempLinkInput || '').trim()) return;
+    let url = String(tempLinkInput || '').trim();
     if (!/^https?:\/\//i.test(url)) {
       url = 'https://' + url;
     }
@@ -4080,7 +4087,7 @@ ${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
       return;
     }
     
-    if (!inquiryText.trim()) {
+    if (!String(inquiryText || '').trim()) {
       toast.error('Please enter your inquiry text!');
       return;
     }
@@ -4091,8 +4098,8 @@ ${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
         id: `inq_${Date.now()}`,
         agentName: currentUser.name,
         clinicName: inquiryClinicName,
-        phoneNumber: inquiryPhoneNumber.trim() || undefined,
-        text: inquiryText.trim(),
+        phoneNumber: String(inquiryPhoneNumber || '').trim() || undefined,
+        text: String(inquiryText || '').trim(),
         photos: inquiryPhotos,
         links: inquiryLinks,
         createdAt: new Date().toISOString(),
@@ -4118,7 +4125,7 @@ ${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
       setTempLinkInput('');
       setTempPhotoUrlInput('');
 
-      handleMentionsInText(inquiryText.trim(), 'Agent Inquiry Description', currentUser.name);
+      handleMentionsInText(String(inquiryText || '').trim(), 'Agent Inquiry Description', currentUser.name);
       addSystemNotification('❓ New Inquiry Submitted', `${currentUser.name} has submitted a new inquiry for clinic: ${inquiryClinicName}.`, 'general', 'tl');
 
       setSubmissionConfirmation({
@@ -4161,7 +4168,7 @@ ${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
 
   const handleSetInquiryAnswered = (inquiryId: string, answerText: string) => {
     if (!currentUser || currentUser.role !== 'tl') return;
-    if (!answerText.trim()) {
+    if (!String(answerText || '').trim()) {
       toast.error('Please supply an answer text.');
       return;
     }
@@ -4175,7 +4182,7 @@ ${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
         const updatedInq = {
           ...inq,
           status: 'answered' as const,
-          answer: answerText.trim(),
+          answer: String(answerText || '').trim(),
           answeredBy: currentUser.name,
           answeredAt: new Date().toISOString(),
           seenByAgent: false
@@ -4193,7 +4200,7 @@ ${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
     if (targetAgentName) {
       addSystemNotification(
         "💬 Inquiry Answered by TL",
-        `Your inquiry regarding clinic "${clinicName}" has been answered by ${currentUser.name}: "${answerText.trim()}"`,
+        `Your inquiry regarding clinic "${clinicName}" has been answered by ${currentUser.name}: "${String(answerText || '').trim()}"`,
         "inquiry",
         targetAgentName
       );
@@ -4561,7 +4568,7 @@ ${ttNotes}` : autoNote;
 
   const handleProcessClientComms = (commId: string, notes: string) => {
     if (!currentUser) return;
-    if (!notes.trim()) {
+    if (!String(notes || '').trim()) {
       toast.error('Please enter your handling notes first.');
       return;
     }
@@ -4959,7 +4966,7 @@ ${ttNotes}` : autoNote;
 
   const handleTLCommentComplaint = (complaintId: string, comment: string) => {
     if (!currentUser) return;
-    if (!comment.trim()) {
+    if (!String(comment || '').trim()) {
       toast.error('Please enter a handling comment first.');
       return;
     }
@@ -11123,7 +11130,7 @@ _ ${inq.answer || 'No answer yet'} _`;
                       {/* Active Roster Live Summary In or Out counters with list of names */}
                       {(() => {
                         let filteredAgents = activeAgentsForUI;
-                        if (rtmSearch.trim()) {
+                        if (String(rtmSearch || '').trim()) {
                           filteredAgents = filteredAgents.filter(a => a?.toLowerCase().includes(rtmSearch.toLowerCase()));
                         }
 
@@ -13866,7 +13873,7 @@ _ ${inq.answer || 'No answer yet'} _`;
                                                 <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-1 font-bold">🔗 TL Provided Links:</p>
                                                 <div className="flex flex-wrap gap-2">
                                                   {req.tlLinks.split(',').map((link, idx) => {
-                                                    const trimmed = link.trim();
+                                                    const trimmed = String(link || '').trim();
                                                     if (!trimmed) return null;
                                                     const href = trimmed.startsWith('http') ? trimmed : `https://${trimmed}`;
                                                     return (
@@ -14860,7 +14867,7 @@ _ ${req.handlingNotes || 'Pending response'} _`;
                           <button
                             onClick={() => {
                               if (!selectedTlForFeedback) return toast.error("Please pick a target TL.");
-                              if (!feedbackNotes.trim()) return toast.error("Notes cannot be blank.");
+                              if (!String(feedbackNotes || '').trim()) return toast.error("Notes cannot be blank.");
                               addTlFeedback(selectedTlForFeedback, feedbackNotes, feedbackAttachment, feedbackAttachmentName);
                             }}
                             className="px-6 py-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:brightness-110 active:scale-95 text-slate-950 font-sans font-black text-xs uppercase tracking-wider rounded-xl shadow-lg cursor-pointer transition-all flex items-center gap-2"

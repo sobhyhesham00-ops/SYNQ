@@ -247,12 +247,12 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
 
   const handleSendMessage = async (textToSend?: string) => {
     const finalVal = textToSend !== undefined ? textToSend : inputText;
-    if (!finalVal.trim() && !attachment) return;
+    if (!String(finalVal || '').trim() && !attachment) return;
 
     const newMessage = {
       senderName: currentUser.name,
       receiverName: selectedRecipient,
-      text: finalVal.trim(),
+      text: String(finalVal || '').trim(),
       attachment: attachment?.data || null,
       attachmentName: attachment?.name || null,
       createdAt: new Date().toISOString(),
@@ -266,7 +266,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
       if (addSystemNotification) {
         addSystemNotification(
           `💬 Chat from ${currentUser.name}`,
-          finalVal.trim() || (attachment ? `Shared attachment: ${attachment.name}` : 'Sent a chat message'),
+          String(finalVal || '').trim() || (attachment ? `Shared attachment: ${attachment.name}` : 'Sent a chat message'),
           'general',
           selectedRecipient
         );
@@ -329,7 +329,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
              (sName === selRecName && rName === curName);
     });
 
-    if (!msgSearchQuery.trim()) return threadMsgs;
+    if (!String(msgSearchQuery || '').trim()) return threadMsgs;
     return threadMsgs.filter(m => 
       m.text?.toLowerCase().includes(msgSearchQuery.toLowerCase())
     );
@@ -874,7 +874,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
 
               <button 
                 type="submit"
-                disabled={!inputText.trim() && !attachment}
+                disabled={!String(inputText || '').trim() && !attachment}
                 className="p-3 rounded-full bg-[#007AFF] hover:bg-blue-600 shadow-lg shadow-blue-500/10 text-white transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shrink-0 cursor-pointer"
                 title="Send Live Sync"
               >

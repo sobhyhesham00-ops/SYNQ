@@ -122,7 +122,7 @@ export const isQAName = (name: string): boolean => {
   if (AGENT_LOBS[normalized] === 'Quality') return true;
   
   const meta = getAgentMeta();
-  const overrideKey = Object.keys(meta).find(k => k.trim().toLowerCase().replace(/\s+/g, ' ') === normalized?.toLowerCase());
+  const overrideKey = Object.keys(meta).find(k => String(k || '').trim().toLowerCase().replace(/\s+/g, ' ') === normalized?.toLowerCase());
   if (overrideKey && meta[overrideKey].roleType) {
     const role = meta[overrideKey]?.roleType?.toLowerCase();
     if (role === 'qa' || role === 'quality') {
@@ -141,7 +141,7 @@ export const isTLName = (name: string): boolean => {
   if (normalized?.toLowerCase() === 'hesso') return true;
   
   const meta = getAgentMeta();
-  const overrideKey = Object.keys(meta).find(k => k.trim().toLowerCase().replace(/\s+/g, ' ') === normalized?.toLowerCase());
+  const overrideKey = Object.keys(meta).find(k => String(k || '').trim().toLowerCase().replace(/\s+/g, ' ') === normalized?.toLowerCase());
   if (overrideKey && meta[overrideKey].roleType) {
     const role = meta[overrideKey]?.roleType?.toLowerCase();
     if (role === 'tl' || role === 'team leader' || role.includes('manager')) {
@@ -178,13 +178,13 @@ export const getAgentLOB = (name: string): string => {
   const cleanName = (fullName || '').trim().toLowerCase().replace(/\s+/g, ' ');
   
   const meta = getAgentMeta();
-  const overrideKey = Object.keys(meta).find(k => k.trim().toLowerCase().replace(/\s+/g, ' ') === cleanName);
+  const overrideKey = Object.keys(meta).find(k => String(k || '').trim().toLowerCase().replace(/\s+/g, ' ') === cleanName);
   if (overrideKey && meta[overrideKey].roleType) {
     return meta[overrideKey].roleType;
   }
 
   const matchedKey = Object.keys(AGENT_LOBS).find(
-    key => key.trim().toLowerCase().replace(/\s+/g, ' ') === cleanName
+    key => String(key || '').trim().toLowerCase().replace(/\s+/g, ' ') === cleanName
   );
   
   return matchedKey ? AGENT_LOBS[matchedKey] : 'General';
@@ -196,7 +196,7 @@ export const getAgentTL = (name: string): string => {
   const cleanName = (fullName || '').trim().toLowerCase().replace(/\s+/g, ' ');
   
   const meta = getAgentMeta();
-  const overrideKey = Object.keys(meta).find(k => k.trim().toLowerCase().replace(/\s+/g, ' ') === cleanName);
+  const overrideKey = Object.keys(meta).find(k => String(k || '').trim().toLowerCase().replace(/\s+/g, ' ') === cleanName);
   if (overrideKey && meta[overrideKey].tlName) {
     return meta[overrideKey].tlName;
   }
@@ -574,7 +574,7 @@ export const parseAgentDirectoryCSV = (
   const directory: AgentDirectoryRow[] = [];
   const errors: string[] = [];
 
-  if (!csvContent || !csvContent.trim()) {
+  if (!csvContent || !String(csvContent || '').trim()) {
     return { directory: [], errors: ['CSV content is empty.'], parsedCount: 0, headers: [] };
   }
 
@@ -587,17 +587,17 @@ export const parseAgentDirectoryCSV = (
       if (char === '"') {
         inQuotes = !inQuotes;
       } else if (char === ',' && !inQuotes) {
-        row.push(curVal.trim().replace(/^["']|["']$/g, ''));
+        row.push(String(curVal || '').trim().replace(/^["']|["']$/g, ''));
         curVal = '';
       } else {
         curVal += char;
       }
     }
-    row.push(curVal.trim().replace(/^["']|["']$/g, ''));
+    row.push(String(curVal || '').trim().replace(/^["']|["']$/g, ''));
     return row;
   };
 
-  const allLines = csvContent.split(/\r?\n/).filter(l => l.trim().length > 0);
+  const allLines = csvContent.split(/\r?\n/).filter(l => String(l || '').trim().length > 0);
   if (allLines.length <= 1) {
     return { directory: [], errors: ['No data rows found in CSV.'], parsedCount: 0, headers: [] };
   }
@@ -705,7 +705,7 @@ export const parseScheduleCSV = (
   const newAgentsSet = new Set<string>();
   const parsedMeta: Record<string, { tlName?: string }> = {};
 
-  if (!csvContent || !csvContent.trim()) {
+  if (!csvContent || !String(csvContent || '').trim()) {
     return { schedules: [], errors: ['CSV content is empty.'], parsedCount: 0, newAgents: [], parsedMeta: {} };
   }
 
@@ -714,7 +714,7 @@ export const parseScheduleCSV = (
 
   // Helper Row Tokenizer
   const getCSVRows = (csvText: string): string[][] => {
-    const lines = csvText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+    const lines = csvText.split(/\r?\n/).map(l => String(l || '').trim()).filter(l => l.length > 0);
     return lines.map(lineStr => {
       const row: string[] = [];
       let curVal = '';
@@ -724,13 +724,13 @@ export const parseScheduleCSV = (
         if (char === '"') {
           inQuotes = !inQuotes;
         } else if (char === ',' && !inQuotes) {
-          row.push(curVal.trim().replace(/^["']|["']$/g, ''));
+          row.push(String(curVal || '').trim().replace(/^["']|["']$/g, ''));
           curVal = '';
         } else {
           curVal += char;
         }
       }
-      row.push(curVal.trim().replace(/^["']|["']$/g, ''));
+      row.push(String(curVal || '').trim().replace(/^["']|["']$/g, ''));
       return row;
     });
   };
@@ -740,8 +740,9 @@ export const parseScheduleCSV = (
     return { schedules: [], errors: ['No data rows found in CSV.'], parsedCount: 0, newAgents: [], parsedMeta: {} };
   }
 
-  const parseTargetDate = (dateStr: string): string | null => {
-    const s = dateStr.trim();
+  const parseTargetDate = (dateStr: string | undefined | null | number): string | null => {
+    if (dateStr == null) return null;
+    const s = String(dateStr).trim();
     if (!s) return null;
 
     const yymmdd = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
@@ -1234,7 +1235,7 @@ export const generateSchedulesCSV = (schedulesList: ScheduledShift[]): string =>
 
 // Safe evaluation of dynamic KPI formula
 export const evaluateKpiFormula = (formula: string, actual: number, target: number): number => {
-  if (!formula || !formula.trim()) return 0;
+  if (!formula || !String(formula || '').trim()) return 0;
   try {
     // Standardize variables
     let expr = formula?.toLowerCase()
