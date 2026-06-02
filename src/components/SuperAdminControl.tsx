@@ -599,6 +599,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                               </div>
                               <p className="text-[10px] text-slate-400 mt-0.5 space-x-2">
                                 <span>{user.email || 'No Email'}</span>
+                                {user.phone && <span className="text-emerald-400 font-mono">• {user.phone}</span>}
                                 {user.lob && <span>• <span className="text-indigo-300 font-semibold">{user.lob}</span></span>}
                                 {user.teamLeader && <span>• TL: <span className="text-cyan-400">{user.teamLeader}</span></span>}
                               </p>

@@ -3476,7 +3476,7 @@ ${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
                const emailVal = (() => {
                    for (const k of Object.keys(a.data)) {
                        const lk = k.toLowerCase().trim().replace(/[\s_-]+/g, '');
-                       if (['email', 'mail', 'corpemail', 'corporateemail', 'address'].some(key => lk.includes(key) || key.includes(lk))) {
+                       if (['email', 'mail', 'corpemail', 'corporateemail', 'emailaddress', 'useremail', 'workemail'].includes(lk) || (['email', 'mail'].some(term => lk.includes(term)) && !['teamleader', 'tl', 'lead', 'leader', 'manager', 'supervisor'].some(term => lk.includes(term))) || (lk.includes('address') && !['home', 'physical', 'street', 'ip', 'residence', 'residential', 'location', 'postal'].some(term => lk.includes(term)))) {
                            return a.data[k] !== undefined && a.data[k] !== null ? String(a.data[k]).trim() : '';
                        }
                    }
@@ -3485,7 +3485,7 @@ ${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
                const phoneVal = (() => {
                    for (const k of Object.keys(a.data)) {
                        const lk = k.toLowerCase().trim().replace(/[\s_-]+/g, '');
-                       if (['phone', 'mobile', 'tel', 'contact', 'number', 'phonenumber'].some(key => lk.includes(key) || key.includes(lk))) {
+                       if (['phone', 'mobile', 'tel', 'tele', 'contact', 'phonenumber'].some(key => lk === key || lk.startsWith('phone') || lk.endsWith('phone') || lk.startsWith('mobile') || lk.endsWith('mobile') || lk === 'contactnumber' || (lk.includes('number') && !['badge', 'serial', 'id', 'count', 'index', 'employee', 'user', 'emp', 'role', 'salary', 'bank', 'doc'].some(term => lk.includes(term))))) {
                            return a.data[k] !== undefined && a.data[k] !== null ? String(a.data[k]).trim() : '';
                        }
                    }
@@ -3494,7 +3494,7 @@ ${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `
                const lobVal = (() => {
                    for (const k of Object.keys(a.data)) {
                        const lk = k.toLowerCase().trim().replace(/[\s_-]+/g, '');
-                       if (['lob', 'lineofbusiness', 'channel', 'queue', 'department', 'function'].some(key => lk.includes(key) || key.includes(lk))) {
+                       if (['lob', 'lineofbusiness', 'channel', 'queue', 'department', 'function', 'business'].some(key => (lk.includes(key) || key.includes(lk)) && !lk.includes('team') && !lk.includes('group') && !lk.includes('sub'))) {
                            return a.data[k] !== undefined && a.data[k] !== null ? String(a.data[k]).trim() : '';
                        }
                    }
@@ -15185,7 +15185,7 @@ _ ${req.handlingNotes || 'Pending response'} _`;
                             const q = directorySearchQuery.toLowerCase();
                             return m.name.toLowerCase().includes(q) || 
                               (m.email && m.email.toLowerCase().includes(q)) || 
-                              (m.phone && m.phone.includes(q)) ||
+                              (m.phone && String(m.phone).toLowerCase().includes(q)) ||
                               getUsernameFromFullName(m.name).toLowerCase().includes(q);
                           }).map((meta, idx) => (
                             <tr key={idx} className="hover:bg-white/5 transition-all">
