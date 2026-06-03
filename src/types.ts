@@ -184,6 +184,7 @@ export interface ClientCommunicationRequest {
   handledBy?: string;
   handledAt?: string;
   handlingNotes?: string;
+  handlingPhotos?: string[];
   screenshot?: string; // Base64 screenshot
   photos?: string[];
   links?: string[];

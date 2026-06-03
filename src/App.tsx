@@ -2488,6 +2488,7 @@ ${pageText}
     null,
   );
   const [ccHandlingNotes, setCcHandlingNotes] = useState("");
+  const [ccHandlingPhotos, setCcHandlingPhotos] = useState<string[]>([]);
 
   // Cases input
   const [casePatientName, setCasePatientName] = useState("");
@@ -5742,10 +5743,10 @@ ${ttNotes}`
     }
   };
 
-  const handleProcessClientComms = (commId: string, notes: string) => {
+  const handleProcessClientComms = (commId: string, notes: string, photos?: string[]) => {
     if (!currentUser) return;
-    if (!String(notes || "").trim()) {
-      toast.error("Please enter your handling notes first.");
+    if (!String(notes || "").trim() && !(photos && photos.length > 0)) {
+      toast.error("Please enter your handling notes or provide attachments first.");
       return;
     }
 
@@ -5757,6 +5758,7 @@ ${ttNotes}`
           handledBy: currentUser.name,
           handledAt: new Date().toISOString(),
           handlingNotes: notes,
+          handlingPhotos: photos || [],
         };
         // Sync to Firestore
         setDoc(doc(db, "client_comms", c.id), updatedComm).catch((e) =>
@@ -21770,15 +21772,24 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                       links={req.links}
                                                     />
 
-                                                    {req.handlingNotes && (
+                                                    {(req.handlingNotes || (req.handlingPhotos && req.handlingPhotos.length > 0)) && (
                                                       <div className="border-t border-indigo-500/20 pt-1.5 text-xs text-indigo-300">
-                                                        <p className="text-[9px] text-indigo-400 uppercase tracking-wider mb-0.5 font-bold">
-                                                          💬 Resolution Notes (
-                                                          {req.handledBy}):
-                                                        </p>
-                                                        <p className="bg-indigo-950/20 p-2 rounded-lg border border-indigo-500/10 text-slate-200 leading-normal font-sans">
-                                                          {req.handlingNotes}
-                                                        </p>
+                                                        {req.handlingNotes && (
+                                                          <>
+                                                            <p className="text-[9px] text-indigo-400 uppercase tracking-wider mb-0.5 font-bold">
+                                                              💬 Resolution Notes (
+                                                              {req.handledBy}):
+                                                            </p>
+                                                            <p className="bg-indigo-950/20 p-2 rounded-lg border border-indigo-500/10 text-slate-200 leading-normal font-sans mb-1">
+                                                              {req.handlingNotes}
+                                                            </p>
+                                                          </>
+                                                        )}
+                                                        {req.handlingPhotos && req.handlingPhotos.length > 0 && (
+                                                          <div className="mt-2">
+                                                            <AttachmentsDisplay photos={req.handlingPhotos} links={[]} />
+                                                          </div>
+                                                        )}
                                                       </div>
                                                     )}
                                                   </div>
@@ -21830,8 +21841,8 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                   {activeCcHandlingId ===
                                                     req.id && (
                                                     <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl space-y-2 text-left animate-fade-in mt-1">
-                                                      <label className="text-[9px] font-bold text-slate-300 uppercase tracking-widest block">
-                                                        Handling Notes *
+                                                      <label className="text-[9px] font-bold text-slate-300 uppercase tracking-widest block mb-1">
+                                                        Handling Notes & Attachments *
                                                       </label>
                                                       <textarea
                                                         placeholder="What was the outcome of contacting the client?"
@@ -21844,26 +21855,38 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                         className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-2.5 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[60px]"
                                                         required
                                                       />
-                                                      <div className="flex gap-2 justify-end">
+                                                      <MultiAttachmentUpload
+                                                        photos={ccHandlingPhotos}
+                                                        links={[]} // links unsupported for inline
+                                                        onPhotosChange={setCcHandlingPhotos}
+                                                        onLinksChange={() => {}}
+                                                        photosLabel="Upload / Paste Handling Screenshots"
+                                                      />
+                                                      <div className="flex gap-2 justify-end pt-2">
                                                         <button
                                                           type="button"
-                                                          onClick={() =>
-                                                            setActiveCcHandlingId(
-                                                              null,
-                                                            )
-                                                          }
+                                                          onClick={() => {
+                                                            setActiveCcHandlingId(null);
+                                                            setCcHandlingPhotos([]);
+                                                          }}
                                                           className="px-2.5 py-1.5 hover:bg-slate-700 rounded-lg text-[10px] font-bold text-slate-400 cursor-pointer"
                                                         >
                                                           Cancel
                                                         </button>
                                                         <button
                                                           type="button"
-                                                          onClick={() =>
+                                                          onClick={() => {
+                                                            if (!ccHandlingNotes.trim() && ccHandlingPhotos.length === 0) {
+                                                              toast.error("Please add notes or an attachment");
+                                                              return;
+                                                            }
                                                             handleProcessClientComms(
                                                               req.id,
                                                               ccHandlingNotes,
-                                                            )
-                                                          }
+                                                              ccHandlingPhotos
+                                                            );
+                                                            setCcHandlingPhotos([]);
+                                                          }}
                                                           className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 active:scale-95 text-slate-950 text-[10px] font-black rounded-lg shadow cursor-pointer transition-all flex items-center gap-1"
                                                         >
                                                           Confirm Handled ✅
