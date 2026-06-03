@@ -17,6 +17,7 @@ export const AgentRequestsLogs = ({
 }: any) => {
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [filterDate, setFilterDate] = useState('');
   
   const allRequests = useMemo(() => {
     if (!currentUser || currentUser.role !== 'agent') return [];
@@ -43,6 +44,13 @@ export const AgentRequestsLogs = ({
       
     if (!matchesSearch) return false;
     if (filterType !== 'all' && r._cType !== filterType) return false;
+
+    if (filterDate) {
+      const qDate = new Date(filterDate).toDateString();
+      const itemDate = new Date(r.createdAt).toDateString();
+      if (qDate !== itemDate) return false;
+    }
+
     return true;
   });
 
@@ -197,11 +205,12 @@ export const AgentRequestsLogs = ({
 
       <div className="bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl p-6 shadow-xl space-y-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-white/10">
-          <div className="relative flex-grow max-w-md w-full">
+          <div className="relative flex-grow max-w-sm w-full">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input type="text" placeholder="Search by ID, Name, Phone, details..." value={search} onChange={e => setSearch(e.target.value)} className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500 font-sans" />
           </div>
           <div className="flex gap-2 w-full md:w-auto items-center">
+            <input type="date" title="Filter by submission date" value={filterDate} onChange={e => setFilterDate(e.target.value)} className="w-full md:w-36 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500 font-sans cursor-pointer h-9 [color-scheme:dark]" />
             <Filter className="w-4 h-4 text-slate-400 flex-shrink-0" />
             <select value={filterType} onChange={e => setFilterType(e.target.value)} className="w-full md:w-40 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500 font-sans cursor-pointer h-9">
               <option value="all" className="bg-slate-800">All Types</option>
@@ -211,6 +220,14 @@ export const AgentRequestsLogs = ({
               <option value="comp" className="bg-slate-800">Complaints</option>
               <option value="comm" className="bg-slate-800">Client Comms</option>
             </select>
+            {filterDate && (
+              <button 
+                onClick={() => setFilterDate('')}
+                className="px-2 py-1.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-xl text-xs font-bold hover:bg-rose-500/20 whitespace-nowrap h-9"
+              >
+                Clear Date
+              </button>
+            )}
           </div>
         </div>
 

@@ -26,22 +26,22 @@ export const NotificationDrawer = ({
   const unreadCount = sortedNotifs.filter(n => !n.seenByUsers?.includes(currentUser?.name)).length;
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {isOpen && (
-        <>
+        <React.Fragment key="drawer">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999]"
           />
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-[#0f0f13] border-l border-white/10 shadow-2xl z-50 flex flex-col"
+            className="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-[#0f0f13] border-l border-white/10 shadow-2xl z-[1000] flex flex-col"
           >
             <div className="flex items-center justify-between p-6 border-b border-white/10 bg-[#16161c]">
               <div className="flex items-center gap-3">
@@ -72,7 +72,7 @@ export const NotificationDrawer = ({
                   <div className="flex justify-end pb-2">
                     <button 
                       onClick={handleMarkAllNotifsAsRead}
-                      className="text-[10px] uppercase tracking-wider font-bold text-indigo-400 hover:text-indigo-300 transition-colors"
+                      className="text-[10px] uppercase tracking-wider font-bold text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer"
                     >
                       Mark all as read
                     </button>
@@ -96,7 +96,7 @@ export const NotificationDrawer = ({
                       <div 
                         key={notif.id}
                         onMouseEnter={() => {
-                          if (isUnread) handleMarkSingleNotifAsRead(notif.id);
+                          if (isUnread && handleMarkSingleNotifAsRead) handleMarkSingleNotifAsRead(notif.id);
                         }}
                         className={`relative p-4 rounded-2xl border transition-all ${getBgClass()}`}
                       >
@@ -133,7 +133,7 @@ export const NotificationDrawer = ({
               )}
             </div>
           </motion.div>
-        </>
+        </React.Fragment>
       )}
     </AnimatePresence>
   );

@@ -6,7 +6,8 @@ import firebaseConfig from "../firebase-applet-config.json";
 const app = initializeApp(firebaseConfig);
 export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
-  ignoreUndefinedProperties: true
+  ignoreUndefinedProperties: true,
+  experimentalForceLongPolling: true
 }, firebaseConfig.firestoreDatabaseId);
 
 export const auth = getAuth(app);
