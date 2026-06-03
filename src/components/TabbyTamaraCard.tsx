@@ -22,7 +22,7 @@ const CopyableField = ({ icon: Icon, label, value, isBold = false }: { icon: any
         </div>
         {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-slate-600 group-hover:text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />}
       </div>
-      <p className={`text-slate-200 text-xs truncate font-sans ${isBold ? 'font-black text-white' : 'font-semibold'}`} title={value}>
+      <p className={`text-slate-200 text-xs break-words break-all font-sans ${isBold ? 'font-black text-white' : 'font-semibold'}`} title={value}>
         {value}
       </p>
     </div>
@@ -370,6 +370,7 @@ Phone: ${req.phoneNumber}
 Price: AED ${req.priceWithoutTax}
 Platform: ${req.platform}
 Clinic: ${req.clinicName || 'N/A'}
+Payment Link: ${req.paymentLink || 'N/A'}
 Notes: ${req.notes || 'None'}
 `;
                 navigator.clipboard.writeText(text);
