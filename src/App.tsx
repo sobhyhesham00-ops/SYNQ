@@ -14127,12 +14127,26 @@ Notes: ${a.notes || "None"}`;
                                                   {statusText}
                                                 </span>
                                                 {inq.clinicName && (
-                                                  <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 border border-indigo-500/30 rounded-lg font-bold flex items-center gap-1">
+                                                  <span 
+                                                    onClick={() => {
+                                                      navigator.clipboard.writeText(inq.clinicName || "");
+                                                      toast.success("Clinic name copied!");
+                                                    }}
+                                                    className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 border border-indigo-500/30 rounded-lg font-bold flex items-center gap-1 cursor-pointer hover:bg-indigo-500/30 transition-colors"
+                                                    title="Copy Clinic"
+                                                  >
                                                     🏥 {inq.clinicName}
                                                   </span>
                                                 )}
                                                 {inq.phoneNumber && (
-                                                  <span className="text-[10px] bg-sky-500/10 text-sky-300 px-2.5 py-0.5 border border-sky-500/20 rounded-lg font-mono flex items-center gap-1">
+                                                  <span 
+                                                    onClick={() => {
+                                                      navigator.clipboard.writeText(inq.phoneNumber || "");
+                                                      toast.success("Phone number copied!");
+                                                    }}
+                                                    className="text-[10px] bg-sky-500/10 text-sky-300 px-2.5 py-0.5 border border-sky-500/20 rounded-lg font-mono flex items-center gap-1 cursor-pointer hover:bg-sky-500/20 transition-colors"
+                                                    title="Copy Phone Number"
+                                                  >
                                                     📞 {inq.phoneNumber}
                                                   </span>
                                                 )}
@@ -14414,16 +14428,37 @@ Notes: ${a.notes || "None"}`;
                                       >
                                         <div className="flex flex-wrap gap-2 items-center justify-between text-[10px] pb-2 border-b border-white/5">
                                           <div className="flex items-center gap-2">
-                                            <span className="bg-slate-800 text-slate-300 font-bold px-2 py-0.5 rounded-lg border border-slate-700">
+                                            <span 
+                                              onClick={() => {
+                                                navigator.clipboard.writeText(inq.agentName || "");
+                                                toast.success("Agent name copied!");
+                                              }}
+                                              className="bg-slate-800 text-slate-300 font-bold px-2 py-0.5 rounded-lg border border-slate-700 cursor-pointer hover:bg-slate-700 transition-colors"
+                                              title="Copy Agent Name"
+                                            >
                                               👤 {inq.agentName}
                                             </span>
                                             {inq.clinicName && (
-                                              <span className="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2.5 py-0.5 rounded-lg">
+                                              <span 
+                                                onClick={() => {
+                                                  navigator.clipboard.writeText(inq.clinicName || "");
+                                                  toast.success("Clinic name copied!");
+                                                }}
+                                                className="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2.5 py-0.5 rounded-lg cursor-pointer hover:bg-indigo-500/20 transition-colors"
+                                                title="Copy Clinic"
+                                              >
                                                 🏥 {inq.clinicName}
                                               </span>
                                             )}
                                             {inq.phoneNumber && (
-                                              <span className="bg-sky-500/10 text-sky-300 border border-sky-500/20 px-2.5 py-0.5 rounded-lg font-mono tracking-wider">
+                                              <span 
+                                                onClick={() => {
+                                                  navigator.clipboard.writeText(inq.phoneNumber || "");
+                                                  toast.success("Phone number copied!");
+                                                }}
+                                                className="bg-sky-500/10 text-sky-300 border border-sky-500/20 px-2.5 py-0.5 rounded-lg font-mono tracking-wider cursor-pointer hover:bg-sky-500/20 transition-colors"
+                                                title="Copy Phone Number"
+                                              >
                                                 📞 {inq.phoneNumber}
                                               </span>
                                             )}
@@ -15692,19 +15727,40 @@ Notes: ${a.notes || "None"}`;
                                         </div>
                                         <div>
                                           <div className="flex items-center gap-2 flex-wrap">
-                                            <span className="text-xs font-bold text-slate-100 uppercase tracking-wide">
+                                            <span 
+                                              onClick={() => {
+                                                navigator.clipboard.writeText(inq.agentName || "");
+                                                toast.success("Agent name copied!");
+                                              }}
+                                              className="text-xs font-bold text-slate-100 uppercase tracking-wide cursor-pointer hover:text-indigo-300 transition-colors"
+                                              title="Copy Agent Name"
+                                            >
                                               {inq.agentName}
                                             </span>
                                             <span className="text-[10px] text-slate-400 lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded font-sans">
                                               {getAgentLOB(inq.agentName)}
                                             </span>
                                             {inq.clinicName && (
-                                              <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 border border-indigo-500/30 rounded font-sans font-bold flex items-center gap-1">
+                                              <span 
+                                                onClick={() => {
+                                                  navigator.clipboard.writeText(inq.clinicName || "");
+                                                  toast.success("Clinic name copied!");
+                                                }}
+                                                className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 border border-indigo-500/30 rounded font-sans font-bold flex items-center gap-1 cursor-pointer hover:bg-indigo-500/30 transition-colors"
+                                                title="Copy Clinic"
+                                              >
                                                 🏥 {inq.clinicName}
                                               </span>
                                             )}
                                             {inq.phoneNumber && (
-                                              <span className="text-[10px] bg-sky-500/10 text-sky-300 px-2 py-0.5 border border-sky-500/20 rounded font-mono font-bold flex items-center gap-1">
+                                              <span 
+                                                onClick={() => {
+                                                  navigator.clipboard.writeText(inq.phoneNumber || "");
+                                                  toast.success("Phone number copied!");
+                                                }}
+                                                className="text-[10px] bg-sky-500/10 text-sky-300 px-2 py-0.5 border border-sky-500/20 rounded font-mono font-bold flex items-center gap-1 cursor-pointer hover:bg-sky-500/20 transition-colors"
+                                                title="Copy Phone Number"
+                                              >
                                                 📞 {inq.phoneNumber}
                                               </span>
                                             )}
@@ -15750,6 +15806,7 @@ Notes: ${a.notes || "None"}`;
                                           onClick={() => {
                                             const details = `*Agent Name:* ${inq.agentName}
 *Clinic:* ${inq.clinicName || "N/A"}
+*Phone:* ${inq.phoneNumber || "N/A"}
 *Inquiry:*
 _ ${inq.text} _
 *Answer:*
