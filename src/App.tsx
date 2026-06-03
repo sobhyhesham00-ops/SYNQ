@@ -21400,31 +21400,29 @@ Links: ${(comp.links || []).join(", ")}
                                                     )}
 
                                                     {/* Copy Option */}
-                                                    {isTLOreSupport && (
-                                                      <button
-                                                        onClick={() => {
-                                                          const details = `*Complaint ID:* ${comp.id}
+                                                    <button
+                                                      onClick={() => {
+                                                        const details = `*Complaint ID:* ${comp.id}
 *Patient Name:* ${comp.patientName}
 *File Number:* ${comp.fileNumber || "N/A"}
 *Phone Number:* ${comp.phoneNumber}
 *Complaint Text:*
-_ ${comp.text} _
+_ ${comp.complaintDetails} _
 *TL Comment:*
 _ ${comp.tlComment || "No comment yet"} _`;
-                                                          navigator.clipboard.writeText(
-                                                            details,
-                                                          );
-                                                          toast.success(
-                                                            "Complaint details copied!",
-                                                          );
-                                                        }}
-                                                        className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-slate-100 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-                                                        title="Copy Complaint details"
-                                                      >
-                                                        <Copy className="w-3.5 h-3.5" />
-                                                        Copy
-                                                      </button>
-                                                    )}
+                                                        navigator.clipboard.writeText(
+                                                          details,
+                                                        );
+                                                        toast.success(
+                                                          "Complaint details copied!",
+                                                        );
+                                                      }}
+                                                      className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-slate-100 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                                                      title="Copy Complaint details"
+                                                    >
+                                                      <Copy className="w-3.5 h-3.5" />
+                                                      Copy
+                                                    </button>
 
                                                     {/* TL Commentary Trigger Button */}
                                                     {isTLOreSupport &&
@@ -21521,10 +21519,7 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                         if (
                                           !isTLOreSupport &&
                                           !isRelevantToMe &&
-                                          !(
-                                            isChatAgent &&
-                                            c.status === "pending"
-                                          )
+                                          c.status !== "pending"
                                         )
                                           return false;
 
@@ -21610,10 +21605,7 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                               if (
                                                 !isTLOreSupport &&
                                                 !isRelevantToMe &&
-                                                !(
-                                                  isChatAgent &&
-                                                  c.status === "pending"
-                                                )
+                                                c.status !== "pending"
                                               )
                                                 return false;
 
@@ -21676,7 +21668,7 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                 userLOB === "Social Media" ||
                                                 userLOB === "Chat";
                                               const canTakeRequest =
-                                                isPending && isChatAgent;
+                                                isPending;
                                               const canProcessRequest =
                                                 isInProgress &&
                                                 (!req.openedBy ||
@@ -21920,11 +21912,11 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                     )}
 
                                                     {/* Copy Option */}
-                                                    {isTLOreSupport && (
-                                                      <button
-                                                        onClick={() => {
-                                                          const details = `*Call Center Request ID:* ${req.id}
+                                                    <button
+                                                      onClick={() => {
+                                                        const details = `*Call Center Request ID:* ${req.id}
 *Requested By:* ${req.callCenterAgentName}
+*Patient Name:* ${req.patientName || "N/A"}
 *Clinic:* ${req.clinicName}
 *Language:* ${req.language}
 *Phone Number:* ${req.phoneNumber}
@@ -21932,20 +21924,19 @@ _ ${comp.tlComment || "No comment yet"} _`;
 _ ${req.notes} _
 *Resolution Notes:*
 _ ${req.handlingNotes || "Pending response"} _`;
-                                                          navigator.clipboard.writeText(
-                                                            details,
-                                                          );
-                                                          toast.success(
-                                                            "Client communication details copied!",
-                                                          );
-                                                        }}
-                                                        className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-slate-100 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-                                                        title="Copy Request details"
-                                                      >
-                                                        <Copy className="w-3.5 h-3.5" />
-                                                        Copy
-                                                      </button>
-                                                    )}
+                                                        navigator.clipboard.writeText(
+                                                          details,
+                                                        );
+                                                        toast.success(
+                                                          "Client communication details copied!",
+                                                        );
+                                                      }}
+                                                      className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-slate-100 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                                                      title="Copy Request details"
+                                                    >
+                                                      <Copy className="w-3.5 h-3.5" />
+                                                      Copy
+                                                    </button>
 
                                                     {canTakeRequest && (
                                                       <button
