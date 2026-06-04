@@ -1,4 +1,6 @@
 import { ScheduleUpload } from "./components/ScheduleUpload";
+import { EditModal } from "./components/EditModal";
+import { ResetPasswordModal } from "./components/ResetPasswordModal";
 import { AgentRequestsLogs } from "./components/AgentRequestsLogs";
 import { NotificationDrawer } from "./components/NotificationDrawer";
 import { TabbyTamaraCard } from "./components/TabbyTamaraCard";
@@ -93,6 +95,7 @@ import {
   Calculator,
   Edit,
   Pencil,
+  Key,
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { AIChatWidget } from "./AIChatWidget";
@@ -2687,6 +2690,8 @@ ${pageText}
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [loginError, setLoginError] = useState("");
+  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
+  const [newPasswordInput, setNewPasswordInput] = useState("");
 
   // Active Menu / Tab States
   // For TL: 'dashboard' | 'overview' | 'all-requests' | 'report' | 'schedules' | 'time-logs'
@@ -3207,6 +3212,30 @@ ${pageText}
   const handleSignOut = () => {
     setCurrentUser(null);
     localStorage.removeItem("sched_current_user");
+  };
+
+  const handleResetUserPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPasswordInput.trim()) return toast.error("Password cannot be empty");
+    if (!currentUser) return;
+    
+    const formattedUsername = currentUser.name.toLowerCase();
+    
+    const updatedCreds = {
+      ...credentials,
+      [formattedUsername]: newPasswordInput.trim(),
+      [currentUser.name]: newPasswordInput.trim()
+    };
+    
+    setCredentials(updatedCreds);
+    setStorageItem("sched_credentials", updatedCreds);
+    setDoc(doc(db, "system", "sched_credentials"), {
+      data: updatedCreds,
+    }).catch(console.error);
+  
+    toast.success("Password updated successfully!");
+    setIsResetPasswordModalOpen(false);
+    setNewPasswordInput("");
   };
 
   // Activity / Inactivity tracking (Auto Sign out after 1 hour of no use)
@@ -7298,6 +7327,14 @@ ${ttNotes}`
                   >
                     <RefreshCw className="w-3.5 h-3.5 animate-pulse" />
                     Update App (Force Sync)
+                  </button>
+
+                  <button
+                    onClick={() => setIsResetPasswordModalOpen(true)}
+                    className="w-full px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/10 text-blue-300 rounded-lg text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-2"
+                  >
+                    <Key className="w-3.5 h-3.5" />
+                    Reset Password
                   </button>
 
                   <button
@@ -22791,6 +22828,18 @@ _ ${req.handlingNotes || "Pending response"} _`;
           </div>
         )}
       </div>
+      <EditModal
+        editingItem={editingItem}
+        setEditingItem={setEditingItem}
+        handleEditSave={handleEditSave}
+      />
+      <ResetPasswordModal
+        isOpen={isResetPasswordModalOpen}
+        onClose={() => setIsResetPasswordModalOpen(false)}
+        newPasswordInput={newPasswordInput}
+        setNewPasswordInput={setNewPasswordInput}
+        handleResetUserPassword={handleResetUserPassword}
+      />
       <NotificationDrawer 
         isOpen={isNotifDrawerOpen} 
         onClose={() => setIsNotifDrawerOpen(false)} 
