@@ -5725,12 +5725,12 @@ ${ttNotes}`
         `💬 New Client Comm Request`,
         `New request submitted for phone: ${ccPhoneNumber}`,
         "general",
-        "tl",
+        "all",
       );
 
       setSubmissionConfirmation({
-        title: "Dialogue Request Submitted! 💬",
-        message: `Your communication and callback request has been dispatched to Team Leaders and social media agents successfully. We will initiate contact and keep you updated.`,
+        title: "Communication Request Submitted! 💬",
+        message: `Your request has been dispatched to other agents successfully. They will initiate contact and keep you updated.`,
         type: "client_comm",
         referenceId: newComm.id,
       });
@@ -7711,10 +7711,8 @@ ${ttNotes}`
                     />
                   )}
 
-                  {/* Client Comm Queue Notification for TLs and Chat Agents */}
-                  {(currentUser.role === "tl" ||
-                    getAgentLOB(currentUser.name) === "Social Media") &&
-                    clientComms.some((c) => c.status === "pending") && (
+                  {/* Client Comm Queue Notification for all agents */}
+                  {clientComms.some((c) => c.status === "pending" && (currentUser.role === "tl" || c.callCenterAgentName !== currentUser?.name)) && (
                       <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -7732,14 +7730,14 @@ ${ttNotes}`
                               <span className="bg-rose-500/20 text-rose-300 text-[9px] px-2 py-0.5 rounded-full border border-rose-500/30 font-black">
                                 {
                                   clientComms.filter(
-                                    (c) => c.status === "pending",
+                                    (c) => c.status === "pending" && (currentUser.role === "tl" || c.callCenterAgentName !== currentUser?.name),
                                   ).length
                                 }{" "}
                                 REQUESTS
                               </span>
                             </h4>
                             <p className="text-[10px] text-slate-400 uppercase tracking-widest font-medium">
-                              Awaiting Chat / Social Media Agent handling
+                              Awaiting handling and resolution
                             </p>
                           </div>
                         </div>
@@ -7747,7 +7745,7 @@ ${ttNotes}`
                         <div className="flex items-center gap-4 w-full sm:w-auto">
                           {(() => {
                             const pending = clientComms.filter(
-                              (c) => c.status === "pending",
+                              (c) => c.status === "pending" && (currentUser.role === "tl" || c.callCenterAgentName !== currentUser?.name),
                             );
                             if (pending.length === 0) return null;
                             const oldest = [...pending].sort(
@@ -19795,7 +19793,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                       ).length}
                                 </p>
                                 <p className="text-[10px] text-amber-200 mt-1 font-sans">
-                                  Currently awaiting Chat/Social interaction
+                                  Currently awaiting agent interaction
                                 </p>
                               </div>
                             </div>
@@ -20355,17 +20353,13 @@ _ ${inq.answer || "No answer yet"} _`;
                                     </form>
                                   </div>
                                 ) : (
-                                  getAgentLOB(currentUser.name) ===
-                                    "Call Center" && (
                                     <div className="p-6 bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl space-y-4 shadow-2xl animate-fade-in">
                                       <h3 className="text-lg font-bold text-slate-100 font-display flex items-center gap-2 text-left">
                                         <MessageSquare className="w-5 h-5 text-indigo-400" />
                                         Submit Communication Request
                                       </h3>
                                       <p className="text-xs text-slate-400 leading-normal text-left">
-                                        Submit a request for Chat or Social
-                                        Media agents to contact a client and
-                                        follow up.
+                                        Submit a request for another agent to contact a client and follow up.
                                       </p>
 
                                       <form
@@ -20537,7 +20531,6 @@ _ ${inq.answer || "No answer yet"} _`;
                                         </button>
                                       </form>
                                     </div>
-                                  )
                                 )}
                               </div>
                             )}
@@ -21498,13 +21491,6 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                   ) : (
                                     <>
                                       {clientComms.filter((c) => {
-                                        const userLOB = getAgentLOB(
-                                          currentUser?.name || "",
-                                        );
-                                        const isChatAgent =
-                                          userLOB === "Social Media" ||
-                                          userLOB === "Chat";
-
                                         const isRelevantToMe =
                                           (
                                             c.callCenterAgentName || ""
@@ -21577,21 +21563,13 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                             criteria.
                                           </p>
                                           <p className="text-xs text-slate-400">
-                                            Requests for Chat and Social Media
-                                            agents will appear here.
+                                            Communication requests for agents will appear here.
                                           </p>
                                         </div>
                                       ) : (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in font-sans">
                                           {clientComms
                                             .filter((c) => {
-                                              const userLOB = getAgentLOB(
-                                                currentUser?.name || "",
-                                              );
-                                              const isChatAgent =
-                                                userLOB === "Social Media" ||
-                                                userLOB === "Chat";
-
                                               const isRelevantToMe =
                                                 (
                                                   c.callCenterAgentName || ""
@@ -21663,14 +21641,8 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                 req.status === "in_progress";
                                               const isClosed =
                                                 req.status === "contacted";
-                                              const userLOB = getAgentLOB(
-                                                currentUser?.name || "",
-                                              );
-                                              const isChatAgent =
-                                                userLOB === "Social Media" ||
-                                                userLOB === "Chat";
                                               const canTakeRequest =
-                                                isPending;
+                                                isPending && req.callCenterAgentName !== currentUser?.name;
                                               const canProcessRequest =
                                                 isInProgress &&
                                                 (!req.openedBy ||
@@ -21937,7 +21909,7 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                     {/* Copy Option */}
                                                     <button
                                                       onClick={() => {
-                                                        const details = `*Call Center Request ID:* ${req.id}
+                                                        const details = `*Communication Request ID:* ${req.id}
 *Requested By:* ${req.callCenterAgentName}
 *Patient Name:* ${req.patientName || "N/A"}
 *Clinic:* ${req.clinicName}

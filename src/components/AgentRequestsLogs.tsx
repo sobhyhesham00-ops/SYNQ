@@ -27,7 +27,7 @@ export const AgentRequestsLogs = ({
     inquiries.filter((r: any) => r.agentName === currentUser.name).forEach((r: any) => res.push({...r, _cType: 'inq'}));
     tabbyTamaraRequests.filter((r: any) => r.agentName === currentUser.name).forEach((r: any) => res.push({...r, _cType: 'tt'}));
     complaints.filter((r: any) => r.agentName === currentUser.name).forEach((r: any) => res.push({...r, _cType: 'comp'}));
-    clientComms.filter((r: any) => r.agentName === currentUser.name).forEach((r: any) => res.push({...r, _cType: 'comm'}));
+    clientComms.filter((r: any) => r.callCenterAgentName === currentUser.name).forEach((r: any) => res.push({...r, _cType: 'comm'}));
     
     return res.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [requests, inquiries, tabbyTamaraRequests, complaints, clientComms, currentUser]);
