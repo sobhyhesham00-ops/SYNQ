@@ -10,8 +10,8 @@ export const AgentRequestsLogs = ({
   tabbyTamaraRequests, 
   complaints, 
   clientComms,
-  isWithinFiveMinutes,
-  getRemainingEditTimeStr,
+  canEditItem,
+  getRemainingEditTime,
   setEditingItem,
   handleCancelRequest
 }: any) => {
@@ -174,9 +174,9 @@ export const AgentRequestsLogs = ({
                   Cancel Request
                 </button>
               )}
-              {isWithinFiveMinutes(req.createdAt) && (
+              {canEditItem(req.createdAt) && (
                 <button onClick={() => setEditingItem({ type: 'scheduling_request', id: req.id, data: { ...req } })} className="text-xs font-bold text-emerald-400 hover:text-emerald-300 hover:underline px-2 py-1 bg-emerald-500/10 rounded-lg cursor-pointer flex items-center gap-1 mt-1">
-                  <Pencil className="w-3.5 h-3.5" /> Edit ({getRemainingEditTimeStr(req.createdAt)})
+                  <Pencil className="w-3.5 h-3.5" /> Edit ({getRemainingEditTime(req.createdAt)})
                 </button>
               )}
             </>

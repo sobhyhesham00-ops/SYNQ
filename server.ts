@@ -91,21 +91,7 @@ async function startServer() {
     }
   });
 
-  // ─── API: Weather Proxy ────────────────────────────────────────────────────
-  app.get("/api/weather", async (req, res) => {
-    try {
-      const { lat = "30.30", lng = "31.75" } = req.query;
-      const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
-      if (!response.ok) {
-        throw new Error(`Open-Meteo returned ${response.status}`);
-      }
-      const data = await response.json();
-      res.json(data);
-    } catch (err: any) {
-      console.error("Weather Proxy Error:", err);
-      res.status(500).json({ error: "Failed to fetch weather" });
-    }
-  });
+
 
   // ─── Vite dev middleware / production static serving ─────────────────────────
   if (process.env.NODE_ENV !== "production") {

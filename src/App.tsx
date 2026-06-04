@@ -613,19 +613,35 @@ export default function App() {
     data: any;
   } | null>(null);
 
-  const isWithinFiveMinutes = (createdAt: string | number | Date) => {
+  const getEditLimitMs = () => {
+    if (!currentUser) return 0;
+    if (currentUser.name === "Hesham Sobhy") {
+      return Infinity; // no limit
+    }
+    if (currentUser.role === "tl") {
+      return 60 * 60 * 1000; // 60 minutes
+    }
+    return 15 * 60 * 1000; // 15 minutes
+  };
+
+  const canEditItem = (createdAt: string | number | Date) => {
     if (!createdAt) return false;
+    const limitMs = getEditLimitMs();
+    if (limitMs === Infinity) return true;
     const createdTime = new Date(createdAt).getTime();
     if (isNaN(createdTime)) return false;
     const diffMs = Date.now() - createdTime;
-    return diffMs >= 0 && diffMs < 5 * 60 * 1000;
+    return diffMs >= 0 && diffMs < limitMs;
   };
 
-  const getRemainingEditTimeStr = (createdAt: string | number | Date) => {
+  const getRemainingEditTime = (createdAt: string | number | Date) => {
     if (!createdAt) return "";
+    const limitMs = getEditLimitMs();
+    if (limitMs === Infinity) return "Unlimited";
+    
     const createdTime = new Date(createdAt).getTime();
     if (isNaN(createdTime)) return "";
-    const diffMs = 5 * 60 * 1000 - (Date.now() - createdTime);
+    const diffMs = limitMs - (Date.now() - createdTime);
     if (diffMs <= 0) return "Expired";
     const totalSecs = Math.floor(diffMs / 1000);
     const mins = Math.floor(totalSecs / 60);
@@ -638,9 +654,9 @@ export default function App() {
     if (!editingItem) return;
     const { type, id, data } = editingItem;
 
-    if (!isWithinFiveMinutes(data.createdAt)) {
+    if (!canEditItem(data.createdAt)) {
       toast.error(
-        "This entry can't be edited anymore because the 5-minute time limit has expired.",
+        "This entry can't be edited anymore because the time limit has expired.",
       );
       setEditingItem(null);
       return;
@@ -701,7 +717,7 @@ export default function App() {
           }
         }
 
-        const res = await fetch("/api/weather?lat=30.30&lng=31.75");
+        const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=30.30&longitude=31.75&current_weather=true");
         const data = await res.json();
         if (data && data.current_weather) {
           const temp = data.current_weather.temperature;
@@ -5777,6 +5793,37 @@ ${ttNotes}`
     setCcHandlingNotes("");
 
     toast.success("Communication request status updated to Contacted!");
+  };
+
+  const handleMarkClientCommDone = (commId: string) => {
+    if (!currentUser) return;
+    const updated = clientComms.map((c) => {
+      if (c.id === commId) {
+        const updatedComm = {
+          ...c,
+          status: "contacted" as const,
+          handledBy: currentUser.name,
+          handledAt: new Date().toISOString(),
+        };
+        // Sync to Firestore
+        setDoc(doc(db, "client_comms", c.id), updatedComm).catch((e) =>
+          console.error("Client Comm Close Error:", e),
+        );
+        return updatedComm;
+      }
+      return c;
+    });
+
+    setClientComms(updated);
+    setStorageItem("sched_client_comms", updated);
+
+    // Clear TL input just in case
+    if (activeCcHandlingId === commId) {
+       setActiveCcHandlingId(null);
+       setCcHandlingNotes("");
+    }
+
+    toast.success("Client communication request marked as done!");
   };
 
   const handleTakeClientComm = (commId: string) => {
@@ -13781,8 +13828,8 @@ Notes: ${a.notes || "None"}`;
                         tabbyTamaraRequests={tabbyTamaraRequests}
                         complaints={tabbyTamaraComplaints}
                         clientComms={clientComms}
-                        isWithinFiveMinutes={isWithinFiveMinutes}
-                        getRemainingEditTimeStr={getRemainingEditTimeStr}
+                        canEditItem={canEditItem}
+                        getRemainingEditTime={getRemainingEditTime}
                         setEditingItem={setEditingItem}
                         handleCancelRequest={handleCancelRequest}
                       />
@@ -14185,7 +14232,7 @@ Notes: ${a.notes || "None"}`;
                                                     Delete
                                                   </button>
                                                 )}
-                                                {isWithinFiveMinutes(
+                                                {canEditItem(
                                                   inq.createdAt,
                                                 ) && (
                                                   <button
@@ -14197,11 +14244,11 @@ Notes: ${a.notes || "None"}`;
                                                       })
                                                     }
                                                     className="text-[10px] bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 font-bold px-2 py-0.5 rounded-md hover:bg-emerald-500/20 transition-all flex items-center gap-1 shrink-0 cursor-pointer"
-                                                    title={`Edit inquiry (${getRemainingEditTimeStr(inq.createdAt)})`}
+                                                    title={`Edit inquiry (${getRemainingEditTime(inq.createdAt)})`}
                                                   >
                                                     <Pencil className="w-2.5 h-2.5" />{" "}
                                                     Edit (
-                                                    {getRemainingEditTimeStr(
+                                                    {getRemainingEditTime(
                                                       inq.createdAt,
                                                     )}
                                                     )
@@ -20919,8 +20966,8 @@ _ ${inq.answer || "No answer yet"} _`;
                                                 }}
                                                 getElapsedTimerString={getElapsedTimerString}
                                                 handleDeleteTabbyTamara={handleDeleteTabbyTamara}
-                                                isWithinFiveMinutes={isWithinFiveMinutes}
-                                                getRemainingEditTimeStr={getRemainingEditTimeStr}
+                                                canEditItem={canEditItem}
+                                                getRemainingEditTime={getRemainingEditTime}
                                                 setEditingItem={setEditingItem}
                                               />
                                             ))}
@@ -21371,7 +21418,7 @@ Links: ${(comp.links || []).join(", ")}
                                                       </button>
                                                     )}
 
-                                                    {isWithinFiveMinutes(
+                                                    {canEditItem(
                                                       comp.createdAt,
                                                     ) && (
                                                       <button
@@ -21383,11 +21430,11 @@ Links: ${(comp.links || []).join(", ")}
                                                           })
                                                         }
                                                         className="px-2.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-lg text-emerald-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-                                                        title={`Edit complaint (${getRemainingEditTimeStr(comp.createdAt)})`}
+                                                        title={`Edit complaint (${getRemainingEditTime(comp.createdAt)})`}
                                                       >
                                                         <Pencil className="w-3.5 h-3.5" />
                                                         Edit (
-                                                        {getRemainingEditTimeStr(
+                                                        {getRemainingEditTime(
                                                           comp.createdAt,
                                                         )}
                                                         )
@@ -21439,10 +21486,8 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                         </button>
                                                       )}
 
-                                                    {/* Agent Mark Contacted Closed Case button */}
-                                                    {currentUser?.role ===
-                                                      "agent" &&
-                                                      isNeedContact && (
+                                                    {/* Agent or TL Mark Contacted Closed Case button */}
+                                                    {(isNeedContact || (isTLOreSupport && !isClosed)) && (
                                                         <button
                                                           onClick={() =>
                                                             handleToggleContactComplaint(
@@ -21452,8 +21497,7 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                           }
                                                           className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 active:scale-95 text-black font-extrabold font-sans text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-1"
                                                         >
-                                                          📞 Mark Case Closed
-                                                          (Contacted)
+                                                          📞 {isNeedContact ? "Mark Case Closed" : "Force Close"}
                                                         </button>
                                                       )}
 
@@ -21883,7 +21927,7 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                       </button>
                                                     )}
 
-                                                    {isWithinFiveMinutes(
+                                                    {canEditItem(
                                                       req.createdAt,
                                                     ) && (
                                                       <button
@@ -21895,11 +21939,11 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                           })
                                                         }
                                                         className="px-2.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-lg text-emerald-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-                                                        title={`Edit communication (${getRemainingEditTimeStr(req.createdAt)})`}
+                                                        title={`Edit communication (${getRemainingEditTime(req.createdAt)})`}
                                                       >
                                                         <Pencil className="w-3.5 h-3.5" />
                                                         Edit (
-                                                        {getRemainingEditTimeStr(
+                                                        {getRemainingEditTime(
                                                           req.createdAt,
                                                         )}
                                                         )
@@ -21963,6 +22007,16 @@ _ ${req.handlingNotes || "Pending response"} _`;
                                                           📞 Finalize Handled
                                                         </button>
                                                       )}
+                                                      
+                                                    {!isClosed && (currentUser?.role === 'tl' || currentUser?.name === req.callCenterAgentName || currentUser?.name === req.openedBy) && (
+                                                      <button
+                                                        onClick={() => handleMarkClientCommDone(req.id)}
+                                                        className={`px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 text-slate-950 font-sans font-black text-xs rounded-xl shadow-lg cursor-pointer transition-all active:scale-95 flex items-center gap-1.5 ${canProcessRequest ? 'ml-1' : ''}`}
+                                                      >
+                                                        <CheckCircle2 className="w-3.5 h-3.5" />
+                                                        {currentUser?.role === 'tl' && req.status === "pending" ? "Force Close" : "Done / Close"}
+                                                      </button>
+                                                    )}
                                                   </div>
 
                                                   <div className="w-full mt-3 pt-3 border-t border-white/5 mx-[2px]">

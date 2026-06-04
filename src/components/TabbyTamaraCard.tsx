@@ -43,8 +43,8 @@ export const TabbyTamaraCard = ({
   handleMarkPatientContactedTT,
   getElapsedTimerString,
   handleDeleteTabbyTamara,
-  isWithinFiveMinutes,
-  getRemainingEditTimeStr,
+  canEditItem,
+  getRemainingEditTime,
   setEditingItem
 }: any) => {
   const isPendingContact = req.status === "confirmed" && req.customerContacted === "not_contacted";
@@ -349,13 +349,13 @@ export const TabbyTamaraCard = ({
         )}
 
         {/* User Edit */}
-        {isWithinFiveMinutes(req.createdAt) && (
+        {canEditItem(req.createdAt) && (
           <button
             onClick={() => setEditingItem({ type: "tt_request", id: req.id, data: { ...req } })}
             className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-md text-[10px] font-black transition-all flex items-center gap-1.5 cursor-pointer uppercase tracking-widest border border-white/5"
           >
             <Pencil className="w-3 h-3" />
-            Edit ({getRemainingEditTimeStr(req.createdAt)})
+            Edit ({getRemainingEditTime(req.createdAt)})
           </button>
         )}
 
@@ -410,6 +410,16 @@ Notes: ${req.notes || 'None'}
               >
                  <CheckCircle2 className="w-3.5 h-3.5" />
                  Mark Contacted
+              </button>
+            )}
+            
+            {req.status === "not_confirmed" && (
+              <button
+                 onClick={() => handleMarkPatientContactedTT(req.id, "contacted")}
+                 className="px-3 py-1.5 bg-emerald-600 text-slate-950 hover:bg-emerald-500 hover:shadow-[0_0_15px_rgba(16,185,129,0.3)] border border-transparent rounded-md text-[10px] font-black transition-all flex items-center gap-1 uppercase tracking-widest cursor-pointer"
+              >
+                 <CheckCircle2 className="w-3.5 h-3.5" />
+                 Force Close
               </button>
             )}
           </>
