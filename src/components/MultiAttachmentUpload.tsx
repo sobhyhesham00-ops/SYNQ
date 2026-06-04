@@ -104,8 +104,38 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
   };
 
 
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleMultipleFiles(e.dataTransfer.files);
+    }
+  };
+
   return (
-    <div className="space-y-4" onPaste={handlePaste}>
+    <div 
+      className={`space-y-4 rounded-xl transition-all ${isDragging ? 'bg-white/5 ring-2 ring-indigo-500 border border-indigo-500/50 p-2' : ''}`}
+      onPaste={handlePaste}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       {/* Photos Section */}
       <div className="space-y-1.5">
         <label className="text-[10px] font-bold uppercase tracking-widest block text-slate-400">
@@ -113,9 +143,18 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
         </label>
         
         <div className="flex flex-wrap gap-2 items-start mt-2">
-            {photos.map((photo, index) => (
-            <div key={index} className="relative group w-24 h-24 rounded-xl border border-white/10 overflow-hidden bg-slate-900 shadow-lg">
-                <img referrerPolicy="no-referrer" src={photo} alt="screenshot" className="w-full h-full object-cover" />
+            {photos.map((photo, index) => {
+              const isImage = photo.startsWith('data:image/') || photo.startsWith('http');
+              return (
+              <div key={index} className="relative group w-24 h-24 rounded-xl border border-white/10 overflow-hidden bg-slate-900 shadow-lg">
+                {isImage ? (
+                  <img referrerPolicy="no-referrer" src={photo} alt="screenshot" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-slate-800">
+                    <ImageIcon className="w-6 h-6 text-slate-400 mb-1" />
+                    <span className="text-[8px] text-slate-400 font-bold uppercase truncate max-w-[80px]">File</span>
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <button
                     type="button"
@@ -125,18 +164,18 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
                     <X className="w-4 h-4 text-white" />
                 </button>
                 </div>
-            </div>
-            ))}
+              </div>
+            )})}
             <label className="flex flex-col items-center justify-center w-24 h-24 border-2 border-dashed border-white/10 rounded-xl bg-white/5 hover:bg-white/10 hover:border-indigo-500/50 transition-all cursor-pointer group hover:scale-[1.02] active:scale-95">
                 <input 
                     type="file"
-                    accept="image/*"
+                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
                     multiple
                     className="hidden"
                     onChange={(e) => handleMultipleFiles(e.target.files)}
                 />
                 <Camera className="w-6 h-6 text-slate-500 group-hover:text-indigo-400 transition-colors" />
-                <span className="text-[9px] text-slate-500 font-bold uppercase mt-1 group-hover:text-indigo-300">Add Photo</span>
+                <span className="text-[9px] text-slate-500 font-bold uppercase mt-1 group-hover:text-indigo-300">Add File</span>
             </label>
         </div>
       </div>

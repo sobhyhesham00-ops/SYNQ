@@ -13773,7 +13773,7 @@ Notes: ${a.notes || "None"}`;
 
                   {/* Agent Portal: Request History Logs (Only Agent) */}
                   {currentUser.role === "agent" &&
-                    activeTab === "my-requests" && (
+                    (activeTab === "my-requests" || activeTab === "submissions-log") && (
                       <AgentRequestsLogs
                         currentUser={currentUser}
                         requests={requests}

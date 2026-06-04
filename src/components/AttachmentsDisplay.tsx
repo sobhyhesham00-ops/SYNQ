@@ -19,32 +19,48 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({ photos, 
         <div className="space-y-2">
           <span className="text-[10px] text-slate-400 font-mono block">Attached Screenshots ({photos.length}):</span>
           <div className="flex flex-wrap gap-2">
-            {photos.map((photo, pIdx) => (
+            {photos.map((photo, pIdx) => {
+              const isImage = photo.startsWith('data:image/') || photo.startsWith('http');
+              return (
               <div key={pIdx} className="relative group/photo shrink-0 w-full max-w-sm">
-                <a
-                  href={photo}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block w-full rounded-lg overflow-hidden border border-white/10 group-hover/photo:border-indigo-500 transition-all bg-black/55"
-                  title="View Full Image"
-                >
-                  <img referrerPolicy="no-referrer" src={photo} alt="screenshot" className="w-full h-auto object-contain max-h-[300px]" />
-                </a>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const a = document.createElement('a');
-                    a.href = photo;
-                    a.download = `attachment-${pIdx + 1}.jpg`;
-                    a.click();
-                  }}
-                  className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-black text-white rounded-md opacity-0 group-hover/photo:opacity-100 transition-opacity backdrop-blur-sm border border-white/20"
-                  title="Download Image"
-                >
-                  <Download className="w-4 h-4" />
-                </button>
+                {isImage ? (
+                  <a
+                    href={photo}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block w-full rounded-lg overflow-hidden border border-white/10 group-hover/photo:border-indigo-500 transition-all bg-black/55"
+                    title="View Full Image"
+                  >
+                    <img referrerPolicy="no-referrer" src={photo} alt="screenshot" className="w-full h-auto object-contain max-h-[300px]" />
+                  </a>
+                ) : (
+                  <a
+                    href={photo}
+                    download={`attachment-${pIdx + 1}`}
+                    className="flex flex-col items-center justify-center p-6 w-full rounded-lg border border-white/10 hover:border-indigo-500 transition-all bg-black/55"
+                  >
+                    <Download className="w-8 h-8 text-indigo-400 mb-2" />
+                    <span className="text-xs text-slate-300 font-medium font-sans">Download File</span>
+                  </a>
+                )}
+                
+                {isImage && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const a = document.createElement('a');
+                      a.href = photo;
+                      a.download = `attachment-${pIdx + 1}.jpg`;
+                      a.click();
+                    }}
+                    className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-black text-white rounded-md opacity-0 group-hover/photo:opacity-100 transition-opacity backdrop-blur-sm border border-white/20"
+                    title="Download Image"
+                  >
+                    <Download className="w-4 h-4" />
+                  </button>
+                )}
               </div>
-            ))}
+            )})}
           </div>
         </div>
       )}
