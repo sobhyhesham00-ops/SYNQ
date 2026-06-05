@@ -202,6 +202,97 @@ export const EditModal = ({
              </>
           )}
 
+          {type === 'scheduling_request' && (
+             <>
+               <div className="mb-4">
+                 <span className="inline-block px-3 py-1 bg-slate-800 text-slate-300 font-bold text-xs uppercase tracking-wider rounded-lg border border-slate-700">
+                   {data.type === 'swap' ? 'Shift Swap' : 'Annual Leave'}
+                 </span>
+               </div>
+               
+               {data.type === 'swap' && (
+                 <>
+                   <div>
+                     <label className="block text-xs font-bold text-slate-300 mb-1">Shift Date</label>
+                     <input
+                       type="date"
+                       name="date"
+                       value={data.date || ""}
+                       onChange={handleChange}
+                       className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans [color-scheme:dark]"
+                     />
+                   </div>
+                   <div>
+                     <label className="block text-xs font-bold text-slate-300 mb-1">Your Shift</label>
+                     <input
+                       type="text"
+                       name="shift"
+                       value={data.shift || ""}
+                       onChange={handleChange}
+                       className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                     />
+                   </div>
+                   <div>
+                     <label className="block text-xs font-bold text-slate-300 mb-1">Swap With Agent</label>
+                     <input
+                       type="text"
+                       name="swapWithAgent"
+                       value={data.swapWithAgent || ""}
+                       onChange={handleChange}
+                       className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                     />
+                   </div>
+                   <div>
+                     <label className="block text-xs font-bold text-slate-300 mb-1">Swap With Shift</label>
+                     <input
+                       type="text"
+                       name="swapWithShift"
+                       value={data.swapWithShift || ""}
+                       onChange={handleChange}
+                       className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                     />
+                   </div>
+                 </>
+               )}
+
+               {data.type === 'annual' && (
+                 <>
+                   <div>
+                     <label className="block text-xs font-bold text-slate-300 mb-1">Start Date</label>
+                     <input
+                       type="date"
+                       name="startDate"
+                       value={data.startDate || ""}
+                       onChange={handleChange}
+                       className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans [color-scheme:dark]"
+                     />
+                   </div>
+                   <div>
+                     <label className="block text-xs font-bold text-slate-300 mb-1">End Date</label>
+                     <input
+                       type="date"
+                       name="endDate"
+                       value={data.endDate || ""}
+                       onChange={handleChange}
+                       className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans [color-scheme:dark]"
+                     />
+                   </div>
+                 </>
+               )}
+
+               <div>
+                 <label className="block text-xs font-bold text-slate-300 mb-1">Notes</label>
+                 <textarea
+                   name="notes"
+                   value={data.notes || ""}
+                   onChange={handleChange}
+                   rows={3}
+                   className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                 />
+               </div>
+             </>
+          )}
+
           <div className="pt-4 flex justify-end gap-3">
              <button
                type="button"

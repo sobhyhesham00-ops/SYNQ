@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Filter, ClipboardList, Clock, CheckCircle2, XCircle, Pencil } from 'lucide-react';
 import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
@@ -19,6 +19,12 @@ export const AgentRequestsLogs = ({
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterDate, setFilterDate] = useState('');
+
+  const [, forceUpdate] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => forceUpdate(n => n + 1), 1000);
+    return () => clearInterval(interval);
+  }, []);
   
   const allRequests = useMemo(() => {
     if (!currentUser || currentUser.role !== 'agent') return [];
@@ -26,8 +32,8 @@ export const AgentRequestsLogs = ({
     
     requests.filter((r: any) => r.agentName === currentUser.name).forEach((r: any) => res.push({...r, _cType: 'sched'}));
     inquiries.filter((r: any) => r.agentName === currentUser.name).forEach((r: any) => res.push({...r, _cType: 'inq'}));
-    tabbyTamaraRequests.filter((r: any) => r.agentName === currentUser.name).forEach((r: any) => res.push({...r, _cType: 'tt'}));
-    complaints.filter((r: any) => r.agentName === currentUser.name).forEach((r: any) => res.push({...r, _cType: 'comp'}));
+    tabbyTamaraRequests.filter((r: any) => r.agentName === currentUser.name).forEach((r: any) => res.push({...r, _cType: 'tt_request'}));
+    complaints.filter((r: any) => r.agentName === currentUser.name).forEach((r: any) => res.push({...r, _cType: 'tt_complaint'}));
     clientComms.filter((r: any) => r.callCenterAgentName === currentUser.name).forEach((r: any) => res.push({...r, _cType: 'comm'}));
     
     return res.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -72,122 +78,157 @@ export const AgentRequestsLogs = ({
     
     if (req._cType === 'sched') {
       title = req.type === 'swap' ? 'Shift Swap Request' : 'Annual Leave Request';
-      typeLab = <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${req.type === 'swap' ? 'bg-blue-500/10 border border-blue-500/20 text-blue-300' : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-300'}`}>{title}</span>;
+      typeLab = <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${req.type === 'swap' ? 'bg-blue-500/10 border border-blue-500/20 text-blue-300' : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-300'}`}>{title}</span>;
       copyData = `ID: ${req.id}\nType: ${title}\nDate: ${new Date(req.createdAt).toLocaleString()}\nStatus: ${req.status}`;
       content = (
-        <>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1">
           {req.type === 'swap' ? (
-            <p className="text-sm font-bold text-slate-100">Swap shift for <span className="text-indigo-300">{req.date}</span></p>
+             <>
+               <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Swap shift for</p><p className="text-sm text-slate-200"><CopyWrap text={req.date || ''}>{req.date}</CopyWrap></p></div>
+               {req.swapWithAgent && <div><p className="text-[10px] uppercase tracking-wider text-slate-500">With Agent</p><p className="text-sm text-slate-200"><CopyWrap text={req.swapWithAgent || ''}>{req.swapWithAgent}</CopyWrap></p></div>}
+             </>
           ) : (
-            <p className="text-sm font-bold text-slate-100">Leave duration: <span className="text-emerald-300">{req.startDate}</span> to <span className="text-emerald-300">{req.endDate}</span></p>
+             <>
+               <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Start Date</p><p className="text-sm text-slate-200"><CopyWrap text={req.startDate || ''}>{req.startDate}</CopyWrap></p></div>
+               <div><p className="text-[10px] uppercase tracking-wider text-slate-500">End Date</p><p className="text-sm text-slate-200"><CopyWrap text={req.endDate || ''}>{req.endDate}</CopyWrap></p></div>
+             </>
           )}
-          {req.notes && <p className="text-slate-400 text-xs italic mt-1 font-sans">"{req.notes}"</p>}
-        </>
+          {req.notes && <div className="col-span-2"><p className="text-[10px] uppercase tracking-wider text-slate-500">Notes</p><div className="text-sm text-slate-200 italic">"<CopyWrap text={req.notes || ''}>{req.notes}</CopyWrap>"</div></div>}
+        </div>
       );
     } else if (req._cType === 'inq') {
       title = 'QA Inquiry';
-      typeLab = <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-purple-500/10 border border-purple-500/20 text-purple-300">{title}</span>;
+      typeLab = <span className="px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-purple-500/10 border border-purple-500/20 text-purple-300">{title}</span>;
       copyData = `ID: ${req.id}\nPatient Phone: ${req.phoneNumber}\nClinic: ${req.clinicName}\nInquiry: ${req.text}\nStatus: ${req.status}`;
       content = (
-        <>
-          <p className="text-sm font-bold text-slate-100">Clinic: <CopyWrap text={req.clinicName || 'N/A'}>{req.clinicName || 'N/A'}</CopyWrap></p>
-          <p className="text-xs text-slate-300 font-mono">Phone: <CopyWrap text={req.phoneNumber || 'N/A'}>{req.phoneNumber || 'N/A'}</CopyWrap></p>
-          <div className="text-slate-200 text-sm mt-1"><CopyWrap text={req.text || ''}>{req.text}</CopyWrap></div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+          <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Clinic</p><p className="text-sm text-slate-200"><CopyWrap text={req.clinicName || 'N/A'}>{req.clinicName || 'N/A'}</CopyWrap></p></div>
+          <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Phone</p><p className="text-sm text-slate-200 font-mono"><CopyWrap text={req.phoneNumber || 'N/A'}>{req.phoneNumber || 'N/A'}</CopyWrap></p></div>
+          <div className="col-span-2"><p className="text-[10px] uppercase tracking-wider text-slate-500">Inquiry</p><div className="text-sm text-slate-200"><CopyWrap text={req.text || ''}>{req.text}</CopyWrap></div></div>
           {req.answer && (
-             <div className="mt-2 p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+             <div className="col-span-2 mt-2 p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
                <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mb-1">Answered</p>
                <p className="text-sm text-slate-200">{req.answer}</p>
              </div>
           )}
-        </>
+        </div>
       );
-    } else if (req._cType === 'tt') {
+    } else if (req._cType === 'tt_request') {
       title = 'Tabby/Tamara Request';
-      typeLab = <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-orange-500/10 border border-orange-500/20 text-orange-300">{title}</span>;
+      typeLab = <span className="px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-orange-500/10 border border-orange-500/20 text-orange-300">{title}</span>;
       copyData = `ID: ${req.id}\nPatient: ${req.patientName}\nPhone: ${req.phoneNumber}\nClinic: ${req.clinicName}\nPlatform: ${req.platform}\nStatus: ${req.status}`;
       content = (
-        <>
-          <p className="text-sm font-bold text-slate-100">Patient: <CopyWrap text={req.patientName || 'N/A'}>{req.patientName || 'N/A'}</CopyWrap> <span className="text-slate-400 text-xs font-normal">({req.platform})</span></p>
-          <p className="text-xs text-slate-300 font-mono">Phone: <CopyWrap text={req.phoneNumber || 'N/A'}>{req.phoneNumber || 'N/A'}</CopyWrap> | Clinic: <CopyWrap text={req.clinicName || 'N/A'}>{req.clinicName || 'N/A'}</CopyWrap></p>
-          {req.notes && <p className="text-slate-400 text-xs italic mt-1 font-sans">"{req.notes}"</p>}
-        </>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+          <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Patient</p><p className="text-sm text-slate-200"><CopyWrap text={req.patientName || 'N/A'}>{req.patientName || 'N/A'}</CopyWrap> <span className="text-slate-400 text-xs font-normal">({req.platform})</span></p></div>
+          <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Phone</p><p className="text-sm text-slate-200 font-mono"><CopyWrap text={req.phoneNumber || 'N/A'}>{req.phoneNumber || 'N/A'}</CopyWrap></p></div>
+          <div className="col-span-2"><p className="text-[10px] uppercase tracking-wider text-slate-500">Clinic</p><p className="text-sm text-slate-200"><CopyWrap text={req.clinicName || 'N/A'}>{req.clinicName || 'N/A'}</CopyWrap></p></div>
+          {req.notes && <div className="col-span-2"><p className="text-[10px] uppercase tracking-wider text-slate-500">Notes</p><p className="text-sm text-slate-200 italic font-sans">"<CopyWrap text={req.notes || ''}>{req.notes}</CopyWrap>"</p></div>}
+        </div>
       );
-    } else if (req._cType === 'comp') {
+    } else if (req._cType === 'tt_complaint') {
       title = 'Complaint';
-      typeLab = <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-red-500/10 border border-red-500/20 text-red-300">{title}</span>;
+      typeLab = <span className="px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-red-500/10 border border-red-500/20 text-red-300">{title}</span>;
       copyData = `ID: ${req.id}\nPatient: ${req.patientName}\nPhone: ${req.phoneNumber}\nClinic: ${req.clinicName}\nComplaint: ${req.complaintDetails}\nStatus: ${req.status}`;
       content = (
-        <>
-          <p className="text-sm font-bold text-slate-100">Patient: <CopyWrap text={req.patientName || 'N/A'}>{req.patientName || 'N/A'}</CopyWrap></p>
-          <p className="text-xs text-slate-300 font-mono">Phone: <CopyWrap text={req.phoneNumber || 'N/A'}>{req.phoneNumber || 'N/A'}</CopyWrap> | Clinic: <CopyWrap text={req.clinicName || 'N/A'}>{req.clinicName || 'N/A'}</CopyWrap></p>
-          <div className="text-slate-200 text-sm mt-1"><CopyWrap text={req.complaintDetails || ''}>{req.complaintDetails}</CopyWrap></div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+          <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Patient</p><p className="text-sm text-slate-200"><CopyWrap text={req.patientName || 'N/A'}>{req.patientName || 'N/A'}</CopyWrap></p></div>
+          <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Phone</p><p className="text-sm text-slate-200 font-mono"><CopyWrap text={req.phoneNumber || 'N/A'}>{req.phoneNumber || 'N/A'}</CopyWrap></p></div>
+          <div className="col-span-2"><p className="text-[10px] uppercase tracking-wider text-slate-500">Clinic</p><p className="text-sm text-slate-200"><CopyWrap text={req.clinicName || 'N/A'}>{req.clinicName || 'N/A'}</CopyWrap></p></div>
+          <div className="col-span-2"><p className="text-[10px] uppercase tracking-wider text-slate-500">Complaint</p><div className="text-sm text-slate-200"><CopyWrap text={req.complaintDetails || ''}>{req.complaintDetails}</CopyWrap></div></div>
           {req.tlComment && (
-             <div className="mt-2 p-2 bg-rose-500/10 border border-rose-500/20 rounded-lg">
+             <div className="col-span-2 mt-2 p-2 bg-rose-500/10 border border-rose-500/20 rounded-lg">
                <p className="text-[10px] text-rose-400 font-bold uppercase tracking-widest mb-1">TL Comment</p>
                <p className="text-sm text-slate-200">{req.tlComment}</p>
              </div>
           )}
-        </>
+        </div>
       );
     } else if (req._cType === 'comm') {
       title = 'Client Communication';
-      typeLab = <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-cyan-500/10 border border-cyan-500/20 text-cyan-300">{title}</span>;
+      typeLab = <span className="px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-cyan-500/10 border border-cyan-500/20 text-cyan-300">{title}</span>;
       copyData = `ID: ${req.id}\nPatient: ${req.patientName}\nPhone: ${req.phoneNumber}\nClinic: ${req.clinicName}\nNotes: ${req.handlingNotes}\nStatus: ${req.status}`;
       content = (
-        <>
-          <p className="text-sm font-bold text-slate-100">Patient: <CopyWrap text={req.patientName || 'N/A'}>{req.patientName || 'N/A'}</CopyWrap></p>
-          <p className="text-xs text-slate-300 font-mono">Phone: <CopyWrap text={req.phoneNumber || 'N/A'}>{req.phoneNumber || 'N/A'}</CopyWrap> | Clinic: <CopyWrap text={req.clinicName || 'N/A'}>{req.clinicName || 'N/A'}</CopyWrap></p>
-          <div className="text-slate-200 text-sm mt-1"><CopyWrap text={req.handlingNotes || ''}>{req.handlingNotes || 'No notes yet'}</CopyWrap></div>
-        </>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+          <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Patient</p><p className="text-sm text-slate-200"><CopyWrap text={req.patientName || 'N/A'}>{req.patientName || 'N/A'}</CopyWrap></p></div>
+          <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Phone</p><p className="text-sm text-slate-200 font-mono"><CopyWrap text={req.phoneNumber || 'N/A'}>{req.phoneNumber || 'N/A'}</CopyWrap></p></div>
+          <div className="col-span-2"><p className="text-[10px] uppercase tracking-wider text-slate-500">Clinic</p><p className="text-sm text-slate-200"><CopyWrap text={req.clinicName || 'N/A'}>{req.clinicName || 'N/A'}</CopyWrap></p></div>
+          <div className="col-span-2"><p className="text-[10px] uppercase tracking-wider text-slate-500">Notes</p><div className="text-sm text-slate-200"><CopyWrap text={req.handlingNotes || ''}>{req.handlingNotes || 'No notes yet'}</CopyWrap></div></div>
+        </div>
       );
     }
 
+    let statusClass = "bg-slate-800 border-slate-700 text-slate-300";
+    if (req.status === 'pending_partner' || req.status === 'pending') {
+      statusClass = "bg-amber-500/10 border-amber-500/20 text-amber-400";
+    } else if (req.status === 'approved' || req.status === 'answered' || req.status === 'closed') {
+      statusClass = "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
+    } else if (req.status === 'rejected' || req.status === 'cancelled') {
+      statusClass = "bg-rose-500/10 border-rose-500/20 text-rose-400";
+    }
+
+    let statusLabel = req.status?.replace(/_/g, ' ') || '';
+
     return (
-      <div key={req.id + req._cType} className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col md:flex-row flex-wrap justify-between items-start md:items-center gap-4 hover:border-white/10 transition-all text-left">
-        <div className="space-y-2 flex-grow min-w-[300px]">
-          <div className="flex items-center gap-2 flex-wrap">
+      <div key={req.id + req._cType} className="flex flex-col p-4 bg-white/5 border border-white/5 rounded-2xl hover:border-white/10 transition-all text-left space-y-3">
+        {/* Header Row */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
             {typeLab}
-            <span className="text-[10px] text-slate-400 font-mono">
-              ID: <CopyWrap text={req.id || ''}>{req.id}</CopyWrap> &bull; Submitted: {new Date(req.createdAt).toLocaleString()}
+            <span className={`px-2 py-0.5 border rounded text-[10px] font-bold uppercase shrink-0 ${statusClass}`}>
+              {statusLabel}
             </span>
           </div>
-
-          <div className="space-y-0.5">
-            {content}
-            <AttachmentsDisplay photos={[...(req.photos || []), ...(req.screenshot ? [req.screenshot] : []), ...(req.imageUrl ? [req.imageUrl] : []), ...(req.paymentScreenshot ? [req.paymentScreenshot] : [])]} links={req.links} />
+          <div className="text-[11px] text-slate-500 font-mono">
+             <CopyWrap text={req.id || ''}>{req.id}</CopyWrap> &bull; {new Date(req.createdAt).toLocaleString()}
           </div>
         </div>
 
-        <div className="flex flex-col items-end gap-2 self-stretch md:self-auto border-t md:border-t-0 border-white/5 pt-3 md:pt-0 min-w-[200px]">
-          <div className="flex items-center justify-end gap-2 mb-1 w-full">
-            <span className="px-2 py-1 bg-slate-800 border border-slate-700 text-slate-300 rounded text-xs font-bold uppercase shrink-0">
-              {req.status?.replace(/_/g, ' ')}
-            </span>
-            <button onClick={(e) => copyText(e, copyData)} className="p-1.5 px-3 text-[10px] font-bold uppercase tracking-wider bg-white/10 hover:bg-white/20 text-white rounded cursor-pointer transition-colors shrink-0">
+        {/* Content Area */}
+        <div className="pt-1">
+          {content}
+          <AttachmentsDisplay photos={[...(req.photos || []), ...(req.screenshot ? [req.screenshot] : []), ...(req.imageUrl ? [req.imageUrl] : []), ...(req.paymentScreenshot ? [req.paymentScreenshot] : [])]} links={req.links} />
+        </div>
+
+        {/* Action Row */}
+        <div className="mt-2 pt-3 border-t border-white/5 flex items-center justify-between gap-4">
+          <div className="text-[10px] text-slate-400">
+            {(req.actionBy || req.tlName) ? `Handled by: ${req.actionBy || req.tlName}` : ''}
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            {req._cType === 'sched' && (req.status === 'pending_partner' || req.status === 'pending') && (
+              <button 
+                onClick={() => handleCancelRequest(req.id)} 
+                className="px-3 py-1.5 text-xs font-bold text-rose-400 hover:text-rose-300 bg-rose-500/10 rounded-lg cursor-pointer"
+              >
+                Cancel Request
+              </button>
+            )}
+
+            <button 
+              onClick={(e) => copyText(e, copyData)} 
+              className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-white/10 hover:bg-white/20 text-white rounded-lg cursor-pointer transition-colors"
+            >
               Copy Details
             </button>
-          </div>
-          
-          {req._cType === 'sched' && (
-            <>
-              {(req.status === 'pending_partner' || req.status === 'pending') && (
-                <button onClick={() => handleCancelRequest(req.id)} className="text-xs font-bold text-rose-400 hover:text-rose-300 hover:underline px-2 py-1 bg-rose-500/10 rounded-lg cursor-pointer mt-1">
-                  Cancel Request
-                </button>
-              )}
-              {canEditItem(req.createdAt) && (
-                <button onClick={() => setEditingItem({ type: 'scheduling_request', id: req.id, data: { ...req } })} className="text-xs font-bold text-emerald-400 hover:text-emerald-300 hover:underline px-2 py-1 bg-emerald-500/10 rounded-lg cursor-pointer flex items-center gap-1 mt-1">
-                  <Pencil className="w-3.5 h-3.5" /> Edit ({getRemainingEditTime(req.createdAt)})
-                </button>
-              )}
-            </>
-          )}
 
-          {(req.actionBy || req.tlName) && (
-            <p className="text-[10px] text-slate-400 mt-2">Handled by: {req.actionBy || req.tlName}</p>
-          )}
+            {canEditItem(req.createdAt) && (
+              <button 
+                onClick={() => {
+                  let editType = 'scheduling_request';
+                  if (req._cType === 'inq') editType = 'inquiry';
+                  if (req._cType === 'tt_request') editType = 'tt_request';
+                  if (req._cType === 'tt_complaint') editType = 'tt_complaint';
+                  if (req._cType === 'comm') editType = 'client_comm';
+                  setEditingItem({ type: editType, id: req.id, data: { ...req } });
+                }} 
+                className="text-xs font-bold text-emerald-400 hover:text-emerald-300 px-3 py-1.5 bg-emerald-500/10 rounded-lg cursor-pointer flex items-center gap-1.5"
+              >
+                <Pencil className="w-3.5 h-3.5" /> Edit ({getRemainingEditTime(req.createdAt)})
+              </button>
+            )}
+          </div>
         </div>
-        
+
         {req._cType === 'sched' && (
           <div className="w-full mt-2 pt-2 border-t border-white/5">
             <RequestReplyThread request={req} currentUser={currentUser} collectionName="requests" />
@@ -217,8 +258,8 @@ export const AgentRequestsLogs = ({
               <option value="all" className="bg-slate-800">All Types</option>
               <option value="sched" className="bg-slate-800">Leaves/Swaps</option>
               <option value="inq" className="bg-slate-800">Inquiries</option>
-              <option value="tt" className="bg-slate-800">Tabby/Tamara</option>
-              <option value="comp" className="bg-slate-800">Complaints</option>
+              <option value="tt_request" className="bg-slate-800">Tabby/Tamara</option>
+              <option value="tt_complaint" className="bg-slate-800">Complaints</option>
               <option value="comm" className="bg-slate-800">Client Comms</option>
             </select>
             {filterDate && (

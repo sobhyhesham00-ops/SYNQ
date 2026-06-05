@@ -20999,7 +20999,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                                     handleContactTabbyTamara(id, status);
                                                   } else {
                                                     // Mark contacted uses default param in this structure logic
-                                                    handleMarkPatientContactedTT(id);
+                                                    handleContactTabbyTamara(id, "contacted");
                                                   }
                                                 }}
                                                 getElapsedTimerString={getElapsedTimerString}
