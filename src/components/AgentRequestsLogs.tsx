@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, Filter, ClipboardList, Clock, CheckCircle2, XCircle, Pencil } from 'lucide-react';
 import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
+import { CopyWrap } from './CopyWrap';
 
 export const AgentRequestsLogs = ({ 
   currentUser, 
@@ -89,9 +90,9 @@ export const AgentRequestsLogs = ({
       copyData = `ID: ${req.id}\nPatient Phone: ${req.phoneNumber}\nClinic: ${req.clinicName}\nInquiry: ${req.text}\nStatus: ${req.status}`;
       content = (
         <>
-          <p className="text-sm font-bold text-slate-100">Clinic: {req.clinicName || 'N/A'}</p>
-          <p className="text-xs text-slate-300 font-mono">Phone: {req.phoneNumber || 'N/A'}</p>
-          <p className="text-slate-200 text-sm mt-1">{req.text}</p>
+          <p className="text-sm font-bold text-slate-100">Clinic: <CopyWrap text={req.clinicName || 'N/A'}>{req.clinicName || 'N/A'}</CopyWrap></p>
+          <p className="text-xs text-slate-300 font-mono">Phone: <CopyWrap text={req.phoneNumber || 'N/A'}>{req.phoneNumber || 'N/A'}</CopyWrap></p>
+          <div className="text-slate-200 text-sm mt-1"><CopyWrap text={req.text || ''}>{req.text}</CopyWrap></div>
           {req.answer && (
              <div className="mt-2 p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
                <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mb-1">Answered</p>
@@ -106,8 +107,8 @@ export const AgentRequestsLogs = ({
       copyData = `ID: ${req.id}\nPatient: ${req.patientName}\nPhone: ${req.phoneNumber}\nClinic: ${req.clinicName}\nPlatform: ${req.platform}\nStatus: ${req.status}`;
       content = (
         <>
-          <p className="text-sm font-bold text-slate-100">Patient: {req.patientName || 'N/A'} <span className="text-slate-400 text-xs font-normal">({req.platform})</span></p>
-          <p className="text-xs text-slate-300 font-mono">Phone: {req.phoneNumber || 'N/A'} | Clinic: {req.clinicName || 'N/A'}</p>
+          <p className="text-sm font-bold text-slate-100">Patient: <CopyWrap text={req.patientName || 'N/A'}>{req.patientName || 'N/A'}</CopyWrap> <span className="text-slate-400 text-xs font-normal">({req.platform})</span></p>
+          <p className="text-xs text-slate-300 font-mono">Phone: <CopyWrap text={req.phoneNumber || 'N/A'}>{req.phoneNumber || 'N/A'}</CopyWrap> | Clinic: <CopyWrap text={req.clinicName || 'N/A'}>{req.clinicName || 'N/A'}</CopyWrap></p>
           {req.notes && <p className="text-slate-400 text-xs italic mt-1 font-sans">"{req.notes}"</p>}
         </>
       );
@@ -117,9 +118,9 @@ export const AgentRequestsLogs = ({
       copyData = `ID: ${req.id}\nPatient: ${req.patientName}\nPhone: ${req.phoneNumber}\nClinic: ${req.clinicName}\nComplaint: ${req.complaintDetails}\nStatus: ${req.status}`;
       content = (
         <>
-          <p className="text-sm font-bold text-slate-100">Patient: {req.patientName || 'N/A'}</p>
-          <p className="text-xs text-slate-300 font-mono">Phone: {req.phoneNumber || 'N/A'} | Clinic: {req.clinicName || 'N/A'}</p>
-          <p className="text-slate-200 text-sm mt-1">{req.complaintDetails}</p>
+          <p className="text-sm font-bold text-slate-100">Patient: <CopyWrap text={req.patientName || 'N/A'}>{req.patientName || 'N/A'}</CopyWrap></p>
+          <p className="text-xs text-slate-300 font-mono">Phone: <CopyWrap text={req.phoneNumber || 'N/A'}>{req.phoneNumber || 'N/A'}</CopyWrap> | Clinic: <CopyWrap text={req.clinicName || 'N/A'}>{req.clinicName || 'N/A'}</CopyWrap></p>
+          <div className="text-slate-200 text-sm mt-1"><CopyWrap text={req.complaintDetails || ''}>{req.complaintDetails}</CopyWrap></div>
           {req.tlComment && (
              <div className="mt-2 p-2 bg-rose-500/10 border border-rose-500/20 rounded-lg">
                <p className="text-[10px] text-rose-400 font-bold uppercase tracking-widest mb-1">TL Comment</p>
@@ -134,9 +135,9 @@ export const AgentRequestsLogs = ({
       copyData = `ID: ${req.id}\nPatient: ${req.patientName}\nPhone: ${req.phoneNumber}\nClinic: ${req.clinicName}\nNotes: ${req.handlingNotes}\nStatus: ${req.status}`;
       content = (
         <>
-          <p className="text-sm font-bold text-slate-100">Patient: {req.patientName || 'N/A'}</p>
-          <p className="text-xs text-slate-300 font-mono">Phone: {req.phoneNumber || 'N/A'} | Clinic: {req.clinicName || 'N/A'}</p>
-          <p className="text-slate-200 text-sm mt-1">{req.handlingNotes}</p>
+          <p className="text-sm font-bold text-slate-100">Patient: <CopyWrap text={req.patientName || 'N/A'}>{req.patientName || 'N/A'}</CopyWrap></p>
+          <p className="text-xs text-slate-300 font-mono">Phone: <CopyWrap text={req.phoneNumber || 'N/A'}>{req.phoneNumber || 'N/A'}</CopyWrap> | Clinic: <CopyWrap text={req.clinicName || 'N/A'}>{req.clinicName || 'N/A'}</CopyWrap></p>
+          <div className="text-slate-200 text-sm mt-1"><CopyWrap text={req.handlingNotes || ''}>{req.handlingNotes || 'No notes yet'}</CopyWrap></div>
         </>
       );
     }
@@ -147,7 +148,7 @@ export const AgentRequestsLogs = ({
           <div className="flex items-center gap-2 flex-wrap">
             {typeLab}
             <span className="text-[10px] text-slate-400 font-mono">
-              ID: {req.id} &bull; Submitted: {new Date(req.createdAt).toLocaleString()}
+              ID: <CopyWrap text={req.id || ''}>{req.id}</CopyWrap> &bull; Submitted: {new Date(req.createdAt).toLocaleString()}
             </span>
           </div>
 

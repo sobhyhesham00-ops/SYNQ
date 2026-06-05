@@ -108,6 +108,7 @@ import { ScreenshotUpload } from "./components/ScreenshotUpload";
 import { MultiAttachmentUpload } from "./components/MultiAttachmentUpload";
 import { AttachmentsDisplay } from "./components/AttachmentsDisplay";
 import { DashboardSummary } from "./components/DashboardSummary";
+import { CopyWrap } from "./components/CopyWrap";
 import { QAScorecards } from "./components/QAScorecards";
 import { PatientSearchHub } from "./components/PatientSearchHub";
 import { AnnouncementsTab } from "./components/AnnouncementsTab";
@@ -21218,7 +21219,9 @@ _ ${inq.answer || "No answer yet"} _`;
                                                           Submitting Agent:
                                                         </p>
                                                         <p className="text-slate-200 font-bold truncate">
-                                                          {comp.agentName}
+                                                          <CopyWrap text={comp.agentName || ''} label="Agent Name">
+                                                            {comp.agentName}
+                                                          </CopyWrap>
                                                         </p>
                                                       </div>
                                                       <div>
@@ -21240,7 +21243,9 @@ _ ${inq.answer || "No answer yet"} _`;
                                                             ID Number:
                                                           </p>
                                                           <p className="text-slate-200 font-mono font-bold">
-                                                            {comp.idNumber}
+                                                            <CopyWrap text={comp.idNumber || ''} label="ID">
+                                                              {comp.idNumber}
+                                                            </CopyWrap>
                                                           </p>
                                                         </div>
                                                       )}
@@ -21261,7 +21266,9 @@ _ ${inq.answer || "No answer yet"} _`;
                                                           Phone number:
                                                         </p>
                                                         <p className="text-slate-200 font-mono font-bold truncate">
-                                                          {comp.phoneNumber}
+                                                          <CopyWrap text={comp.phoneNumber || ''} label="Phone">
+                                                            {comp.phoneNumber}
+                                                          </CopyWrap>
                                                         </p>
                                                       </div>
                                                     </div>
@@ -21271,13 +21278,11 @@ _ ${inq.answer || "No answer yet"} _`;
                                                         <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5 font-bold">
                                                           Complaint Issue:
                                                         </p>
-                                                        <p className="bg-black/25 p-2 rounded-lg border border-white/[0.03] text-slate-300 leading-normal font-sans italic">
-                                                          "
-                                                          {
-                                                            comp.complaintDetails
-                                                          }
-                                                          "
-                                                        </p>
+                                                        <div className="bg-black/25 p-2 rounded-lg border border-white/[0.03] text-slate-300 leading-normal font-sans italic">
+                                                          <CopyWrap text={comp.complaintDetails || ''} label="Details">
+                                                            "{comp.complaintDetails}"
+                                                          </CopyWrap>
+                                                        </div>
                                                       </div>
                                                     )}
 
@@ -21791,9 +21796,9 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                           Requested By:
                                                         </p>
                                                         <p className="text-slate-200 font-bold truncate">
-                                                          {
-                                                            req.callCenterAgentName
-                                                          }
+                                                          <CopyWrap text={req.callCenterAgentName || ''} label="Agent Name">
+                                                            {req.callCenterAgentName}
+                                                          </CopyWrap>
                                                         </p>
                                                       </div>
                                                       <div>
@@ -21801,7 +21806,9 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                           Phone number:
                                                         </p>
                                                         <p className="text-indigo-300 font-mono font-bold truncate">
-                                                          {req.phoneNumber}
+                                                          <CopyWrap text={req.phoneNumber || ''} label="Phone">
+                                                            {req.phoneNumber}
+                                                          </CopyWrap>
                                                         </p>
                                                       </div>
                                                     </div>
@@ -21810,9 +21817,11 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                       <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5 font-bold">
                                                         Notes / Inquiry:
                                                       </p>
-                                                      <p className="bg-black/25 p-2 rounded-lg border border-white/[0.03] text-slate-300 leading-normal font-sans italic">
-                                                        "{req.notes}"
-                                                      </p>
+                                                      <div className="bg-black/25 p-2 rounded-lg border border-white/[0.03] text-slate-300 leading-normal font-sans italic">
+                                                        <CopyWrap text={req.notes || ''} label="Notes">
+                                                          "{req.notes}"
+                                                        </CopyWrap>
+                                                      </div>
                                                     </div>
 
                                                     <AttachmentsDisplay
@@ -21833,9 +21842,11 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                               💬 Resolution Notes (
                                                               {req.handledBy}):
                                                             </p>
-                                                            <p className="bg-indigo-950/20 p-2 rounded-lg border border-indigo-500/10 text-slate-200 leading-normal font-sans mb-1">
-                                                              {req.handlingNotes}
-                                                            </p>
+                                                            <div className="bg-indigo-950/20 p-2 rounded-lg border border-indigo-500/10 text-slate-200 leading-normal font-sans mb-1">
+                                                              <CopyWrap text={req.handlingNotes || ''} label="Resolution Notes">
+                                                                {req.handlingNotes}
+                                                              </CopyWrap>
+                                                            </div>
                                                           </>
                                                         )}
                                                         {req.handlingPhotos && req.handlingPhotos.length > 0 && (

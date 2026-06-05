@@ -83,8 +83,12 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({ photos, 
                 </a>
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={(e) => {
                     navigator.clipboard.writeText(link);
+                    const btn = e.currentTarget;
+                    const origHtml = btn.innerHTML;
+                    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check text-emerald-400"><path d="M20 6 9 17l-5-5"/></svg>';
+                    setTimeout(() => { btn.innerHTML = origHtml; }, 1000);
                   }}
                   className="p-1.5 text-slate-400 hover:text-slate-100 bg-white/5 rounded-md hover:bg-white/10 transition-colors shrink-0"
                   title="Copy Link"
