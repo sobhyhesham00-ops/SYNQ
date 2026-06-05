@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Search, History, MessageCircle, FileText, CheckCircle2, X, Download } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Search, History, MessageCircle, FileText, CheckCircle2, X, Download, ChevronDown, ChevronUp } from 'lucide-react';
 import { Inquiry, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, CaseRecord } from '../types';
+import { CopyWrap } from './CopyWrap';
 
 interface PatientSearchHubProps {
   inquiries: Inquiry[];
@@ -8,18 +9,64 @@ interface PatientSearchHubProps {
   ttComplaints: TabbyTamaraComplaint[];
   clientComms: ClientCommunicationRequest[];
   cases: CaseRecord[];
+  currentUser?: { name: string; role: string };
+  requests?: any[];
 }
+
+const formatCaseRef = (id: string, cType: string): string => {
+  const typeMap: Record<string, string> = {
+    inquiry: 'INQ',
+    tt_request: 'TTR',
+    tt_complaint: 'TTC',
+    comm: 'COM',
+    case: 'CAS',
+    sched: 'SCH'
+  };
+  const prefix = typeMap[cType] || 'REF';
+  const tsMatch = id.match(/(\d{10,13})/);
+  if (!tsMatch) return `${prefix}-??????`;
+  const ts = parseInt(tsMatch[1]);
+  const d = new Date(ts > 9999999999 ? ts : ts * 1000);
+  const ymd = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  const suffix = String(ts).slice(-4);
+  return `${prefix}-${ymd}-${suffix}`;
+};
+
+const getRelativeTime = (dateString: string) => {
+  const now = new Date();
+  const date = new Date(dateString);
+  const diffInMs = Math.abs(now.getTime() - date.getTime());
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+
+  if (diffInDays > 0) return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+  if (diffInHours > 0) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+  if (diffInMinutes > 0) return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
+  return 'Just now';
+};
+
 
 export function PatientSearchHub({
   inquiries,
   ttRequests,
   ttComplaints,
   clientComms,
-  cases
+  cases,
+  currentUser,
+  requests = []
 }: PatientSearchHubProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [hasSearched, setHasSearched] = useState(false);
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [viewerImage, setViewerImage] = useState<string | null>(null);
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
   const downloadFile = (url: string, prefix: string) => {
     try {
@@ -34,40 +81,239 @@ export function PatientSearchHub({
     }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!String(searchQuery || '').trim()) return;
-    setHasSearched(true);
-  };
-
-  const cleanPhone = (phone: string | undefined) => phone?.replace(/\D/g, '') || '';
-  const phoneQuery = cleanPhone(searchQuery);
-  const textQuery = String(searchQuery || '').trim().toLowerCase();
+  const cleanPhone = (p: string | undefined) => (p || '').replace(/\D/g, '').replace(/^0+/, '');
+  const phoneQuery = cleanPhone(debouncedQuery);
+  const textQuery = String(debouncedQuery || '').trim().toLowerCase();
 
   const isMatch = (item: any) => {
-    if (!String(searchQuery || '').trim()) return false;
-    if (phoneQuery && item.phoneNumber && cleanPhone(item.phoneNumber).includes(phoneQuery)) return true;
-    if (item.clinicName && item.clinicName.toLowerCase().includes(textQuery)) return true;
-    if (item.patientName && item.patientName.toLowerCase().includes(textQuery)) return true;
+    if (!String(debouncedQuery || '').trim()) return false;
+    
+    // Phone logic
+    if (phoneQuery.length >= 4 && item.phoneNumber) {
+      const itemPhone = cleanPhone(item.phoneNumber);
+      if (itemPhone.includes(phoneQuery) || phoneQuery.includes(itemPhone)) return true;
+    }
+
+    // Text fields
+    const searchFields = [
+      item.clinicName,
+      item.patientName,
+      item.agentName,
+      item.callCenterAgentName,
+      item.id,
+      item.inquiry,
+      item.complaintDetails,
+      item.handlingNotes,
+      item.text
+    ];
+
+    for (const field of searchFields) {
+       if (field && String(field).toLowerCase().includes(textQuery)) return true;
+    }
+
     return false;
   };
 
-  const matchedInquiries = hasSearched ? inquiries.filter(isMatch) : [];
-  const matchedTTReq = hasSearched ? ttRequests.filter(isMatch) : [];
-  const matchedTTComp = hasSearched ? ttComplaints.filter(isMatch) : [];
-  const matchedComms = hasSearched ? clientComms.filter(isMatch) : [];
-  const matchedCases = hasSearched ? cases.filter(isMatch) : [];
+  const matchedItems = useMemo(() => {
+    if (!debouncedQuery.trim()) return [];
 
-  const totalResults = matchedInquiries.length + matchedTTReq.length + matchedTTComp.length + matchedComms.length + matchedCases.length;
+    const res: any[] = [];
+    
+    inquiries.filter(isMatch).forEach(r => res.push({...r, _type: 'inquiry'}));
+    ttRequests.filter(isMatch).forEach(r => res.push({...r, _type: 'tt_request'}));
+    ttComplaints.filter(isMatch).forEach(r => res.push({...r, _type: 'tt_complaint'}));
+    clientComms.filter(isMatch).forEach(r => res.push({...r, _type: 'comm'}));
+    cases.filter(isMatch).forEach(r => res.push({...r, _type: 'case'}));
+    requests.filter(isMatch).forEach(r => res.push({...r, _type: 'sched'}));
 
-  const getAllPatientNames = () => {
-    const names = new Set<string>();
-    matchedTTReq.forEach(r => { if (r.patientName) names.add(r.patientName) });
-    matchedTTComp.forEach(c => { if (c.patientName) names.add(c.patientName) });
-    matchedCases.forEach(c => { if (c.patientName) names.add(c.patientName) });
-    return Array.from(names);
+    return res.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [debouncedQuery, inquiries, ttRequests, ttComplaints, clientComms, cases, requests]);
+
+
+  const toggleExpand = (id: string) => {
+    setExpandedItems(prev => ({ ...prev, [id]: !prev[id] }));
   };
-  const patientNames = getAllPatientNames();
+
+  const patientIdentity = useMemo(() => {
+    if (matchedItems.length === 0) return null;
+
+    const names = new Set<string>();
+    const phones = new Set<string>();
+    let firstContact = new Date();
+    
+    let stats = { inq: 0, tt: 0, comp: 0, comm: 0, case: 0, sched: 0 };
+
+    matchedItems.forEach(item => {
+      if (item.patientName) names.add(item.patientName);
+      if (item.phoneNumber) {
+         const cp = cleanPhone(item.phoneNumber);
+         if (cp) phones.add('0' + cp);
+      }
+      
+      const itemDate = new Date(item.createdAt);
+      if (itemDate < firstContact) firstContact = itemDate;
+
+      if (item._type === 'inquiry') stats.inq++;
+      if (item._type === 'tt_request') stats.tt++;
+      if (item._type === 'tt_complaint') stats.comp++;
+      if (item._type === 'comm') stats.comm++;
+      if (item._type === 'case') stats.case++;
+      if (item._type === 'sched') stats.sched++;
+    });
+
+    if (phones.size === 0 && names.size === 0) return null;
+
+    return {
+      names: Array.from(names),
+      phones: Array.from(phones),
+      firstContact,
+      stats,
+      total: matchedItems.length
+    };
+  }, [matchedItems]);
+
+
+  const renderTimelineCard = (item: any) => {
+    const isExpanded = !!expandedItems[item.id];
+    
+    let title = '';
+    let typeLab;
+    let summary = '';
+    
+    if (item._type === 'sched') {
+      title = item.type === 'swap' ? 'Shift Swap' : 'Annual Leave';
+      typeLab = <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 border border-blue-500/20 text-blue-300">{title}</span>;
+      summary = item.notes || `Shift Date: ${item.date || item.startDate}`;
+    } else if (item._type === 'inquiry') {
+      title = 'QA Inquiry';
+      typeLab = <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-purple-500/10 border border-purple-500/20 text-purple-300">{title}</span>;
+      summary = item.text || 'No inquiry text';
+    } else if (item._type === 'tt_request') {
+      title = 'Tabby/Tamara Request';
+      typeLab = <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-orange-500/10 border border-orange-500/20 text-orange-300">{title}</span>;
+      summary = `Platform: ${item.platform} - ${item.notes || 'No notes'}`;
+    } else if (item._type === 'tt_complaint') {
+      title = 'Complaint';
+      typeLab = <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-red-500/10 border border-red-500/20 text-red-300">{title}</span>;
+      summary = item.complaintDetails || 'No details';
+    } else if (item._type === 'comm') {
+      title = 'Client Communication';
+      typeLab = <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-cyan-500/10 border border-cyan-500/20 text-cyan-300">{title}</span>;
+      summary = item.handlingNotes || 'No handling notes';
+    } else if (item._type === 'case') {
+      title = 'Case Record';
+      typeLab = <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/20 text-emerald-300">{title}</span>;
+      summary = item.inquiry || 'No case details';
+    }
+
+    let statusClass = "bg-slate-800 border-slate-700 text-slate-300";
+    if (item.status === 'pending_partner' || item.status === 'pending') {
+      statusClass = "bg-amber-500/10 border-amber-500/20 text-amber-400";
+    } else if (item.status === 'approved' || item.status === 'answered' || item.status === 'closed') {
+      statusClass = "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
+    } else if (item.status === 'rejected' || item.status === 'cancelled') {
+      statusClass = "bg-rose-500/10 border-rose-500/20 text-rose-400";
+    }
+    
+    const statusLabel = item.status?.replace(/_/g, ' ') || 'OPEN';
+
+    return (
+      <div key={item.id} className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col gap-3 hover:border-white/20 transition-all text-left w-full overflow-hidden">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 overflow-hidden w-full">
+          <div className="flex items-center gap-3 flex-wrap">
+            {typeLab}
+            <span className={`px-2 py-0.5 border rounded text-[10px] font-bold uppercase shrink-0 ${statusClass}`}>
+              {statusLabel}
+            </span>
+            <span className="text-slate-400 text-xs font-mono bg-black/20 px-2 py-1 rounded inline-block max-w-[150px] sm:max-w-max truncate">
+               <CopyWrap text={item.id || ''}>{formatCaseRef(item.id, item._type)}</CopyWrap>
+            </span>
+          </div>
+          <div className="text-[11px] text-slate-500 font-mono text-left sm:text-right shrink-0" title={new Date(item.createdAt).toLocaleString()}>
+            {getRelativeTime(item.createdAt)}
+          </div>
+        </div>
+
+        {/* Content Summary */}
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 cursor-pointer" onClick={() => toggleExpand(item.id)}>
+          <div className="flex-1 space-y-1 w-full min-w-0">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-300">
+               {(item.patientName || item.clinicName) && (
+                 <span className="flex gap-2">
+                   {item.patientName && <span className="font-bold text-slate-200"><CopyWrap text={item.patientName}>{item.patientName}</CopyWrap></span>}
+                   {item.patientName && item.clinicName && <span className="text-slate-500">@</span>}
+                   {item.clinicName && <span className="font-medium text-slate-300"><CopyWrap text={item.clinicName}>{item.clinicName}</CopyWrap></span>}
+                 </span>
+               )}
+               {item.phoneNumber && (
+                 <span className="font-mono text-slate-400">
+                   <CopyWrap text={item.phoneNumber} phoneMode={true} label="Phone">{item.phoneNumber}</CopyWrap>
+                 </span>
+               )}
+            </div>
+            
+            <p className="text-sm text-slate-200 line-clamp-2 mt-2">{summary}</p>
+            
+            <p className="text-[10px] text-slate-500 pt-1">By: {item.agentName || item.callCenterAgentName || 'Unknown Agent'}</p>
+          </div>
+          
+          <button className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors shrink-0 self-start sm:self-center">
+            {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+          </button>
+        </div>
+
+        {/* Expanded Details */}
+        {isExpanded && (
+          <div className="mt-4 pt-4 border-t border-white/5 space-y-4 animate-fade-in pl-2 border-l-2 border-l-slate-700/50">
+            {/* Extended fields */}
+            {item.tlNotes && (
+               <div className="bg-indigo-500/10 p-3 rounded-xl border border-indigo-500/20">
+                 <p className="text-[10px] uppercase tracking-widest font-bold text-indigo-400 mb-1">TL Notes</p>
+                 <p className="text-sm text-slate-200">{item.tlNotes}</p>
+               </div>
+            )}
+            {item.tlComment && (
+               <div className="bg-rose-500/10 p-3 rounded-xl border border-rose-500/20">
+                 <p className="text-[10px] uppercase tracking-widest font-bold text-rose-400 mb-1">TL Comment</p>
+                 <p className="text-sm text-slate-200">{item.tlComment}</p>
+               </div>
+            )}
+            {item.answer && (
+               <div className="bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20">
+                 <p className="text-[10px] uppercase tracking-widest font-bold text-emerald-400 mb-1">QA Answer</p>
+                 <p className="text-sm text-slate-200">{item.answer}</p>
+               </div>
+            )}
+            
+            {/* Attachments */}
+            {((item.photos && item.photos.length > 0) || item.screenshot || item.imageUrl || item.paymentScreenshot) && (
+              <div>
+                <p className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-2">Attachments</p>
+                <div className="flex gap-2 flex-wrap">
+                  {[...(item.photos || []), ...(item.screenshot ? [item.screenshot] : []), ...(item.imageUrl ? [item.imageUrl] : []), ...(item.paymentScreenshot ? [item.paymentScreenshot] : [])].map((p, idx) => (
+                    <button key={idx} onClick={() => setViewerImage(p as string)} className="focus:outline-none">
+                      <img src={p as string} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-slate-700 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {item.links && item.links.length > 0 && (
+              <div>
+                <p className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-1">Links</p>
+                <div className="flex gap-2 flex-wrap">
+                  {item.links.map((link: string, idx: number) => (
+                    <a key={idx} href={link} target="_blank" rel="noreferrer" className="text-xs text-cyan-400 hover:text-cyan-300 underline truncate max-w-[200px] bg-cyan-500/10 px-2 py-1 rounded inline-block">{link}</a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6 animate-fade-in text-left">
@@ -76,257 +322,68 @@ export function PatientSearchHub({
           <Search className="w-8 h-8 text-cyan-400" />
           Patient Search Hub
         </h2>
-        <p className="text-slate-400 text-sm mt-1">Search patient history, interactions, and inquiries globally by phone, name, or clinic.</p>
+        <p className="text-slate-400 text-sm mt-1">Search patient history, interactions, and inquiries globally.</p>
       </div>
 
       <div className="bg-white/[0.02] border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
-        <form onSubmit={handleSearch} className="flex gap-4 items-center">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => { setSearchQuery(e.target.value); setHasSearched(false); }}
-            placeholder="Search by phone, clinic, or patient name..."
-            className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 outline-none focus:border-cyan-500 font-mono tracking-wider transition-colors"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="e.g. 0501234567 or ahmed or INQ-202505"
+            className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-12 pr-12 py-3.5 text-slate-100 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 font-sans tracking-wide transition-colors"
           />
-          <button
-            type="submit"
-            disabled={!String(searchQuery || '').trim()}
-            className="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white font-bold rounded-xl transition-all shadow-lg shadow-cyan-900/20 flex items-center gap-2"
-          >
-            <Search className="w-4 h-4" />
-            Search Records
-          </button>
-        </form>
+          {searchQuery && (
+             <button 
+               onClick={() => setSearchQuery('')}
+               className="absolute right-4 top-1/2 -translate-y-1/2 p-1 bg-slate-800 hover:bg-slate-700 rounded-full text-slate-300 transition-colors"
+             >
+               <X className="w-4 h-4" />
+             </button>
+          )}
+        </div>
       </div>
 
-      {hasSearched && String(searchQuery || '').trim() && (
+      {debouncedQuery.trim() && (
         <div className="space-y-6">
-          <div className="flex items-center gap-4 py-2 border-b border-white/10">
-            <h3 className="text-xl font-bold text-slate-200">
-              Results found: <span className="text-cyan-400">{totalResults}</span>
-            </h3>
-            {patientNames.length > 0 && (
-              <div className="text-sm px-4 py-1.5 bg-slate-800 rounded-lg text-slate-300 font-semibold border border-slate-700">
-                Known Names: {patientNames.join(' | ')}
-              </div>
-            )}
-          </div>
-
-          {totalResults === 0 ? (
-            <div className="p-12 text-center text-slate-500 bg-black/20 rounded-3xl border border-dashed border-white/10">
-              No historical interaction found for phone number matching '{searchQuery}'.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              
-              {/* Inquiries */}
-              {matchedInquiries.length > 0 && (
-                <div className="space-y-4">
-                  <h4 className="font-bold flex items-center gap-2 text-amber-500 uppercase tracking-widest text-xs">
-                    <MessageCircle className="w-4 h-4" /> General Inquiries ({matchedInquiries.length})
-                  </h4>
-                  {matchedInquiries.map(inq => (
-                    <div key={inq.id} className="bg-amber-500/5 border border-amber-500/20 p-4 rounded-2xl flex flex-col gap-2">
-                      <div className="flex justify-between items-start text-xs text-slate-400">
-                        <span><span className="text-slate-300 font-bold">{inq.agentName}</span> @ {inq.clinicName}</span>
-                        <span>{new Date(inq.createdAt).toLocaleString()}</span>
-                      </div>
-                      <div className="text-slate-200 text-sm italic border-l-2 border-amber-500/30 pl-3 my-1">
-                        "{inq.text}"
-                      </div>
-                      {inq.status === 'answered' && inq.answer && (
-                        <div className="mt-2 bg-slate-900/50 p-3 rounded-xl border border-slate-700">
-                          <span className="text-xs font-bold text-emerald-400 flex items-center gap-1 mb-1"><CheckCircle2 className="w-3 h-3"/> Resolution:</span>
-                          <span className="text-sm text-slate-300">{inq.answer}</span>
-                        </div>
-                      )}
-                      {inq.photos && inq.photos.length > 0 && (
-                        <div className="flex gap-2 flex-wrap mt-2">
-                          {inq.photos.map((p, idx) => (
-                            <button key={idx} onClick={() => setViewerImage(p)} className="focus:outline-none">
-                              <img src={p} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-amber-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                      {inq.links && inq.links.length > 0 && (
-                        <div className="flex gap-2 flex-wrap mt-1">
-                          {inq.links.map((link, idx) => (
-                            <a key={idx} href={link} target="_blank" rel="noreferrer" className="text-[10px] text-amber-400 underline truncate max-w-[150px] bg-amber-500/10 px-2 py-1 rounded">{link}</a>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Client Comms */}
-              {matchedComms.length > 0 && (
-                <div className="space-y-4">
-                  <h4 className="font-bold flex items-center gap-2 text-sky-500 uppercase tracking-widest text-xs">
-                    <MessageCircle className="w-4 h-4" /> Client Communications ({matchedComms.length})
-                  </h4>
-                  {matchedComms.map(cc => (
-                    <div key={cc.id} className="bg-sky-500/5 border border-sky-500/20 p-4 rounded-2xl flex flex-col gap-2">
-                      <div className="flex justify-between items-start text-xs text-slate-400">
-                        <span><span className="text-slate-300 font-bold">{cc.callCenterAgentName}</span> @ {cc.clinicName}</span>
-                        <span>{new Date(cc.createdAt).toLocaleString()}</span>
-                      </div>
-                      <div className="text-slate-200 text-sm">
-                        {cc.notes}
-                      </div>
-                      {((cc.photos && cc.photos.length > 0) || cc.screenshot) && (
-                        <div className="flex gap-2 flex-wrap mt-2">
-                          {cc.screenshot && (
-                            <button onClick={() => setViewerImage(cc.screenshot!)} className="focus:outline-none">
-                              <img src={cc.screenshot} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-sky-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
-                            </button>
-                          )}
-                          {cc.photos?.map((p, idx) => (
-                            <button key={idx} onClick={() => setViewerImage(p)} className="focus:outline-none">
-                              <img src={p} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-sky-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                      {cc.links && cc.links.length > 0 && (
-                        <div className="flex gap-2 flex-wrap mt-1">
-                          {cc.links.map((link, idx) => (
-                            <a key={idx} href={link} target="_blank" rel="noreferrer" className="text-[10px] text-sky-400 underline truncate max-w-[150px] bg-sky-500/10 px-2 py-1 rounded">{link}</a>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* TT Requests */}
-              {matchedTTReq.length > 0 && (
-                <div className="space-y-4">
-                  <h4 className="font-bold flex items-center gap-2 text-rose-500 uppercase tracking-widest text-xs">
-                    <FileText className="w-4 h-4" /> Tabby & Tamara Requests ({matchedTTReq.length})
-                  </h4>
-                  {matchedTTReq.map(tt => (
-                    <div key={tt.id} className="bg-rose-500/5 border border-rose-500/20 p-4 rounded-2xl flex flex-col gap-2">
-                       <div className="flex justify-between items-start text-xs text-slate-400">
-                        <span><span className="text-slate-300 font-bold">{tt.agentName}</span> @ {tt.clinicName}</span>
-                        <span>{new Date(tt.createdAt).toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between text-sm text-slate-200 mt-1">
-                         <span className="font-bold uppercase text-xs px-2 py-1 bg-black/30 rounded">{tt.platform}</span>
-                         <span className="font-mono text-rose-300">{tt.priceWithoutTax ? 'AED ' + tt.priceWithoutTax : ''}</span>
-                      </div>
-                      {((tt.photos && tt.photos.length > 0) || tt.paymentScreenshot) && (
-                        <div className="flex gap-2 flex-wrap mt-2">
-                          {tt.paymentScreenshot && (
-                            <button onClick={() => setViewerImage(tt.paymentScreenshot!)} className="focus:outline-none">
-                              <img src={tt.paymentScreenshot} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-rose-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
-                            </button>
-                          )}
-                          {tt.photos?.map((p, idx) => (
-                            <button key={idx} onClick={() => setViewerImage(p)} className="focus:outline-none">
-                              <img src={p} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-rose-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                      {tt.links && tt.links.length > 0 && (
-                        <div className="flex gap-2 flex-wrap mt-1">
-                          {tt.links.map((link, idx) => (
-                            <a key={idx} href={link} target="_blank" rel="noreferrer" className="text-[10px] text-rose-400 underline truncate max-w-[150px] bg-rose-500/10 px-2 py-1 rounded">{link}</a>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Cases */}
-              {matchedCases.length > 0 && (
-                <div className="space-y-4">
-                  <h4 className="font-bold flex items-center gap-2 text-orange-500 uppercase tracking-widest text-xs">
-                    <History className="w-4 h-4" /> Service Cases ({matchedCases.length})
-                  </h4>
-                  {matchedCases.map(c => (
-                    <div key={c.id} className="bg-orange-500/5 border border-orange-500/20 p-4 rounded-2xl flex flex-col gap-2">
-                       <div className="flex justify-between items-start text-xs text-slate-400">
-                        <span><span className="text-slate-300 font-bold">{c.agentName}</span> {c.leadSource ? `@ ${c.leadSource}` : ''}</span>
-                        <span>{new Date(c.createdAt).toLocaleString()}</span>
-                      </div>
-                      <div className="text-slate-200 text-sm">
-                        {c.inquiry}
-                      </div>
-                      {((c.photos && c.photos.length > 0) || c.screenshot) && (
-                        <div className="flex gap-2 flex-wrap mt-2">
-                          {c.screenshot && (
-                            <button onClick={() => setViewerImage(c.screenshot!)} className="focus:outline-none">
-                              <img src={c.screenshot} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-orange-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
-                            </button>
-                          )}
-                          {c.photos?.map((p, idx) => (
-                            <button key={idx} onClick={() => setViewerImage(p)} className="focus:outline-none">
-                              <img src={p} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-orange-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                      {c.links && c.links.length > 0 && (
-                        <div className="flex gap-2 flex-wrap mt-1">
-                          {c.links.map((link, idx) => (
-                            <a key={idx} href={link} target="_blank" rel="noreferrer" className="text-[10px] text-orange-400 underline truncate max-w-[150px] bg-orange-500/10 px-2 py-1 rounded">{link}</a>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* TT Complaints */}
-              {matchedTTComp.length > 0 && (
-                <div className="space-y-4">
-                  <h4 className="font-bold flex items-center gap-2 text-red-500 uppercase tracking-widest text-xs">
-                    <History className="w-4 h-4" /> TT Complaints ({matchedTTComp.length})
-                  </h4>
-                  {matchedTTComp.map(c => (
-                    <div key={c.id} className="bg-red-500/5 border border-red-500/20 p-4 rounded-2xl flex flex-col gap-2">
-                       <div className="flex justify-between items-start text-xs text-slate-400">
-                        <span><span className="text-slate-300 font-bold">{c.agentName}</span> @ {c.clinicName}</span>
-                        <span>{new Date(c.createdAt).toLocaleString()}</span>
-                      </div>
-                      <div className="text-slate-200 text-sm bg-black/20 p-2 rounded">
-                        {c.complaintDetails}
-                      </div>
-                      {((c.photos && c.photos.length > 0) || c.imageUrl) && (
-                        <div className="flex gap-2 flex-wrap mt-2">
-                          {c.imageUrl && (
-                            <button onClick={() => setViewerImage(c.imageUrl!)} className="focus:outline-none">
-                              <img src={c.imageUrl} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-red-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
-                            </button>
-                          )}
-                          {c.photos?.map((p, idx) => (
-                            <button key={idx} onClick={() => setViewerImage(p)} className="focus:outline-none">
-                              <img src={p} alt="Attached" className="h-16 w-16 md:h-20 md:w-20 rounded-lg border border-red-500/30 object-cover shadow-sm hover:scale-105 transition hover:opacity-80" />
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                      {c.links && c.links.length > 0 && (
-                        <div className="flex gap-2 flex-wrap mt-1">
-                          {c.links.map((link, idx) => (
-                            <a key={idx} href={link} target="_blank" rel="noreferrer" className="text-[10px] text-red-400 underline truncate max-w-[150px] bg-red-500/10 px-2 py-1 rounded">{link}</a>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
+          {/* Header Profile */}
+          {patientIdentity && matchedItems.length > 0 && (
+            <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-5 shadow-xl font-mono text-sm">
+               <div className="flex items-center gap-2 text-cyan-400 font-bold mb-3 uppercase tracking-wider text-xs">
+                 <span>👤 Patient Profile Match</span>
+               </div>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-slate-300">
+                 <div><span className="text-slate-500 mr-2">Names seen:</span> {patientIdentity.names.length > 0 ? patientIdentity.names.join(', ') : 'Unknown'}</div>
+                 <div><span className="text-slate-500 mr-2">Phone numbers:</span> {patientIdentity.phones.length > 0 ? patientIdentity.phones.join(', ') : 'Unknown'}</div>
+                 <div><span className="text-slate-500 mr-2">First contact:</span> {patientIdentity.firstContact.toDateString()}</div>
+                 <div>
+                   <span className="text-slate-500 mr-2">Total interactions:</span> 
+                   <span className="font-bold text-white">{patientIdentity.total}</span>
+                   <span className="text-slate-400 text-xs ml-2">
+                     ({patientIdentity.stats.inq} INQ, {patientIdentity.stats.tt} TT, {patientIdentity.stats.comp} COMP, {patientIdentity.stats.comm} COMM, {patientIdentity.stats.case} CASE)
+                   </span>
+                 </div>
+               </div>
             </div>
           )}
+
+          {/* Timeline list */}
+          <div className="space-y-4">
+             {matchedItems.length === 0 ? (
+               <div className="text-center py-12 text-slate-400 space-y-2 bg-slate-900/30 rounded-2xl border border-slate-800">
+                 <History className="w-10 h-10 mx-auto text-slate-600 mb-4" />
+                 <p>No records found matching "{debouncedQuery}"</p>
+                 <p className="text-xs text-slate-500">Try a different phone number, name or reference ID.</p>
+               </div>
+             ) : (
+               <div className="space-y-3 w-full">
+                 <h3 className="text-sm font-bold text-slate-300 uppercase tracking-widest mb-4 pl-2 border-l-2 border-cyan-500">Timeline</h3>
+                 {matchedItems.map(renderTimelineCard)}
+               </div>
+             )}
+          </div>
         </div>
       )}
 

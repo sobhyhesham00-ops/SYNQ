@@ -4,6 +4,24 @@ import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
 import { CopyWrap } from './CopyWrap';
 
+const formatCaseRef = (id: string, cType: string): string => {
+  const typeMap: Record<string, string> = {
+    sched: 'SCH',
+    inq: 'INQ',
+    tt_request: 'TTR',
+    tt_complaint: 'TTC',
+    comm: 'COM',
+  };
+  const prefix = typeMap[cType] || 'REF';
+  const tsMatch = id.match(/(\d{10,13})/);
+  if (!tsMatch) return `${prefix}-??????`;
+  const ts = parseInt(tsMatch[1]);
+  const d = new Date(ts > 9999999999 ? ts : ts * 1000);
+  const ymd = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  const suffix = String(ts).slice(-4);
+  return `${prefix}-${ymd}-${suffix}`;
+};
+
 export const AgentRequestsLogs = ({ 
   currentUser, 
   requests, 
@@ -103,7 +121,7 @@ export const AgentRequestsLogs = ({
       content = (
         <div className="grid grid-cols-2 gap-x-4 gap-y-1">
           <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Clinic</p><p className="text-sm text-slate-200"><CopyWrap text={req.clinicName || 'N/A'}>{req.clinicName || 'N/A'}</CopyWrap></p></div>
-          <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Phone</p><p className="text-sm text-slate-200 font-mono"><CopyWrap text={req.phoneNumber || 'N/A'}>{req.phoneNumber || 'N/A'}</CopyWrap></p></div>
+          <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Phone</p><p className="text-sm text-slate-200 font-mono"><CopyWrap text={req.phoneNumber || 'N/A'} phoneMode={true} label='Phone'>{req.phoneNumber || 'N/A'}</CopyWrap></p></div>
           <div className="col-span-2"><p className="text-[10px] uppercase tracking-wider text-slate-500">Inquiry</p><div className="text-sm text-slate-200"><CopyWrap text={req.text || ''}>{req.text}</CopyWrap></div></div>
           {req.answer && (
              <div className="col-span-2 mt-2 p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
@@ -120,7 +138,7 @@ export const AgentRequestsLogs = ({
       content = (
         <div className="grid grid-cols-2 gap-x-4 gap-y-1">
           <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Patient</p><p className="text-sm text-slate-200"><CopyWrap text={req.patientName || 'N/A'}>{req.patientName || 'N/A'}</CopyWrap> <span className="text-slate-400 text-xs font-normal">({req.platform})</span></p></div>
-          <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Phone</p><p className="text-sm text-slate-200 font-mono"><CopyWrap text={req.phoneNumber || 'N/A'}>{req.phoneNumber || 'N/A'}</CopyWrap></p></div>
+          <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Phone</p><p className="text-sm text-slate-200 font-mono"><CopyWrap text={req.phoneNumber || 'N/A'} phoneMode={true} label='Phone'>{req.phoneNumber || 'N/A'}</CopyWrap></p></div>
           <div className="col-span-2"><p className="text-[10px] uppercase tracking-wider text-slate-500">Clinic</p><p className="text-sm text-slate-200"><CopyWrap text={req.clinicName || 'N/A'}>{req.clinicName || 'N/A'}</CopyWrap></p></div>
           {req.notes && <div className="col-span-2"><p className="text-[10px] uppercase tracking-wider text-slate-500">Notes</p><p className="text-sm text-slate-200 italic font-sans">"<CopyWrap text={req.notes || ''}>{req.notes}</CopyWrap>"</p></div>}
         </div>
@@ -132,7 +150,7 @@ export const AgentRequestsLogs = ({
       content = (
         <div className="grid grid-cols-2 gap-x-4 gap-y-1">
           <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Patient</p><p className="text-sm text-slate-200"><CopyWrap text={req.patientName || 'N/A'}>{req.patientName || 'N/A'}</CopyWrap></p></div>
-          <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Phone</p><p className="text-sm text-slate-200 font-mono"><CopyWrap text={req.phoneNumber || 'N/A'}>{req.phoneNumber || 'N/A'}</CopyWrap></p></div>
+          <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Phone</p><p className="text-sm text-slate-200 font-mono"><CopyWrap text={req.phoneNumber || 'N/A'} phoneMode={true} label='Phone'>{req.phoneNumber || 'N/A'}</CopyWrap></p></div>
           <div className="col-span-2"><p className="text-[10px] uppercase tracking-wider text-slate-500">Clinic</p><p className="text-sm text-slate-200"><CopyWrap text={req.clinicName || 'N/A'}>{req.clinicName || 'N/A'}</CopyWrap></p></div>
           <div className="col-span-2"><p className="text-[10px] uppercase tracking-wider text-slate-500">Complaint</p><div className="text-sm text-slate-200"><CopyWrap text={req.complaintDetails || ''}>{req.complaintDetails}</CopyWrap></div></div>
           {req.tlComment && (
@@ -150,7 +168,7 @@ export const AgentRequestsLogs = ({
       content = (
         <div className="grid grid-cols-2 gap-x-4 gap-y-1">
           <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Patient</p><p className="text-sm text-slate-200"><CopyWrap text={req.patientName || 'N/A'}>{req.patientName || 'N/A'}</CopyWrap></p></div>
-          <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Phone</p><p className="text-sm text-slate-200 font-mono"><CopyWrap text={req.phoneNumber || 'N/A'}>{req.phoneNumber || 'N/A'}</CopyWrap></p></div>
+          <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Phone</p><p className="text-sm text-slate-200 font-mono"><CopyWrap text={req.phoneNumber || 'N/A'} phoneMode={true} label='Phone'>{req.phoneNumber || 'N/A'}</CopyWrap></p></div>
           <div className="col-span-2"><p className="text-[10px] uppercase tracking-wider text-slate-500">Clinic</p><p className="text-sm text-slate-200"><CopyWrap text={req.clinicName || 'N/A'}>{req.clinicName || 'N/A'}</CopyWrap></p></div>
           <div className="col-span-2"><p className="text-[10px] uppercase tracking-wider text-slate-500">Notes</p><div className="text-sm text-slate-200"><CopyWrap text={req.handlingNotes || ''}>{req.handlingNotes || 'No notes yet'}</CopyWrap></div></div>
         </div>
@@ -179,7 +197,7 @@ export const AgentRequestsLogs = ({
             </span>
           </div>
           <div className="text-[11px] text-slate-500 font-mono">
-             <CopyWrap text={req.id || ''}>{req.id}</CopyWrap> &bull; {new Date(req.createdAt).toLocaleString()}
+             <CopyWrap text={req.id || ''}>{formatCaseRef(req.id, req._cType)}</CopyWrap> &bull; {new Date(req.createdAt).toLocaleString()}
           </div>
         </div>
 

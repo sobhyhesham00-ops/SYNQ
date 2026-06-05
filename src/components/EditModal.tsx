@@ -130,20 +130,42 @@ export const EditModal = ({
           )}
 
           {type === 'inquiry' && (
-             <div>
-               <label className="block text-xs font-bold text-slate-300 mb-1">Inquiry Text</label>
-               <textarea
-                 name="text"
-                 value={data.text || ""}
-                 onChange={handleChange}
-                 rows={4}
-                 className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
-               />
-             </div>
+             <>
+               <div>
+                 <label className="block text-xs font-bold text-slate-300 mb-1">Phone Number</label>
+                 <input
+                   type="text"
+                   name="phoneNumber"
+                   value={data.phoneNumber || ''}
+                   onChange={handleChange}
+                   className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                 />
+               </div>
+               <div>
+                 <label className="block text-xs font-bold text-slate-300 mb-1">Inquiry Text</label>
+                 <textarea
+                   name="text"
+                   value={data.text || ""}
+                   onChange={handleChange}
+                   rows={4}
+                   className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                 />
+               </div>
+             </>
           )}
 
           {type === 'client_comm' && (
              <>
+               <div>
+                 <label className="block text-xs font-bold text-slate-300 mb-1">Patient Name</label>
+                 <input
+                   type="text"
+                   name="patientName"
+                   value={data.patientName || ''}
+                   onChange={handleChange}
+                   className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                 />
+               </div>
                <div>
                  <label className="block text-xs font-bold text-slate-300 mb-1">Phone Number</label>
                  <input

@@ -7,9 +7,15 @@ import { RequestReplyThread } from './RequestReplyThread';
 const CopyableField = ({ icon: Icon, label, value, isBold = false }: { icon: any, label: string, value: string, isBold?: boolean }) => {
   const [copied, setCopied] = React.useState(false);
   const handleCopy = () => {
-    navigator.clipboard.writeText(value);
+    const isPhone = label === 'Phone' || /^(\+971|0)\d{9}/.test(value);
+    const copyValue = isPhone ? value.replace(/^0+/, '').replace(/^\+971\s?/, '') : value;
+    navigator.clipboard.writeText(copyValue);
     setCopied(true);
-    toast.success(`${label} copied!`, { icon: '📋' });
+    if (isPhone) {
+        toast.success('Phone copied (starts from 5)', { icon: '📋' });
+    } else {
+        toast.success(`${label} copied!`, { icon: '📋' });
+    }
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -51,11 +57,24 @@ export const TabbyTamaraCard = ({
   const isAwaitingConfirm = req.status === "not_confirmed";
   const isCompleted = req.customerContacted === "contacted";
 
+  const elapsedMins = req.confirmedAt && req.customerContacted !== 'contacted'
+    ? (Date.now() - new Date(req.confirmedAt).getTime()) / 60000
+    : 0;
+  const isOverdue = isPendingContact && elapsedMins > 60;
+  const isWarning = isPendingContact && elapsedMins > 30 && !isOverdue;
+
   const getThemeColor = () => {
     if (req.platform === "tabby") return "amber";
     if (req.platform === "tamara") return "pink";
     if (req.platform === "one_time_payment") return "indigo";
     return "emerald";
+  };
+
+  const formatTTRef = (id: string) => {
+    const tsMatch = id.match(/(\d{10,13})/);
+    if (!tsMatch) return 'TTR-??????';
+    const d = new Date(parseInt(tsMatch[1]));
+    return `TTR-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${tsMatch[1].slice(-4)}`;
   };
 
   const platformBadgeColor = 
@@ -65,7 +84,7 @@ export const TabbyTamaraCard = ({
     "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]";
 
   return (
-    <div className={`relative bg-[#111113] border border-white/10 rounded-xl p-3 md:p-4 overflow-hidden group hover:border-white/20 transition-all duration-300 shadow-xl ${isPendingContact ? "bg-gradient-to-b from-rose-500/[0.03] to-transparent ring-1 ring-rose-500/20" : isAwaitingConfirm ? "bg-gradient-to-b from-amber-500/[0.03] to-transparent" : "opacity-95 hover:opacity-100"}`}>
+    <div className={`relative bg-[#111113] border border-white/10 rounded-xl p-3 md:p-4 overflow-hidden group hover:border-white/20 transition-all duration-300 shadow-xl ${isPendingContact ? `bg-gradient-to-b from-rose-500/[0.03] to-transparent ${isOverdue ? "ring-2 ring-red-500/50" : isWarning ? "ring-1 ring-amber-500/40" : "ring-1 ring-rose-500/20"}` : isAwaitingConfirm ? "bg-gradient-to-b from-amber-500/[0.03] to-transparent" : "opacity-95 hover:opacity-100"}`}>
       {/* Top Border Accent - Glow effect */}
       <div className={`absolute top-0 left-0 right-0 h-1.5 ${
         req.platform === "tabby" ? "bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.5)]" :
@@ -79,6 +98,9 @@ export const TabbyTamaraCard = ({
           <div className="flex flex-wrap items-center gap-1.5 mb-2 cursor-default">
             <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest border ${platformBadgeColor}`}>
               {req.platform === "one_time_payment" ? "One Time Paid" : req.platform}
+            </span>
+            <span className="font-mono text-[10px] text-slate-500 font-bold tracking-wider">
+              {formatTTRef(req.id)}
             </span>
             <span className={`px-2 py-0.5 rounded text-[9px] font-bold border ${req.isOldCustomer ? "bg-slate-800/80 text-slate-300 border-white/5" : "bg-indigo-500/15 text-indigo-300 border-indigo-500/20"}`}>
               {req.isOldCustomer ? "👤 Old Customer" : "✨ New Customer"}
@@ -131,11 +153,12 @@ export const TabbyTamaraCard = ({
       </div>
 
       {/* Grid Data */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3 text-left">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 mb-3 text-left">
         <CopyableField icon={Hash} label="File/ID" value={req.fileNumber ? `F: ${req.fileNumber}` : (req.idNumber || "N/A")} isBold />
         <CopyableField icon={Phone} label="Phone" value={req.phoneNumber || "N/A"} isBold />
         <CopyableField icon={Hospital} label="Clinic" value={req.clinicName || "N/A"} />
         <CopyableField icon={Calendar} label="Plan Length" value={req.paymentLength ? `${req.paymentLength} M` : "Default terms"} />
+        <CopyableField icon={Hash} label="Platform" value={req.platform?.toUpperCase() || "N/A"} />
       </div>
 
       {req.notes && (
@@ -308,7 +331,7 @@ export const TabbyTamaraCard = ({
               <span className="text-white">{req.confirmedBy}</span> &bull; {new Date(req.confirmedAt || req.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
             </p>
           </div>
-          {isCompleted && (
+          {isCompleted ? (
             <div className="text-right space-y-0.5">
               <p className="text-[8px] text-slate-500 uppercase font-black tracking-widest md:mr-1">
                 Turnaround Time
@@ -316,6 +339,16 @@ export const TabbyTamaraCard = ({
               <p className="font-mono text-[10px] font-black px-2 py-0.5 rounded text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 inline-block">
                 {getElapsedTimerString(req.confirmedAt || req.createdAt, req.contactedAt)}
               </p>
+            </div>
+          ) : (
+            <div className="text-right flex flex-col items-end gap-0.5">
+              <p className="text-[8px] text-slate-500 uppercase font-black tracking-widest flex gap-1 items-center md:mr-1">
+                Elapsed <span className={`text-[8px] px-1 rounded ${isOverdue ? "bg-red-500 text-white" : isWarning ? "bg-amber-500 text-white" : "hidden"}`}>{isOverdue ? "🚨 OVERDUE" : "⚠️ WARNING"}</span>
+              </p>
+              <p className={`font-mono text-[10px] font-black px-2 py-0.5 rounded inline-block ${isOverdue ? "text-red-400 bg-red-500/10 border border-red-500/20 animate-pulse" : isWarning ? "text-amber-400 bg-amber-500/10 border border-amber-500/20" : "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"}`}>
+                {getElapsedTimerString(req.confirmedAt || req.createdAt)}
+              </p>
+              <p className="text-[7px] text-slate-500 tracking-wider font-bold">SLA: 30 min warning / 60 min overdue</p>
             </div>
           )}
         </div>

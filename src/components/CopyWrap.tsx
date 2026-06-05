@@ -5,11 +5,13 @@ import { toast } from 'sonner';
 export const CopyWrap = ({ 
   text, 
   children, 
-  label = "Data" 
+  label = "Data",
+  phoneMode = false
 }: { 
   text: string; 
   children: React.ReactNode; 
   label?: string;
+  phoneMode?: boolean;
 }) => {
   const [copied, setCopied] = useState(false);
 
@@ -17,7 +19,13 @@ export const CopyWrap = ({
     e.preventDefault();
     e.stopPropagation();
     if (!text) return;
-    navigator.clipboard.writeText(text);
+    
+    let textToCopy = text;
+    if (phoneMode && typeof text === 'string') {
+      textToCopy = text.replace(/^0+/, '');
+    }
+    
+    navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     toast.success(`${label} copied!`, { icon: '📋' });
     setTimeout(() => setCopied(false), 2000);

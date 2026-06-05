@@ -592,6 +592,13 @@ const ActiveTimer = ({ startTime }: { startTime: string }) => {
   return <span className="font-mono tabular-nums">{elapsed}</span>;
 };
 
+const formatCaseRef = (id: string) => {
+  const tsMatch = id.match(/(\d{10,13})/);
+  if (!tsMatch) return 'INQ-??????';
+  const d = new Date(parseInt(tsMatch[1]));
+  return `INQ-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${tsMatch[1].slice(-4)}`;
+};
+
 export default function App() {
   // Current local time context of the user's PC (synced and showing in the main page)
   const [systemTime, setSystemTime] = useState<Date>(new Date());
@@ -670,26 +677,32 @@ export default function App() {
       if (type === "inquiry") {
         const docRef = doc(db, "inquiries", id);
         await setDoc(docRef, data, { merge: true });
+        setInquiries(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
         toast.success("Inquiry updated successfully!");
       } else if (type === "scheduling_request") {
         const docRef = doc(db, "scheduling_requests", id);
         await setDoc(docRef, data, { merge: true });
+        setRequests(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
         toast.success("Scheduling request updated successfully!");
       } else if (type === "tt_request") {
         const docRef = doc(db, "tt_requests", id);
         await setDoc(docRef, data, { merge: true });
+        setTabbyTamaraRequests(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
         toast.success("Installment request updated successfully!");
       } else if (type === "tt_complaint") {
         const docRef = doc(db, "tt_complaints", id);
         await setDoc(docRef, data, { merge: true });
+        setTabbyTamaraComplaints(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
         toast.success("Installment complaint updated successfully!");
       } else if (type === "client_comm") {
         const docRef = doc(db, "client_comms", id);
         await setDoc(docRef, data, { merge: true });
+        setClientComms(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
         toast.success("Communication request updated successfully!");
       } else if (type === "case") {
         const docRef = doc(db, "cases", id);
         await setDoc(docRef, data, { merge: true });
+        setCases(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
         toast.success("Case record updated successfully!");
       }
       setEditingItem(null);
@@ -977,7 +990,7 @@ export default function App() {
               );
               toast.custom(
                 (t) => (
-                  <div className="bg-slate-900/95 border border-amber-500/40 text-white rounded-2xl p-4 shadow-2xl flex flex-col gap-2 max-w-sm border-l-4 border-l-amber-500 backdrop-blur-md animate-fade-in text-left">
+                  <div className="bg-[#1e1e1e]/40 backdrop-blur-lg/95 border border-amber-500/40 text-white rounded-2xl p-4 shadow-2xl flex flex-col gap-2 max-w-sm border-l-4 border-l-amber-500 backdrop-blur-md animate-fade-in text-left">
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-500 shrink-0 border border-amber-500/20">
                         <Bell className="w-5 h-5 animate-bounce" />
@@ -1006,7 +1019,7 @@ export default function App() {
                       </button>
                       <button
                         onClick={() => toast.dismiss(t)}
-                        className="px-3 py-1.5 bg-white/10 hover:bg-slate-900/40/15 text-white rounded-lg text-xs font-bold cursor-pointer transition-colors"
+                        className="px-3 py-1.5 bg-white/10 hover:bg-[#1e1e1e]/40 backdrop-blur-lg/40/15 text-white rounded-lg text-xs font-bold cursor-pointer transition-colors"
                       >
                         Dismiss
                       </button>
@@ -2677,6 +2690,8 @@ ${pageText}
 
   // Tabby/Tamara search and filter states
   const [ttSearchQuery, setTtSearchQuery] = useState("");
+  const [ttSearch, setTtSearch] = useState("");
+  const [ttDateFilter, setTtDateFilter] = useState("");
   const [ttFilterStatus, setTtFilterStatus] = useState<
     "all" | "not_confirmed" | "confirmed" | "contacted"
   >("all");
@@ -6672,7 +6687,7 @@ ${ttNotes}`
 
   if (isAppKilled) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-transparent text-slate-100 flex flex-col items-center justify-center p-4">
         <Toaster theme="dark" position="bottom-right" />
         <div className="max-w-md w-full text-center space-y-6">
           <AlertTriangle className="w-16 h-16 text-rose-500 mx-auto animate-pulse" />
@@ -6696,7 +6711,7 @@ ${ttNotes}`
                 placeholder="Admin Password"
                 value={killSwitchPassword}
                 onChange={(e) => setKillSwitchPassword(e.target.value)}
-                className="w-full pl-4 pr-10 py-2 bg-black/40 border border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 transition-colors"
+                className="w-full pl-4 pr-10 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 transition-colors"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     const creds = getStorageItem<Record<string, string>>(
@@ -6747,7 +6762,7 @@ ${ttNotes}`
               placeholder="Security Check: Favorite car?"
               value={killSwitchCar}
               onChange={(e) => setKillSwitchCar(e.target.value)}
-              className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 transition-colors"
+              className="w-full px-4 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 transition-colors"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   const creds = getStorageItem<Record<string, string>>(
@@ -6999,7 +7014,7 @@ ${ttNotes}`
                   <button
                     id="login-submit-btn"
                     type="submit"
-                    className="w-full py-3.5 bg-white/10 hover:bg-slate-800/15 border border-white/10 hover:border-white/20 text-slate-100 rounded-xl font-bold text-sm tracking-wide transition-all shadow-lg shadow-white/5 mt-4"
+                    className="w-full py-3.5 bg-white/10 hover:bg-white/10 backdrop-blur-md/15 border border-white/10 hover:border-white/20 text-slate-100 rounded-xl font-bold text-sm tracking-wide transition-all shadow-lg shadow-white/5 mt-4"
                   >
                     Sign In / Access
                   </button>
@@ -7224,7 +7239,7 @@ ${ttNotes}`
                         }}
                         placeholder="Tell others about yourself..."
                         rows={2}
-                        className="w-full bg-slate-900/50 border border-white/5 rounded-lg px-2 py-1 text-[11px] text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/40 transition-all resize-none custom-scrollbar"
+                        className="w-full bg-white/5 backdrop-blur-xl border border-white/20 rounded-lg px-2 py-1 text-[11px] text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/40 transition-all resize-none custom-scrollbar"
                       />
                     </div>
 
@@ -7251,7 +7266,7 @@ ${ttNotes}`
                         }}
                         placeholder="E.g. working on social media posts..."
                         rows={2}
-                        className="w-full bg-slate-900/50 border border-white/5 rounded-lg px-2 py-1 text-[11px] text-indigo-300 placeholder:text-slate-500 focus:outline-none focus:border-purple-500/45 transition-all resize-none custom-scrollbar"
+                        className="w-full bg-white/5 backdrop-blur-xl border border-white/20 rounded-lg px-2 py-1 text-[11px] text-indigo-300 placeholder:text-slate-500 focus:outline-none focus:border-purple-500/45 transition-all resize-none custom-scrollbar"
                       />
                     </div>
                   </div>
@@ -7400,7 +7415,7 @@ ${ttNotes}`
                     const isActive = activeTab === id;
                     const baseClass = isActive
                       ? `${bgColors} text-white shadow-lg scale-[1.02] font-bold border`
-                      : "border-transparent text-slate-300 hover:bg-slate-700/60 hover:text-white border font-medium hover:scale-[1.01]";
+                      : "border-transparent text-slate-300 hover:bg-white/20 backdrop-blur-md/60 hover:text-white border font-medium hover:scale-[1.01]";
 
                     return (
                       <button
@@ -7444,7 +7459,7 @@ ${ttNotes}`
                         {buildBtn(
                           "client-search",
                           <Search className="w-4 h-4 text-cyan-400" />,
-                          "Patient Search Hub",
+                          "Universal Search",
                           "bg-cyan-500/20 border-cyan-500/30 text-cyan-100",
                         )}
                         {buildBtn(
@@ -7589,7 +7604,7 @@ ${ttNotes}`
                         {buildBtn(
                           "client-search",
                           <Search className="w-4 h-4 text-cyan-400" />,
-                          "Patient Search Hub",
+                          "Universal Search",
                           "bg-cyan-500/20 border-cyan-500/30 text-cyan-100",
                         )}
                         {buildBtn(
@@ -8218,7 +8233,7 @@ ${ttNotes}`
 
                   {activeTab === "profile" && currentUser && (
                     <div className="space-y-6 max-w-4xl mx-auto w-full animate-fade-in relative z-10 p-4 sm:p-0 text-left">
-                      <div className="bg-slate-800/80 backdrop-blur-xl border border-white/10 p-6 sm:p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+                      <div className="bg-white/10 backdrop-blur-md/80 backdrop-blur-xl border border-white/10 p-6 sm:p-8 rounded-3xl shadow-2xl relative overflow-hidden">
                         <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
                         <div className="flex flex-col sm:flex-row items-center gap-6 mb-8">
                           <div className="relative group">
@@ -8293,7 +8308,7 @@ ${ttNotes}`
                                 {formatAgentName(currentUser.name)}{" "}
                                 {currentUser.role === "tl" ? "👑" : "🌟"}
                               </h2>
-                              <p className="text-xs font-mono text-slate-500 uppercase tracking-widest bg-slate-900/50 px-2 py-1 rounded mb-1">
+                              <p className="text-xs font-mono text-slate-500 uppercase tracking-widest bg-[#1e1e1e]/40 backdrop-blur-lg/50 px-2 py-1 rounded mb-1">
                                 LOB: {getAgentLOB(currentUser.name)} 🏢
                               </p>
                             </div>
@@ -8392,7 +8407,7 @@ ${ttNotes}`
                                   setSoundEnabled(nextState);
                                   if (nextState) triggerNotificationAlert();
                                 }}
-                                className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 border rounded-lg transition-all cursor-pointer ${soundEnabled ? "bg-indigo-500/20 border-indigo-500/30 text-indigo-300" : "bg-slate-800/80 border-slate-700 text-slate-500 hover:text-slate-300"}`}
+                                className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 border rounded-lg transition-all cursor-pointer ${soundEnabled ? "bg-indigo-500/20 border-indigo-500/30 text-indigo-300" : "bg-white/10 backdrop-blur-md/80 border-slate-700 text-slate-500 hover:text-slate-300"}`}
                               >
                                 {soundEnabled
                                   ? "🔊 Sound: ON"
@@ -8408,7 +8423,7 @@ ${ttNotes}`
                               📝 My Personal Inbox & Notes
                             </h3>
                             <textarea
-                              className="w-full h-32 bg-slate-900/50 border border-white/10 text-slate-100 p-3 rounded-xl focus:border-indigo-500 outline-none resize-none text-sm font-medium"
+                              className="w-full h-32 bg-white/5 backdrop-blur-xl border border-white/20 text-slate-100 p-3 rounded-xl focus:border-indigo-500 outline-none resize-none text-sm font-medium"
                               placeholder="Write anything... scratchpad... thoughts... 💭"
                             ></textarea>
                           </div>
@@ -8423,7 +8438,7 @@ ${ttNotes}`
                                 onChange={(e) =>
                                   setTodoFilter(e.target.value as any)
                                 }
-                                className="bg-black/30 border border-white/10 text-xs font-bold text-slate-300 rounded px-2 py-1 outline-none"
+                                className="bg-white/5 backdrop-blur-xl border border-white/10 text-xs font-bold text-slate-300 rounded px-2 py-1 outline-none"
                               >
                                 <option value="All">All Categories</option>
                                 <option value="Work">Work</option>
@@ -8472,11 +8487,11 @@ ${ttNotes}`
                                   type="text"
                                   placeholder="I need to..."
                                   required
-                                  className="flex-1 bg-slate-900/50 border border-white/10 text-slate-100 px-3 py-2 text-sm rounded-xl outline-none focus:border-indigo-500"
+                                  className="flex-1 bg-white/5 backdrop-blur-xl border border-white/20 text-slate-100 px-3 py-2 text-sm rounded-xl outline-none focus:border-indigo-500"
                                 />
                                 <select
                                   name="category"
-                                  className="bg-slate-900/50 border border-white/10 text-slate-100 px-2 text-xs rounded-xl outline-none focus:border-indigo-500"
+                                  className="bg-white/5 backdrop-blur-xl border border-white/20 text-slate-100 px-2 text-xs rounded-xl outline-none focus:border-indigo-500"
                                 >
                                   <option value="Work">Work</option>
                                   <option value="Personal">Personal</option>
@@ -8488,7 +8503,7 @@ ${ttNotes}`
                                   placeholder="Mins?"
                                   title="Remind in X mins"
                                   min="1"
-                                  className="w-20 bg-slate-900/50 border border-white/10 text-slate-100 px-2 py-2 text-sm rounded-xl outline-none focus:border-indigo-500 text-center"
+                                  className="w-20 bg-white/5 backdrop-blur-xl border border-white/20 text-slate-100 px-2 py-2 text-sm rounded-xl outline-none focus:border-indigo-500 text-center"
                                 />
                                 <button
                                   type="submit"
@@ -8519,7 +8534,7 @@ ${ttNotes}`
                                   .map((t) => (
                                     <div
                                       key={t.id}
-                                      className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${t.isCompleted ? "bg-slate-800/30 border-slate-700/30 opacity-60" : "bg-slate-800/80 border-slate-700 shadow-sm"}`}
+                                      className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${t.isCompleted ? "bg-white/10 backdrop-blur-md/30 border-slate-700/30 opacity-60" : "bg-white/10 backdrop-blur-md/80 border-slate-700 shadow-sm"}`}
                                     >
                                       <input
                                         type="checkbox"
@@ -8537,7 +8552,7 @@ ${ttNotes}`
                                               "personal",
                                             );
                                         }}
-                                        className="w-4 h-4 rounded text-indigo-500 accent-indigo-500 bg-slate-900"
+                                        className="w-4 h-4 rounded text-indigo-500 accent-indigo-500 bg-[#1e1e1e]/40 backdrop-blur-lg"
                                       />
                                       <div className="flex-1 min-w-0 flex flex-col justify-center">
                                         <div className="flex items-center gap-2">
@@ -8588,7 +8603,7 @@ ${ttNotes}`
 
                         {/* Activity & Data Vault Section */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-                          <div className="bg-slate-900/40 rounded-2xl border border-white/5 p-6 backdrop-blur-xl">
+                          <div className="bg-[#1e1e1e]/40 backdrop-blur-lg/40 rounded-2xl border border-white/5 p-6 backdrop-blur-xl">
                             <div className="flex items-center gap-4 mb-6">
                               <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
                                 <Activity className="w-6 h-6" />
@@ -8881,13 +8896,13 @@ ${ttNotes}`
                                     <span className="text-xs uppercase tracking-widest text-slate-400 font-bold">
                                       Your Login ID:
                                     </span>
-                                    <code className="px-2.5 py-1 bg-black/40 border border-white/10 rounded-lg text-xs font-mono text-cyan-300">
+                                    <code className="px-2.5 py-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-xs font-mono text-cyan-300">
                                       first_letter.last_name
                                     </code>
                                     <span className="text-xs text-slate-400 font-semibold">
                                       • e.g., Hesham Sobhy enters
                                     </span>
-                                    <code className="px-2 py-0.5 bg-black/40 border border-white/5 rounded-md text-xs font-mono text-amber-300 font-bold">
+                                    <code className="px-2 py-0.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-md text-xs font-mono text-amber-300 font-bold">
                                       h.sobhy
                                     </code>
                                   </div>
@@ -8909,7 +8924,7 @@ ${ttNotes}`
                                   className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                                     dashboardViewMode === "personal"
                                       ? "bg-gradient-to-r from-indigo-500/20 to-indigo-500/10 text-slate-100 border border-indigo-500/40 font-bold shadow-md shadow-indigo-500/10"
-                                      : "text-slate-400 hover:text-slate-100 hover:bg-slate-700"
+                                      : "text-slate-400 hover:text-slate-100 hover:bg-white/20 backdrop-blur-md"
                                   }`}
                                 >
                                   <UserIcon className="w-3.5 h-3.5 text-cyan-400" />
@@ -8927,7 +8942,7 @@ ${ttNotes}`
                                   className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                                     dashboardViewMode === "team"
                                       ? "bg-gradient-to-r from-indigo-500/20 to-indigo-500/10 text-slate-100 border border-indigo-500/40 font-bold shadow-md shadow-indigo-500/10"
-                                      : "text-slate-400 hover:text-slate-100 hover:bg-slate-700"
+                                      : "text-slate-400 hover:text-slate-100 hover:bg-white/20 backdrop-blur-md"
                                   }`}
                                 >
                                   <Users className="w-3.5 h-3.5 text-indigo-400" />
@@ -8946,7 +8961,7 @@ ${ttNotes}`
                                       className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                                         agentDashboardTab === tab
                                           ? "bg-indigo-500 text-white shadow font-black"
-                                          : "text-slate-400 hover:text-slate-100 hover:bg-slate-700"
+                                          : "text-slate-400 hover:text-slate-100 hover:bg-white/20 backdrop-blur-md"
                                       }`}
                                     >
                                       {tab}
@@ -9393,7 +9408,7 @@ ${ttNotes}`
                                                   d.toISOString().split("T")[0],
                                                 );
                                               }}
-                                              className="p-1.5 hover:bg-slate-700 rounded-xl text-slate-300 hover:text-slate-100 transition-all cursor-pointer text-xs"
+                                              className="p-1.5 hover:bg-white/20 backdrop-blur-md rounded-xl text-slate-300 hover:text-slate-100 transition-all cursor-pointer text-xs"
                                             >
                                               &larr; Prev
                                             </button>
@@ -9414,7 +9429,7 @@ ${ttNotes}`
                                                   d.toISOString().split("T")[0],
                                                 );
                                               }}
-                                              className="p-1.5 hover:bg-slate-700 rounded-xl text-slate-300 hover:text-slate-100 transition-all cursor-pointer text-xs"
+                                              className="p-1.5 hover:bg-white/20 backdrop-blur-md rounded-xl text-slate-300 hover:text-slate-100 transition-all cursor-pointer text-xs"
                                             >
                                               Next &rarr;
                                             </button>
@@ -10387,7 +10402,7 @@ ${ttNotes}`
                                             d.toISOString().split("T")[0],
                                           );
                                         }}
-                                        className="p-2 hover:bg-slate-700 rounded-xl text-slate-300 hover:text-slate-100 transition-all cursor-pointer"
+                                        className="p-2 hover:bg-white/20 backdrop-blur-md rounded-xl text-slate-300 hover:text-slate-100 transition-all cursor-pointer"
                                       >
                                         &larr;
                                       </button>
@@ -10412,7 +10427,7 @@ ${ttNotes}`
                                             d.toISOString().split("T")[0],
                                           );
                                         }}
-                                        className="p-2 hover:bg-slate-700 rounded-xl text-slate-300 hover:text-slate-100 transition-all cursor-pointer"
+                                        className="p-2 hover:bg-white/20 backdrop-blur-md rounded-xl text-slate-300 hover:text-slate-100 transition-all cursor-pointer"
                                       >
                                         &rarr;
                                       </button>
@@ -10736,7 +10751,7 @@ ${ttNotes}`
                                               return (
                                                 <div
                                                   key={row.name}
-                                                  className="flex justify-between items-center bg-slate-800/[0.02] border border-white/5 p-2 rounded-xl text-xs font-sans"
+                                                  className="flex justify-between items-center bg-white/10 backdrop-blur-md/[0.02] border border-white/5 p-2 rounded-xl text-xs font-sans"
                                                 >
                                                   <div className="flex items-center gap-2.5">
                                                     <span className="font-mono text-[10px] w-4 text-center text-slate-500 font-bold">
@@ -11158,7 +11173,7 @@ ${ttNotes}`
                                           className={`px-3 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all cursor-pointer ${
                                             dashboardChartMetric === m
                                               ? "bg-indigo-500 text-white"
-                                              : "text-slate-400 hover:bg-slate-700 hover:text-slate-100"
+                                              : "text-slate-400 hover:bg-white/20 backdrop-blur-md hover:text-slate-100"
                                           }`}
                                         >
                                           {m === "all"
@@ -11797,7 +11812,7 @@ ${ttNotes}`
                                               return (
                                                 <tr
                                                   key={log.id}
-                                                  className="hover:bg-slate-700 transition-colors"
+                                                  className="hover:bg-white/20 backdrop-blur-md transition-colors"
                                                 >
                                                   <td className="py-3 font-bold text-slate-100 whitespace-nowrap">
                                                     {log.agentName}
@@ -11922,7 +11937,7 @@ ${ttNotes}`
                           </div>
                         </div>
 
-                        <div className="p-4 bg-slate-800/6 border border-white/10 rounded-2xl backdrop-blur-sm shadow-md">
+                        <div className="p-4 bg-white/10 backdrop-blur-md/6 border border-white/10 rounded-2xl backdrop-blur-sm shadow-md">
                           <p className="text-[10px] uppercase tracking-widest text-rose-400 font-bold mb-1">
                             Violations Blocked
                           </p>
@@ -11961,7 +11976,7 @@ ${ttNotes}`
 
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                           {/* SLA Gauge - SVG Circle representation */}
-                          <div className="p-5 bg-slate-800/[0.02] border border-white/5 rounded-2xl flex flex-col justify-between space-y-4">
+                          <div className="p-5 bg-white/10 backdrop-blur-md/[0.02] border border-white/5 rounded-2xl flex flex-col justify-between space-y-4">
                             <div className="text-left">
                               <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
                                 Inquiry Queue SLA
@@ -12033,7 +12048,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Live Queue Monitor (Simulator Interface) */}
-                          <div className="p-5 bg-slate-800/[0.02] border border-white/5 rounded-2xl space-y-4 flex flex-col justify-between">
+                          <div className="p-5 bg-white/10 backdrop-blur-md/[0.02] border border-white/5 rounded-2xl space-y-4 flex flex-col justify-between">
                             <div className="flex justify-between items-start">
                               <div className="text-left">
                                 <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
@@ -12143,7 +12158,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Live Action/Audit Ticker Console Logs */}
-                          <div className="p-5 bg-slate-800/[0.02] border border-white/5 rounded-2xl flex flex-col justify-between space-y-3">
+                          <div className="p-5 bg-white/10 backdrop-blur-md/[0.02] border border-white/5 rounded-2xl flex flex-col justify-between space-y-3">
                             <div className="text-left">
                               <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
                                 Live Activity Log
@@ -12334,7 +12349,7 @@ ${ttNotes}`
                                 <th className="px-6 py-4 font-bold max-w-[20px]">
                                   <input
                                     type="checkbox"
-                                    className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-indigo-500 cursor-pointer"
+                                    className="w-4 h-4 rounded border-slate-700 bg-white/10 backdrop-blur-md text-indigo-500 cursor-pointer"
                                     onChange={(e) => {
                                       if (e.target.checked) {
                                         setSelectedPendingRequests(
@@ -12420,12 +12435,12 @@ ${ttNotes}`
                                   return (
                                     <tr
                                       key={req.id}
-                                      className="border-b border-white/5 hover:bg-slate-700 transition-colors"
+                                      className="border-b border-white/5 hover:bg-white/20 backdrop-blur-md transition-colors"
                                     >
                                       <td className="px-6 py-4">
                                         <input
                                           type="checkbox"
-                                          className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-indigo-500 cursor-pointer"
+                                          className="w-4 h-4 rounded border-slate-700 bg-white/10 backdrop-blur-md text-indigo-500 cursor-pointer"
                                           checked={selectedPendingRequests.has(
                                             req.id,
                                           )}
@@ -12687,7 +12702,7 @@ Notes: ${a.notes || "None"}`;
                                     return (
                                       <tr
                                         key={req.id}
-                                        className="border-b border-white/5 hover:bg-slate-700 transition-colors"
+                                        className="border-b border-white/5 hover:bg-white/20 backdrop-blur-md transition-colors"
                                       >
                                         <td className="px-6 py-4 font-bold text-slate-100">
                                           {req.agentName}
@@ -12823,6 +12838,21 @@ Notes: ${a.notes || "None"}`;
                         </div>
                       </div>
                     )}
+
+                  {/* TL PatientSearchHub */}
+                  {currentUser.role === 'tl' && activeTab === 'client-search' && (
+                    <div className='w-full'>
+                      <PatientSearchHub
+                        inquiries={inquiries}
+                        ttRequests={tabbyTamaraRequests}
+                        ttComplaints={tabbyTamaraComplaints}
+                        clientComms={clientComms}
+                        cases={cases}
+                        currentUser={currentUser}
+                        requests={requests}
+                      />
+                    </div>
+                  )}
 
                   {/* TL Report Section (Only TL) */}
                   {currentUser.role === "tl" && activeTab === "report" && (
@@ -13599,7 +13629,7 @@ Notes: ${a.notes || "None"}`;
                                     <option
                                       key={s.id}
                                       value={s.label}
-                                      className="bg-slate-800 text-slate-100 "
+                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
                                     >
                                       {s.display} ({s.label})
                                     </option>
@@ -13626,7 +13656,7 @@ Notes: ${a.notes || "None"}`;
                                     <option
                                       key={s.id}
                                       value={s.label}
-                                      className="bg-slate-800 text-slate-100 "
+                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
                                     >
                                       {s.display} ({s.label})
                                     </option>
@@ -13653,7 +13683,7 @@ Notes: ${a.notes || "None"}`;
                               >
                                 <option
                                   value=""
-                                  className="bg-slate-800 text-slate-100 "
+                                  className="bg-white/10 backdrop-blur-md text-slate-100 "
                                 >
                                   -- Select Partner Agent --
                                 </option>
@@ -13663,7 +13693,7 @@ Notes: ${a.notes || "None"}`;
                                     <option
                                       key={name}
                                       value={name}
-                                      className="bg-slate-800 text-slate-100 "
+                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
                                     >
                                       {name} ({getAgentLOB(name)})
                                     </option>
@@ -13719,7 +13749,7 @@ Notes: ${a.notes || "None"}`;
                               disabled={swapWarning !== null}
                               className={`w-full py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
                                 swapWarning !== null
-                                  ? "bg-slate-900/40/20 backdrop-blur-md text-slate-500 cursor-not-allowed border border-white/5"
+                                  ? "bg-[#1e1e1e]/40 backdrop-blur-lg/40/20 backdrop-blur-md text-slate-500 cursor-not-allowed border border-white/5"
                                   : "bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/25 cursor-pointer"
                               }`}
                             >
@@ -13843,7 +13873,7 @@ Notes: ${a.notes || "None"}`;
                               disabled={annualWarning !== null}
                               className={`w-full py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
                                 annualWarning !== null
-                                  ? "bg-slate-900/40/20 backdrop-blur-md text-slate-500 cursor-not-allowed border border-white/5"
+                                  ? "bg-[#1e1e1e]/40 backdrop-blur-lg/40/20 backdrop-blur-md text-slate-500 cursor-not-allowed border border-white/5"
                                   : "bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/25 cursor-pointer"
                               }`}
                             >
@@ -13882,6 +13912,8 @@ Notes: ${a.notes || "None"}`;
                         ttComplaints={tabbyTamaraComplaints}
                         clientComms={clientComms}
                         cases={cases}
+                        requests={requests}
+                        currentUser={currentUser}
                       />
                     </div>
                   )}
@@ -13958,37 +13990,37 @@ Notes: ${a.notes || "None"}`;
                                 >
                                   <option
                                     value=""
-                                    className="bg-slate-800 text-slate-100 "
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
                                   >
                                     -- Select Clinic * --
                                   </option>
                                   <option
                                     value="dermadent"
-                                    className="bg-slate-800 text-slate-100 "
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
                                   >
                                     Dermadent
                                   </option>
                                   <option
                                     value="onetouch_mo3tred"
-                                    className="bg-slate-800 text-slate-100 "
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
                                   >
                                     One Touch Mo3tred
                                   </option>
                                   <option
                                     value="onetouch_merkhnya"
-                                    className="bg-slate-800 text-slate-100 "
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
                                   >
                                     One Touch Merkhnya
                                   </option>
                                   <option
                                     value="welltouch"
-                                    className="bg-slate-800 text-slate-100 "
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
                                   >
                                     WellTouch
                                   </option>
                                   <option
                                     value="newage"
-                                    className="bg-slate-800 text-slate-100 "
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
                                   >
                                     New Age
                                   </option>
@@ -14198,6 +14230,11 @@ Notes: ${a.notes || "None"}`;
                                           statusText = "Answered";
                                         }
 
+                                        const ageMs = Date.now() - new Date(inq.createdAt).getTime();
+                                        const ageHours = ageMs / 3600000;
+                                        const ageLabel = ageMs < 3600000 ? `${Math.floor(ageMs/60000)}m open` : `${Math.floor(ageHours)}h ${Math.floor((ageHours % 1) * 60)}m open`;
+                                        const ageBadgeColor = inq.status !== 'answered' ? (ageHours > 4 ? 'bg-red-500/20 text-red-400 border-red-500/30 animate-pulse' : ageHours > 1 ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-slate-700 text-slate-400 border-white/10') : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+
                                         return (
                                           <div
                                             key={inq.id}
@@ -14211,6 +14248,9 @@ Notes: ${a.notes || "None"}`;
                                                 >
                                                   {statusText}
                                                 </span>
+                                                {inq.status !== 'answered' && (
+                                                  <span className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 ${ageBadgeColor}`}>⏱ {ageLabel}</span>
+                                                )}
                                                 {inq.clinicName && (
                                                   <span 
                                                     onClick={() => {
@@ -14226,8 +14266,8 @@ Notes: ${a.notes || "None"}`;
                                                 {inq.phoneNumber && (
                                                   <span 
                                                     onClick={() => {
-                                                      navigator.clipboard.writeText(inq.phoneNumber || "");
-                                                      toast.success("Phone number copied!");
+                                                      navigator.clipboard.writeText((inq.phoneNumber || "").replace(/^0+/, ""));
+                                                      toast.success("Phone copied (no leading zero)");
                                                     }}
                                                     className="text-[10px] bg-sky-500/10 text-sky-300 px-2.5 py-0.5 border border-sky-500/20 rounded-lg font-mono flex items-center gap-1 cursor-pointer hover:bg-sky-500/20 transition-colors"
                                                     title="Copy Phone Number"
@@ -14235,6 +14275,9 @@ Notes: ${a.notes || "None"}`;
                                                     📞 {inq.phoneNumber}
                                                   </span>
                                                 )}
+                                                <span className="font-mono text-[10px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded mr-1">
+                                                  {formatCaseRef(inq.id)}
+                                                </span>
                                                 <span className="text-[10px] text-slate-400">
                                                   {new Date(
                                                     inq.createdAt,
@@ -14380,19 +14423,19 @@ Notes: ${a.notes || "None"}`;
                                               >
                                                 <option
                                                   value="not_contacted"
-                                                  className="bg-slate-800 text-slate-100 backdrop-blur-lg  font-sans"
+                                                  className="bg-white/10 backdrop-blur-md text-slate-100 backdrop-blur-lg  font-sans"
                                                 >
                                                   ❌ Not Contacted
                                                 </option>
                                                 <option
                                                   value="contacted"
-                                                  className="bg-slate-800 text-slate-100 backdrop-blur-lg  font-sans"
+                                                  className="bg-white/10 backdrop-blur-md text-slate-100 backdrop-blur-lg  font-sans"
                                                 >
                                                   📞 Contacted
                                                 </option>
                                                 <option
                                                   value="attempted"
-                                                  className="bg-slate-800 text-slate-100 backdrop-blur-lg  font-sans"
+                                                  className="bg-white/10 backdrop-blur-md text-slate-100 backdrop-blur-lg  font-sans"
                                                 >
                                                   ⏳ Contact Attempted
                                                 </option>
@@ -14509,7 +14552,7 @@ Notes: ${a.notes || "None"}`;
                                     return results.map((inq) => (
                                       <div
                                         key={inq.id}
-                                        className="p-4 bg-black/20 border border-white/5 rounded-2xl hover:border-indigo-500/30 transition-all font-sans text-left space-y-3"
+                                        className="p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl hover:border-indigo-500/30 transition-all font-sans text-left space-y-3"
                                       >
                                         <div className="flex flex-wrap gap-2 items-center justify-between text-[10px] pb-2 border-b border-white/5">
                                           <div className="flex items-center gap-2">
@@ -14518,7 +14561,7 @@ Notes: ${a.notes || "None"}`;
                                                 navigator.clipboard.writeText(inq.agentName || "");
                                                 toast.success("Agent name copied!");
                                               }}
-                                              className="bg-slate-800 text-slate-300 font-bold px-2 py-0.5 rounded-lg border border-slate-700 cursor-pointer hover:bg-slate-700 transition-colors"
+                                              className="bg-white/10 backdrop-blur-md text-slate-300 font-bold px-2 py-0.5 rounded-lg border border-slate-700 cursor-pointer hover:bg-white/20 backdrop-blur-md transition-colors"
                                               title="Copy Agent Name"
                                             >
                                               👤 {inq.agentName}
@@ -14538,8 +14581,8 @@ Notes: ${a.notes || "None"}`;
                                             {inq.phoneNumber && (
                                               <span 
                                                 onClick={() => {
-                                                  navigator.clipboard.writeText(inq.phoneNumber || "");
-                                                  toast.success("Phone number copied!");
+                                                  navigator.clipboard.writeText((inq.phoneNumber || "").replace(/^0+/, ""));
+                                                  toast.success("Phone copied (no leading zero)");
                                                 }}
                                                 className="bg-sky-500/10 text-sky-300 border border-sky-500/20 px-2.5 py-0.5 rounded-lg font-mono tracking-wider cursor-pointer hover:bg-sky-500/20 transition-colors"
                                                 title="Copy Phone Number"
@@ -14548,6 +14591,9 @@ Notes: ${a.notes || "None"}`;
                                               </span>
                                             )}
                                           </div>
+                                          <span className="font-mono text-[10px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded mr-1">
+                                            {formatCaseRef(inq.id)}
+                                          </span>
                                           <span className="text-slate-500">
                                             {new Date(
                                               inq.createdAt,
@@ -15561,37 +15607,37 @@ Notes: ${a.notes || "None"}`;
                           >
                             <option
                               value="all"
-                              className="bg-slate-800 text-slate-100 "
+                              className="bg-white/10 backdrop-blur-md text-slate-100 "
                             >
                               All Clinics
                             </option>
                             <option
                               value="dermadent"
-                              className="bg-slate-800 text-slate-100 "
+                              className="bg-white/10 backdrop-blur-md text-slate-100 "
                             >
                               Dermadent
                             </option>
                             <option
                               value="onetouch_mo3tred"
-                              className="bg-slate-800 text-slate-100 "
+                              className="bg-white/10 backdrop-blur-md text-slate-100 "
                             >
                               One Touch Mo3tred
                             </option>
                             <option
                               value="onetouch_merkhnya"
-                              className="bg-slate-800 text-slate-100 "
+                              className="bg-white/10 backdrop-blur-md text-slate-100 "
                             >
                               One Touch Merkhnya
                             </option>
                             <option
                               value="welltouch"
-                              className="bg-slate-800 text-slate-100 "
+                              className="bg-white/10 backdrop-blur-md text-slate-100 "
                             >
                               WellTouch
                             </option>
                             <option
                               value="newage"
-                              className="bg-slate-800 text-slate-100 "
+                              className="bg-white/10 backdrop-blur-md text-slate-100 "
                             >
                               New Age
                             </option>
@@ -15623,165 +15669,39 @@ Notes: ${a.notes || "None"}`;
                       </div>
 
                       {/* Inquiries Records display */}
-                      <div className="bg-white/5 border border-white/10 p-5 sm:p-6 rounded-3xl backdrop-blur-xl space-y-4">
-                        <div className="border-b border-white/5 pb-3">
-                          <h3 className="text-base font-bold text-slate-100 font-display">
-                            Inquiry Record Pipeline
-                          </h3>
-                          <p className="text-xs text-slate-400">
-                            Total matched cases waiting in queue:{" "}
-                            {
-                              inquiries.filter((i) => {
-                                const matchesSearch =
-                                  i.agentName
-                                    ?.toLowerCase()
-                                    .includes(
-                                      inquirySearchQuery.toLowerCase(),
-                                    ) ||
-                                  i.text
-                                    .toLowerCase()
-                                    .includes(
-                                      inquirySearchQuery.toLowerCase(),
-                                    ) ||
-                                  getAgentLOB(i.agentName)
-                                    .toLowerCase()
-                                    .includes(
-                                      inquirySearchQuery.toLowerCase(),
-                                    ) ||
-                                  (i.clinicName &&
-                                    i.clinicName
-                                      .toLowerCase()
-                                      .includes(
-                                        inquirySearchQuery.toLowerCase(),
-                                      )) ||
-                                  (i.answer &&
-                                    i.answer
-                                      .toLowerCase()
-                                      .includes(
-                                        inquirySearchQuery.toLowerCase(),
-                                      )) ||
-                                  (i.phoneNumber &&
-                                    i.phoneNumber
-                                      .toLowerCase()
-                                      .includes(
-                                        inquirySearchQuery.toLowerCase(),
-                                      ));
-                                const matchesStatus =
-                                  inquiryStatusFilter === "" ||
-                                  i.status === inquiryStatusFilter;
-                                const matchesClinic =
-                                  inquiryClinicFilter === "all" ||
-                                  (i.clinicName &&
-                                    i.clinicName.toLowerCase() ===
-                                      inquiryClinicFilter.toLowerCase());
-                                return (
-                                  matchesSearch &&
-                                  matchesStatus &&
-                                  matchesClinic
-                                );
-                              }).length
-                            }
-                          </p>
-                        </div>
+                      {(() => {
+                        const filteredInquiries = inquiries.filter(i => {
+                          const s = inquirySearchQuery.toLowerCase();
+                          const cleanPhone = (p) => p.replace(/\D/g, '').replace(/^0+/, '');
+                          const matchesSearch = !s || i.agentName?.toLowerCase().includes(s) || i.text.toLowerCase().includes(s) || i.clinicName?.toLowerCase().includes(s) || i.answer?.toLowerCase().includes(s) || (i.phoneNumber && cleanPhone(i.phoneNumber).includes(cleanPhone(inquirySearchQuery)));
+                          const matchesStatus = !inquiryStatusFilter || i.status === inquiryStatusFilter;
+                          const matchesClinic = inquiryClinicFilter === 'all' || i.clinicName?.toLowerCase() === inquiryClinicFilter.toLowerCase();
+                          return matchesSearch && matchesStatus && matchesClinic;
+                        });
 
-                        <div className="space-y-4 max-h-[700px] overflow-y-auto pr-1">
-                          {inquiries.filter((i) => {
-                            const matchesSearch =
-                              i.agentName
-                                ?.toLowerCase()
-                                .includes(inquirySearchQuery.toLowerCase()) ||
-                              i.text
-                                .toLowerCase()
-                                .includes(inquirySearchQuery.toLowerCase()) ||
-                              getAgentLOB(i.agentName)
-                                .toLowerCase()
-                                .includes(inquirySearchQuery.toLowerCase()) ||
-                              (i.clinicName &&
-                                i.clinicName
-                                  .toLowerCase()
-                                  .includes(
-                                    inquirySearchQuery.toLowerCase(),
-                                  )) ||
-                              (i.answer &&
-                                i.answer
-                                  .toLowerCase()
-                                  .includes(
-                                    inquirySearchQuery.toLowerCase(),
-                                  )) ||
-                              (i.phoneNumber &&
-                                i.phoneNumber
-                                  .toLowerCase()
-                                  .includes(inquirySearchQuery.toLowerCase()));
-                            const matchesStatus =
-                              inquiryStatusFilter === "" ||
-                              i.status === inquiryStatusFilter;
-                            const matchesClinic =
-                              inquiryClinicFilter === "all" ||
-                              (i.clinicName &&
-                                i.clinicName.toLowerCase() ===
-                                  inquiryClinicFilter.toLowerCase());
-                            return (
-                              matchesSearch && matchesStatus && matchesClinic
-                            );
-                          }).length === 0 ? (
-                            <div className="text-center py-16">
-                              <MessageSquare className="w-12 h-12 text-slate-400 mx-auto mb-2 animate-pulse" />
-                              <p className="text-xs text-slate-400 italic">
-                                No inquiries match the search filters or the
-                                queue is currently empty.
+                        return (
+                          <div className="bg-white/5 border border-white/10 p-5 sm:p-6 rounded-3xl backdrop-blur-xl space-y-4">
+                            <div className="border-b border-white/5 pb-3">
+                              <h3 className="text-base font-bold text-slate-100 font-display">
+                                Inquiry Record Pipeline
+                              </h3>
+                              <p className="text-xs text-slate-400">
+                                Total matched cases waiting in queue:{" "}
+                                {filteredInquiries.length}
                               </p>
                             </div>
-                          ) : (
-                            inquiries
-                              .filter((i) => {
-                                const matchesSearch =
-                                  i.agentName
-                                    ?.toLowerCase()
-                                    .includes(
-                                      inquirySearchQuery.toLowerCase(),
-                                    ) ||
-                                  i.text
-                                    .toLowerCase()
-                                    .includes(
-                                      inquirySearchQuery.toLowerCase(),
-                                    ) ||
-                                  getAgentLOB(i.agentName)
-                                    .toLowerCase()
-                                    .includes(
-                                      inquirySearchQuery.toLowerCase(),
-                                    ) ||
-                                  (i.clinicName &&
-                                    i.clinicName
-                                      .toLowerCase()
-                                      .includes(
-                                        inquirySearchQuery.toLowerCase(),
-                                      )) ||
-                                  (i.answer &&
-                                    i.answer
-                                      .toLowerCase()
-                                      .includes(
-                                        inquirySearchQuery.toLowerCase(),
-                                      )) ||
-                                  (i.phoneNumber &&
-                                    i.phoneNumber
-                                      .toLowerCase()
-                                      .includes(
-                                        inquirySearchQuery.toLowerCase(),
-                                      ));
-                                const matchesStatus =
-                                  inquiryStatusFilter === "" ||
-                                  i.status === inquiryStatusFilter;
-                                const matchesClinic =
-                                  inquiryClinicFilter === "all" ||
-                                  (i.clinicName &&
-                                    i.clinicName.toLowerCase() ===
-                                      inquiryClinicFilter.toLowerCase());
-                                return (
-                                  matchesSearch &&
-                                  matchesStatus &&
-                                  matchesClinic
-                                );
-                              })
+
+                            <div className="space-y-4 max-h-[700px] overflow-y-auto pr-1">
+                              {filteredInquiries.length === 0 ? (
+                                <div className="text-center py-16">
+                                  <MessageSquare className="w-12 h-12 text-slate-400 mx-auto mb-2 animate-pulse" />
+                                  <p className="text-xs text-slate-400 italic">
+                                    No inquiries match the search filters or the
+                                    queue is currently empty.
+                                  </p>
+                                </div>
+                              ) : (
+                                filteredInquiries
                               .map((inq) => {
                                 let statusColor =
                                   "bg-yellow-500/10 border-yellow-500/20 text-yellow-400 animate-pulse";
@@ -15795,6 +15715,11 @@ Notes: ${a.notes || "None"}`;
                                     "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
                                   statusText = "Answered";
                                 }
+
+                                const ageMs = Date.now() - new Date(inq.createdAt).getTime();
+                                const ageHours = ageMs / 3600000;
+                                const ageLabel = ageMs < 3600000 ? `${Math.floor(ageMs/60000)}m open` : `${Math.floor(ageHours)}h ${Math.floor((ageHours % 1) * 60)}m open`;
+                                const ageBadgeColor = inq.status !== 'answered' ? (ageHours > 4 ? 'bg-red-500/20 text-red-400 border-red-500/30 animate-pulse' : ageHours > 1 ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-slate-700 text-slate-400 border-white/10') : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
 
                                 return (
                                   <div
@@ -15840,8 +15765,8 @@ Notes: ${a.notes || "None"}`;
                                             {inq.phoneNumber && (
                                               <span 
                                                 onClick={() => {
-                                                  navigator.clipboard.writeText(inq.phoneNumber || "");
-                                                  toast.success("Phone number copied!");
+                                                  navigator.clipboard.writeText((inq.phoneNumber || "").replace(/^0+/, ""));
+                                                  toast.success("Phone copied (no leading zero)");
                                                 }}
                                                 className="text-[10px] bg-sky-500/10 text-sky-300 px-2 py-0.5 border border-sky-500/20 rounded font-mono font-bold flex items-center gap-1 cursor-pointer hover:bg-sky-500/20 transition-colors"
                                                 title="Copy Phone Number"
@@ -15878,6 +15803,9 @@ Notes: ${a.notes || "None"}`;
                                               </span>
                                             )}
                                           </div>
+                                          <span className="font-mono text-[10px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded mr-1">
+                                            {formatCaseRef(inq.id)}
+                                          </span>
                                           <span className="text-[9px] text-slate-500 font-mono">
                                             {new Date(
                                               inq.createdAt,
@@ -15913,6 +15841,9 @@ _ ${inq.answer || "No answer yet"} _`;
                                         >
                                           {statusText}
                                         </span>
+                                        {inq.status !== 'answered' && (
+                                           <span className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 ${ageBadgeColor}`}>⏱ {ageLabel}</span>
+                                        )}
                                         {isSuperAdmin && (
                                           <button
                                             onClick={() =>
@@ -15938,6 +15869,28 @@ _ ${inq.answer || "No answer yet"} _`;
                                         photos={inq.photos}
                                         links={inq.links}
                                       />
+
+                                      {/* TL customerContacted quick update buttons */}
+                                      <div className="flex flex-wrap bg-slate-900/50 p-1 rounded-lg gap-1 border border-white/5 mt-3 w-max">
+                                          <button
+                                              onClick={() => handleUpdateContactedStatus(inq.id, 'not_contacted')}
+                                              className={`text-[10px] px-2 py-1 rounded transition-colors ${(!inq.customerContacted || inq.customerContacted === 'not_contacted') ? 'bg-rose-500/20 text-rose-300 font-bold' : 'text-slate-400 hover:bg-white/5'}`}
+                                          >
+                                              ❌ Not Contacted
+                                          </button>
+                                          <button
+                                              onClick={() => handleUpdateContactedStatus(inq.id, 'attempted')}
+                                              className={`text-[10px] px-2 py-1 rounded transition-colors ${inq.customerContacted === 'attempted' ? 'bg-amber-500/20 text-amber-300 font-bold' : 'text-slate-400 hover:bg-white/5'}`}
+                                          >
+                                              ⏳ Attempted
+                                          </button>
+                                          <button
+                                              onClick={() => handleUpdateContactedStatus(inq.id, 'contacted')}
+                                              className={`text-[10px] px-2 py-1 rounded transition-colors ${inq.customerContacted === 'contacted' ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'text-slate-400 hover:bg-white/5'}`}
+                                          >
+                                              ✅ Contacted
+                                          </button>
+                                      </div>
 
                                       {/* End attachments */}
                                     </div>
@@ -16045,7 +15998,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                             <option
                                               key={aName}
                                               value={aName}
-                                              className="bg-slate-800 text-slate-100 backdrop-blur-lg  font-sans"
+                                              className="bg-white/10 backdrop-blur-md text-slate-100 backdrop-blur-lg  font-sans"
                                             >
                                               {aName}
                                             </option>
@@ -16101,6 +16054,8 @@ _ ${inq.answer || "No answer yet"} _`;
                           )}
                         </div>
                       </div>
+                      );
+                    })()}
                     </div>
                   )}
 
@@ -16133,7 +16088,7 @@ _ ${inq.answer || "No answer yet"} _`;
 
                           <button
                             onClick={() => setTlIsPrintMode(!tlIsPrintMode)}
-                            className="flex-1 sm:flex-initial px-4 py-2.5 bg-white/10 backdrop-blur-md hover:bg-slate-700 backdrop-blur-xl border border-white/20 text-slate-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans"
+                            className="flex-1 sm:flex-initial px-4 py-2.5 bg-white/10 backdrop-blur-md hover:bg-white/20 backdrop-blur-md backdrop-blur-xl border border-white/20 text-slate-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans"
                           >
                             <Printer className="w-4 h-4 text-slate-400" />
                             {tlIsPrintMode
@@ -16194,7 +16149,7 @@ _ ${inq.answer || "No answer yet"} _`;
 
                         if (tlIsPrintMode) {
                           return (
-                            <div className="p-8 bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl space-y-6 animate-fade-in text-slate-100 print:p-0 print:bg-slate-800 print:text-black">
+                            <div className="p-8 bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl space-y-6 animate-fade-in text-slate-100 print:p-0 print:bg-white/10 backdrop-blur-md print:text-black">
                               <div className="flex justify-between items-center border-b border-white/10 pb-4 print:border-black">
                                 <div>
                                   <h3 className="text-xl font-extrabold font-display uppercase tracking-wider">
@@ -16337,7 +16292,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                       return (
                                         <tr
                                           key={agent}
-                                          className="print:text-black hover:bg-slate-700 transition-all"
+                                          className="print:text-black hover:bg-white/20 backdrop-blur-md transition-all"
                                         >
                                           <td className="px-4 py-3 font-bold uppercase">
                                             {agent}{" "}
@@ -16440,7 +16395,7 @@ _ ${inq.answer || "No answer yet"} _`;
                               <div className="flex justify-end pr-2 pt-4">
                                 <button
                                   onClick={() => setTlIsPrintMode(false)}
-                                  className="px-4 py-2 bg-white/10 backdrop-blur-md text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-900/40/20 backdrop-blur-md cursor-pointer print:hidden"
+                                  className="px-4 py-2 bg-white/10 backdrop-blur-md text-slate-300 rounded-xl text-xs font-bold hover:bg-[#1e1e1e]/40 backdrop-blur-lg/40/20 backdrop-blur-md cursor-pointer print:hidden"
                                 >
                                   &larr; Exit Roster View
                                 </button>
@@ -16634,7 +16589,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                 return (
                                   <div className="space-y-6">
                                     {/* Control Bar */}
-                                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-900/50 p-4 border border-white/5 rounded-2xl">
+                                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#1e1e1e]/40 backdrop-blur-lg/50 p-4 border border-white/5 rounded-2xl">
                                       <div className="flex items-center gap-3">
                                         <span className="relative flex h-3 w-3">
                                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -16656,7 +16611,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                             setRtmSearch(e.target.value)
                                           }
                                           placeholder="Search agents by name..."
-                                          className="w-full pl-9 pr-4 py-2 bg-black/50 border border-white/10 rounded-xl text-sm focus:border-indigo-500 text-slate-200 outline-none transition-all placeholder:text-slate-600 focus:bg-black/70"
+                                          className="w-full pl-9 pr-4 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-sm focus:border-indigo-500 text-slate-200 outline-none transition-all placeholder:text-slate-600 focus:bg-black/70"
                                         />
                                       </div>
                                     </div>
@@ -16790,53 +16745,53 @@ _ ${inq.answer || "No answer yet"} _`;
                                                                 null,
                                                               );
                                                             }}
-                                                            className="w-full bg-black/50 border border-white/10 rounded text-[10px] text-slate-200 px-1 py-1 flex items-center justify-center focus:outline-none focus:border-indigo-500 font-medium font-sans"
+                                                            className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded text-[10px] text-slate-200 px-1 py-1 flex items-center justify-center focus:outline-none focus:border-indigo-500 font-medium font-sans"
                                                           >
                                                             <option
                                                               value="working"
-                                                              className="bg-slate-800"
+                                                              className="bg-white/10 backdrop-blur-md"
                                                             >
                                                               Online / On Duty
                                                             </option>
                                                             <option
                                                               value="break"
-                                                              className="bg-slate-800"
+                                                              className="bg-white/10 backdrop-blur-md"
                                                             >
                                                               On Break
                                                             </option>
                                                             <option
                                                               value="lunch"
-                                                              className="bg-slate-800"
+                                                              className="bg-white/10 backdrop-blur-md"
                                                             >
                                                               On Lunch
                                                             </option>
                                                             <option
                                                               value="restroom"
-                                                              className="bg-slate-800"
+                                                              className="bg-white/10 backdrop-blur-md"
                                                             >
                                                               Restroom
                                                             </option>
                                                             <option
                                                               value="meeting"
-                                                              className="bg-slate-800"
+                                                              className="bg-white/10 backdrop-blur-md"
                                                             >
                                                               In Meeting
                                                             </option>
                                                             <option
                                                               value="one_on_one"
-                                                              className="bg-slate-800"
+                                                              className="bg-white/10 backdrop-blur-md"
                                                             >
                                                               1:1 Session
                                                             </option>
                                                             <option
                                                               value="personal"
-                                                              className="bg-slate-800"
+                                                              className="bg-white/10 backdrop-blur-md"
                                                             >
                                                               Personal Time
                                                             </option>
                                                             <option
                                                               value="clocked_out"
-                                                              className="bg-slate-800 text-rose-300"
+                                                              className="bg-white/10 backdrop-blur-md text-rose-300"
                                                             >
                                                               Force Clock Out
                                                             </option>
@@ -17171,31 +17126,31 @@ _ ${inq.answer || "No answer yet"} _`;
                                   >
                                     <option
                                       value="all"
-                                      className="bg-slate-800 text-slate-100 "
+                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
                                     >
                                       All Agents
                                     </option>
                                     <option
                                       value="in"
-                                      className="bg-slate-800 text-slate-100 "
+                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
                                     >
                                       Clocked In (IN)
                                     </option>
                                     <option
                                       value="out"
-                                      className="bg-slate-800 text-slate-100 "
+                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
                                     >
                                       Clocked Out (OUT)
                                     </option>
                                     <option
                                       value="break_lunch"
-                                      className="bg-slate-800 text-slate-100 "
+                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
                                     >
                                       On Break / Lunch Activity
                                     </option>
                                     <option
                                       value="overtime"
-                                      className="bg-slate-800 text-slate-100 "
+                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
                                     >
                                       Warning / Overtime Limit Exceeded
                                     </option>
@@ -17365,7 +17320,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                             return (
                                               <tr
                                                 key={name}
-                                                className="hover:bg-slate-700 transition-all"
+                                                className="hover:bg-white/20 backdrop-blur-md transition-all"
                                               >
                                                 {/* Name */}
                                                 <td className="px-5 py-4 font-bold text-slate-100 font-display uppercase tracking-wide">
@@ -17393,55 +17348,55 @@ _ ${inq.answer || "No answer yet"} _`;
                                                     >
                                                       <option
                                                         value="working"
-                                                        className="bg-slate-800 text-slate-100 "
+                                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
                                                       >
                                                         On Shift (Working)
                                                       </option>
                                                       <option
                                                         value="break"
-                                                        className="bg-slate-800 text-slate-100 "
+                                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
                                                       >
                                                         On Break
                                                       </option>
                                                       <option
                                                         value="lunch"
-                                                        className="bg-slate-800 text-slate-100 "
+                                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
                                                       >
                                                         On Lunch
                                                       </option>
                                                       <option
                                                         value="restroom"
-                                                        className="bg-slate-800 text-slate-100 "
+                                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
                                                       >
                                                         In Restroom
                                                       </option>
                                                       <option
                                                         value="clocked_out"
-                                                        className="bg-slate-800 text-slate-100 "
+                                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
                                                       >
                                                         Clocked Out
                                                       </option>
                                                       <option
                                                         value="day_off"
-                                                        className="bg-slate-800 text-slate-100 "
+                                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
                                                       >
                                                         Day Off
                                                       </option>
                                                       <option
                                                         value="casual"
-                                                        className="bg-slate-800 text-slate-100 "
+                                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
                                                       >
                                                         Casual Leave
                                                       </option>
                                                       <option
                                                         value="annual"
-                                                        className="bg-slate-800 text-slate-100 "
+                                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
                                                       >
                                                         Annual Leave
                                                       </option>
                                                       <option
                                                         value="no_show"
-                                                        className="bg-slate-800 text-slate-100 "
+                                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
                                                       >
                                                         No Show
                                                       </option>
@@ -17702,7 +17657,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                 }}
                                 className="sr-only peer"
                               />
-                              <div className="w-14 h-7 bg-white/5 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-slate-800 after:border-slate-700 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-600 border border-white/10"></div>
+                              <div className="w-14 h-7 bg-white/5 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white/10 backdrop-blur-md after:border-slate-700 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-600 border border-white/10"></div>
                             </label>
                           </div>
                         </div>
@@ -17735,12 +17690,12 @@ _ ${inq.answer || "No answer yet"} _`;
                                 onChange={(e) =>
                                   setManualRosterAgent(e.target.value)
                                 }
-                                className="w-full px-3 py-2.5 bg-black/45 border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer focus:border-indigo-500 font-sans"
+                                className="w-full px-3 py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer focus:border-indigo-500 font-sans"
                               >
                                 <option value="">-- Choose Agent --</option>
                                 {agentsList.map((name) => (
                                   <option
-                                    className="bg-slate-800 text-slate-100 "
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
                                     key={name}
                                     value={name}
                                   >
@@ -17760,7 +17715,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                 onChange={(e) =>
                                   setManualRosterDate(e.target.value)
                                 }
-                                className="w-full px-3 py-1.5 bg-black/45 border border-white/10 rounded-xl text-xs text-slate-100 outline-none focus:border-indigo-500 h-[42px]"
+                                className="w-full px-3 py-1.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none focus:border-indigo-500 h-[42px]"
                               />
                             </div>
 
@@ -17773,11 +17728,11 @@ _ ${inq.answer || "No answer yet"} _`;
                                 onChange={(e) =>
                                   setManualRosterShift(e.target.value)
                                 }
-                                className="w-full px-3 py-2.5 bg-black/45 border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer focus:border-indigo-500 font-sans"
+                                className="w-full px-3 py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer focus:border-indigo-500 font-sans"
                               >
                                 {SHIFTS.map((s) => (
                                   <option
-                                    className="bg-slate-800 text-slate-100 "
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
                                     key={s.id}
                                     value={s.label}
                                   >
@@ -17785,7 +17740,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                   </option>
                                 ))}
                                 <option
-                                  className="bg-slate-800 text-slate-100 "
+                                  className="bg-white/10 backdrop-blur-md text-slate-100 "
                                   value="Off"
                                 >
                                   Rest Day (Off Day)
@@ -17815,7 +17770,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                 onChange={(e) =>
                                   setManualRosterNotes(e.target.value)
                                 }
-                                className="w-full px-4 py-2.5 bg-black/45 border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500"
+                                className="w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500"
                               />
                             </div>
                           </form>
@@ -17902,7 +17857,7 @@ _ ${inq.answer || "No answer yet"} _`;
 
                       {false ? (
                         <div className="space-y-6">
-                          <div className="p-12 text-center rounded-3xl border border-dashed border-indigo-500/30 bg-slate-800/[0.02] space-y-4 shadow-xl text-left">
+                          <div className="p-12 text-center rounded-3xl border border-dashed border-indigo-500/30 bg-white/10 backdrop-blur-md/[0.02] space-y-4 shadow-xl text-left">
                             <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto text-indigo-400 shadow-inner">
                               <Shield className="w-8 h-8" />
                             </div>
@@ -17962,7 +17917,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                     return (
                                       <div
                                         key={shift.id}
-                                        className="p-4 bg-slate-800/[0.02] border border-white/5 rounded-2xl flex items-center justify-between shadow"
+                                        className="p-4 bg-white/10 backdrop-blur-md/[0.02] border border-white/5 rounded-2xl flex items-center justify-between shadow"
                                       >
                                         <div>
                                           <p className="text-[10px] text-slate-400 font-mono font-medium">
@@ -17998,7 +17953,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                 onChange={(e) =>
                                   setScheduleFilterAgent(e.target.value)
                                 }
-                                className="px-4 py-2 bg-black/45 hover:bg-slate-700 backdrop-blur-xl border border-white/10 focus:border-indigo-500/85 focus:ring-1 focus:ring-indigo-500 rounded-xl text-xs text-slate-100 placeholder-slate-400 outline-none transition-all w-full sm:w-64"
+                                className="px-4 py-2 bg-black/45 hover:bg-white/20 backdrop-blur-md backdrop-blur-xl border border-white/10 focus:border-indigo-500/85 focus:ring-1 focus:ring-indigo-500 rounded-xl text-xs text-slate-100 placeholder-slate-400 outline-none transition-all w-full sm:w-64"
                               />
 
                               {/* View Mode */}
@@ -18103,7 +18058,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                   </button>
                                   <button
                                     onClick={downloadShiftsICS}
-                                    className="px-4 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-slate-700/20"
+                                    className="px-4 py-1.5 bg-white/20 backdrop-blur-md hover:bg-slate-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-slate-700/20"
                                     title="Download .ics for Outlook/Apple Calendar"
                                   >
                                     <Download className="w-3.5 h-3.5" />
@@ -18259,7 +18214,7 @@ _ ${inq.answer || "No answer yet"} _`;
 
                                       {/* Interactive Target Configurator Panel */}
                                       {heatmapConfigureOpen && (
-                                        <div className="p-4 bg-slate-900/40 rounded-2xl border border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-5 text-left transition-all">
+                                        <div className="p-4 bg-[#1e1e1e]/40 backdrop-blur-lg/40 rounded-2xl border border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-5 text-left transition-all">
                                           <div className="space-y-2">
                                             <label className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
                                               🌅 Morning Shift Target (07-16)
@@ -18425,7 +18380,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                                   return (
                                                     <div
                                                       key={dateStr}
-                                                      className="flex-1 text-center bg-slate-900/30 py-1.5 rounded-xl border border-white/5 shadow-sm"
+                                                      className="flex-1 text-center bg-[#1e1e1e]/40 backdrop-blur-lg/30 py-1.5 rounded-xl border border-white/5 shadow-sm"
                                                     >
                                                       <p className="text-[9px] text-indigo-300 uppercase font-black tracking-wider leading-none">
                                                         {dayLabel}
@@ -18476,7 +18431,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                                 className="flex items-stretch"
                                               >
                                                 {/* Left Row Title & Header */}
-                                                <div className="w-44 shrink-0 flex flex-col justify-center text-left pl-3 py-1 bg-slate-900/30 border-r border-white/5 rounded-l-xl select-none">
+                                                <div className="w-44 shrink-0 flex flex-col justify-center text-left pl-3 py-1 bg-[#1e1e1e]/40 backdrop-blur-lg/30 border-r border-white/5 rounded-l-xl select-none">
                                                   <p className="text-xs font-black text-slate-200 font-display">
                                                     {row.label}
                                                   </p>
@@ -18539,7 +18494,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                                           </span>
 
                                                           {/* Tooltip listing agents */}
-                                                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 hidden group-hover:block bg-slate-950 border border-indigo-500/30 text-slate-100 rounded-xl p-3 shadow-2xl z-50 text-[10px] leading-relaxed backdrop-blur-md">
+                                                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 hidden group-hover:block bg-transparent border border-indigo-500/30 text-slate-100 rounded-xl p-3 shadow-2xl z-50 text-[10px] leading-relaxed backdrop-blur-md">
                                                             <p className="font-extrabold text-indigo-300 border-b border-indigo-500/20 pb-0.5 mb-1.5 flex items-center justify-between">
                                                               <span>
                                                                 📋 Coverage
@@ -18768,7 +18723,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                         visibleAgents.map((agentName) => (
                                           <tr
                                             key={agentName}
-                                            className="border-b border-white/5 hover:bg-slate-700 transition-all"
+                                            className="border-b border-white/5 hover:bg-white/20 backdrop-blur-md transition-all"
                                           >
                                             <td className="px-5 py-3 text-xs font-bold text-slate-100 font-sans bg-[#1e1e1e]/40 backdrop-blur-lg border-r border-white/5 shadow-sm sticky left-0 z-10 truncate min-w-[140px]">
                                               {agentName}
@@ -18821,7 +18776,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                                           { ...findShift },
                                                         );
                                                     }}
-                                                    className={`p-1 border-r border-white/5 hover:bg-slate-700/40 transition-all relative group ${isSuperAdmin && findShift ? "cursor-pointer hover:ring-1 ring-inset ring-indigo-500/50" : "cursor-help"}`}
+                                                    className={`p-1 border-r border-white/5 hover:bg-white/20 backdrop-blur-md/40 transition-all relative group ${isSuperAdmin && findShift ? "cursor-pointer hover:ring-1 ring-inset ring-indigo-500/50" : "cursor-help"}`}
                                                   >
                                                     <div
                                                       className={`mx-auto rounded-lg px-2 py-2 text-center border text-[10px] font-bold ${style.bg} transition-all flex items-center justify-center gap-1 relative overflow-hidden`}
@@ -18835,7 +18790,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                                       {findShift?.activities &&
                                                         findShift.activities
                                                           .length > 0 && (
-                                                          <div className="absolute bottom-0 left-0 right-0 h-1 flex bg-slate-900/40">
+                                                          <div className="absolute bottom-0 left-0 right-0 h-1 flex bg-[#1e1e1e]/40 backdrop-blur-lg/40">
                                                             {findShift.activities.map(
                                                               (a, i) => (
                                                                 <div
@@ -18855,7 +18810,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                                         findShift.activities
                                                           .length > 0) ||
                                                       isSuperAdmin) && (
-                                                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block bg-slate-900 border border-indigo-400/40 text-slate-100 rounded-xl p-3 shadow-2xl z-50 text-[10px] leading-relaxed backdrop-blur-md">
+                                                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block bg-[#1e1e1e]/40 backdrop-blur-lg border border-indigo-400/40 text-slate-100 rounded-xl p-3 shadow-2xl z-50 text-[10px] leading-relaxed backdrop-blur-md">
                                                         <p className="font-extrabold text-indigo-300 border-b border-indigo-400/20 pb-0.5 mb-1.5 flex items-center justify-between font-display">
                                                           <span>
                                                             📌 Details
@@ -19022,7 +18977,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                                       {findShift?.activities &&
                                                         findShift.activities
                                                           .length > 0 && (
-                                                          <div className="absolute bottom-0 left-0 right-0 h-1 flex bg-slate-900/40 opacity-70">
+                                                          <div className="absolute bottom-0 left-0 right-0 h-1 flex bg-[#1e1e1e]/40 backdrop-blur-lg/40 opacity-70">
                                                             {findShift.activities.map(
                                                               (a, i) => (
                                                                 <div
@@ -19148,7 +19103,7 @@ _ ${inq.answer || "No answer yet"} _`;
 
                             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                               {/* Interactive Trade Listing Launcher Form */}
-                              <div className="bg-slate-800/[0.01] p-5 border border-white/5 rounded-2xl space-y-4 text-left">
+                              <div className="bg-white/10 backdrop-blur-md/[0.01] p-5 border border-white/5 rounded-2xl space-y-4 text-left">
                                 <div>
                                   <p className="text-xs font-black text-rose-450 uppercase tracking-widest">
                                     Publish Open Trade Offer
@@ -19196,14 +19151,14 @@ _ ${inq.answer || "No answer yet"} _`;
                                           className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
                                         >
                                           <option
-                                            className="bg-slate-800 text-slate-100 "
+                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
                                             value=""
                                           >
                                             -- Choose Assigned Date --
                                           </option>
                                           {myShedList.map((s) => (
                                             <option
-                                              className="bg-slate-800 text-slate-100 "
+                                              className="bg-white/10 backdrop-blur-md text-slate-100 "
                                               key={s.id}
                                               value={s.date}
                                             >
@@ -19229,7 +19184,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                       className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
                                     >
                                       <option
-                                        className="bg-slate-800 text-slate-100 "
+                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
                                         value=""
                                       >
                                         -- Let Any Peer in LOB Grab It --
@@ -19244,7 +19199,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                         )
                                         .map((aName) => (
                                           <option
-                                            className="bg-slate-800 text-slate-100 "
+                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
                                             key={aName}
                                             value={aName}
                                           >
@@ -19273,7 +19228,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                     >
                                       {SHIFTS.map((s) => (
                                         <option
-                                          className="bg-slate-800 text-slate-100 "
+                                          className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           key={s.id}
                                           value={s.label}
                                         >
@@ -19281,7 +19236,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                         </option>
                                       ))}
                                       <option
-                                        className="bg-slate-800 text-slate-100 "
+                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
                                         value="Off"
                                       >
                                         Rest Day (Off Day)
@@ -19471,7 +19426,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                             return (
                                               <tr
                                                 key={req.id}
-                                                className="hover:bg-slate-800/[0.02] transition-colors"
+                                                className="hover:bg-white/10 backdrop-blur-md/[0.02] transition-colors"
                                               >
                                                 <td className="px-4 py-3.5 font-bold text-slate-100">
                                                   {req.agentName}
@@ -19962,7 +19917,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                               }
                                               className="sr-only peer"
                                             />
-                                            <div className="w-11 h-6 bg-slate-900/40/20 backdrop-blur-md peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-800 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                            <div className="w-11 h-6 bg-[#1e1e1e]/40 backdrop-blur-lg/40/20 backdrop-blur-md peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 backdrop-blur-md after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                                           </label>
                                         </div>
 
@@ -20069,7 +20024,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                             className={`py-2 rounded-xl text-[11px] font-black uppercase transition-all tracking-wider flex items-center justify-center gap-1.5 border cursor-pointer ${
                                               ttPlatform === "tabby"
                                                 ? "bg-amber-400 border-amber-300 text-slate-950 shadow-md"
-                                                : "bg-black/25 border-white/5 text-slate-400 hover:bg-slate-700"
+                                                : "bg-black/25 border-white/5 text-slate-400 hover:bg-white/20 backdrop-blur-md"
                                             }`}
                                           >
                                             💳 Tabby
@@ -20082,7 +20037,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                             className={`py-2 rounded-xl text-[11px] font-black uppercase transition-all tracking-wider flex items-center justify-center gap-1.5 border cursor-pointer ${
                                               ttPlatform === "tamara"
                                                 ? "bg-pink-500 border-pink-400 text-slate-100 shadow-md"
-                                                : "bg-black/25 border-white/5 text-slate-400 hover:bg-slate-700"
+                                                : "bg-black/25 border-white/5 text-slate-400 hover:bg-white/20 backdrop-blur-md"
                                             }`}
                                           >
                                             💳 Tamara
@@ -20098,7 +20053,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                               ttPlatform ===
                                               ("one_time_payment" as any)
                                                 ? "bg-emerald-500 border-emerald-400 text-white shadow-md"
-                                                : "bg-black/25 border-white/5 text-slate-400 hover:bg-slate-700"
+                                                : "bg-black/25 border-white/5 text-slate-400 hover:bg-white/20 backdrop-blur-md"
                                             }`}
                                           >
                                             💰 One Time
@@ -20124,37 +20079,37 @@ _ ${inq.answer || "No answer yet"} _`;
                                         >
                                           <option
                                             value=""
-                                            className="bg-slate-800 text-slate-100 "
+                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
                                             Select a Clinic
                                           </option>
                                           <option
                                             value="dermadent"
-                                            className="bg-slate-800 text-slate-100 "
+                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
                                             Dermadent
                                           </option>
                                           <option
                                             value="onetouch_mo3tred"
-                                            className="bg-slate-800 text-slate-100 "
+                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
                                             One Touch Mo3tred
                                           </option>
                                           <option
                                             value="onetouch_merkhnya"
-                                            className="bg-slate-800 text-slate-100 "
+                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
                                             One Touch Merkhnya
                                           </option>
                                           <option
                                             value="welltouch"
-                                            className="bg-slate-800 text-slate-100 "
+                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
                                             WellTouch
                                           </option>
                                           <option
                                             value="newage"
-                                            className="bg-slate-800 text-slate-100 "
+                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
                                             New Age
                                           </option>
@@ -20277,7 +20232,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                               }
                                               className="sr-only peer"
                                             />
-                                            <div className="w-11 h-6 bg-slate-900/40/20 backdrop-blur-md peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-800 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
+                                            <div className="w-11 h-6 bg-[#1e1e1e]/40 backdrop-blur-lg/40/20 backdrop-blur-md peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 backdrop-blur-md after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
                                           </label>
                                         </div>
 
@@ -20363,37 +20318,37 @@ _ ${inq.answer || "No answer yet"} _`;
                                         >
                                           <option
                                             value=""
-                                            className="bg-slate-800 text-slate-100 "
+                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
                                             Select a Clinic
                                           </option>
                                           <option
                                             value="dermadent"
-                                            className="bg-slate-800 text-slate-100 "
+                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
                                             Dermadent
                                           </option>
                                           <option
                                             value="onetouch_mo3tred"
-                                            className="bg-slate-800 text-slate-100 "
+                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
                                             One Touch Mo3tred
                                           </option>
                                           <option
                                             value="onetouch_merkhnya"
-                                            className="bg-slate-800 text-slate-100 "
+                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
                                             One Touch Merkhnya
                                           </option>
                                           <option
                                             value="welltouch"
-                                            className="bg-slate-800 text-slate-100 "
+                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
                                             WellTouch
                                           </option>
                                           <option
                                             value="newage"
-                                            className="bg-slate-800 text-slate-100 "
+                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
                                             New Age
                                           </option>
@@ -20473,37 +20428,37 @@ _ ${inq.answer || "No answer yet"} _`;
                                           >
                                             <option
                                               value=""
-                                              className="bg-slate-800 text-slate-100 "
+                                              className="bg-white/10 backdrop-blur-md text-slate-100 "
                                             >
                                               Select a Clinic
                                             </option>
                                             <option
                                               value="dermadent"
-                                              className="bg-slate-800 text-slate-100 "
+                                              className="bg-white/10 backdrop-blur-md text-slate-100 "
                                             >
                                               Dermadent
                                             </option>
                                             <option
                                               value="onetouch_mo3tred"
-                                              className="bg-slate-800 text-slate-100 "
+                                              className="bg-white/10 backdrop-blur-md text-slate-100 "
                                             >
                                               One Touch Mo3tred
                                             </option>
                                             <option
                                               value="onetouch_merkhnya"
-                                              className="bg-slate-800 text-slate-100 "
+                                              className="bg-white/10 backdrop-blur-md text-slate-100 "
                                             >
                                               One Touch Merkhnya
                                             </option>
                                             <option
                                               value="welltouch"
-                                              className="bg-slate-800 text-slate-100 "
+                                              className="bg-white/10 backdrop-blur-md text-slate-100 "
                                             >
                                               WellTouch
                                             </option>
                                             <option
                                               value="newage"
-                                              className="bg-slate-800 text-slate-100 "
+                                              className="bg-white/10 backdrop-blur-md text-slate-100 "
                                             >
                                               New Age
                                             </option>
@@ -20740,25 +20695,25 @@ _ ${inq.answer || "No answer yet"} _`;
                                       >
                                         <option
                                           value="all"
-                                          className="bg-slate-800 text-slate-100 "
+                                          className="bg-white/10 backdrop-blur-md text-slate-100 "
                                         >
                                           All Providers
                                         </option>
                                         <option
                                           value="tabby"
-                                          className="bg-slate-800 text-slate-100 "
+                                          className="bg-white/10 backdrop-blur-md text-slate-100 "
                                         >
                                           Tabby Only
                                         </option>
                                         <option
                                           value="tamara"
-                                          className="bg-slate-800 text-slate-100 "
+                                          className="bg-white/10 backdrop-blur-md text-slate-100 "
                                         >
                                           Tamara Only
                                         </option>
                                         <option
                                           value="one_time_payment"
-                                          className="bg-slate-800 text-slate-100 "
+                                          className="bg-white/10 backdrop-blur-md text-slate-100 "
                                         >
                                           One Time Payment
                                         </option>
@@ -20784,37 +20739,37 @@ _ ${inq.answer || "No answer yet"} _`;
                                   >
                                     <option
                                       value="all"
-                                      className="bg-slate-800 text-slate-100 "
+                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
                                     >
                                       All Clinics
                                     </option>
                                     <option
                                       value="dermadent"
-                                      className="bg-slate-800 text-slate-100 "
+                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
                                     >
                                       Dermadent
                                     </option>
                                     <option
                                       value="onetouch_mo3tred"
-                                      className="bg-slate-800 text-slate-100 "
+                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
                                     >
                                       One Touch Mo3tred
                                     </option>
                                     <option
                                       value="onetouch_merkhnya"
-                                      className="bg-slate-800 text-slate-100 "
+                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
                                     >
                                       One Touch Merkhnya
                                     </option>
                                     <option
                                       value="welltouch"
-                                      className="bg-slate-800 text-slate-100 "
+                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
                                     >
                                       WellTouch
                                     </option>
                                     <option
                                       value="newage"
-                                      className="bg-slate-800 text-slate-100 "
+                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
                                     >
                                       New Age
                                     </option>
@@ -20823,73 +20778,62 @@ _ ${inq.answer || "No answer yet"} _`;
 
                                 {/* List rendering */}
                                 <div className="space-y-4 pt-2 text-left">
-                                  {localSubTab === "requests" ? (
-                                    <>
-                                      {tabbyTamaraRequests.filter((r) => {
-                                        const isMyRequest =
-                                          r.agentName?.toLowerCase() ===
-                                          currentUser?.name?.toLowerCase();
-                                        if (!isTLOreSupport && !isMyRequest)
-                                          return false;
+                                  {localSubTab === "requests" ? (() => {
+                                    const cleanPhone = (p) => p.replace(/\D/g, '').replace(/^0+/, '');
+                                    const filteredTTRequests = tabbyTamaraRequests.filter(r => {
+                                      const isMyRequest = r.agentName?.toLowerCase() === currentUser?.name?.toLowerCase();
+                                      if (!isTLOreSupport && !isMyRequest) return false;
 
-                                        const matchesSearch =
-                                          (r.patientName || "")
-                                            .toLowerCase()
-                                            .includes(
-                                              ttSearchQuery.toLowerCase(),
-                                            ) ||
-                                          (r.fileNumber || "")
-                                            .toLowerCase()
-                                            .includes(
-                                              ttSearchQuery.toLowerCase(),
-                                            ) ||
-                                          (r.phoneNumber || "")
-                                            .toLowerCase()
-                                            .includes(
-                                              ttSearchQuery.toLowerCase(),
-                                            ) ||
-                                          (r.agentName || "")
-                                            .toLowerCase()
-                                            .includes(
-                                              ttSearchQuery.toLowerCase(),
-                                            ) ||
-                                          (r.idNumber &&
-                                            r.idNumber
-                                              .toLowerCase()
-                                              .includes(
-                                                ttSearchQuery.toLowerCase(),
-                                              ));
+                                      const s = ttSearch.toLowerCase();
+                                      const matchSearch = !s ||
+                                        (r.patientName || "").toLowerCase().includes(s) ||
+                                        (r.agentName || "").toLowerCase().includes(s) ||
+                                        (r.clinicName || "").toLowerCase().includes(s) ||
+                                        (r.fileNumber || "").toLowerCase().includes(s) ||
+                                        (r.phoneNumber && cleanPhone(r.phoneNumber).includes(cleanPhone(ttSearch)));
+                                      
+                                      const matchDate = !ttDateFilter || new Date(r.createdAt).toDateString() === new Date(ttDateFilter).toDateString();
+                                      
+                                      const matchesStatus =
+                                        ttFilterStatus === "all" ||
+                                        (ttFilterStatus === "not_confirmed" && r.status === "not_confirmed") ||
+                                        (ttFilterStatus === "confirmed" && r.status === "confirmed" && r.customerContacted !== "contacted") ||
+                                        (ttFilterStatus === "contacted" && r.customerContacted === "contacted");
+                                      
+                                      const matchesProvider = ttFilterProvider === "all" || r.platform === ttFilterProvider;
+                                      const matchesClinic = tcFilterClinic === "all" || (r.clinicName && r.clinicName.toLowerCase() === tcFilterClinic.toLowerCase());
 
-                                        const matchesStatus =
-                                          ttFilterStatus === "all" ||
-                                          (ttFilterStatus === "not_confirmed" &&
-                                            r.status === "not_confirmed") ||
-                                          (ttFilterStatus === "confirmed" &&
-                                            r.status === "confirmed" &&
-                                            r.customerContacted !==
-                                              "contacted") ||
-                                          (ttFilterStatus === "contacted" &&
-                                            r.customerContacted ===
-                                              "contacted");
+                                      return matchSearch && matchDate && matchesStatus && matchesProvider && matchesClinic;
+                                    });
 
-                                        const matchesProvider =
-                                          ttFilterProvider === "all" ||
-                                          r.platform === ttFilterProvider;
+                                    return (
+                                        <>
+                                        {/* TT Sub-Search & Filter */}
+                                        <div className="flex gap-3 mb-4">
+                                            <div className="relative flex-1">
+                                                <span className="absolute left-3 top-2.5 text-slate-400">
+                                                    <Search className="w-4 h-4" />
+                                                </span>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search patient, phone, clinic, agent..."
+                                                    value={ttSearch}
+                                                    onChange={(e) => setTtSearch(e.target.value)}
+                                                    className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium"
+                                                />
+                                            </div>
+                                            <div className="relative w-40">
+                                                <input
+                                                    type="date"
+                                                    value={ttDateFilter}
+                                                    onChange={(e) => setTtDateFilter(e.target.value)}
+                                                    className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium [color-scheme:dark]"
+                                                />
+                                            </div>
+                                        </div>
 
-                                        const matchesClinic =
-                                          tcFilterClinic === "all" ||
-                                          (r.clinicName &&
-                                            r.clinicName.toLowerCase() ===
-                                              tcFilterClinic.toLowerCase());
-
-                                        return (
-                                          matchesSearch &&
-                                          matchesStatus &&
-                                          matchesProvider &&
-                                          matchesClinic
-                                        );
-                                      }).length === 0 ? (
-                                        <div className="p-12 text-center rounded-3xl border border-dashed border-white/10 bg-slate-800/[0.02] space-y-2">
+                                      {filteredTTRequests.length === 0 ? (
+                                        <div className="p-12 text-center rounded-3xl border border-dashed border-white/10 bg-white/10 backdrop-blur-md/[0.02] space-y-2">
                                           <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mx-auto text-slate-500">
                                             <Wallet className="w-6 h-6" />
                                           </div>
@@ -20905,79 +20849,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                         </div>
                                       ) : (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                          {tabbyTamaraRequests
-                                            .filter((r) => {
-                                              const isMyRequest =
-                                                r.agentName?.toLowerCase() ===
-                                                currentUser?.name?.toLowerCase();
-                                              if (
-                                                !isTLOreSupport &&
-                                                !isMyRequest
-                                              )
-                                                return false;
-
-                                              const matchesSearch =
-                                                (r.patientName || "")
-                                                  .toLowerCase()
-                                                  .includes(
-                                                    ttSearchQuery.toLowerCase(),
-                                                  ) ||
-                                                (r.fileNumber || "")
-                                                  .toLowerCase()
-                                                  .includes(
-                                                    ttSearchQuery.toLowerCase(),
-                                                  ) ||
-                                                (r.phoneNumber || "")
-                                                  .toLowerCase()
-                                                  .includes(
-                                                    ttSearchQuery.toLowerCase(),
-                                                  ) ||
-                                                (r.agentName || "")
-                                                  .toLowerCase()
-                                                  .includes(
-                                                    ttSearchQuery.toLowerCase(),
-                                                  ) ||
-                                                (r.idNumber &&
-                                                  r.idNumber
-                                                    .toLowerCase()
-                                                    .includes(
-                                                      ttSearchQuery.toLowerCase(),
-                                                    ));
-
-                                              const matchesStatus =
-                                                ttFilterStatus === "all" ||
-                                                (ttFilterStatus ===
-                                                  "not_confirmed" &&
-                                                  r.status ===
-                                                    "not_confirmed") ||
-                                                (ttFilterStatus ===
-                                                  "confirmed" &&
-                                                  r.status === "confirmed" &&
-                                                  r.customerContacted !==
-                                                    "contacted") ||
-                                                (ttFilterStatus ===
-                                                  "contacted" &&
-                                                  r.customerContacted ===
-                                                    "contacted");
-
-                                              const matchesProvider =
-                                                ttFilterProvider === "all" ||
-                                                r.platform === ttFilterProvider;
-
-                                              const matchesClinic =
-                                                tcFilterClinic === "all" ||
-                                                (r.clinicName &&
-                                                  r.clinicName.toLowerCase() ===
-                                                    tcFilterClinic.toLowerCase());
-
-                                              return (
-                                                matchesSearch &&
-                                                matchesStatus &&
-                                                matchesProvider &&
-                                                matchesClinic
-                                              );
-                                            })
-                                            .map((req) => (
+                                          {filteredTTRequests.map((req) => (
                                               <TabbyTamaraCard 
                                                 key={req.id}
                                                 req={req}
@@ -21008,11 +20880,13 @@ _ ${inq.answer || "No answer yet"} _`;
                                                 getRemainingEditTime={getRemainingEditTime}
                                                 setEditingItem={setEditingItem}
                                               />
-                                            ))}
+                                          ))}
                                         </div>
                                       )}
                                     </>
-                                  ) : localSubTab === "complaints" ? (
+                                  );
+                                })()
+                                  : localSubTab === "complaints" ? (
                                     <>
                                       {tabbyTamaraComplaints.filter((c) => {
                                         const isMyComplaint =
@@ -21070,7 +20944,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                           matchesProvider
                                         );
                                       }).length === 0 ? (
-                                        <div className="p-12 text-center rounded-3xl border border-dashed border-white/10 bg-slate-800/[0.02] space-y-2 animate-fade-in">
+                                        <div className="p-12 text-center rounded-3xl border border-dashed border-white/10 bg-white/10 backdrop-blur-md/[0.02] space-y-2 animate-fade-in">
                                           <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mx-auto text-slate-500">
                                             <AlertTriangle className="w-6 h-6 text-pink-500" />
                                           </div>
@@ -21394,7 +21268,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                                                 null,
                                                               )
                                                             }
-                                                            className="px-2.5 py-1.5 hover:bg-slate-700 rounded-lg text-[10px] font-bold text-slate-400 cursor-pointer"
+                                                            className="px-2.5 py-1.5 hover:bg-white/20 backdrop-blur-md rounded-lg text-[10px] font-bold text-slate-400 cursor-pointer"
                                                           >
                                                             Cancel
                                                           </button>
@@ -21640,7 +21514,7 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                           matchesClinic
                                         );
                                       }).length === 0 ? (
-                                        <div className="p-12 text-center rounded-3xl border border-dashed border-white/10 bg-slate-800/[0.02] space-y-2 animate-fade-in">
+                                        <div className="p-12 text-center rounded-3xl border border-dashed border-white/10 bg-white/10 backdrop-blur-md/[0.02] space-y-2 animate-fade-in">
                                           <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mx-auto text-slate-500">
                                             <MessageSquare className="w-6 h-6 text-indigo-400" />
                                           </div>
@@ -21933,7 +21807,7 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                             setActiveCcHandlingId(null);
                                                             setCcHandlingPhotos([]);
                                                           }}
-                                                          className="px-2.5 py-1.5 hover:bg-slate-700 rounded-lg text-[10px] font-bold text-slate-400 cursor-pointer"
+                                                          className="px-2.5 py-1.5 hover:bg-white/20 backdrop-blur-md rounded-lg text-[10px] font-bold text-slate-400 cursor-pointer"
                                                         >
                                                           Cancel
                                                         </button>
@@ -22193,7 +22067,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
                                 >
                                   <option
                                     value="all"
-                                    className="bg-slate-800 text-slate-100 "
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
                                   >
                                     All Team Leaders
                                   </option>
@@ -22201,7 +22075,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
                                     <option
                                       key={tl}
                                       value={tl}
-                                      className="bg-slate-800 text-slate-100 "
+                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
                                     >
                                       {tl}
                                     </option>
@@ -22240,7 +22114,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
                                   >
                                     <option
                                       value=""
-                                      className="bg-slate-800 text-slate-100 backdrop-blur-lg"
+                                      className="bg-white/10 backdrop-blur-md text-slate-100 backdrop-blur-lg"
                                     >
                                       -- Choose TL --
                                     </option>
@@ -22248,7 +22122,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
                                       <option
                                         key={tl}
                                         value={tl}
-                                        className="bg-slate-800 text-slate-100 backdrop-blur-lg"
+                                        className="bg-white/10 backdrop-blur-md text-slate-100 backdrop-blur-lg"
                                       >
                                         {tl}
                                       </option>
@@ -22804,7 +22678,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
                                         {meta.phone || "-"}
                                       </td>
                                       <td className="p-4">
-                                        <span className="bg-slate-800 text-slate-300 px-2 py-1 rounded-lg bg-opacity-40">
+                                        <span className="bg-white/10 backdrop-blur-md text-slate-300 px-2 py-1 rounded-lg bg-opacity-40">
                                           {meta.lob || "-"}
                                         </span>
                                       </td>
