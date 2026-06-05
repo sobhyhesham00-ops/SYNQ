@@ -27,7 +27,10 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
   const [googleUser, setGoogleUser] = useState<any>(null);
   const [token, setToken] = useState<string | null>(null);
 
-  const isGlobalAdmin = currentUser?.email === 'sobhyhesham00@gmail.com';
+  const isGlobalAdmin = currentUser?.email?.toLowerCase() === 'sobhyhesham00@gmail.com' ||
+    currentUser?.name?.toLowerCase() === 'h.sobhy' ||
+    currentUser?.name?.toLowerCase() === 'hesham sobhy' ||
+    currentUser?.name?.toLowerCase() === 'hesso';
 
   useEffect(() => {
     // On load, check if we have a token (some persistence might carry over if session is active)

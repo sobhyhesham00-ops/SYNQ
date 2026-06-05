@@ -55,6 +55,11 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
+
+  const isGlobalAdminUser = currentUser?.email?.toLowerCase() === 'sobhyhesham00@gmail.com' ||
+    currentUser?.name?.toLowerCase() === 'h.sobhy' ||
+    currentUser?.name?.toLowerCase() === 'hesham sobhy' ||
+    currentUser?.name?.toLowerCase() === 'hesso';
   
   // States for new user
   const [showAddForm, setShowAddForm] = useState(false);
@@ -153,21 +158,33 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   };
 
   const handleSetPassword = async (userName: string) => {
+    if (!isGlobalAdminUser) {
+      toast.error('Only the global super admin (h.sobhy) can reset credentials.');
+      return;
+    }
     if (!String(newPasswordValue || '').trim()) {
       toast.error('Password cannot be empty!');
       return;
     }
 
-    const usernameKey = normalizeUsername(userName);
-    const updatedCreds = { ...credentials, [usernameKey]: String(newPasswordValue || '').trim() };
+    const usernameKey = getUsernameFromFullName(userName).toLowerCase();
+    const fullNameKey = String(userName || '').trim();
+    const lowerFullNameKey = fullNameKey.toLowerCase();
+    const oldNormalizeKey = String(userName || '').trim().toLowerCase().replace(/\s+/g, '');
+
+    const updatedCreds = { 
+      ...credentials, 
+      [usernameKey]: String(newPasswordValue || '').trim(),
+      [fullNameKey]: String(newPasswordValue || '').trim(),
+      [lowerFullNameKey]: String(newPasswordValue || '').trim(),
+      [oldNormalizeKey]: String(newPasswordValue || '').trim()
+    };
 
     try {
       await setDoc(doc(db, "system", "sched_credentials"), { data: updatedCreds });
       
       // Also automatically unlock if is locked
-      if (lockedAccounts.includes(usernameKey)) {
-        await handleUnlock(userName);
-      }
+      await handleUnlock(userName);
 
       toast.success(`Successfully set password for ${userName}!`);
       setTargetPasswordChange(null);
@@ -179,13 +196,19 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   };
 
   const handleLock = async (userName: string) => {
-    const usernameKey = normalizeUsername(userName);
-    if (lockedAccounts.includes(usernameKey)) {
-      toast.info('Account is already locked');
-      return;
-    }
+    const usernameKey = getUsernameFromFullName(userName).toLowerCase();
+    const fullNameKey = String(userName || '').trim();
+    const lowerFullNameKey = fullNameKey.toLowerCase();
+    const oldNormalizeKey = String(userName || '').trim().toLowerCase().replace(/\s+/g, '');
 
-    const updated = [...lockedAccounts, usernameKey];
+    const keysToLock = [usernameKey, fullNameKey, lowerFullNameKey, oldNormalizeKey];
+    let updated = [...lockedAccounts];
+    keysToLock.forEach(k => {
+      if (!updated.includes(k)) {
+        updated.push(k);
+      }
+    });
+
     try {
       await setDoc(doc(db, "system", "sched_locked_accounts"), { data: updated });
       toast.success(`Locked login account for "${userName}"`);
@@ -196,14 +219,22 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   };
 
   const handleUnlock = async (userName: string) => {
-    const usernameKey = normalizeUsername(userName);
-    const updated = lockedAccounts.filter(name => name !== usernameKey);
+    const usernameKey = getUsernameFromFullName(userName).toLowerCase();
+    const fullNameKey = String(userName || '').trim();
+    const lowerFullNameKey = fullNameKey.toLowerCase();
+    const oldNormalizeKey = String(userName || '').trim().toLowerCase().replace(/\s+/g, '');
+
+    const keysToRemove = [usernameKey, fullNameKey, lowerFullNameKey, oldNormalizeKey];
+
+    const updated = lockedAccounts.filter(name => !keysToRemove.includes(name));
     try {
       await setDoc(doc(db, "system", "sched_locked_accounts"), { data: updated });
       
       // Reset failed attempts as well
       const updatedAttempts = { ...failedAttempts };
-      delete updatedAttempts[usernameKey];
+      keysToRemove.forEach(k => {
+        delete updatedAttempts[k];
+      });
       await setDoc(doc(db, "system", "sched_failed_attempts"), { data: updatedAttempts });
 
       toast.success(`Unlocked and clear attempts for "${userName}"!`);
@@ -214,9 +245,18 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   };
 
   const handleClearAttempts = async (userName: string) => {
-    const usernameKey = normalizeUsername(userName);
+    const usernameKey = getUsernameFromFullName(userName).toLowerCase();
+    const fullNameKey = String(userName || '').trim();
+    const lowerFullNameKey = fullNameKey.toLowerCase();
+    const oldNormalizeKey = String(userName || '').trim().toLowerCase().replace(/\s+/g, '');
+
+    const keysToRemove = [usernameKey, fullNameKey, lowerFullNameKey, oldNormalizeKey];
+
     const updatedAttempts = { ...failedAttempts };
-    delete updatedAttempts[usernameKey];
+    keysToRemove.forEach(k => {
+      delete updatedAttempts[k];
+    });
+
     try {
       await setDoc(doc(db, "system", "sched_failed_attempts"), { data: updatedAttempts });
       toast.success(`Failed attempts counters reset for "${userName}"`);
@@ -236,19 +276,29 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
       const docId = cleanName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
       await deleteDoc(doc(db, "users", docId));
 
+      const usernameKey = getUsernameFromFullName(cleanName).toLowerCase();
+      const fullNameKey = String(cleanName || '').trim();
+      const lowerFullNameKey = fullNameKey.toLowerCase();
+      const oldNormalizeKey = String(cleanName || '').trim().toLowerCase().replace(/\s+/g, '');
+
+      const keysToRemove = [usernameKey, fullNameKey, lowerFullNameKey, oldNormalizeKey];
+
       // Remove from credentials
-      const usernameKey = normalizeUsername(cleanName);
-      if (credentials[usernameKey]) {
-        const updatedCreds = { ...credentials };
-        delete updatedCreds[usernameKey];
+      const updatedCreds = { ...credentials };
+      let hadCreds = false;
+      keysToRemove.forEach(k => {
+        if (updatedCreds[k]) {
+          delete updatedCreds[k];
+          hadCreds = true;
+        }
+      });
+      if (hadCreds) {
         await setDoc(doc(db, "system", "sched_credentials"), { data: updatedCreds });
       }
 
       // Remove from locked accounts
-      if (lockedAccounts.includes(usernameKey)) {
-        const updatedLocked = lockedAccounts.filter(l => l !== usernameKey);
-        await setDoc(doc(db, "system", "sched_locked_accounts"), { data: updatedLocked });
-      }
+      const updatedLocked = lockedAccounts.filter(l => !keysToRemove.includes(l));
+      await setDoc(doc(db, "system", "sched_locked_accounts"), { data: updatedLocked });
 
       toast.success(`Fully removed user "${cleanName}"!`);
     } catch (err) {
@@ -468,10 +518,22 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
             <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
               {filteredUsers.map((user) => {
-                const normalized = normalizeUsername(user.name);
-                const isUserLocked = lockedAccounts.includes(normalized);
+                const usernameKey = getUsernameFromFullName(user.name).toLowerCase();
+                const fullNameKey = String(user.name || '').trim();
+                const lowerFullNameKey = fullNameKey.toLowerCase();
+                const oldNormalizeKey = String(user.name || '').trim().toLowerCase().replace(/\s+/g, '');
+
+                const isUserLocked = lockedAccounts.includes(usernameKey) || 
+                                     lockedAccounts.includes(fullNameKey) || 
+                                     lockedAccounts.includes(lowerFullNameKey) || 
+                                     lockedAccounts.includes(oldNormalizeKey);
+
                 const isEditing = editingUserId === user.id;
-                const failureCount = failedAttempts[normalized] || 0;
+
+                const failureCount = failedAttempts[usernameKey] || 
+                                     failedAttempts[fullNameKey] || 
+                                     failedAttempts[lowerFullNameKey] || 
+                                     failedAttempts[oldNormalizeKey] || 0;
                 
                 return (
                   <div 
@@ -639,35 +701,41 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                         {/* Lower row: Inline password reset or profile action button triggers */}
                         <div className="flex items-center justify-between border-t border-white/5 pt-2.5 text-xs text-slate-400">
                           <div className="flex items-center gap-3">
-                            {targetPasswordChange === user.id ? (
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="text"
-                                  placeholder="New Password"
-                                  value={newPasswordValue}
-                                  onChange={(e) => setNewPasswordValue(e.target.value)}
-                                  className="bg-black/40 border border-white/10 rounded-xl p-1 px-2.5 text-slate-200 text-[11px] focus:outline-none focus:border-rose-500 w-36"
-                                />
+                            {isGlobalAdminUser ? (
+                              targetPasswordChange === user.id ? (
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="text"
+                                    placeholder="Enter New Password"
+                                    value={newPasswordValue}
+                                    onChange={(e) => setNewPasswordValue(e.target.value)}
+                                    className="bg-black/40 border border-white/10 rounded-xl p-1 px-2.5 text-slate-200 text-[11px] focus:outline-none focus:border-rose-500 w-36"
+                                  />
+                                  <button
+                                    onClick={() => handleSetPassword(user.name)}
+                                    className="p-1 px-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-[10px] font-extrabold transition-all cursor-pointer"
+                                  >
+                                    Reset Password
+                                  </button>
+                                  <button
+                                    onClick={() => { setTargetPasswordChange(null); setNewPasswordValue(''); }}
+                                    className="p-1 text-slate-400 hover:text-slate-200 text-[10px] font-medium cursor-pointer"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              ) : (
                                 <button
-                                  onClick={() => handleSetPassword(user.name)}
-                                  className="p-1 px-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-[10px] font-extrabold transition-all"
+                                  onClick={() => setTargetPasswordChange(user.id)}
+                                  className="flex items-center gap-1 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 hover:border-rose-500/30 transition-all rounded-xl p-1 px-2.5 text-[10.5px] font-bold text-rose-300 cursor-pointer"
                                 >
-                                  Save
+                                  <Key className="w-3 h-3 text-rose-400" /> Reset Password
                                 </button>
-                                <button
-                                  onClick={() => { setTargetPasswordChange(null); setNewPasswordValue(''); }}
-                                  className="p-1 text-slate-400 hover:text-slate-200 text-[10px] font-medium"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
+                              )
                             ) : (
-                              <button
-                                onClick={() => setTargetPasswordChange(user.id)}
-                                className="flex items-center gap-1 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 transition-all rounded-xl p-1 px-2.5 text-[10.5px] font-bold text-slate-300 cursor-pointer"
-                              >
-                                <Key className="w-3 h-3 text-slate-400" /> Overwrite Safe Password
-                              </button>
+                              <div className="text-[10px] text-slate-500 flex items-center gap-1 font-medium font-sans">
+                                <Lock className="w-2.5 h-2.5 text-slate-600" /> Password reset restricted to Global Admin
+                              </div>
                             )}
                           </div>
 

@@ -592,11 +592,11 @@ const ActiveTimer = ({ startTime }: { startTime: string }) => {
   return <span className="font-mono tabular-nums">{elapsed}</span>;
 };
 
-const formatCaseRef = (id: string) => {
+const formatCaseRef = (id: string, prefix: string = "INQ") => {
   const tsMatch = id.match(/(\d{10,13})/);
-  if (!tsMatch) return 'INQ-??????';
+  if (!tsMatch) return `${prefix}-??????`;
   const d = new Date(parseInt(tsMatch[1]));
-  return `INQ-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${tsMatch[1].slice(-4)}`;
+  return `${prefix}-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${tsMatch[1].slice(-4)}`;
 };
 
 const compStatusLabels: Record<string, string> = {
@@ -6098,7 +6098,11 @@ ${ttNotes}`
     setTempParsedMeta({});
   };
 
-  const isGlobalAdmin = currentUser?.email === "sobhyhesham00@gmail.com";
+  const isGlobalAdmin =
+    currentUser?.email?.toLowerCase() === "sobhyhesham00@gmail.com" ||
+    currentUser?.name?.toLowerCase() === "h.sobhy" ||
+    currentUser?.name?.toLowerCase() === "hesham sobhy" ||
+    currentUser?.name?.toLowerCase() === "hesso";
 
   const handleResetAllData = async () => {
     if (!isGlobalAdmin) {
