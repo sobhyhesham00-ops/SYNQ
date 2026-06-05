@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Search, History, MessageCircle, FileText, CheckCircle2, X, Download, ChevronDown, ChevronUp } from 'lucide-react';
 import { Inquiry, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, CaseRecord } from '../types';
 import { CopyWrap } from './CopyWrap';
@@ -58,15 +58,11 @@ export function PatientSearchHub({
 }: PatientSearchHubProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const [viewerImage, setViewerImage] = useState<string | null>(null);
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedQuery(searchQuery);
-    }, 300);
-    return () => clearTimeout(handler);
-  }, [searchQuery]);
+  const hasSearched = debouncedQuery.trim().length >= 3;
 
   const downloadFile = (url: string, prefix: string) => {
     try {
@@ -331,22 +327,28 @@ export function PatientSearchHub({
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setSearchQuery(val);
+              clearTimeout(debounceRef.current);
+              debounceRef.current = setTimeout(() => setDebouncedQuery(val), 300);
+            }}
             placeholder="e.g. 0501234567 or ahmed or INQ-202505"
             className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-12 pr-12 py-3.5 text-slate-100 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 font-sans tracking-wide transition-colors"
           />
           {searchQuery && (
              <button 
-               onClick={() => setSearchQuery('')}
-               className="absolute right-4 top-1/2 -translate-y-1/2 p-1 bg-slate-800 hover:bg-slate-700 rounded-full text-slate-300 transition-colors"
+               onClick={() => { setSearchQuery(''); setDebouncedQuery(''); }}
+               className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
              >
                <X className="w-4 h-4" />
              </button>
           )}
         </div>
+        <p className='text-[11px] text-slate-500 mt-2'>Type at least 3 characters to search...</p>
       </div>
 
-      {debouncedQuery.trim() && (
+      {hasSearched && (
         <div className="space-y-6">
           {/* Header Profile */}
           {patientIdentity && matchedItems.length > 0 && (

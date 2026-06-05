@@ -37,6 +37,7 @@ export const AgentRequestsLogs = ({
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterDate, setFilterDate] = useState('');
+  const [sortBy, setSortBy] = useState<'date_desc'|'date_asc'|'status'>('date_desc');
 
   const [, forceUpdate] = useState(0);
   useEffect(() => {
@@ -78,6 +79,13 @@ export const AgentRequestsLogs = ({
 
     return true;
   });
+
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === 'date_asc') return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    if (sortBy === 'status') return (a.status || '').localeCompare(b.status || '');
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
 
   const renderCard = (req: any) => {
     const copyText = (e: React.MouseEvent, text: string) => {
@@ -164,13 +172,20 @@ export const AgentRequestsLogs = ({
     } else if (req._cType === 'comm') {
       title = 'Client Communication';
       typeLab = <span className="px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-cyan-500/10 border border-cyan-500/20 text-cyan-300">{title}</span>;
-      copyData = `ID: ${req.id}\nPatient: ${req.patientName}\nPhone: ${req.phoneNumber}\nClinic: ${req.clinicName}\nNotes: ${req.handlingNotes}\nStatus: ${req.status}`;
+      copyData = `ID: ${req.id}\nPatient: ${req.patientName}\nPhone: ${req.phoneNumber}\nClinic: ${req.clinicName}\nNotes: ${req.notes}\nStatus: ${req.status}`;
       content = (
         <div className="grid grid-cols-2 gap-x-4 gap-y-1">
           <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Patient</p><p className="text-sm text-slate-200"><CopyWrap text={req.patientName || 'N/A'}>{req.patientName || 'N/A'}</CopyWrap></p></div>
           <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Phone</p><p className="text-sm text-slate-200 font-mono"><CopyWrap text={req.phoneNumber || 'N/A'} phoneMode={true} label='Phone'>{req.phoneNumber || 'N/A'}</CopyWrap></p></div>
           <div className="col-span-2"><p className="text-[10px] uppercase tracking-wider text-slate-500">Clinic</p><p className="text-sm text-slate-200"><CopyWrap text={req.clinicName || 'N/A'}>{req.clinicName || 'N/A'}</CopyWrap></p></div>
-          <div className="col-span-2"><p className="text-[10px] uppercase tracking-wider text-slate-500">Notes</p><div className="text-sm text-slate-200"><CopyWrap text={req.handlingNotes || ''}>{req.handlingNotes || 'No notes yet'}</CopyWrap></div></div>
+          <div className="col-span-2"><p className="text-[10px] uppercase tracking-wider text-slate-500">Notes</p><div className="text-sm text-slate-200"><CopyWrap text={req.notes || ''}>{req.notes || 'No notes yet'}</CopyWrap></div></div>
+          {req.handlingNotes && (
+            <div className='col-span-2 mt-2 p-2 bg-sky-500/10 border border-sky-500/20 rounded-lg'>
+              <p className='text-[10px] text-sky-400 font-bold uppercase tracking-widest mb-1'>TL Handling Notes</p>
+              <p className='text-sm text-slate-200'>{req.handlingNotes}</p>
+              {req.handledBy && <p className='text-[10px] text-slate-500 mt-1'>By {req.handledBy} at {new Date(req.handledAt || '').toLocaleString()}</p>}
+            </div>
+          )}
         </div>
       );
     }
@@ -195,6 +210,12 @@ export const AgentRequestsLogs = ({
             <span className={`px-2 py-0.5 border rounded text-[10px] font-bold uppercase shrink-0 ${statusClass}`}>
               {statusLabel}
             </span>
+            {req._cType === 'inq' && req.answer && !req.seenByAgent && (
+              <span className='w-2 h-2 rounded-full bg-emerald-400 animate-pulse' title='New answer from TL' />
+            )}
+            {req._cType === 'tt_complaint' && req.tlComment && (
+              <span className='w-2 h-2 rounded-full bg-amber-400 animate-pulse' title='New comment from TL' />
+            )}
           </div>
           <div className="text-[11px] text-slate-500 font-mono">
              <CopyWrap text={req.id || ''}>{formatCaseRef(req.id, req._cType)}</CopyWrap> &bull; {new Date(req.createdAt).toLocaleString()}
@@ -229,7 +250,7 @@ export const AgentRequestsLogs = ({
               Copy Details
             </button>
 
-            {canEditItem(req.createdAt) && (
+            {canEditItem(req.createdAt) && !['approved', 'answered', 'confirmed', 'closed', 'contacted', 'rejected', 'declined', 'cancelled'].includes(req.status) && (
               <button 
                 onClick={() => {
                   let editType = 'scheduling_request';
@@ -263,6 +284,30 @@ export const AgentRequestsLogs = ({
         <p className="text-slate-400 text-sm text-left">Review status, details and feedback on all your submitted requests.</p>
       </div>
 
+      {/* 4-Stat Summary Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col items-center justify-center shadow-lg">
+          <span className="text-2xl font-black text-slate-100">{allRequests.length}</span>
+          <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-1">Total Lifetime</span>
+        </div>
+        <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col items-center justify-center shadow-lg">
+          <span className="text-2xl font-black text-indigo-400">{filtered.length}</span>
+          <span className="text-[10px] text-indigo-500/70 uppercase tracking-widest font-bold mt-1">Matched</span>
+        </div>
+        <div className="bg-slate-900 border border-amber-900/40 p-4 rounded-2xl flex flex-col items-center justify-center shadow-lg">
+          <span className="text-2xl font-black text-amber-400">
+            {filtered.filter(r => ['pending','pending_partner','submitted','not_confirmed','pending_tl'].includes(r.status)).length}
+          </span>
+          <span className="text-[10px] text-amber-500/70 uppercase tracking-widest font-bold mt-1">Pending Filtered</span>
+        </div>
+        <div className="bg-slate-900 border border-emerald-900/40 p-4 rounded-2xl flex flex-col items-center justify-center shadow-lg">
+          <span className="text-2xl font-black text-emerald-400">
+            {filtered.filter(r => ['approved','answered','confirmed','closed','contacted'].includes(r.status)).length}
+          </span>
+          <span className="text-[10px] text-emerald-500/70 uppercase tracking-widest font-bold mt-1">Resolved Filtered</span>
+        </div>
+      </div>
+
       <div className="bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl p-6 shadow-xl space-y-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-white/10">
           <div className="relative flex-grow max-w-sm w-full">
@@ -272,6 +317,11 @@ export const AgentRequestsLogs = ({
           <div className="flex gap-2 w-full md:w-auto items-center">
             <input type="date" title="Filter by submission date" value={filterDate} onChange={e => setFilterDate(e.target.value)} className="w-full md:w-36 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500 font-sans cursor-pointer h-9 [color-scheme:dark]" />
             <Filter className="w-4 h-4 text-slate-400 flex-shrink-0" />
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="w-full md:w-36 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500 font-sans cursor-pointer h-9">
+              <option value="date_desc" className="bg-slate-800">Newest First</option>
+              <option value="date_asc" className="bg-slate-800">Oldest First</option>
+              <option value="status" className="bg-slate-800">By Status</option>
+            </select>
             <select value={filterType} onChange={e => setFilterType(e.target.value)} className="w-full md:w-40 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500 font-sans cursor-pointer h-9">
               <option value="all" className="bg-slate-800">All Types</option>
               <option value="sched" className="bg-slate-800">Leaves/Swaps</option>
@@ -292,13 +342,13 @@ export const AgentRequestsLogs = ({
         </div>
 
         <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
-          {filtered.length === 0 ? (
+          {sorted.length === 0 ? (
             <div className="text-center py-12 text-slate-400 space-y-2">
               <ClipboardList className="w-10 h-10 mx-auto text-indigo-400 opacity-50" />
               <p>No requests found matching your filter.</p>
             </div>
           ) : (
-            filtered.map(renderCard)
+            sorted.map(renderCard)
           )}
         </div>
       </div>

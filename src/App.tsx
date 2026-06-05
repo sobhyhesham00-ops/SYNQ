@@ -599,6 +599,12 @@ const formatCaseRef = (id: string) => {
   return `INQ-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${tsMatch[1].slice(-4)}`;
 };
 
+const compStatusLabels: Record<string, string> = {
+  pending_tl: '🕐 Pending TL Review',
+  need_contact: '📞 Action Required: Contact Patient',
+  closed: '✅ Resolved & Closed'
+};
+
 export default function App() {
   // Current local time context of the user's PC (synced and showing in the main page)
   const [systemTime, setSystemTime] = useState<Date>(new Date());
@@ -1283,6 +1289,20 @@ export default function App() {
       unsubFailedAttempts();
     };
   }, []);
+
+  const formatComRef = (id: string) => {
+    const tsMatch = id?.match(/(\d{10,13})/);
+    if (!tsMatch) return 'COM-??????';
+    const d = new Date(parseInt(tsMatch[1]));
+    return `COM-${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}-${tsMatch[1].slice(-4)}`;
+  };
+
+  const formatCompRef = (id: string) => {
+    const tsMatch = id?.match(/(\d{10,13})/);
+    if (!tsMatch) return 'TTC-??????';
+    const d = new Date(parseInt(tsMatch[1]));
+    return `TTC-${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}-${tsMatch[1].slice(-4)}`;
+  };
 
   const getElapsedTimerString = (
     confirmedAtISO: string,
@@ -2689,6 +2709,10 @@ ${pageText}
   >(null);
 
   // Tabby/Tamara search and filter states
+  const [compSearch, setCompSearch] = useState("");
+  const [compDateFilter, setCompDateFilter] = useState("");
+  const [commSearch, setCommSearch] = useState("");
+  const [commLangFilter, setCommLangFilter] = useState<'all'|'Arabic'|'English'>('all');
   const [ttSearchQuery, setTtSearchQuery] = useState("");
   const [ttSearch, setTtSearch] = useState("");
   const [ttDateFilter, setTtDateFilter] = useState("");
@@ -6517,6 +6541,9 @@ ${ttNotes}`
   // Filter logs for general browsing
   const [logFilter, setLogFilter] = useState<"all" | "swap" | "annual">("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [logDateFrom, setLogDateFrom] = useState('');
+  const [logDateTo, setLogDateTo] = useState('');
+  const [logPage, setLogPage] = useState(1);
 
   // TL Dashboard search, filter and print states
   const [tlSearchQuery, setTlSearchQuery] = useState("");
@@ -6525,16 +6552,22 @@ ${ttNotes}`
   >("all");
   const [tlIsPrintMode, setTlIsPrintMode] = useState(false);
 
-  const filteredLogs = requests.filter((req) => {
-    const matchesFilter = logFilter === "all" || req.type === logFilter;
-    const matchesSearch =
-      req.agentName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (req.type === "swap" &&
-        (req as SwapRequest).swapWithAgent
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()));
-    return matchesFilter && matchesSearch;
-  });
+  const filteredLogs = requests.filter(r => {
+    const s = searchQuery.toLowerCase();
+    const matchSearch = !s ||
+      r.agentName?.toLowerCase().includes(s) ||
+      r.status?.toLowerCase().includes(s) ||
+      (r.type === 'swap' && (r as any).date?.includes(s)) ||
+      (r.type === 'swap' && (r as any).swapWithAgent?.toLowerCase().includes(s)) ||
+      r.notes?.toLowerCase().includes(s);
+    const matchType = logFilter === 'all' || r.type === logFilter;
+    const matchDate = (!logDateFrom || new Date(r.createdAt) >= new Date(logDateFrom)) && (!logDateTo || new Date(r.createdAt) <= new Date(logDateTo + 'T23:59:59'));
+    return matchSearch && matchType && matchDate;
+  }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  const PAGE_SIZE = 25;
+  const paginatedLogs = filteredLogs.slice((logPage - 1) * PAGE_SIZE, logPage * PAGE_SIZE);
+  const totalPages = Math.ceil(filteredLogs.length / PAGE_SIZE);
 
   // Derived counts for overview cards
   const pendingRequests = requests.filter(
@@ -7757,7 +7790,30 @@ ${ttNotes}`
                   className="flex flex-col gap-6"
                 >
                   {activeTab === "dashboard" && (
-                    <DashboardSummary
+                    <div className="flex flex-col">
+                      {(() => {
+                        if (currentUser.role !== "tl") return null;
+                        const staleSLA = {
+                          inquiries: inquiries.filter(i => i.status !== 'answered' && (Date.now() - new Date(i.createdAt).getTime()) > 2 * 3600000).length,
+                          ttPending: tabbyTamaraRequests.filter(r => r.status === 'not_confirmed').length,
+                          ttOverdue: tabbyTamaraRequests.filter(r => r.status === 'confirmed' && r.customerContacted !== 'contacted' && (Date.now() - new Date(r.confirmedAt || r.createdAt).getTime()) > 3600000).length,
+                          complaints: tabbyTamaraComplaints.filter(c => c.status !== 'closed' && (Date.now() - new Date(c.createdAt).getTime()) > 8 * 3600000).length,
+                          comms: clientComms.filter(cc => cc.status === 'pending' && (Date.now() - new Date(cc.createdAt).getTime()) > 2 * 3600000).length,
+                        };
+                        const hasAlerts = Object.values(staleSLA).some(v => v > 0);
+                        if (!hasAlerts) return null;
+                        return (
+                          <div className='bg-red-500/10 border border-red-500/20 rounded-2xl p-4 flex flex-wrap gap-3 items-center mb-6'>
+                            <span className='text-red-400 font-bold text-xs uppercase tracking-wider flex items-center gap-1'><AlertTriangle className='w-4 h-4' /> Needs Attention</span>
+                            {staleSLA.inquiries > 0 && <span className='px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all' onClick={() => setActiveTab('inquiries')}>{staleSLA.inquiries} Inquiries Stale &gt;2h</span>}
+                            {staleSLA.ttPending > 0 && <span className='px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all' onClick={() => setActiveTab('tabby-tamara')}>{staleSLA.ttPending} TT Awaiting Confirm</span>}
+                            {staleSLA.ttOverdue > 0 && <span className='px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all' onClick={() => setActiveTab('tabby-tamara')}>{staleSLA.ttOverdue} TT Contact OVERDUE</span>}
+                            {staleSLA.complaints > 0 && <span className='px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all' onClick={() => setActiveTab('complaints')}>{staleSLA.complaints} Complaints &gt;8h Open</span>}
+                            {staleSLA.comms > 0 && <span className='px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all' onClick={() => setActiveTab('client-comms')}>{staleSLA.comms} Comms Pending &gt;2h</span>}
+                          </div>
+                        );
+                      })()}
+                      <DashboardSummary
                       currentUser={currentUser}
                       myNextShift={schedules.find(
                         (s) =>
@@ -7802,6 +7858,7 @@ ${ttNotes}`
                       }
                       announcements={announcements}
                     />
+                    </div>
                   )}
 
                   {activeTab === "integrations" && (
@@ -12622,7 +12679,7 @@ Notes: ${a.notes || "None"}`;
                         <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col md:flex-row items-center gap-4">
                           <div className="flex items-center gap-1 bg-black/20 p-1 rounded-xl w-full md:w-auto self-stretch">
                             <button
-                              onClick={() => setLogFilter("all")}
+                              onClick={() => { setLogFilter("all"); setLogPage(1); }}
                               className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all ${
                                 logFilter === "all"
                                   ? "bg-indigo-500 text-white shadow"
@@ -12632,7 +12689,7 @@ Notes: ${a.notes || "None"}`;
                               All Categories
                             </button>
                             <button
-                              onClick={() => setLogFilter("swap")}
+                              onClick={() => { setLogFilter("swap"); setLogPage(1); }}
                               className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all ${
                                 logFilter === "swap"
                                   ? "bg-indigo-500 text-white shadow"
@@ -12642,7 +12699,7 @@ Notes: ${a.notes || "None"}`;
                               Shift Swaps
                             </button>
                             <button
-                              onClick={() => setLogFilter("annual")}
+                              onClick={() => { setLogFilter("annual"); setLogPage(1); }}
                               className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all ${
                                 logFilter === "annual"
                                   ? "bg-indigo-500 text-white shadow"
@@ -12658,8 +12715,25 @@ Notes: ${a.notes || "None"}`;
                             placeholder="🔍 Search by agent name..."
                             className="flex-1 w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(e) => { setSearchQuery(e.target.value); setLogPage(1); }}
                           />
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="date"
+                              title="From Date"
+                              value={logDateFrom}
+                              onChange={(e) => { setLogDateFrom(e.target.value); setLogPage(1); }}
+                              className="px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-indigo-500 [color-scheme:dark]"
+                            />
+                            <span className="text-slate-500">-</span>
+                            <input
+                              type="date"
+                              title="To Date"
+                              value={logDateTo}
+                              onChange={(e) => { setLogDateTo(e.target.value); setLogPage(1); }}
+                              className="px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-indigo-500 [color-scheme:dark]"
+                            />
+                          </div>
                         </div>
 
                         {/* Logs Table */}
@@ -12668,6 +12742,7 @@ Notes: ${a.notes || "None"}`;
                             <table className="w-full text-left min-w-[800px]">
                               <thead className="text-[10px] uppercase tracking-widest text-slate-400 border-b border-white/5 bg-[#1e1e1e]/40 backdrop-blur-lg/40">
                                 <tr>
+                                  <th className="px-6 py-4 font-bold">REF #</th>
                                   <th className="px-6 py-4 font-bold">Agent</th>
                                   <th className="px-6 py-4 font-bold">
                                     Request Type
@@ -12690,20 +12765,23 @@ Notes: ${a.notes || "None"}`;
                                 {filteredLogs.length === 0 ? (
                                   <tr>
                                     <td
-                                      colSpan={6}
+                                      colSpan={7}
                                       className="px-6 py-12 text-center text-slate-400"
                                     >
                                       No records matching filters.
                                     </td>
                                   </tr>
                                 ) : (
-                                  filteredLogs.map((req) => {
+                                  paginatedLogs.map((req) => {
                                     const isSwap = req.type === "swap";
                                     return (
                                       <tr
                                         key={req.id}
                                         className="border-b border-white/5 hover:bg-white/20 backdrop-blur-md transition-colors"
                                       >
+                                        <td className="px-6 py-4 font-mono text-[10px] text-slate-400">
+                                          {formatCaseRef(req.id, "sched")}
+                                        </td>
                                         <td className="px-6 py-4 font-bold text-slate-100">
                                           {req.agentName}
                                         </td>
@@ -12836,6 +12914,29 @@ Notes: ${a.notes || "None"}`;
                             </table>
                           </div>
                         </div>
+
+                        {/* Pagination Controls */}
+                        {totalPages > 1 && (
+                          <div className="flex items-center justify-between px-4 py-3 bg-white/5 border border-white/10 rounded-2xl">
+                            <button
+                              onClick={() => setLogPage(p => Math.max(1, p - 1))}
+                              disabled={logPage === 1}
+                              className="px-4 py-2 text-sm font-medium text-slate-300 bg-white/10 rounded-lg disabled:opacity-50 hover:bg-white/20 transition-all font-sans"
+                            >
+                              &larr; Prev
+                            </button>
+                            <span className="text-sm font-medium text-slate-400 font-sans">
+                              Page {logPage} of {totalPages}
+                            </span>
+                            <button
+                              onClick={() => setLogPage(p => Math.min(totalPages, p + 1))}
+                              disabled={logPage === totalPages}
+                              className="px-4 py-2 text-sm font-medium text-slate-300 bg-white/10 rounded-lg disabled:opacity-50 hover:bg-white/20 transition-all font-sans"
+                            >
+                              Next &rarr;
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -20608,28 +20709,78 @@ _ ${inq.answer || "No answer yet"} _`;
                                   </h3>
 
                                   {/* Search bar inside */}
-                                  <div className="relative w-full md:w-64">
-                                    <span className="absolute left-3 top-2.5 text-slate-400">
-                                      <Search className="w-4 h-4" />
-                                    </span>
-                                    <input
-                                      type="text"
-                                      placeholder={
-                                        localSubTab === "client-comms"
-                                          ? "Search clinic, phone..."
-                                          : "Search patient, phone, file..."
-                                      }
-                                      value={ttSearchQuery}
-                                      onChange={(e) =>
-                                        setTtSearchQuery(e.target.value)
-                                      }
-                                      className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium"
-                                    />
+                                  <div className="flex items-center gap-2 w-full md:w-auto">
+                                    <div className="relative w-full md:w-64">
+                                      <span className="absolute left-3 top-2.5 text-slate-400">
+                                        <Search className="w-4 h-4" />
+                                      </span>
+                                      <input
+                                        type="text"
+                                        placeholder={
+                                          localSubTab === "client-comms"
+                                            ? "Search clinic, phone..."
+                                            : localSubTab === "complaints"
+                                            ? "Search complaints..."
+                                            : "Search patient, phone, file..."
+                                        }
+                                        value={
+                                          localSubTab === "complaints" ? compSearch : 
+                                          localSubTab === "client-comms" ? commSearch : 
+                                          ttSearchQuery
+                                        }
+                                        onChange={(e) => {
+                                          if (localSubTab === "complaints") setCompSearch(e.target.value);
+                                          else if (localSubTab === "client-comms") setCommSearch(e.target.value);
+                                          else setTtSearchQuery(e.target.value);
+                                        }}
+                                        className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium"
+                                      />
+                                    </div>
+                                    {localSubTab === "complaints" && isTLOreSupport && (
+                                      <div className="relative w-full md:w-40">
+                                        <span className="absolute left-3 top-2.5 text-slate-400">
+                                          <Calendar className="w-4 h-4" />
+                                        </span>
+                                        <input
+                                          type="date"
+                                          value={compDateFilter}
+                                          onChange={(e) => setCompDateFilter(e.target.value)}
+                                          className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium [color-scheme:dark]"
+                                        />
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
 
                                 {/* Dropdown Filters and status segment selection buttons */}
                                 <div className="flex flex-wrap items-center gap-3 text-xs text-left">
+                                  {localSubTab === "client-comms" && (
+                                    <>
+                                      <span className="text-slate-400 font-semibold font-sans ml-auto">
+                                        Language:
+                                      </span>
+                                      <div className="flex items-center gap-1.5 bg-black/35 p-1 rounded-xl border border-white/5">
+                                        <button
+                                          onClick={() => setCommLangFilter("all")}
+                                          className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${commLangFilter === "all" ? "bg-indigo-600 text-white font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                        >
+                                          All
+                                        </button>
+                                        <button
+                                          onClick={() => setCommLangFilter("Arabic")}
+                                          className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${commLangFilter === "Arabic" ? "bg-indigo-600 text-white font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                        >
+                                          Arabic
+                                        </button>
+                                        <button
+                                          onClick={() => setCommLangFilter("English")}
+                                          className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${commLangFilter === "English" ? "bg-indigo-600 text-white font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                        >
+                                          English
+                                        </button>
+                                      </div>
+                                    </>
+                                  )}
                                   <span className="text-slate-400 font-semibold font-sans">
                                     Filter status:
                                   </span>
@@ -20895,35 +21046,15 @@ _ ${inq.answer || "No answer yet"} _`;
                                         if (!isTLOreSupport && !isMyComplaint)
                                           return false;
 
-                                        const matchesSearch =
-                                          (c.patientName || "")
-                                            .toLowerCase()
-                                            .includes(
-                                              ttSearchQuery.toLowerCase(),
-                                            ) ||
-                                          (c.fileNumber || "")
-                                            .toLowerCase()
-                                            .includes(
-                                              ttSearchQuery.toLowerCase(),
-                                            ) ||
-                                          (c.phoneNumber || "")
-                                            .toLowerCase()
-                                            .includes(
-                                              ttSearchQuery.toLowerCase(),
-                                            ) ||
-                                          (c.agentName || "")
-                                            .toLowerCase()
-                                            .includes(
-                                              ttSearchQuery.toLowerCase(),
-                                            ) ||
-                                          (c.idNumber &&
-                                            c.idNumber
-                                              .toLowerCase()
-                                              .includes(
-                                                ttSearchQuery.toLowerCase(),
-                                              ));
+  const sq = compSearch.toLowerCase();
+  const matchesSearch = !sq ||
+    (c.patientName || "").toLowerCase().includes(sq) ||
+    (c.phoneNumber || "").toLowerCase().includes(sq.replace(/\D/g, '')) ||
+    (c.clinicName || "").toLowerCase().includes(sq) ||
+    (c.agentName || "").toLowerCase().includes(sq) ||
+    (c.complaintDetails || "").toLowerCase().includes(sq);
 
-                                        const matchesStatus =
+  const matchesStatus =
                                           ttFilterStatus === "all" ||
                                           (ttFilterStatus === "not_confirmed" &&
                                             c.status === "pending_tl") ||
@@ -20938,10 +21069,13 @@ _ ${inq.answer || "No answer yet"} _`;
                                             c.clinicName?.toLowerCase() ===
                                               tcFilterClinic.toLowerCase());
 
+                                        const matchesDate = !compDateFilter || (c.createdAt && c.createdAt.startsWith(compDateFilter));
+
                                         return (
                                           matchesSearch &&
                                           matchesStatus &&
-                                          matchesProvider
+                                          matchesProvider &&
+                                          matchesDate
                                         );
                                       }).length === 0 ? (
                                         <div className="p-12 text-center rounded-3xl border border-dashed border-white/10 bg-white/10 backdrop-blur-md/[0.02] space-y-2 animate-fade-in">
@@ -20969,33 +21103,13 @@ _ ${inq.answer || "No answer yet"} _`;
                                               )
                                                 return false;
 
-                                              const matchesSearch =
-                                                (c.patientName || "")
-                                                  .toLowerCase()
-                                                  .includes(
-                                                    ttSearchQuery.toLowerCase(),
-                                                  ) ||
-                                                (c.fileNumber || "")
-                                                  .toLowerCase()
-                                                  .includes(
-                                                    ttSearchQuery.toLowerCase(),
-                                                  ) ||
-                                                (c.phoneNumber || "")
-                                                  .toLowerCase()
-                                                  .includes(
-                                                    ttSearchQuery.toLowerCase(),
-                                                  ) ||
-                                                (c.agentName || "")
-                                                  .toLowerCase()
-                                                  .includes(
-                                                    ttSearchQuery.toLowerCase(),
-                                                  ) ||
-                                                (c.idNumber &&
-                                                  c.idNumber
-                                                    .toLowerCase()
-                                                    .includes(
-                                                      ttSearchQuery.toLowerCase(),
-                                                    ));
+                                              const sq = compSearch.toLowerCase();
+                                              const matchesSearch = !sq ||
+                                                (c.patientName || "").toLowerCase().includes(sq) ||
+                                                (c.phoneNumber || "").toLowerCase().includes(sq.replace(/\D/g, '')) ||
+                                                (c.clinicName || "").toLowerCase().includes(sq) ||
+                                                (c.agentName || "").toLowerCase().includes(sq) ||
+                                                (c.complaintDetails || "").toLowerCase().includes(sq);
 
                                               const matchesStatus =
                                                 ttFilterStatus === "all" ||
@@ -21016,10 +21130,13 @@ _ ${inq.answer || "No answer yet"} _`;
                                                   c.clinicName?.toLowerCase() ===
                                                     tcFilterClinic.toLowerCase());
 
+                                              const matchesDate = !compDateFilter || (c.createdAt && c.createdAt.startsWith(compDateFilter));
+
                                               return (
                                                 matchesSearch &&
                                                 matchesStatus &&
-                                                matchesProvider
+                                                matchesProvider &&
+                                                matchesDate
                                               );
                                             })
                                             .map((comp) => {
@@ -21030,10 +21147,24 @@ _ ${inq.answer || "No answer yet"} _`;
                                               const isClosed =
                                                 comp.status === "closed";
 
+                                              const compAgeMs = Date.now() - new Date(comp.createdAt).getTime();
+                                              const compAgeHours = compAgeMs / 3600000;
+                                              const compAgeLabel = compAgeHours < 1 ? `${Math.floor(compAgeMs/60000)}m open` : `${Math.floor(compAgeHours)}h open`;
+                                              const compUrgency = comp.status !== 'closed'
+                                                ? (compAgeHours > 24 ? 'critical' : compAgeHours > 8 ? 'high' : compAgeHours > 2 ? 'medium' : 'low')
+                                                : 'resolved';
+                                              const urgencyColors = {
+                                                critical: 'border-l-red-500',
+                                                high: 'border-l-orange-500',
+                                                medium: 'border-l-amber-500',
+                                                low: 'border-l-slate-700',
+                                                resolved: 'border-l-emerald-500'
+                                              };
+
                                               return (
                                                 <div
                                                   key={comp.id}
-                                                  className={`relative p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4 shadow-md overflow-hidden bg-[#1e1e1e]/40 backdrop-blur-lg/60 ${
+                                                  className={`relative p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4 shadow-md overflow-hidden bg-[#1e1e1e]/40 backdrop-blur-lg/60 border-l-4 ${urgencyColors[compUrgency]} ${
                                                     isNeedContact
                                                       ? "border-pink-500/30 bg-gradient-to-b from-pink-955/10 to-transparent animate-pulse"
                                                       : isPendingTL
@@ -21067,21 +21198,17 @@ _ ${inq.answer || "No answer yet"} _`;
 
                                                     {/* Status Badges */}
                                                     <div className="text-right flex flex-col items-end gap-1 shrink-0 font-sans">
-                                                      {isPendingTL && (
-                                                        <span className="text-[9px] uppercase tracking-wide font-extrabold bg-amber-500/10 border border-amber-500/30 text-amber-300 px-2 py-0.5 rounded-md">
-                                                          ⏳ PENDING TL
-                                                        </span>
-                                                      )}
-                                                      {isNeedContact && (
-                                                        <span className="text-[9px] uppercase tracking-wide font-extrabold bg-rose-500/10 border border-rose-500/30 text-rose-400 px-2 py-0.5 rounded-md animate-pulse">
-                                                          📞 TELEPHONE CLIENT
-                                                        </span>
-                                                      )}
-                                                      {isClosed && (
-                                                        <span className="text-[9px] uppercase tracking-wide font-extrabold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-2 py-0.5 rounded-md">
-                                                          ✅ CLOSED CASE
-                                                        </span>
-                                                      )}
+                                                      <span className="font-mono text-[10px] text-slate-500 font-bold tracking-wider mb-1 flex items-center justify-end gap-2">
+                                                        <span className="px-1.5 py-0.5 rounded-sm bg-black/20 border border-white/10 text-white/60">⏱ {compAgeLabel}</span>
+                                                        {formatCompRef(comp.id)}
+                                                      </span>
+                                                      <span className={`text-[9px] uppercase tracking-wide font-extrabold px-2 py-0.5 rounded-md ${
+                                                        isPendingTL ? "bg-amber-500/10 border border-amber-500/30 text-amber-300" :
+                                                        isNeedContact ? "bg-rose-500/10 border border-rose-500/30 text-rose-400 animate-pulse" :
+                                                        isClosed ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400" : ""
+                                                      }`}>
+                                                        {compStatusLabels[comp.status] || comp.status}
+                                                      </span>
                                                     </div>
                                                   </div>
 
@@ -21140,7 +21267,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                                           Phone number:
                                                         </p>
                                                         <p className="text-slate-200 font-mono font-bold truncate">
-                                                          <CopyWrap text={comp.phoneNumber || ''} label="Phone">
+                                                          <CopyWrap text={(comp.phoneNumber || '').replace(/^0+/, '')} label="Phone">
                                                             {comp.phoneNumber}
                                                           </CopyWrap>
                                                         </p>
@@ -21175,6 +21302,11 @@ _ ${inq.answer || "No answer yet"} _`;
                                                         <p className="bg-rose-950/10 p-2 rounded-lg border border-pink-500/10 text-slate-200 leading-normal font-sans">
                                                           {comp.tlComment}
                                                         </p>
+                                                        {comp.tlHandledAt && (
+                                                          <p className='text-[10px] text-slate-500 mt-1 font-mono'>
+                                                            Last updated by {comp.tlHandledBy || 'TL'} at {new Date(comp.tlHandledAt).toLocaleString()}
+                                                          </p>
+                                                        )}
                                                       </div>
                                                     )}
                                                   </div>
@@ -21297,7 +21429,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                                           const text = `Complaint Data:
 Patient: ${comp.patientName}
 File: ${comp.fileNumber}
-Phone: ${comp.phoneNumber}
+Phone: ${(comp.phoneNumber || '').replace(/^0+/, '')}
 ID/Type: ${comp.idNumber || (comp.isOldCustomer ? "Old" : "New")}
 Clinic: ${comp.clinicName}
 Status: ${comp.status}
@@ -21363,7 +21495,7 @@ Links: ${(comp.links || []).join(", ")}
                                                         const details = `*Complaint ID:* ${comp.id}
 *Patient Name:* ${comp.patientName}
 *File Number:* ${comp.fileNumber || "N/A"}
-*Phone Number:* ${comp.phoneNumber}
+*Phone Number:* ${(comp.phoneNumber || '').replace(/^0+/, '')}
 *Complaint Text:*
 _ ${comp.complaintDetails} _
 *TL Comment:*
@@ -21471,28 +21603,17 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                         )
                                           return false;
 
+                                        const query = commSearch.toLowerCase();
                                         const matchesSearch =
-                                          c.clinicName
-                                            ?.toLowerCase()
-                                            .includes(
-                                              ttSearchQuery.toLowerCase(),
-                                            ) ||
-                                          (c.phoneNumber || "")
-                                            .toLowerCase()
-                                            .includes(
-                                              ttSearchQuery.toLowerCase(),
-                                            ) ||
-                                          c.callCenterAgentName
-                                            ?.toLowerCase()
-                                            .includes(
-                                              ttSearchQuery.toLowerCase(),
-                                            ) ||
-                                          (c.handledBy &&
-                                            c.handledBy
-                                              .toLowerCase()
-                                              .includes(
-                                                ttSearchQuery.toLowerCase(),
-                                              ));
+                                          !query ||
+                                          c.patientName?.toLowerCase().includes(query) ||
+                                          (c.phoneNumber || "").replace(/[^\d]/g, "").includes(query.replace(/[^\d]/g, "")) ||
+                                          c.clinicName?.toLowerCase().includes(query) ||
+                                          c.callCenterAgentName?.toLowerCase().includes(query) ||
+                                          c.notes?.toLowerCase().includes(query) ||
+                                          (c.handledBy || "").toLowerCase().includes(query);
+
+                                        const matchesLang = commLangFilter === "all" || c.language === commLangFilter;
 
                                         const matchesStatus =
                                           ttFilterStatus === "all" ||
@@ -21510,6 +21631,7 @@ _ ${comp.tlComment || "No comment yet"} _`;
 
                                         return (
                                           matchesSearch &&
+                                          matchesLang &&
                                           matchesStatus &&
                                           matchesClinic
                                         );
@@ -21608,6 +21730,9 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                 (!req.openedBy ||
                                                   req.openedBy ===
                                                     currentUser?.name);
+                                              const commAgeHours = (Date.now() - new Date(req.createdAt).getTime()) / 3600000;
+                                              const commSLABadge = req.status === 'contacted' ? 'bg-emerald-500/10 text-emerald-400' : commAgeHours > 2 ? 'bg-red-500/20 text-red-400 animate-pulse' : commAgeHours > 0.5 ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-700 text-slate-400';
+                                              const commAgeLabel = commAgeHours < 1 ? `${Math.floor(commAgeHours * 60)}m` : `${Math.floor(commAgeHours)}h ${Math.floor((commAgeHours % 1) * 60)}m`;
 
                                               return (
                                                 <div
@@ -21643,6 +21768,10 @@ _ ${comp.tlComment || "No comment yet"} _`;
 
                                                     {/* Status Badges */}
                                                     <div className="text-right flex flex-col items-end gap-1 shrink-0 font-sans">
+                                                      <span className="font-mono text-[10px] text-slate-500 font-bold tracking-wider mb-1 flex items-center justify-end gap-2">
+                                                        <span className={`px-1.5 py-0.5 rounded-sm border border-white/10 ${commSLABadge}`}>⏱ {commAgeLabel} open</span>
+                                                        {formatComRef(req.id)}
+                                                      </span>
                                                       {isPending && (
                                                         <span className="text-[9px] uppercase tracking-wide font-extrabold bg-amber-500/10 border border-amber-500/30 text-amber-400 px-2 py-0.5 rounded-md animate-pulse">
                                                           ⏳ PENDING ACTION
@@ -21680,8 +21809,8 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                           Phone number:
                                                         </p>
                                                         <p className="text-indigo-300 font-mono font-bold truncate">
-                                                          <CopyWrap text={req.phoneNumber || ''} label="Phone">
-                                                            {req.phoneNumber}
+                                                          <CopyWrap text={req.phoneNumber ? ('0' + req.phoneNumber.replace(/^0+/, '')) : ''} label="Phone">
+                                                            {req.phoneNumber ? ('0' + req.phoneNumber.replace(/^0+/, '')) : ''}
                                                           </CopyWrap>
                                                         </p>
                                                       </div>
