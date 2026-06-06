@@ -1,6 +1,13 @@
 import React from 'react';
 import { X, Save } from 'lucide-react';
-const CLINICS = ['Dermadent VIP', 'Dermadent', 'One Touch Mo3tred', 'One Touch Merkhnya', 'WellTouch', 'New Edge', 'DermaDent', 'One Touch 1 AlMu\'tarid', 'One Touch 2 Markhaniya'];
+const CLINICS = ['dermadent', 'onetouch_mo3tred', 'onetouch_merkhnya', 'welltouch', 'newage'];
+const CLINIC_LABELS: Record<string, string> = {
+  dermadent: 'Dermadent', 
+  onetouch_mo3tred: 'One Touch Mo3tred',
+  onetouch_merkhnya: 'One Touch Merkhnya', 
+  welltouch: 'WellTouch', 
+  newage: 'New Age'
+};
 
 export const EditModal = ({
   editingItem,
@@ -9,6 +16,13 @@ export const EditModal = ({
 }: any) => {
   if (!editingItem) return null;
   const { type, data } = editingItem;
+
+  const handleValidatedSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (type === 'inquiry' && !data.text?.trim()) { alert('Inquiry text cannot be empty'); return; }
+    if ((type === 'tt_request' || type === 'tt_complaint') && !data.patientName?.trim()) { alert('Patient name required'); return; }
+    handleEditSave(e);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setEditingItem({
@@ -45,7 +59,7 @@ export const EditModal = ({
           Edit Request
         </h3>
 
-        <form onSubmit={handleEditSave} className="space-y-4">
+        <form onSubmit={handleValidatedSave} className="space-y-4">
           
           {/* Clinic Name (Shared across most) */}
           {(type === 'inquiry' || type === 'tt_request' || type === 'tt_complaint' || type === 'client_comm' || type === 'case') && (
@@ -58,11 +72,7 @@ export const EditModal = ({
                 className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans cursor-pointer"
               >
                  <option value="">Select a Clinic</option>
-                 {CLINICS.map((clinic: string) => (
-                    <option key={clinic} value={clinic}>
-                      {clinic}
-                    </option>
-                 ))}
+                 {CLINICS.map(c => <option key={c} value={c}>{CLINIC_LABELS[c]}</option>)}
               </select>
             </div>
           )}

@@ -51,7 +51,8 @@ export const TabbyTamaraCard = ({
   handleDeleteTabbyTamara,
   canEditItem,
   getRemainingEditTime,
-  setEditingItem
+  setEditingItem,
+  addSystemNotification
 }: any) => {
   const isPendingContact = req.status === "confirmed" && req.customerContacted === "not_contacted";
   const isAwaitingConfirm = req.status === "not_confirmed";
@@ -474,6 +475,9 @@ Notes: ${req.notes || 'None'}
           request={req}
           currentUser={currentUser}
           collectionName="tabby_tamara"
+          addSystemNotification={addSystemNotification}
+          requestType="Tabby/Tamara"
+          requestAgentName={req.agentName}
         />
       </div>
     </div>

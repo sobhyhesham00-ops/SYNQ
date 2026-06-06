@@ -3,24 +3,8 @@ import { Search, Filter, ClipboardList, Clock, CheckCircle2, XCircle, Pencil } f
 import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
 import { CopyWrap } from './CopyWrap';
+import { formatCaseRef, normalizePhone, getSLAStatus } from '../utils';
 
-const formatCaseRef = (id: string, cType: string): string => {
-  const typeMap: Record<string, string> = {
-    sched: 'SCH',
-    inq: 'INQ',
-    tt_request: 'TTR',
-    tt_complaint: 'TTC',
-    comm: 'COM',
-  };
-  const prefix = typeMap[cType] || 'REF';
-  const tsMatch = id.match(/(\d{10,13})/);
-  if (!tsMatch) return `${prefix}-??????`;
-  const ts = parseInt(tsMatch[1]);
-  const d = new Date(ts > 9999999999 ? ts : ts * 1000);
-  const ymd = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
-  const suffix = String(ts).slice(-4);
-  return `${prefix}-${ymd}-${suffix}`;
-};
 
 export const AgentRequestsLogs = ({ 
   currentUser, 
@@ -32,7 +16,8 @@ export const AgentRequestsLogs = ({
   canEditItem,
   getRemainingEditTime,
   setEditingItem,
-  handleCancelRequest
+  handleCancelRequest,
+  addSystemNotification
 }: any) => {
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
@@ -57,6 +42,14 @@ export const AgentRequestsLogs = ({
     
     return res.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [requests, inquiries, tabbyTamaraRequests, complaints, clientComms, currentUser]);
+
+  const pendingCount = useMemo(() => {
+    return allRequests.filter(r => ['pending','pending_partner','submitted','not_confirmed','pending_tl'].includes(r.status)).length;
+  }, [allRequests]);
+
+  const resolvedCount = useMemo(() => {
+    return allRequests.filter(r => ['approved','answered','confirmed','closed','contacted'].includes(r.status)).length;
+  }, [allRequests]);
 
   const filtered = allRequests.filter(r => {
     const s = search.toLowerCase();
@@ -270,7 +263,14 @@ export const AgentRequestsLogs = ({
 
         {req._cType === 'sched' && (
           <div className="w-full mt-2 pt-2 border-t border-white/5">
-            <RequestReplyThread request={req} currentUser={currentUser} collectionName="requests" />
+            <RequestReplyThread 
+              request={req} 
+              currentUser={currentUser} 
+              collectionName="requests" 
+              addSystemNotification={addSystemNotification}
+              requestType="Scheduling"
+              requestAgentName={req.agentName}
+            />
           </div>
         )}
       </div>
@@ -309,6 +309,11 @@ export const AgentRequestsLogs = ({
       </div>
 
       <div className="bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl p-6 shadow-xl space-y-4">
+        <div className='flex gap-2 flex-wrap pb-2'>
+          <span className='px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-slate-300'>📋 {allRequests.length} Total</span>
+          <span className='px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-xs font-bold text-amber-400'>⏳ {pendingCount} Pending</span>
+          <span className='px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-xs font-bold text-emerald-400'>✅ {resolvedCount} Resolved</span>
+        </div>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-white/10">
           <div className="relative flex-grow max-w-sm w-full">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />

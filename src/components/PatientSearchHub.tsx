@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef } from 'react';
 import { Search, History, MessageCircle, FileText, CheckCircle2, X, Download, ChevronDown, ChevronUp } from 'lucide-react';
 import { Inquiry, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, CaseRecord } from '../types';
 import { CopyWrap } from './CopyWrap';
+import { formatCaseRef } from '../utils';
 
 interface PatientSearchHubProps {
   inquiries: Inquiry[];
@@ -13,24 +14,6 @@ interface PatientSearchHubProps {
   requests?: any[];
 }
 
-const formatCaseRef = (id: string, cType: string): string => {
-  const typeMap: Record<string, string> = {
-    inquiry: 'INQ',
-    tt_request: 'TTR',
-    tt_complaint: 'TTC',
-    comm: 'COM',
-    case: 'CAS',
-    sched: 'SCH'
-  };
-  const prefix = typeMap[cType] || 'REF';
-  const tsMatch = id.match(/(\d{10,13})/);
-  if (!tsMatch) return `${prefix}-??????`;
-  const ts = parseInt(tsMatch[1]);
-  const d = new Date(ts > 9999999999 ? ts : ts * 1000);
-  const ymd = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
-  const suffix = String(ts).slice(-4);
-  return `${prefix}-${ymd}-${suffix}`;
-};
 
 const getRelativeTime = (dateString: string) => {
   const now = new Date();

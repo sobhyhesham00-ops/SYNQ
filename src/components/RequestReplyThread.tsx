@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { User } from '../types';
 import { MessageSquare, Paperclip, Send, Download, X } from 'lucide-react';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../firebase';
 import { toast } from 'sonner';
 
@@ -14,15 +14,23 @@ interface BaseRequest {
 export function RequestReplyThread({ 
   request, 
   currentUser, 
-  collectionName 
+  collectionName,
+  addSystemNotification,
+  requestType,
+  requestAgentName
 }: { 
   request: BaseRequest, 
   currentUser: User,
-  collectionName: string 
+  collectionName: string,
+  addSystemNotification?: (title: string, message: string, type: any, target: string) => void,
+  requestType?: string,
+  requestAgentName?: string
 }) {
   const [text, setText] = useState('');
   const [screenshotPreview, setScreenshotPreview] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+
+  const newReplies = (request.replies || []).filter(r => r.senderName !== currentUser.name).length;
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -48,18 +56,38 @@ export function RequestReplyThread({
       screenshot: screenshotPreview || undefined
     };
 
-    const currentReplies = request.replies || [];
-    const updatedRequest = {
-      ...request,
-      replies: [...currentReplies, newReply]
-    };
+    // Fallbacks for notifications if props were not provided
+    const computedRequestType = requestType || (
+      collectionName === 'requests' ? 'Scheduling' :
+      collectionName === 'tabby_tamara' ? 'Tabby/Tamara' :
+      collectionName === 'tabby_tamara_complaints' ? 'Complaint' :
+      collectionName === 'client_comms' ? 'Client Comm' :
+      'Request'
+    );
+    const computedRequestAgentName = requestAgentName || request.agentName || request.callCenterAgentName || request.openedBy;
 
     try {
-      await setDoc(doc(db, collectionName, request.id), updatedRequest);
+      await updateDoc(doc(db, collectionName, request.id), {
+        replies: arrayUnion(newReply)
+      });
+
+      if (addSystemNotification) {
+        const isAgentReplying = currentUser.role === 'agent';
+        const target = isAgentReplying ? 'tl' : (computedRequestAgentName || 'tl');
+        const title = isAgentReplying
+          ? `💬 Agent Reply on ${computedRequestType || 'Request'}`
+          : `📩 TL Reply on Your ${computedRequestType || 'Request'}`;
+        const message = isAgentReplying
+          ? `${currentUser.name} replied to a ${computedRequestType || 'Request'}: "${text.substring(0, 80)}"`
+          : `${currentUser.name} replied to your ${computedRequestType || 'Request'}: "${text.substring(0, 80)}"`;
+        addSystemNotification(title, message, 'general', target);
+      }
+
       toast.success("Reply added!");
       setText('');
       setScreenshotPreview('');
     } catch(err) {
+      console.error(err);
       toast.error("Failed to add reply");
     }
   };
@@ -81,10 +109,15 @@ export function RequestReplyThread({
     return (
       <button 
         onClick={() => setIsOpen(true)}
-        className="mt-2 text-[10px] uppercase font-bold tracking-widest text-indigo-400 bg-indigo-500/10 px-3 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-indigo-500/20 transition-colors"
+        className="mt-2 text-[10px] uppercase font-bold tracking-widest text-indigo-400 bg-indigo-500/10 px-3 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-indigo-500/20 transition-colors cursor-pointer select-none"
       >
         <MessageSquare className="w-3.5 h-3.5" />
-        Thread / Notes ({(request.replies || []).length})
+        Thread ({(request.replies || []).length})
+        {newReplies > 0 && !isOpen && (
+          <span className="ml-1 w-4 h-4 bg-indigo-500 text-white rounded-full text-[9px] flex items-center justify-center font-bold animate-pulse">
+            {newReplies}
+          </span>
+        )}
       </button>
     );
   }

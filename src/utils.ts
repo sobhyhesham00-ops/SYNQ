@@ -1371,5 +1371,42 @@ export const compressImage = (base64Str: string, maxDimension = 800, quality = 0
   });
 };
 
+export const formatCaseRef = (id: string, cType: string = 'inq'): string => {
+  const typeMap: Record<string, string> = {
+    sched: 'SCH',
+    inq: 'INQ',
+    inquiry: 'INQ',
+    tt_request: 'TTR',
+    tt_complaint: 'TTC',
+    comm: 'COM',
+    case: 'CAS'
+  };
+  const prefix = typeMap[cType] || 'REF';
+  const tsMatch = id.match(/(\d{10,13})/);
+  if (!tsMatch) return `${prefix}-??????`;
+  const d = new Date(parseInt(tsMatch[1]));
+  const ymd = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  return `${prefix}-${ymd}-${tsMatch[1].slice(-4)}`;
+};
+
+export const normalizePhone = (phone: string): string => {
+  return (phone || '').replace(/\D/g, '').replace(/^(971|00971|0)+/, '');
+};
+
+export const getSLAStatus = (createdAt: string, status: string, resolvedStatuses: string[]) => {
+  const ageMs = Date.now() - new Date(createdAt).getTime();
+  const ageH = ageMs / 3600000;
+  const isResolved = resolvedStatuses.includes(status);
+  const mins = Math.floor(ageMs / 60000);
+  const label = ageH < 1 ? `${mins}m open` : `${Math.floor(ageH)}h ${Math.floor((ageH % 1)*60)}m open`;
+  let color = 'bg-slate-700 text-slate-400 border-white/5';
+  if (isResolved) color = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+  else if (ageH > 24) color = 'bg-red-500/20 text-red-400 border-red-500/30 animate-pulse';
+  else if (ageH > 4) color = 'bg-orange-500/20 text-orange-400 border-orange-500/30';
+  else if (ageH > 1) color = 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+  return { label, color, isResolved, ageMs };
+};
+
+
 
 

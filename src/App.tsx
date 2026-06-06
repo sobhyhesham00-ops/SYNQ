@@ -151,6 +151,8 @@ import {
   findAgentByUsername,
   compressImage,
   handleGlobalImagePaste,
+  formatCaseRef,
+  normalizePhone,
 } from "./utils";
 import {
   SchedulingRequest,
@@ -592,12 +594,8 @@ const ActiveTimer = ({ startTime }: { startTime: string }) => {
   return <span className="font-mono tabular-nums">{elapsed}</span>;
 };
 
-const formatCaseRef = (id: string, prefix: string = "INQ") => {
-  const tsMatch = id.match(/(\d{10,13})/);
-  if (!tsMatch) return `${prefix}-??????`;
-  const d = new Date(parseInt(tsMatch[1]));
-  return `${prefix}-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${tsMatch[1].slice(-4)}`;
-};
+
+
 
 const compStatusLabels: Record<string, string> = {
   pending_tl: '🕐 Pending TL Review',
@@ -8396,9 +8394,7 @@ ${ttNotes}`
                                     ) {
                                       finalPhone =
                                         "+971 " +
-                                        finalPhone
-                                          .replace(/\D/g, "")
-                                          .replace(/^(971|00971|0)/, "");
+                                        normalizePhone(finalPhone);
                                     }
                                     if (finalPhone === "+971 ") finalPhone = "";
                                     const updated = {
@@ -14005,6 +14001,7 @@ Notes: ${a.notes || "None"}`;
                         getRemainingEditTime={getRemainingEditTime}
                         setEditingItem={setEditingItem}
                         handleCancelRequest={handleCancelRequest}
+                        addSystemNotification={addSystemNotification}
                       />
                     )}
 
@@ -14146,10 +14143,8 @@ Notes: ${a.notes || "None"}`;
                                     if (val && !val.startsWith("+971 ")) {
                                       val =
                                         "+971 " +
-                                        val
-                                          .replace(/\D/g, "")
-                                          .replace(/^(971|00971|0)/, "");
-                                    }
+                                                 normalizePhone(val);
+                                             }
                                     if (val === "+971 ") val = "";
                                     setInquiryPhoneNumber(val);
                                   }}
@@ -20096,13 +20091,8 @@ _ ${inq.answer || "No answer yet"} _`;
                                             ) {
                                               val =
                                                 "+971 " +
-                                                val
-                                                  .replace(/\D/g, "")
-                                                  .replace(
-                                                    /^(971|00971|0)/,
-                                                    "",
-                                                  );
-                                            }
+                                                 normalizePhone(val);
+                                             }
                                             if (val === "+971 ") val = "";
                                             setTtPhoneNumber(val);
                                           }}
@@ -20386,13 +20376,8 @@ _ ${inq.answer || "No answer yet"} _`;
                                             ) {
                                               val =
                                                 "+971 " +
-                                                val
-                                                  .replace(/\D/g, "")
-                                                  .replace(
-                                                    /^(971|00971|0)/,
-                                                    "",
-                                                  );
-                                            }
+                                                 normalizePhone(val);
+                                             }
                                             if (val === "+971 ") val = "";
                                             setTcPhoneNumber(val);
                                           }}
@@ -20587,13 +20572,8 @@ _ ${inq.answer || "No answer yet"} _`;
                                               ) {
                                                 val =
                                                   "+971 " +
-                                                  val
-                                                    .replace(/\D/g, "")
-                                                    .replace(
-                                                      /^(971|00971|0)/,
-                                                      "",
-                                                    );
-                                              }
+                                                 normalizePhone(val);
+                                             }
                                               if (val === "+971 ") val = "";
                                               setCcPhoneNumber(val);
                                             }}
@@ -21034,6 +21014,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                                 canEditItem={canEditItem}
                                                 getRemainingEditTime={getRemainingEditTime}
                                                 setEditingItem={setEditingItem}
+                                                addSystemNotification={addSystemNotification}
                                               />
                                           ))}
                                         </div>
@@ -21576,6 +21557,9 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                       request={comp}
                                                       currentUser={currentUser}
                                                       collectionName="tabby_tamara_complaints"
+                                                      addSystemNotification={addSystemNotification}
+                                                      requestType="Complaint"
+                                                      requestAgentName={comp.agentName}
                                                     />
                                                   </div>
                                                 </div>
@@ -22079,6 +22063,9 @@ _ ${req.handlingNotes || "Pending response"} _`;
                                                       request={req}
                                                       currentUser={currentUser}
                                                       collectionName="client_comms"
+                                                      addSystemNotification={addSystemNotification}
+                                                      requestType="Client Comm"
+                                                      requestAgentName={req.callCenterAgentName || req.openedBy}
                                                     />
                                                   </div>
                                                 </div>
@@ -22865,6 +22852,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
         currentUser={currentUser} 
         handleMarkAllNotifsAsRead={handleMarkAllNotifsAsRead} 
         handleMarkSingleNotifAsRead={handleMarkSingleNotifAsRead} 
+        setActiveTab={setActiveTab}
       />
     </div>
   );
