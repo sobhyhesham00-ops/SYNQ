@@ -3318,29 +3318,19 @@ ${pageText}
     return () => clearInterval(interval);
   }, [currentUser, lastUserInteraction]);
 
-  // Real-time compliance overstay alerts background checks (break, lunch, restroom > 10m) & absent alerts
-  const [notifiedOverstays, setNotifiedOverstays] = useState<
-    Record<string, boolean>
-  >(() => {
-    return getStorageItem<Record<string, boolean>>(
-      "sched_notified_overstays",
-      {},
-    );
-  });
-  const [notifiedAbsences, setNotifiedAbsences] = useState<
-    Record<string, boolean>
-  >(() => {
-    return getStorageItem<Record<string, boolean>>(
-      "sched_notified_absences",
-      {},
-    );
-  });
+  // Real-time compliance overstay alerts background checks (break, lunch, restroom > 10m) & absent alerts using useRef to prevent re-render loops
+  const notifiedOverstaysRef = useRef<Record<string, boolean>>(
+    getStorageItem<Record<string, boolean>>("sched_notified_overstays", {})
+  );
+  const notifiedAbsencesRef = useRef<Record<string, boolean>>(
+    getStorageItem<Record<string, boolean>>("sched_notified_absences", {})
+  );
 
   useEffect(() => {
     if (!currentUser) return;
 
     let overstaysUpdated = false;
-    const newNotifiedOverstays = { ...notifiedOverstays };
+    const newNotifiedOverstays = { ...notifiedOverstaysRef.current };
 
     // Check for exceeding break / lunch / restroom / meeting / one_on_one / personal
     agentsList.forEach((agent) => {
@@ -3386,7 +3376,7 @@ ${pageText}
     });
 
     if (overstaysUpdated) {
-      setNotifiedOverstays(newNotifiedOverstays);
+      notifiedOverstaysRef.current = newNotifiedOverstays;
       localStorage.setItem(
         "sched_notified_overstays",
         JSON.stringify(newNotifiedOverstays),
@@ -3398,7 +3388,7 @@ ${pageText}
     const todaySchedules = schedules.filter((s) => s.date === todayStr);
 
     let absencesUpdated = false;
-    const newNotifiedAbsences = { ...notifiedAbsences };
+    const newNotifiedAbsences = { ...notifiedAbsencesRef.current };
 
     todaySchedules.forEach((sched) => {
       const agent = sched.agentName;
@@ -3452,7 +3442,7 @@ ${pageText}
     });
 
     if (absencesUpdated) {
-      setNotifiedAbsences(newNotifiedAbsences);
+      notifiedAbsencesRef.current = newNotifiedAbsences;
       localStorage.setItem(
         "sched_notified_absences",
         JSON.stringify(newNotifiedAbsences),
@@ -3464,8 +3454,6 @@ ${pageText}
     schedules,
     agentsList,
     currentUser,
-    notifiedOverstays,
-    notifiedAbsences,
   ]);
 
   const handleAssignSupport = () => {
