@@ -3809,6 +3809,18 @@ ${swapTargetAgent}'s LOB: ${targetLOB}`);
 
     setRequests(updated);
     setStorageItem("sched_requests", updated);
+
+    const decidedReq = updated.find(r => r.id === requestId);
+    if (decidedReq) {
+      addSystemNotification(
+        approve ? '✅ Leave/Swap Approved' : '❌ Leave/Swap Declined',
+        approve
+          ? `Your ${decidedReq.type === 'swap' ? 'shift swap' : 'annual leave'} request has been approved by ${currentUser.name}.`
+          : `Your ${decidedReq.type === 'swap' ? 'shift swap' : 'annual leave'} request was declined by ${currentUser.name}.`,
+        'schedule',
+        decidedReq.agentName
+      );
+    }
   };
 
   // Agent cancelling own pending request
@@ -5310,8 +5322,11 @@ ${result.errors.slice(0, 5).join("\n")}${
   const handleSetInquirySent = (inquiryId: string) => {
     if (!currentUser || currentUser.role !== "tl") return;
 
+    let sentInquiry: any = null;
+
     const updated = inquiries.map((inq) => {
       if (inq.id === inquiryId) {
+        sentInquiry = inq;
         const updatedInq = {
           ...inq,
           status: "sent" as const,
@@ -5330,6 +5345,15 @@ ${result.errors.slice(0, 5).join("\n")}${
 
     setInquiries(updated);
     setStorageItem("sched_inquiries", updated);
+
+    if (sentInquiry) {
+      addSystemNotification(
+        '📨 Inquiry Forwarded to Partner',
+        `Your inquiry for clinic ${sentInquiry.clinicName} has been forwarded to the partner by ${currentUser.name}.`,
+        'inquiry',
+        sentInquiry.agentName
+      );
+    }
   };
 
   const handleSetInquiryAnswered = (inquiryId: string, answerText: string) => {
@@ -5855,6 +5879,16 @@ ${ttNotes}`
     setClientComms(updated);
     setStorageItem("sched_client_comms", updated);
 
+    const handledComm = updated.find(c => c.id === commId);
+    if (handledComm) {
+      addSystemNotification(
+        '✅ Client Comm Request Completed',
+        `Your client communication request for ${handledComm.clinicName} has been handled by ${currentUser.name}. Notes: ${notes.substring(0, 100)}`,
+        'general',
+        handledComm.callCenterAgentName
+      );
+    }
+
     // Clear TL input
     setActiveCcHandlingId(null);
     setCcHandlingNotes("");
@@ -5913,6 +5947,17 @@ ${ttNotes}`
     });
     setClientComms(updated);
     setStorageItem("sched_client_comms", updated);
+
+    const takenComm = updated.find(c => c.id === commId);
+    if (takenComm) {
+      addSystemNotification(
+        '🔄 Request In Progress',
+        `${currentUser.name} has taken your client communication request and is working on it now.`,
+        'general',
+        takenComm.callCenterAgentName
+      );
+    }
+
     toast.success("Request taken! You can now provide handling notes.");
   };
 
@@ -6398,9 +6443,11 @@ ${ttNotes}`
     complaintId: string,
     status: "not_contacted" | "contacted",
   ) => {
+    let comp: any = null;
+
     const updated = tabbyTamaraComplaints.map((c) => {
       if (c.id === complaintId) {
-        const updatedComplaint = {
+        comp = {
           ...c,
           customerContacted: status,
           status:
@@ -6411,16 +6458,25 @@ ${ttNotes}`
             status === "contacted" ? new Date().toISOString() : undefined,
         };
         // Sync to Firestore
-        setDoc(doc(db, "tt_complaints", c.id), updatedComplaint).catch((e) =>
+        setDoc(doc(db, "tt_complaints", c.id), comp).catch((e) =>
           console.error("TT Complaint Contact Update Error:", e),
         );
-        return updatedComplaint;
+        return comp;
       }
       return c;
     });
 
     setTabbyTamaraComplaints(updated);
     setStorageItem("sched_tt_complaints", updated);
+
+    if (comp && status === "contacted") {
+      addSystemNotification(
+        '✅ Complaint Resolved',
+        `Your complaint for ${comp.patientName} has been marked as resolved (patient contacted).`,
+        'general',
+        comp.agentName
+      );
+    }
   };
 
   const handleDeleteComplaint = (complaintId: string) => {

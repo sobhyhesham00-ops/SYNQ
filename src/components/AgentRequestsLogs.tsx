@@ -184,34 +184,59 @@ export const AgentRequestsLogs = ({
     }
 
     let statusClass = "bg-slate-800 border-slate-700 text-slate-300";
-    if (req.status === 'pending_partner' || req.status === 'pending') {
+    if (['pending_partner', 'pending', 'pending_tl', 'not_confirmed', 'submitted', 'sent'].includes(req.status)) {
       statusClass = "bg-amber-500/10 border-amber-500/20 text-amber-400";
-    } else if (req.status === 'approved' || req.status === 'answered' || req.status === 'closed') {
+    } else if (['approved', 'answered', 'confirmed', 'closed', 'contacted', 'in_progress'].includes(req.status)) {
       statusClass = "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
-    } else if (req.status === 'rejected' || req.status === 'cancelled') {
+    } else if (['rejected', 'cancelled', 'declined'].includes(req.status)) {
       statusClass = "bg-rose-500/10 border-rose-500/20 text-rose-400";
+    } else if (req.status === 'need_contact') {
+      statusClass = "bg-blue-500/10 border-blue-500/20 text-blue-400";
     }
 
-    let statusLabel = req.status?.replace(/_/g, ' ') || '';
+    const resolvedStatuses = ['approved', 'answered', 'confirmed', 'closed', 'contacted', 'rejected', 'declined', 'cancelled'];
+    const canShowEdit = canEditItem(req.createdAt) && !resolvedStatuses.includes(req.status);
+    const sla = getSLAStatus(req.createdAt, req.status, resolvedStatuses);
+
+    const STATUS_LABELS: Record<string, string> = {
+      pending: '⏳ Pending', pending_partner: '🤝 Awaiting Partner',
+      pending_tl: '🕐 Pending TL', not_confirmed: '🕐 Awaiting Confirm',
+      approved: '✅ Approved', answered: '✅ Answered',
+      confirmed: '✅ Confirmed', closed: '✅ Closed', contacted: '✅ Contacted',
+      rejected: '❌ Rejected', cancelled: '❌ Cancelled', declined: '❌ Declined',
+      need_contact: '📞 Action: Contact Patient', in_progress: '🔄 In Progress',
+      submitted: '📤 Submitted', sent: '📨 Sent to Partner'
+    };
+    let statusLabel = STATUS_LABELS[req.status] || req.status?.replace(/_/g, ' ') || '';
+
+    const collectionMap: Record<string, string> = {
+      sched: 'scheduling_requests', inq: 'inquiries', tt_request: 'tt_requests',
+      tt_complaint: 'tt_complaints', comm: 'client_comms'
+    };
 
     return (
       <div key={req.id + req._cType} className="flex flex-col p-4 bg-white/5 border border-white/5 rounded-2xl hover:border-white/10 transition-all text-left space-y-3">
         {/* Header Row */}
         <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {typeLab}
             <span className={`px-2 py-0.5 border rounded text-[10px] font-bold uppercase shrink-0 ${statusClass}`}>
               {statusLabel}
             </span>
             {req._cType === 'inq' && req.answer && !req.seenByAgent && (
-              <span className='w-2 h-2 rounded-full bg-emerald-400 animate-pulse' title='New answer from TL' />
+              <span className='w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-1' title='New answer from TL' />
             )}
             {req._cType === 'tt_complaint' && req.tlComment && (
               <span className='w-2 h-2 rounded-full bg-amber-400 animate-pulse' title='New comment from TL' />
             )}
+            <span className={`px-2 py-0.5 border rounded-lg text-[10px] font-mono shrink-0 ${sla.color}`}>
+              {sla.label}
+            </span>
           </div>
           <div className="text-[11px] text-slate-500 font-mono">
-             <CopyWrap text={req.id || ''}>{formatCaseRef(req.id, req._cType)}</CopyWrap> &bull; {new Date(req.createdAt).toLocaleString()}
+             <CopyWrap text={req.id || ''}>
+               <span className='font-mono text-[10px] text-slate-500'>{formatCaseRef(req.id, req._cType)}</span>
+             </CopyWrap> &bull; {new Date(req.createdAt).toLocaleString()}
           </div>
         </div>
 
@@ -243,7 +268,7 @@ export const AgentRequestsLogs = ({
               Copy Details
             </button>
 
-            {canEditItem(req.createdAt) && !['approved', 'answered', 'confirmed', 'closed', 'contacted', 'rejected', 'declined', 'cancelled'].includes(req.status) && (
+            {canShowEdit && (
               <button 
                 onClick={() => {
                   let editType = 'scheduling_request';
@@ -261,15 +286,15 @@ export const AgentRequestsLogs = ({
           </div>
         </div>
 
-        {req._cType === 'sched' && (
+        {collectionMap[req._cType] && (
           <div className="w-full mt-2 pt-2 border-t border-white/5">
             <RequestReplyThread 
               request={req} 
               currentUser={currentUser} 
-              collectionName="requests" 
+              collectionName={collectionMap[req._cType]} 
               addSystemNotification={addSystemNotification}
-              requestType="Scheduling"
-              requestAgentName={req.agentName}
+              requestType={req._cType === 'sched' ? 'Scheduling' : req._cType === 'inq' ? 'Inquiry' : req._cType === 'tt_request' ? 'TT/Tamara' : req._cType === 'tt_complaint' ? 'Complaint' : 'Client Comm'}
+              requestAgentName={req.agentName || req.openedBy || req.callCenterAgentName || currentUser.name}
             />
           </div>
         )}

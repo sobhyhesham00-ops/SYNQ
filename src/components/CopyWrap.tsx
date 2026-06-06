@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import { formatCaseRef, normalizePhone } from '../utils';
 
 export const CopyWrap = ({ 
   text, 
@@ -20,14 +21,12 @@ export const CopyWrap = ({
     e.stopPropagation();
     if (!text) return;
     
-    let textToCopy = text;
-    if (phoneMode && typeof text === 'string') {
-      textToCopy = text.replace(/^0+/, '');
-    }
+    const value = text;
+    const copyValue = label === 'Phone' ? normalizePhone(value) : value;
     
-    navigator.clipboard.writeText(textToCopy);
+    navigator.clipboard.writeText(copyValue);
     setCopied(true);
-    toast.success(`${label} copied!`, { icon: '📋' });
+    toast.success(label === 'Phone' ? 'Phone copied (starts from 5)' : `${label} copied!`, { icon: '📋' });
     setTimeout(() => setCopied(false), 2000);
   };
 
