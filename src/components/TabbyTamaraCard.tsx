@@ -3,6 +3,7 @@ import { Copy, ExternalLink, MessageCircle, AlertCircle, Phone, CheckCircle2, Ho
 import { toast } from 'sonner';
 import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
+import { formatCaseRef } from '../utils';
 
 const CopyableField = ({ icon: Icon, label, value, isBold = false }: { icon: any, label: string, value: string, isBold?: boolean }) => {
   const [copied, setCopied] = React.useState(false);
@@ -59,10 +60,9 @@ export const TabbyTamaraCard = ({
   const isCompleted = req.customerContacted === "contacted";
 
   const elapsedMins = req.confirmedAt && req.customerContacted !== 'contacted'
-    ? (Date.now() - new Date(req.confirmedAt).getTime()) / 60000
-    : 0;
-  const isOverdue = isPendingContact && elapsedMins > 60;
-  const isWarning = isPendingContact && elapsedMins > 30 && !isOverdue;
+    ? (Date.now() - new Date(req.confirmedAt).getTime()) / 60000 : 0;
+  const isOverdue = elapsedMins > 60;
+  const isWarning = elapsedMins > 30 && !isOverdue;
 
   const getThemeColor = () => {
     if (req.platform === "tabby") return "amber";
@@ -100,9 +100,7 @@ export const TabbyTamaraCard = ({
             <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest border ${platformBadgeColor}`}>
               {req.platform === "one_time_payment" ? "One Time Paid" : req.platform}
             </span>
-            <span className="font-mono text-[10px] text-slate-500 font-bold tracking-wider">
-              {formatTTRef(req.id)}
-            </span>
+            <span className='font-mono text-[10px] text-slate-500 ml-auto'>{formatCaseRef(req.id, 'tt_request')}</span>
             <span className={`px-2 py-0.5 rounded text-[9px] font-bold border ${req.isOldCustomer ? "bg-slate-800/80 text-slate-300 border-white/5" : "bg-indigo-500/15 text-indigo-300 border-indigo-500/20"}`}>
               {req.isOldCustomer ? "👤 Old Customer" : "✨ New Customer"}
             </span>
@@ -262,6 +260,12 @@ export const TabbyTamaraCard = ({
               placeholder="https://..."
               value={tlFintechPaymentLink}
               onChange={(e) => setTlFintechPaymentLink(e.target.value)}
+              onBlur={(e) => {
+                const val = e.target.value;
+                if (val && !val.startsWith('http')) {
+                  toast.error('Payment link must start with http:// or https://');
+                }
+              }}
               className="w-full bg-[#16161a] border border-white/10 rounded-xl px-3.5 py-2.5 text-[13px] text-white focus:outline-none focus:border-indigo-400 focus:bg-[#1a1a20] font-sans font-medium transition-colors"
             />
           </div>
