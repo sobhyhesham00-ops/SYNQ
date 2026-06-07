@@ -90,6 +90,16 @@ export const AgentRequestsLogs = ({
       setTimeout(() => { btn.innerText = orig; }, 1000);
     };
 
+    const STATUS_LABELS: Record<string, string> = {
+      pending: '⏳ Pending', pending_partner: '🤝 Awaiting Partner',
+      pending_tl: '🕐 Pending TL', not_confirmed: '🕐 Awaiting Confirm',
+      approved: '✅ Approved', answered: '✅ Answered',
+      confirmed: '✅ Confirmed', closed: '✅ Closed', contacted: '✅ Contacted',
+      rejected: '❌ Rejected', cancelled: '❌ Cancelled', declined: '❌ Declined',
+      need_contact: '📞 Action: Contact Patient', in_progress: '🔄 In Progress',
+      submitted: '📤 Submitted', sent: '📨 Sent to Partner'
+    };
+
     let title = "";
     let content = null;
     let typeLab = null;
@@ -98,7 +108,18 @@ export const AgentRequestsLogs = ({
     if (req._cType === 'sched') {
       title = req.type === 'swap' ? 'Shift Swap Request' : 'Annual Leave Request';
       typeLab = <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${req.type === 'swap' ? 'bg-blue-500/10 border border-blue-500/20 text-blue-300' : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-300'}`}>{title}</span>;
-      copyData = `ID: ${req.id}\nType: ${title}\nDate: ${new Date(req.createdAt).toLocaleString()}\nStatus: ${req.status}`;
+      copyData = [
+        `📋 ${title}`,
+        `Ref: ${formatCaseRef(req.id, 'sched')}`,
+        `Date: ${new Date(req.createdAt).toLocaleString()}`,
+        `Status: ${STATUS_LABELS[req.status] || req.status}`,
+        req.type === 'swap'
+          ? `Swap Date: ${req.date} | With: ${req.swapWithAgent} | Their Shift: ${req.swapWithShift}`
+          : `Leave: ${req.startDate} → ${req.endDate}`,
+        req.notes ? `Notes: ${req.notes}` : '',
+        (req.links || []).length > 0 ? `Links:\n${(req.links || []).join('\n')}` : '',
+        (req.photos || []).length > 0 ? `Attachments: ${req.photos.length} photo(s) attached` : '',
+      ].filter(Boolean).join('\n');
       content = (
         <div className="grid grid-cols-2 gap-x-4 gap-y-1">
           {req.type === 'swap' ? (
@@ -118,7 +139,17 @@ export const AgentRequestsLogs = ({
     } else if (req._cType === 'inq') {
       title = 'QA Inquiry';
       typeLab = <span className="px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-purple-500/10 border border-purple-500/20 text-purple-300">{title}</span>;
-      copyData = `ID: ${req.id}\nPatient Phone: ${req.phoneNumber}\nClinic: ${req.clinicName}\nInquiry: ${req.text}\nStatus: ${req.status}`;
+      copyData = [
+        `📋 QA Inquiry`,
+        `Ref: ${formatCaseRef(req.id, 'inq')}`,
+        `Clinic: ${req.clinicName}`,
+        `Phone: ${normalizePhone(req.phoneNumber || '')}`,
+        `Inquiry: ${req.text}`,
+        `Status: ${STATUS_LABELS[req.status] || req.status}`,
+        req.answer ? `Answer: ${req.answer}` : '',
+        (req.links || []).length > 0 ? `Links:\n${(req.links || []).join('\n')}` : '',
+        (req.photos || []).length > 0 ? `Attachments: ${req.photos.length} photo(s) attached` : '',
+      ].filter(Boolean).join('\n');
       content = (
         <div className="grid grid-cols-2 gap-x-4 gap-y-1">
           <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Clinic</p><p className="text-sm text-slate-200"><CopyWrap text={req.clinicName || 'N/A'}>{req.clinicName || 'N/A'}</CopyWrap></p></div>
@@ -135,7 +166,20 @@ export const AgentRequestsLogs = ({
     } else if (req._cType === 'tt_request') {
       title = 'Tabby/Tamara Request';
       typeLab = <span className="px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-orange-500/10 border border-orange-500/20 text-orange-300">{title}</span>;
-      copyData = `ID: ${req.id}\nPatient: ${req.patientName}\nPhone: ${req.phoneNumber}\nClinic: ${req.clinicName}\nPlatform: ${req.platform}\nStatus: ${req.status}`;
+      copyData = [
+        `📋 Tabby/Tamara Request`,
+        `Ref: ${formatCaseRef(req.id, 'tt_request')}`,
+        `Patient: ${req.patientName} | File: ${req.fileNumber || 'N/A'}`,
+        `Phone: ${normalizePhone(req.phoneNumber || '')}`,
+        `Clinic: ${req.clinicName}`,
+        `Platform: ${req.platform?.toUpperCase()}`,
+        `Amount: AED ${req.priceWithoutTax || 'N/A'}`,
+        `Status: ${STATUS_LABELS[req.status] || req.status}`,
+        req.paymentLink ? `Payment Link: ${req.paymentLink}` : '',
+        req.notes ? `Notes: ${req.notes}` : '',
+        (req.links || []).length > 0 ? `Links:\n${(req.links || []).join('\n')}` : '',
+        (req.photos || []).length > 0 ? `Attachments: ${req.photos.length} photo(s) attached` : '',
+      ].filter(Boolean).join('\n');
       content = (
         <div className="grid grid-cols-2 gap-x-4 gap-y-1">
           <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Patient</p><p className="text-sm text-slate-200"><CopyWrap text={req.patientName || 'N/A'}>{req.patientName || 'N/A'}</CopyWrap> <span className="text-slate-400 text-xs font-normal">({req.platform})</span></p></div>
@@ -147,7 +191,18 @@ export const AgentRequestsLogs = ({
     } else if (req._cType === 'tt_complaint') {
       title = 'Complaint';
       typeLab = <span className="px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-red-500/10 border border-red-500/20 text-red-300">{title}</span>;
-      copyData = `ID: ${req.id}\nPatient: ${req.patientName}\nPhone: ${req.phoneNumber}\nClinic: ${req.clinicName}\nComplaint: ${req.complaintDetails}\nStatus: ${req.status}`;
+      copyData = [
+        `📋 Complaint`,
+        `Ref: ${formatCaseRef(req.id, 'tt_complaint')}`,
+        `Patient: ${req.patientName} | File: ${req.fileNumber || 'N/A'}`,
+        `Phone: ${normalizePhone(req.phoneNumber || '')}`,
+        `Clinic: ${req.clinicName}`,
+        `Complaint: ${req.complaintDetails}`,
+        `Status: ${STATUS_LABELS[req.status] || req.status}`,
+        req.tlComment ? `TL Comment: ${req.tlComment}` : '',
+        (req.links || []).length > 0 ? `Links:\n${(req.links || []).join('\n')}` : '',
+        (req.photos || []).length > 0 ? `Attachments: ${req.photos.length} photo(s) attached` : '',
+      ].filter(Boolean).join('\n');
       content = (
         <div className="grid grid-cols-2 gap-x-4 gap-y-1">
           <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Patient</p><p className="text-sm text-slate-200"><CopyWrap text={req.patientName || 'N/A'}>{req.patientName || 'N/A'}</CopyWrap></p></div>
@@ -165,7 +220,19 @@ export const AgentRequestsLogs = ({
     } else if (req._cType === 'comm') {
       title = 'Client Communication';
       typeLab = <span className="px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-cyan-500/10 border border-cyan-500/20 text-cyan-300">{title}</span>;
-      copyData = `ID: ${req.id}\nPatient: ${req.patientName}\nPhone: ${req.phoneNumber}\nClinic: ${req.clinicName}\nNotes: ${req.notes}\nStatus: ${req.status}`;
+      copyData = [
+        `📋 Client Communication`,
+        `Ref: ${formatCaseRef(req.id, 'comm')}`,
+        `Patient: ${req.patientName || 'N/A'}`,
+        `Phone: ${normalizePhone(req.phoneNumber || '')}`,
+        `Clinic: ${req.clinicName}`,
+        `Language: ${req.language || 'N/A'}`,
+        `Notes: ${req.notes || 'N/A'}`,
+        `Status: ${STATUS_LABELS[req.status] || req.status}`,
+        req.handlingNotes ? `TL Handling Notes: ${req.handlingNotes}` : '',
+        (req.links || []).length > 0 ? `Links:\n${(req.links || []).join('\n')}` : '',
+        (req.photos || []).length > 0 ? `Attachments: ${req.photos.length} photo(s) attached` : '',
+      ].filter(Boolean).join('\n');
       content = (
         <div className="grid grid-cols-2 gap-x-4 gap-y-1">
           <div><p className="text-[10px] uppercase tracking-wider text-slate-500">Patient</p><p className="text-sm text-slate-200"><CopyWrap text={req.patientName || 'N/A'}>{req.patientName || 'N/A'}</CopyWrap></p></div>
@@ -198,15 +265,6 @@ export const AgentRequestsLogs = ({
     const canShowEdit = canEditItem(req.createdAt) && !resolvedStatuses.includes(req.status);
     const sla = getSLAStatus(req.createdAt, req.status, resolvedStatuses);
 
-    const STATUS_LABELS: Record<string, string> = {
-      pending: '⏳ Pending', pending_partner: '🤝 Awaiting Partner',
-      pending_tl: '🕐 Pending TL', not_confirmed: '🕐 Awaiting Confirm',
-      approved: '✅ Approved', answered: '✅ Answered',
-      confirmed: '✅ Confirmed', closed: '✅ Closed', contacted: '✅ Contacted',
-      rejected: '❌ Rejected', cancelled: '❌ Cancelled', declined: '❌ Declined',
-      need_contact: '📞 Action: Contact Patient', in_progress: '🔄 In Progress',
-      submitted: '📤 Submitted', sent: '📨 Sent to Partner'
-    };
     let statusLabel = STATUS_LABELS[req.status] || req.status?.replace(/_/g, ' ') || '';
 
     const collectionMap: Record<string, string> = {
