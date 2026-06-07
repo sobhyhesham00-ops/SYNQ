@@ -2664,6 +2664,17 @@ ${pageText}
   const [logTypeFilter, setLogTypeFilter] = useState("all");
   const [logSearchQuery, setLogSearchQuery] = useState("");
 
+  const filteredInquiries = useMemo(() => inquiries.filter(i => {
+    const s = inquirySearchQuery.toLowerCase();
+    const matchesSearch = !s ||
+      i.agentName?.toLowerCase().includes(s) || i.text.toLowerCase().includes(s) ||
+      i.clinicName?.toLowerCase().includes(s) || i.answer?.toLowerCase().includes(s) ||
+      (i.phoneNumber && normalizePhone(i.phoneNumber).includes(normalizePhone(inquirySearchQuery)));
+    const matchesStatus = !inquiryStatusFilter || i.status === inquiryStatusFilter;
+    const matchesClinic = inquiryClinicFilter === 'all' || i.clinicName?.toLowerCase() === inquiryClinicFilter.toLowerCase();
+    return matchesSearch && matchesStatus && matchesClinic;
+  }), [inquiries, inquirySearchQuery, inquiryStatusFilter, inquiryClinicFilter]);
+
   // Unified Screenshot Upload State
   const [activeScreenshot, setActiveScreenshot] = useState<string | null>(null);
   const [activePhotos, setActivePhotos] = useState<string[]>([]);
@@ -15814,15 +15825,6 @@ Notes: ${a.notes || "None"}`;
 
                       {/* Inquiries Records display */}
                       {(() => {
-                        const filteredInquiries = inquiries.filter(i => {
-                          const s = inquirySearchQuery.toLowerCase();
-                          const cleanPhone = (p) => p.replace(/\D/g, '').replace(/^0+/, '');
-                          const matchesSearch = !s || i.agentName?.toLowerCase().includes(s) || i.text.toLowerCase().includes(s) || i.clinicName?.toLowerCase().includes(s) || i.answer?.toLowerCase().includes(s) || (i.phoneNumber && cleanPhone(i.phoneNumber).includes(cleanPhone(inquirySearchQuery)));
-                          const matchesStatus = !inquiryStatusFilter || i.status === inquiryStatusFilter;
-                          const matchesClinic = inquiryClinicFilter === 'all' || i.clinicName?.toLowerCase() === inquiryClinicFilter.toLowerCase();
-                          return matchesSearch && matchesStatus && matchesClinic;
-                        });
-
                         return (
                           <div className="bg-white/5 border border-white/10 p-5 sm:p-6 rounded-3xl backdrop-blur-xl space-y-4">
                             <div className="border-b border-white/5 pb-3">

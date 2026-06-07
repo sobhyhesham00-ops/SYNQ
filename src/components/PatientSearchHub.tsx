@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef } from 'react';
 import { Search, History, MessageCircle, FileText, CheckCircle2, X, Download, ChevronDown, ChevronUp } from 'lucide-react';
 import { Inquiry, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, CaseRecord } from '../types';
 import { CopyWrap } from './CopyWrap';
-import { formatCaseRef } from '../utils';
+import { formatCaseRef, normalizePhone } from '../utils';
 
 interface PatientSearchHubProps {
   inquiries: Inquiry[];
@@ -30,6 +30,9 @@ const getRelativeTime = (dateString: string) => {
 };
 
 
+const cleanPhone = (p: string | undefined) => (p || '').replace(/\D/g, '').replace(/^0+/, '');
+
+
 export function PatientSearchHub({
   inquiries,
   ttRequests,
@@ -39,13 +42,13 @@ export function PatientSearchHub({
   currentUser,
   requests = []
 }: PatientSearchHubProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedQuery, setDebouncedQuery] = useState('');
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const [inputVal, setInputVal] = useState('');
+  const [query, setQuery] = useState('');
+  const debounceRef = useRef<any>(null);
   const [viewerImage, setViewerImage] = useState<string | null>(null);
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
 
-  const hasSearched = debouncedQuery.trim().length >= 3;
+  const hasSearched = query.length >= 3;
 
   const downloadFile = (url: string, prefix: string) => {
     try {
@@ -60,96 +63,41 @@ export function PatientSearchHub({
     }
   };
 
-  const cleanPhone = (p: string | undefined) => (p || '').replace(/\D/g, '').replace(/^0+/, '');
-  const phoneQuery = cleanPhone(debouncedQuery);
-  const textQuery = String(debouncedQuery || '').trim().toLowerCase();
-
   const isMatch = (item: any) => {
-    if (!String(debouncedQuery || '').trim()) return false;
-    
-    // Phone logic
-    if (phoneQuery.length >= 4 && item.phoneNumber) {
-      const itemPhone = cleanPhone(item.phoneNumber);
-      if (itemPhone.includes(phoneQuery) || phoneQuery.includes(itemPhone)) return true;
-    }
-
-    // Text fields
-    const searchFields = [
-      item.clinicName,
-      item.patientName,
-      item.agentName,
-      item.callCenterAgentName,
-      item.id,
-      item.inquiry,
-      item.complaintDetails,
-      item.handlingNotes,
-      item.text
+    if (!query) return false;
+    const q = query.toLowerCase();
+    const qPhone = normalizePhone(query);
+    const fields = [
+      item.agentName, item.callCenterAgentName, item.patientName,
+      item.clinicName, item.text, item.inquiry, item.complaintDetails,
+      item.notes, item.handlingNotes, item.id
     ];
-
-    for (const field of searchFields) {
-       if (field && String(field).toLowerCase().includes(textQuery)) return true;
+    if (fields.some(f => f && String(f).toLowerCase().includes(q))) return true;
+    if (qPhone.length >= 4 && item.phoneNumber) {
+      if (normalizePhone(item.phoneNumber).includes(qPhone) || qPhone.includes(normalizePhone(item.phoneNumber))) return true;
     }
-
     return false;
   };
 
   const matchedItems = useMemo(() => {
-    if (!debouncedQuery.trim()) return [];
+    if (!query.trim()) return [];
 
-    const res: any[] = [];
-    
-    inquiries.filter(isMatch).forEach(r => res.push({...r, _type: 'inquiry'}));
-    ttRequests.filter(isMatch).forEach(r => res.push({...r, _type: 'tt_request'}));
-    ttComplaints.filter(isMatch).forEach(r => res.push({...r, _type: 'tt_complaint'}));
-    clientComms.filter(isMatch).forEach(r => res.push({...r, _type: 'comm'}));
-    cases.filter(isMatch).forEach(r => res.push({...r, _type: 'case'}));
-    requests.filter(isMatch).forEach(r => res.push({...r, _type: 'sched'}));
+    const allResults: any[] = [
+      ...inquiries.filter(isMatch).map(r => ({...r, _rType: 'inq', _type: 'inquiry'})),
+      ...ttRequests.filter(isMatch).map(r => ({...r, _rType: 'tt_request', _type: 'tt_request'})),
+      ...ttComplaints.filter(isMatch).map(r => ({...r, _rType: 'tt_complaint', _type: 'tt_complaint'})),
+      ...clientComms.filter(isMatch).map(r => ({...r, _rType: 'comm', _type: 'comm'})),
+      ...cases.filter(isMatch).map(r => ({...r, _rType: 'case', _type: 'case'})),
+    ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    return res.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [debouncedQuery, inquiries, ttRequests, ttComplaints, clientComms, cases, requests]);
+    return allResults;
+  }, [query, inquiries, ttRequests, ttComplaints, clientComms, cases]);
 
+  const allResults = matchedItems;
 
   const toggleExpand = (id: string) => {
     setExpandedItems(prev => ({ ...prev, [id]: !prev[id] }));
   };
-
-  const patientIdentity = useMemo(() => {
-    if (matchedItems.length === 0) return null;
-
-    const names = new Set<string>();
-    const phones = new Set<string>();
-    let firstContact = new Date();
-    
-    let stats = { inq: 0, tt: 0, comp: 0, comm: 0, case: 0, sched: 0 };
-
-    matchedItems.forEach(item => {
-      if (item.patientName) names.add(item.patientName);
-      if (item.phoneNumber) {
-         const cp = cleanPhone(item.phoneNumber);
-         if (cp) phones.add('0' + cp);
-      }
-      
-      const itemDate = new Date(item.createdAt);
-      if (itemDate < firstContact) firstContact = itemDate;
-
-      if (item._type === 'inquiry') stats.inq++;
-      if (item._type === 'tt_request') stats.tt++;
-      if (item._type === 'tt_complaint') stats.comp++;
-      if (item._type === 'comm') stats.comm++;
-      if (item._type === 'case') stats.case++;
-      if (item._type === 'sched') stats.sched++;
-    });
-
-    if (phones.size === 0 && names.size === 0) return null;
-
-    return {
-      names: Array.from(names),
-      phones: Array.from(phones),
-      firstContact,
-      stats,
-      total: matchedItems.length
-    };
-  }, [matchedItems]);
 
 
   const renderTimelineCard = (item: any) => {
@@ -309,19 +257,18 @@ export function PatientSearchHub({
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input
             type="text"
-            value={searchQuery}
+            value={inputVal}
             onChange={(e) => {
-              const val = e.target.value;
-              setSearchQuery(val);
+              setInputVal(e.target.value);
               clearTimeout(debounceRef.current);
-              debounceRef.current = setTimeout(() => setDebouncedQuery(val), 300);
+              debounceRef.current = setTimeout(() => setQuery(e.target.value.trim()), 300);
             }}
             placeholder="e.g. 0501234567 or ahmed or INQ-202505"
             className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-12 pr-12 py-3.5 text-slate-100 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 font-sans tracking-wide transition-colors"
           />
-          {searchQuery && (
+          {inputVal && (
              <button 
-               onClick={() => { setSearchQuery(''); setDebouncedQuery(''); }}
+               onClick={() => { setInputVal(''); setQuery(''); }}
                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
              >
                <X className="w-4 h-4" />
@@ -334,23 +281,15 @@ export function PatientSearchHub({
       {hasSearched && (
         <div className="space-y-6">
           {/* Header Profile */}
-          {patientIdentity && matchedItems.length > 0 && (
-            <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-5 shadow-xl font-mono text-sm">
-               <div className="flex items-center gap-2 text-cyan-400 font-bold mb-3 uppercase tracking-wider text-xs">
-                 <span>👤 Patient Profile Match</span>
-               </div>
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-slate-300">
-                 <div><span className="text-slate-500 mr-2">Names seen:</span> {patientIdentity.names.length > 0 ? patientIdentity.names.join(', ') : 'Unknown'}</div>
-                 <div><span className="text-slate-500 mr-2">Phone numbers:</span> {patientIdentity.phones.length > 0 ? patientIdentity.phones.join(', ') : 'Unknown'}</div>
-                 <div><span className="text-slate-500 mr-2">First contact:</span> {patientIdentity.firstContact.toDateString()}</div>
-                 <div>
-                   <span className="text-slate-500 mr-2">Total interactions:</span> 
-                   <span className="font-bold text-white">{patientIdentity.total}</span>
-                   <span className="text-slate-400 text-xs ml-2">
-                     ({patientIdentity.stats.inq} INQ, {patientIdentity.stats.tt} TT, {patientIdentity.stats.comp} COMP, {patientIdentity.stats.comm} COMM, {patientIdentity.stats.case} CASE)
-                   </span>
-                 </div>
-               </div>
+          {allResults.length > 0 && (
+            <div className='p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl mb-4 text-left'>
+              <p className='text-xs font-bold text-indigo-300 uppercase tracking-widest mb-2'>👤 Patient Profile</p>
+              <div className='grid grid-cols-2 gap-2 text-xs'>
+                <div><span className='text-slate-500'>Names seen:</span> <span className='text-slate-200'>{[...new Set(allResults.map(r => r.patientName).filter(Boolean))].join(', ')}</span></div>
+                <div><span className='text-slate-500'>Phone:</span> <span className='text-slate-200 font-mono'>{query}</span></div>
+                <div><span className='text-slate-500'>First contact:</span> <span className='text-slate-200'>{allResults.length ? new Date(allResults[allResults.length-1].createdAt).toLocaleDateString() : 'N/A'}</span></div>
+                <div><span className='text-slate-500'>Total interactions:</span> <span className='text-slate-200 font-bold'>{allResults.length}</span></div>
+              </div>
             </div>
           )}
 
@@ -359,7 +298,7 @@ export function PatientSearchHub({
              {matchedItems.length === 0 ? (
                <div className="text-center py-12 text-slate-400 space-y-2 bg-slate-900/30 rounded-2xl border border-slate-800">
                  <History className="w-10 h-10 mx-auto text-slate-600 mb-4" />
-                 <p>No records found matching "{debouncedQuery}"</p>
+                 <p>No records found matching "{query}"</p>
                  <p className="text-xs text-slate-500">Try a different phone number, name or reference ID.</p>
                </div>
              ) : (
