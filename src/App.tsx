@@ -2654,6 +2654,7 @@ ${pageText}
     },
   ]);
   const [inquirySearchQuery, setInquirySearchQuery] = useState("");
+  const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
   const [globalInquirySearch, setGlobalInquirySearch] = useState("");
   const [agentInquiryView, setAgentInquiryView] = useState<"my" | "global">(
     "my",
@@ -3824,26 +3825,21 @@ ${swapTargetAgent}'s LOB: ${targetLOB}`);
 
   // Agent cancelling own pending request
   const handleCancelRequest = (requestId: string) => {
-    const confirmation = window.confirm(
-      "Are you sure you want to cancel this pending request?",
-    );
-    if (!confirmation) return;
+    setPendingCancelId(requestId);
+  };
 
-    const updated = requests.filter(
-      (req) =>
-        !(
-          req.id === requestId &&
-          req.agentName === currentUser?.name &&
-          (req.status === "pending" || req.status === "pending_partner")
-        ),
+  const handleConfirmCancel = () => {
+    if (!pendingCancelId) return;
+    const updated = requests.filter(req =>
+      !(req.id === pendingCancelId &&
+        req.agentName === currentUser?.name &&
+        (req.status === 'pending' || req.status === 'pending_partner'))
     );
     setRequests(updated);
-    setStorageItem("sched_requests", updated);
-
-    // Sync to Firestore
-    deleteDoc(doc(db, "scheduling_requests", requestId)).catch((e) =>
-      console.error("Request Cancel Error:", e),
-    );
+    setStorageItem('sched_requests', updated);
+    deleteDoc(doc(db, 'scheduling_requests', pendingCancelId)).catch(e => console.error('Request Cancel Error:', e));
+    setPendingCancelId(null);
+    toast.success('Request cancelled.');
   };
 
   // Download Report Helpers
@@ -5916,6 +5912,16 @@ ${ttNotes}`
 
     setClientComms(updated);
     setStorageItem("sched_client_comms", updated);
+
+    const doneComm = updated.find(c => c.id === commId);
+    if (doneComm) {
+      addSystemNotification(
+        '✅ Client Comm Request Closed',
+        `Your client communication request for ${doneComm.clinicName} has been marked as done by ${currentUser.name}.`,
+        'general',
+        doneComm.callCenterAgentName
+      );
+    }
 
     // Clear TL input just in case
     if (activeCcHandlingId === commId) {
@@ -22900,6 +22906,30 @@ _ ${req.handlingNotes || "Pending response"} _`;
         handleMarkSingleNotifAsRead={handleMarkSingleNotifAsRead} 
         setActiveTab={setActiveTab}
       />
+
+      {pendingCancelId && (
+        <div className='fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm'>
+          <div className='bg-[#0f0f13] border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4 mx-4'>
+            <div className='flex items-center gap-3'>
+              <div className='w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center border border-rose-500/20'>
+                <AlertTriangle className='w-5 h-5 text-rose-400' />
+              </div>
+              <div>
+                <h3 className='font-bold text-slate-100 text-sm'>Cancel Request?</h3>
+                <p className='text-xs text-slate-400'>This action cannot be undone.</p>
+              </div>
+            </div>
+            <div className='flex justify-end gap-3 pt-2'>
+              <button onClick={() => setPendingCancelId(null)} className='px-4 py-2 text-xs border border-white/10 rounded-xl text-slate-300 hover:bg-white/5 transition-colors cursor-pointer'>
+                Keep Request
+              </button>
+              <button onClick={handleConfirmCancel} className='px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-black transition-colors cursor-pointer'>
+                Yes, Cancel It
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

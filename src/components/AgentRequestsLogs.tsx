@@ -23,7 +23,6 @@ export const AgentRequestsLogs = ({
   const [filterType, setFilterType] = useState('all');
   const [filterDate, setFilterDate] = useState('');
   const [sortBy, setSortBy] = useState<'date_desc'|'date_asc'|'status'>('date_desc');
-  const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
 
   const [, forceUpdate] = useState(0);
   useEffect(() => {
@@ -255,7 +254,7 @@ export const AgentRequestsLogs = ({
           <div className="flex items-center justify-end gap-2">
             {req._cType === 'sched' && (req.status === 'pending_partner' || req.status === 'pending') && (
               <button 
-                onClick={() => setPendingCancelId(req.id)} 
+                onClick={() => handleCancelRequest(req.id)} 
                 className="px-3 py-1.5 text-xs font-bold text-rose-400 hover:text-rose-300 bg-rose-500/10 rounded-lg cursor-pointer"
               >
                 Cancel Request
@@ -383,19 +382,6 @@ export const AgentRequestsLogs = ({
           )}
         </div>
       </div>
-
-      {pendingCancelId && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm'>
-          <div className='bg-slate-900 border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4'>
-            <p className='text-sm text-slate-200 font-semibold'>Cancel this request?</p>
-            <p className='text-xs text-slate-400'>This action cannot be undone.</p>
-            <div className='flex justify-end gap-3'>
-              <button onClick={() => setPendingCancelId(null)} className='px-4 py-2 text-xs border border-white/10 rounded-xl text-slate-300 hover:bg-white/5'>Keep Request</button>
-              <button onClick={() => { handleCancelRequest(pendingCancelId); setPendingCancelId(null); }} className='px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold'>Yes, Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
