@@ -21893,22 +21893,31 @@ _ ${inq.answer || "No answer yet"} _`;
                                                     {isTLOreSupport && (
                                                       <button
                                                         onClick={() => {
-                                                          const text = `Complaint Data:
-Patient: ${comp.patientName}
-File: ${comp.fileNumber}
-Phone: ${(comp.phoneNumber || "").replace(/^0+/, "")}
-ID/Type: ${comp.idNumber || (comp.isOldCustomer ? "Old" : "New")}
-Clinic: ${comp.clinicName}
-Status: ${comp.status}
-Details: ${comp.complaintDetails}
-Links: ${(comp.links || []).join(", ")}
-`;
-                                                          navigator.clipboard.writeText(
-                                                            text,
-                                                          );
-                                                          toast.success(
-                                                            "Complaint details copied to clipboard!",
-                                                          );
+                                                          const photoLines = (comp.photos || []).length > 0
+                                                            ? `Attachments: ${comp.photos.length} photo(s) attached`
+                                                            : '';
+                                                          const screenshotLine = (comp.screenshot || comp.imageUrl)
+                                                            ? `Screenshot: 1 image attached`
+                                                            : '';
+                                                          const linkLines = (comp.links || []).length > 0
+                                                            ? `Links:\n${(comp.links || []).join('\n')}`
+                                                            : '';
+
+                                                          const text = [
+                                                            `📋 Complaint`,
+                                                            `Ref: ${formatCaseRef(comp.id, 'tt_complaint')}`,
+                                                            `Patient: ${comp.patientName} | File: ${comp.fileNumber || 'N/A'}`,
+                                                            `Phone: ${normalizePhone(comp.phoneNumber || '')}`,
+                                                            `ID Type: ${comp.idNumber || (comp.isOldCustomer ? 'Old Customer' : 'New Customer')}`,
+                                                            `Clinic: ${comp.clinicName}`,
+                                                            `Status: ${comp.status}`,
+                                                            `Complaint: ${comp.complaintDetails}`,
+                                                            comp.tlComment ? `TL Comment: ${comp.tlComment}` : '',
+                                                            photoLines, screenshotLine, linkLines,
+                                                          ].filter(Boolean).join('\n');
+
+                                                          navigator.clipboard.writeText(text);
+                                                          toast.success('Complaint details copied — including attachments info!');
                                                         }}
                                                         className="mr-auto px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-slate-100 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                                                         title="Copy Complaint details"
