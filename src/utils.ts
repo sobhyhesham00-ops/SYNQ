@@ -1,8 +1,8 @@
 import { SchedulingRequest, SHIFTS, TEAM_LEADERS, INITIAL_AGENTS, SwapRequest, AnnualRequest, ScheduledShift, AGENT_LOBS, Inquiry, TimeLog, AgentDirectoryRow, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, CaseRecord, SystemNotification, Order } from './types';
 
 // Simple client-side storage helpers
-import { db } from './firebase';
-import { doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { db, wrappedSetDoc as setDoc, wrappedDeleteDoc as deleteDoc } from './firebase';
+import { doc } from 'firebase/firestore';
 
 export const compressPastedImage = (base64Str: string, maxWidth = 1024, quality = 0.7): Promise<string> => {
   return new Promise((resolve) => {

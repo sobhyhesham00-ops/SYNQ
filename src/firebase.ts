@@ -1,7 +1,41 @@
 import { initializeApp } from "firebase/app";
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
-import firebaseConfig from "../firebase-applet-config.json";
+import { 
+  initializeFirestore, 
+  persistentLocalCache, 
+  persistentMultipleTabManager,
+  onSnapshot as firestoreOnSnapshot,
+  setDoc as firestoreSetDoc,
+  updateDoc as firestoreUpdateDoc,
+  deleteDoc as firestoreDeleteDoc,
+  addDoc as firestoreAddDoc,
+  getDocs as firestoreGetDocs,
+  getDoc as firestoreGetDoc,
+  connectFirestoreEmulator
+} from "firebase/firestore";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, connectAuthEmulator } from "firebase/auth";
+import firebaseConfigFromJson from "../firebase-applet-config.json";
+
+// 1. Load Firebase configuration from environment with startup validation & json fallback
+const firebaseConfig = {
+  apiKey: (import.meta as any).env.VITE_FIREBASE_API_KEY || firebaseConfigFromJson.apiKey,
+  authDomain: (import.meta as any).env.VITE_FIREBASE_AUTH_DOMAIN || firebaseConfigFromJson.authDomain,
+  projectId: (import.meta as any).env.VITE_FIREBASE_PROJECT_ID || firebaseConfigFromJson.projectId,
+  firestoreDatabaseId: (import.meta as any).env.VITE_FIREBASE_DATABASE_ID || firebaseConfigFromJson.firestoreDatabaseId,
+  storageBucket: (import.meta as any).env.VITE_FIREBASE_STORAGE_BUCKET || firebaseConfigFromJson.storageBucket,
+  messagingSenderId: (import.meta as any).env.VITE_FIREBASE_MESSAGING_SENDER_ID || firebaseConfigFromJson.messagingSenderId,
+  appId: (import.meta as any).env.VITE_FIREBASE_APP_ID || firebaseConfigFromJson.appId,
+  measurementId: (import.meta as any).env.VITE_FIREBASE_MEASUREMENT_ID || firebaseConfigFromJson.measurementId,
+};
+
+// Perform strict configuration validation
+const requiredKeys: (keyof typeof firebaseConfig)[] = ["apiKey", "projectId", "appId"];
+for (const key of requiredKeys) {
+  if (!firebaseConfig[key]) {
+    throw new Error(
+      `Firebase config validation error: missing critical schema field "${key}". Please configure VITE_FIREBASE_${key.toUpperCase().replace(/([a-z])([A-Z])/g, "$1_$2")} or check firebase-applet-config.json.`
+    );
+  }
+}
 
 const app = initializeApp(firebaseConfig);
 export const db = initializeFirestore(app, {
@@ -11,6 +45,77 @@ export const db = initializeFirestore(app, {
 }, firebaseConfig.firestoreDatabaseId);
 
 export const auth = getAuth(app);
+
+// Enable Emulator Suite globally in local environment
+export const useEmulator = (import.meta as any).env.VITE_USE_EMULATOR === "true" || ((import.meta as any).env.DEV && window.location.hostname === "localhost");
+
+if (useEmulator) {
+  console.log("[Firebase Emulator] Local emulation active. Connecting to emulators...");
+  try {
+    connectFirestoreEmulator(db, "127.0.0.1", 8080);
+    connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+    console.log("[Firebase Emulator] Successfully initialized Auth and Firestore emulators.");
+  } catch (err) {
+    console.warn("[Firebase Emulator] Connection error (it may already be initialized):", err);
+  }
+}
+
+// Deterministic mock seed data function
+export async function seedEmulatorDatabase() {
+  if (!useEmulator) return;
+  console.log("[Firebase Emulator] Seeding roles and credentials...");
+  try {
+    const { doc, writeBatch } = await import("firebase/firestore");
+    const batch = writeBatch(db);
+
+    // 1. Credentials Document
+    const credRef = doc(db, "system", "credentials");
+    batch.set(credRef, {
+      "h.sobhy": "Password123",
+      "a.hassan": "Password123",
+      "s.hassan": "Password123",
+      "b.rabea": "Password123",
+      "a.sayed": "Password123",
+      "j.mohamed": "Password123"
+    });
+
+    // 2. Support Assignments Document
+    const suppRef = doc(db, "system", "sched_support_assignments");
+    batch.set(suppRef, {
+      data: {
+        "Jodie El Sayed Mohamed Mohamed": {
+          assignedBy: "Hesham Sobhy",
+          assignedAt: new Date().toISOString()
+        }
+      }
+    });
+
+    // 3. User lists profiles seed
+    const users = [
+      { id: "usr_superadmin", name: "Hesham Sobhy", role: "tl" },
+      { id: "usr_director", name: "Amira Hassan", role: "tl" },
+      { id: "usr_tl", name: "Shymaa Hassan", role: "tl" },
+      { id: "usr_qa", name: "Basma Rabea", role: "qa" },
+      { id: "usr_agent", name: "AbdelRahman Al Sayed", role: "agent" },
+      { id: "usr_support", name: "Jodie El Sayed Mohamed Mohamed", role: "agent" }
+    ];
+
+    for (const u of users) {
+      const uRef = doc(db, "users", u.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase());
+      batch.set(uRef, u);
+    }
+
+    await batch.commit();
+    console.log("[Firebase Emulator] Local deterministic seed data published successfully.");
+  } catch (error) {
+    console.error("[Firebase Emulator] Error during auto-seeding:", error);
+  }
+}
+
+// Auto-run seeding if using emulator
+if (useEmulator) {
+  seedEmulatorDatabase();
+}
 
 // Simulated/stubbed auth methods based on what App.tsx expects if we want Google sign-in
 const googleProvider = new GoogleAuthProvider();
@@ -67,4 +172,163 @@ export const logout = async () => {
   cachedAccessToken = null;
   return await signOut(auth);
 };
+
+// --- Firestore Hardened Error Interceptor ---
+
+export enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+export interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId?: string | null;
+    email?: string | null;
+    emailVerified?: boolean | null;
+    isAnonymous?: boolean | null;
+    tenantId?: string | null;
+    providerInfo?: {
+      providerId?: string | null;
+      email?: string | null;
+    }[];
+  };
+}
+
+export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+      tenantId: auth.currentUser?.tenantId,
+      providerInfo: auth.currentUser?.providerData?.map(provider => ({
+        providerId: provider.providerId,
+        email: provider.email,
+      })) || []
+    },
+    operationType,
+    path
+  };
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
+}
+
+// Helper to extract a path string from any document / collection reference or query
+function getReferencePath(ref: any): string | null {
+  if (!ref) return null;
+  if (typeof ref.path === 'string') return ref.path;
+  if (ref.query && typeof ref.query.path === 'string') return ref.query.path;
+  if (typeof ref.toString === 'function') return ref.toString();
+  return null;
+}
+
+export function wrappedOnSnapshot(ref: any, ...args: any[]) {
+  const path = getReferencePath(ref);
+  let nextCb: any = null;
+  let errorCb: any = null;
+  let options: any = null;
+
+  if (typeof args[0] === 'function') {
+    nextCb = args[0];
+    errorCb = args[1];
+  } else if (typeof args[0] === 'object' && typeof args[1] === 'function') {
+    options = args[0];
+    nextCb = args[1];
+    errorCb = args[2];
+  }
+
+  const wrappedNext = (snapshot: any) => {
+    if (nextCb) {
+      try {
+        nextCb(snapshot);
+      } catch (err) {
+        console.error("Error in onSnapshot next callback:", err);
+      }
+    }
+  };
+
+  const wrappedError = (error: any) => {
+    if (errorCb) {
+      try {
+        errorCb(error);
+      } catch (err) {
+        console.error("Error in user-provided onSnapshot error handler:", err);
+      }
+    }
+    handleFirestoreError(error, OperationType.GET, path);
+  };
+
+  if (options) {
+    return firestoreOnSnapshot(ref, options, wrappedNext, wrappedError);
+  } else {
+    return firestoreOnSnapshot(ref, wrappedNext, wrappedError);
+  }
+}
+
+export async function wrappedSetDoc(ref: any, data: any, options?: any) {
+  const path = getReferencePath(ref);
+  try {
+    if (options) {
+      return await firestoreSetDoc(ref, data, options);
+    } else {
+      return await firestoreSetDoc(ref, data);
+    }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+  }
+}
+
+export async function wrappedUpdateDoc(ref: any, ...args: any[]) {
+  const path = getReferencePath(ref);
+  try {
+    return await (firestoreUpdateDoc as any)(ref, ...args);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, path);
+  }
+}
+
+export async function wrappedDeleteDoc(ref: any) {
+  const path = getReferencePath(ref);
+  try {
+    return await firestoreDeleteDoc(ref);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, path);
+  }
+}
+
+export async function wrappedAddDoc(ref: any, data: any) {
+  const path = getReferencePath(ref);
+  try {
+    return await firestoreAddDoc(ref, data);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, path);
+  }
+}
+
+export async function wrappedGetDocs(ref: any) {
+  const path = getReferencePath(ref);
+  try {
+    return await firestoreGetDocs(ref);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.LIST, path);
+  }
+}
+
+export async function wrappedGetDoc(ref: any) {
+  const path = getReferencePath(ref);
+  try {
+    return await firestoreGetDoc(ref);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, path);
+  }
+}
 

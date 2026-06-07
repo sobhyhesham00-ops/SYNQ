@@ -18,8 +18,8 @@ import {
   Shield,
   UserPlus
 } from 'lucide-react';
-import { doc, setDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { doc } from 'firebase/firestore';
+import { db, wrappedSetDoc as setDoc, wrappedDeleteDoc as deleteDoc } from '../firebase';
 import { toast } from 'sonner';
 import { getUsernameFromFullName } from '../utils';
 

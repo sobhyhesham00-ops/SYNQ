@@ -2,18 +2,20 @@
   "entities": {
     "user": {
       "title": "User",
-      "description": "User profile with avatar",
+      "description": "User profile containing name, role, email, status, avatar",
       "type": "object",
       "properties": {
+        "id": { "type": "string" },
         "name": { "type": "string" },
         "role": { "type": "string" },
-        "avatarUrl": { "type": "string" },
-        "lastUpdated": { "type": "number" }
+        "email": { "type": "string" },
+        "status": { "type": "string" },
+        "avatarUrl": { "type": "string" }
       }
     },
     "todo": {
       "title": "Todo",
-      "description": "Agent personal task",
+      "description": "Agent to-dos containing category and description",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
@@ -21,18 +23,168 @@
         "text": { "type": "string" },
         "isCompleted": { "type": "boolean" },
         "reminderTimeMs": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "category": { "type": "string" }
+      }
+    },
+    "inquiry": {
+      "title": "Inquiry",
+      "description": "Customer inquiry submitted by agent",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "agentName": { "type": "string" },
+        "clinicName": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    },
+    "qa_score": {
+      "title": "QAScore",
+      "description": "Quality assurance evaluation record and scores",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "qaName": { "type": "string" },
+        "agentName": { "type": "string" },
+        "totalScore": { "type": "number" }
+      }
+    },
+    "tt_request": {
+      "title": "TabbyTamaraRequest",
+      "description": "Payment requests via Tabby/Tamara finance portals",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "agentName": { "type": "string" },
+        "patientName": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    },
+    "tt_complaint": {
+      "title": "TabbyTamaraComplaint",
+      "description": "Customer complaints received regarding financial portals",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "agentName": { "type": "string" },
+        "patientName": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    },
+    "client_comm": {
+      "title": "ClientCommunicationRequest",
+      "description": "Outgoing patient contact requests",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "callCenterAgentName": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    },
+    "scheduling_request": {
+      "title": "SchedulingRequest",
+      "description": "Annual leaves or shift swaps submitted by agents",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "agentName": { "type": "string" },
+        "type": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    },
+    "timelog": {
+      "title": "TimeLog",
+      "description": "Daily attendance and break time trackers",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "agentName": { "type": "string" },
+        "clockIn": { "type": "string" }
+      }
+    },
+    "announcement": {
+      "title": "Announcement",
+      "description": "Global notification bulletins published by TLs",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "message": { "type": "string" },
         "createdAt": { "type": "string" }
+      }
+    },
+    "case": {
+      "title": "CaseRecord",
+      "description": "Helpdesk clinical ticket records",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "agentName": { "type": "string" },
+        "patientName": { "type": "string" }
+      }
+    },
+    "tl_feedback": {
+      "title": "TLFeedback",
+      "description": "Weekly performance feedback sheets",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "agentName": { "type": "string" },
+        "tlName": { "type": "string" }
       }
     }
   },
   "firestore": {
     "users/{userId}": {
       "schema": { "$ref": "#/entities/user" },
-      "description": "User profile information"
+      "description": "User profiles"
     },
     "todos/{todoId}": {
       "schema": { "$ref": "#/entities/todo" },
-      "description": "Agent to-dos"
+      "description": "Agent reminders and simple scratch todo pads"
+    },
+    "inquiries/{inquiryId}": {
+      "schema": { "$ref": "#/entities/inquiry" },
+      "description": "Customer inquiry records"
+    },
+    "qa_scores/{scoreId}": {
+      "schema": { "$ref": "#/entities/qa_score" },
+      "description": "Quality scoring parameters"
+    },
+    "tt_requests/{reqId}": {
+      "schema": { "$ref": "#/entities/tt_request" },
+      "description": "Tabby and Tamara approval requests"
+    },
+    "tt_complaints/{compId}": {
+      "schema": { "$ref": "#/entities/tt_complaint" },
+      "description": "Tabby and Tamara customer complaints"
+    },
+    "client_comms/{commId}": {
+      "schema": { "$ref": "#/entities/client_comm" },
+      "description": "Custom communication requests and patient updates"
+    },
+    "scheduling_requests/{reqId}": {
+      "schema": { "$ref": "#/entities/scheduling_request" },
+      "description": "Team scheduling and annual leaves"
+    },
+    "timelogs/{logId}": {
+      "schema": { "$ref": "#/entities/timelog" },
+      "description": "Team logs and attendance sheets"
+    },
+    "announcements/{annId}": {
+      "schema": { "$ref": "#/entities/announcement" },
+      "description": "System bulletins and announcements"
+    },
+    "cases/{caseId}": {
+      "schema": { "$ref": "#/entities/case" },
+      "description": "Clinic desk incidents"
+    },
+    "tl_feedbacks/{fbId}": {
+      "schema": { "$ref": "#/entities/tl_feedback" },
+      "description": "Team feedback sheets"
     }
   }
 }

@@ -12,8 +12,8 @@ import {
   FileJson,
   RefreshCw
 } from 'lucide-react';
-import { getDocs, collection } from 'firebase/firestore';
-import { db } from '../firebase';
+import { collection } from 'firebase/firestore';
+import { db, wrappedGetDocs as getDocs } from '../firebase';
 import { toast } from 'sonner';
 
 interface DataVaultProps {
@@ -34,10 +34,14 @@ export const DataVault: React.FC<DataVaultProps> = ({ userName }) => {
 
       for (const collName of collections) {
         const querySnapshot = await getDocs(collection(db, collName));
-        backupData[collName] = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
+        if (querySnapshot) {
+          backupData[collName] = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...(doc.data() as any)
+          }));
+        } else {
+          backupData[collName] = [];
+        }
       }
 
       // Create the file

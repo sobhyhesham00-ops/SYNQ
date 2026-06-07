@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Bell, CheckCircle2, Info, AlertTriangle, X, Trash2 } from 'lucide-react';
-import { updateDoc, doc } from 'firebase/firestore'; 
-import { db } from '../firebase'; // verify path
+import { doc } from 'firebase/firestore'; 
+import { db, wrappedUpdateDoc as updateDoc } from '../firebase'; // verify path
 
 export const NotificationDrawer = ({
   isOpen,

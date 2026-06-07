@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Announcement, User } from '../types';
 import { Bell, Image as ImageIcon, Link, CheckCircle2, Download, Paperclip, X } from 'lucide-react';
-import { doc, setDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { doc } from 'firebase/firestore';
+import { db, wrappedSetDoc as setDoc, wrappedDeleteDoc as deleteDoc } from '../firebase';
 import { toast } from 'sonner';
 
 export function AnnouncementsTab({ 

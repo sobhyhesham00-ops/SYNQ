@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Order, OrderMember, User } from '../types';
 import { ShoppingBag, Plus, Calculator, Timer, CheckCircle, BellRing, Settings2, Trash2 } from 'lucide-react';
-import { doc, setDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { doc } from 'firebase/firestore';
+import { db, wrappedSetDoc as setDoc, wrappedDeleteDoc as deleteDoc } from '../firebase';
 import { toast } from 'sonner';
 
 export function OrdersTab({

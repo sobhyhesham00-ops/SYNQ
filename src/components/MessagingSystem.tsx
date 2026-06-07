@@ -28,17 +28,17 @@ import {
   query, 
   orderBy, 
   limit, 
-  onSnapshot as originalOnSnapshot, disableNetwork, 
-  addDoc, 
-  updateDoc, 
-  doc, 
-  deleteDoc,
-  setDoc
+  disableNetwork, 
+  doc
 } from 'firebase/firestore';
-import { db } from '../firebase';
-
-
-const onSnapshot = originalOnSnapshot;
+import { 
+  db,
+  wrappedOnSnapshot as onSnapshot,
+  wrappedAddDoc as addDoc,
+  wrappedUpdateDoc as updateDoc,
+  wrappedDeleteDoc as deleteDoc,
+  wrappedSetDoc as setDoc
+} from '../firebase';
 
 import { ChatMessage, User as AppUser } from '../types';
 import { getAgentTL } from '../utils';

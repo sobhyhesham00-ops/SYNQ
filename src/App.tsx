@@ -9,22 +9,25 @@ import React, { useState, useEffect, FormEvent, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   doc,
-  onSnapshot as firestoreOnSnapshot,
   collection,
-  setDoc,
-  updateDoc,
-  deleteDoc,
   query,
-  getDocs,
   writeBatch,
   disableNetwork,
   where,
   orderBy,
 } from "firebase/firestore";
-import { db, initAuth, googleSignIn, getAccessToken, logout } from "./firebase";
-
-// Intercept removed
-const onSnapshot = firestoreOnSnapshot;
+import { 
+  db, 
+  initAuth, 
+  googleSignIn, 
+  getAccessToken, 
+  logout,
+  wrappedOnSnapshot as onSnapshot,
+  wrappedSetDoc as setDoc,
+  wrappedUpdateDoc as updateDoc,
+  wrappedDeleteDoc as deleteDoc,
+  wrappedGetDocs as getDocs
+} from "./firebase";
 import {
   Calendar,
   Users,
@@ -115,6 +118,7 @@ import { AnnouncementsTab } from "./components/AnnouncementsTab";
 import { OrdersTab } from "./components/OrdersTab";
 import { ArticleManager } from "./components/ArticleManager";
 import { RequestReplyThread } from "./components/RequestReplyThread";
+import { EnvironmentBadge } from "./components/EnvironmentBadge";
 import * as XLSX from "xlsx";
 import {
   isTLName,
@@ -6980,6 +6984,7 @@ ${ttNotes}`
     >
       <Toaster theme="dark" position="bottom-right" />
       <AIChatWidget />
+      <EnvironmentBadge currentUser={currentUser} setCurrentUser={setCurrentUser} />
 
       {/* Background aesthetic blobs */}
       <div className="fixed top-[-10%] -left-32 w-[600px] h-[600px] bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none"></div>

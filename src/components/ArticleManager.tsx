@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../types';
 import { Book, Tag, Plus, File, Paperclip, Trash2, Download } from 'lucide-react';
-import { collection, onSnapshot as originalOnSnapshot, addDoc, deleteDoc, doc, updateDoc, disableNetwork } from 'firebase/firestore';
-import { db } from '../firebase';
-
-
-const onSnapshot = originalOnSnapshot;
+import { collection, doc, disableNetwork } from 'firebase/firestore';
+import { 
+  db,
+  wrappedOnSnapshot as onSnapshot,
+  wrappedAddDoc as addDoc,
+  wrappedDeleteDoc as deleteDoc,
+  wrappedUpdateDoc as updateDoc
+} from '../firebase';
 
 import { toast } from 'sonner';
 

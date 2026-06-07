@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { User } from '../types';
 import { MessageSquare, Paperclip, Send, Download, X } from 'lucide-react';
-import { doc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
-import { db } from '../firebase';
+import { doc, arrayUnion } from 'firebase/firestore';
+import { db, wrappedSetDoc as setDoc, wrappedUpdateDoc as updateDoc } from '../firebase';
 import { toast } from 'sonner';
 
 interface BaseRequest {

@@ -1,8 +1,102 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // 1. Global default-deny safety net
     match /{document=**} {
-      allow read, write: if true;
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() { return request.auth != null; }
+
+    // Users
+    match /users/{userId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Todos
+    match /todos/{todoId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Inquiries
+    match /inquiries/{inquiryId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // QA Scores
+    match /qa_scores/{scoreId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // System config
+    match /system/{docId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Tabby Tamara Requests
+    match /tt_requests/{reqId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Tabby Tamara Complaints
+    match /tt_complaints/{compId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Client Communications
+    match /client_comms/{commId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Scheduling Requests
+    match /scheduling_requests/{reqId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Time Logs
+    match /timelogs/{logId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Announcements
+    match /announcements/{annId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Cases
+    match /cases/{caseId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // TL Feedbacks
+    match /tl_feedbacks/{fbId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Schedules
+    match /schedules/{schedId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Notifications
+    match /notifications/{notifId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Orders
+    match /orders/{orderId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Agents
+    match /agents/{agentId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Agents Nested Schedules
+    match /agents/{agentId}/schedules/{schedId} {
+      allow read, write: if isSignedIn();
     }
   }
 }
