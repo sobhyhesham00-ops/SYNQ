@@ -594,13 +594,10 @@ const ActiveTimer = ({ startTime }: { startTime: string }) => {
   return <span className="font-mono tabular-nums">{elapsed}</span>;
 };
 
-
-
-
 const compStatusLabels: Record<string, string> = {
-  pending_tl: '🕐 Pending TL Review',
-  need_contact: '📞 Action Required: Contact Patient',
-  closed: '✅ Resolved & Closed'
+  pending_tl: "🕐 Pending TL Review",
+  need_contact: "📞 Action Required: Contact Patient",
+  closed: "✅ Resolved & Closed",
 };
 
 export default function App() {
@@ -653,7 +650,7 @@ export default function App() {
     if (!createdAt) return "";
     const limitMs = getEditLimitMs();
     if (limitMs === Infinity) return "Unlimited";
-    
+
     const createdTime = new Date(createdAt).getTime();
     if (isNaN(createdTime)) return "";
     const diffMs = limitMs - (Date.now() - createdTime);
@@ -681,32 +678,44 @@ export default function App() {
       if (type === "inquiry") {
         const docRef = doc(db, "inquiries", id);
         await setDoc(docRef, data, { merge: true });
-        setInquiries(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
+        setInquiries((prev) =>
+          prev.map((item) => (item.id === id ? { ...item, ...data } : item)),
+        );
         toast.success("Inquiry updated successfully!");
       } else if (type === "scheduling_request") {
         const docRef = doc(db, "scheduling_requests", id);
         await setDoc(docRef, data, { merge: true });
-        setRequests(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
+        setRequests((prev) =>
+          prev.map((item) => (item.id === id ? { ...item, ...data } : item)),
+        );
         toast.success("Scheduling request updated successfully!");
       } else if (type === "tt_request") {
         const docRef = doc(db, "tt_requests", id);
         await setDoc(docRef, data, { merge: true });
-        setTabbyTamaraRequests(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
+        setTabbyTamaraRequests((prev) =>
+          prev.map((item) => (item.id === id ? { ...item, ...data } : item)),
+        );
         toast.success("Installment request updated successfully!");
       } else if (type === "tt_complaint") {
         const docRef = doc(db, "tt_complaints", id);
         await setDoc(docRef, data, { merge: true });
-        setTabbyTamaraComplaints(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
+        setTabbyTamaraComplaints((prev) =>
+          prev.map((item) => (item.id === id ? { ...item, ...data } : item)),
+        );
         toast.success("Installment complaint updated successfully!");
       } else if (type === "client_comm") {
         const docRef = doc(db, "client_comms", id);
         await setDoc(docRef, data, { merge: true });
-        setClientComms(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
+        setClientComms((prev) =>
+          prev.map((item) => (item.id === id ? { ...item, ...data } : item)),
+        );
         toast.success("Communication request updated successfully!");
       } else if (type === "case") {
         const docRef = doc(db, "cases", id);
         await setDoc(docRef, data, { merge: true });
-        setCases(prev => prev.map(item => item.id === id ? { ...item, ...data } : item));
+        setCases((prev) =>
+          prev.map((item) => (item.id === id ? { ...item, ...data } : item)),
+        );
         toast.success("Case record updated successfully!");
       }
       setEditingItem(null);
@@ -738,7 +747,9 @@ export default function App() {
           }
         }
 
-        const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=30.30&longitude=31.75&current_weather=true");
+        const res = await fetch(
+          "https://api.open-meteo.com/v1/forecast?latitude=30.30&longitude=31.75&current_weather=true",
+        );
         const data = await res.json();
         if (data && data.current_weather) {
           const temp = data.current_weather.temperature;
@@ -1290,16 +1301,16 @@ export default function App() {
 
   const formatComRef = (id: string) => {
     const tsMatch = id?.match(/(\d{10,13})/);
-    if (!tsMatch) return 'COM-??????';
+    if (!tsMatch) return "COM-??????";
     const d = new Date(parseInt(tsMatch[1]));
-    return `COM-${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}-${tsMatch[1].slice(-4)}`;
+    return `COM-${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}-${tsMatch[1].slice(-4)}`;
   };
 
   const formatCompRef = (id: string) => {
     const tsMatch = id?.match(/(\d{10,13})/);
-    if (!tsMatch) return 'TTC-??????';
+    if (!tsMatch) return "TTC-??????";
     const d = new Date(parseInt(tsMatch[1]));
-    return `TTC-${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}-${tsMatch[1].slice(-4)}`;
+    return `TTC-${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}-${tsMatch[1].slice(-4)}`;
   };
 
   const getElapsedTimerString = (
@@ -2665,16 +2676,29 @@ ${pageText}
   const [logTypeFilter, setLogTypeFilter] = useState("all");
   const [logSearchQuery, setLogSearchQuery] = useState("");
 
-  const filteredInquiries = useMemo(() => inquiries.filter(i => {
-    const s = inquirySearchQuery.toLowerCase();
-    const matchesSearch = !s ||
-      i.agentName?.toLowerCase().includes(s) || i.text.toLowerCase().includes(s) ||
-      i.clinicName?.toLowerCase().includes(s) || i.answer?.toLowerCase().includes(s) ||
-      (i.phoneNumber && normalizePhone(i.phoneNumber).includes(normalizePhone(inquirySearchQuery)));
-    const matchesStatus = !inquiryStatusFilter || i.status === inquiryStatusFilter;
-    const matchesClinic = inquiryClinicFilter === 'all' || i.clinicName?.toLowerCase() === inquiryClinicFilter.toLowerCase();
-    return matchesSearch && matchesStatus && matchesClinic;
-  }), [inquiries, inquirySearchQuery, inquiryStatusFilter, inquiryClinicFilter]);
+  const filteredInquiries = useMemo(
+    () =>
+      inquiries.filter((i) => {
+        const s = inquirySearchQuery.toLowerCase();
+        const matchesSearch =
+          !s ||
+          i.agentName?.toLowerCase().includes(s) ||
+          i.text.toLowerCase().includes(s) ||
+          i.clinicName?.toLowerCase().includes(s) ||
+          i.answer?.toLowerCase().includes(s) ||
+          (i.phoneNumber &&
+            normalizePhone(i.phoneNumber).includes(
+              normalizePhone(inquirySearchQuery),
+            ));
+        const matchesStatus =
+          !inquiryStatusFilter || i.status === inquiryStatusFilter;
+        const matchesClinic =
+          inquiryClinicFilter === "all" ||
+          i.clinicName?.toLowerCase() === inquiryClinicFilter.toLowerCase();
+        return matchesSearch && matchesStatus && matchesClinic;
+      }),
+    [inquiries, inquirySearchQuery, inquiryStatusFilter, inquiryClinicFilter],
+  );
 
   // Unified Screenshot Upload State
   const [activeScreenshot, setActiveScreenshot] = useState<string | null>(null);
@@ -2722,7 +2746,9 @@ ${pageText}
   const [compSearch, setCompSearch] = useState("");
   const [compDateFilter, setCompDateFilter] = useState("");
   const [commSearch, setCommSearch] = useState("");
-  const [commLangFilter, setCommLangFilter] = useState<'all'|'Arabic'|'English'>('all');
+  const [commLangFilter, setCommLangFilter] = useState<
+    "all" | "Arabic" | "English"
+  >("all");
   const [ttSearchQuery, setTtSearchQuery] = useState("");
   const [ttSearch, setTtSearch] = useState("");
   const [ttDateFilter, setTtDateFilter] = useState("");
@@ -2740,7 +2766,8 @@ ${pageText}
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [loginError, setLoginError] = useState("");
-  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
+  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] =
+    useState(false);
   const [newPasswordInput, setNewPasswordInput] = useState("");
 
   // Active Menu / Tab States
@@ -3266,23 +3293,24 @@ ${pageText}
 
   const handleResetUserPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPasswordInput.trim()) return toast.error("Password cannot be empty");
+    if (!newPasswordInput.trim())
+      return toast.error("Password cannot be empty");
     if (!currentUser) return;
-    
+
     const formattedUsername = currentUser.name.toLowerCase();
-    
+
     const updatedCreds = {
       ...credentials,
       [formattedUsername]: newPasswordInput.trim(),
-      [currentUser.name]: newPasswordInput.trim()
+      [currentUser.name]: newPasswordInput.trim(),
     };
-    
+
     setCredentials(updatedCreds);
     setStorageItem("sched_credentials", updatedCreds);
     setDoc(doc(db, "system", "sched_credentials"), {
       data: updatedCreds,
     }).catch(console.error);
-  
+
     toast.success("Password updated successfully!");
     setIsResetPasswordModalOpen(false);
     setNewPasswordInput("");
@@ -3332,10 +3360,10 @@ ${pageText}
 
   // Real-time compliance overstay alerts background checks (break, lunch, restroom > 10m) & absent alerts using useRef to prevent re-render loops
   const notifiedOverstaysRef = useRef<Record<string, boolean>>(
-    getStorageItem<Record<string, boolean>>("sched_notified_overstays", {})
+    getStorageItem<Record<string, boolean>>("sched_notified_overstays", {}),
   );
   const notifiedAbsencesRef = useRef<Record<string, boolean>>(
-    getStorageItem<Record<string, boolean>>("sched_notified_absences", {})
+    getStorageItem<Record<string, boolean>>("sched_notified_absences", {}),
   );
 
   useEffect(() => {
@@ -3460,13 +3488,7 @@ ${pageText}
         JSON.stringify(newNotifiedAbsences),
       );
     }
-  }, [
-    currentTime,
-    timeLogs,
-    schedules,
-    agentsList,
-    currentUser,
-  ]);
+  }, [currentTime, timeLogs, schedules, agentsList, currentUser]);
 
   const handleAssignSupport = () => {
     if (!targetSupportAgent || !currentUser) return;
@@ -3810,15 +3832,15 @@ ${swapTargetAgent}'s LOB: ${targetLOB}`);
     setRequests(updated);
     setStorageItem("sched_requests", updated);
 
-    const decidedReq = updated.find(r => r.id === requestId);
+    const decidedReq = updated.find((r) => r.id === requestId);
     if (decidedReq) {
       addSystemNotification(
-        approve ? '✅ Leave/Swap Approved' : '❌ Leave/Swap Declined',
+        approve ? "✅ Leave/Swap Approved" : "❌ Leave/Swap Declined",
         approve
-          ? `Your ${decidedReq.type === 'swap' ? 'shift swap' : 'annual leave'} request has been approved by ${currentUser.name}.`
-          : `Your ${decidedReq.type === 'swap' ? 'shift swap' : 'annual leave'} request was declined by ${currentUser.name}.`,
-        'schedule',
-        decidedReq.agentName
+          ? `Your ${decidedReq.type === "swap" ? "shift swap" : "annual leave"} request has been approved by ${currentUser.name}.`
+          : `Your ${decidedReq.type === "swap" ? "shift swap" : "annual leave"} request was declined by ${currentUser.name}.`,
+        "schedule",
+        decidedReq.agentName,
       );
     }
   };
@@ -3830,16 +3852,21 @@ ${swapTargetAgent}'s LOB: ${targetLOB}`);
 
   const handleConfirmCancel = () => {
     if (!pendingCancelId) return;
-    const updated = requests.filter(req =>
-      !(req.id === pendingCancelId &&
-        req.agentName === currentUser?.name &&
-        (req.status === 'pending' || req.status === 'pending_partner'))
+    const updated = requests.filter(
+      (req) =>
+        !(
+          req.id === pendingCancelId &&
+          req.agentName === currentUser?.name &&
+          (req.status === "pending" || req.status === "pending_partner")
+        ),
     );
     setRequests(updated);
-    setStorageItem('sched_requests', updated);
-    deleteDoc(doc(db, 'scheduling_requests', pendingCancelId)).catch(e => console.error('Request Cancel Error:', e));
+    setStorageItem("sched_requests", updated);
+    deleteDoc(doc(db, "scheduling_requests", pendingCancelId)).catch((e) =>
+      console.error("Request Cancel Error:", e),
+    );
     setPendingCancelId(null);
-    toast.success('Request cancelled.');
+    toast.success("Request cancelled.");
   };
 
   // Download Report Helpers
@@ -5343,10 +5370,10 @@ ${result.errors.slice(0, 5).join("\n")}${
 
     if (sentInquiry) {
       addSystemNotification(
-        '📨 Inquiry Forwarded to Partner',
+        "📨 Inquiry Forwarded to Partner",
         `Your inquiry for clinic ${sentInquiry.clinicName} has been forwarded to the partner by ${currentUser.name}.`,
-        'inquiry',
-        sentInquiry.agentName
+        "inquiry",
+        sentInquiry.agentName,
       );
     }
   };
@@ -5845,10 +5872,16 @@ ${ttNotes}`
     }
   };
 
-  const handleProcessClientComms = (commId: string, notes: string, photos?: string[]) => {
+  const handleProcessClientComms = (
+    commId: string,
+    notes: string,
+    photos?: string[],
+  ) => {
     if (!currentUser) return;
     if (!String(notes || "").trim() && !(photos && photos.length > 0)) {
-      toast.error("Please enter your handling notes or provide attachments first.");
+      toast.error(
+        "Please enter your handling notes or provide attachments first.",
+      );
       return;
     }
 
@@ -5874,13 +5907,13 @@ ${ttNotes}`
     setClientComms(updated);
     setStorageItem("sched_client_comms", updated);
 
-    const handledComm = updated.find(c => c.id === commId);
+    const handledComm = updated.find((c) => c.id === commId);
     if (handledComm) {
       addSystemNotification(
-        '✅ Client Comm Request Completed',
+        "✅ Client Comm Request Completed",
         `Your client communication request for ${handledComm.clinicName} has been handled by ${currentUser.name}. Notes: ${notes.substring(0, 100)}`,
-        'general',
-        handledComm.callCenterAgentName
+        "general",
+        handledComm.callCenterAgentName,
       );
     }
 
@@ -5913,20 +5946,20 @@ ${ttNotes}`
     setClientComms(updated);
     setStorageItem("sched_client_comms", updated);
 
-    const doneComm = updated.find(c => c.id === commId);
+    const doneComm = updated.find((c) => c.id === commId);
     if (doneComm) {
       addSystemNotification(
-        '✅ Client Comm Request Closed',
+        "✅ Client Comm Request Closed",
         `Your client communication request for ${doneComm.clinicName} has been marked as done by ${currentUser.name}.`,
-        'general',
-        doneComm.callCenterAgentName
+        "general",
+        doneComm.callCenterAgentName,
       );
     }
 
     // Clear TL input just in case
     if (activeCcHandlingId === commId) {
-       setActiveCcHandlingId(null);
-       setCcHandlingNotes("");
+      setActiveCcHandlingId(null);
+      setCcHandlingNotes("");
     }
 
     toast.success("Client communication request marked as done!");
@@ -5953,13 +5986,13 @@ ${ttNotes}`
     setClientComms(updated);
     setStorageItem("sched_client_comms", updated);
 
-    const takenComm = updated.find(c => c.id === commId);
+    const takenComm = updated.find((c) => c.id === commId);
     if (takenComm) {
       addSystemNotification(
-        '🔄 Request In Progress',
+        "🔄 Request In Progress",
         `${currentUser.name} has taken your client communication request and is working on it now.`,
-        'general',
-        takenComm.callCenterAgentName
+        "general",
+        takenComm.callCenterAgentName,
       );
     }
 
@@ -6476,10 +6509,10 @@ ${ttNotes}`
 
     if (comp && status === "contacted") {
       addSystemNotification(
-        '✅ Complaint Resolved',
+        "✅ Complaint Resolved",
         `Your complaint for ${comp.patientName} has been marked as resolved (patient contacted).`,
-        'general',
-        comp.agentName
+        "general",
+        comp.agentName,
       );
     }
   };
@@ -6604,8 +6637,8 @@ ${ttNotes}`
   // Filter logs for general browsing
   const [logFilter, setLogFilter] = useState<"all" | "swap" | "annual">("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [logDateFrom, setLogDateFrom] = useState('');
-  const [logDateTo, setLogDateTo] = useState('');
+  const [logDateFrom, setLogDateFrom] = useState("");
+  const [logDateTo, setLogDateTo] = useState("");
   const [logPage, setLogPage] = useState(1);
 
   // TL Dashboard search, filter and print states
@@ -6615,21 +6648,34 @@ ${ttNotes}`
   >("all");
   const [tlIsPrintMode, setTlIsPrintMode] = useState(false);
 
-  const filteredLogs = requests.filter(r => {
-    const s = searchQuery.toLowerCase();
-    const matchSearch = !s ||
-      r.agentName?.toLowerCase().includes(s) ||
-      r.status?.toLowerCase().includes(s) ||
-      (r.type === 'swap' && (r as any).date?.includes(s)) ||
-      (r.type === 'swap' && (r as any).swapWithAgent?.toLowerCase().includes(s)) ||
-      r.notes?.toLowerCase().includes(s);
-    const matchType = logFilter === 'all' || r.type === logFilter;
-    const matchDate = (!logDateFrom || new Date(r.createdAt) >= new Date(logDateFrom)) && (!logDateTo || new Date(r.createdAt) <= new Date(logDateTo + 'T23:59:59'));
-    return matchSearch && matchType && matchDate;
-  }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const filteredLogs = requests
+    .filter((r) => {
+      const s = searchQuery.toLowerCase();
+      const matchSearch =
+        !s ||
+        r.agentName?.toLowerCase().includes(s) ||
+        r.status?.toLowerCase().includes(s) ||
+        (r.type === "swap" && (r as any).date?.includes(s)) ||
+        (r.type === "swap" &&
+          (r as any).swapWithAgent?.toLowerCase().includes(s)) ||
+        r.notes?.toLowerCase().includes(s);
+      const matchType = logFilter === "all" || r.type === logFilter;
+      const matchDate =
+        (!logDateFrom || new Date(r.createdAt) >= new Date(logDateFrom)) &&
+        (!logDateTo ||
+          new Date(r.createdAt) <= new Date(logDateTo + "T23:59:59"));
+      return matchSearch && matchType && matchDate;
+    })
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
 
   const PAGE_SIZE = 25;
-  const paginatedLogs = filteredLogs.slice((logPage - 1) * PAGE_SIZE, logPage * PAGE_SIZE);
+  const paginatedLogs = filteredLogs.slice(
+    (logPage - 1) * PAGE_SIZE,
+    logPage * PAGE_SIZE,
+  );
   const totalPages = Math.ceil(filteredLogs.length / PAGE_SIZE);
 
   // Derived counts for overview cards
@@ -7857,70 +7903,136 @@ ${ttNotes}`
                       {(() => {
                         if (currentUser.role !== "tl") return null;
                         const staleSLA = {
-                          inquiries: inquiries.filter(i => i.status !== 'answered' && (Date.now() - new Date(i.createdAt).getTime()) > 2 * 3600000).length,
-                          ttPending: tabbyTamaraRequests.filter(r => r.status === 'not_confirmed').length,
-                          ttOverdue: tabbyTamaraRequests.filter(r => r.status === 'confirmed' && r.customerContacted !== 'contacted' && (Date.now() - new Date(r.confirmedAt || r.createdAt).getTime()) > 3600000).length,
-                          complaints: tabbyTamaraComplaints.filter(c => c.status !== 'closed' && (Date.now() - new Date(c.createdAt).getTime()) > 8 * 3600000).length,
-                          comms: clientComms.filter(cc => cc.status === 'pending' && (Date.now() - new Date(cc.createdAt).getTime()) > 2 * 3600000).length,
+                          inquiries: inquiries.filter(
+                            (i) =>
+                              i.status !== "answered" &&
+                              Date.now() - new Date(i.createdAt).getTime() >
+                                2 * 3600000,
+                          ).length,
+                          ttPending: tabbyTamaraRequests.filter(
+                            (r) => r.status === "not_confirmed",
+                          ).length,
+                          ttOverdue: tabbyTamaraRequests.filter(
+                            (r) =>
+                              r.status === "confirmed" &&
+                              r.customerContacted !== "contacted" &&
+                              Date.now() -
+                                new Date(
+                                  r.confirmedAt || r.createdAt,
+                                ).getTime() >
+                                3600000,
+                          ).length,
+                          complaints: tabbyTamaraComplaints.filter(
+                            (c) =>
+                              c.status !== "closed" &&
+                              Date.now() - new Date(c.createdAt).getTime() >
+                                8 * 3600000,
+                          ).length,
+                          comms: clientComms.filter(
+                            (cc) =>
+                              cc.status === "pending" &&
+                              Date.now() - new Date(cc.createdAt).getTime() >
+                                2 * 3600000,
+                          ).length,
                         };
-                        const hasAlerts = Object.values(staleSLA).some(v => v > 0);
+                        const hasAlerts = Object.values(staleSLA).some(
+                          (v) => v > 0,
+                        );
                         if (!hasAlerts) return null;
                         return (
-                          <div className='bg-red-500/10 border border-red-500/20 rounded-2xl p-4 flex flex-wrap gap-3 items-center mb-6'>
-                            <span className='text-red-400 font-bold text-xs uppercase tracking-wider flex items-center gap-1'><AlertTriangle className='w-4 h-4' /> Needs Attention</span>
-                            {staleSLA.inquiries > 0 && <span className='px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all' onClick={() => setActiveTab('inquiries')}>{staleSLA.inquiries} Inquiries Stale &gt;2h</span>}
-                            {staleSLA.ttPending > 0 && <span className='px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all' onClick={() => setActiveTab('tabby-tamara')}>{staleSLA.ttPending} TT Awaiting Confirm</span>}
-                            {staleSLA.ttOverdue > 0 && <span className='px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all' onClick={() => setActiveTab('tabby-tamara')}>{staleSLA.ttOverdue} TT Contact OVERDUE</span>}
-                            {staleSLA.complaints > 0 && <span className='px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all' onClick={() => setActiveTab('complaints')}>{staleSLA.complaints} Complaints &gt;8h Open</span>}
-                            {staleSLA.comms > 0 && <span className='px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all' onClick={() => setActiveTab('client-comms')}>{staleSLA.comms} Comms Pending &gt;2h</span>}
+                          <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 flex flex-wrap gap-3 items-center mb-6">
+                            <span className="text-red-400 font-bold text-xs uppercase tracking-wider flex items-center gap-1">
+                              <AlertTriangle className="w-4 h-4" /> Needs
+                              Attention
+                            </span>
+                            {staleSLA.inquiries > 0 && (
+                              <span
+                                className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all"
+                                onClick={() => setActiveTab("inquiries")}
+                              >
+                                {staleSLA.inquiries} Inquiries Stale &gt;2h
+                              </span>
+                            )}
+                            {staleSLA.ttPending > 0 && (
+                              <span
+                                className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all"
+                                onClick={() => setActiveTab("tabby-tamara")}
+                              >
+                                {staleSLA.ttPending} TT Awaiting Confirm
+                              </span>
+                            )}
+                            {staleSLA.ttOverdue > 0 && (
+                              <span
+                                className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all"
+                                onClick={() => setActiveTab("tabby-tamara")}
+                              >
+                                {staleSLA.ttOverdue} TT Contact OVERDUE
+                              </span>
+                            )}
+                            {staleSLA.complaints > 0 && (
+                              <span
+                                className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all"
+                                onClick={() => setActiveTab("complaints")}
+                              >
+                                {staleSLA.complaints} Complaints &gt;8h Open
+                              </span>
+                            )}
+                            {staleSLA.comms > 0 && (
+                              <span
+                                className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all"
+                                onClick={() => setActiveTab("client-comms")}
+                              >
+                                {staleSLA.comms} Comms Pending &gt;2h
+                              </span>
+                            )}
                           </div>
                         );
                       })()}
                       <DashboardSummary
-                      currentUser={currentUser}
-                      myNextShift={schedules.find(
-                        (s) =>
-                          s.agentName?.toLowerCase() ===
-                            currentUser?.name?.toLowerCase() &&
-                          s.date >= getLocalISOString(),
-                      )}
-                      pendingRequestsCount={
-                        currentUser.role === "tl"
-                          ? requests.filter((r) => r.status === "pending")
-                              .length
-                          : clientComms.filter((c) => c.status === "pending")
-                              .length
-                      }
-                      activeCasesCount={
-                        cases.filter(
-                          (c) =>
-                            c.agentName?.toLowerCase() ===
+                        currentUser={currentUser}
+                        myNextShift={schedules.find(
+                          (s) =>
+                            s.agentName?.toLowerCase() ===
                               currentUser?.name?.toLowerCase() &&
-                            c.createdAt.startsWith(getLocalISOString()),
-                        ).length
-                      }
-                      inquiriesCount={
-                        inquiries.filter(
-                          (i) =>
-                            currentUser.role === "tl" ||
-                            i.agentName?.toLowerCase() ===
-                              currentUser?.name?.toLowerCase(),
-                        ).length
-                      }
-                      ttRequestsCount={
-                        tabbyTamaraRequests.filter(
-                          (i) =>
-                            currentUser.role === "tl" ||
-                            i.agentName?.toLowerCase() ===
-                              currentUser?.name?.toLowerCase(),
-                        ).length
-                      }
-                      qaScores={qaScores}
-                      onNavigate={(tab) =>
-                        setActiveTab(tab === "roster" ? "schedules" : tab)
-                      }
-                      announcements={announcements}
-                    />
+                            s.date >= getLocalISOString(),
+                        )}
+                        pendingRequestsCount={
+                          currentUser.role === "tl"
+                            ? requests.filter((r) => r.status === "pending")
+                                .length
+                            : clientComms.filter((c) => c.status === "pending")
+                                .length
+                        }
+                        activeCasesCount={
+                          cases.filter(
+                            (c) =>
+                              c.agentName?.toLowerCase() ===
+                                currentUser?.name?.toLowerCase() &&
+                              c.createdAt.startsWith(getLocalISOString()),
+                          ).length
+                        }
+                        inquiriesCount={
+                          inquiries.filter(
+                            (i) =>
+                              currentUser.role === "tl" ||
+                              i.agentName?.toLowerCase() ===
+                                currentUser?.name?.toLowerCase(),
+                          ).length
+                        }
+                        ttRequestsCount={
+                          tabbyTamaraRequests.filter(
+                            (i) =>
+                              currentUser.role === "tl" ||
+                              i.agentName?.toLowerCase() ===
+                                currentUser?.name?.toLowerCase(),
+                          ).length
+                        }
+                        qaScores={qaScores}
+                        onNavigate={(tab) =>
+                          setActiveTab(tab === "roster" ? "schedules" : tab)
+                        }
+                        announcements={announcements}
+                      />
                     </div>
                   )}
 
@@ -7932,72 +8044,84 @@ ${ttNotes}`
                   )}
 
                   {/* Client Comm Queue Notification for all agents */}
-                  {clientComms.some((c) => c.status === "pending" && (currentUser.role === "tl" || c.callCenterAgentName !== currentUser?.name)) && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-indigo-600/10 border border-indigo-500/20 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 mb-4 shadow-xl shadow-indigo-500/5"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 relative">
-                            <MessageSquare className="w-5 h-5" />
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full animate-ping" />
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full" />
-                          </div>
-                          <div className="text-left">
-                            <h4 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-                              Communication Queue Active
-                              <span className="bg-rose-500/20 text-rose-300 text-[9px] px-2 py-0.5 rounded-full border border-rose-500/30 font-black">
-                                {
-                                  clientComms.filter(
-                                    (c) => c.status === "pending" && (currentUser.role === "tl" || c.callCenterAgentName !== currentUser?.name),
-                                  ).length
-                                }{" "}
-                                REQUESTS
-                              </span>
-                            </h4>
-                            <p className="text-[10px] text-slate-400 uppercase tracking-widest font-medium">
-                              Awaiting handling and resolution
-                            </p>
-                          </div>
+                  {clientComms.some(
+                    (c) =>
+                      c.status === "pending" &&
+                      (currentUser.role === "tl" ||
+                        c.callCenterAgentName !== currentUser?.name),
+                  ) && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="bg-indigo-600/10 border border-indigo-500/20 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 mb-4 shadow-xl shadow-indigo-500/5"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 relative">
+                          <MessageSquare className="w-5 h-5" />
+                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full animate-ping" />
+                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full" />
                         </div>
-
-                        <div className="flex items-center gap-4 w-full sm:w-auto">
-                          {(() => {
-                            const pending = clientComms.filter(
-                              (c) => c.status === "pending" && (currentUser.role === "tl" || c.callCenterAgentName !== currentUser?.name),
-                            );
-                            if (pending.length === 0) return null;
-                            const oldest = [...pending].sort(
-                              (a, b) =>
-                                new Date(a.createdAt).getTime() -
-                                new Date(b.createdAt).getTime(),
-                            )[0];
-                            const start = new Date(oldest.createdAt).getTime();
-                            const diff = currentTime.getTime() - start;
-                            const mins = Math.floor(diff / 60000);
-                            const secs = Math.floor((diff % 60000) / 1000);
-
-                            return (
-                              <div className="text-center sm:text-right px-4 py-2 bg-black/20 rounded-xl border border-white/5 flex-1 sm:flex-initial">
-                                <p className="text-[8px] text-slate-500 uppercase font-black tracking-tighter">
-                                  Queue Time (Oldest)
-                                </p>
-                                <p className="text-sm font-mono text-amber-400 font-bold tabular-nums">
-                                  {mins}m {secs}s
-                                </p>
-                              </div>
-                            );
-                          })()}
-                          <button
-                            onClick={() => setActiveTab("client-comms")}
-                            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-500/30 flex-1 sm:flex-initial uppercase tracking-wider"
-                          >
-                            Process Queue
-                          </button>
+                        <div className="text-left">
+                          <h4 className="text-sm font-bold text-slate-100 flex items-center gap-2">
+                            Communication Queue Active
+                            <span className="bg-rose-500/20 text-rose-300 text-[9px] px-2 py-0.5 rounded-full border border-rose-500/30 font-black">
+                              {
+                                clientComms.filter(
+                                  (c) =>
+                                    c.status === "pending" &&
+                                    (currentUser.role === "tl" ||
+                                      c.callCenterAgentName !==
+                                        currentUser?.name),
+                                ).length
+                              }{" "}
+                              REQUESTS
+                            </span>
+                          </h4>
+                          <p className="text-[10px] text-slate-400 uppercase tracking-widest font-medium">
+                            Awaiting handling and resolution
+                          </p>
                         </div>
-                      </motion.div>
-                    )}
+                      </div>
+
+                      <div className="flex items-center gap-4 w-full sm:w-auto">
+                        {(() => {
+                          const pending = clientComms.filter(
+                            (c) =>
+                              c.status === "pending" &&
+                              (currentUser.role === "tl" ||
+                                c.callCenterAgentName !== currentUser?.name),
+                          );
+                          if (pending.length === 0) return null;
+                          const oldest = [...pending].sort(
+                            (a, b) =>
+                              new Date(a.createdAt).getTime() -
+                              new Date(b.createdAt).getTime(),
+                          )[0];
+                          const start = new Date(oldest.createdAt).getTime();
+                          const diff = currentTime.getTime() - start;
+                          const mins = Math.floor(diff / 60000);
+                          const secs = Math.floor((diff % 60000) / 1000);
+
+                          return (
+                            <div className="text-center sm:text-right px-4 py-2 bg-black/20 rounded-xl border border-white/5 flex-1 sm:flex-initial">
+                              <p className="text-[8px] text-slate-500 uppercase font-black tracking-tighter">
+                                Queue Time (Oldest)
+                              </p>
+                              <p className="text-sm font-mono text-amber-400 font-bold tabular-nums">
+                                {mins}m {secs}s
+                              </p>
+                            </div>
+                          );
+                        })()}
+                        <button
+                          onClick={() => setActiveTab("client-comms")}
+                          className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-500/30 flex-1 sm:flex-initial uppercase tracking-wider"
+                        >
+                          Process Queue
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
 
                   {/* Live Inquiry Notifications */}
                   {currentUser.role === "agent" &&
@@ -8454,8 +8578,7 @@ ${ttNotes}`
                                       !finalPhone.startsWith("+971 ")
                                     ) {
                                       finalPhone =
-                                        "+971 " +
-                                        normalizePhone(finalPhone);
+                                        "+971 " + normalizePhone(finalPhone);
                                     }
                                     if (finalPhone === "+971 ") finalPhone = "";
                                     const updated = {
@@ -12660,31 +12783,32 @@ ${ttNotes}`
                                       </td>
                                       <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2.5 flex-wrap">
-                                          <button
+                                                                                    <button
                                             onClick={() => {
-                                              let details = "";
-                                              if (req.type === "swap") {
-                                                const s = req as SwapRequest;
-                                                details = `Request Type: Shift Swap
-Agent Name: ${s.agentName}
-Swap Date: ${s.date}
-Shift: ${s.shift}
-Swap Partner Name: ${s.swapWithAgent}
-Notes: ${s.notes || "None"}`;
-                                              } else {
-                                                const a = req as AnnualRequest;
-                                                details = `Request Type: Annual Leave
-Agent Name: ${a.agentName}
-Start Date: ${a.startDate}
-End Date: ${a.endDate}
-Notes: ${a.notes || "None"}`;
-                                              }
-                                              navigator.clipboard.writeText(
-                                                details,
-                                              );
-                                              toast.success(
-                                                "Approval request details copied!",
-                                              );
+                                              const r = req as any;
+                                              const photoLines = (r.photos || []).length > 0
+                                                ? `Attachments: ${r.photos.length} photo(s) attached`
+                                                : '';
+                                              const linkLines = (r.links || []).length > 0
+                                                ? `Links:\n${(r.links || []).join('\n')}`
+                                                : '';
+
+                                              const text = [
+                                                `📋 Scheduling Request`,
+                                                `Ref: ${formatCaseRef(r.id, 'sched')}`,
+                                                `Agent: ${r.agentName}`,
+                                                `Type: ${r.type === 'swap' ? 'Shift Swap' : 'Annual Leave'}`,
+                                                r.type === 'swap'
+                                                  ? `Date: ${r.date} | Shift: ${r.shift} | Swap With: ${r.swapWithAgent} (${r.swapWithShift})`
+                                                  : `Leave: ${r.startDate} → ${r.endDate}`,
+                                                `Status: ${r.status}`,
+                                                r.notes ? `Notes: ${r.notes}` : '',
+                                                r.actionBy ? `Actioned by: ${r.actionBy} at ${r.actionAt ? new Date(r.actionAt).toLocaleString() : 'N/A'}` : '',
+                                                photoLines, linkLines,
+                                              ].filter(Boolean).join('\n');
+
+                                              navigator.clipboard.writeText(text);
+                                              toast.success('Request copied to clipboard!');
                                             }}
                                             className="p-1.5 hover:bg-white/10 text-slate-300 hover:text-slate-100 rounded-lg transition-all cursor-pointer flex items-center justify-center border border-white/5 hover:border-white/15"
                                             title="Copy Request details"
@@ -12740,7 +12864,10 @@ Notes: ${a.notes || "None"}`;
                         <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col md:flex-row items-center gap-4">
                           <div className="flex items-center gap-1 bg-black/20 p-1 rounded-xl w-full md:w-auto self-stretch">
                             <button
-                              onClick={() => { setLogFilter("all"); setLogPage(1); }}
+                              onClick={() => {
+                                setLogFilter("all");
+                                setLogPage(1);
+                              }}
                               className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all ${
                                 logFilter === "all"
                                   ? "bg-indigo-500 text-white shadow"
@@ -12750,7 +12877,10 @@ Notes: ${a.notes || "None"}`;
                               All Categories
                             </button>
                             <button
-                              onClick={() => { setLogFilter("swap"); setLogPage(1); }}
+                              onClick={() => {
+                                setLogFilter("swap");
+                                setLogPage(1);
+                              }}
                               className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all ${
                                 logFilter === "swap"
                                   ? "bg-indigo-500 text-white shadow"
@@ -12760,7 +12890,10 @@ Notes: ${a.notes || "None"}`;
                               Shift Swaps
                             </button>
                             <button
-                              onClick={() => { setLogFilter("annual"); setLogPage(1); }}
+                              onClick={() => {
+                                setLogFilter("annual");
+                                setLogPage(1);
+                              }}
                               className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all ${
                                 logFilter === "annual"
                                   ? "bg-indigo-500 text-white shadow"
@@ -12776,14 +12909,20 @@ Notes: ${a.notes || "None"}`;
                             placeholder="🔍 Search by agent name..."
                             className="flex-1 w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
                             value={searchQuery}
-                            onChange={(e) => { setSearchQuery(e.target.value); setLogPage(1); }}
+                            onChange={(e) => {
+                              setSearchQuery(e.target.value);
+                              setLogPage(1);
+                            }}
                           />
                           <div className="flex items-center gap-2">
                             <input
                               type="date"
                               title="From Date"
                               value={logDateFrom}
-                              onChange={(e) => { setLogDateFrom(e.target.value); setLogPage(1); }}
+                              onChange={(e) => {
+                                setLogDateFrom(e.target.value);
+                                setLogPage(1);
+                              }}
                               className="px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-indigo-500 [color-scheme:dark]"
                             />
                             <span className="text-slate-500">-</span>
@@ -12791,7 +12930,10 @@ Notes: ${a.notes || "None"}`;
                               type="date"
                               title="To Date"
                               value={logDateTo}
-                              onChange={(e) => { setLogDateTo(e.target.value); setLogPage(1); }}
+                              onChange={(e) => {
+                                setLogDateTo(e.target.value);
+                                setLogPage(1);
+                              }}
                               className="px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-indigo-500 [color-scheme:dark]"
                             />
                           </div>
@@ -12980,7 +13122,9 @@ Notes: ${a.notes || "None"}`;
                         {totalPages > 1 && (
                           <div className="flex items-center justify-between px-4 py-3 bg-white/5 border border-white/10 rounded-2xl">
                             <button
-                              onClick={() => setLogPage(p => Math.max(1, p - 1))}
+                              onClick={() =>
+                                setLogPage((p) => Math.max(1, p - 1))
+                              }
                               disabled={logPage === 1}
                               className="px-4 py-2 text-sm font-medium text-slate-300 bg-white/10 rounded-lg disabled:opacity-50 hover:bg-white/20 transition-all font-sans"
                             >
@@ -12990,7 +13134,9 @@ Notes: ${a.notes || "None"}`;
                               Page {logPage} of {totalPages}
                             </span>
                             <button
-                              onClick={() => setLogPage(p => Math.min(totalPages, p + 1))}
+                              onClick={() =>
+                                setLogPage((p) => Math.min(totalPages, p + 1))
+                              }
                               disabled={logPage === totalPages}
                               className="px-4 py-2 text-sm font-medium text-slate-300 bg-white/10 rounded-lg disabled:opacity-50 hover:bg-white/20 transition-all font-sans"
                             >
@@ -13002,19 +13148,20 @@ Notes: ${a.notes || "None"}`;
                     )}
 
                   {/* TL PatientSearchHub */}
-                  {currentUser.role === 'tl' && activeTab === 'client-search' && (
-                    <div className='w-full'>
-                      <PatientSearchHub
-                        inquiries={inquiries}
-                        ttRequests={tabbyTamaraRequests}
-                        ttComplaints={tabbyTamaraComplaints}
-                        clientComms={clientComms}
-                        cases={cases}
-                        currentUser={currentUser}
-                        requests={requests}
-                      />
-                    </div>
-                  )}
+                  {currentUser.role === "tl" &&
+                    activeTab === "client-search" && (
+                      <div className="w-full">
+                        <PatientSearchHub
+                          inquiries={inquiries}
+                          ttRequests={tabbyTamaraRequests}
+                          ttComplaints={tabbyTamaraComplaints}
+                          clientComms={clientComms}
+                          cases={cases}
+                          currentUser={currentUser}
+                          requests={requests}
+                        />
+                      </div>
+                    )}
 
                   {/* TL Report Section (Only TL) */}
                   {currentUser.role === "tl" && activeTab === "report" && (
@@ -14050,7 +14197,8 @@ Notes: ${a.notes || "None"}`;
 
                   {/* Agent Portal: Request History Logs (Only Agent) */}
                   {currentUser.role === "agent" &&
-                    (activeTab === "my-requests" || activeTab === "submissions-log") && (
+                    (activeTab === "my-requests" ||
+                      activeTab === "submissions-log") && (
                       <AgentRequestsLogs
                         currentUser={currentUser}
                         requests={requests}
@@ -14202,10 +14350,8 @@ Notes: ${a.notes || "None"}`;
                                   onChange={(e) => {
                                     let val = e.target.value;
                                     if (val && !val.startsWith("+971 ")) {
-                                      val =
-                                        "+971 " +
-                                                 normalizePhone(val);
-                                             }
+                                      val = "+971 " + normalizePhone(val);
+                                    }
                                     if (val === "+971 ") val = "";
                                     setInquiryPhoneNumber(val);
                                   }}
@@ -14391,10 +14537,22 @@ Notes: ${a.notes || "None"}`;
                                           statusText = "Answered";
                                         }
 
-                                        const ageMs = Date.now() - new Date(inq.createdAt).getTime();
+                                        const ageMs =
+                                          Date.now() -
+                                          new Date(inq.createdAt).getTime();
                                         const ageHours = ageMs / 3600000;
-                                        const ageLabel = ageMs < 3600000 ? `${Math.floor(ageMs/60000)}m open` : `${Math.floor(ageHours)}h ${Math.floor((ageHours % 1) * 60)}m open`;
-                                        const ageBadgeColor = inq.status !== 'answered' ? (ageHours > 4 ? 'bg-red-500/20 text-red-400 border-red-500/30 animate-pulse' : ageHours > 1 ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-slate-700 text-slate-400 border-white/10') : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+                                        const ageLabel =
+                                          ageMs < 3600000
+                                            ? `${Math.floor(ageMs / 60000)}m open`
+                                            : `${Math.floor(ageHours)}h ${Math.floor((ageHours % 1) * 60)}m open`;
+                                        const ageBadgeColor =
+                                          inq.status !== "answered"
+                                            ? ageHours > 4
+                                              ? "bg-red-500/20 text-red-400 border-red-500/30 animate-pulse"
+                                              : ageHours > 1
+                                                ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
+                                                : "bg-slate-700 text-slate-400 border-white/10"
+                                            : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
 
                                         return (
                                           <div
@@ -14409,14 +14567,22 @@ Notes: ${a.notes || "None"}`;
                                                 >
                                                   {statusText}
                                                 </span>
-                                                {inq.status !== 'answered' && (
-                                                  <span className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 ${ageBadgeColor}`}>⏱ {ageLabel}</span>
+                                                {inq.status !== "answered" && (
+                                                  <span
+                                                    className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 ${ageBadgeColor}`}
+                                                  >
+                                                    ⏱ {ageLabel}
+                                                  </span>
                                                 )}
                                                 {inq.clinicName && (
-                                                  <span 
+                                                  <span
                                                     onClick={() => {
-                                                      navigator.clipboard.writeText(inq.clinicName || "");
-                                                      toast.success("Clinic name copied!");
+                                                      navigator.clipboard.writeText(
+                                                        inq.clinicName || "",
+                                                      );
+                                                      toast.success(
+                                                        "Clinic name copied!",
+                                                      );
                                                     }}
                                                     className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 border border-indigo-500/30 rounded-lg font-bold flex items-center gap-1 cursor-pointer hover:bg-indigo-500/30 transition-colors"
                                                     title="Copy Clinic"
@@ -14425,10 +14591,16 @@ Notes: ${a.notes || "None"}`;
                                                   </span>
                                                 )}
                                                 {inq.phoneNumber && (
-                                                  <span 
+                                                  <span
                                                     onClick={() => {
-                                                      navigator.clipboard.writeText((inq.phoneNumber || "").replace(/^0+/, ""));
-                                                      toast.success("Phone copied (no leading zero)");
+                                                      navigator.clipboard.writeText(
+                                                        (
+                                                          inq.phoneNumber || ""
+                                                        ).replace(/^0+/, ""),
+                                                      );
+                                                      toast.success(
+                                                        "Phone copied (no leading zero)",
+                                                      );
                                                     }}
                                                     className="text-[10px] bg-sky-500/10 text-sky-300 px-2.5 py-0.5 border border-sky-500/20 rounded-lg font-mono flex items-center gap-1 cursor-pointer hover:bg-sky-500/20 transition-colors"
                                                     title="Copy Phone Number"
@@ -14474,9 +14646,7 @@ Notes: ${a.notes || "None"}`;
                                                     Delete
                                                   </button>
                                                 )}
-                                                {canEditItem(
-                                                  inq.createdAt,
-                                                ) && (
+                                                {canEditItem(inq.createdAt) && (
                                                   <button
                                                     onClick={() =>
                                                       setEditingItem({
@@ -14717,10 +14887,14 @@ Notes: ${a.notes || "None"}`;
                                       >
                                         <div className="flex flex-wrap gap-2 items-center justify-between text-[10px] pb-2 border-b border-white/5">
                                           <div className="flex items-center gap-2">
-                                            <span 
+                                            <span
                                               onClick={() => {
-                                                navigator.clipboard.writeText(inq.agentName || "");
-                                                toast.success("Agent name copied!");
+                                                navigator.clipboard.writeText(
+                                                  inq.agentName || "",
+                                                );
+                                                toast.success(
+                                                  "Agent name copied!",
+                                                );
                                               }}
                                               className="bg-white/10 backdrop-blur-md text-slate-300 font-bold px-2 py-0.5 rounded-lg border border-slate-700 cursor-pointer hover:bg-white/20 backdrop-blur-md transition-colors"
                                               title="Copy Agent Name"
@@ -14728,10 +14902,14 @@ Notes: ${a.notes || "None"}`;
                                               👤 {inq.agentName}
                                             </span>
                                             {inq.clinicName && (
-                                              <span 
+                                              <span
                                                 onClick={() => {
-                                                  navigator.clipboard.writeText(inq.clinicName || "");
-                                                  toast.success("Clinic name copied!");
+                                                  navigator.clipboard.writeText(
+                                                    inq.clinicName || "",
+                                                  );
+                                                  toast.success(
+                                                    "Clinic name copied!",
+                                                  );
                                                 }}
                                                 className="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2.5 py-0.5 rounded-lg cursor-pointer hover:bg-indigo-500/20 transition-colors"
                                                 title="Copy Clinic"
@@ -14740,10 +14918,16 @@ Notes: ${a.notes || "None"}`;
                                               </span>
                                             )}
                                             {inq.phoneNumber && (
-                                              <span 
+                                              <span
                                                 onClick={() => {
-                                                  navigator.clipboard.writeText((inq.phoneNumber || "").replace(/^0+/, ""));
-                                                  toast.success("Phone copied (no leading zero)");
+                                                  navigator.clipboard.writeText(
+                                                    (
+                                                      inq.phoneNumber || ""
+                                                    ).replace(/^0+/, ""),
+                                                  );
+                                                  toast.success(
+                                                    "Phone copied (no leading zero)",
+                                                  );
                                                 }}
                                                 className="bg-sky-500/10 text-sky-300 border border-sky-500/20 px-2.5 py-0.5 rounded-lg font-mono tracking-wider cursor-pointer hover:bg-sky-500/20 transition-colors"
                                                 title="Copy Phone Number"
@@ -15853,361 +16037,407 @@ Notes: ${a.notes || "None"}`;
                                   </p>
                                 </div>
                               ) : (
-                                filteredInquiries
-                              .map((inq) => {
-                                let statusColor =
-                                  "bg-yellow-500/10 border-yellow-500/20 text-yellow-400 animate-pulse";
-                                let statusText = "Submitted";
-                                if (inq.status === "sent") {
-                                  statusColor =
-                                    "bg-orange-500/10 border-orange-500/20 text-orange-400";
-                                  statusText = "Sent to Client";
-                                } else if (inq.status === "answered") {
-                                  statusColor =
-                                    "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
-                                  statusText = "Answered";
-                                }
+                                filteredInquiries.map((inq) => {
+                                  let statusColor =
+                                    "bg-yellow-500/10 border-yellow-500/20 text-yellow-400 animate-pulse";
+                                  let statusText = "Submitted";
+                                  if (inq.status === "sent") {
+                                    statusColor =
+                                      "bg-orange-500/10 border-orange-500/20 text-orange-400";
+                                    statusText = "Sent to Client";
+                                  } else if (inq.status === "answered") {
+                                    statusColor =
+                                      "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
+                                    statusText = "Answered";
+                                  }
 
-                                const ageMs = Date.now() - new Date(inq.createdAt).getTime();
-                                const ageHours = ageMs / 3600000;
-                                const ageLabel = ageMs < 3600000 ? `${Math.floor(ageMs/60000)}m open` : `${Math.floor(ageHours)}h ${Math.floor((ageHours % 1) * 60)}m open`;
-                                const ageBadgeColor = inq.status !== 'answered' ? (ageHours > 4 ? 'bg-red-500/20 text-red-400 border-red-500/30 animate-pulse' : ageHours > 1 ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-slate-700 text-slate-400 border-white/10') : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+                                  const ageMs =
+                                    Date.now() -
+                                    new Date(inq.createdAt).getTime();
+                                  const ageHours = ageMs / 3600000;
+                                  const ageLabel =
+                                    ageMs < 3600000
+                                      ? `${Math.floor(ageMs / 60000)}m open`
+                                      : `${Math.floor(ageHours)}h ${Math.floor((ageHours % 1) * 60)}m open`;
+                                  const ageBadgeColor =
+                                    inq.status !== "answered"
+                                      ? ageHours > 4
+                                        ? "bg-red-500/20 text-red-400 border-red-500/30 animate-pulse"
+                                        : ageHours > 1
+                                          ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
+                                          : "bg-slate-700 text-slate-400 border-white/10"
+                                      : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
 
-                                return (
-                                  <div
-                                    key={inq.id}
-                                    className="p-5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl hover:border-white/10 transition-all space-y-4 relative"
-                                  >
-                                    {/* Agent info, LOB and date */}
-                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-2.5">
-                                      <div className="flex items-center gap-3">
-                                        <div className="w-8.5 h-8.5 bg-indigo-500 rounded-full flex items-center justify-center font-bold text-white text-xs shadow">
-                                          {(inq.agentName || "")
-                                            .split(" ")
-                                            .map((n) => n[0])
-                                            .join("")}
-                                        </div>
-                                        <div>
-                                          <div className="flex items-center gap-2 flex-wrap">
-                                            <span 
-                                              onClick={() => {
-                                                navigator.clipboard.writeText(inq.agentName || "");
-                                                toast.success("Agent name copied!");
-                                              }}
-                                              className="text-xs font-bold text-slate-100 uppercase tracking-wide cursor-pointer hover:text-indigo-300 transition-colors"
-                                              title="Copy Agent Name"
-                                            >
-                                              {inq.agentName}
-                                            </span>
-                                            <span className="text-[10px] text-slate-400 lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded font-sans">
-                                              {getAgentLOB(inq.agentName)}
-                                            </span>
-                                            {inq.clinicName && (
-                                              <span 
-                                                onClick={() => {
-                                                  navigator.clipboard.writeText(inq.clinicName || "");
-                                                  toast.success("Clinic name copied!");
-                                                }}
-                                                className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 border border-indigo-500/30 rounded font-sans font-bold flex items-center gap-1 cursor-pointer hover:bg-indigo-500/30 transition-colors"
-                                                title="Copy Clinic"
-                                              >
-                                                🏥 {inq.clinicName}
-                                              </span>
-                                            )}
-                                            {inq.phoneNumber && (
-                                              <span 
-                                                onClick={() => {
-                                                  navigator.clipboard.writeText((inq.phoneNumber || "").replace(/^0+/, ""));
-                                                  toast.success("Phone copied (no leading zero)");
-                                                }}
-                                                className="text-[10px] bg-sky-500/10 text-sky-300 px-2 py-0.5 border border-sky-500/20 rounded font-mono font-bold flex items-center gap-1 cursor-pointer hover:bg-sky-500/20 transition-colors"
-                                                title="Copy Phone Number"
-                                              >
-                                                📞 {inq.phoneNumber}
-                                              </span>
-                                            )}
-                                            {inq.customerContacted ===
-                                              "contacted" && (
-                                              <span
-                                                className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 border border-emerald-500/30 rounded font-sans font-bold flex items-center gap-1"
-                                                title="Customer is Contacted"
-                                              >
-                                                📞 Contacted
-                                              </span>
-                                            )}
-                                            {inq.customerContacted ===
-                                              "attempted" && (
-                                              <span
-                                                className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 border border-amber-500/30 rounded font-sans font-bold flex items-center gap-1"
-                                                title="Contact has been Attempted"
-                                              >
-                                                ⏳ Contact Attempted
-                                              </span>
-                                            )}
-                                            {(inq.customerContacted ===
-                                              "not_contacted" ||
-                                              !inq.customerContacted) && (
-                                              <span
-                                                className="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.5 border border-rose-500/30 rounded font-sans font-bold flex items-center gap-1"
-                                                title="Customer not contacted yet"
-                                              >
-                                                ❌ Not Contacted
-                                              </span>
-                                            )}
+                                  return (
+                                    <div
+                                      key={inq.id}
+                                      className="p-5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl hover:border-white/10 transition-all space-y-4 relative"
+                                    >
+                                      {/* Agent info, LOB and date */}
+                                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-2.5">
+                                        <div className="flex items-center gap-3">
+                                          <div className="w-8.5 h-8.5 bg-indigo-500 rounded-full flex items-center justify-center font-bold text-white text-xs shadow">
+                                            {(inq.agentName || "")
+                                              .split(" ")
+                                              .map((n) => n[0])
+                                              .join("")}
                                           </div>
-                                          <span className="font-mono text-[10px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded mr-1">
-                                            {formatCaseRef(inq.id)}
-                                          </span>
-                                          <span className="text-[9px] text-slate-500 font-mono">
-                                            {new Date(
-                                              inq.createdAt,
-                                            ).toLocaleString()}
-                                          </span>
+                                          <div>
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                              <span
+                                                onClick={() => {
+                                                  navigator.clipboard.writeText(
+                                                    inq.agentName || "",
+                                                  );
+                                                  toast.success(
+                                                    "Agent name copied!",
+                                                  );
+                                                }}
+                                                className="text-xs font-bold text-slate-100 uppercase tracking-wide cursor-pointer hover:text-indigo-300 transition-colors"
+                                                title="Copy Agent Name"
+                                              >
+                                                {inq.agentName}
+                                              </span>
+                                              <span className="text-[10px] text-slate-400 lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded font-sans">
+                                                {getAgentLOB(inq.agentName)}
+                                              </span>
+                                              {inq.clinicName && (
+                                                <span
+                                                  onClick={() => {
+                                                    navigator.clipboard.writeText(
+                                                      inq.clinicName || "",
+                                                    );
+                                                    toast.success(
+                                                      "Clinic name copied!",
+                                                    );
+                                                  }}
+                                                  className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 border border-indigo-500/30 rounded font-sans font-bold flex items-center gap-1 cursor-pointer hover:bg-indigo-500/30 transition-colors"
+                                                  title="Copy Clinic"
+                                                >
+                                                  🏥 {inq.clinicName}
+                                                </span>
+                                              )}
+                                              {inq.phoneNumber && (
+                                                <span
+                                                  onClick={() => {
+                                                    navigator.clipboard.writeText(
+                                                      (
+                                                        inq.phoneNumber || ""
+                                                      ).replace(/^0+/, ""),
+                                                    );
+                                                    toast.success(
+                                                      "Phone copied (no leading zero)",
+                                                    );
+                                                  }}
+                                                  className="text-[10px] bg-sky-500/10 text-sky-300 px-2 py-0.5 border border-sky-500/20 rounded font-mono font-bold flex items-center gap-1 cursor-pointer hover:bg-sky-500/20 transition-colors"
+                                                  title="Copy Phone Number"
+                                                >
+                                                  📞 {inq.phoneNumber}
+                                                </span>
+                                              )}
+                                              {inq.customerContacted ===
+                                                "contacted" && (
+                                                <span
+                                                  className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 border border-emerald-500/30 rounded font-sans font-bold flex items-center gap-1"
+                                                  title="Customer is Contacted"
+                                                >
+                                                  📞 Contacted
+                                                </span>
+                                              )}
+                                              {inq.customerContacted ===
+                                                "attempted" && (
+                                                <span
+                                                  className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 border border-amber-500/30 rounded font-sans font-bold flex items-center gap-1"
+                                                  title="Contact has been Attempted"
+                                                >
+                                                  ⏳ Contact Attempted
+                                                </span>
+                                              )}
+                                              {(inq.customerContacted ===
+                                                "not_contacted" ||
+                                                !inq.customerContacted) && (
+                                                <span
+                                                  className="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.5 border border-rose-500/30 rounded font-sans font-bold flex items-center gap-1"
+                                                  title="Customer not contacted yet"
+                                                >
+                                                  ❌ Not Contacted
+                                                </span>
+                                              )}
+                                            </div>
+                                            <span className="font-mono text-[10px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded mr-1">
+                                              {formatCaseRef(inq.id)}
+                                            </span>
+                                            <span className="text-[9px] text-slate-500 font-mono">
+                                              {new Date(
+                                                inq.createdAt,
+                                              ).toLocaleString()}
+                                            </span>
+                                          </div>
                                         </div>
-                                      </div>
 
-                                      <div className="flex items-center gap-2">
-                                        <button
-                                          onClick={() => {
-                                            const details = `*Agent Name:* ${inq.agentName}
+                                        <div className="flex items-center gap-2">
+                                          <button
+                                            onClick={() => {
+                                              const details = `*Agent Name:* ${inq.agentName}
 *Clinic:* ${inq.clinicName || "N/A"}
 *Phone:* ${inq.phoneNumber || "N/A"}
 *Inquiry:*
 _ ${inq.text} _
 *Answer:*
 _ ${inq.answer || "No answer yet"} _`;
-                                            navigator.clipboard.writeText(
-                                              details,
-                                            );
-                                            toast.success(
-                                              "Inquiry details copied!",
-                                            );
-                                          }}
-                                          className="p-1 hover:bg-white/10 text-slate-300 hover:text-slate-100 rounded-md transition-all shrink-0 flex items-center gap-1 cursor-pointer"
-                                          title="Copy Inquiry Details"
-                                        >
-                                          <Copy className="w-3.5 h-3.5" />
-                                        </button>
-                                        <span
-                                          className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg uppercase tracking-wider shrink-0 ${statusColor}`}
-                                        >
-                                          {statusText}
-                                        </span>
-                                        {inq.status !== 'answered' && (
-                                           <span className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 ${ageBadgeColor}`}>⏱ {ageLabel}</span>
-                                        )}
-                                        {isSuperAdmin && (
-                                          <button
-                                            onClick={() =>
-                                              handleDeleteInquiry(inq.id)
-                                            }
-                                            className="text-stone-400 hover:text-rose-400 p-1 rounded-md transition-all shrink-0 ml-1.5"
-                                            title="Delete Inquiry"
-                                          >
-                                            <Trash2 className="w-3.5 h-3.5" />
-                                          </button>
-                                        )}
-                                      </div>
-                                    </div>
-
-                                    {/* Question body */}
-                                    <div className="space-y-3 font-sans">
-                                      <p className="text-xs text-slate-200 leading-relaxed whitespace-pre-wrap">
-                                        {inq.text}
-                                      </p>
-
-                                      {/* Render attachments */}
-                                      <AttachmentsDisplay
-                                        photos={inq.photos}
-                                        links={inq.links}
-                                      />
-
-                                      {/* TL customerContacted quick update buttons */}
-                                      <div className="flex flex-wrap bg-slate-900/50 p-1 rounded-lg gap-1 border border-white/5 mt-3 w-max">
-                                          <button
-                                              onClick={() => handleUpdateContactedStatus(inq.id, 'not_contacted')}
-                                              className={`text-[10px] px-2 py-1 rounded transition-colors ${(!inq.customerContacted || inq.customerContacted === 'not_contacted') ? 'bg-rose-500/20 text-rose-300 font-bold' : 'text-slate-400 hover:bg-white/5'}`}
-                                          >
-                                              ❌ Not Contacted
-                                          </button>
-                                          <button
-                                              onClick={() => handleUpdateContactedStatus(inq.id, 'attempted')}
-                                              className={`text-[10px] px-2 py-1 rounded transition-colors ${inq.customerContacted === 'attempted' ? 'bg-amber-500/20 text-amber-300 font-bold' : 'text-slate-400 hover:bg-white/5'}`}
-                                          >
-                                              ⏳ Attempted
-                                          </button>
-                                          <button
-                                              onClick={() => handleUpdateContactedStatus(inq.id, 'contacted')}
-                                              className={`text-[10px] px-2 py-1 rounded transition-colors ${inq.customerContacted === 'contacted' ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'text-slate-400 hover:bg-white/5'}`}
-                                          >
-                                              ✅ Contacted
-                                          </button>
-                                      </div>
-
-                                      {/* End attachments */}
-                                    </div>
-
-                                    {/* Update and input tools */}
-                                    <div className="pt-2 border-t border-white/5 space-y-3">
-                                      {/* Default action stage button rows */}
-                                      {inq.status === "submitted" && (
-                                        <div className="flex flex-wrap gap-2">
-                                          <button
-                                            onClick={() =>
-                                              handleSetInquirySent(inq.id)
-                                            }
-                                            className="px-3.5 py-1.5 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/25 text-orange-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95"
-                                          >
-                                            <Send className="w-3.5 h-3.5" />
-                                            Mark as Sent
-                                          </button>
-                                          <button
-                                            onClick={() => {
-                                              setAnsweringInquiryId(inq.id);
-                                              setCurrentAnswerText(
-                                                inq.answer || "",
+                                              navigator.clipboard.writeText(
+                                                details,
+                                              );
+                                              toast.success(
+                                                "Inquiry details copied!",
                                               );
                                             }}
-                                            className="px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 text-emerald-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95"
+                                            className="p-1 hover:bg-white/10 text-slate-300 hover:text-slate-100 rounded-md transition-all shrink-0 flex items-center gap-1 cursor-pointer"
+                                            title="Copy Inquiry Details"
                                           >
-                                            <CheckCircle2 className="w-3.5 h-3.5" />
-                                            Inquiry Answered
+                                            <Copy className="w-3.5 h-3.5" />
                                           </button>
-                                        </div>
-                                      )}
-
-                                      {inq.status === "sent" && (
-                                        <div className="space-y-2">
-                                          <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-orange-400 uppercase">
-                                            <Send className="w-3.5 h-3.5 animate-pulse" />
-                                            <span>
-                                              Sent to partner by {inq.sentBy} on{" "}
-                                              {new Date(
-                                                inq.sentAt || "",
-                                              ).toLocaleString()}
-                                            </span>
-                                          </div>
-                                          <button
-                                            onClick={() => {
-                                              setAnsweringInquiryId(inq.id);
-                                              setCurrentAnswerText(
-                                                inq.answer || "",
-                                              );
-                                            }}
-                                            className="px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 text-emerald-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95"
+                                          <span
+                                            className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg uppercase tracking-wider shrink-0 ${statusColor}`}
                                           >
-                                            <CheckCircle2 className="w-3.5 h-3.5" />
-                                            Inquiry Answered
-                                          </button>
-                                        </div>
-                                      )}
-
-                                      {inq.status === "answered" && (
-                                        <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl space-y-2">
-                                          <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 border-b border-emerald-500/5 pb-1 max-sm:flex-wrap gap-1">
-                                            <span className="text-emerald-400 font-bold font-sans uppercase">
-                                              ✓ Answered by {inq.answeredBy}
-                                            </span>
-                                            <span>
-                                              {new Date(
-                                                inq.answeredAt || "",
-                                              ).toLocaleString()}
-                                            </span>
-                                          </div>
-                                          <p className="text-xs text-emerald-200 italic font-medium leading-relaxed font-sans">
-                                            "{inq.answer}"
-                                          </p>
-                                          <button
-                                            onClick={() => {
-                                              setAnsweringInquiryId(inq.id);
-                                              setCurrentAnswerText(
-                                                inq.answer || "",
-                                              );
-                                            }}
-                                            className="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold block"
-                                          >
-                                            Edit Response
-                                          </button>
-                                        </div>
-                                      )}
-
-                                      {/* Reassign Agent Option */}
-                                      <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/5">
-                                        <span className="text-[11px] text-slate-400 font-semibold flex items-center gap-1">
-                                          👤 Reassign Agent:
-                                        </span>
-                                        <select
-                                          value={inq.agentName}
-                                          onChange={(e) =>
-                                            handleReassignInquiry(
-                                              inq.id,
-                                              e.target.value,
-                                            )
-                                          }
-                                          className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-2.5 py-1 text-[11px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
-                                        >
-                                          {agentsList.map((aName) => (
-                                            <option
-                                              key={aName}
-                                              value={aName}
-                                              className="bg-white/10 backdrop-blur-md text-slate-100 backdrop-blur-lg  font-sans"
+                                            {statusText}
+                                          </span>
+                                          {inq.status !== "answered" && (
+                                            <span
+                                              className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 ${ageBadgeColor}`}
                                             >
-                                              {aName}
-                                            </option>
-                                          ))}
-                                        </select>
+                                              ⏱ {ageLabel}
+                                            </span>
+                                          )}
+                                          {isSuperAdmin && (
+                                            <button
+                                              onClick={() =>
+                                                handleDeleteInquiry(inq.id)
+                                              }
+                                              className="text-stone-400 hover:text-rose-400 p-1 rounded-md transition-all shrink-0 ml-1.5"
+                                              title="Delete Inquiry"
+                                            >
+                                              <Trash2 className="w-3.5 h-3.5" />
+                                            </button>
+                                          )}
+                                        </div>
                                       </div>
 
-                                      {/* Dialog for answering inside pipeline cards */}
-                                      {answeringInquiryId === inq.id && (
-                                        <div className="p-4 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl space-y-3 animate-fade-in text-left">
-                                          <div className="flex justify-between items-center pb-1">
-                                            <h4 className="text-xs font-bold text-slate-100 font-display">
-                                              Feed Back / System Answer Details
-                                            </h4>
+                                      {/* Question body */}
+                                      <div className="space-y-3 font-sans">
+                                        <p className="text-xs text-slate-200 leading-relaxed whitespace-pre-wrap">
+                                          {inq.text}
+                                        </p>
+
+                                        {/* Render attachments */}
+                                        <AttachmentsDisplay
+                                          photos={inq.photos}
+                                          links={inq.links}
+                                        />
+
+                                        {/* TL customerContacted quick update buttons */}
+                                        <div className="flex flex-wrap bg-slate-900/50 p-1 rounded-lg gap-1 border border-white/5 mt-3 w-max">
+                                          <button
+                                            onClick={() =>
+                                              handleUpdateContactedStatus(
+                                                inq.id,
+                                                "not_contacted",
+                                              )
+                                            }
+                                            className={`text-[10px] px-2 py-1 rounded transition-colors ${!inq.customerContacted || inq.customerContacted === "not_contacted" ? "bg-rose-500/20 text-rose-300 font-bold" : "text-slate-400 hover:bg-white/5"}`}
+                                          >
+                                            ❌ Not Contacted
+                                          </button>
+                                          <button
+                                            onClick={() =>
+                                              handleUpdateContactedStatus(
+                                                inq.id,
+                                                "attempted",
+                                              )
+                                            }
+                                            className={`text-[10px] px-2 py-1 rounded transition-colors ${inq.customerContacted === "attempted" ? "bg-amber-500/20 text-amber-300 font-bold" : "text-slate-400 hover:bg-white/5"}`}
+                                          >
+                                            ⏳ Attempted
+                                          </button>
+                                          <button
+                                            onClick={() =>
+                                              handleUpdateContactedStatus(
+                                                inq.id,
+                                                "contacted",
+                                              )
+                                            }
+                                            className={`text-[10px] px-2 py-1 rounded transition-colors ${inq.customerContacted === "contacted" ? "bg-emerald-500/20 text-emerald-300 font-bold" : "text-slate-400 hover:bg-white/5"}`}
+                                          >
+                                            ✅ Contacted
+                                          </button>
+                                        </div>
+
+                                        {/* End attachments */}
+                                      </div>
+
+                                      {/* Update and input tools */}
+                                      <div className="pt-2 border-t border-white/5 space-y-3">
+                                        {/* Default action stage button rows */}
+                                        {inq.status === "submitted" && (
+                                          <div className="flex flex-wrap gap-2">
+                                            <button
+                                              onClick={() =>
+                                                handleSetInquirySent(inq.id)
+                                              }
+                                              className="px-3.5 py-1.5 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/25 text-orange-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95"
+                                            >
+                                              <Send className="w-3.5 h-3.5" />
+                                              Mark as Sent
+                                            </button>
                                             <button
                                               onClick={() => {
-                                                setAnsweringInquiryId(null);
-                                                setCurrentAnswerText("");
+                                                setAnsweringInquiryId(inq.id);
+                                                setCurrentAnswerText(
+                                                  inq.answer || "",
+                                                );
                                               }}
-                                              className="text-slate-400 text-xs hover:text-slate-100"
+                                              className="px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 text-emerald-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95"
                                             >
-                                              Cancel
+                                              <CheckCircle2 className="w-3.5 h-3.5" />
+                                              Inquiry Answered
                                             </button>
                                           </div>
-                                          <textarea
-                                            placeholder="Type the response/answer details clearly..."
-                                            value={currentAnswerText}
+                                        )}
+
+                                        {inq.status === "sent" && (
+                                          <div className="space-y-2">
+                                            <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-orange-400 uppercase">
+                                              <Send className="w-3.5 h-3.5 animate-pulse" />
+                                              <span>
+                                                Sent to partner by {inq.sentBy}{" "}
+                                                on{" "}
+                                                {new Date(
+                                                  inq.sentAt || "",
+                                                ).toLocaleString()}
+                                              </span>
+                                            </div>
+                                            <button
+                                              onClick={() => {
+                                                setAnsweringInquiryId(inq.id);
+                                                setCurrentAnswerText(
+                                                  inq.answer || "",
+                                                );
+                                              }}
+                                              className="px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 text-emerald-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95"
+                                            >
+                                              <CheckCircle2 className="w-3.5 h-3.5" />
+                                              Inquiry Answered
+                                            </button>
+                                          </div>
+                                        )}
+
+                                        {inq.status === "answered" && (
+                                          <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl space-y-2">
+                                            <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 border-b border-emerald-500/5 pb-1 max-sm:flex-wrap gap-1">
+                                              <span className="text-emerald-400 font-bold font-sans uppercase">
+                                                ✓ Answered by {inq.answeredBy}
+                                              </span>
+                                              <span>
+                                                {new Date(
+                                                  inq.answeredAt || "",
+                                                ).toLocaleString()}
+                                              </span>
+                                            </div>
+                                            <p className="text-xs text-emerald-200 italic font-medium leading-relaxed font-sans">
+                                              "{inq.answer}"
+                                            </p>
+                                            <button
+                                              onClick={() => {
+                                                setAnsweringInquiryId(inq.id);
+                                                setCurrentAnswerText(
+                                                  inq.answer || "",
+                                                );
+                                              }}
+                                              className="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold block"
+                                            >
+                                              Edit Response
+                                            </button>
+                                          </div>
+                                        )}
+
+                                        {/* Reassign Agent Option */}
+                                        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/5">
+                                          <span className="text-[11px] text-slate-400 font-semibold flex items-center gap-1">
+                                            👤 Reassign Agent:
+                                          </span>
+                                          <select
+                                            value={inq.agentName}
                                             onChange={(e) =>
-                                              setCurrentAnswerText(
+                                              handleReassignInquiry(
+                                                inq.id,
                                                 e.target.value,
                                               )
                                             }
-                                            rows={3}
-                                            className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-emerald-500 transition-all font-sans resize-none"
-                                          />
-                                          <button
-                                            onClick={() =>
-                                              handleSetInquiryAnswered(
-                                                inq.id,
-                                                currentAnswerText,
-                                              )
-                                            }
-                                            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow cursor-pointer transition-all active:scale-95 text-center block w-max"
+                                            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-2.5 py-1 text-[11px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                                           >
-                                            Submit Final Answer
-                                          </button>
+                                            {agentsList.map((aName) => (
+                                              <option
+                                                key={aName}
+                                                value={aName}
+                                                className="bg-white/10 backdrop-blur-md text-slate-100 backdrop-blur-lg  font-sans"
+                                              >
+                                                {aName}
+                                              </option>
+                                            ))}
+                                          </select>
                                         </div>
-                                      )}
+
+                                        {/* Dialog for answering inside pipeline cards */}
+                                        {answeringInquiryId === inq.id && (
+                                          <div className="p-4 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl space-y-3 animate-fade-in text-left">
+                                            <div className="flex justify-between items-center pb-1">
+                                              <h4 className="text-xs font-bold text-slate-100 font-display">
+                                                Feed Back / System Answer
+                                                Details
+                                              </h4>
+                                              <button
+                                                onClick={() => {
+                                                  setAnsweringInquiryId(null);
+                                                  setCurrentAnswerText("");
+                                                }}
+                                                className="text-slate-400 text-xs hover:text-slate-100"
+                                              >
+                                                Cancel
+                                              </button>
+                                            </div>
+                                            <textarea
+                                              placeholder="Type the response/answer details clearly..."
+                                              value={currentAnswerText}
+                                              onChange={(e) =>
+                                                setCurrentAnswerText(
+                                                  e.target.value,
+                                                )
+                                              }
+                                              rows={3}
+                                              className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-emerald-500 transition-all font-sans resize-none"
+                                            />
+                                            <button
+                                              onClick={() =>
+                                                handleSetInquiryAnswered(
+                                                  inq.id,
+                                                  currentAnswerText,
+                                                )
+                                              }
+                                              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow cursor-pointer transition-all active:scale-95 text-center block w-max"
+                                            >
+                                              Submit Final Answer
+                                            </button>
+                                          </div>
+                                        )}
+                                      </div>
                                     </div>
-                                  </div>
-                                );
-                              })
-                          )}
-                        </div>
-                      </div>
-                      );
-                    })()}
+                                  );
+                                })
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
 
@@ -20142,9 +20372,8 @@ _ ${inq.answer || "No answer yet"} _`;
                                               !val.startsWith("+971 ")
                                             ) {
                                               val =
-                                                "+971 " +
-                                                 normalizePhone(val);
-                                             }
+                                                "+971 " + normalizePhone(val);
+                                            }
                                             if (val === "+971 ") val = "";
                                             setTtPhoneNumber(val);
                                           }}
@@ -20427,9 +20656,8 @@ _ ${inq.answer || "No answer yet"} _`;
                                               !val.startsWith("+971 ")
                                             ) {
                                               val =
-                                                "+971 " +
-                                                 normalizePhone(val);
-                                             }
+                                                "+971 " + normalizePhone(val);
+                                            }
                                             if (val === "+971 ") val = "";
                                             setTcPhoneNumber(val);
                                           }}
@@ -20535,179 +20763,179 @@ _ ${inq.answer || "No answer yet"} _`;
                                     </form>
                                   </div>
                                 ) : (
-                                    <div className="p-6 bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl space-y-4 shadow-2xl animate-fade-in">
-                                      <h3 className="text-lg font-bold text-slate-100 font-display flex items-center gap-2 text-left">
-                                        <MessageSquare className="w-5 h-5 text-indigo-400" />
-                                        Submit Communication Request
-                                      </h3>
-                                      <p className="text-xs text-slate-400 leading-normal text-left">
-                                        Submit a request for another agent to contact a client and follow up.
-                                      </p>
+                                  <div className="p-6 bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl space-y-4 shadow-2xl animate-fade-in">
+                                    <h3 className="text-lg font-bold text-slate-100 font-display flex items-center gap-2 text-left">
+                                      <MessageSquare className="w-5 h-5 text-indigo-400" />
+                                      Submit Communication Request
+                                    </h3>
+                                    <p className="text-xs text-slate-400 leading-normal text-left">
+                                      Submit a request for another agent to
+                                      contact a client and follow up.
+                                    </p>
 
-                                      <form
-                                        onSubmit={handleSubmitClientComms}
-                                        onPaste={(e) =>
-                                          handleGlobalImagePaste(
-                                            e,
-                                            activePhotos,
-                                            setActivePhotos,
-                                          )
-                                        }
-                                        className="space-y-4 pt-2 text-left"
-                                      >
-                                        {/* Clinic Name */}
-                                        <div className="space-y-1 sm:col-span-2">
-                                          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block ml-1">
-                                            Clinic Name *
-                                          </label>
-                                          <select
-                                            value={ccClinicName}
-                                            onChange={(e) =>
-                                              setCcClinicName(e.target.value)
-                                            }
-                                            className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
-                                            required
-                                          >
-                                            <option
-                                              value=""
-                                              className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                            >
-                                              Select a Clinic
-                                            </option>
-                                            <option
-                                              value="dermadent"
-                                              className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                            >
-                                              Dermadent
-                                            </option>
-                                            <option
-                                              value="onetouch_mo3tred"
-                                              className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                            >
-                                              One Touch Mo3tred
-                                            </option>
-                                            <option
-                                              value="onetouch_merkhnya"
-                                              className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                            >
-                                              One Touch Merkhnya
-                                            </option>
-                                            <option
-                                              value="welltouch"
-                                              className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                            >
-                                              WellTouch
-                                            </option>
-                                            <option
-                                              value="newage"
-                                              className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                            >
-                                              New Age
-                                            </option>
-                                          </select>
-                                        </div>
-
-                                        {/* Phone Number */}
-                                        <div className="space-y-1.5 text-left">
-                                          <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-mono">
-                                            Phone Number *
-                                          </label>
-                                          <input
-                                            type="tel"
-                                            placeholder="+971 5XXXXXXXX"
-                                            value={ccPhoneNumber}
-                                            onChange={(e) => {
-                                              let val = e.target.value;
-                                              if (
-                                                val &&
-                                                !val.startsWith("+971 ")
-                                              ) {
-                                                val =
-                                                  "+971 " +
-                                                 normalizePhone(val);
-                                             }
-                                              if (val === "+971 ") val = "";
-                                              setCcPhoneNumber(val);
-                                            }}
-                                            className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
-                                            required
-                                          />
-                                          <p className="text-[10px] text-slate-400 mt-1">
-                                            * Please enter the number starting
-                                            from 5 (e.g., 501234567)
-                                          </p>
-                                        </div>
-
-                                        {/* Language */}
-                                        <div className="space-y-1.5 text-left">
-                                          <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
-                                            Language Priority *
-                                          </label>
-                                          <div className="grid grid-cols-2 gap-2">
-                                            <button
-                                              type="button"
-                                              onClick={() =>
-                                                setCcLanguage("Arabic")
-                                              }
-                                              className={`py-2 rounded-xl text-xs font-bold uppercase transition-all flex items-center justify-center border cursor-pointer ${
-                                                ccLanguage === "Arabic"
-                                                  ? "bg-indigo-600 border-indigo-500 text-white shadow"
-                                                  : "bg-black/25 border-white/5 text-slate-400"
-                                              }`}
-                                            >
-                                              Arabic
-                                            </button>
-                                            <button
-                                              type="button"
-                                              onClick={() =>
-                                                setCcLanguage("English")
-                                              }
-                                              className={`py-2 rounded-xl text-xs font-bold uppercase transition-all flex items-center justify-center border cursor-pointer ${
-                                                ccLanguage === "English"
-                                                  ? "bg-indigo-600 border-indigo-500 text-white shadow"
-                                                  : "bg-black/25 border-white/5 text-slate-400"
-                                              }`}
-                                            >
-                                              English
-                                            </button>
-                                          </div>
-                                        </div>
-
-                                        {/* Notes */}
-                                        <div className="space-y-1.5 text-left">
-                                          <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
-                                            Inquiry Details / Notes *
-                                          </label>
-                                          <textarea
-                                            placeholder="Explain the required follow up..."
-                                            value={ccNotes}
-                                            onChange={(e) =>
-                                              setCcNotes(e.target.value)
-                                            }
-                                            className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[80px] resize-y font-medium"
-                                            required
-                                          />
-                                        </div>
-
-                                        <MultiAttachmentUpload
-                                          photos={activePhotos}
-                                          links={activeLinks}
-                                          onPhotosChange={setActivePhotos}
-                                          onLinksChange={setActiveLinks}
-                                          photosLabel="Customer Inquiry Screenshot"
-                                        />
-
-                                        <button
-                                          type="submit"
-                                          className="w-full py-3.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] text-slate-100 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow shadow-indigo-500/10"
+                                    <form
+                                      onSubmit={handleSubmitClientComms}
+                                      onPaste={(e) =>
+                                        handleGlobalImagePaste(
+                                          e,
+                                          activePhotos,
+                                          setActivePhotos,
+                                        )
+                                      }
+                                      className="space-y-4 pt-2 text-left"
+                                    >
+                                      {/* Clinic Name */}
+                                      <div className="space-y-1 sm:col-span-2">
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block ml-1">
+                                          Clinic Name *
+                                        </label>
+                                        <select
+                                          value={ccClinicName}
+                                          onChange={(e) =>
+                                            setCcClinicName(e.target.value)
+                                          }
+                                          className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
+                                          required
                                         >
-                                          <Send className="w-3.5 h-3.5" />
-                                          {isFormSubmitting
-                                            ? "Submitting..."
-                                            : "Submit Request"}
-                                        </button>
-                                      </form>
-                                    </div>
+                                          <option
+                                            value=""
+                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                          >
+                                            Select a Clinic
+                                          </option>
+                                          <option
+                                            value="dermadent"
+                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                          >
+                                            Dermadent
+                                          </option>
+                                          <option
+                                            value="onetouch_mo3tred"
+                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                          >
+                                            One Touch Mo3tred
+                                          </option>
+                                          <option
+                                            value="onetouch_merkhnya"
+                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                          >
+                                            One Touch Merkhnya
+                                          </option>
+                                          <option
+                                            value="welltouch"
+                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                          >
+                                            WellTouch
+                                          </option>
+                                          <option
+                                            value="newage"
+                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                          >
+                                            New Age
+                                          </option>
+                                        </select>
+                                      </div>
+
+                                      {/* Phone Number */}
+                                      <div className="space-y-1.5 text-left">
+                                        <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-mono">
+                                          Phone Number *
+                                        </label>
+                                        <input
+                                          type="tel"
+                                          placeholder="+971 5XXXXXXXX"
+                                          value={ccPhoneNumber}
+                                          onChange={(e) => {
+                                            let val = e.target.value;
+                                            if (
+                                              val &&
+                                              !val.startsWith("+971 ")
+                                            ) {
+                                              val =
+                                                "+971 " + normalizePhone(val);
+                                            }
+                                            if (val === "+971 ") val = "";
+                                            setCcPhoneNumber(val);
+                                          }}
+                                          className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
+                                          required
+                                        />
+                                        <p className="text-[10px] text-slate-400 mt-1">
+                                          * Please enter the number starting
+                                          from 5 (e.g., 501234567)
+                                        </p>
+                                      </div>
+
+                                      {/* Language */}
+                                      <div className="space-y-1.5 text-left">
+                                        <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                                          Language Priority *
+                                        </label>
+                                        <div className="grid grid-cols-2 gap-2">
+                                          <button
+                                            type="button"
+                                            onClick={() =>
+                                              setCcLanguage("Arabic")
+                                            }
+                                            className={`py-2 rounded-xl text-xs font-bold uppercase transition-all flex items-center justify-center border cursor-pointer ${
+                                              ccLanguage === "Arabic"
+                                                ? "bg-indigo-600 border-indigo-500 text-white shadow"
+                                                : "bg-black/25 border-white/5 text-slate-400"
+                                            }`}
+                                          >
+                                            Arabic
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() =>
+                                              setCcLanguage("English")
+                                            }
+                                            className={`py-2 rounded-xl text-xs font-bold uppercase transition-all flex items-center justify-center border cursor-pointer ${
+                                              ccLanguage === "English"
+                                                ? "bg-indigo-600 border-indigo-500 text-white shadow"
+                                                : "bg-black/25 border-white/5 text-slate-400"
+                                            }`}
+                                          >
+                                            English
+                                          </button>
+                                        </div>
+                                      </div>
+
+                                      {/* Notes */}
+                                      <div className="space-y-1.5 text-left">
+                                        <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                                          Inquiry Details / Notes *
+                                        </label>
+                                        <textarea
+                                          placeholder="Explain the required follow up..."
+                                          value={ccNotes}
+                                          onChange={(e) =>
+                                            setCcNotes(e.target.value)
+                                          }
+                                          className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[80px] resize-y font-medium"
+                                          required
+                                        />
+                                      </div>
+
+                                      <MultiAttachmentUpload
+                                        photos={activePhotos}
+                                        links={activeLinks}
+                                        onPhotosChange={setActivePhotos}
+                                        onLinksChange={setActiveLinks}
+                                        photosLabel="Customer Inquiry Screenshot"
+                                      />
+
+                                      <button
+                                        type="submit"
+                                        className="w-full py-3.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] text-slate-100 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow shadow-indigo-500/10"
+                                      >
+                                        <Send className="w-3.5 h-3.5" />
+                                        {isFormSubmitting
+                                          ? "Submitting..."
+                                          : "Submit Request"}
+                                      </button>
+                                    </form>
+                                  </div>
                                 )}
                               </div>
                             )}
@@ -20756,35 +20984,44 @@ _ ${inq.answer || "No answer yet"} _`;
                                           localSubTab === "client-comms"
                                             ? "Search clinic, phone..."
                                             : localSubTab === "complaints"
-                                            ? "Search complaints..."
-                                            : "Search patient, phone, file..."
+                                              ? "Search complaints..."
+                                              : "Search patient, phone, file..."
                                         }
                                         value={
-                                          localSubTab === "complaints" ? compSearch : 
-                                          localSubTab === "client-comms" ? commSearch : 
-                                          ttSearchQuery
+                                          localSubTab === "complaints"
+                                            ? compSearch
+                                            : localSubTab === "client-comms"
+                                              ? commSearch
+                                              : ttSearchQuery
                                         }
                                         onChange={(e) => {
-                                          if (localSubTab === "complaints") setCompSearch(e.target.value);
-                                          else if (localSubTab === "client-comms") setCommSearch(e.target.value);
+                                          if (localSubTab === "complaints")
+                                            setCompSearch(e.target.value);
+                                          else if (
+                                            localSubTab === "client-comms"
+                                          )
+                                            setCommSearch(e.target.value);
                                           else setTtSearchQuery(e.target.value);
                                         }}
                                         className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium"
                                       />
                                     </div>
-                                    {localSubTab === "complaints" && isTLOreSupport && (
-                                      <div className="relative w-full md:w-40">
-                                        <span className="absolute left-3 top-2.5 text-slate-400">
-                                          <Calendar className="w-4 h-4" />
-                                        </span>
-                                        <input
-                                          type="date"
-                                          value={compDateFilter}
-                                          onChange={(e) => setCompDateFilter(e.target.value)}
-                                          className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium [color-scheme:dark]"
-                                        />
-                                      </div>
-                                    )}
+                                    {localSubTab === "complaints" &&
+                                      isTLOreSupport && (
+                                        <div className="relative w-full md:w-40">
+                                          <span className="absolute left-3 top-2.5 text-slate-400">
+                                            <Calendar className="w-4 h-4" />
+                                          </span>
+                                          <input
+                                            type="date"
+                                            value={compDateFilter}
+                                            onChange={(e) =>
+                                              setCompDateFilter(e.target.value)
+                                            }
+                                            className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium [color-scheme:dark]"
+                                          />
+                                        </div>
+                                      )}
                                   </div>
                                 </div>
 
@@ -20797,19 +21034,25 @@ _ ${inq.answer || "No answer yet"} _`;
                                       </span>
                                       <div className="flex items-center gap-1.5 bg-black/35 p-1 rounded-xl border border-white/5">
                                         <button
-                                          onClick={() => setCommLangFilter("all")}
+                                          onClick={() =>
+                                            setCommLangFilter("all")
+                                          }
                                           className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${commLangFilter === "all" ? "bg-indigo-600 text-white font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
                                         >
                                           All
                                         </button>
                                         <button
-                                          onClick={() => setCommLangFilter("Arabic")}
+                                          onClick={() =>
+                                            setCommLangFilter("Arabic")
+                                          }
                                           className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${commLangFilter === "Arabic" ? "bg-indigo-600 text-white font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
                                         >
                                           Arabic
                                         </button>
                                         <button
-                                          onClick={() => setCommLangFilter("English")}
+                                          onClick={() =>
+                                            setCommLangFilter("English")
+                                          }
                                           className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${commLangFilter === "English" ? "bg-indigo-600 text-white font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
                                         >
                                           English
@@ -20965,116 +21208,205 @@ _ ${inq.answer || "No answer yet"} _`;
 
                                 {/* List rendering */}
                                 <div className="space-y-4 pt-2 text-left">
-                                  {localSubTab === "requests" ? (() => {
-                                    const cleanPhone = (p) => p.replace(/\D/g, '').replace(/^0+/, '');
-                                    const filteredTTRequests = tabbyTamaraRequests.filter(r => {
-                                      const isMyRequest = r.agentName?.toLowerCase() === currentUser?.name?.toLowerCase();
-                                      if (!isTLOreSupport && !isMyRequest) return false;
+                                  {localSubTab === "requests" ? (
+                                    (() => {
+                                      const cleanPhone = (p) =>
+                                        p.replace(/\D/g, "").replace(/^0+/, "");
+                                      const filteredTTRequests =
+                                        tabbyTamaraRequests.filter((r) => {
+                                          const isMyRequest =
+                                            r.agentName?.toLowerCase() ===
+                                            currentUser?.name?.toLowerCase();
+                                          if (!isTLOreSupport && !isMyRequest)
+                                            return false;
 
-                                      const s = ttSearch.toLowerCase();
-                                      const matchSearch = !s ||
-                                        (r.patientName || "").toLowerCase().includes(s) ||
-                                        (r.agentName || "").toLowerCase().includes(s) ||
-                                        (r.clinicName || "").toLowerCase().includes(s) ||
-                                        (r.fileNumber || "").toLowerCase().includes(s) ||
-                                        (r.phoneNumber && cleanPhone(r.phoneNumber).includes(cleanPhone(ttSearch)));
-                                      
-                                      const matchDate = !ttDateFilter || new Date(r.createdAt).toDateString() === new Date(ttDateFilter).toDateString();
-                                      
-                                      const matchesStatus =
-                                        ttFilterStatus === "all" ||
-                                        (ttFilterStatus === "not_confirmed" && r.status === "not_confirmed") ||
-                                        (ttFilterStatus === "confirmed" && r.status === "confirmed" && r.customerContacted !== "contacted") ||
-                                        (ttFilterStatus === "contacted" && r.customerContacted === "contacted");
-                                      
-                                      const matchesProvider = ttFilterProvider === "all" || r.platform === ttFilterProvider;
-                                      const matchesClinic = tcFilterClinic === "all" || (r.clinicName && r.clinicName.toLowerCase() === tcFilterClinic.toLowerCase());
+                                          const s = ttSearch.toLowerCase();
+                                          const matchSearch =
+                                            !s ||
+                                            (r.patientName || "")
+                                              .toLowerCase()
+                                              .includes(s) ||
+                                            (r.agentName || "")
+                                              .toLowerCase()
+                                              .includes(s) ||
+                                            (r.clinicName || "")
+                                              .toLowerCase()
+                                              .includes(s) ||
+                                            (r.fileNumber || "")
+                                              .toLowerCase()
+                                              .includes(s) ||
+                                            (r.phoneNumber &&
+                                              cleanPhone(
+                                                r.phoneNumber,
+                                              ).includes(cleanPhone(ttSearch)));
 
-                                      return matchSearch && matchDate && matchesStatus && matchesProvider && matchesClinic;
-                                    });
+                                          const matchDate =
+                                            !ttDateFilter ||
+                                            new Date(
+                                              r.createdAt,
+                                            ).toDateString() ===
+                                              new Date(
+                                                ttDateFilter,
+                                              ).toDateString();
 
-                                    return (
+                                          const matchesStatus =
+                                            ttFilterStatus === "all" ||
+                                            (ttFilterStatus ===
+                                              "not_confirmed" &&
+                                              r.status === "not_confirmed") ||
+                                            (ttFilterStatus === "confirmed" &&
+                                              r.status === "confirmed" &&
+                                              r.customerContacted !==
+                                                "contacted") ||
+                                            (ttFilterStatus === "contacted" &&
+                                              r.customerContacted ===
+                                                "contacted");
+
+                                          const matchesProvider =
+                                            ttFilterProvider === "all" ||
+                                            r.platform === ttFilterProvider;
+                                          const matchesClinic =
+                                            tcFilterClinic === "all" ||
+                                            (r.clinicName &&
+                                              r.clinicName.toLowerCase() ===
+                                                tcFilterClinic.toLowerCase());
+
+                                          return (
+                                            matchSearch &&
+                                            matchDate &&
+                                            matchesStatus &&
+                                            matchesProvider &&
+                                            matchesClinic
+                                          );
+                                        });
+
+                                      return (
                                         <>
-                                        {/* TT Sub-Search & Filter */}
-                                        <div className="flex gap-3 mb-4">
+                                          {/* TT Sub-Search & Filter */}
+                                          <div className="flex gap-3 mb-4">
                                             <div className="relative flex-1">
-                                                <span className="absolute left-3 top-2.5 text-slate-400">
-                                                    <Search className="w-4 h-4" />
-                                                </span>
-                                                <input
-                                                    type="text"
-                                                    placeholder="Search patient, phone, clinic, agent..."
-                                                    value={ttSearch}
-                                                    onChange={(e) => setTtSearch(e.target.value)}
-                                                    className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium"
-                                                />
+                                              <span className="absolute left-3 top-2.5 text-slate-400">
+                                                <Search className="w-4 h-4" />
+                                              </span>
+                                              <input
+                                                type="text"
+                                                placeholder="Search patient, phone, clinic, agent..."
+                                                value={ttSearch}
+                                                onChange={(e) =>
+                                                  setTtSearch(e.target.value)
+                                                }
+                                                className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium"
+                                              />
                                             </div>
                                             <div className="relative w-40">
-                                                <input
-                                                    type="date"
-                                                    value={ttDateFilter}
-                                                    onChange={(e) => setTtDateFilter(e.target.value)}
-                                                    className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium [color-scheme:dark]"
-                                                />
-                                            </div>
-                                        </div>
-
-                                      {filteredTTRequests.length === 0 ? (
-                                        <div className="p-12 text-center rounded-3xl border border-dashed border-white/10 bg-white/10 backdrop-blur-md/[0.02] space-y-2">
-                                          <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mx-auto text-slate-500">
-                                            <Wallet className="w-6 h-6" />
-                                          </div>
-                                          <p className="text-sm font-bold text-slate-100 font-sans">
-                                            No installment requests matching
-                                            criteria.
-                                          </p>
-                                          <p className="text-xs text-slate-400">
-                                            Requests will be logged here with
-                                            live status loops and response
-                                            timers.
-                                          </p>
-                                        </div>
-                                      ) : (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                          {filteredTTRequests.map((req) => (
-                                              <TabbyTamaraCard 
-                                                key={req.id}
-                                                req={req}
-                                                currentUser={currentUser}
-                                                isTLOreSupport={isTLOreSupport}
-                                                isSuperAdmin={isSuperAdmin}
-                                                activeFintechHandlingId={activeFintechHandlingId}
-                                                setActiveFintechHandlingId={setActiveFintechHandlingId}
-                                                tlFintechPaymentLink={tlFintechPaymentLink}
-                                                setTlFintechPaymentLink={setTlFintechPaymentLink}
-                                                tlFintechNotes={tlFintechNotes}
-                                                setTlFintechNotes={setTlFintechNotes}
-                                                tlFintechLinks={tlFintechLinks}
-                                                setTlFintechLinks={setTlFintechLinks}
-                                                handleConfirmTabbyTamara={handleConfirmTabbyTamara}
-                                                handleMarkPatientContactedTT={(id, status) => {
-                                                  if (status) {
-                                                    // Undo Contact case uses status
-                                                    handleContactTabbyTamara(id, status);
-                                                  } else {
-                                                    // Mark contacted uses default param in this structure logic
-                                                    handleContactTabbyTamara(id, "contacted");
-                                                  }
-                                                }}
-                                                getElapsedTimerString={getElapsedTimerString}
-                                                handleDeleteTabbyTamara={handleDeleteTabbyTamara}
-                                                canEditItem={canEditItem}
-                                                getRemainingEditTime={getRemainingEditTime}
-                                                setEditingItem={setEditingItem}
-                                                addSystemNotification={addSystemNotification}
+                                              <input
+                                                type="date"
+                                                value={ttDateFilter}
+                                                onChange={(e) =>
+                                                  setTtDateFilter(
+                                                    e.target.value,
+                                                  )
+                                                }
+                                                className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium [color-scheme:dark]"
                                               />
-                                          ))}
-                                        </div>
-                                      )}
-                                    </>
-                                  );
-                                })()
-                                  : localSubTab === "complaints" ? (
+                                            </div>
+                                          </div>
+
+                                          {filteredTTRequests.length === 0 ? (
+                                            <div className="p-12 text-center rounded-3xl border border-dashed border-white/10 bg-white/10 backdrop-blur-md/[0.02] space-y-2">
+                                              <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mx-auto text-slate-500">
+                                                <Wallet className="w-6 h-6" />
+                                              </div>
+                                              <p className="text-sm font-bold text-slate-100 font-sans">
+                                                No installment requests matching
+                                                criteria.
+                                              </p>
+                                              <p className="text-xs text-slate-400">
+                                                Requests will be logged here
+                                                with live status loops and
+                                                response timers.
+                                              </p>
+                                            </div>
+                                          ) : (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                              {filteredTTRequests.map((req) => (
+                                                <TabbyTamaraCard
+                                                  key={req.id}
+                                                  req={req}
+                                                  currentUser={currentUser}
+                                                  isTLOreSupport={
+                                                    isTLOreSupport
+                                                  }
+                                                  isSuperAdmin={isSuperAdmin}
+                                                  activeFintechHandlingId={
+                                                    activeFintechHandlingId
+                                                  }
+                                                  setActiveFintechHandlingId={
+                                                    setActiveFintechHandlingId
+                                                  }
+                                                  tlFintechPaymentLink={
+                                                    tlFintechPaymentLink
+                                                  }
+                                                  setTlFintechPaymentLink={
+                                                    setTlFintechPaymentLink
+                                                  }
+                                                  tlFintechNotes={
+                                                    tlFintechNotes
+                                                  }
+                                                  setTlFintechNotes={
+                                                    setTlFintechNotes
+                                                  }
+                                                  tlFintechLinks={
+                                                    tlFintechLinks
+                                                  }
+                                                  setTlFintechLinks={
+                                                    setTlFintechLinks
+                                                  }
+                                                  handleConfirmTabbyTamara={
+                                                    handleConfirmTabbyTamara
+                                                  }
+                                                  handleMarkPatientContactedTT={(
+                                                    id,
+                                                    status,
+                                                  ) => {
+                                                    if (status) {
+                                                      // Undo Contact case uses status
+                                                      handleContactTabbyTamara(
+                                                        id,
+                                                        status,
+                                                      );
+                                                    } else {
+                                                      // Mark contacted uses default param in this structure logic
+                                                      handleContactTabbyTamara(
+                                                        id,
+                                                        "contacted",
+                                                      );
+                                                    }
+                                                  }}
+                                                  getElapsedTimerString={
+                                                    getElapsedTimerString
+                                                  }
+                                                  handleDeleteTabbyTamara={
+                                                    handleDeleteTabbyTamara
+                                                  }
+                                                  canEditItem={canEditItem}
+                                                  getRemainingEditTime={
+                                                    getRemainingEditTime
+                                                  }
+                                                  setEditingItem={
+                                                    setEditingItem
+                                                  }
+                                                  addSystemNotification={
+                                                    addSystemNotification
+                                                  }
+                                                />
+                                              ))}
+                                            </div>
+                                          )}
+                                        </>
+                                      );
+                                    })()
+                                  ) : localSubTab === "complaints" ? (
                                     <>
                                       {tabbyTamaraComplaints.filter((c) => {
                                         const isMyComplaint =
@@ -21083,15 +21415,26 @@ _ ${inq.answer || "No answer yet"} _`;
                                         if (!isTLOreSupport && !isMyComplaint)
                                           return false;
 
-  const sq = compSearch.toLowerCase();
-  const matchesSearch = !sq ||
-    (c.patientName || "").toLowerCase().includes(sq) ||
-    (c.phoneNumber || "").toLowerCase().includes(sq.replace(/\D/g, '')) ||
-    (c.clinicName || "").toLowerCase().includes(sq) ||
-    (c.agentName || "").toLowerCase().includes(sq) ||
-    (c.complaintDetails || "").toLowerCase().includes(sq);
+                                        const sq = compSearch.toLowerCase();
+                                        const matchesSearch =
+                                          !sq ||
+                                          (c.patientName || "")
+                                            .toLowerCase()
+                                            .includes(sq) ||
+                                          (c.phoneNumber || "")
+                                            .toLowerCase()
+                                            .includes(sq.replace(/\D/g, "")) ||
+                                          (c.clinicName || "")
+                                            .toLowerCase()
+                                            .includes(sq) ||
+                                          (c.agentName || "")
+                                            .toLowerCase()
+                                            .includes(sq) ||
+                                          (c.complaintDetails || "")
+                                            .toLowerCase()
+                                            .includes(sq);
 
-  const matchesStatus =
+                                        const matchesStatus =
                                           ttFilterStatus === "all" ||
                                           (ttFilterStatus === "not_confirmed" &&
                                             c.status === "pending_tl") ||
@@ -21106,7 +21449,12 @@ _ ${inq.answer || "No answer yet"} _`;
                                             c.clinicName?.toLowerCase() ===
                                               tcFilterClinic.toLowerCase());
 
-                                        const matchesDate = !compDateFilter || (c.createdAt && c.createdAt.startsWith(compDateFilter));
+                                        const matchesDate =
+                                          !compDateFilter ||
+                                          (c.createdAt &&
+                                            c.createdAt.startsWith(
+                                              compDateFilter,
+                                            ));
 
                                         return (
                                           matchesSearch &&
@@ -21140,13 +21488,27 @@ _ ${inq.answer || "No answer yet"} _`;
                                               )
                                                 return false;
 
-                                              const sq = compSearch.toLowerCase();
-                                              const matchesSearch = !sq ||
-                                                (c.patientName || "").toLowerCase().includes(sq) ||
-                                                (c.phoneNumber || "").toLowerCase().includes(sq.replace(/\D/g, '')) ||
-                                                (c.clinicName || "").toLowerCase().includes(sq) ||
-                                                (c.agentName || "").toLowerCase().includes(sq) ||
-                                                (c.complaintDetails || "").toLowerCase().includes(sq);
+                                              const sq =
+                                                compSearch.toLowerCase();
+                                              const matchesSearch =
+                                                !sq ||
+                                                (c.patientName || "")
+                                                  .toLowerCase()
+                                                  .includes(sq) ||
+                                                (c.phoneNumber || "")
+                                                  .toLowerCase()
+                                                  .includes(
+                                                    sq.replace(/\D/g, ""),
+                                                  ) ||
+                                                (c.clinicName || "")
+                                                  .toLowerCase()
+                                                  .includes(sq) ||
+                                                (c.agentName || "")
+                                                  .toLowerCase()
+                                                  .includes(sq) ||
+                                                (c.complaintDetails || "")
+                                                  .toLowerCase()
+                                                  .includes(sq);
 
                                               const matchesStatus =
                                                 ttFilterStatus === "all" ||
@@ -21167,7 +21529,12 @@ _ ${inq.answer || "No answer yet"} _`;
                                                   c.clinicName?.toLowerCase() ===
                                                     tcFilterClinic.toLowerCase());
 
-                                              const matchesDate = !compDateFilter || (c.createdAt && c.createdAt.startsWith(compDateFilter));
+                                              const matchesDate =
+                                                !compDateFilter ||
+                                                (c.createdAt &&
+                                                  c.createdAt.startsWith(
+                                                    compDateFilter,
+                                                  ));
 
                                               return (
                                                 matchesSearch &&
@@ -21184,18 +21551,34 @@ _ ${inq.answer || "No answer yet"} _`;
                                               const isClosed =
                                                 comp.status === "closed";
 
-                                              const compAgeMs = Date.now() - new Date(comp.createdAt).getTime();
-                                              const compAgeHours = compAgeMs / 3600000;
-                                              const compAgeLabel = compAgeHours < 1 ? `${Math.floor(compAgeMs/60000)}m open` : `${Math.floor(compAgeHours)}h open`;
-                                              const compUrgency = comp.status !== 'closed'
-                                                ? (compAgeHours > 24 ? 'critical' : compAgeHours > 8 ? 'high' : compAgeHours > 2 ? 'medium' : 'low')
-                                                : 'resolved';
+                                              const compAgeMs =
+                                                Date.now() -
+                                                new Date(
+                                                  comp.createdAt,
+                                                ).getTime();
+                                              const compAgeHours =
+                                                compAgeMs / 3600000;
+                                              const compAgeLabel =
+                                                compAgeHours < 1
+                                                  ? `${Math.floor(compAgeMs / 60000)}m open`
+                                                  : `${Math.floor(compAgeHours)}h open`;
+                                              const compUrgency =
+                                                comp.status !== "closed"
+                                                  ? compAgeHours > 24
+                                                    ? "critical"
+                                                    : compAgeHours > 8
+                                                      ? "high"
+                                                      : compAgeHours > 2
+                                                        ? "medium"
+                                                        : "low"
+                                                  : "resolved";
                                               const urgencyColors = {
-                                                critical: 'border-l-red-500',
-                                                high: 'border-l-orange-500',
-                                                medium: 'border-l-amber-500',
-                                                low: 'border-l-slate-700',
-                                                resolved: 'border-l-emerald-500'
+                                                critical: "border-l-red-500",
+                                                high: "border-l-orange-500",
+                                                medium: "border-l-amber-500",
+                                                low: "border-l-slate-700",
+                                                resolved:
+                                                  "border-l-emerald-500",
                                               };
 
                                               return (
@@ -21236,15 +21619,25 @@ _ ${inq.answer || "No answer yet"} _`;
                                                     {/* Status Badges */}
                                                     <div className="text-right flex flex-col items-end gap-1 shrink-0 font-sans">
                                                       <span className="font-mono text-[10px] text-slate-500 font-bold tracking-wider mb-1 flex items-center justify-end gap-2">
-                                                        <span className="px-1.5 py-0.5 rounded-sm bg-black/20 border border-white/10 text-white/60">⏱ {compAgeLabel}</span>
+                                                        <span className="px-1.5 py-0.5 rounded-sm bg-black/20 border border-white/10 text-white/60">
+                                                          ⏱ {compAgeLabel}
+                                                        </span>
                                                         {formatCompRef(comp.id)}
                                                       </span>
-                                                      <span className={`text-[9px] uppercase tracking-wide font-extrabold px-2 py-0.5 rounded-md ${
-                                                        isPendingTL ? "bg-amber-500/10 border border-amber-500/30 text-amber-300" :
-                                                        isNeedContact ? "bg-rose-500/10 border border-rose-500/30 text-rose-400 animate-pulse" :
-                                                        isClosed ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400" : ""
-                                                      }`}>
-                                                        {compStatusLabels[comp.status] || comp.status}
+                                                      <span
+                                                        className={`text-[9px] uppercase tracking-wide font-extrabold px-2 py-0.5 rounded-md ${
+                                                          isPendingTL
+                                                            ? "bg-amber-500/10 border border-amber-500/30 text-amber-300"
+                                                            : isNeedContact
+                                                              ? "bg-rose-500/10 border border-rose-500/30 text-rose-400 animate-pulse"
+                                                              : isClosed
+                                                                ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
+                                                                : ""
+                                                        }`}
+                                                      >
+                                                        {compStatusLabels[
+                                                          comp.status
+                                                        ] || comp.status}
                                                       </span>
                                                     </div>
                                                   </div>
@@ -21257,7 +21650,13 @@ _ ${inq.answer || "No answer yet"} _`;
                                                           Submitting Agent:
                                                         </p>
                                                         <p className="text-slate-200 font-bold truncate">
-                                                          <CopyWrap text={comp.agentName || ''} label="Agent Name">
+                                                          <CopyWrap
+                                                            text={
+                                                              comp.agentName ||
+                                                              ""
+                                                            }
+                                                            label="Agent Name"
+                                                          >
                                                             {comp.agentName}
                                                           </CopyWrap>
                                                         </p>
@@ -21281,7 +21680,13 @@ _ ${inq.answer || "No answer yet"} _`;
                                                             ID Number:
                                                           </p>
                                                           <p className="text-slate-200 font-mono font-bold">
-                                                            <CopyWrap text={comp.idNumber || ''} label="ID">
+                                                            <CopyWrap
+                                                              text={
+                                                                comp.idNumber ||
+                                                                ""
+                                                              }
+                                                              label="ID"
+                                                            >
                                                               {comp.idNumber}
                                                             </CopyWrap>
                                                           </p>
@@ -21304,7 +21709,16 @@ _ ${inq.answer || "No answer yet"} _`;
                                                           Phone number:
                                                         </p>
                                                         <p className="text-slate-200 font-mono font-bold truncate">
-                                                          <CopyWrap text={(comp.phoneNumber || '').replace(/^0+/, '')} label="Phone">
+                                                          <CopyWrap
+                                                            text={(
+                                                              comp.phoneNumber ||
+                                                              ""
+                                                            ).replace(
+                                                              /^0+/,
+                                                              "",
+                                                            )}
+                                                            label="Phone"
+                                                          >
                                                             {comp.phoneNumber}
                                                           </CopyWrap>
                                                         </p>
@@ -21317,8 +21731,18 @@ _ ${inq.answer || "No answer yet"} _`;
                                                           Complaint Issue:
                                                         </p>
                                                         <div className="bg-black/25 p-2 rounded-lg border border-white/[0.03] text-slate-300 leading-normal font-sans italic">
-                                                          <CopyWrap text={comp.complaintDetails || ''} label="Details">
-                                                            "{comp.complaintDetails}"
+                                                          <CopyWrap
+                                                            text={
+                                                              comp.complaintDetails ||
+                                                              ""
+                                                            }
+                                                            label="Details"
+                                                          >
+                                                            "
+                                                            {
+                                                              comp.complaintDetails
+                                                            }
+                                                            "
                                                           </CopyWrap>
                                                         </div>
                                                       </div>
@@ -21340,8 +21764,14 @@ _ ${inq.answer || "No answer yet"} _`;
                                                           {comp.tlComment}
                                                         </p>
                                                         {comp.tlHandledAt && (
-                                                          <p className='text-[10px] text-slate-500 mt-1 font-mono'>
-                                                            Last updated by {comp.tlHandledBy || 'TL'} at {new Date(comp.tlHandledAt).toLocaleString()}
+                                                          <p className="text-[10px] text-slate-500 mt-1 font-mono">
+                                                            Last updated by{" "}
+                                                            {comp.tlHandledBy ||
+                                                              "TL"}{" "}
+                                                            at{" "}
+                                                            {new Date(
+                                                              comp.tlHandledAt,
+                                                            ).toLocaleString()}
                                                           </p>
                                                         )}
                                                       </div>
@@ -21466,7 +21896,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                                           const text = `Complaint Data:
 Patient: ${comp.patientName}
 File: ${comp.fileNumber}
-Phone: ${(comp.phoneNumber || '').replace(/^0+/, '')}
+Phone: ${(comp.phoneNumber || "").replace(/^0+/, "")}
 ID/Type: ${comp.idNumber || (comp.isOldCustomer ? "Old" : "New")}
 Clinic: ${comp.clinicName}
 Status: ${comp.status}
@@ -21529,19 +21959,46 @@ Links: ${(comp.links || []).join(", ")}
                                                     {/* Copy Option */}
                                                     <button
                                                       onClick={() => {
-                                                        const details = `*Complaint ID:* ${comp.id}
-*Patient Name:* ${comp.patientName}
-*File Number:* ${comp.fileNumber || "N/A"}
-*Phone Number:* ${(comp.phoneNumber || '').replace(/^0+/, '')}
-*Complaint Text:*
-_ ${comp.complaintDetails} _
-*TL Comment:*
-_ ${comp.tlComment || "No comment yet"} _`;
+                                                        const photoLines =
+                                                          (comp.photos || [])
+                                                            .length > 0
+                                                            ? `Attachments: ${comp.photos.length} photo(s) attached`
+                                                            : "";
+                                                        const screenshotLine =
+                                                          comp.screenshot ||
+                                                          comp.imageUrl
+                                                            ? `Screenshot: 1 image attached`
+                                                            : "";
+                                                        const linkLines =
+                                                          (comp.links || [])
+                                                            .length > 0
+                                                            ? `Links:\n${(comp.links || []).join("\n")}`
+                                                            : "";
+
+                                                        const text = [
+                                                          `📋 Complaint`,
+                                                          `Ref: ${formatCaseRef(comp.id, "tt_complaint")}`,
+                                                          `Patient: ${comp.patientName} | File: ${comp.fileNumber || "N/A"}`,
+                                                          `Phone: ${normalizePhone(comp.phoneNumber || "")}`,
+                                                          `ID Type: ${comp.idNumber || (comp.isOldCustomer ? "Old Customer" : "New Customer")}`,
+                                                          `Clinic: ${comp.clinicName}`,
+                                                          `Status: ${comp.status}`,
+                                                          `Complaint: ${comp.complaintDetails}`,
+                                                          comp.tlComment
+                                                            ? `TL Comment: ${comp.tlComment}`
+                                                            : "",
+                                                          photoLines,
+                                                          screenshotLine,
+                                                          linkLines,
+                                                        ]
+                                                          .filter(Boolean)
+                                                          .join("\n");
+
                                                         navigator.clipboard.writeText(
-                                                          details,
+                                                          text,
                                                         );
                                                         toast.success(
-                                                          "Complaint details copied!",
+                                                          "Complaint details copied — including attachments info!",
                                                         );
                                                       }}
                                                       className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-slate-100 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
@@ -21572,19 +22029,24 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                       )}
 
                                                     {/* Agent or TL Mark Contacted Closed Case button */}
-                                                    {(isNeedContact || (isTLOreSupport && !isClosed)) && (
-                                                        <button
-                                                          onClick={() =>
-                                                            handleToggleContactComplaint(
-                                                              comp.id,
-                                                              "contacted",
-                                                            )
-                                                          }
-                                                          className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 active:scale-95 text-black font-extrabold font-sans text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-1"
-                                                        >
-                                                          📞 {isNeedContact ? "Mark Case Closed" : "Force Close"}
-                                                        </button>
-                                                      )}
+                                                    {(isNeedContact ||
+                                                      (isTLOreSupport &&
+                                                        !isClosed)) && (
+                                                      <button
+                                                        onClick={() =>
+                                                          handleToggleContactComplaint(
+                                                            comp.id,
+                                                            "contacted",
+                                                          )
+                                                        }
+                                                        className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 active:scale-95 text-black font-extrabold font-sans text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-1"
+                                                      >
+                                                        📞{" "}
+                                                        {isNeedContact
+                                                          ? "Mark Case Closed"
+                                                          : "Force Close"}
+                                                      </button>
+                                                    )}
 
                                                     {/* Reopen Closed Case if done in error */}
                                                     {currentUser?.role ===
@@ -21609,9 +22071,13 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                       request={comp}
                                                       currentUser={currentUser}
                                                       collectionName="tabby_tamara_complaints"
-                                                      addSystemNotification={addSystemNotification}
+                                                      addSystemNotification={
+                                                        addSystemNotification
+                                                      }
                                                       requestType="Complaint"
-                                                      requestAgentName={comp.agentName}
+                                                      requestAgentName={
+                                                        comp.agentName
+                                                      }
                                                     />
                                                   </div>
                                                 </div>
@@ -21646,14 +22112,30 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                         const query = commSearch.toLowerCase();
                                         const matchesSearch =
                                           !query ||
-                                          c.patientName?.toLowerCase().includes(query) ||
-                                          (c.phoneNumber || "").replace(/[^\d]/g, "").includes(query.replace(/[^\d]/g, "")) ||
-                                          c.clinicName?.toLowerCase().includes(query) ||
-                                          c.callCenterAgentName?.toLowerCase().includes(query) ||
-                                          c.notes?.toLowerCase().includes(query) ||
-                                          (c.handledBy || "").toLowerCase().includes(query);
+                                          c.patientName
+                                            ?.toLowerCase()
+                                            .includes(query) ||
+                                          (c.phoneNumber || "")
+                                            .replace(/[^\d]/g, "")
+                                            .includes(
+                                              query.replace(/[^\d]/g, ""),
+                                            ) ||
+                                          c.clinicName
+                                            ?.toLowerCase()
+                                            .includes(query) ||
+                                          c.callCenterAgentName
+                                            ?.toLowerCase()
+                                            .includes(query) ||
+                                          c.notes
+                                            ?.toLowerCase()
+                                            .includes(query) ||
+                                          (c.handledBy || "")
+                                            .toLowerCase()
+                                            .includes(query);
 
-                                        const matchesLang = commLangFilter === "all" || c.language === commLangFilter;
+                                        const matchesLang =
+                                          commLangFilter === "all" ||
+                                          c.language === commLangFilter;
 
                                         const matchesStatus =
                                           ttFilterStatus === "all" ||
@@ -21685,7 +22167,8 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                             criteria.
                                           </p>
                                           <p className="text-xs text-slate-400">
-                                            Communication requests for agents will appear here.
+                                            Communication requests for agents
+                                            will appear here.
                                           </p>
                                         </div>
                                       ) : (
@@ -21764,15 +22247,32 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                               const isClosed =
                                                 req.status === "contacted";
                                               const canTakeRequest =
-                                                isPending && req.callCenterAgentName !== currentUser?.name;
+                                                isPending &&
+                                                req.callCenterAgentName !==
+                                                  currentUser?.name;
                                               const canProcessRequest =
                                                 isInProgress &&
                                                 (!req.openedBy ||
                                                   req.openedBy ===
                                                     currentUser?.name);
-                                              const commAgeHours = (Date.now() - new Date(req.createdAt).getTime()) / 3600000;
-                                              const commSLABadge = req.status === 'contacted' ? 'bg-emerald-500/10 text-emerald-400' : commAgeHours > 2 ? 'bg-red-500/20 text-red-400 animate-pulse' : commAgeHours > 0.5 ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-700 text-slate-400';
-                                              const commAgeLabel = commAgeHours < 1 ? `${Math.floor(commAgeHours * 60)}m` : `${Math.floor(commAgeHours)}h ${Math.floor((commAgeHours % 1) * 60)}m`;
+                                              const commAgeHours =
+                                                (Date.now() -
+                                                  new Date(
+                                                    req.createdAt,
+                                                  ).getTime()) /
+                                                3600000;
+                                              const commSLABadge =
+                                                req.status === "contacted"
+                                                  ? "bg-emerald-500/10 text-emerald-400"
+                                                  : commAgeHours > 2
+                                                    ? "bg-red-500/20 text-red-400 animate-pulse"
+                                                    : commAgeHours > 0.5
+                                                      ? "bg-amber-500/20 text-amber-400"
+                                                      : "bg-slate-700 text-slate-400";
+                                              const commAgeLabel =
+                                                commAgeHours < 1
+                                                  ? `${Math.floor(commAgeHours * 60)}m`
+                                                  : `${Math.floor(commAgeHours)}h ${Math.floor((commAgeHours % 1) * 60)}m`;
 
                                               return (
                                                 <div
@@ -21809,7 +22309,11 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                     {/* Status Badges */}
                                                     <div className="text-right flex flex-col items-end gap-1 shrink-0 font-sans">
                                                       <span className="font-mono text-[10px] text-slate-500 font-bold tracking-wider mb-1 flex items-center justify-end gap-2">
-                                                        <span className={`px-1.5 py-0.5 rounded-sm border border-white/10 ${commSLABadge}`}>⏱ {commAgeLabel} open</span>
+                                                        <span
+                                                          className={`px-1.5 py-0.5 rounded-sm border border-white/10 ${commSLABadge}`}
+                                                        >
+                                                          ⏱ {commAgeLabel} open
+                                                        </span>
                                                         {formatComRef(req.id)}
                                                       </span>
                                                       {isPending && (
@@ -21839,8 +22343,16 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                           Requested By:
                                                         </p>
                                                         <p className="text-slate-200 font-bold truncate">
-                                                          <CopyWrap text={req.callCenterAgentName || ''} label="Agent Name">
-                                                            {req.callCenterAgentName}
+                                                          <CopyWrap
+                                                            text={
+                                                              req.callCenterAgentName ||
+                                                              ""
+                                                            }
+                                                            label="Agent Name"
+                                                          >
+                                                            {
+                                                              req.callCenterAgentName
+                                                            }
                                                           </CopyWrap>
                                                         </p>
                                                       </div>
@@ -21849,8 +22361,25 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                           Phone number:
                                                         </p>
                                                         <p className="text-indigo-300 font-mono font-bold truncate">
-                                                          <CopyWrap text={req.phoneNumber ? ('0' + req.phoneNumber.replace(/^0+/, '')) : ''} label="Phone">
-                                                            {req.phoneNumber ? ('0' + req.phoneNumber.replace(/^0+/, '')) : ''}
+                                                          <CopyWrap
+                                                            text={
+                                                              req.phoneNumber
+                                                                ? "0" +
+                                                                  req.phoneNumber.replace(
+                                                                    /^0+/,
+                                                                    "",
+                                                                  )
+                                                                : ""
+                                                            }
+                                                            label="Phone"
+                                                          >
+                                                            {req.phoneNumber
+                                                              ? "0" +
+                                                                req.phoneNumber.replace(
+                                                                  /^0+/,
+                                                                  "",
+                                                                )
+                                                              : ""}
                                                           </CopyWrap>
                                                         </p>
                                                       </div>
@@ -21861,7 +22390,10 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                         Notes / Inquiry:
                                                       </p>
                                                       <div className="bg-black/25 p-2 rounded-lg border border-white/[0.03] text-slate-300 leading-normal font-sans italic">
-                                                        <CopyWrap text={req.notes || ''} label="Notes">
+                                                        <CopyWrap
+                                                          text={req.notes || ""}
+                                                          label="Notes"
+                                                        >
                                                           "{req.notes}"
                                                         </CopyWrap>
                                                       </div>
@@ -21877,26 +22409,45 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                       links={req.links}
                                                     />
 
-                                                    {(req.handlingNotes || (req.handlingPhotos && req.handlingPhotos.length > 0)) && (
+                                                    {(req.handlingNotes ||
+                                                      (req.handlingPhotos &&
+                                                        req.handlingPhotos
+                                                          .length > 0)) && (
                                                       <div className="border-t border-indigo-500/20 pt-1.5 text-xs text-indigo-300">
                                                         {req.handlingNotes && (
                                                           <>
                                                             <p className="text-[9px] text-indigo-400 uppercase tracking-wider mb-0.5 font-bold">
-                                                              💬 Resolution Notes (
+                                                              💬 Resolution
+                                                              Notes (
                                                               {req.handledBy}):
                                                             </p>
                                                             <div className="bg-indigo-950/20 p-2 rounded-lg border border-indigo-500/10 text-slate-200 leading-normal font-sans mb-1">
-                                                              <CopyWrap text={req.handlingNotes || ''} label="Resolution Notes">
-                                                                {req.handlingNotes}
+                                                              <CopyWrap
+                                                                text={
+                                                                  req.handlingNotes ||
+                                                                  ""
+                                                                }
+                                                                label="Resolution Notes"
+                                                              >
+                                                                {
+                                                                  req.handlingNotes
+                                                                }
                                                               </CopyWrap>
                                                             </div>
                                                           </>
                                                         )}
-                                                        {req.handlingPhotos && req.handlingPhotos.length > 0 && (
-                                                          <div className="mt-2">
-                                                            <AttachmentsDisplay photos={req.handlingPhotos} links={[]} />
-                                                          </div>
-                                                        )}
+                                                        {req.handlingPhotos &&
+                                                          req.handlingPhotos
+                                                            .length > 0 && (
+                                                            <div className="mt-2">
+                                                              <AttachmentsDisplay
+                                                                photos={
+                                                                  req.handlingPhotos
+                                                                }
+                                                                links={[]}
+                                                              />
+                                                            </div>
+                                                          )}
                                                       </div>
                                                     )}
                                                   </div>
@@ -21949,7 +22500,8 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                     req.id && (
                                                     <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl space-y-2 text-left animate-fade-in mt-1">
                                                       <label className="text-[9px] font-bold text-slate-300 uppercase tracking-widest block mb-1">
-                                                        Handling Notes & Attachments *
+                                                        Handling Notes &
+                                                        Attachments *
                                                       </label>
                                                       <textarea
                                                         placeholder="What was the outcome of contacting the client?"
@@ -21963,9 +22515,13 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                         required
                                                       />
                                                       <MultiAttachmentUpload
-                                                        photos={ccHandlingPhotos}
+                                                        photos={
+                                                          ccHandlingPhotos
+                                                        }
                                                         links={[]} // links unsupported for inline
-                                                        onPhotosChange={setCcHandlingPhotos}
+                                                        onPhotosChange={
+                                                          setCcHandlingPhotos
+                                                        }
                                                         onLinksChange={() => {}}
                                                         photosLabel="Upload / Paste Handling Screenshots"
                                                       />
@@ -21973,8 +22529,12 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                         <button
                                                           type="button"
                                                           onClick={() => {
-                                                            setActiveCcHandlingId(null);
-                                                            setCcHandlingPhotos([]);
+                                                            setActiveCcHandlingId(
+                                                              null,
+                                                            );
+                                                            setCcHandlingPhotos(
+                                                              [],
+                                                            );
                                                           }}
                                                           className="px-2.5 py-1.5 hover:bg-white/20 backdrop-blur-md rounded-lg text-[10px] font-bold text-slate-400 cursor-pointer"
                                                         >
@@ -21983,16 +22543,24 @@ _ ${comp.tlComment || "No comment yet"} _`;
                                                         <button
                                                           type="button"
                                                           onClick={() => {
-                                                            if (!ccHandlingNotes.trim() && ccHandlingPhotos.length === 0) {
-                                                              toast.error("Please add notes or an attachment");
+                                                            if (
+                                                              !ccHandlingNotes.trim() &&
+                                                              ccHandlingPhotos.length ===
+                                                                0
+                                                            ) {
+                                                              toast.error(
+                                                                "Please add notes or an attachment",
+                                                              );
                                                               return;
                                                             }
                                                             handleProcessClientComms(
                                                               req.id,
                                                               ccHandlingNotes,
-                                                              ccHandlingPhotos
+                                                              ccHandlingPhotos,
                                                             );
-                                                            setCcHandlingPhotos([]);
+                                                            setCcHandlingPhotos(
+                                                              [],
+                                                            );
                                                           }}
                                                           className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 active:scale-95 text-slate-950 text-[10px] font-black rounded-lg shadow cursor-pointer transition-all flex items-center gap-1"
                                                         >
@@ -22098,16 +22666,31 @@ _ ${req.handlingNotes || "Pending response"} _`;
                                                           📞 Finalize Handled
                                                         </button>
                                                       )}
-                                                      
-                                                    {!isClosed && (currentUser?.role === 'tl' || currentUser?.name === req.callCenterAgentName || currentUser?.name === req.openedBy) && (
-                                                      <button
-                                                        onClick={() => handleMarkClientCommDone(req.id)}
-                                                        className={`px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 text-slate-950 font-sans font-black text-xs rounded-xl shadow-lg cursor-pointer transition-all active:scale-95 flex items-center gap-1.5 ${canProcessRequest ? 'ml-1' : ''}`}
-                                                      >
-                                                        <CheckCircle2 className="w-3.5 h-3.5" />
-                                                        {currentUser?.role === 'tl' && req.status === "pending" ? "Force Close" : "Done / Close"}
-                                                      </button>
-                                                    )}
+
+                                                    {!isClosed &&
+                                                      (currentUser?.role ===
+                                                        "tl" ||
+                                                        currentUser?.name ===
+                                                          req.callCenterAgentName ||
+                                                        currentUser?.name ===
+                                                          req.openedBy) && (
+                                                        <button
+                                                          onClick={() =>
+                                                            handleMarkClientCommDone(
+                                                              req.id,
+                                                            )
+                                                          }
+                                                          className={`px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 text-slate-950 font-sans font-black text-xs rounded-xl shadow-lg cursor-pointer transition-all active:scale-95 flex items-center gap-1.5 ${canProcessRequest ? "ml-1" : ""}`}
+                                                        >
+                                                          <CheckCircle2 className="w-3.5 h-3.5" />
+                                                          {currentUser?.role ===
+                                                            "tl" &&
+                                                          req.status ===
+                                                            "pending"
+                                                            ? "Force Close"
+                                                            : "Done / Close"}
+                                                        </button>
+                                                      )}
                                                   </div>
 
                                                   <div className="w-full mt-3 pt-3 border-t border-white/5 mx-[2px]">
@@ -22115,9 +22698,14 @@ _ ${req.handlingNotes || "Pending response"} _`;
                                                       request={req}
                                                       currentUser={currentUser}
                                                       collectionName="client_comms"
-                                                      addSystemNotification={addSystemNotification}
+                                                      addSystemNotification={
+                                                        addSystemNotification
+                                                      }
                                                       requestType="Client Comm"
-                                                      requestAgentName={req.callCenterAgentName || req.openedBy}
+                                                      requestAgentName={
+                                                        req.callCenterAgentName ||
+                                                        req.openedBy
+                                                      }
                                                     />
                                                   </div>
                                                 </div>
@@ -22897,33 +23485,43 @@ _ ${req.handlingNotes || "Pending response"} _`;
         setNewPasswordInput={setNewPasswordInput}
         handleResetUserPassword={handleResetUserPassword}
       />
-      <NotificationDrawer 
-        isOpen={isNotifDrawerOpen} 
-        onClose={() => setIsNotifDrawerOpen(false)} 
-        visibleNotifs={visibleNotifs} 
-        currentUser={currentUser} 
-        handleMarkAllNotifsAsRead={handleMarkAllNotifsAsRead} 
-        handleMarkSingleNotifAsRead={handleMarkSingleNotifAsRead} 
+      <NotificationDrawer
+        isOpen={isNotifDrawerOpen}
+        onClose={() => setIsNotifDrawerOpen(false)}
+        visibleNotifs={visibleNotifs}
+        currentUser={currentUser}
+        handleMarkAllNotifsAsRead={handleMarkAllNotifsAsRead}
+        handleMarkSingleNotifAsRead={handleMarkSingleNotifAsRead}
         setActiveTab={setActiveTab}
       />
 
       {pendingCancelId && (
-        <div className='fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm'>
-          <div className='bg-[#0f0f13] border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4 mx-4'>
-            <div className='flex items-center gap-3'>
-              <div className='w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center border border-rose-500/20'>
-                <AlertTriangle className='w-5 h-5 text-rose-400' />
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="bg-[#0f0f13] border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4 mx-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center border border-rose-500/20">
+                <AlertTriangle className="w-5 h-5 text-rose-400" />
               </div>
               <div>
-                <h3 className='font-bold text-slate-100 text-sm'>Cancel Request?</h3>
-                <p className='text-xs text-slate-400'>This action cannot be undone.</p>
+                <h3 className="font-bold text-slate-100 text-sm">
+                  Cancel Request?
+                </h3>
+                <p className="text-xs text-slate-400">
+                  This action cannot be undone.
+                </p>
               </div>
             </div>
-            <div className='flex justify-end gap-3 pt-2'>
-              <button onClick={() => setPendingCancelId(null)} className='px-4 py-2 text-xs border border-white/10 rounded-xl text-slate-300 hover:bg-white/5 transition-colors cursor-pointer'>
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                onClick={() => setPendingCancelId(null)}
+                className="px-4 py-2 text-xs border border-white/10 rounded-xl text-slate-300 hover:bg-white/5 transition-colors cursor-pointer"
+              >
                 Keep Request
               </button>
-              <button onClick={handleConfirmCancel} className='px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-black transition-colors cursor-pointer'>
+              <button
+                onClick={handleConfirmCancel}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-black transition-colors cursor-pointer"
+              >
                 Yes, Cancel It
               </button>
             </div>

@@ -3,7 +3,7 @@ import { Copy, ExternalLink, MessageCircle, AlertCircle, Phone, CheckCircle2, Ho
 import { toast } from 'sonner';
 import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
-import { formatCaseRef } from '../utils';
+import { formatCaseRef, normalizePhone } from '../utils';
 
 const CopyableField = ({ icon: Icon, label, value, isBold = false }: { icon: any, label: string, value: string, isBold?: boolean }) => {
   const [copied, setCopied] = React.useState(false);
@@ -402,17 +402,36 @@ export const TabbyTamaraCard = ({
           <>
             <button
               onClick={() => {
-                const text = `Tabby / Tamara Request:
-Patient: ${req.patientName} | File: ${req.fileNumber || 'N/A'}
-Phone: ${req.phoneNumber}
-Price: AED ${req.priceWithoutTax}
-Platform: ${req.platform}
-Clinic: ${req.clinicName || 'N/A'}
-Payment Link: ${req.paymentLink || 'N/A'}
-Notes: ${req.notes || 'None'}
-`;
+                const photoLines = (req.photos || []).length > 0
+                  ? `\nScreenshots: ${req.photos.length} photo(s) attached`
+                  : '';
+                const screenshotLine = req.paymentScreenshot
+                  ? `\nPayment Screenshot: attached`
+                  : '';
+                const linkLines = (req.links || []).length > 0
+                  ? `\nLinks:\n${(req.links || []).join('\n')}`
+                  : '';
+                const tlLinkLines = req.tlLinks
+                  ? `\nTL Links: ${req.tlLinks}`
+                  : '';
+
+                const text = [
+                  `📋 Tabby/Tamara Request`,
+                  `Ref: ${formatCaseRef(req.id, 'tt_request')}`,
+                  `Patient: ${req.patientName} | File: ${req.fileNumber || 'N/A'}`,
+                  `Phone: ${normalizePhone(req.phoneNumber)}`,
+                  `Price: AED ${req.priceWithoutTax}`,
+                  `Platform: ${req.platform?.toUpperCase()}`,
+                  `Clinic: ${req.clinicName || 'N/A'}`,
+                  `Status: ${req.status}`,
+                  req.paymentLink ? `Payment Link: ${req.paymentLink}` : '',
+                  req.notes ? `Notes: ${req.notes}` : '',
+                  req.tlNotes ? `TL Notes: ${req.tlNotes}` : '',
+                  photoLines, screenshotLine, linkLines, tlLinkLines,
+                ].filter(Boolean).join('\n');
+
                 navigator.clipboard.writeText(text);
-                toast.success("Summary copied to clipboard!");
+                toast.success('Full summary copied — including attachments info!');
               }}
               className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-md text-slate-300 text-[10px] font-black transition-all flex items-center gap-1.5 uppercase tracking-widest cursor-pointer"
               title="Copy Request Summary"
