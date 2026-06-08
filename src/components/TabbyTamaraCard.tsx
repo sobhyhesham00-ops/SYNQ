@@ -10,7 +10,8 @@ import { db, wrappedUpdateDoc as updateDoc } from '../firebase';
 import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
 import { MultiAttachmentUpload } from './MultiAttachmentUpload';
-import { formatCaseRef, normalizePhone, copyToClipboard, extractLinks, normalizeUrl } from '../utils';
+import { formatCaseRef, normalizePhone, copyToClipboard, extractLinks, normalizeUrl, getSafeTTWorkflowStatus, getSafeTTSourceChannel, getAgentLOB, buildCaseClipboardPayload, normalizeAttachments } from '../utils';
+import { AGENT_LOBS } from '../types';
 
 // REUSABLE COMPONENTS
 
@@ -133,6 +134,202 @@ export const TabbyTamaraCard = ({
   const [followUpText, setFollowUpText] = useState('');
   const [followUpPhotos, setFollowUpPhotos] = useState<string[]>([]);
   const [followUpUploading, setFollowUpUploading] = useState(false);
+
+  // CRM States & Workflow Derived Properties
+  const workflowStatus = getSafeTTWorkflowStatus(req);
+  const sourceChannel = getSafeTTSourceChannel(req);
+  const userLOB = getAgentLOB(currentUser?.name || '');
+  
+  const isSocialMedia = userLOB === 'Social Media';
+  const isUnassigned = !req.assignedToId;
+  const isCallCenterRequest = sourceChannel === 'call_center';
+  const canClaim = isSocialMedia && isUnassigned && isCallCenterRequest;
+  
+  // Reassign / Assign State
+  const [showAssignDropdown, setShowAssignDropdown] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
+  const socialMediaAgents = Object.entries(AGENT_LOBS)
+    .filter(([_, lob]) => lob === 'Social Media')
+    .map(([name]) => name);
+
+  // Client Materials Mode
+  const [isCrmMaterialsMode, setIsCrmMaterialsMode] = useState(false);
+  const [clientIdPhotos, setClientIdPhotos] = useState<string[]>([]);
+  const [paymentProofPhotos, setPaymentProofPhotos] = useState<string[]>([]);
+  const [isClientIdUploading, setIsClientIdUploading] = useState(false);
+  const [isPaymentProofUploading, setIsPaymentProofUploading] = useState(false);
+  const [crmContactNotes, setCrmContactNotes] = useState("");
+
+  // Sent To Partner Panel
+  const [showPartnerPanel, setShowPartnerPanel] = useState(false);
+  const [partnerPhotos, setPartnerPhotos] = useState<string[]>([]);
+  const [isPartnerUploading, setIsPartnerUploading] = useState(false);
+  const [partnerNotes, setPartnerNotes] = useState("");
+  const [isPartnerSubmitting, setIsPartnerSubmitting] = useState(false);
+
+  const handleClaimRequest = async () => {
+    try {
+      const claimActivity = {
+        id: "act_" + Math.random().toString(36).substring(2, 11),
+        senderName: "System",
+        authorId: "system",
+        authorRole: "system",
+        text: `${currentUser.name} claimed this request. Assigned to ${currentUser.name}. Status set to: Awaiting Client Contact.`,
+        createdAt: new Date().toISOString()
+      };
+      
+      await updateDoc(doc(db, "tt_requests", req.id), {
+        assignedToId: currentUser.id || currentUser.uid || "usr_" + currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
+        assignedToName: currentUser.name,
+        assignedAt: new Date().toISOString(),
+        assignedById: currentUser.id || currentUser.uid || "usr_" + currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
+        assignedByName: currentUser.name,
+        workflowStatus: "awaiting_client_contact",
+        replies: arrayUnion(claimActivity)
+      });
+
+      if (addSystemNotification) {
+        addSystemNotification(
+          "Claimed: Tabby/Tamara Request",
+          `You claimed request ${formatCaseRef(req.id, 'tt_request')} submitted by ${req.submittedByName || req.agentName}.`,
+          "general",
+          currentUser.name,
+          undefined,
+          "tt_request",
+          req.id
+        );
+        addSystemNotification(
+          "Claimed: Tabby/Tamara Request",
+          `${currentUser.name} claimed request ${formatCaseRef(req.id, 'tt_request')} submitted by ${req.submittedByName || req.agentName}.`,
+          "general",
+          req.submittedByName || req.agentName,
+          undefined,
+          "tt_request",
+          req.id
+        );
+        addSystemNotification(
+          "Claimed: Tabby/Tamara Request",
+          `${currentUser.name} claimed request ${formatCaseRef(req.id, 'tt_request')} submitted by ${req.submittedByName || req.agentName}.`,
+          "general",
+          "tl",
+          undefined,
+          "tt_request",
+          req.id
+        );
+      }
+      toast.success("Request claimed successfully!");
+    } catch (err: any) {
+      toast.error("Failed to claim request: " + err.message);
+    }
+  };
+
+  const handleAssignAgent = async (agentName: string) => {
+    try {
+      setIsAssigning(true);
+      const assignActivity = {
+        id: "act_" + Math.random().toString(36).substring(2, 11),
+        senderName: "System",
+        authorId: "system",
+        authorRole: "system",
+        text: `${currentUser.name} assigned this request to ${agentName}. Status set to: Awaiting Client Contact.`,
+        createdAt: new Date().toISOString()
+      };
+      
+      await updateDoc(doc(db, "tt_requests", req.id), {
+        assignedToId: "usr_" + agentName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
+        assignedToName: agentName,
+        assignedAt: new Date().toISOString(),
+        assignedById: currentUser.id || currentUser.uid || "usr_" + currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
+        assignedByName: currentUser.name,
+        workflowStatus: "awaiting_client_contact",
+        replies: arrayUnion(assignActivity)
+      });
+
+      if (addSystemNotification) {
+        addSystemNotification(
+          "Assigned: Tabby/Tamara Request",
+          `You have been assigned to handle Tabby/Tamara request for ${req.patientName}.`,
+          "general",
+          agentName,
+          undefined,
+          "tt_request",
+          req.id
+        );
+        addSystemNotification(
+          "Assigned: Tabby/Tamara Request",
+          `${currentUser.name} assigned request ${formatCaseRef(req.id, 'tt_request')} to ${agentName}.`,
+          "general",
+          req.submittedByName || req.agentName,
+          undefined,
+          "tt_request",
+          req.id
+        );
+      }
+      setShowAssignDropdown(false);
+      toast.success(`Request assigned to ${agentName}!`);
+    } catch (err: any) {
+      toast.error("Failed to assign request: " + err.message);
+    } finally {
+      setIsAssigning(false);
+    }
+  };
+
+  const handleSendToPartner = async () => {
+    try {
+      setIsPartnerSubmitting(true);
+      const partnerAtts = normalizeAttachments(partnerPhotos);
+      
+      const sendActivity = {
+        id: "act_" + Math.random().toString(36).substring(2, 11),
+        senderName: "System",
+        authorId: "system",
+        authorRole: "system",
+        text: `${currentUser.name} sent case to partner. Case officially completed with notes: "${partnerNotes || "None"}".`,
+        createdAt: new Date().toISOString()
+      };
+      
+      await updateDoc(doc(db, "tt_requests", req.id), {
+        workflowStatus: "sent_to_partner",
+        partnerSentAt: new Date().toISOString(),
+        partnerSentById: currentUser.id || currentUser.uid || "usr_" + currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
+        partnerSentByName: currentUser.name,
+        partnerAttachments: partnerAtts,
+        partnerNotes: partnerNotes,
+        status: "confirmed",
+        replies: arrayUnion(sendActivity)
+      });
+
+      if (addSystemNotification) {
+        const targets = Array.from(new Set([req.assignedToName, req.submittedByName, req.agentName])).filter(Boolean);
+        targets.forEach(target => {
+          addSystemNotification(
+            "🚢 Sent to Partner — Case Completed",
+            `The Tabby/Tamara request for ${req.patientName} has been submitted to partner.`,
+            "general",
+            target,
+            undefined,
+            "tt_request",
+            req.id
+          );
+        });
+        addSystemNotification(
+          "🚢 Sent to Partner — Case Completed",
+          `Request ${formatCaseRef(req.id, 'tt_request')} for ${req.patientName} marked sent to partner by ${currentUser.name}.`,
+          "general",
+          "tl",
+          undefined,
+          "tt_request",
+          req.id
+        );
+      }
+      setShowPartnerPanel(false);
+      toast.success("Case successfully sent to partner and completed!");
+    } catch (err: any) {
+      toast.error("Failed to send to partner: " + err.message);
+    } finally {
+      setIsPartnerSubmitting(false);
+    }
+  };
   
   const isPendingContact = req.status === "confirmed" && req.customerContacted === "not_contacted";
   const elapsedMins = req.confirmedAt && req.customerContacted !== 'contacted'
@@ -237,10 +434,8 @@ export const TabbyTamaraCard = ({
 
   const handleCopyTextOnly = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const uniquePhotos = getAllAttachments();
-    const text = buildRequestText(req, uniquePhotos);
-    const html = buildRequestHtml(req, uniquePhotos);
-    const success = await copyToClipboard(text, "Request details copied successfully!", html);
+    const payload = buildCaseClipboardPayload(req);
+    const success = await copyToClipboard(payload.text, "Report details copied successfully!", payload.html);
     if (!success) {
       toast.error("Failed to copy request details.");
     }
@@ -249,8 +444,8 @@ export const TabbyTamaraCard = ({
   const handleShareAction = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
+    const payload = buildCaseClipboardPayload(req);
     const uniquePhotos = getAllAttachments();
-    const text = buildRequestText(req, uniquePhotos);
     
     const tempFiles: File[] = [];
     
@@ -274,7 +469,7 @@ export const TabbyTamaraCard = ({
 
     const shareData: ShareData = {
       title: `Request ${formatCaseRef(req.id, 'tt_request')}`,
-      text: text,
+      text: payload.text,
     };
 
     try {
@@ -357,13 +552,32 @@ export const TabbyTamaraCard = ({
         <div className='flex items-center flex-wrap gap-2 mt-1.5'>
           <span className='text-[10px] text-slate-400 font-mono bg-white/[0.04] px-2 py-0.5 rounded-md'>File: {req.fileNumber || req.idNumber || 'N/A'}</span>
           <span className='w-1 h-1 rounded-full bg-slate-700' />
+          
+          {/* Source Channel Badge */}
+          <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${
+            sourceChannel === 'call_center' 
+              ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' 
+              : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+          }`}>
+            {sourceChannel === 'call_center' ? '📞 Call Center' : '💬 Social Media'}
+          </span>
+          <span className='w-1 h-1 rounded-full bg-slate-700' />
+
+          {/* Assignee */}
+          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md border ${
+            req.assignedToName ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-amber-500/10 text-amber-500/80 border-amber-500/20'
+          }`}>
+            👤 {req.assignedToName ? `Assigned to: ${req.assignedToName}` : 'Unassigned'}
+          </span>
+          <span className='w-1 h-1 rounded-full bg-slate-700' />
+
           {req.isOldCustomer && (
             <>
-              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase bg-slate-800 text-slate-300 border border-slate-700/50">Returning Pt</span>
-              <span className='w-1 h-1 rounded-full bg-slate-700' />
+               <span className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase bg-slate-800 text-slate-300 border border-slate-700/50">Returning Pt</span>
+               <span className='w-1 h-1 rounded-full bg-slate-700' />
             </>
           )}
-          <span className='text-[10px] text-slate-400 font-semibold flex items-center gap-1 bg-white/[0.04] px-2 py-0.5 rounded-md'><User className="w-3 h-3 text-slate-500"/> By {req.agentName}</span>
+          <span className='text-[10px] text-slate-400 font-semibold flex items-center gap-1 bg-white/[0.04] px-2 py-0.5 rounded-md'><User className="w-3 h-3 text-slate-500"/> Submitter: {req.submittedByName || req.agentName}</span>
         </div>
       </div>
 
@@ -401,25 +615,56 @@ export const TabbyTamaraCard = ({
       </div>
 
       {/* PROGRESS TIMELINE */}
-      <div className='px-5 py-4 border-b border-slate-700/40 bg-slate-950/20'>
-        <div className='flex items-center gap-0'>
-          {[
-            { label: 'Submitted', done: true },
-            { label: req.status === 'rejected' ? 'TL Rejected' : 'TL Confirmed', done: req.status === 'confirmed' || req.status === 'rejected' },
-            { label: 'Pt Contacted', done: req.customerContacted === 'contacted' },
-          ].map((step, i, arr) => (
-            <React.Fragment key={step.label}>
-              <div className='flex flex-col items-center gap-1 w-24 shrink-0'>
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center border transition-all ${step.done ? 'bg-indigo-500 border-indigo-300 shadow-sm shadow-indigo-500/50' : 'bg-transparent border-slate-800'}`}>
-                  {step.done && <Check className='w-3.5 h-3.5 text-white' />}
+      <div className='px-5 py-4 border-b border-slate-700/40 bg-slate-950/20 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-800'>
+        <div className='flex items-center gap-0 pb-1 min-w-[500px] sm:min-w-0 justify-between'>
+          {(() => {
+            const steps = [
+              { label: 'Submitted', done: true },
+              { label: req.status === 'rejected' ? 'Rejected' : 'Link Ready', done: req.status === 'rejected' || ['tl_link_ready', 'awaiting_client_contact', 'ready_for_partner', 'sent_to_partner', 'completed'].includes(workflowStatus) },
+              { label: 'Client Contact', done: ['ready_for_partner', 'sent_to_partner', 'completed'].includes(workflowStatus) },
+              { label: 'Ready for Partner', done: ['ready_for_partner', 'sent_to_partner', 'completed'].includes(workflowStatus) },
+              { label: 'Sent', done: ['sent_to_partner', 'completed'].includes(workflowStatus) }
+            ];
+            return steps.map((step, i, arr) => (
+              <React.Fragment key={step.label}>
+                <div className='flex flex-col items-center gap-1 w-20 shrink-0'>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center border transition-all ${
+                    req.status === 'rejected' && i === 1
+                      ? 'bg-red-500/20 border-red-500 text-red-500' 
+                      : step.done 
+                        ? 'bg-indigo-500 border-indigo-300 shadow-sm shadow-indigo-500/50 text-white' 
+                        : 'bg-transparent border-slate-800 text-slate-500'
+                  }`}>
+                    {req.status === 'rejected' && i === 1 ? (
+                      <span className="text-[10px] font-bold">X</span>
+                    ) : step.done ? (
+                      <Check className='w-3 h-3 text-white' />
+                    ) : (
+                      <span className="text-[9px] font-mono">{i + 1}</span>
+                    )}
+                  </div>
+                  <span className={`text-[9px] font-bold uppercase tracking-wide whitespace-nowrap text-center ${
+                    req.status === 'rejected' && i === 1 
+                      ? 'text-red-400' 
+                      : step.done 
+                        ? 'text-indigo-400' 
+                        : 'text-slate-500'
+                  }`}>
+                    {step.label}
+                  </span>
                 </div>
-                <span className={`text-[10px] font-bold uppercase tracking-wide whitespace-nowrap ${step.done ? 'text-indigo-400' : 'text-slate-500'}`}>{step.label}</span>
-              </div>
-              {i < arr.length - 1 && (
-                <div className={`flex-1 h-1 rounded-full mb-5 mx-1 transition-all ${arr[i+1].done ? 'bg-indigo-500' : 'bg-slate-800'}`} />
-              )}
-            </React.Fragment>
-          ))}
+                {i < arr.length - 1 && (
+                  <div className={`flex-1 h-0.5 rounded-full mb-3.5 mx-1 transition-all ${
+                    req.status === 'rejected' && i === 1 
+                      ? 'bg-red-500/20' 
+                      : arr[i+1].done 
+                        ? 'bg-indigo-500' 
+                        : 'bg-slate-800'
+                  }`} />
+                )}
+              </React.Fragment>
+            ));
+          })()}
         </div>
       </div>
 
@@ -444,8 +689,55 @@ export const TabbyTamaraCard = ({
              )}
              {hasAttachments && (
                <div className="space-y-3">
-                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Attached Files</span>
+                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Original Submission Files</span>
                  <AttachmentsDisplay photos={[...(req.photos || []), ...(req.paymentScreenshot ? [req.paymentScreenshot] : [])]} links={req.links} />
+               </div>
+             )}
+
+             {/* CRM Client ID Attachments */}
+             {((req.clientIdAttachments && req.clientIdAttachments.length > 0) || (req.clientIdPhotos && req.clientIdPhotos.length > 0)) && (
+               <div className="space-y-3">
+                 <span className="text-[10px] font-bold text-teal-400 uppercase tracking-widest block">🪪 Client ID Attachments</span>
+                 <AttachmentsDisplay 
+                   photos={[
+                     ...(req.clientIdAttachments || []).map((f: any) => typeof f === 'object' ? f.url || f.imageUrl || f.screenshot : f),
+                     ...(req.clientIdPhotos || [])
+                   ].filter(Boolean)} 
+                   links={[]} 
+                 />
+               </div>
+             )}
+
+             {/* CRM Payment Proof Attachments */}
+             {((req.paymentProofAttachments && req.paymentProofAttachments.length > 0) || (req.paymentProofPhotos && req.paymentProofPhotos.length > 0)) && (
+               <div className="space-y-3">
+                 <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block">💰 Payment Proof Attachments</span>
+                 <AttachmentsDisplay 
+                   photos={[
+                     ...(req.paymentProofAttachments || []).map((f: any) => typeof f === 'object' ? f.url || f.imageUrl || f.screenshot : f),
+                     ...(req.paymentProofPhotos || [])
+                   ].filter(Boolean)} 
+                   links={[]} 
+                 />
+               </div>
+             )}
+
+             {/* Partner Sent Attachments */}
+             {((req.partnerAttachments && req.partnerAttachments.length > 0) || (req.partnerPhotos && req.partnerPhotos.length > 0)) && (
+               <div className="space-y-3">
+                 <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest block">🚢 Partner Submission Files</span>
+                 {req.partnerNotes && (
+                   <p className="p-3 bg-indigo-950/20 text-xs text-indigo-200 rounded-xl border border-indigo-500/10 mb-2">
+                     Notes: {req.partnerNotes}
+                   </p>
+                 )}
+                 <AttachmentsDisplay 
+                   photos={[
+                     ...(req.partnerAttachments || []).map((f: any) => typeof f === 'object' ? f.url || f.imageUrl || f.screenshot : f),
+                     ...(req.partnerPhotos || [])
+                   ].filter(Boolean)} 
+                   links={[]} 
+                 />
                </div>
              )}
           </div>
@@ -609,11 +901,11 @@ export const TabbyTamaraCard = ({
                  {req.tlNotes || "Request rejected by TL."}
                </div>
              </div>
-           </div>
-        </div>
-      )}
+            </div>
+         </div>
+       )}
 
-      {/* TL INLINE HANDLING FORM */}
+         {/* TL INLINE HANDLING FORM */}
       {activeFintechHandlingId === req.id && isTLOreSupport && req.status === "not_confirmed" && (
         <div className="bg-slate-900/80 border-y border-indigo-500/30 p-5 space-y-4">
            <h4 className="text-xs font-black text-indigo-400 flex items-center gap-2 mb-3 uppercase tracking-widest"><CornerDownRight className="w-4 h-4" /> Processing Panel</h4>
@@ -664,10 +956,10 @@ export const TabbyTamaraCard = ({
           )}
         </div>
 
-        {/* RIGHT group: copy, share, handle, contact */}
+        {/* RIGHT group: copy, share, claim, assign, crm actions */}
         {isTLOreSupport && (
            <button onClick={handleShareAction} className="px-3 py-1.5 text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-widest border border-indigo-500/20 hidden md:flex">
-              <Share className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Share</span>
+              <Share className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Share Full Case</span>
            </button>
         )}
 
@@ -679,12 +971,53 @@ export const TabbyTamaraCard = ({
             }}
             className="px-3 py-1.5 text-teal-400 hover:text-teal-300 bg-teal-500/10 hover:bg-teal-500/20 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-widest border border-teal-500/20 cursor-pointer"
           >
-            <Eye className="w-3.5 h-3.5 text-teal-400" /> <span className="hidden sm:inline">View Details</span>
+            <Eye className="w-3.5 h-3.5 text-teal-400" /> <span className="hidden sm:inline">Details</span>
           </button>
         )}
 
+        {/* Claim button */}
+        {canClaim && (
+          <button 
+            onClick={handleClaimRequest} 
+            className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-500/30 ring-1 ring-indigo-500/30"
+          >
+            <CheckIcon className="w-3.5 h-3.5" /> Claim Case
+          </button>
+        )}
+
+        {/* Assign Dropdown (TL only) */}
+        {isTLOreSupport && (
+          <div className="relative">
+            <button
+              onClick={() => setShowAssignDropdown(!showAssignDropdown)}
+              className="px-3 py-1.5 text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-widest border border-indigo-500/20 cursor-pointer"
+            >
+              <User className="w-3.5 h-3.5" /> {req.assignedToName ? "Reassign" : "Assign Agent"}
+            </button>
+            {showAssignDropdown && (
+              <div className="absolute bottom-10 right-0 z-50 bg-[#1e1e24] border border-slate-700 rounded-xl w-56 shadow-2xl p-2 space-y-1">
+                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest px-2 py-1">Select Social Media Agent</p>
+                {socialMediaAgents.length === 0 ? (
+                  <p className="text-xs text-slate-400 px-2 py-1">No agents found</p>
+                ) : (
+                  socialMediaAgents.map((agentName) => (
+                    <button
+                      key={agentName}
+                      onClick={() => handleAssignAgent(agentName)}
+                      disabled={isAssigning}
+                      className="w-full text-left px-2 py-1.5 hover:bg-white/[0.04] text-xs text-slate-200 rounded-lg hover:text-white transition-colors"
+                    >
+                      {agentName} {req.assignedToName === agentName ? '✓' : ''}
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         <button onClick={handleCopyTextOnly} className="px-3 py-1.5 text-slate-400 hover:text-white bg-slate-700/60 hover:bg-slate-600/80 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-widest border border-slate-600/40">
-          <Copy className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Copy</span>
+          <Copy className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Copy Text</span>
         </button>
 
         {isTLOreSupport && req.status === "not_confirmed" && (
@@ -714,65 +1047,160 @@ export const TabbyTamaraCard = ({
           </>
         )}
 
-        {(isTLOreSupport || currentUser?.role === "agent") && req.status === "confirmed" && req.customerContacted !== "contacted" && (
-           <button
-              onClick={() => setIsContactingMode(!isContactingMode)}
-              className={`px-4 py-1.5 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 transition-all ${isContactingMode ? 'bg-slate-700 text-white shadow-inner' : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-lg shadow-emerald-500/30 ring-1 ring-emerald-500/30'}`}
-           >
-              <CheckCircle2 className="w-3.5 h-3.5" /> <span className="hidden sm:inline">{isContactingMode ? 'Cancel' : 'Mark Contacted'}</span>
-           </button>
+        {/* Attach Client Materials (Assignee / Submitter / TL) */}
+        {((req.assignedToName?.toLowerCase() === currentUser?.name?.toLowerCase()) || 
+          (req.submittedByName || req.agentName)?.toLowerCase() === currentUser?.name?.toLowerCase() || 
+          isTLOreSupport) && 
+         req.status === "confirmed" && 
+         workflowStatus !== "ready_for_partner" && 
+         workflowStatus !== "sent_to_partner" && (
+          <button
+             onClick={() => setIsCrmMaterialsMode(!isCrmMaterialsMode)}
+             className={`px-4 py-1.5 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 transition-all ${isCrmMaterialsMode ? 'bg-slate-700 text-white shadow-inner' : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-lg shadow-emerald-500/30 ring-1 ring-emerald-505/30'}`}
+          >
+             <CheckCircle2 className="w-3.5 h-3.5" /> <span className="hidden sm:inline">{isCrmMaterialsMode ? 'Cancel' : 'Attach Client Docs'}</span>
+          </button>
         )}
 
-        {currentUser?.role === "agent" && req.status === "confirmed" && req.customerContacted === "contacted" && (
+        {/* Send to partner panel launcher */}
+        {isTLOreSupport && req.status === "confirmed" && workflowStatus !== "sent_to_partner" && (
           <button
-             onClick={() => handleMarkPatientContactedTT?.(req.id, "not_contacted")} 
-             className="px-3 py-1.5 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 transition-colors border border-slate-700/40"
+             onClick={() => setShowPartnerPanel(!showPartnerPanel)}
+             className={`px-4 py-1.5 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 transition-all ${showPartnerPanel ? 'bg-slate-700 text-white shadow-inner' : 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white hover:from-indigo-500 hover:to-indigo-600 shadow-lg shadow-indigo-500/30'}`}
           >
-             <AlertCircle className="w-3.5 h-3.5 opacity-70" /> Undo Contact
+             <ExternalLink className="w-3.5 h-3.5" /> <span className="hidden sm:inline">{showPartnerPanel ? 'Cancel Partner' : 'Send to Partner'}</span>
           </button>
         )}
       </div>
 
-      {isContactingMode && (
-        <div className="p-4 md:p-5 bg-emerald-950/20 border-t border-emerald-500/10 flex flex-col gap-4">
+      {/* CRM CLIENT MATERIALS SUBMISSION CONTAINER */}
+      {isCrmMaterialsMode && (
+        <div className="p-4 md:p-5 bg-emerald-950/10 border-t border-emerald-500/10 flex flex-col gap-4">
            <div className="flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-              <h3 className="text-sm font-bold text-emerald-100 uppercase tracking-widest">Mark as Contacted</h3>
+              <h3 className="text-sm font-bold text-emerald-100 uppercase tracking-widest">Attach CRM Client Materials</h3>
            </div>
            
-           <div className="space-y-3">
+           <div className="space-y-4">
               <div>
-                <label className="text-[10px] font-bold text-emerald-500/70 uppercase tracking-widest block mb-1">Contact Notes (Optional)</label>
+                <label className="text-[10px] font-bold text-emerald-500/70 uppercase tracking-widest block mb-1">Contact Notes / Remark Text</label>
                 <textarea
-                  value={contactNotes}
-                  onChange={(e) => setContactNotes(e.target.value)}
-                  placeholder="E.g., Called patient, they will complete the payment link..."
-                  className="w-full bg-black/40 border border-emerald-500/20 rounded-xl p-3 text-sm text-white placeholder-emerald-500/30 focus:outline-none focus:border-emerald-500/50 resize-none h-24"
+                  value={crmContactNotes}
+                  onChange={(e) => setCrmContactNotes(e.target.value)}
+                  placeholder="Record calling details, conversations, or reference comments..."
+                  className="w-full bg-black/40 border border-emerald-500/20 rounded-xl p-3 text-sm text-white placeholder-emerald-500/30 focus:outline-none focus:border-emerald-500/50 resize-none h-20"
                 />
               </div>
-              
-              <MultiAttachmentUpload
-                 photos={contactPhotos}
-                 links={[]}
-                 onPhotosChange={setContactPhotos}
-                 onLinksChange={() => {}}
-                 photosLabel="Attach Proof / Screenshots (Optional)"
-                 onUploadStateChange={setIsContactingUploading}
-              />
-              
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-slate-900/50 p-4 border border-slate-700/40 rounded-xl">
+                  <MultiAttachmentUpload
+                     photos={clientIdPhotos}
+                     links={[]}
+                     onPhotosChange={setClientIdPhotos}
+                     onLinksChange={() => {}}
+                     photosLabel="Attach Client ID Card Screenshot (Required)"
+                     onUploadStateChange={setIsClientIdUploading}
+                  />
+                </div>
+                <div className="bg-slate-900/50 p-4 border border-slate-700/40 rounded-xl">
+                  <MultiAttachmentUpload
+                     photos={paymentProofPhotos}
+                     links={[]}
+                     onPhotosChange={setPaymentProofPhotos}
+                     onLinksChange={() => {}}
+                     photosLabel="Attach Payment screenshot (Required)"
+                     onUploadStateChange={setIsPaymentProofUploading}
+                  />
+                </div>
+              </div>
+
               <div className="flex justify-end gap-2 pt-2">
                  <button
-                    disabled={isContactingUploading}
-                    onClick={() => {
-                       handleMarkPatientContactedTT(req.id, "contacted", contactNotes, "", contactPhotos);
-                       setIsContactingMode(false);
-                       setContactNotes("");
-                       setContactPhotos([]);
-                    }}
-                    className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-[10px] font-bold transition-all shadow-lg shadow-emerald-500/20 uppercase tracking-widest flex items-center gap-2"
+                    onClick={() => setIsCrmMaterialsMode(false)}
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-[10px] font-bold uppercase tracking-widest"
                  >
-                   {isContactingUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                   Confirm Contacted
+                   Cancel
+                 </button>
+                 <button
+                    disabled={isClientIdUploading || isPaymentProofUploading || clientIdPhotos.length === 0 || paymentProofPhotos.length === 0}
+                    onClick={async () => {
+                      try {
+                        const clientIds = normalizeAttachments(clientIdPhotos);
+                        const paymentProofs = normalizeAttachments(paymentProofPhotos);
+                        
+                        await handleMarkPatientContactedTT(
+                          req.id,
+                          "contacted",
+                          crmContactNotes,
+                          "ready_for_partner",
+                          [], // original legacy screenshots empty
+                          clientIds,
+                          paymentProofs
+                        );
+                        setIsCrmMaterialsMode(false);
+                        setCrmContactNotes("");
+                        setClientIdPhotos([]);
+                        setPaymentProofPhotos([]);
+                        toast.success("Request ready for partner! Client materials successfully recorded ");
+                      } catch (err: any) {
+                        toast.error("Failed to attach client materials: " + err.message);
+                      }
+                    }}
+                    className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-[10px] font-bold transition-all shadow-lg shadow-emerald-500/20 uppercase tracking-widest flex items-center gap-2"
+                 >
+                   {(isClientIdUploading || isPaymentProofUploading) ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                   Set Ready for Partner
+                 </button>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {/* CRM SENT TO PARTNER PANEL */}
+      {showPartnerPanel && (
+        <div className="p-4 md:p-5 bg-indigo-950/20 border-t border-indigo-500/10 flex flex-col gap-4">
+           <div className="flex items-center gap-2">
+              <ExternalLink className="w-5 h-5 text-indigo-400" />
+              <h3 className="text-sm font-bold text-indigo-100 uppercase tracking-widest">Mark Sent to Partner & Close Case</h3>
+           </div>
+           
+           <div className="space-y-4">
+              <div>
+                <label className="text-[10px] font-bold text-indigo-500/75 uppercase tracking-widest block mb-1">Partner Submissions Notes (Optional)</label>
+                <textarea
+                  value={partnerNotes}
+                  onChange={(e) => setPartnerNotes(e.target.value)}
+                  placeholder="E.g., Submitted via Partner API, confirmation reference code..."
+                  className="w-full bg-black/40 border border-indigo-500/20 rounded-xl p-3 text-sm text-white placeholder-indigo-500/30 focus:outline-none focus:border-indigo-500/50 resize-none h-20"
+                />
+              </div>
+
+              <div className="bg-slate-900/50 p-4 border border-slate-700/40 rounded-xl">
+                <MultiAttachmentUpload
+                   photos={partnerPhotos}
+                   links={[]}
+                   onPhotosChange={setPartnerPhotos}
+                   onLinksChange={() => {}}
+                   photosLabel="Attach Partner confirmation invoices/screenshots (Optional)"
+                   onUploadStateChange={setIsPartnerUploading}
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                 <button
+                    onClick={() => setShowPartnerPanel(false)}
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-[10px] font-bold uppercase tracking-widest"
+                 >
+                   Cancel
+                 </button>
+                 <button
+                    disabled={isPartnerUploading || isPartnerSubmitting}
+                    onClick={handleSendToPartner}
+                    className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-[10px] font-bold transition-all shadow-lg shadow-indigo-500/20 uppercase tracking-widest flex items-center gap-2"
+                 >
+                   {(isPartnerUploading || isPartnerSubmitting) ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
+                   Mark Sent to Partner & Close
                  </button>
               </div>
            </div>

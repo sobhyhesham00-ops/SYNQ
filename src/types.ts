@@ -133,6 +133,23 @@ export interface Inquiry {
   }[];
 }
 
+export type TTWorkflowStatus =
+  | "submitted"
+  | "tl_link_ready"
+  | "awaiting_client_contact"
+  | "ready_for_partner"
+  | "sent_to_partner"
+  | "completed"
+  | "rejected";
+
+export interface AssignmentInfo {
+  assignedToId?: string;
+  assignedToName?: string;
+  assignedAt?: string;
+  assignedById?: string;
+  assignedByName?: string;
+}
+
 export interface TabbyTamaraRequest {
   id: string;
   agentName: string;
@@ -162,7 +179,25 @@ export interface TabbyTamaraRequest {
   screenshot?: string;
   imageUrl?: string;
   agentFollowUps?: { senderName: string; senderRole: string; text: string; photos?: string[]; createdAt: string }[];
-  replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string; photos?: string[]; attachments?: string[]; imageUrl?: string }[];
+  replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string; photos?: string[]; attachments?: string[]; imageUrl?: string; authorId?: string; authorRole?: string; attachmentsObjects?: FileAttachment[]; links?: string[] }[];
+  
+  // New workflow fields
+  workflowStatus?: TTWorkflowStatus;
+  sourceChannel?: "chat" | "call_center";
+  submittedById?: string;
+  submittedByName?: string;
+  assignedToId?: string;
+  assignedToName?: string;
+  assignedAt?: string;
+  assignedById?: string;
+  assignedByName?: string;
+  clientIdAttachments?: FileAttachment[];
+  paymentProofAttachments?: FileAttachment[];
+  partnerAttachments?: FileAttachment[];
+  partnerSentAt?: string;
+  partnerSentById?: string;
+  partnerSentByName?: string;
+  updatedAt?: string;
 }
 
 export interface TabbyTamaraComplaint {

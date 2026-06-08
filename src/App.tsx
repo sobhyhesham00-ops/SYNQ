@@ -4,6 +4,7 @@ import { ResetPasswordModal } from "./components/ResetPasswordModal";
 import { AgentRequestsLogs } from "./components/AgentRequestsLogs";
 import { NotificationDrawer } from "./components/NotificationDrawer";
 import { TabbyTamaraCard } from "./components/TabbyTamaraCard";
+import { CRMWorkspace } from "./components/crm/CRMWorkspace";
 import * as mammoth from "mammoth";
 import React, { useState, useEffect, FormEvent, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -182,6 +183,8 @@ import {
   Inquiry,
   TabbyTamaraRequest,
   TabbyTamaraComplaint,
+  FileAttachment,
+  TTWorkflowStatus,
   ClientCommunicationRequest,
   CaseRecord,
   AgentDirectoryRow,
@@ -5768,6 +5771,10 @@ ${result.errors.slice(0, 5).join("\n")}${
 ${ttNotes}`
         : autoNote;
 
+      const userLob = getAgentLOB(currentUser.name);
+      const isCc = userLob === 'Call Center';
+      const channelLabel = isCc ? 'call_center' : 'chat';
+
       const newRequest: any = {
         id: "tt_" + Math.random().toString(36).substr(2, 9),
         agentName: currentUser.name,
@@ -5787,6 +5794,17 @@ ${ttNotes}`
         paymentScreenshot: activeScreenshot || null,
         photos: activePhotos,
         links: activeLinks,
+
+        // New workflow fields
+        workflowStatus: "submitted",
+        sourceChannel: channelLabel,
+        submittedById: currentUser.id || "",
+        submittedByName: currentUser.name,
+        updatedAt: new Date().toISOString(),
+        replies: [],
+        clientIdAttachments: [],
+        paymentProofAttachments: [],
+        partnerAttachments: []
       };
       Object.keys(newRequest).forEach(
         (k) => newRequest[k] === undefined && delete newRequest[k],
@@ -5813,6 +5831,25 @@ ${ttNotes}`
       setActiveScreenshot(null);
       setActivePhotos([]);
       setActiveLinks([]);
+
+      // Notifications
+      if (channelLabel === 'call_center') {
+        const socialMediaAgents = Object.entries(AGENT_LOBS)
+          .filter(([name, lob]) => lob === 'Social Media' && name !== currentUser?.name)
+          .map(([name]) => name);
+
+        socialMediaAgents.forEach(agentName => {
+          addSystemNotification(
+            "New Tabby/Tamara request. Please contact the client.",
+            `${currentUser.name} (Call Center) submitted a request for ${ttPatientName} (${ttPhoneNumber}).`,
+            "general",
+            agentName,
+            undefined,
+            "tt_request",
+            newRequest.id
+          );
+        });
+      }
 
       addSystemNotification(
         `💳 New ${ttPlatform.toUpperCase()} Request`,
@@ -5849,6 +5886,26 @@ ${ttNotes}`
     if (!currentUser) return;
     const updated = tabbyTamaraRequests.map((r) => {
       if (r.id === requestId) {
+        const isRejected = status === "rejected";
+        const newWorkflowStatus: TTWorkflowStatus = isRejected ? "rejected" : "tl_link_ready";
+        
+        const activityText = isRejected 
+          ? `${currentUser.name} (TL) rejected this request. Notes: ${tlNotes || ""}`
+          : `${currentUser.name} (TL) processed the request. Payment link attached. Workflow set to: Link Ready.`;
+
+        const activityEntry = {
+          id: "act_" + Math.random().toString(36).substr(2, 9),
+          senderName: "System",
+          authorId: "system",
+          authorRole: "system",
+          text: activityText,
+          createdAt: new Date().toISOString(),
+          attachments: [],
+          links: []
+        };
+
+        const existingReplies = Array.isArray(r.replies) ? r.replies : [];
+
         const updatedReq = {
           ...r,
           status: status,
@@ -5857,11 +5914,16 @@ ${ttNotes}`
           paymentLink: paymentLink || null,
           tlNotes: tlNotes || null,
           tlLinks: tlLinks || undefined,
+          workflowStatus: newWorkflowStatus,
+          replies: [...existingReplies, activityEntry],
+          updatedAt: new Date().toISOString()
         };
         // Sync to Firestore
         setDoc(doc(db, "tt_requests", r.id), updatedReq).catch((e) =>
           console.error("TT Confirm Error:", e),
         );
+
+        const notifyTarget = r.assignedToName || r.agentName;
 
         addSystemNotification(
           status === "confirmed"
@@ -5871,7 +5933,7 @@ ${ttNotes}`
             ? `Your ${r.platform} request for ${r.patientName} has been confirmed. ${tlNotes ? `Notes: ${tlNotes}` : ""}`
             : `Your ${r.platform} request for ${r.patientName} has been rejected. ${tlNotes ? `Notes: ${tlNotes}` : ""}`,
           "general",
-          r.agentName,
+          notifyTarget,
           undefined,
           "tt_request",
           r.id
@@ -5898,19 +5960,69 @@ ${ttNotes}`
     status: "not_contacted" | "contacted",
     notes?: string,
     screenshot?: string,
-    attachments?: string[]
+    attachments?: string[],
+    clientIdAttachments?: FileAttachment[],
+    paymentProofAttachments?: FileAttachment[],
+    newWorkflowStatus?: TTWorkflowStatus
   ) => {
+    if (!currentUser) return;
     const updated = tabbyTamaraRequests.map((r) => {
       if (r.id === requestId) {
+        const derivedStatus = newWorkflowStatus || (status === "contacted" ? "ready_for_partner" : "tl_link_ready");
+        const existingReplies = Array.isArray(r.replies) ? r.replies : [];
+        const activityEntries: any[] = [];
+
+        if (status === "contacted") {
+          let desc = `${currentUser.name} contacted the client. Status changed to Ready for Partner.`;
+          if (notes) {
+            desc += ` Notes: ${notes}`;
+          }
+          activityEntries.push({
+            id: "act_" + Math.random().toString(36).substr(2, 9),
+            senderName: "System",
+            authorId: "system",
+            authorRole: "system",
+            text: desc,
+            createdAt: new Date().toISOString()
+          });
+        } else {
+          activityEntries.push({
+            id: "act_" + Math.random().toString(36).substr(2, 9),
+            senderName: "System",
+            authorId: "system",
+            authorRole: "system",
+            text: `${currentUser.name} marked contact status as UNDO. Status changed back to Link Ready / Awaiting Client Contact.`,
+            createdAt: new Date().toISOString()
+          });
+        }
+
         const updatedReq = {
           ...r,
           customerContacted: status,
-          contactedAt:
-            status === "contacted" ? new Date().toISOString() : undefined,
-          agentContactNotes: notes,
-          paymentScreenshot: screenshot,
-          ...((attachments && attachments.length > 0) ? { attachments: [...(r.attachments || []), ...attachments] } : {})
+          contactedAt: status === "contacted" ? new Date().toISOString() : undefined,
+          agentContactNotes: notes || r.agentContactNotes || "",
+          paymentScreenshot: screenshot || r.paymentScreenshot || null,
+          attachments: (attachments && attachments.length > 0) ? [...(r.attachments || []), ...attachments] : (r.attachments || []),
+          clientIdAttachments: clientIdAttachments || r.clientIdAttachments || [],
+          paymentProofAttachments: paymentProofAttachments || r.paymentProofAttachments || [],
+          workflowStatus: derivedStatus,
+          replies: [...existingReplies, ...activityEntries],
+          updatedAt: new Date().toISOString()
         };
+
+        // Notify TL/support when ready_for_partner
+        if (derivedStatus === 'ready_for_partner') {
+          addSystemNotification(
+            `📦 Fintech Ready for Partner`,
+            `${currentUser.name} completed client contact and uploaded materials for ${r.patientName}. Request is ready for partner.`,
+            "general",
+            "tl",
+            undefined,
+            "tt_request",
+            r.id
+          );
+        }
+
         // Sync to Firestore
         setDoc(doc(db, "tt_requests", r.id), updatedReq).catch((e) =>
           console.error("TT Update Contact Error:", e),
@@ -5923,7 +6035,7 @@ ${ttNotes}`
     setTabbyTamaraRequests(updated);
     setStorageItem("sched_tabby_tamara", updated);
     if (status === "contacted") {
-      toast.success("Case marked as contacted and successfully closed!");
+      toast.success("Case marked as contacted and uploaded!");
     } else {
       toast.success("Undo contact status.");
     }
@@ -14762,9 +14874,28 @@ ${ttNotes}`
                             </form>
                           </div>
 
-                          {/* Inquiry Logs and Progress (Right Side / Col Span 2) */}
-                          <div className="lg:col-span-2 space-y-4">
-                            {/* View Toggles */}
+                          {/* Inquiry Logs and Progress (Right Side / Col Span 2) using CRM Workspace */}
+                          <div className="lg:col-span-2 h-full flex flex-col min-h-[500px]">
+                            <CRMWorkspace
+                              activeTab="inquiries"
+                              currentUser={currentUser}
+                              isTLOreSupport={isTLOreSupport}
+                              inquiries={inquiries}
+                              tabbyTamaraRequests={tabbyTamaraRequests}
+                              tabbyTamaraComplaints={tabbyTamaraComplaints}
+                              addSystemNotification={addSystemNotification}
+                              onEditItem={(item) => {
+                                setEditingItem({ type: item.type as any, id: item.id, data: item.data });
+                              }}
+                              setInquiries={setInquiries}
+                              setTabbyTamaraRequests={setTabbyTamaraRequests}
+                              setTabbyTamaraComplaints={setTabbyTamaraComplaints}
+                            />
+                          </div>
+                          {/* Legacy code skipped dynamically */}
+                          {false && (
+                            <div className="lg:col-span-2 space-y-4">
+                              {/* View Toggles */}
                             <div className="flex bg-white/5 border border-white/10 p-1.5 rounded-xl text-sm font-bold flex-wrap">
                               <button
                                 onClick={() => setAgentInquiryView("my")}
@@ -15257,6 +15388,7 @@ ${ttNotes}`
                               </div>
                             )}
                           </div>
+                        )}
                         </div>
                       </div>
                     )}
@@ -16207,8 +16339,30 @@ ${ttNotes}`
                         </div>
                       </div>
 
-                      {/* Search & Filters */}
-                      <div className="bg-white/5 border border-white/10 p-4 rounded-3xl flex flex-col md:flex-row gap-4 items-center">
+                      {/* Unified CRM Workspace for Team Leaders */}
+                      <div className="h-full flex flex-col min-h-[600px] mt-6">
+                        <CRMWorkspace
+                          activeTab="inquiries"
+                          currentUser={currentUser}
+                          isTLOreSupport={isTLOreSupport}
+                          inquiries={inquiries}
+                          tabbyTamaraRequests={tabbyTamaraRequests}
+                          tabbyTamaraComplaints={tabbyTamaraComplaints}
+                          addSystemNotification={addSystemNotification}
+                          onEditItem={(item) => {
+                            setEditingItem({ type: item.type as any, id: item.id, data: item.data });
+                          }}
+                          setInquiries={setInquiries}
+                          setTabbyTamaraRequests={setTabbyTamaraRequests}
+                          setTabbyTamaraComplaints={setTabbyTamaraComplaints}
+                        />
+                      </div>
+
+                      {/* Legacy Team Leader list skipped */}
+                      {false && (
+                        <>
+                          {/* Search & Filters */}
+                          <div className="bg-white/5 border border-white/10 p-4 rounded-3xl flex flex-col md:flex-row gap-4 items-center">
                         <div className="relative flex-1 w-full">
                           <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                           <input
@@ -16705,6 +16859,7 @@ ${ttNotes}`
                           </div>
                         );
                       })()}
+                    </>)}
                     </div>
                   )}
 
@@ -21382,10 +21537,32 @@ ${ttNotes}`
                               </div>
                             )}
 
-                            {/* Right Column: Listing & Administration */}
+                            {/* Right Column: Listing & Administration using CRM Workspace */}
                             <div
-                              className={`${currentUser?.role === "agent" ? "lg:col-span-8" : "lg:col-span-12"} space-y-4 text-left`}
+                              className={`${currentUser?.role === "agent" ? "lg:col-span-8" : "lg:col-span-12"} h-full flex flex-col min-h-[600px]`}
                             >
+                              <CRMWorkspace
+                                activeTab={activeTab as any}
+                                currentUser={currentUser}
+                                isTLOreSupport={isTLOreSupport}
+                                inquiries={inquiries}
+                                tabbyTamaraRequests={tabbyTamaraRequests}
+                                tabbyTamaraComplaints={tabbyTamaraComplaints}
+                                addSystemNotification={addSystemNotification}
+                                onEditItem={(item) => {
+                                  setEditingItem({ type: item.type as any, id: item.id, data: item.data });
+                                }}
+                                setInquiries={setInquiries}
+                                setTabbyTamaraRequests={setTabbyTamaraRequests}
+                                setTabbyTamaraComplaints={setTabbyTamaraComplaints}
+                              />
+                            </div>
+
+                            {/* Legacy tabby tamara rendering code skipped */}
+                            {false && (
+                              <div
+                                className={`${currentUser?.role === "agent" ? "lg:col-span-8" : "lg:col-span-12"} space-y-4 text-left`}
+                              >
                               <div className="p-6 bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl space-y-4 shadow-2xl">
                                 {/* Filters and search Header */}
                                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-4">
@@ -21656,9 +21833,20 @@ ${ttNotes}`
                                         p.replace(/\D/g, "").replace(/^0+/, "");
                                       const filteredTTRequests =
                                         tabbyTamaraRequests.filter((r) => {
-                                          const isMyRequest =
-                                            r.agentName?.toLowerCase() ===
+                                          const isOriginalSubmitter =
+                                            (r.submittedByName || r.agentName)?.toLowerCase() ===
                                             currentUser?.name?.toLowerCase();
+                                          const isAssignedAgent =
+                                            r.assignedToName?.toLowerCase() ===
+                                            currentUser?.name?.toLowerCase() ||
+                                            r.assignedToId === currentUser?.id;
+                                          const isUnassignedCallCenter =
+                                            (r.sourceChannel === 'call_center' || (r.agentName && getAgentLOB(r.agentName) === 'Call Center')) &&
+                                            !r.assignedToId &&
+                                            (currentUser && getAgentLOB(currentUser.name) === 'Social Media');
+
+                                          const isMyRequest = isOriginalSubmitter || isAssignedAgent || isUnassignedCallCenter;
+
                                           if (!isTLOreSupport && !isMyRequest)
                                             return false;
 
@@ -21812,27 +22000,21 @@ ${ttNotes}`
                                                     status,
                                                     notes,
                                                     screenshot,
-                                                    attachments
+                                                    attachments,
+                                                    clientIdAttachments,
+                                                    paymentProofAttachments,
+                                                    newWorkflowStatus
                                                   ) => {
-                                                    if (status) {
-                                                      // Undo Contact case uses status
-                                                      handleContactTabbyTamara(
-                                                        id,
-                                                        status,
-                                                        notes,
-                                                        screenshot,
-                                                        attachments
-                                                      );
-                                                    } else {
-                                                      // Mark contacted uses default param in this structure logic
-                                                      handleContactTabbyTamara(
-                                                        id,
-                                                        "contacted",
-                                                        notes,
-                                                        screenshot,
-                                                        attachments
-                                                      );
-                                                    }
+                                                    handleContactTabbyTamara(
+                                                      id,
+                                                      status,
+                                                      notes,
+                                                      screenshot,
+                                                      attachments,
+                                                      clientIdAttachments,
+                                                      paymentProofAttachments,
+                                                      newWorkflowStatus
+                                                    );
                                                   }}
                                                   getElapsedTimerString={
                                                     getElapsedTimerString
@@ -23202,6 +23384,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
                                 </div>
                               </div>
                             </div>
+                          )}
                           </div>
                         </div>
                       );
