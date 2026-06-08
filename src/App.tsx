@@ -99,6 +99,7 @@ import {
   Edit,
   Pencil,
   Key,
+  PenTool,
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { AIChatWidget } from "./AIChatWidget";
@@ -2627,6 +2628,8 @@ ${pageText}
     string | null
   >(null);
   const [tlComplaintComment, setTlComplaintComment] = useState("");
+  const [tlComplaintResolution, setTlComplaintResolution] = useState('');
+  const [tlComplaintResolutionType, setTlComplaintResolutionType] = useState('');
 
   // TL Fintech handling input
   const [activeFintechHandlingId, setActiveFintechHandlingId] = useState<
@@ -2868,6 +2871,16 @@ ${pageText}
   // For TL: 'dashboard' | 'overview' | 'all-requests' | 'report' | 'schedules' | 'time-logs'
   // For Agent: 'dashboard' | 'clocking' | 'apply' | 'my-requests' | 'schedules'
   const [activeTab, setActiveTab] = useState<string>("");
+  const [viewingRecord, setViewingRecord] = useState<{ type: string; data: any } | null>(null);
+
+  useEffect(() => {
+    (window as any).setViewingRecord = setViewingRecord;
+    return () => {
+      try {
+        delete (window as any).setViewingRecord;
+      } catch (e) {}
+    };
+  }, []);
   const [selectedDashboardDate, setSelectedDashboardDate] = useState<string>(
     () => getLocalISOString(),
   );
@@ -6661,52 +6674,59 @@ ${ttNotes}`
     );
   };
 
-  const handleTLCommentComplaint = (complaintId: string, comment: string) => {
+  const handleTLCommentComplaint = (
+    complaintId: string,
+    comment: string,
+    resolutionType?: string
+  ) => {
     if (!currentUser) return;
     if (!String(comment || "").trim()) {
       toast.error("Please enter a handling comment first.");
       return;
     }
-
+    const now = new Date().toISOString();
     const updated = tabbyTamaraComplaints.map((c) => {
       if (c.id === complaintId) {
-        const updatedComplaint = {
+        const updatedComp = {
           ...c,
-          status: "need_contact" as const,
           tlComment: comment,
-          tlHandledAt: new Date().toISOString(),
+          tlResolutionType: resolutionType || c.tlResolutionType,
+          tlName: currentUser.name,
           tlHandledBy: currentUser.name,
+          tlHandledAt: now,
+          commentedAt: now,
+          status: "need_contact" as const,
         };
-        // Sync to Firestore
-        setDoc(doc(db, "tt_complaints", c.id), updatedComplaint).catch((e) =>
+        setDoc(doc(db, "tt_complaints", c.id), updatedComp).catch((e) =>
           console.error("TT Complaint Comment Error:", e),
         );
-
-        addSystemNotification(
-          `📝 Complaint Evaluated`,
-          `Your complaint for ${c.patientName} has been evaluated by ${currentUser.name}. Please contact the client now.`,
-          "general",
-          c.agentName,
-          undefined,
-          "tt_complaint",
-          complaintId
-        );
-
-        return updatedComplaint;
+        return updatedComp;
       }
       return c;
     });
 
     setTabbyTamaraComplaints(updated);
     setStorageItem("sched_tt_complaints", updated);
+    setStorageItem("sched_tabby_tamara_complaints", updated);
 
-    // Clear TL input
-    setActiveComplaintHandlingId(null);
     setTlComplaintComment("");
+    setTlComplaintResolution("");
+    setTlComplaintResolutionType("");
+    setActiveComplaintHandlingId(null);
 
-    toast.success(
-      "Complaint successfully updated! Status changed to: Need to contact the client. The agent has been notified with a timer.",
-    );
+    const comp = updated.find((c) => c.id === complaintId);
+    if (comp) {
+      addSystemNotification(
+        "📋 Complaint Reviewed by TL",
+        `Your complaint for ${comp.patientName} has been reviewed. Resolution: ${resolutionType || "See TL comment"}. Action required: contact the patient.`,
+        "general",
+        comp.agentName,
+        undefined,
+        "tt_complaint",
+        complaintId
+      );
+    }
+    toast.success("Complaint feedback submitted. Agent notified.");
   };
 
   const handleToggleContactComplaint = (
@@ -13405,6 +13425,7 @@ ${ttNotes}`
                           cases={cases}
                           currentUser={currentUser}
                           requests={requests}
+                          onViewRecord={setViewingRecord}
                         />
                       </div>
                     )}
@@ -14472,6 +14493,7 @@ ${ttNotes}`
                         cases={cases}
                         requests={requests}
                         currentUser={currentUser}
+                        onViewRecord={setViewingRecord}
                       />
                     </div>
                   )}
@@ -14901,6 +14923,12 @@ ${ttNotes}`
                                                     )
                                                   </button>
                                                 )}
+                                                <button
+                                                  onClick={() => setViewingRecord({ type: 'inq', data: inq })}
+                                                  className="px-3 py-1.5 bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/20 rounded-lg text-teal-400 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-2"
+                                                >
+                                                  <Eye className="w-3 h-3 text-teal-400" /> View Details
+                                                </button>
                                                 <button
                                                   onClick={() => {
                                                     const photoLines = (inq.photos || []).length > 0
@@ -22140,11 +22168,21 @@ ${ttNotes}`
 
                                                     {comp.tlComment && (
                                                       <div className="border-t border-rose-500/20 pt-1.5 text-xs text-amber-300">
-                                                        <p className="text-[9px] text-rose-400 uppercase tracking-wider mb-0.5 font-bold">
-                                                          💬 Team Leader Answer
-                                                          ({comp.tlName || "TL"}
-                                                          ):
-                                                        </p>
+                                                        <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                                                          <p className="text-[9px] text-rose-400 uppercase tracking-wider font-bold">
+                                                            💬 Team Leader Answer ({comp.tlName || "TL"}):
+                                                          </p>
+                                                          {comp.tlResolutionType && (
+                                                            <span className="inline-flex items-center px-1.5 py-0.5 bg-rose-500/10 border border-rose-500/20 rounded-md text-[9px] font-black uppercase text-rose-400">
+                                                              {comp.tlResolutionType === "refund" ? "💰 Refund" :
+                                                               comp.tlResolutionType === "replacement" ? "🔄 Replacement" :
+                                                               comp.tlResolutionType === "apology" ? "🙏 Apology" :
+                                                               comp.tlResolutionType === "escalated" ? "⬆️ Escalated" :
+                                                               comp.tlResolutionType === "no_action" ? "🚫 No Action" :
+                                                               comp.tlResolutionType === "follow_up" ? "📞 Follow Up" : comp.tlResolutionType}
+                                                            </span>
+                                                          )}
+                                                        </div>
                                                         <p className="bg-rose-950/10 p-2 rounded-lg border border-pink-500/10 text-slate-200 leading-normal font-sans">
                                                           {comp.tlComment}
                                                         </p>
@@ -22226,47 +22264,70 @@ ${ttNotes}`
                                                   {activeComplaintHandlingId ===
                                                     comp.id &&
                                                     isTLOreSupport && (
-                                                      <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl space-y-2 text-left animate-fade-in mt-1">
-                                                        <label className="text-[9px] font-bold text-slate-300 uppercase tracking-widest block">
-                                                          TL Commentary / Answer
-                                                          *
-                                                        </label>
-                                                        <textarea
-                                                          placeholder="Write comment/resolution details to update status to Pending Contact..."
-                                                          value={
-                                                            tlComplaintComment
-                                                          }
-                                                          onChange={(e) =>
-                                                            setTlComplaintComment(
-                                                              e.target.value,
-                                                            )
-                                                          }
-                                                          className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-2.5 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[60px]"
-                                                          required
-                                                        />
-                                                        <div className="flex gap-2 justify-end">
+                                                      <div className="p-4 bg-white/5 border border-white/20 rounded-xl space-y-3 animate-fade-in mt-1 text-left">
+                                                        <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
+                                                          <PenTool className="w-3 h-3" /> TL Resolution Panel
+                                                        </p>
+
+                                                        {/* Resolution Type */}
+                                                        <div>
+                                                          <label className="text-[9px] text-slate-400 uppercase tracking-widest font-bold block mb-1.5">
+                                                            Resolution Type <span className="text-red-400">*</span>
+                                                          </label>
+                                                          <div className="grid grid-cols-2 gap-2">
+                                                            {[
+                                                              { value: "refund", label: "💰 Refund" },
+                                                              { value: "replacement", label: "🔄 Replacement" },
+                                                              { value: "apology", label: "🙏 Apology" },
+                                                              { value: "escalated", label: "⬆️ Escalated" },
+                                                              { value: "no_action", label: "🚫 No Action" },
+                                                              { value: "follow_up", label: "📞 Follow Up Required" },
+                                                            ].map((opt) => (
+                                                              <button
+                                                                key={opt.value}
+                                                                type="button"
+                                                                onClick={() => setTlComplaintResolutionType(opt.value)}
+                                                                className={`px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all text-left cursor-pointer ${
+                                                                  tlComplaintResolutionType === opt.value
+                                                                    ? "bg-rose-500/20 border-rose-500/40 text-rose-300"
+                                                                    : "bg-white/[0.02] border-white/10 text-slate-400 hover:border-white/20"
+                                                                }`}
+                                                              >
+                                                                {opt.label}
+                                                              </button>
+                                                            ))}
+                                                          </div>
+                                                        </div>
+
+                                                        {/* TL Comment */}
+                                                        <div>
+                                                          <label className="text-[9px] text-slate-400 uppercase tracking-widest font-bold block mb-1.5">
+                                                            Resolution Details / Instructions for Agent <span className="text-red-400">*</span>
+                                                          </label>
+                                                          <textarea
+                                                            placeholder="Explain the resolution, what action the agent must take, and any instructions for the patient contact..."
+                                                            value={tlComplaintComment}
+                                                            onChange={(e) => setTlComplaintComment(e.target.value)}
+                                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-rose-500 font-sans min-h-[80px] resize-none"
+                                                            required
+                                                          />
+                                                        </div>
+
+                                                        <div className="flex gap-2 justify-end pt-1">
                                                           <button
                                                             type="button"
-                                                            onClick={() =>
-                                                              setActiveComplaintHandlingId(
-                                                                null,
-                                                              )
-                                                            }
-                                                            className="px-2.5 py-1.5 hover:bg-white/20 backdrop-blur-md rounded-lg text-[10px] font-bold text-slate-400 cursor-pointer"
+                                                            onClick={() => setActiveComplaintHandlingId(null)}
+                                                            className="px-3 py-1.5 hover:bg-white/10 rounded-lg text-[10px] font-bold text-slate-400 cursor-pointer"
                                                           >
                                                             Cancel
                                                           </button>
                                                           <button
                                                             type="button"
-                                                            onClick={() =>
-                                                              handleTLCommentComplaint(
-                                                                comp.id,
-                                                                tlComplaintComment,
-                                                              )
-                                                            }
-                                                            className="px-3.5 py-1.5 bg-gradient-to-r from-pink-500 to-pink-600 hover:brightness-110 active:scale-95 text-slate-100 text-[10px] font-bold rounded-lg shadow cursor-pointer transition-all flex items-center gap-1"
+                                                            disabled={!tlComplaintComment.trim() || !tlComplaintResolutionType}
+                                                            onClick={() => handleTLCommentComplaint(comp.id, tlComplaintComment, tlComplaintResolutionType)}
+                                                            className="px-4 py-1.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[10px] font-bold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer"
                                                           >
-                                                            Submit Issue Review
+                                                            <CheckCircle2 className="w-3.5 h-3.5" /> Submit Resolution
                                                           </button>
                                                         </div>
                                                       </div>
@@ -23612,7 +23673,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
                       );
                     })()}
 
-                  {/* QA Scorecards Tab */}
+                  {/* ===== QA SCORECARDS TAB ===== */}
                   {activeTab === 'qa-scorecard' && (
                     <div className='animate-fade-in'>
                       <QAScorecards
@@ -23629,6 +23690,12 @@ _ ${req.handlingNotes || "Pending response"} _`;
                           const updated = [score, ...qaScores.filter(s => s.id !== score.id)];
                           setQaScores(updated);
                           setDoc(doc(db, 'qa_scores', score.id), score).catch(console.error);
+                          addSystemNotification(
+                            '📊 QA Score Submitted',
+                            `${currentUser.name} submitted a QA evaluation for ${score.agentName} — Score: ${score.totalScore}/${score.maxTotalScore}`,
+                            'feedback',
+                            score.agentName
+                          );
                           toast.success('QA Score submitted!');
                         }}
                       />
@@ -23914,6 +23981,223 @@ _ ${req.handlingNotes || "Pending response"} _`;
         handleMarkSingleNotifAsRead={handleMarkSingleNotifAsRead}
         setActiveTab={setActiveTab}
       />
+
+      {viewingRecord && (
+        <div className='fixed inset-0 z-[90] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-md p-0 sm:p-4' onClick={() => setViewingRecord(null)}>
+          <div
+            className='bg-[#0d0d10] border border-white/10 rounded-t-3xl sm:rounded-3xl w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl'
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className='sticky top-0 bg-[#0d0d10] border-b border-white/10 px-5 py-4 flex items-center justify-between z-10'>
+              <div className='flex items-center gap-3'>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase border ${
+                  viewingRecord.type === 'inq' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' :
+                  viewingRecord.type === 'tt_request' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                  viewingRecord.type === 'tt_complaint' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :
+                  viewingRecord.type === 'comm' ? 'bg-sky-500/10 text-sky-400 border-sky-500/20' :
+                  viewingRecord.type === 'sched' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                  'bg-slate-700 text-slate-300 border-white/10'
+                }`}>
+                  {viewingRecord.type === 'inq' ? 'Inquiry' : viewingRecord.type === 'tt_request' ? 'TT Request' : viewingRecord.type === 'tt_complaint' ? 'Complaint' : viewingRecord.type === 'comm' ? 'Client Comm' : viewingRecord.type === 'sched' ? 'Scheduling' : 'Case'}
+                </span>
+                <span className='font-mono text-[11px] text-slate-500'>{formatCaseRef(viewingRecord.data.id, viewingRecord.type)}</span>
+              </div>
+              <button onClick={() => setViewingRecord(null)} className='p-2 hover:bg-white/10 rounded-xl transition-colors text-slate-400 hover:text-white'>
+                <X className='w-4 h-4' />
+              </button>
+            </div>
+
+            {/* Modal Body — Dynamic fields */}
+            <div className='p-5 space-y-4'>
+              {/* Patient / Requester info */}
+              <div className='grid grid-cols-2 gap-3 text-left'>
+                {viewingRecord.data.patientName && (
+                  <div className='col-span-2 bg-white/[0.02] border border-white/5 rounded-xl p-3'>
+                    <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1'>Patient Name</p>
+                    <p className='text-base font-black text-white'>{viewingRecord.data.patientName}</p>
+                  </div>
+                )}
+                {viewingRecord.data.phoneNumber && (
+                  <div className='bg-white/[0.02] border border-white/5 rounded-xl p-3 cursor-pointer hover:bg-white/[0.04]'
+                    onClick={() => { copyToClipboard(normalizePhone(viewingRecord.data.phoneNumber), 'Phone copied!'); }}>
+                    <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1'>📞 Phone</p>
+                    <p className='text-sm font-bold text-slate-200 font-mono'>{viewingRecord.data.phoneNumber}</p>
+                  </div>
+                )}
+                {viewingRecord.data.clinicName && (
+                  <div className='bg-white/[0.02] border border-white/5 rounded-xl p-3'>
+                    <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1'>🏥 Clinic</p>
+                    <p className='text-sm font-bold text-slate-200'>{viewingRecord.data.clinicName}</p>
+                  </div>
+                )}
+                {viewingRecord.data.agentName && (
+                  <div className='bg-white/[0.02] border border-white/5 rounded-xl p-3'>
+                    <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1'>👤 Agent</p>
+                    <p className='text-sm font-bold text-slate-200'>{viewingRecord.data.agentName}</p>
+                  </div>
+                )}
+                {viewingRecord.data.status && (
+                  <div className='bg-white/[0.02] border border-white/5 rounded-xl p-3'>
+                    <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1'>Status</p>
+                    <p className='text-sm font-bold text-slate-200'>{viewingRecord.data.status?.replace(/_/g,' ')}</p>
+                  </div>
+                )}
+                <div className='bg-white/[0.02] border border-white/5 rounded-xl p-3'>
+                  <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1'>📅 Submitted</p>
+                  <p className='text-xs font-bold text-slate-200'>{new Date(viewingRecord.data.createdAt).toLocaleString()}</p>
+                </div>
+              </div>
+
+              {/* Main content field */}
+              {(viewingRecord.data.text || viewingRecord.data.complaintDetails || viewingRecord.data.notes || viewingRecord.data.inquiry) && (
+                <div className='bg-white/[0.02] border border-white/5 rounded-xl p-4 text-left'>
+                  <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-2'>
+                    {viewingRecord.type === 'inq' ? 'Inquiry' : viewingRecord.type === 'tt_complaint' ? 'Complaint Details' : viewingRecord.type === 'comm' ? 'Notes' : 'Details'}
+                  </p>
+                  <p className='text-sm text-slate-200 leading-relaxed whitespace-pre-line'>
+                    {viewingRecord.data.text || viewingRecord.data.complaintDetails || viewingRecord.data.notes || viewingRecord.data.inquiry}
+                  </p>
+                </div>
+              )}
+
+              {/* TL Answer / TL Notes */}
+              {(viewingRecord.data.answer || viewingRecord.data.tlNotes || viewingRecord.data.tlComment) && (
+                <div className='bg-emerald-500/5 border border-emerald-500/15 rounded-xl p-4 text-left'>
+                  <p className='text-[9px] text-emerald-400 uppercase tracking-widest font-bold mb-2'>
+                    {viewingRecord.data.answer ? '✅ TL Answer' : '📝 TL Notes / Comment'}
+                  </p>
+                  <p className='text-sm text-slate-200 leading-relaxed'>
+                    {viewingRecord.data.answer || viewingRecord.data.tlNotes || viewingRecord.data.tlComment}
+                  </p>
+                </div>
+              )}
+
+              {/* Attachments */}
+              {((viewingRecord.data.photos && viewingRecord.data.photos.length > 0) ||
+                (viewingRecord.data.screenshot) ||
+                (viewingRecord.data.paymentScreenshot) ||
+                (viewingRecord.data.imageUrl) ||
+                (viewingRecord.data.attachments && viewingRecord.data.attachments.length > 0) ||
+                (viewingRecord.data.links && viewingRecord.data.links.length > 0)) && (
+                <div className='space-y-2 text-left'>
+                  <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold'>📎 Attachments</p>
+                  <AttachmentsDisplay 
+                    photos={[
+                      ...(viewingRecord.data.photos || []), 
+                      ...(viewingRecord.data.screenshot ? [viewingRecord.data.screenshot] : []),
+                      ...(viewingRecord.data.paymentScreenshot ? [viewingRecord.data.paymentScreenshot] : []),
+                      ...(viewingRecord.data.imageUrl ? [viewingRecord.data.imageUrl] : [])
+                    ]} 
+                    attachments={viewingRecord.data.attachments || []}
+                    links={viewingRecord.data.links || []} 
+                  />
+                </div>
+              )}
+
+              {/* Replies thread if any */}
+              {viewingRecord.data.replies && viewingRecord.data.replies.length > 0 && (
+                <div className='space-y-2 text-left'>
+                  <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold'>💬 Thread ({viewingRecord.data.replies.length})</p>
+                  {viewingRecord.data.replies.map((r: any, i: number) => (
+                    <div key={i} className='bg-white/[0.02] border border-white/5 rounded-xl p-3'>
+                      <div className='flex items-center justify-between mb-1'>
+                        <p className='text-[10px] font-bold text-slate-300'>{r.senderName}</p>
+                        <p className='text-[9px] text-slate-600 font-mono'>{new Date(r.createdAt).toLocaleString()}</p>
+                      </div>
+                      <p className='text-xs text-slate-400 whitespace-pre-line'>{r.text}</p>
+                      {((r.photos && r.photos.length > 0) || r.screenshot || r.imageUrl || r.attachments) && (
+                        <div className="mt-2 text-left">
+                          <AttachmentsDisplay 
+                            photos={[...(r.photos || []), ...(r.screenshot ? [r.screenshot] : []), ...(r.imageUrl ? [r.imageUrl] : [])]} 
+                            attachments={r.attachments || []}
+                            links={[]} 
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Copy button */}
+              <button
+                onClick={() => {
+                  const d = viewingRecord.data;
+                  const attachments = [
+                    ...(d.photos || []),
+                    ...(d.screenshot ? [d.screenshot] : []),
+                    ...(d.paymentScreenshot ? [d.paymentScreenshot] : []),
+                    ...(d.imageUrl ? [d.imageUrl] : []),
+                    ...(d.attachments || [])
+                  ];
+
+                  let photoLines = '';
+                  if (attachments.length > 0) {
+                    photoLines = `\nAttachments (${attachments.length}):\n` + attachments.map((att: string, idx: number) => {
+                       const isPdf = typeof att === 'string' && (att.includes('application/pdf') || att.includes('.pdf'));
+                       if (typeof att === 'string' && att.startsWith('http')) {
+                           return `- attachment-${idx + 1}${isPdf ? '.pdf' : '.jpg'}: ${att}`;
+                       }
+                       return `- attachment-${idx + 1}${isPdf ? '.pdf' : '.jpg'}`;
+                    }).join('\n');
+                  }
+
+                  const text = [
+                    `📋 [${viewingRecord.type.toUpperCase()}] ${formatCaseRef(d.id, viewingRecord.type)}`,
+                    d.patientName ? `Patient: ${d.patientName}` : '',
+                    d.phoneNumber ? `Phone: ${normalizePhone(d.phoneNumber)}` : '',
+                    d.clinicName ? `Clinic: ${d.clinicName}` : '',
+                    d.agentName ? `Agent: ${d.agentName}` : '',
+                    `Status: ${d.status}`,
+                    d.text ? `\nInquiry/Details: ${d.text}` : '',
+                    d.complaintDetails ? `\nComplaint: ${d.complaintDetails}` : '',
+                    d.notes ? `\nNotes: ${d.notes}` : '',
+                    d.answer ? `\nTL Answer: ${d.answer}` : '',
+                    d.tlComment ? `\nTL Comment: ${d.tlComment}` : '',
+                    photoLines,
+                    (d.links || []).length > 0 ? `\nLinks:\n${(d.links || []).map((l: string) => l).join('\n')}` : '',
+                    `\nDate: ${new Date(d.createdAt).toLocaleString()}`,
+                  ].filter(Boolean).join('\n');
+
+                  let html = `<div><strong>📋 [${viewingRecord.type.toUpperCase()}] ${formatCaseRef(d.id, viewingRecord.type)}</strong><br/>`;
+                  if (d.patientName) html += `Patient: ${d.patientName}<br/>`;
+                  if (d.phoneNumber) html += `Phone: ${normalizePhone(d.phoneNumber)}<br/>`;
+                  if (d.clinicName) html += `Clinic: ${d.clinicName}<br/>`;
+                  if (d.agentName) html += `Agent: ${d.agentName}<br/>`;
+                  html += `Status: ${d.status}<br/>`;
+                  if (d.text) html += `Inquiry: ${d.text.replace(/\n/g, '<br/>')}<br/>`;
+                  if (d.complaintDetails) html += `Complaint: ${d.complaintDetails.replace(/\n/g, '<br/>')}<br/>`;
+                  if (d.notes) html += `Notes: ${d.notes.replace(/\n/g, '<br/>')}<br/>`;
+                  if (d.answer) html += `TL Answer: ${d.answer.replace(/\n/g, '<br/>')}<br/>`;
+                  if (d.tlComment) html += `TL Comment: ${d.tlComment.replace(/\n/g, '<br/>')}<br/>`;
+
+                  if (attachments.length > 0) {
+                    html += `<br/><strong>Attachments (${attachments.length}):</strong><br/>`;
+                    attachments.forEach((att: string, idx: number) => {
+                      const isPdf = typeof att === 'string' && (att.includes('application/pdf') || att.includes('.pdf'));
+                      if (isPdf) {
+                        html += `<a href="${att}">attachment-${idx + 1}.pdf</a><br/>`;
+                      } else {
+                        html += `<img src="${att}" alt="attachment-${idx + 1}" style="max-height: 300px; max-width: 100%; margin-top: 8px; display: block;" /><br/>`;
+                      }
+                    });
+                  }
+                  if ((d.links || []).length > 0) {
+                    html += `<br/><strong>Links:</strong><br/>${(d.links || []).map((l: string) => `<a href="${l}">${l}</a>`).join('<br/>')}<br/>`;
+                  }
+                  html += `</div>`;
+
+                  copyToClipboard(text, 'Full record copied to clipboard (including images)!', html);
+                }}
+                className='w-full px-4 py-2.5 bg-cyan-600/10 hover:bg-cyan-600/20 border border-cyan-500/20 hover:border-cyan-500/40 rounded-xl text-cyan-400 hover:text-cyan-300 text-xs font-bold transition-all flex items-center justify-center gap-2'
+              >
+                <Copy className='w-3.5 h-3.5' /> Copy Full Record with Attachments
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {pendingCancelId && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm">

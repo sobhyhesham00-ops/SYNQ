@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { 
   Copy, ExternalLink, MessageCircle, AlertCircle, Phone, CheckCircle2, 
   Hospital, Hash, User, Calendar, DollarSign, PenTool, Trash2, Pencil, 
-  Check, Clock, CheckIcon, Download, LinkIcon, FileText, Share, CornerDownRight, ChevronDown, ChevronUp 
+  Check, Clock, CheckIcon, Download, LinkIcon, FileText, Share, CornerDownRight, ChevronDown, ChevronUp, Loader2, Eye 
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { doc, arrayUnion } from 'firebase/firestore';
+import { db, wrappedUpdateDoc as updateDoc } from '../firebase';
 import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
 import { MultiAttachmentUpload } from './MultiAttachmentUpload';
@@ -126,6 +128,11 @@ export const TabbyTamaraCard = ({
   const [contactNotes, setContactNotes] = useState("");
   const [contactPhotos, setContactPhotos] = useState<string[]>([]);
   const [isContactingUploading, setIsContactingUploading] = useState(false);
+
+  const [showFollowUp, setShowFollowUp] = useState(false);
+  const [followUpText, setFollowUpText] = useState('');
+  const [followUpPhotos, setFollowUpPhotos] = useState<string[]>([]);
+  const [followUpUploading, setFollowUpUploading] = useState(false);
   
   const isPendingContact = req.status === "confirmed" && req.customerContacted === "not_contacted";
   const elapsedMins = req.confirmedAt && req.customerContacted !== 'contacted'
@@ -323,7 +330,7 @@ export const TabbyTamaraCard = ({
                 <AlertCircle className="w-3.5 h-3.5 animate-pulse" /> {getElapsedTimerString(req.confirmedAt || req.createdAt)}
               </span>
            )}
-           <div className="font-mono text-[11px] text-slate-500 uppercase tracking-widest hidden sm:block mr-2">
+           <div className="font-mono text-[10px] text-slate-600 uppercase tracking-wider hidden sm:block mr-2">
              Ref: {formatCaseRef(req.id, 'tt_request')}
            </div>
            <StatusBadge status={req.status} customerContacted={req.customerContacted} />
@@ -333,7 +340,7 @@ export const TabbyTamaraCard = ({
       {/* BODY */}
       <div className='px-4 pb-3 border-b border-white/[0.05]'>
         <h3 
-          className='text-xl md:text-2xl font-black text-white tracking-tight cursor-pointer hover:text-amber-100 transition-colors w-fit flex items-center gap-2 group/name' 
+          className='text-lg md:text-xl font-black text-white tracking-tight cursor-pointer hover:text-amber-100 transition-colors w-fit flex items-center gap-2 group/name'  
           onClick={() => copyToClipboard(req.patientName || "Unknown", "Patient name copied!")}
           title="Copy Patient Name"
         >
@@ -361,23 +368,23 @@ export const TabbyTamaraCard = ({
         >
           <div className="flex flex-col">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1"><Phone className="w-3 h-3 text-blue-400" /> Phone</span>
-            <span className="text-sm font-bold text-slate-200 mt-0.5 truncate">{req.phoneNumber || "N/A"}</span>
+            <span className="text-[13px] font-bold text-slate-200 mt-0.5 truncate">{req.phoneNumber || "N/A"}</span>
           </div>
         </div>
         <div className="px-3 py-2 flex flex-col overflow-hidden">
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1"><Hospital className="w-3 h-3 text-emerald-400" /> Clinic</span>
-          <span className="text-sm font-bold text-slate-200 mt-0.5 truncate">{req.clinicName || "N/A"}</span>
+          <span className="text-[13px] font-bold text-slate-200 mt-0.5 truncate">{req.clinicName || "N/A"}</span>
         </div>
         <div className="px-3 py-2 flex flex-col">
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1"><Calendar className="w-3 h-3 text-slate-400" /> Date</span>
-          <span className="text-xs font-bold text-slate-200 mt-0.5 truncate">{new Date(req.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+          <span className="text-[13px] font-bold text-slate-200 mt-0.5 truncate">{new Date(req.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
         </div>
       </div>
       
       <div className='px-4 py-2.5 flex flex-wrap items-baseline justify-between border-b border-white/[0.05] bg-white/[0.01]'>
         <div className='flex items-baseline gap-1.5'>
-          <span className='text-xs text-emerald-500 font-bold'>AED</span>
-          <span className='text-2xl md:text-3xl font-black text-white font-mono tracking-tight'>{req.priceWithoutTax || 0}</span>
+          <span className='text-[11px] text-emerald-500 font-bold'>AED</span>
+          <span className='text-xl md:text-2xl font-black text-white font-mono'>{req.priceWithoutTax || 0}</span>
           {req.paymentLength && <span className="ml-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest bg-white/[0.05] px-2 py-0.5 rounded-full">{req.paymentLength} Mo. Plan</span>}
         </div>
         <span className='text-[10px] text-slate-500 font-mono font-medium'>w/tax: AED {amountTax}</span>
@@ -396,7 +403,7 @@ export const TabbyTamaraCard = ({
                 <div className={`w-5 h-5 rounded-full flex items-center justify-center border-2 transition-all ${step.done ? 'bg-indigo-500 border-indigo-400' : 'bg-transparent border-slate-700'}`}>
                   {step.done && <Check className='w-2.5 h-2.5 text-white' />}
                 </div>
-                <span className={`text-[8px] font-bold uppercase tracking-widest whitespace-nowrap ${step.done ? 'text-indigo-400' : 'text-slate-500'}`}>{step.label}</span>
+                <span className={`text-[9px] font-bold uppercase tracking-wider whitespace-nowrap ${step.done ? 'text-indigo-400' : 'text-slate-500'}`}>{step.label}</span>
               </div>
               {i < arr.length - 1 && (
                 <div className={`flex-1 h-0.5 mb-4 mx-1 sm:mx-2 transition-all ${arr[i+1].done ? 'bg-indigo-500' : 'bg-slate-800'}`} />
@@ -410,7 +417,7 @@ export const TabbyTamaraCard = ({
       <div className="border-b border-white/5 bg-white/[0.02]">
         <button onClick={() => setExpandedNotes(!expandedNotes)} className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-white/[0.02] transition-colors group">
           <div className="flex items-center gap-3">
-             <span className="text-[11px] font-bold text-slate-400 group-hover:text-slate-300 uppercase tracking-widest flex items-center gap-2">
+             <span className="text-[10px] font-bold text-slate-400 group-hover:text-slate-300 uppercase tracking-widest flex items-center gap-2">
                 <FileText className="w-4 h-4" /> Notes & Attachments
              </span>
              {hasAttachments && <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-lg text-[10px] font-bold tracking-widest uppercase">Has Files</span>}
@@ -421,13 +428,13 @@ export const TabbyTamaraCard = ({
           <div className="px-5 pb-5 space-y-5">
              {req.notes && (
                <div className="p-4 bg-black/40 border border-white/5 rounded-xl text-sm text-slate-300 font-medium leading-relaxed">
-                 <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Agent Notes</span> 
+                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Agent Notes</span> 
                  {req.notes}
                </div>
              )}
              {hasAttachments && (
                <div className="space-y-3">
-                 <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Attached Files</span>
+                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Attached Files</span>
                  <AttachmentsDisplay photos={[...(req.photos || []), ...(req.paymentScreenshot ? [req.paymentScreenshot] : [])]} links={req.links} />
                </div>
              )}
@@ -483,6 +490,101 @@ export const TabbyTamaraCard = ({
            </div>
         </div>
       )}
+
+      {req.status === 'confirmed' && (
+         <div className='border-t border-white/[0.05]'>
+           {/* Show existing follow-up replies */}
+           {(req.agentFollowUps || []).length > 0 && (
+             <div className='px-4 pt-3 pb-0 space-y-2'>
+               <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold'>
+                 💬 Post-Confirmation Notes ({(req.agentFollowUps || []).length})
+               </p>
+               {(req.agentFollowUps || []).map((fu: any, i: number) => (
+                 <div key={i} className={`p-3 rounded-xl border text-xs ${fu.senderRole === 'tl' ? 'bg-amber-500/5 border-amber-500/15 ml-6' : 'bg-indigo-500/5 border-indigo-500/10'}`}>
+                   <div className='flex items-center justify-between mb-1.5'>
+                     <span className={`font-bold text-[10px] ${fu.senderRole === 'tl' ? 'text-amber-400' : 'text-indigo-400'}`}>
+                       {fu.senderRole === 'tl' ? '👔' : '👤'} {fu.senderName}
+                     </span>
+                     <span className='text-[9px] text-slate-600 font-mono'>{new Date(fu.createdAt).toLocaleString()}</span>
+                   </div>
+                   {fu.text && <p className='text-slate-300 leading-relaxed'>{fu.text}</p>}
+                   {fu.photos && fu.photos.length > 0 && (
+                     <div className='mt-2'>
+                       <AttachmentsDisplay photos={fu.photos} links={[]} />
+                     </div>
+                   )}
+                 </div>
+               ))}
+             </div>
+           )}
+
+           {/* Toggle button */}
+           <div className='px-4 py-2'>
+             <button
+               onClick={() => setShowFollowUp(v => !v)}
+               className='text-[10px] font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 transition-colors cursor-pointer'
+             >
+               <MessageCircle className='w-3.5 h-3.5' />
+               {showFollowUp ? 'Cancel' : '+ Add Follow-up Note / Screenshot'}
+             </button>
+           </div>
+
+           {showFollowUp && (
+             <div className='px-4 pb-4 space-y-3'>
+               <textarea
+                 value={followUpText}
+                 onChange={e => setFollowUpText(e.target.value)}
+                 placeholder='Add a note, update, or question about this confirmed request...'
+                 className='w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 resize-none h-20 font-sans'
+               />
+               <MultiAttachmentUpload
+                 photos={followUpPhotos}
+                 links={[]}
+                 onPhotosChange={setFollowUpPhotos}
+                 onLinksChange={() => {}}
+                 photosLabel='Attach screenshots (optional)'
+                 onUploadStateChange={setFollowUpUploading}
+               />
+               <div className='flex justify-end'>
+                 <button
+                   disabled={(!followUpText.trim() && followUpPhotos.length === 0) || followUpUploading}
+                   onClick={async () => {
+                     const newFollowUp = {
+                       senderName: currentUser.name,
+                       senderRole: currentUser.role,
+                       text: followUpText.trim(),
+                       photos: followUpPhotos,
+                       createdAt: new Date().toISOString(),
+                     };
+                     await updateDoc(doc(db, 'tt_requests', req.id), {
+                       agentFollowUps: arrayUnion(newFollowUp)
+                     });
+                     if (addSystemNotification) {
+                       const target = currentUser.role === 'agent' ? 'tl' : req.agentName;
+                       addSystemNotification(
+                         '💬 Follow-up on TT Request',
+                         `${currentUser.name} added a follow-up note on ${formatCaseRef(req.id, 'tt_request')}: "${followUpText.substring(0, 80)}"`,
+                         'general',
+                         target,
+                         undefined,
+                         'tt_request',
+                         req.id
+                       );
+                     }
+                     setFollowUpText('');
+                     setFollowUpPhotos([]);
+                     setShowFollowUp(false);
+                     toast.success('Follow-up note added!');
+                   }}
+                   className='px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer'
+                 >
+                   {followUpUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CornerDownRight className='w-3.5 h-3.5' />} Post Follow-up
+                 </button>
+               </div>
+             </div>
+           )}
+         </div>
+       )}
 
       {req.status === "rejected" && (
         <div className="p-4 md:p-5 border-b border-white/5 bg-red-950/5 relative overflow-hidden">
@@ -557,6 +659,18 @@ export const TabbyTamaraCard = ({
            <button onClick={handleShareAction} className="px-3 py-1.5 text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-widest border border-indigo-500/20 hidden md:flex">
               <Share className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Share</span>
            </button>
+        )}
+
+        {typeof (window as any).setViewingRecord === 'function' && (
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              (window as any).setViewingRecord({ type: 'tt_request', data: req });
+            }}
+            className="px-3 py-1.5 text-teal-400 hover:text-teal-300 bg-teal-500/10 hover:bg-teal-500/20 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-widest border border-teal-500/20 cursor-pointer"
+          >
+            <Eye className="w-3.5 h-3.5 text-teal-400" /> <span className="hidden sm:inline">View Details</span>
+          </button>
         )}
 
         <button onClick={handleCopyTextOnly} className="px-3 py-1.5 text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-700/80 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-widest border border-white/5">

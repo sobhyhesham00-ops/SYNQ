@@ -150,7 +150,11 @@ export interface TabbyTamaraRequest {
   links?: string[];
   tlNotes?: string;
   tlLinks?: string;
-  replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
+  attachments?: string[];
+  screenshot?: string;
+  imageUrl?: string;
+  agentFollowUps?: { senderName: string; senderRole: string; text: string; photos?: string[]; createdAt: string }[];
+  replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string; photos?: string[]; attachments?: string[]; imageUrl?: string }[];
 }
 
 export interface TabbyTamaraComplaint {
@@ -179,6 +183,7 @@ export interface TabbyTamaraComplaint {
   commentedAt?: string;
   closedAt?: string;
   text?: string;
+  tlResolutionType?: string;
 }
 
 export interface ClientCommunicationRequest {

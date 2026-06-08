@@ -60,7 +60,8 @@
         "agentName": { "type": "string" },
         "patientName": { "type": "string" },
         "phoneNumber": { "type": "string" },
-        "status": { "type": "string" }
+        "status": { "type": "string" },
+        "agentFollowUps": { "type": "array" }
       }
     },
     "tt_complaint": {
@@ -71,7 +72,8 @@
         "id": { "type": "string" },
         "agentName": { "type": "string" },
         "patientName": { "type": "string" },
-        "status": { "type": "string" }
+        "status": { "type": "string" },
+        "tlResolutionType": { "type": "string" }
       }
     },
     "client_comm": {

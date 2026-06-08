@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef } from 'react';
-import { Search, History, MessageCircle, FileText, CheckCircle2, X, Download, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, History, MessageCircle, FileText, CheckCircle2, X, Download, ChevronDown, ChevronUp, Eye } from 'lucide-react';
 import { Inquiry, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, CaseRecord } from '../types';
 import { CopyWrap } from './CopyWrap';
 import { formatCaseRef, normalizePhone } from '../utils';
@@ -12,6 +12,7 @@ interface PatientSearchHubProps {
   cases: CaseRecord[];
   currentUser?: { name: string; role: string };
   requests?: any[];
+  onViewRecord?: (record: { type: string; data: any }) => void;
 }
 
 
@@ -40,7 +41,8 @@ export function PatientSearchHub({
   clientComms,
   cases,
   currentUser,
-  requests = []
+  requests = [],
+  onViewRecord
 }: PatientSearchHubProps) {
   const [inputVal, setInputVal] = useState('');
   const [query, setQuery] = useState('');
@@ -100,7 +102,8 @@ export function PatientSearchHub({
   };
 
 
-  const renderTimelineCard = (item: any) => {
+  const renderTimelineCard = (r: any) => {
+    const item = r;
     const isExpanded = !!expandedItems[item.id];
     
     let title = '';
@@ -156,6 +159,14 @@ export function PatientSearchHub({
             <span className="text-slate-400 text-xs font-mono bg-black/20 px-2 py-1 rounded inline-block max-w-[150px] sm:max-w-max truncate">
                <CopyWrap text={item.id || ''}>{formatCaseRef(item.id, item._type)}</CopyWrap>
             </span>
+            {onViewRecord && (
+              <button
+                onClick={() => onViewRecord({ type: r._rType, data: r })}
+                className='px-2 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[10px] font-bold text-slate-300 flex items-center gap-1'
+              >
+                <Eye className='w-3 h-3' /> View
+              </button>
+            )}
           </div>
           <div className="text-[11px] text-slate-500 font-mono text-left sm:text-right shrink-0" title={new Date(item.createdAt).toLocaleString()}>
             {getRelativeTime(item.createdAt)}
