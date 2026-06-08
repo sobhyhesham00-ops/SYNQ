@@ -71,17 +71,29 @@ export const CaseTable: React.FC<CaseTableProps> = ({
         </span>
       );
     } else {
-      const isTamara = item.raw.provider?.toLowerCase() === "tamara" || item.raw.paymentMethod?.toLowerCase() === "tamara";
-      if (isTamara) {
+      const platform = item.raw.platform;
+      if (platform === "tamara") {
         return (
           <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-[#ff9900]/10 text-[#ffb84d] border border-[#ff9900]/20">
             Tamara
           </span>
         );
+      } else if (platform === "tabby") {
+        return (
+          <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-[#00e3a5]/10 text-[#2effc3] border border-[#00e3a5]/20">
+            Tabby
+          </span>
+        );
+      } else if (platform === "one_time_payment") {
+        return (
+          <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+            One Time
+          </span>
+        );
       }
       return (
-        <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-[#00e3a5]/10 text-[#2effc3] border border-[#00e3a5]/20">
-          Tabby
+        <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-slate-500/10 text-slate-400 border border-slate-500/20">
+          Unknown
         </span>
       );
     }

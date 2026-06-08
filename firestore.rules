@@ -1,102 +1,114 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // 1. Global default-deny safety net
     match /{document=**} {
       allow read, write: if false;
     }
 
     // Helper functions
     function isSignedIn() { return request.auth != null; }
+    
+    // Note: If Firebase Auth custom claims are not set, we look up the user document.
+    // This costs 1 read per evaluation. For scale, consider Custom Auth Claims.
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    function getUserName() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name;
+    }
+
+    function isSuperAdmin() {
+      return getUserRole() in ["super_admin", "admin", "Super Admin"];
+    }
+
+    function isTLOrSupport() {
+      return getUserRole() in ["tl", "support", "Team Leader", "Quality Assurance", "QA"];
+    }
+
+    // Agent can only update if they are the author or assigned
+    function isOwnerOrAssigned() {
+      let userName = getUserName();
+      return resource.data.agentName == userName || 
+             resource.data.assignedToName == userName ||
+             resource.data.openedBy == userName ||
+             resource.data.submittedByName == userName;
+    }
 
     // Users
     match /users/{userId} {
-      allow read, write: if isSignedIn();
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && (request.auth.uid == userId || isSuperAdmin());
     }
 
-    // Todos
-    match /todos/{todoId} {
-      allow read, write: if isSignedIn();
+    // Cases, Requests, Inquiries
+    match /inquiries/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && (isTLOrSupport() || isSuperAdmin() || isOwnerOrAssigned());
+    }
+    match /tt_requests/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && (isTLOrSupport() || isSuperAdmin() || isOwnerOrAssigned());
+    }
+    match /tt_complaints/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && (isTLOrSupport() || isSuperAdmin() || isOwnerOrAssigned());
+    }
+    match /client_comms/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && (isTLOrSupport() || isSuperAdmin() || isOwnerOrAssigned());
+    }
+    match /scheduling_requests/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && (isTLOrSupport() || isSuperAdmin() || isOwnerOrAssigned());
+    }
+    match /cases/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && (isTLOrSupport() || isSuperAdmin() || isOwnerOrAssigned());
+    }
+    match /case_activity/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      // Immutable log
+      allow update, delete: if false;
     }
 
-    // Inquiries
-    match /inquiries/{inquiryId} {
-      allow read, write: if isSignedIn();
-    }
-
-    // QA Scores
-    match /qa_scores/{scoreId} {
-      allow read, write: if isSignedIn();
-    }
-
-    // System config
-    match /system/{docId} {
-      allow read, write: if isSignedIn();
-    }
-
-    // Tabby Tamara Requests
-    match /tt_requests/{reqId} {
-      allow read, write: if isSignedIn();
-    }
-
-    // Tabby Tamara Complaints
-    match /tt_complaints/{compId} {
-      allow read, write: if isSignedIn();
-    }
-
-    // Client Communications
-    match /client_comms/{commId} {
-      allow read, write: if isSignedIn();
-    }
-
-    // Scheduling Requests
-    match /scheduling_requests/{reqId} {
-      allow read, write: if isSignedIn();
-    }
-
-    // Time Logs
+    // Timelogs - only superadmin/admin can purge 
     match /timelogs/{logId} {
-      allow read, write: if isSignedIn();
+      allow read, create: if isSignedIn();
+      allow update: if isSignedIn() && (resource.data.agentName == getUserName() || isSuperAdmin() || isTLOrSupport());
+      allow delete: if isSignedIn() && isSuperAdmin();
     }
 
-    // Announcements
-    match /announcements/{annId} {
-      allow read, write: if isSignedIn();
-    }
-
-    // Cases
-    match /cases/{caseId} {
-      allow read, write: if isSignedIn();
-    }
-
-    // TL Feedbacks
-    match /tl_feedbacks/{fbId} {
-      allow read, write: if isSignedIn();
-    }
-
-    // Schedules
-    match /schedules/{schedId} {
-      allow read, write: if isSignedIn();
-    }
-
-    // Notifications
+    // Notifications - users may only mark their own notification read/cleared state
     match /notifications/{notifId} {
-      allow read, write: if isSignedIn();
+      // Allow read/create for system
+      allow read, create: if isSignedIn();
+      // Restrict update/delete
+      // Cannot fully restrict based strictly on UID since the app uses `targetAgentName` or `targetRole`. 
+      // To prevent breaking, allow update if user name matches target, or if TL/Admin.
+      allow update, delete: if isSignedIn() && 
+        (resource.data.targetAgentName == getUserName() || 
+         resource.data.targetRole == getUserRole() || 
+         isSuperAdmin() || isTLOrSupport() ||
+         resource.data.targetRole == 'general');
     }
 
-    // Orders
-    match /orders/{orderId} {
-      allow read, write: if isSignedIn();
-    }
-
-    // Agents
-    match /agents/{agentId} {
-      allow read, write: if isSignedIn();
-    }
-
-    // Agents Nested Schedules
-    match /agents/{agentId}/schedules/{schedId} {
-      allow read, write: if isSignedIn();
-    }
+    // Others (Basic fallback for existing functionality)
+    match /todos/{todoId} { allow read, write: if isSignedIn(); }
+    match /qa_scores/{scoreId} { allow read, write: if isSignedIn(); }
+    match /system/{docId} { allow read, write: if isSignedIn(); }
+    match /announcements/{annId} { allow read: if isSignedIn(); allow write: if isSignedIn() && isSuperAdmin(); }
+    match /tl_feedbacks/{fbId} { allow read, write: if isSignedIn(); }
+    match /schedules/{schedId} { allow read, write: if isSignedIn(); }
+    match /orders/{orderId} { allow read, write: if isSignedIn(); }
+    match /agents/{agentId} { allow read, write: if isSignedIn(); }
+    match /agents/{agentId}/schedules/{schedId} { allow read, write: if isSignedIn(); }
   }
 }

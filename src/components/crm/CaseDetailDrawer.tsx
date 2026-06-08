@@ -522,6 +522,18 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
                     </span>
                   </div>
                 )}
+                
+                {caseData.raw.platform && (
+                  <div>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider leading-none mb-1">Platform</p>
+                    <span className="text-xs font-black text-[#00e3a5] block truncate">
+                      {caseData.raw.platform === "tabby" ? "Tabby" : 
+                       caseData.raw.platform === "tamara" ? "Tamara" : 
+                       caseData.raw.platform === "one_time_payment" ? "One Time Paid" : 
+                       caseData.raw.platform?.toUpperCase()}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 

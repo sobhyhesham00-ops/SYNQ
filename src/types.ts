@@ -6,6 +6,7 @@ export interface FileAttachment {
   type: string;
   size: number;
   url: string; // data URL or http URL
+  file?: File; // Store original file for deferred upload
 }
 
 export interface User {

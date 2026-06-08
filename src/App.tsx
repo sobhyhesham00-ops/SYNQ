@@ -125,6 +125,7 @@ import { OrdersTab } from "./components/OrdersTab";
 import { ArticleManager } from "./components/ArticleManager";
 import { RequestReplyThread } from "./components/RequestReplyThread";
 import { EnvironmentBadge } from "./components/EnvironmentBadge";
+import { processAttachments } from "./services/attachmentService";
 import * as XLSX from "xlsx";
 import {
   isTLName,
@@ -5464,14 +5465,23 @@ ${result.errors.slice(0, 5).join("\n")}${
 
     setIsFormSubmitting(true);
     try {
+      const inquiryId = `inq_${Date.now()}`;
+      
+      const processedAttachments = await processAttachments(
+        inquiryAttachments,
+        "inquiry",
+        inquiryId,
+        "root"
+      );
+
       const newInquiry: Inquiry = {
-        id: `inq_${Date.now()}`,
+        id: inquiryId,
         agentName: currentUser.name,
         clinicName: inquiryClinicName,
         phoneNumber: String(inquiryPhoneNumber || "").trim() || undefined,
         text: String(inquiryText || "").trim(),
         photos: inquiryPhotos,
-        attachments: inquiryAttachments,
+        attachments: processedAttachments,
         links: inquiryLinks,
         createdAt: new Date().toISOString(),
         status: "submitted",
@@ -5580,6 +5590,13 @@ ${result.errors.slice(0, 5).join("\n")}${
     setIsSubmittingAnswer(true);
 
     try {
+      const processedAttachments = await processAttachments(
+        currentAnswerAttachments,
+        "inquiry",
+        inquiryId,
+        "reply"
+      );
+
       let targetAgentName = "";
       let clinicName = "";
       let updatedInqObject: Inquiry | null = null;
@@ -5596,7 +5613,7 @@ ${result.errors.slice(0, 5).join("\n")}${
             senderName: currentUser.name,
             authorRole: currentUser.role,
             text: answerText,
-            attachments: currentAnswerAttachments.length > 0 ? currentAnswerAttachments : undefined,
+            attachments: processedAttachments.length > 0 ? processedAttachments : undefined,
             links: currentAnswerLinks.length > 0 ? currentAnswerLinks : undefined,
             createdAt: new Date().toISOString()
           };
@@ -5955,7 +5972,7 @@ ${ttNotes}`
     }
   };
 
-  const handleContactTabbyTamara = (
+  const handleContactTabbyTamara = async (
     requestId: string,
     status: "not_contacted" | "contacted",
     notes?: string,
@@ -5966,6 +5983,22 @@ ${ttNotes}`
     newWorkflowStatus?: TTWorkflowStatus
   ) => {
     if (!currentUser) return;
+    
+    // Process attachments if they exist
+    const processedClientIdAttachments = await processAttachments(
+      clientIdAttachments,
+      "tabby_tamara",
+      requestId,
+      "client_id"
+    );
+
+    const processedPaymentProofAttachments = await processAttachments(
+      paymentProofAttachments,
+      "tabby_tamara",
+      requestId,
+      "payment_proof"
+    );
+
     const updated = tabbyTamaraRequests.map((r) => {
       if (r.id === requestId) {
         const derivedStatus = newWorkflowStatus || (status === "contacted" ? "ready_for_partner" : "tl_link_ready");
@@ -6003,8 +6036,8 @@ ${ttNotes}`
           agentContactNotes: notes || r.agentContactNotes || "",
           paymentScreenshot: screenshot || r.paymentScreenshot || null,
           attachments: (attachments && attachments.length > 0) ? [...(r.attachments || []), ...attachments] : (r.attachments || []),
-          clientIdAttachments: clientIdAttachments || r.clientIdAttachments || [],
-          paymentProofAttachments: paymentProofAttachments || r.paymentProofAttachments || [],
+          clientIdAttachments: processedClientIdAttachments.length > 0 ? processedClientIdAttachments : (r.clientIdAttachments || []),
+          paymentProofAttachments: processedPaymentProofAttachments.length > 0 ? processedPaymentProofAttachments : (r.paymentProofAttachments || []),
           workflowStatus: derivedStatus,
           replies: [...existingReplies, ...activityEntries],
           updatedAt: new Date().toISOString()

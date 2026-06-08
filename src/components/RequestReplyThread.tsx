@@ -5,6 +5,7 @@ import { doc, arrayUnion } from 'firebase/firestore';
 import { db, wrappedUpdateDoc as updateDoc } from '../firebase';
 import { toast } from 'sonner';
 import { compressImage } from '../utils';
+import { processAttachments } from '../services/attachmentService';
 
 interface ThreadReply {
   id: string;
@@ -69,37 +70,16 @@ export function RequestReplyThread({
       }
 
       try {
-        const dataUrl = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = async (event) => {
-            if (event.target?.result) {
-              if (file.type.startsWith('image/')) {
-                try {
-                  const compressed = await compressImage(event.target.result as string, 800, 0.6);
-                  resolve(compressed);
-                } catch (err) {
-                  resolve(event.target.result as string);
-                }
-              } else {
-                resolve(event.target.result as string);
-              }
-            } else {
-              resolve('');
-            }
-          };
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
+        const previewUrl = URL.createObjectURL(file);
+        
+        newAttachments.push({
+          id: `att_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          name: file.name,
+          type: file.type || 'application/octet-stream',
+          size: file.size,
+          url: previewUrl,
+          file: file
         });
-
-        if (dataUrl) {
-          newAttachments.push({
-            id: `att_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            url: dataUrl
-          });
-        }
       } catch (err) {
         console.error('File load error', err);
         toast.error(`Failed to load "${file.name}"`);
@@ -141,28 +121,40 @@ export function RequestReplyThread({
     e.preventDefault();
     if (!String(text || '').trim() && attachments.length === 0 && links.length === 0) return;
 
-    const newReply: ThreadReply = {
-      id: `rpl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      authorId: currentUser.id,
-      senderName: currentUser.name,
-      authorRole: currentUser.role,
-      text,
-      createdAt: new Date().toISOString(),
-      attachments,
-      links
-    };
-
-    // Fallbacks for notifications if props were not provided
-    const computedRequestType = requestType || (
-      collectionName === 'requests' ? 'Scheduling' :
-      collectionName === 'tabby_tamara' ? 'Tabby/Tamara' :
-      collectionName === 'tt_complaints' ? 'Complaint' :
-      collectionName === 'client_comms' ? 'Client Comm' :
-      'Request'
-    );
-    const computedRequestAgentName = requestAgentName || request.agentName || request.callCenterAgentName || request.openedBy;
-
     try {
+      const eType = collectionName === 'inquiries' ? 'inquiry' :
+                    collectionName === 'requests' ? 'scheduling' :
+                    collectionName === 'tt_complaints' ? 'tt_complaint' :
+                    collectionName === 'client_comms' ? 'client_comm' : 'tabby_tamara';
+
+      const processedAttachments = await processAttachments(
+        attachments,
+        eType,
+        request.id,
+        "reply"
+      );
+
+      const newReply: ThreadReply = {
+        id: `rpl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        authorId: currentUser.id,
+        senderName: currentUser.name,
+        authorRole: currentUser.role,
+        text,
+        createdAt: new Date().toISOString(),
+        attachments: processedAttachments,
+        links
+      };
+
+      // Fallbacks for notifications if props were not provided
+      const computedRequestType = requestType || (
+        collectionName === 'requests' ? 'Scheduling' :
+        collectionName === 'tabby_tamara' ? 'Tabby/Tamara' :
+        collectionName === 'tt_complaints' ? 'Complaint' :
+        collectionName === 'client_comms' ? 'Client Comm' :
+        'Request'
+      );
+      const computedRequestAgentName = requestAgentName || request.agentName || request.callCenterAgentName || request.openedBy;
+
       await updateDoc(doc(db, collectionName, request.id), {
         replies: arrayUnion(newReply)
       });

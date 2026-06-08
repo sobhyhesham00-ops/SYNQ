@@ -13,6 +13,7 @@ import {
   connectFirestoreEmulator
 } from "firebase/firestore";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, connectAuthEmulator } from "firebase/auth";
+import { getStorage, connectStorageEmulator } from "firebase/storage";
 import firebaseConfigFromJson from "../firebase-applet-config.json";
 
 // 1. Load Firebase configuration from environment with startup validation & json fallback
@@ -45,6 +46,7 @@ export const db = initializeFirestore(app, {
 }, firebaseConfig.firestoreDatabaseId);
 
 export const auth = getAuth(app);
+export const storage = getStorage(app);
 
 // Enable Emulator Suite globally in local environment
 export const useEmulator = (import.meta as any).env.VITE_USE_EMULATOR === "true" || ((import.meta as any).env.DEV && window.location.hostname === "localhost");
@@ -54,7 +56,8 @@ if (useEmulator) {
   try {
     connectFirestoreEmulator(db, "127.0.0.1", 8080);
     connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
-    console.log("[Firebase Emulator] Successfully initialized Auth and Firestore emulators.");
+    connectStorageEmulator(storage, "127.0.0.1", 9199);
+    console.log("[Firebase Emulator] Successfully initialized Auth, Firestore, and Storage emulators.");
   } catch (err) {
     console.warn("[Firebase Emulator] Connection error (it may already be initialized):", err);
   }

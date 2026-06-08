@@ -8,6 +8,7 @@ export interface FileAttachment {
   type: string;
   size: number;
   url: string; // data URL or http URL
+  file?: globalThis.File;
 }
 
 interface ProfessionalAttachmentUploaderProps {
@@ -17,6 +18,8 @@ interface ProfessionalAttachmentUploaderProps {
   onLinksChange: (links: string[]) => void;
   onUploadStateChange?: (isUploading: boolean) => void;
 }
+
+import { validateFile } from "../services/attachmentService";
 
 export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUploaderProps> = ({
   attachments = [],
@@ -56,55 +59,43 @@ export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUplo
     if (filesArray.length > 0) handleFiles(filesArray as unknown as FileList);
   };
 
-  const handleFiles = async (files: FileList | File[]) => {
+  const handleFiles = async (files: FileList | globalThis.File[]) => {
     if (!files || files.length === 0) return;
     setIsUploading(true);
     setUploadProgress({ current: 0, total: files.length });
 
     const newAttachments: FileAttachment[] = [];
-    const MAX_SIZE = 15 * 1024 * 1024; // 15MB
-    
     const fileArray = Array.from(files);
 
     for (let i = 0; i < fileArray.length; i++) {
         const file = fileArray[i];
         
-        // 1. Validate size
-        if (file.size > MAX_SIZE) {
-            toast.error(`File ${file.name} exceeds 15MB limit.`);
+        // 1. Validate file
+        const validation = validateFile(file);
+        if (!validation.valid) {
+            toast.error(validation.error);
             continue;
         }
 
-        // 2. Validate type
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
-        if (!allowedTypes.includes(file.type) && !file.type.startsWith('image/')) {
-            toast.error(`Invalid file type for ${file.name}. Must be an image or document.`);
-            continue;
-        }
-
-        // 3. Prevent exact duplicates
+        // 2. Prevent exact duplicates
         if (attachments.some(a => a.name === file.name && a.size === file.size) || newAttachments.some(a => a.name === file.name && a.size === file.size)) {
             toast.error(`${file.name} is already attached.`);
             continue;
         }
 
         try {
-            const dataUrl = await new Promise<string>((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => resolve(e.target?.result as string);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
+            const previewUrl = URL.createObjectURL(file);
             
             newAttachments.push({
                 id: `att_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 name: file.name,
                 type: file.type || 'application/octet-stream',
                 size: file.size,
-                url: dataUrl
+                url: previewUrl,
+                file: file
             });
         } catch (e) {
-            toast.error(`Failed to read ${file.name}`);
+            toast.error(`Failed to process ${file.name}`);
         }
         setUploadProgress({ current: i + 1, total: fileArray.length });
     }

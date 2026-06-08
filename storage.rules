@@ -1,0 +1,16 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /case-attachments/{entityType}/{entityId}/{replyOrRoot}/{fileName} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+                    && request.resource.size <= 20 * 1024 * 1024
+                    && !request.resource.name.matches('(?i).*\\.(exe|msi|bat|cmd|js|sh|ps1|vbs|scr|com)$')
+                    && request.resource.contentType != 'application/javascript'
+                    && request.resource.contentType != 'application/x-msdownload';
+    }
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
