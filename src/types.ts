@@ -1,5 +1,13 @@
 export type Role = 'tl' | 'agent' | 'qa';
 
+export interface FileAttachment {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string; // data URL or http URL
+}
+
 export interface User {
   id: string;
   name: string;

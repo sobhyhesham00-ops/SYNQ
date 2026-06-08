@@ -1,4 +1,4 @@
-import { SchedulingRequest, SHIFTS, TEAM_LEADERS, INITIAL_AGENTS, SwapRequest, AnnualRequest, ScheduledShift, AGENT_LOBS, Inquiry, TimeLog, AgentDirectoryRow, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, CaseRecord, SystemNotification, Order } from './types';
+import { SchedulingRequest, SHIFTS, TEAM_LEADERS, INITIAL_AGENTS, SwapRequest, AnnualRequest, ScheduledShift, AGENT_LOBS, Inquiry, TimeLog, AgentDirectoryRow, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, CaseRecord, SystemNotification, Order, FileAttachment } from './types';
 
 // Simple client-side storage helpers
 import { db, wrappedSetDoc as setDoc, wrappedDeleteDoc as deleteDoc } from './firebase';
@@ -174,9 +174,78 @@ const getCollectionName = (key: string) => {
     }
 };
 
+const stripLargeFields = (obj: any): any => {
+  if (obj === null || obj === undefined) return obj;
+  if (typeof obj === 'string') {
+    // Strip inline image base64 strings
+    if (obj.startsWith('data:') && obj.includes(';base64,')) {
+      return '[omitted_base64]';
+    }
+    // Truncate extremely long strings to prevent storage bloat
+    if (obj.length > 5000) {
+      return obj.substring(0, 100) + '...[truncated]';
+    }
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(item => stripLargeFields(item));
+  }
+  if (typeof obj === 'object') {
+    const cleaned: any = {};
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        if (['photos', 'attachments', 'screenshot', 'paymentScreenshot', 'imageUrl', 'handlingPhotos'].includes(key)) {
+          if (Array.isArray(obj[key])) {
+             cleaned[key] = obj[key].map((p: any) => typeof p === 'string' && p.startsWith('data:') ? '[omitted_image_data]' : p);
+          } else if (typeof obj[key] === 'string' && obj[key].startsWith('data:')) {
+             cleaned[key] = '[omitted_image_data]';
+          } else {
+             cleaned[key] = stripLargeFields(obj[key]);
+          }
+        } else {
+          cleaned[key] = stripLargeFields(obj[key]);
+        }
+      }
+    }
+    return cleaned;
+  }
+  return obj;
+};
+
 export const setStorageItem = <T>(key: string, value: T): void => {
   try {
-    localStorage.setItem(key, JSON.stringify(value));
+    const cleanedValue = stripLargeFields(value);
+    
+    try {
+      localStorage.setItem(key, JSON.stringify(cleanedValue));
+    } catch (quotaError) {
+      // If we got QuotaExceededError, try clearing unneeded cache collections to free up space
+      console.warn(`Quota exceeded for ${key}, clearing caches and retrying...`);
+      const keysToClear = [
+        'sched_inquiries',
+        'sched_tabby_tamara',
+        'sched_tt_complaints',
+        'sched_client_comms',
+        'sched_requests',
+        'sched_time_logs',
+        'sched_cases',
+        'sched_notifications',
+        'sched_tl_feedbacks'
+      ];
+      keysToClear.forEach(k => {
+        if (k !== key) {
+          try {
+            localStorage.removeItem(k);
+          } catch (e) {}
+        }
+      });
+      // Retry setting item once caches are freed
+      try {
+        localStorage.setItem(key, JSON.stringify(cleanedValue));
+      } catch (retryError) {
+        console.warn(`Failed to set ${key} item even after cache clear:`, retryError);
+      }
+    }
     
     // Asynchronous mirror to Firestore (non-blocking, item-level delta sync)
     if (key.startsWith('sched_')) {
@@ -189,12 +258,12 @@ export const setStorageItem = <T>(key: string, value: T): void => {
         // Fallback for settings or config (e.g. system/sched_support_assignments)
         const cleanValue = JSON.parse(JSON.stringify(value));
         setDoc(doc(db, "system", key), { data: cleanValue }).catch(err => {
-          console.error("Firestore sync error for " + key, err);
+          console.warn("Firestore sync error for " + key, err);
         });
       }
     }
   } catch (e) {
-    console.error(`Error writing key ${key} to storage`, e);
+    console.warn(`Error writing key ${key} to storage`, e);
   }
 };
 
@@ -1494,6 +1563,30 @@ export const getSLAStatus = (createdAt: string, status: string, resolvedStatuses
   return { label, color, isResolved, ageMs };
 };
 
-
-
-
+export const normalizeAttachments = (attachments: any[] | undefined | null): FileAttachment[] => {
+  if (!attachments || !Array.isArray(attachments)) return [];
+  return attachments
+    .map((att, index) => {
+      if (!att) return null;
+      if (typeof att === 'string') {
+        const isDataUrl = att.startsWith('data:');
+        return {
+          id: `att_${index}_${Date.now()}`,
+          name: isDataUrl ? `Attachment ${index + 1}` : att,
+          type: isDataUrl ? (att.split(';')[0]?.replace('data:', '') || 'image/png') : 'application/octet-stream',
+          size: 0,
+          url: att
+        };
+      } else if (typeof att === 'object') {
+        return {
+          id: att.id || att.uid || `att_${index}_${Date.now()}`,
+          name: att.name || att.filename || `Attachment ${index + 1}`,
+          type: att.type || att.mimeType || 'application/octet-stream',
+          size: typeof att.size === 'number' ? att.size : 0,
+          url: att.url || att.dataUrl || ''
+        };
+      }
+      return null;
+    })
+    .filter((v): v is FileAttachment => !!v);
+};

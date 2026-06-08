@@ -100,6 +100,7 @@ import {
   Pencil,
   Key,
   PenTool,
+  Loader2,
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { AIChatWidget } from "./AIChatWidget";
@@ -907,7 +908,7 @@ export default function App() {
           new Date(a.createdAt || 0).getTime(),
       );
       setInquiries(arr);
-      localStorage.setItem("sched_inquiries", JSON.stringify(arr));
+      setStorageItem("sched_inquiries", arr);
     });
 
     const unsubQa = onSnapshot(collection(db, "qa_scores"), (snap) => {
@@ -918,7 +919,7 @@ export default function App() {
           new Date(a.createdAt || 0).getTime(),
       );
       setQaScores(arr);
-      localStorage.setItem("sched_qa_scores", JSON.stringify(arr));
+      setStorageItem("sched_qa_scores", arr);
     });
 
     const unsubQATemplate = onSnapshot(
@@ -927,7 +928,7 @@ export default function App() {
         if (snap.exists()) {
           const data = snap.data().data;
           setQaTemplate(data);
-          localStorage.setItem("sched_qa_template", JSON.stringify(data));
+          setStorageItem("sched_qa_template", data);
         }
       },
     );
@@ -939,7 +940,7 @@ export default function App() {
           new Date(a.createdAt || 0).getTime(),
       );
       setTabbyTamaraRequests(arr);
-      localStorage.setItem("sched_tabby_tamara", JSON.stringify(arr));
+      setStorageItem("sched_tabby_tamara", arr);
     });
     const unsubComp = onSnapshot(collection(db, "tt_complaints"), (snap) => {
       const arr = snap.docs.map((d) => d.data() as TabbyTamaraComplaint);
@@ -949,7 +950,7 @@ export default function App() {
           new Date(a.createdAt || 0).getTime(),
       );
       setTabbyTamaraComplaints(arr);
-      localStorage.setItem("sched_tt_complaints", JSON.stringify(arr));
+      setStorageItem("sched_tt_complaints", arr);
     });
     const unsubComms = onSnapshot(collection(db, "client_comms"), (snap) => {
       const arr = snap.docs.map((d) => d.data() as ClientCommunicationRequest);
@@ -959,7 +960,7 @@ export default function App() {
           new Date(a.createdAt || 0).getTime(),
       );
       setClientComms(arr);
-      localStorage.setItem("sched_client_comms", JSON.stringify(arr));
+      setStorageItem("sched_client_comms", arr);
     });
     const unsubReq = onSnapshot(
       collection(db, "scheduling_requests"),
@@ -971,7 +972,7 @@ export default function App() {
             new Date(a.createdAt || 0).getTime(),
         );
         setRequests(arr);
-        localStorage.setItem("sched_requests", JSON.stringify(arr));
+        setStorageItem("sched_requests", arr);
       },
     );
     const unsubTime = onSnapshot(
@@ -992,7 +993,7 @@ export default function App() {
           return (b.id || "").localeCompare(a.id || "");
         });
         setTimeLogs(arr);
-        localStorage.setItem("sched_time_logs", JSON.stringify(arr));
+        setStorageItem("sched_time_logs", arr);
       },
       (error) => {
         if (error && error.code === "resource-exhausted") return;
@@ -1076,7 +1077,7 @@ export default function App() {
         }
 
         setAnnouncements(arr);
-        localStorage.setItem("sched_announcements", JSON.stringify(arr));
+        setStorageItem("sched_announcements", arr);
       },
       (error) => {
         if (error && error.code === "resource-exhausted") return;
@@ -1103,10 +1104,7 @@ export default function App() {
         if (snap.exists()) {
           const data = snap.data().data;
           setSupportAssignments(data);
-          localStorage.setItem(
-            "sched_support_assignments",
-            JSON.stringify(data),
-          );
+          setStorageItem("sched_support_assignments", data);
         }
       },
     );
@@ -1118,7 +1116,7 @@ export default function App() {
           new Date(a.createdAt || 0).getTime(),
       );
       setCases(arr);
-      localStorage.setItem("sched_cases", JSON.stringify(arr));
+      setStorageItem("sched_cases", arr);
     });
     const unsubOrders = () => {};
     const unsubAgents = onSnapshot(
@@ -1136,7 +1134,7 @@ export default function App() {
             { roleType: string; tlName: string }
           >;
           setAgentMeta(data);
-          localStorage.setItem("sched_agent_meta", JSON.stringify(data));
+          setStorageItem("sched_agent_meta", data);
         }
       },
     );
@@ -1146,7 +1144,7 @@ export default function App() {
         if (snap.exists()) {
           const data = snap.data().data as AgentDirectoryRow[];
           setAgentDirectory(data);
-          localStorage.setItem("sched_agent_directory", JSON.stringify(data));
+          setStorageItem("sched_agent_directory", data);
         }
       },
     );
@@ -1156,10 +1154,7 @@ export default function App() {
         if (snap.exists()) {
           const data = snap.data().data as string[];
           setDirectoryHeaders(data);
-          localStorage.setItem(
-            "sched_agent_directory_headers",
-            JSON.stringify(data),
-          );
+          setStorageItem("sched_agent_directory_headers", data);
         }
       },
     );
@@ -1170,7 +1165,7 @@ export default function App() {
         if (snap.exists()) {
           const data = snap.data().data as boolean;
           setIsRosterPublished(data);
-          localStorage.setItem("sched_roster_published", JSON.stringify(data));
+          setStorageItem("sched_roster_published", data);
         }
       },
     );
@@ -1181,7 +1176,7 @@ export default function App() {
         if (snap.exists()) {
           const data = snap.data().data || {};
           setCredentials(data);
-          localStorage.setItem("sched_credentials", JSON.stringify(data));
+          setStorageItem("sched_credentials", data);
         }
       },
     );
@@ -1192,7 +1187,7 @@ export default function App() {
         if (snap.exists()) {
           const data = snap.data().data || [];
           setLockedAccounts(data);
-          localStorage.setItem("sched_locked_accounts", JSON.stringify(data));
+          setStorageItem("sched_locked_accounts", data);
         }
       },
     );
@@ -1203,7 +1198,7 @@ export default function App() {
         if (snap.exists()) {
           const data = snap.data().data || {};
           setFailedAttempts(data);
-          localStorage.setItem("sched_failed_attempts", JSON.stringify(data));
+          setStorageItem("sched_failed_attempts", data);
         }
       },
     );
@@ -1220,7 +1215,7 @@ export default function App() {
             new Date(a.createdAt || 0).getTime(),
         );
         setTlFeedbacks(arr);
-        localStorage.setItem("sched_tl_feedbacks", JSON.stringify(arr));
+        setStorageItem("sched_tl_feedbacks", arr);
       },
     );
 
@@ -1564,6 +1559,8 @@ export default function App() {
   const [timeLogs, setTimeLogs] = useState<TimeLog[]>(() => {
     return getStorageItem<TimeLog[]>("sched_time_logs", []);
   });
+
+  const [isPurgingTimeLogs, setIsPurgingTimeLogs] = useState<boolean>(false);
 
   // State to minimize the overtime modal popup
   const [isOvertimeAlertMinimized, setIsOvertimeAlertMinimized] =
@@ -2831,6 +2828,50 @@ ${pageText}
         setActiveScreenshot(compressed);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePurgeTimeLogs = async () => {
+    if (!isSuperAdmin) {
+      toast.error("Unauthorized: Only Super Administrators can purge logs.");
+      return;
+    }
+    
+    setIsPurgingTimeLogs(true);
+    let deletedCount = 0;
+    try {
+      const snapshot = await getDocs(collection(db, "timelogs"));
+      const docs = snapshot.docs;
+      
+      if (docs.length === 0) {
+        setTimeLogs([]);
+        setStorageItem("sched_time_logs", []);
+        toast.info("No logs found in Firestore.");
+        setIsPurgingTimeLogs(false);
+        return;
+      }
+      
+      const batchSize = 450;
+      for (let i = 0; i < docs.length; i += batchSize) {
+        const chunk = docs.slice(i, i + batchSize);
+        const batch = writeBatch(db);
+        chunk.forEach((docSnap) => {
+          batch.delete(docSnap.ref);
+        });
+        await batch.commit();
+        deletedCount += chunk.length;
+      }
+      
+      setTimeLogs([]);
+      setStorageItem("sched_time_logs", []);
+      toast.success(`Successfully purged ${deletedCount} logs from Firestore and CRM storage.`);
+    } catch (error) {
+      console.error("Purge Error:", error);
+      toast.error(
+        `Failed to purge timelogs: ${error instanceof Error ? error.message : String(error)}`
+      );
+    } finally {
+      setIsPurgingTimeLogs(false);
     }
   };
 
@@ -6707,7 +6748,6 @@ ${ttNotes}`
 
     setTabbyTamaraComplaints(updated);
     setStorageItem("sched_tt_complaints", updated);
-    setStorageItem("sched_tabby_tamara_complaints", updated);
 
     setTlComplaintComment("");
     setTlComplaintResolution("");
@@ -16878,27 +16918,26 @@ ${ttNotes}`
                               : "Open Printable Report"}
                           </button>
 
-                          {isSuperAdmin && (
+                           {isSuperAdmin && (
                             <button
+                              disabled={isPurgingTimeLogs}
                               onClick={() => {
                                 showConfirm(
                                   'Purge ALL Logs',
                                   'Are you absolutely sure you want to delete all historical logs? This cannot be undone.',
                                   'Purge',
                                   'bg-rose-700 hover:bg-rose-600',
-                                  () => {
-                                    setTimeLogs([]);
-                                    setStorageItem("sched_time_logs", []);
-                                    toast.success(
-                                      "Successfully purged all agent time card logs.",
-                                    );
-                                  }
+                                  handlePurgeTimeLogs
                                 );
                               }}
-                              className="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans"
+                              className="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans disabled:opacity-50"
                             >
-                              <XCircle className="w-4 h-4 text-rose-400 shrink-0" />
-                              Purge All Logs
+                              {isPurgingTimeLogs ? (
+                                <Loader2 className="w-4 h-4 text-rose-400 animate-spin shrink-0" />
+                              ) : (
+                                <XCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                              )}
+                              {isPurgingTimeLogs ? "Purging..." : "Purge All Logs"}
                             </button>
                           )}
                         </div>
@@ -21997,6 +22036,7 @@ ${ttNotes}`
                                               return (
                                                 <div
                                                   key={comp.id}
+                                                  id={`request-${comp.id}`}
                                                   className={`relative p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4 shadow-md overflow-hidden bg-[#1e1e1e]/40 backdrop-blur-lg/60 border-l-4 ${urgencyColors[compUrgency]} ${
                                                     isNeedContact
                                                       ? "border-pink-500/30 bg-gradient-to-b from-pink-955/10 to-transparent animate-pulse"
@@ -22519,7 +22559,7 @@ ${ttNotes}`
                                                     <RequestReplyThread
                                                       request={comp}
                                                       currentUser={currentUser}
-                                                      collectionName="tabby_tamara_complaints"
+                                                      collectionName="tt_complaints"
                                                       addSystemNotification={
                                                         addSystemNotification
                                                       }

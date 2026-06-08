@@ -34,9 +34,9 @@ export const NotificationDrawer = ({
     if (notif.entityType === 'inquiry') return 'inquiries';
     if (notif.entityType === 'scheduling_request') return 'my-requests';
     if (notif.entityType === 'case') return 'daily-cases';
-    if (notif.entityType === 'tt_request') return 'fintech';
-    if (notif.entityType === 'tt_complaint') return 'fintech';
-    if (notif.entityType === 'client_comm') return 'fintech';
+    if (notif.entityType === 'tt_request') return 'tabby-tamara';
+    if (notif.entityType === 'tt_complaint') return 'complaints';
+    if (notif.entityType === 'client_comm') return 'client-comms';
     
     // fallbacks based on type string for older notifications:
     if (notif.type === 'inquiry') return 'inquiries';
@@ -134,7 +134,7 @@ export const NotificationDrawer = ({
                     </div>
                   ) : (
                     displayNotifs.map(notif => {
-                      const isUnread = !notif.seenByUsers?.includes(currentUser?.name);
+                      const isUnread = !notif.seenByUsers?.includes(currentUser?.id);
                       const getIcon = () => {
                         if (notif.type === 'incident' || notif.type === 'compliance') return <AlertTriangle className="w-4 h-4 text-rose-400" />;
                         if (notif.type === 'schedule') return <Info className="w-4 h-4 text-blue-400" />;
