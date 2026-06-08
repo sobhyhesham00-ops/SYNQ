@@ -101,6 +101,7 @@ export interface Inquiry {
   phoneNumber?: string;
   text: string;
   photos: string[]; // Base64 data-urls or image urls
+  attachments?: any[]; // Array of FileAttachment objects
   links: string[]; // URLs
   createdAt: string; // ISO timestamp
   status: 'submitted' | 'sent' | 'answered';
@@ -111,7 +112,17 @@ export interface Inquiry {
   answeredAt?: string;
   seenByAgent?: boolean; // Tracking if agent acknowledged the notification
   customerContacted?: 'not_contacted' | 'contacted' | 'attempted'; // Dropdown menu status for customer contact status
-  replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
+  replies?: {
+    id: string;
+    authorId?: string;
+    senderName: string;
+    authorRole?: 'agent' | 'tl' | 'qa' | 'admin' | 'superadmin' | string;
+    text: string;
+    createdAt: string;
+    attachments?: any[];
+    links?: string[];
+    screenshot?: string;
+  }[];
 }
 
 export interface TabbyTamaraRequest {
@@ -358,9 +369,12 @@ export interface SystemNotification {
   type: 'schedule' | 'compliance' | 'inquiry' | 'general' | 'incident' | 'absence' | 'feedback';
   targetAgent: string; // specific agent name, or "all", or "tl"
   createdAt: string; // ISO string
-  seenByUsers?: string[]; // list of names who have seen it
-  clearedByUsers?: string[]; // list of names who have cleared/deleted it from their inbox
-  userId?: string; // specific user ID for real-time querying filter
+  seenByUsers?: string[]; // list of ids who have seen it
+  clearedByUsers?: string[]; // list of ids who have cleared/deleted it from their inbox
+  userId?: string; // specific recipient user ID for real-time querying filter
+  targetGroups?: string[]; // target group arrays for 'all', 'tl', 'qa', or specific user IDs
+  entityType?: 'scheduling_request' | 'inquiry' | 'tt_request' | 'tt_complaint' | 'client_comm' | 'case';
+  entityId?: string;
 }
 
 export interface FeedbackReply {

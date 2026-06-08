@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
-import { formatCaseRef, normalizePhone } from '../utils';
+import { formatCaseRef, normalizePhone, copyToClipboard } from '../utils';
 
 export const CopyWrap = ({ 
   text, 
@@ -16,7 +16,7 @@ export const CopyWrap = ({
 }) => {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = (e: React.MouseEvent) => {
+  const handleCopy = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!text) return;
@@ -24,10 +24,13 @@ export const CopyWrap = ({
     const value = text;
     const copyValue = label === 'Phone' ? normalizePhone(value) : value;
     
-    navigator.clipboard.writeText(copyValue);
-    setCopied(true);
-    toast.success(label === 'Phone' ? 'Phone copied (starts from 5)' : `${label} copied!`, { icon: '📋' });
-    setTimeout(() => setCopied(false), 2000);
+    const msg = label === 'Phone' ? 'Phone copied (starts from 5)' : `${label} copied!`;
+    const ok = await copyToClipboard(copyValue, msg);
+    
+    if (ok) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (

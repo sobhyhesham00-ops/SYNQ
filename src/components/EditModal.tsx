@@ -1,6 +1,7 @@
 import React from "react";
 import { X, Save } from "lucide-react";
 import { MultiAttachmentUpload } from "./MultiAttachmentUpload";
+import { ProfessionalAttachmentUploader } from "./ProfessionalAttachmentUploader";
 
 const CLINICS = [
   "dermadent",
@@ -39,10 +40,26 @@ const EditModalContent = ({
 }: any) => {
   const { type, data } = editingItem;
 
-  const [editPhotos, setEditPhotos] = React.useState<string[]>(
-    data.photos || [],
-  );
-  const [editLinks, setEditLinks] = React.useState<string[]>(data.links || []);
+  const [editPhotos, setEditPhotos] = React.useState<string[]>(() => {
+    const arr = [...(data.photos || [])];
+    if (data.screenshot && !arr.includes(data.screenshot)) arr.push(data.screenshot);
+    if (data.imageUrl && !arr.includes(data.imageUrl)) arr.push(data.imageUrl);
+    if (data.paymentScreenshot && !arr.includes(data.paymentScreenshot)) arr.push(data.paymentScreenshot);
+    if (data.attachment && !arr.includes(data.attachment)) arr.push(data.attachment);
+    return arr;
+  });
+
+  const [editLinks, setEditLinks] = React.useState<string[]>(() => {
+    const arr = [...(data.links || [])];
+    if (data.paymentLink && !arr.includes(data.paymentLink)) arr.push(data.paymentLink);
+    return arr;
+  });
+
+  const [editAttachments, setEditAttachments] = React.useState<any[]>(() => {
+    return data.attachments ? [...data.attachments] : [];
+  });
+
+  const [isUploading, setIsUploading] = React.useState(false);
 
   // Sync back to editingItem when photos/links change
   React.useEffect(() => {
@@ -50,11 +67,21 @@ const EditModalContent = ({
       prev
         ? {
             ...prev,
-            data: { ...prev.data, photos: editPhotos, links: editLinks },
+            data: { 
+              ...prev.data, 
+              photos: editPhotos, 
+              links: editLinks,
+              attachments: editAttachments,
+              screenshot: null,
+              imageUrl: null,
+              paymentScreenshot: null,
+              attachment: null,
+              paymentLink: null
+            },
           }
         : prev,
     );
-  }, [editPhotos, editLinks, setEditingItem]);
+  }, [editPhotos, editLinks, editAttachments, setEditingItem]);
 
   const handleValidatedSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -430,31 +457,24 @@ const EditModalContent = ({
           <div className="pt-4 border-t border-white/10">
             <p className="text-xs font-bold text-slate-300 mb-3 uppercase tracking-wider">📎 Attachments & Links</p>
 
-            {/* Show existing single screenshot if present */}
-            {data.screenshot && !editPhotos.includes(data.screenshot) && (
-              <div className="mb-3 p-2 bg-white/5 border border-white/10 rounded-xl">
-                <p className="text-[10px] text-slate-500 mb-2 uppercase tracking-wider">Original Screenshot</p>
-                <div className="relative group w-20 h-20 rounded-lg overflow-hidden border border-white/10">
-                  <img src={data.screenshot} alt="Existing" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <button type="button"
-                      onClick={() => setEditingItem((prev: any) => ({ ...prev, data: { ...prev.data, screenshot: null } }))}
-                      className="p-1 bg-rose-500 rounded-lg cursor-pointer"
-                    >
-                      <X className="w-3 h-3 text-white" />
-                    </button>
-                  </div>
-                </div>
-              </div>
+            {type === "inquiry" ? (
+              <ProfessionalAttachmentUploader
+                attachments={editAttachments}
+                links={editLinks}
+                onAttachmentsChange={setEditAttachments}
+                onLinksChange={setEditLinks}
+                onUploadStateChange={setIsUploading}
+              />
+            ) : (
+              <MultiAttachmentUpload
+                photos={editPhotos}
+                links={editLinks}
+                onPhotosChange={setEditPhotos}
+                onLinksChange={setEditLinks}
+                photosLabel="Add / Remove Screenshots"
+                onUploadStateChange={setIsUploading}
+              />
             )}
-
-            <MultiAttachmentUpload
-              photos={editPhotos}
-              links={editLinks}
-              onPhotosChange={setEditPhotos}
-              onLinksChange={setEditLinks}
-              photosLabel="Add / Remove Screenshots"
-            />
           </div>
 
           <div className="pt-4 flex justify-end gap-3">
@@ -467,9 +487,10 @@ const EditModalContent = ({
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 text-slate-900 rounded-xl text-sm font-black transition-all flex items-center gap-2 cursor-pointer"
+              disabled={isUploading}
+              className={`px-6 py-2 ${isUploading ? 'bg-emerald-500/50 cursor-not-allowed text-slate-500' : 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 text-slate-900 cursor-pointer'} rounded-xl text-sm font-black transition-all flex items-center gap-2`}
             >
-              Save Changes
+              {isUploading ? 'Uploading...' : 'Save Changes'}
             </button>
           </div>
         </form>

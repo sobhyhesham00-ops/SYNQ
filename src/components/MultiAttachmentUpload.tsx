@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Link, Camera, X, ImageIcon } from 'lucide-react';
-import { ScreenshotUpload } from './ScreenshotUpload'; // Optional: reuse existing single-photo if needed, but we will make it independent
+import { Link, Camera, X, ImageIcon, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { compressImage } from '../utils';
 
 interface MultiAttachmentUploadProps {
@@ -9,6 +9,7 @@ interface MultiAttachmentUploadProps {
   onPhotosChange: (photos: string[]) => void;
   onLinksChange: (links: string[]) => void;
   photosLabel?: string;
+  onUploadStateChange?: (isUploading: boolean) => void;
 }
 
 export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
@@ -16,59 +17,22 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
   links,
   onPhotosChange,
   onLinksChange,
-  photosLabel = "Additional Photos / Screenshots"
+  photosLabel = "Additional Photos / Screenshots",
+  onUploadStateChange
 }) => {
   const [tempLinkInput, setTempLinkInput] = useState('');
-
-  const handleAddLink = () => {
-    if (!String(tempLinkInput || '').trim()) return;
-    let url = String(tempLinkInput || '').trim();
-    if (!/^https?:\/\//i.test(url)) {
-      url = 'https://' + url;
-    }
-    onLinksChange([...links, url]);
-    setTempLinkInput('');
-  };
-
-  const handleRemoveLink = (index: number) => {
-    onLinksChange(links.filter((_, i) => i !== index));
-  };
-
-  const handlePhotoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    handleMultipleFiles(files);
-  };
-
-  // We handle multiple files by tracking an array of pending loads so we don't overwrite
-  const handleMultipleFiles = (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    
-    const filesArray = Array.from(files);
-    Promise.all(filesArray.map(file => {
-      return new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-          if (event.target?.result) {
-            const compressed = await compressImage(event.target.result as string);
-            resolve(compressed);
-          } else {
-            resolve('');
-          }
-        };
-        reader.readAsDataURL(file);
-      });
-    })).then(newCompressedPhotos => {
-      const filtered = newCompressedPhotos.filter(Boolean);
-      if (filtered.length > 0) {
-        onPhotosChange([...photos, ...filtered]);
-      }
-    });
-  };
 
   const handleRemovePhoto = (index: number) => {
     onPhotosChange(photos.filter((_, i) => i !== index));
   };
+  
+  const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{current: number, total: number} | null>(null);
+
+  React.useEffect(() => {
+    if (onUploadStateChange) onUploadStateChange(isUploading);
+  }, [isUploading, onUploadStateChange]);
   
   const handlePaste = (e: React.ClipboardEvent) => {
     const items = e.clipboardData.items;
@@ -97,14 +61,13 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
         })).then(newCompressedPhotos => {
           const filtered = newCompressedPhotos.filter(Boolean);
           if (filtered.length > 0) {
-            onPhotosChange([...photos, ...filtered]);
+            const uniquePhotos = Array.from(new Set([...photos, ...filtered]));
+            onPhotosChange(uniquePhotos);
           }
         });
     }
   };
 
-
-  const [isDragging, setIsDragging] = useState(false);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -126,6 +89,94 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleMultipleFiles(e.dataTransfer.files);
     }
+  };
+
+  const handleAddLink = () => {
+    if (!String(tempLinkInput || '').trim()) return;
+    let url = String(tempLinkInput || '').trim();
+    if (!/^https?:\/\//i.test(url)) {
+      url = 'https://' + url;
+    }
+    if (links.includes(url)) {
+      toast.error('Link already added');
+      return;
+    }
+    onLinksChange([...links, url]);
+    setTempLinkInput('');
+  };
+
+  const handleRemoveLink = (index: number) => {
+    onLinksChange(links.filter((_, i) => i !== index));
+  };
+
+  const handlePhotoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    handleMultipleFiles(files);
+  };
+
+  const handleMultipleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    
+    setIsUploading(true);
+    setUploadProgress({ current: 0, total: files.length });
+
+    const filesArray = Array.from(files);
+    const newPhotos: string[] = [];
+
+    for (let i = 0; i < filesArray.length; i++) {
+        const file = filesArray[i];
+        
+        // Size validation (Max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error(`File ${file.name} is too large. Max size is 5MB.`);
+            continue;
+        }
+
+        // Type validation
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+        if (!allowedTypes.includes(file.type) && !file.type.startsWith('image/')) {
+             toast.error(`Invalid file type for ${file.name}`);
+             continue;
+        }
+
+        try {
+            const dataUrl = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = async (event) => {
+                    if (event.target?.result) {
+                        try {
+                            const compressed = await compressImage(event.target.result as string);
+                            resolve(compressed);
+                        } catch (err) {
+                            reject(err);
+                        }
+                    } else {
+                        resolve('');
+                    }
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+            
+            if (dataUrl && !photos.includes(dataUrl) && !newPhotos.includes(dataUrl)) {
+                 newPhotos.push(dataUrl);
+            }
+        } catch (e) {
+            console.error('File read error', e);
+            toast.error(`Failed to process ${file.name}`);
+        }
+
+        setUploadProgress({ current: i + 1, total: files.length });
+    }
+
+    if (newPhotos.length > 0) {
+        onPhotosChange([...photos, ...newPhotos]);
+        toast.success(`Successfully added ${newPhotos.length} attachment(s)`);
+    }
+    
+    setIsUploading(false);
+    setUploadProgress(null);
   };
 
   return (
@@ -166,16 +217,28 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
                 </div>
               </div>
             )})}
-            <label className="flex flex-col items-center justify-center w-24 h-24 border-2 border-dashed border-white/10 rounded-xl bg-white/5 hover:bg-white/10 hover:border-indigo-500/50 transition-all cursor-pointer group hover:scale-[1.02] active:scale-95">
+            <label className={`flex flex-col items-center justify-center w-24 h-24 border-2 border-dashed border-white/10 rounded-xl bg-white/5 transition-all ${isUploading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/10 hover:border-indigo-500/50 cursor-pointer group hover:scale-[1.02] active:scale-95'}`}>
                 <input 
                     type="file"
                     accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
                     multiple
                     className="hidden"
+                    disabled={isUploading}
                     onChange={(e) => handleMultipleFiles(e.target.files)}
                 />
-                <Camera className="w-6 h-6 text-slate-500 group-hover:text-indigo-400 transition-colors" />
-                <span className="text-[9px] text-slate-500 font-bold uppercase mt-1 group-hover:text-indigo-300">Add File</span>
+                {isUploading ? (
+                  <>
+                    <Loader2 className="w-6 h-6 text-indigo-400 animate-spin" />
+                    <span className="text-[9px] text-indigo-300 font-bold uppercase mt-2">
+                       {uploadProgress ? `${uploadProgress.current}/${uploadProgress.total}` : 'Uploading'}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Camera className="w-6 h-6 text-slate-500 group-hover:text-indigo-400 transition-colors" />
+                    <span className="text-[9px] text-slate-500 font-bold uppercase mt-1 group-hover:text-indigo-300">Add File</span>
+                  </>
+                )}
             </label>
         </div>
       </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useEmulator, seedEmulatorDatabase } from "../firebase";
 import { User, Role } from "../types";
 import { Shield, Sparkles, Database, UserCheck, ChevronDown, Check, Key, Layers, RefreshCw } from "lucide-react";
+import { copyToClipboard } from '../utils';
 
 interface EnvironmentBadgeProps {
   currentUser: User | null;
@@ -44,10 +45,12 @@ export function EnvironmentBadge({ currentUser, setCurrentUser }: EnvironmentBad
     setIsOpen(false);
   };
 
-  const handleCopyPassword = (username: string) => {
-    navigator.clipboard.writeText("Password123");
-    setCopiedAccount(username);
-    setTimeout(() => setCopiedAccount(null), 1500);
+  const handleCopyPassword = async (username: string) => {
+    const ok = await copyToClipboard("Password123", "Copied Password123!");
+    if (ok) {
+      setCopiedAccount(username);
+      setTimeout(() => setCopiedAccount(null), 1500);
+    }
   };
 
   const badgeStyles = {

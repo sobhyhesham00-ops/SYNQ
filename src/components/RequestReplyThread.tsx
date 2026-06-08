@@ -22,7 +22,7 @@ export function RequestReplyThread({
   request: BaseRequest, 
   currentUser: User,
   collectionName: string,
-  addSystemNotification?: (title: string, message: string, type: any, target: string) => void,
+  addSystemNotification?: (title: string, message: string, type: any, target: string, stableId?: string, entityType?: any, entityId?: string) => void,
   requestType?: string,
   requestAgentName?: string
 }) {
@@ -80,7 +80,15 @@ export function RequestReplyThread({
         const message = isAgentReplying
           ? `${currentUser.name} replied to a ${computedRequestType || 'Request'}: "${text.substring(0, 80)}"`
           : `${currentUser.name} replied to your ${computedRequestType || 'Request'}: "${text.substring(0, 80)}"`;
-        addSystemNotification(title, message, 'general', target);
+          
+        const eType = collectionName === 'inquiries' ? 'inquiry' :
+                     collectionName === 'scheduling_requests' ? 'scheduling_request' :
+                     collectionName === 'tt_requests' ? 'tt_request' :
+                     collectionName === 'tt_complaints' ? 'tt_complaint' :
+                     collectionName === 'client_comms' ? 'client_comm' :
+                     collectionName === 'cases' ? 'case' : undefined;
+                     
+        addSystemNotification(title, message, 'general', target, undefined, eType, request.id);
       }
 
       toast.success("Reply added!");
@@ -175,6 +183,7 @@ export function RequestReplyThread({
            </label>
            
            <input 
+             id={`reply-input-${request.id}`}
              value={text}
              onChange={e => setText(e.target.value)}
              className="flex-1 bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"

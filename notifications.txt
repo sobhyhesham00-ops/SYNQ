@@ -1,0 +1,279 @@
+690-        toast.success("Inquiry updated successfully!");
+691:        addSystemNotification("✏️ Request Updated", `Inquiry updated by ${currentUser?.name || 'Agent'}`, "general", "");
+692-      } else if (type === "scheduling_request") {
+693-        const docRef = doc(db, "scheduling_requests", id);
+694-        await setDoc(docRef, data, { merge: true });
+695-        setRequests((prev) =>
+696-          prev.map((item) => (item.id === id ? { ...item, ...data } : item)),
+--
+698-        toast.success("Scheduling request updated successfully!");
+699:        addSystemNotification("✏️ Request Updated", `Scheduling request updated by ${currentUser?.name || 'Agent'}`, "general", "");
+700-      } else if (type === "tt_request") {
+701-        const docRef = doc(db, "tt_requests", id);
+702-        await setDoc(docRef, data, { merge: true });
+703-        setTabbyTamaraRequests((prev) =>
+704-          prev.map((item) => (item.id === id ? { ...item, ...data } : item)),
+--
+706-        toast.success("Installment request updated successfully!");
+707:        addSystemNotification("✏️ Request Updated", `Installment request updated by ${currentUser?.name || 'Agent'}`, "general", "");
+708-      } else if (type === "tt_complaint") {
+709-        const docRef = doc(db, "tt_complaints", id);
+710-        await setDoc(docRef, data, { merge: true });
+711-        setTabbyTamaraComplaints((prev) =>
+712-          prev.map((item) => (item.id === id ? { ...item, ...data } : item)),
+--
+714-        toast.success("Installment complaint updated successfully!");
+715:        addSystemNotification("✏️ Request Updated", `Installment complaint updated by ${currentUser?.name || 'Agent'}`, "general", "");
+716-      } else if (type === "client_comm") {
+717-        const docRef = doc(db, "client_comms", id);
+718-        await setDoc(docRef, data, { merge: true });
+719-        setClientComms((prev) =>
+720-          prev.map((item) => (item.id === id ? { ...item, ...data } : item)),
+--
+722-        toast.success("Communication request updated successfully!");
+723:        addSystemNotification("✏️ Request Updated", `Communication request updated by ${currentUser?.name || 'Agent'}`, "general", "");
+724-      } else if (type === "case") {
+725-        const docRef = doc(db, "cases", id);
+726-        await setDoc(docRef, data, { merge: true });
+727-        setCases((prev) =>
+728-          prev.map((item) => (item.id === id ? { ...item, ...data } : item)),
+--
+730-        toast.success("Case record updated successfully!");
+731:        addSystemNotification("✏️ Request Updated", `Case record updated by ${currentUser?.name || 'Agent'}`, "general", "");
+732-      }
+733-      setEditingItem(null);
+734-    } catch (error) {
+735-      console.error("Error editing item:", error);
+736-      toast.error("Failed to update item.");
+--
+1858-          notifiedSet.add(name);
+1859:          addSystemNotification(
+1860-            `💬 Mentioned by ${sourceAuthorName}`,
+1861-            `You were mentioned in ${contextTitle}: "${text.substring(0, 100)}${text.length > 100 ? "..." : ""}"`,
+1862-            "general",
+1863-            name,
+1864-          );
+--
+1909-
+1910:    addSystemNotification(
+1911-      "👑 Director Feedback Received",
+1912-      `Amira Hassan left feedback for you: "${notes.substring(0, 60)}${notes.length > 60 ? "..." : ""}"`,
+1913-      "feedback",
+1914-      tlName,
+1915-    );
+--
+1976-
+1977:      addSystemNotification(
+1978-        isDirector
+1979-          ? "👑 Director Feedback Updates"
+1980-          : "✉️ Reply to Director Feedback",
+1981-        `${senderName} replied to feedback: "${text.substring(0, 60)}${text.length > 60 ? "..." : ""}"`,
+1982-        "feedback",
+--
+3429-          // 1. Notify the agent
+3430:          addSystemNotification(
+3431-            `⚠️ Activity Warning: Exceeding ${readableType}`,
+3432-            `You have been on ${readableType} for ${!isNaN(Math.floor(elapsed.duration)) ? Math.floor(elapsed.duration) : 0} minutes, exceeding the standard limit of ${elapsed.limit} minutes. Please resume working.`,
+3433-            "compliance",
+3434-            agent,
+3435-            `overstay_agent_${notifKey}`,
+--
+3440-            assignedTL !== "Unassigned" ? assignedTL : "tl";
+3441:          addSystemNotification(
+3442-            `🚨 Alert: ${formatAgentName(agent)} overstaying ${readableType}`,
+3443-            `Agent ${formatAgentName(agent)} has exceeded the standard ${elapsed.limit} minutes limit for ${readableType}. Current duration: ${!isNaN(Math.floor(elapsed.duration)) ? Math.floor(elapsed.duration) : 0} minutes.`,
+3444-            "compliance",
+3445-            targetNotifUser,
+3446-            `overstay_tl_${notifKey}`,
+--
+3505-              assignedTL !== "Unassigned" ? assignedTL : "tl";
+3506:            addSystemNotification(
+3507-              `❌ Absence Warning: ${formatAgentName(agent)} did not clock in`,
+3508-              `Agent ${formatAgentName(agent)} was scheduled for shift ${shiftLabel} today starting at ${startHourStr}, but has failed to clock in within 30 minutes of shift commencement.`,
+3509-              "absence",
+3510-              targetNotifUser,
+3511-              `absence_tl_${notifKey}`,
+--
+3605-
+3606:      addSystemNotification(
+3607-        `🔄 New Swap Request: ${formatAgentName(name)}`,
+3608-        `${formatAgentName(name)} requested a shift swap with ${formatAgentName(swapTargetAgent)} for ${swapDate}.`,
+3609-        "schedule",
+3610-        "tl",
+3611-      );
+--
+3688-
+3689:      addSystemNotification(
+3690-        `✈️ New Annual Leave: ${formatAgentName(name)}`,
+3691-        `${formatAgentName(name)} requested an annual leave from ${annualStart} to ${annualEnd}.`,
+3692-        "schedule",
+3693-        "tl",
+3694-      );
+--
+3870-    if (decidedReq) {
+3871:      addSystemNotification(
+3872-        approve ? "✅ Leave/Swap Approved" : "❌ Leave/Swap Declined",
+3873-        approve
+3874-          ? `Your ${decidedReq.type === "swap" ? "shift swap" : "annual leave"} request has been approved by ${currentUser.name}.`
+3875-          : `Your ${decidedReq.type === "swap" ? "shift swap" : "annual leave"} request was declined by ${currentUser.name}.`,
+3876-        "schedule",
+--
+5022-    const toStatusLabel = friendlyNameMap[type] || type;
+5023:    addSystemNotification(
+5024-      `🔄 Status Switch: ${formatAgentName(name)}`,
+5025-      `${formatAgentName(name)} switched AUX status from **${fromStatusLabel}** to **${toStatusLabel}**.`,
+5026-      "compliance",
+5027-      "tl",
+5028-    );
+--
+5091-    const actLabel = friendlyNameMap[currentType] || currentType;
+5092:    addSystemNotification(
+5093-      `🟢 Agent Back Online: ${formatAgentName(name)}`,
+5094-      `${formatAgentName(name)} completed their ${actLabel} session and is now **Active Work**.`,
+5095-      "compliance",
+5096-      "tl",
+5097-    );
+--
+5355-      );
+5356:      addSystemNotification(
+5357-        "❓ New Inquiry Submitted",
+5358-        `${currentUser.name} has submitted a new inquiry for clinic: ${inquiryClinicName}.`,
+5359-        "general",
+5360-        "tl",
+5361-      );
+--
+5405-    if (sentInquiry) {
+5406:      addSystemNotification(
+5407-        "📨 Inquiry Forwarded to Partner",
+5408-        `Your inquiry for clinic ${sentInquiry.clinicName} has been forwarded to the partner by ${currentUser.name}.`,
+5409-        "inquiry",
+5410-        sentInquiry.agentName,
+5411-      );
+--
+5448-    if (targetAgentName) {
+5449:      addSystemNotification(
+5450-        "💬 Inquiry Answered by TL",
+5451-        `Your inquiry regarding clinic "${clinicName}" has been answered by ${currentUser.name}: "${String(answerText || "").trim()}"`,
+5452-        "inquiry",
+5453-        targetAgentName,
+5454-      );
+--
+5622-
+5623:      addSystemNotification(
+5624-        `💳 New ${ttPlatform.toUpperCase()} Request`,
+5625-        `${currentUser.name} submitted a new request for ${ttPatientName} (${ttPhoneNumber})`,
+5626-        "general",
+5627-        "tl",
+5628-      );
+--
+5668-
+5669:        addSystemNotification(
+5670-          status === "confirmed"
+5671-            ? `✅ Payment Link Ready`
+5672-            : `❌ Fintech Request Rejected`,
+5673-          status === "confirmed"
+5674-            ? `Your ${r.platform} request for ${r.patientName} has been confirmed. ${tlNotes ? `Notes: ${tlNotes}` : ""}`
+--
+5813-
+5814:      addSystemNotification(
+5815-        `⚠️ New Complaint`,
+5816-        `${currentUser.name} submitted a new complaint for ${tcPatientName} (${tcPhoneNumber})`,
+5817-        "general",
+5818-        "tl",
+5819-      );
+--
+5886-
+5887:      addSystemNotification(
+5888-        `💬 New Client Comm Request`,
+5889-        `New request submitted for phone: ${ccPhoneNumber}`,
+5890-        "general",
+5891-        "all",
+5892-      );
+--
+5945-    if (handledComm) {
+5946:      addSystemNotification(
+5947-        "✅ Client Comm Request Completed",
+5948-        `Your client communication request for ${handledComm.clinicName} has been handled by ${currentUser.name}. Notes: ${notes.substring(0, 100)}`,
+5949-        "general",
+5950-        handledComm.callCenterAgentName,
+5951-      );
+--
+5984-    if (doneComm) {
+5985:      addSystemNotification(
+5986-        "✅ Client Comm Request Closed",
+5987-        `Your client communication request for ${doneComm.clinicName} has been marked as done by ${currentUser.name}.`,
+5988-        "general",
+5989-        doneComm.callCenterAgentName,
+5990-      );
+--
+6024-    if (takenComm) {
+6025:      addSystemNotification(
+6026-        "🔄 Request In Progress",
+6027-        `${currentUser.name} has taken your client communication request and is working on it now.`,
+6028-        "general",
+6029-        takenComm.callCenterAgentName,
+6030-      );
+--
+6165-    // Automatically trigger notification
+6166:    addSystemNotification(
+6167-      "📅 New Schedule Released & Published!",
+6168-      `A new shift schedule has been successfully uploaded and automatically published by ${currentUser?.name || "Leadership"}. System state is now updated.`,
+6169-      "schedule",
+6170-      "all",
+6171-    );
+--
+6489-
+6490:        addSystemNotification(
+6491-          `📝 Complaint Evaluated`,
+6492-          `Your complaint for ${c.patientName} has been evaluated by ${currentUser.name}. Please contact the client now.`,
+6493-          "general",
+6494-          c.agentName,
+6495-        );
+--
+6544-    if (comp && status === "contacted") {
+6545:      addSystemNotification(
+6546-        "✅ Complaint Resolved",
+6547-        `Your complaint for ${comp.patientName} has been marked as resolved (patient contacted).`,
+6548-        "general",
+6549-        comp.agentName,
+6550-      );
+--
+8567-                                      ).catch(console.error);
+8568:                                      addSystemNotification(
+8569-                                        "🖼️ Profile Updated!",
+8570-                                        "Your profile picture has been updated across the workspace! 😎",
+8571-                                        "general",
+8572-                                        "personal",
+8573-                                      );
+--
+8748-                                e.currentTarget.reset();
+8749:                                addSystemNotification(
+8750-                                  "📋 Task Added!",
+8751-                                  `Added: "${text}" ${minutes ? "with a reminder set!" : ""} ✅`,
+8752-                                  "general",
+8753-                                  "personal",
+8754-                                );
+--
+8820-                                          if (done)
+8821:                                            addSystemNotification(
+8822-                                              "🎉 Goal Reached!",
+8823-                                              `You completed: "${t.text}" Awesome job! 🚀`,
+8824-                                              "general",
+8825-                                              "personal",
+8826-                                            );
+--
+17438-                                                    .join(", ");
+17439:                                                addSystemNotification(
+17440-                                                  "🚨 Compliance Warning: Auxiliary Limit Exceeded",
+17441-                                                  `Hello ${entry.agentName}. Your daily total or session threshold for ${violationTypes} has exceeded allowed limits. Please coordinate with your Team Leader immediately.`,
+17442-                                                  "compliance",
+17443-                                                  entry.agentName,
+17444-                                                );
+--
+18009-                                  if (val) {
+18010:                                    addSystemNotification(
+18011-                                      "✨ New Schedule Published!",
+18012-                                      `The direct schedule roster has been published by ${currentUser?.name || "Leadership"}! You can now view your active shifts in the Schedules tab and request shift swaps.`,
+18013-                                      "schedule",
+18014-                                      "all",
+18015-                                    );

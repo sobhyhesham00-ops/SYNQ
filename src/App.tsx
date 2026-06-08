@@ -109,11 +109,14 @@ import { IntegrationsManager } from "./components/IntegrationsManager";
 import { SuperAdminControl } from "./components/SuperAdminControl";
 import { ScreenshotUpload } from "./components/ScreenshotUpload";
 import { MultiAttachmentUpload } from "./components/MultiAttachmentUpload";
+import { ProfessionalAttachmentUploader } from "./components/ProfessionalAttachmentUploader";
 import { AttachmentsDisplay } from "./components/AttachmentsDisplay";
 import { DashboardSummary } from "./components/DashboardSummary";
 import { CopyWrap } from "./components/CopyWrap";
 import { QAScorecards } from "./components/QAScorecards";
+import { KPICalculatorPanel } from "./components/KPICalculatorPanel";
 import { PatientSearchHub } from "./components/PatientSearchHub";
+import { InquiryRepliesViewer } from "./components/InquiryRepliesViewer";
 import { AnnouncementsTab } from "./components/AnnouncementsTab";
 import { OrdersTab } from "./components/OrdersTab";
 import { ArticleManager } from "./components/ArticleManager";
@@ -157,6 +160,8 @@ import {
   handleGlobalImagePaste,
   formatCaseRef,
   normalizePhone,
+  copyToClipboard,
+  extractLinks,
 } from "./utils";
 import {
   SchedulingRequest,
@@ -631,7 +636,7 @@ export default function App() {
 
   const getEditLimitMs = () => {
     if (!currentUser) return 0;
-    if (currentUser.name === "Hesham Sobhy") {
+    if (currentUser.name === "Hesham Sobhy" || getUsernameFromFullName(currentUser.name) === "h.sobhy") {
       return Infinity; // no limit
     }
     if (currentUser.role === "tl") {
@@ -679,48 +684,66 @@ export default function App() {
     }
 
     try {
+      const systemReply = {
+        id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        senderName: currentUser?.name || "System",
+        text: `Activity Log: Request edited & attachments managed.`,
+        createdAt: new Date().toISOString()
+      };
+      
+      const updatedData = {
+          ...data,
+          replies: [...(data.replies || []), systemReply]
+      };
+
       if (type === "inquiry") {
         const docRef = doc(db, "inquiries", id);
-        await setDoc(docRef, data, { merge: true });
+        await setDoc(docRef, updatedData, { merge: true });
         setInquiries((prev) =>
-          prev.map((item) => (item.id === id ? { ...item, ...data } : item)),
+          prev.map((item) => (item.id === id ? { ...item, ...updatedData } : item)),
         );
         toast.success("Inquiry updated successfully!");
+        addSystemNotification("✏️ Request Updated", `Inquiry updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "inquiry", id);
       } else if (type === "scheduling_request") {
         const docRef = doc(db, "scheduling_requests", id);
-        await setDoc(docRef, data, { merge: true });
+        await setDoc(docRef, updatedData, { merge: true });
         setRequests((prev) =>
-          prev.map((item) => (item.id === id ? { ...item, ...data } : item)),
+          prev.map((item) => (item.id === id ? { ...item, ...updatedData } : item)),
         );
         toast.success("Scheduling request updated successfully!");
+        addSystemNotification("✏️ Request Updated", `Scheduling request updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "scheduling_request", id);
       } else if (type === "tt_request") {
         const docRef = doc(db, "tt_requests", id);
-        await setDoc(docRef, data, { merge: true });
+        await setDoc(docRef, updatedData, { merge: true });
         setTabbyTamaraRequests((prev) =>
-          prev.map((item) => (item.id === id ? { ...item, ...data } : item)),
+          prev.map((item) => (item.id === id ? { ...item, ...updatedData } : item)),
         );
         toast.success("Installment request updated successfully!");
+        addSystemNotification("✏️ Request Updated", `Installment request updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "tt_request", id);
       } else if (type === "tt_complaint") {
         const docRef = doc(db, "tt_complaints", id);
-        await setDoc(docRef, data, { merge: true });
+        await setDoc(docRef, updatedData, { merge: true });
         setTabbyTamaraComplaints((prev) =>
-          prev.map((item) => (item.id === id ? { ...item, ...data } : item)),
+          prev.map((item) => (item.id === id ? { ...item, ...updatedData } : item)),
         );
         toast.success("Installment complaint updated successfully!");
+        addSystemNotification("✏️ Request Updated", `Installment complaint updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "tt_complaint", id);
       } else if (type === "client_comm") {
         const docRef = doc(db, "client_comms", id);
-        await setDoc(docRef, data, { merge: true });
+        await setDoc(docRef, updatedData, { merge: true });
         setClientComms((prev) =>
-          prev.map((item) => (item.id === id ? { ...item, ...data } : item)),
+          prev.map((item) => (item.id === id ? { ...item, ...updatedData } : item)),
         );
         toast.success("Communication request updated successfully!");
+        addSystemNotification("✏️ Request Updated", `Communication request updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "client_comm", id);
       } else if (type === "case") {
         const docRef = doc(db, "cases", id);
-        await setDoc(docRef, data, { merge: true });
+        await setDoc(docRef, updatedData, { merge: true });
         setCases((prev) =>
-          prev.map((item) => (item.id === id ? { ...item, ...data } : item)),
+          prev.map((item) => (item.id === id ? { ...item, ...updatedData } : item)),
         );
         toast.success("Case record updated successfully!");
+        addSystemNotification("✏️ Request Updated", `Case record updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "case", id);
       }
       setEditingItem(null);
     } catch (error) {
@@ -1418,7 +1441,7 @@ export default function App() {
     // 2. Notifications Real-time Sync
     const qNotifs = query(
       collection(db, "notifications"),
-      where("userId", "==", currentUser.id),
+      where("targetGroups", "array-contains-any", [currentUser.id, "all", currentUser.role]),
     );
     let isNotifsInitialized = false;
     const unsubNotifs = onSnapshot(
@@ -1779,7 +1802,20 @@ export default function App() {
     type: SystemNotification["type"],
     targetAgent: string,
     stableId?: string,
+    entityType?: SystemNotification["entityType"],
+    entityId?: string
   ) => {
+    let targetGroups: string[] = [];
+    if (!targetAgent || targetAgent === "all") {
+      targetGroups = ["all"];
+    } else if (targetAgent === "tl") {
+      targetGroups = ["tl"];
+    } else if (targetAgent === "qa") {
+      targetGroups = ["qa"];
+    } else {
+      targetGroups = [`usr_${targetAgent.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}`];
+    }
+
     const newNotif: SystemNotification = {
       id:
         stableId ||
@@ -1790,8 +1826,18 @@ export default function App() {
       targetAgent,
       createdAt: new Date().toISOString(),
       seenByUsers: [],
-      userId: currentUser?.id || "all",
+      targetGroups,
+      entityType,
+      entityId
     };
+    // Play sound if not from self
+    if (targetAgent !== "all" && currentUser && !targetGroups.includes(currentUser.id)) {
+        try {
+            const audio = new Audio("https://media.soundjay.com/misc/sounds/bell-ringing-05.mp3");
+            audio.volume = 0.5;
+            audio.play().catch(() => {});
+        } catch(e){}
+    }
     // Sync to state which forwards to firestore
     setNotifications((prev) => {
       const updated = [newNotif, ...prev];
@@ -1967,29 +2013,26 @@ export default function App() {
 
   const visibleNotifs = notifications.filter((notif) => {
     if (!currentUser) return false;
-    if (notif.clearedByUsers && notif.clearedByUsers.includes(currentUser.name))
+    if (notif.clearedByUsers && notif.clearedByUsers.includes(currentUser.id))
       return false;
-    if (notif.targetAgent === "all") return true;
-    if (isTLOreSupport && notif.targetAgent === "tl") return true;
-    return notif.targetAgent.toLowerCase() === currentUser?.name?.toLowerCase();
+    return true; // Already filtered by query (targetGroups)
   });
 
   const unreadCount = visibleNotifs.filter((notif) => {
     return (
-      !notif.seenByUsers || !notif.seenByUsers.includes(currentUser?.name || "")
+      !notif.seenByUsers || !notif.seenByUsers.includes(currentUser?.id || "")
     );
   }).length;
 
   const handleMarkAllNotifsAsRead = () => {
     if (!currentUser) return;
     const updated = notifications.map((n) => {
-      const isVisible =
-        n.targetAgent === "all" ||
-        (isTLOreSupport && n.targetAgent === "tl") ||
-        n.targetAgent.toLowerCase() === currentUser?.name?.toLowerCase();
-      if (isVisible) {
-        const seenSet = new Set(n.seenByUsers || []);
-        seenSet.add(currentUser.name);
+      // If it's in the list it should be visible based on our targetGroups, but let's check it's not cleared
+      if (n.clearedByUsers && n.clearedByUsers.includes(currentUser.id)) return n;
+      
+      const seenSet = new Set(n.seenByUsers || []);
+      if (!seenSet.has(currentUser.id)) {
+        seenSet.add(currentUser.id);
         const updatedNotif = { ...n, seenByUsers: Array.from(seenSet) };
         // Sync to Firestore
         updateDoc(doc(db, "notifications", n.id), {
@@ -2008,13 +2051,15 @@ export default function App() {
     const updated = notifications.map((n) => {
       if (n.id === id) {
         const seenSet = new Set(n.seenByUsers || []);
-        seenSet.add(currentUser.name);
-        const updatedNotif = { ...n, seenByUsers: Array.from(seenSet) };
-        // Sync to Firestore
-        updateDoc(doc(db, "notifications", n.id), {
-          seenByUsers: updatedNotif.seenByUsers,
-        }).catch((e) => console.error("Mark Single Read Error:", e));
-        return updatedNotif;
+        if (!seenSet.has(currentUser.id)) {
+          seenSet.add(currentUser.id);
+          const updatedNotif = { ...n, seenByUsers: Array.from(seenSet) };
+          // Sync to Firestore
+          updateDoc(doc(db, "notifications", n.id), {
+            seenByUsers: updatedNotif.seenByUsers,
+          }).catch((e) => console.error("Mark Single Read Error:", e));
+          return updatedNotif;
+        }
       }
       return n;
     });
@@ -2360,15 +2405,17 @@ ${pageText}
   };
 
   const handleDeleteKbDoc = (id: string) => {
-    if (
-      !window.confirm(
-        "Are you sure you want to permanently delete this document from the knowledge base?",
-      )
-    )
-      return;
-    setKnowledgeBaseDocuments((prev) => prev.filter((d) => d.id !== id));
-    if (selectedKbDocId === id) setSelectedKbDocId(null);
-    toast.success("Document deleted successfully.");
+    showConfirm(
+      'Delete Document',
+      'Are you sure you want to permanently delete this document from the knowledge base?',
+      'Delete',
+      'bg-rose-700 hover:bg-rose-600',
+      () => {
+        setKnowledgeBaseDocuments((prev) => prev.filter((d) => d.id !== id));
+        if (selectedKbDocId === id) setSelectedKbDocId(null);
+        toast.success("Document deleted successfully.");
+      }
+    );
   };
 
   const filteredKbDocs = useMemo(() => {
@@ -2608,6 +2655,7 @@ ${pageText}
   // Inquiry submission inputs
   const [inquiryText, setInquiryText] = useState("");
   const [inquiryPhotos, setInquiryPhotos] = useState<string[]>([]);
+  const [inquiryAttachments, setInquiryAttachments] = useState<any[]>([]);
   const [inquiryLinks, setInquiryLinks] = useState<string[]>([]);
   const [tempLinkInput, setTempLinkInput] = useState("");
   const [tempPhotoUrlInput, setTempPhotoUrlInput] = useState("");
@@ -2622,6 +2670,10 @@ ${pageText}
     null,
   );
   const [currentAnswerText, setCurrentAnswerText] = useState("");
+  const [currentAnswerAttachments, setCurrentAnswerAttachments] = useState<any[]>([]);
+  const [currentAnswerLinks, setCurrentAnswerLinks] = useState<string[]>([]);
+  const [isSubmittingAnswer, setIsSubmittingAnswer] = useState(false);
+
 
   // Inquiries Search and Filter states
   const [directorySearchQuery, setDirectorySearchQuery] = useState("");
@@ -2676,8 +2728,46 @@ ${pageText}
   );
   const [inquiryStatusFilter, setInquiryStatusFilter] = useState("");
   const [inquiryClinicFilter, setInquiryClinicFilter] = useState("all");
+  const [casesSearch, setCasesSearch] = useState('');
   const [logAgentFilter, setLogAgentFilter] = useState("all");
   const [logTypeFilter, setLogTypeFilter] = useState("all");
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmText: string;
+    confirmButtonClass: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    confirmText: "",
+    confirmButtonClass: "",
+    onConfirm: () => {},
+  });
+
+  const showConfirm = (
+    title: string,
+    message: string,
+    confirmText: string,
+    confirmButtonClass: string,
+    onConfirm: () => void
+  ) => {
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message,
+      confirmText,
+      confirmButtonClass,
+      onConfirm,
+    });
+  };
+
+  const closeConfirm = () => {
+    setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+  };
+
   const [logSearchQuery, setLogSearchQuery] = useState("");
 
   const filteredInquiries = useMemo(
@@ -2972,12 +3062,12 @@ ${pageText}
       return;
     }
 
-    // New format must contain a dot and no spaces:
+    // New format must contain a dot, no spaces, and MUST NOT be an email (no @)
     const isNewFormat =
-      trimmedInput.includes(".") && !trimmedInput.includes(" ");
+      trimmedInput.includes(".") && !trimmedInput.includes(" ") && !trimmedInput.includes("@");
     if (!isNewFormat) {
       setLoginError(
-        "Invalid format! Please enter your username in the 'first_letter.last_name' format (e.g., h.sobhy).",
+        "Invalid format! Please enter your username in the 'first_letter.last_name' format (e.g., h.sobhy). Do not use an email address.",
       );
       return;
     }
@@ -3113,7 +3203,7 @@ ${pageText}
         ? "tl"
         : "agent";
     const authenticatedUser: User = {
-      id: `usr_${Date.now()}`,
+      id: `usr_${correspondingFullName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}`,
       name: correspondingFullName,
       role: userRole,
     };
@@ -3223,7 +3313,7 @@ ${pageText}
         ? "tl"
         : "agent";
     const authenticatedUser: User = {
-      id: `usr_${Date.now()}`,
+      id: `usr_${correspondingFullName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}`,
       name: correspondingFullName,
       role: userRole,
     };
@@ -3578,6 +3668,9 @@ ${swapTargetAgent}'s LOB: ${targetLOB}`);
         `${formatAgentName(name)} requested a shift swap with ${formatAgentName(swapTargetAgent)} for ${swapDate}.`,
         "schedule",
         "tl",
+        undefined,
+        "scheduling_request",
+        newRequest.id
       );
 
       // Reset form
@@ -3661,6 +3754,9 @@ ${swapTargetAgent}'s LOB: ${targetLOB}`);
         `${formatAgentName(name)} requested an annual leave from ${annualStart} to ${annualEnd}.`,
         "schedule",
         "tl",
+        undefined,
+        "scheduling_request",
+        newRequest.id
       );
 
       // Reset form
@@ -3692,39 +3788,54 @@ ${swapTargetAgent}'s LOB: ${targetLOB}`);
   const handlePartnerDecision = (requestId: string, agree: boolean) => {
     if (!currentUser) return;
 
-    const updated = requests.map((req) => {
-      if (req.id === requestId && req.type === "swap") {
-        const swapReq = req as SwapRequest;
-        if (
-          swapReq.swapWithAgent.toLowerCase() ===
-            currentUser?.name?.toLowerCase() &&
-          swapReq.status === "pending_partner"
-        ) {
-          const updatedReq = {
-            ...swapReq,
-            status: agree ? "pending" : "declined_by_partner",
-            partnerActionAt: new Date().toISOString(),
-          } as SwapRequest;
-          // Sync to Firestore
-          setDoc(doc(db, "scheduling_requests", req.id), updatedReq).catch(
-            (e) => console.error("Partner Decision Error:", e),
-          );
-          return updatedReq;
+    const performAction = () => {
+      const updated = requests.map((req) => {
+        if (req.id === requestId && req.type === "swap") {
+          const swapReq = req as SwapRequest;
+          if (
+            swapReq.swapWithAgent.toLowerCase() ===
+              currentUser?.name?.toLowerCase() &&
+            swapReq.status === "pending_partner"
+          ) {
+            const updatedReq = {
+              ...swapReq,
+              status: agree ? "pending" : "declined_by_partner",
+              partnerActionAt: new Date().toISOString(),
+            } as SwapRequest;
+            // Sync to Firestore
+            setDoc(doc(db, "scheduling_requests", req.id), updatedReq).catch(
+              (e) => console.error("Partner Decision Error:", e),
+            );
+            return updatedReq;
+          }
         }
-      }
-      return req;
-    });
+        return req;
+      });
 
-    setRequests(updated);
-    setStorageItem("sched_requests", updated);
+      setRequests(updated);
+      setStorageItem("sched_requests", updated);
+
+      if (agree) {
+        toast.success(
+          "You have agreed to the swap. The request is now forwarded to Team Leaders for final decision.",
+        );
+      } else {
+        toast.error("You have declined the swap request.");
+      }
+    };
 
     if (agree) {
-      toast.error(
-        "You have agreed to the swap. The request is now forwarded to Team Leaders for final decision.",
+      showConfirm(
+        'Accept Swap Request', 
+        'Are you sure you want to accept this swap? This cannot be undone.', 
+        'Yes, Accept', 
+        'bg-emerald-600 hover:bg-emerald-500', 
+        performAction
       );
-    } else {
-      toast.error("You have declined the swap request.");
+      return;
     }
+
+    performAction();
   };
 
   const handleBulkTLApproval = (requestIds: string[], approve: boolean) => {
@@ -3845,6 +3956,9 @@ ${swapTargetAgent}'s LOB: ${targetLOB}`);
           : `Your ${decidedReq.type === "swap" ? "shift swap" : "annual leave"} request was declined by ${currentUser.name}.`,
         "schedule",
         decidedReq.agentName,
+        undefined,
+        "scheduling_request",
+        requestId
       );
     }
   };
@@ -4233,27 +4347,30 @@ ${result.errors.slice(0, 5).join("\n")}${
   };
 
   const clearTargetSchedules = async () => {
-    const doubleCheck = window.confirm(
-      "Are you sure you want to completely erase the current schedule roster?",
-    );
-    if (doubleCheck) {
-      try {
-        setSchedules([]);
+    showConfirm(
+      'Clear Schedules',
+      'Are you sure you want to completely erase the current schedule roster?',
+      'Clear',
+      'bg-rose-700 hover:bg-rose-600',
+      async () => {
+        try {
+          setSchedules([]);
 
-        // Also query and delete all docs under the 'schedules' collection in Firestore
-        const snap = await getDocs(collection(db, "schedules"));
-        const batch = writeBatch(db);
-        snap.docs.forEach((doc) => {
-          batch.delete(doc.ref);
-        });
-        await batch.commit();
+          // Also query and delete all docs under the 'schedules' collection in Firestore
+          const snap = await getDocs(collection(db, "schedules"));
+          const batch = writeBatch(db);
+          snap.docs.forEach((doc) => {
+            batch.delete(doc.ref);
+          });
+          await batch.commit();
 
-        toast.success("Schedules cleared.");
-      } catch (err: any) {
-        console.error("Purging Firestore schedules failed: ", err);
-        toast.error("Failed to clear database schedules.");
+          toast.success("Schedules cleared.");
+        } catch (err: any) {
+          console.error("Purging Firestore schedules failed: ", err);
+          toast.error("Failed to clear database schedules.");
+        }
       }
-    }
+    );
   };
 
   const handleScheduleUpload = (file: File) => {
@@ -5077,43 +5194,46 @@ ${result.errors.slice(0, 5).join("\n")}${
       return;
     }
 
-    const confirmSign = window.confirm(
-      "Are you sure you want to clock out of your shift?",
-    );
-    if (!confirmSign) return;
+    showConfirm(
+      'Clock Out',
+      'Are you sure you want to clock out of your shift?',
+      'Clock Out',
+      'bg-emerald-600 hover:bg-emerald-500',
+      () => {
+        const endTimeStr = new Date().toISOString();
 
-    const endTimeStr = new Date().toISOString();
+        const updated = timeLogs.map((log) => {
+          if (log.id === active.id) {
+            const updatedActivities = log.activities.map((act) => {
+              if (!act.endTime) {
+                const diffMs =
+                  new Date(endTimeStr).getTime() -
+                  new Date(act.startTime).getTime();
+                let diffMins = parseFloat((diffMs / 1000 / 60).toFixed(2));
+                if (isNaN(diffMins)) diffMins = 0;
+                return {
+                  ...act,
+                  endTime: endTimeStr,
+                  durationMinutes: diffMins,
+                };
+              }
+              return act;
+            });
 
-    const updated = timeLogs.map((log) => {
-      if (log.id === active.id) {
-        const updatedActivities = log.activities.map((act) => {
-          if (!act.endTime) {
-            const diffMs =
-              new Date(endTimeStr).getTime() -
-              new Date(act.startTime).getTime();
-            let diffMins = parseFloat((diffMs / 1000 / 60).toFixed(2));
-            if (isNaN(diffMins)) diffMins = 0;
             return {
-              ...act,
-              endTime: endTimeStr,
-              durationMinutes: diffMins,
+              ...log,
+              clockOut: endTimeStr,
+              status: "clocked_out" as const,
+              activities: updatedActivities,
             };
           }
-          return act;
+          return log;
         });
 
-        return {
-          ...log,
-          clockOut: endTimeStr,
-          status: "clocked_out" as const,
-          activities: updatedActivities,
-        };
+        setTimeLogs(updated);
+        setStorageItem("sched_time_logs", updated);
       }
-      return log;
-    });
-
-    setTimeLogs(updated);
-    setStorageItem("sched_time_logs", updated);
+    );
   };
 
   const handleTLOverrideAgentStatus = (
@@ -5294,6 +5414,7 @@ ${result.errors.slice(0, 5).join("\n")}${
         phoneNumber: String(inquiryPhoneNumber || "").trim() || undefined,
         text: String(inquiryText || "").trim(),
         photos: inquiryPhotos,
+        attachments: inquiryAttachments,
         links: inquiryLinks,
         createdAt: new Date().toISOString(),
         status: "submitted",
@@ -5314,6 +5435,7 @@ ${result.errors.slice(0, 5).join("\n")}${
       setInquiryClinicName("");
       setInquiryPhoneNumber("");
       setInquiryPhotos([]);
+      setInquiryAttachments([]);
       setInquiryLinks([]);
       setTempLinkInput("");
       setTempPhotoUrlInput("");
@@ -5328,6 +5450,9 @@ ${result.errors.slice(0, 5).join("\n")}${
         `${currentUser.name} has submitted a new inquiry for clinic: ${inquiryClinicName}.`,
         "general",
         "tl",
+        undefined,
+        "inquiry",
+        newInquiry.id
       );
 
       setSubmissionConfirmation({
@@ -5378,57 +5503,98 @@ ${result.errors.slice(0, 5).join("\n")}${
         `Your inquiry for clinic ${sentInquiry.clinicName} has been forwarded to the partner by ${currentUser.name}.`,
         "inquiry",
         sentInquiry.agentName,
+        undefined,
+        "inquiry",
+        sentInquiry.id
       );
     }
   };
 
-  const handleSetInquiryAnswered = (inquiryId: string, answerText: string) => {
+  const handleSetInquiryAnswered = async (inquiryId: string) => {
     if (!currentUser || currentUser.role !== "tl") return;
-    if (!String(answerText || "").trim()) {
-      toast.error("Please supply an answer text.");
+    if (isSubmittingAnswer) return;
+
+    const answerText = String(currentAnswerText || "").trim();
+    if (!answerText && currentAnswerAttachments.length === 0 && currentAnswerLinks.length === 0) {
+      toast.error("Please supply an answer text or attach a file.");
       return;
     }
 
-    let targetAgentName = "";
-    let clinicName = "";
-    const updated = inquiries.map((inq) => {
-      if (inq.id === inquiryId) {
-        targetAgentName = inq.agentName;
-        clinicName = inq.clinicName;
-        const updatedInq = {
-          ...inq,
-          status: "answered" as const,
-          answer: String(answerText || "").trim(),
-          answeredBy: currentUser.name,
-          answeredAt: new Date().toISOString(),
-          seenByAgent: false,
-        };
-        // Sync to Firestore
-        setDoc(doc(db, "inquiries", inq.id), updatedInq).catch((e) =>
-          console.error("Inquiry Answer Error:", e),
-        );
-        return updatedInq;
+    setIsSubmittingAnswer(true);
+
+    try {
+      let targetAgentName = "";
+      let clinicName = "";
+      let updatedInqObject: Inquiry | null = null;
+      let finalAnswerString = answerText || "See structured reply timeline...";
+
+      const updated = inquiries.map((inq) => {
+        if (inq.id === inquiryId) {
+          targetAgentName = inq.agentName;
+          clinicName = inq.clinicName;
+
+          const newReply = {
+            id: `reply_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            authorId: currentUser.id,
+            senderName: currentUser.name,
+            authorRole: currentUser.role,
+            text: answerText,
+            attachments: currentAnswerAttachments.length > 0 ? currentAnswerAttachments : undefined,
+            links: currentAnswerLinks.length > 0 ? currentAnswerLinks : undefined,
+            createdAt: new Date().toISOString()
+          };
+
+          const updatedInq: Inquiry = {
+            ...inq,
+            status: "answered" as const,
+            answer: finalAnswerString, // keep for backward compatibility
+            answeredBy: currentUser.name,
+            answeredAt: new Date().toISOString(),
+            seenByAgent: false,
+            replies: [...(inq.replies || []), newReply]
+          };
+          updatedInqObject = updatedInq;
+          return updatedInq;
+        }
+        return inq;
+      });
+
+      if (!updatedInqObject) {
+         setIsSubmittingAnswer(false);
+         return;
       }
-      return inq;
-    });
 
-    setInquiries(updated);
-    setStorageItem("sched_inquiries", updated);
+      await setDoc(doc(db, "inquiries", inquiryId), updatedInqObject);
 
-    if (targetAgentName) {
-      addSystemNotification(
-        "💬 Inquiry Answered by TL",
-        `Your inquiry regarding clinic "${clinicName}" has been answered by ${currentUser.name}: "${String(answerText || "").trim()}"`,
-        "inquiry",
-        targetAgentName,
+      setInquiries(updated);
+      setStorageItem("sched_inquiries", updated);
+
+      if (targetAgentName) {
+        addSystemNotification(
+          "💬 Inquiry Answered by TL",
+          `Your inquiry regarding clinic "${clinicName}" has been answered by ${currentUser.name}.`,
+          "inquiry",
+          targetAgentName,
+          undefined,
+          "inquiry",
+          inquiryId
+        );
+      }
+      handleMentionsInText(answerText, "Inquiry Response", currentUser.name);
+      
+      setAnsweringInquiryId(null);
+      setCurrentAnswerText("");
+      setCurrentAnswerAttachments([]);
+      setCurrentAnswerLinks([]);
+      toast.success(
+        "Answer response committed successfully! Agent will receive a live notification.",
       );
+    } catch (e: any) {
+      console.error("Inquiry Answer Error:", e);
+      toast.error(`Database Error: Failed to save reply. ${e.message}`);
+    } finally {
+      setIsSubmittingAnswer(false);
     }
-    handleMentionsInText(answerText, "Inquiry Response", currentUser.name);
-    setAnsweringInquiryId(null);
-    setCurrentAnswerText("");
-    toast.success(
-      "Answer response committed successfully! Agent will receive a live notification.",
-    );
   };
 
   const handleReassignInquiry = (inquiryId: string, newAgentName: string) => {
@@ -5494,16 +5660,20 @@ ${result.errors.slice(0, 5).join("\n")}${
   };
 
   const handleDeleteInquiry = (inquiryId: string) => {
-    const doubleCheck = window.confirm(
-      "Are you sure you want to delete this inquiry record?",
-    );
-    if (!doubleCheck) return;
-    const updated = inquiries.filter((inq) => inq.id !== inquiryId);
-    setInquiries(updated);
-    setStorageItem("sched_inquiries", updated);
-    // Sync to Firestore
-    deleteDoc(doc(db, "inquiries", inquiryId)).catch((e) =>
-      console.error("Inquiry Delete Error:", e),
+    showConfirm(
+      'Delete Inquiry',
+      'Are you sure you want to delete this inquiry record?',
+      'Delete',
+      'bg-rose-700 hover:bg-rose-600',
+      () => {
+        const updated = inquiries.filter((inq) => inq.id !== inquiryId);
+        setInquiries(updated);
+        setStorageItem("sched_inquiries", updated);
+        // Sync to Firestore
+        deleteDoc(doc(db, "inquiries", inquiryId)).catch((e) =>
+          console.error("Inquiry Delete Error:", e),
+        );
+      }
     );
   };
 
@@ -5595,6 +5765,9 @@ ${ttNotes}`
         `${currentUser.name} submitted a new request for ${ttPatientName} (${ttPhoneNumber})`,
         "general",
         "tl",
+        undefined,
+        "tt_request",
+        newRequest.id
       );
 
       setSubmissionConfirmation({
@@ -5645,6 +5818,9 @@ ${ttNotes}`
             : `Your ${r.platform} request for ${r.patientName} has been rejected. ${tlNotes ? `Notes: ${tlNotes}` : ""}`,
           "general",
           r.agentName,
+          undefined,
+          "tt_request",
+          r.id
         );
 
         return updatedReq;
@@ -5668,6 +5844,7 @@ ${ttNotes}`
     status: "not_contacted" | "contacted",
     notes?: string,
     screenshot?: string,
+    attachments?: string[]
   ) => {
     const updated = tabbyTamaraRequests.map((r) => {
       if (r.id === requestId) {
@@ -5678,6 +5855,7 @@ ${ttNotes}`
             status === "contacted" ? new Date().toISOString() : undefined,
           agentContactNotes: notes,
           paymentScreenshot: screenshot,
+          ...((attachments && attachments.length > 0) ? { attachments: [...(r.attachments || []), ...attachments] } : {})
         };
         // Sync to Firestore
         setDoc(doc(db, "tt_requests", r.id), updatedReq).catch((e) =>
@@ -5698,17 +5876,21 @@ ${ttNotes}`
   };
 
   const handleDeleteTabbyTamara = (requestId: string) => {
-    const doubleCheck = window.confirm(
-      "Are you sure you want to delete this Tabby/Tamara request?",
-    );
-    if (!doubleCheck) return;
-    const updated = tabbyTamaraRequests.filter((r) => r.id !== requestId);
-    setTabbyTamaraRequests(updated);
-    setStorageItem("sched_tabby_tamara", updated);
+    showConfirm(
+      'Delete Request',
+      'Are you sure you want to delete this Tabby/Tamara request?',
+      'Delete',
+      'bg-rose-700 hover:bg-rose-600',
+      () => {
+        const updated = tabbyTamaraRequests.filter((r) => r.id !== requestId);
+        setTabbyTamaraRequests(updated);
+        setStorageItem("sched_tabby_tamara", updated);
 
-    // Sync to Firestore
-    deleteDoc(doc(db, "tt_requests", requestId)).catch((e) =>
-      console.error("TT Delete Error:", e),
+        // Sync to Firestore
+        deleteDoc(doc(db, "tt_requests", requestId)).catch((e) =>
+          console.error("TT Delete Error:", e),
+        );
+      }
     );
   };
 
@@ -5786,6 +5968,9 @@ ${ttNotes}`
         `${currentUser.name} submitted a new complaint for ${tcPatientName} (${tcPhoneNumber})`,
         "general",
         "tl",
+        undefined,
+        "tt_complaint",
+        newComplaint.id
       );
 
       setSubmissionConfirmation({
@@ -5854,11 +6039,32 @@ ${ttNotes}`
       setActivePhotos([]);
       setActiveLinks([]);
 
+      // Notify only Social Media / Chat agents — not the submitter, not Call Center
+      const socialMediaAgents = Object.entries(AGENT_LOBS)
+        .filter(([name, lob]) => lob === 'Social Media' && name !== currentUser?.name)
+        .map(([name]) => name);
+
+      socialMediaAgents.forEach(agentName => {
+        addSystemNotification(
+          '📞 New Client Comm Request — Action Required',
+          `${currentUser?.name} (Call Center) submitted a comm request.\nClinic: ${ccClinicName} | Phone: ${ccPhoneNumber} | Language: ${ccLanguage}\n\n${ccNotes.substring(0, 120)}`,
+          'general',
+          agentName,
+          undefined,
+          "client_comm",
+          newComm.id
+        );
+      });
+
+      // Also notify TL
       addSystemNotification(
-        `💬 New Client Comm Request`,
-        `New request submitted for phone: ${ccPhoneNumber}`,
-        "general",
-        "all",
+        '📋 Client Comm Submitted',
+        `${currentUser?.name} submitted a client comm request for ${ccClinicName}.`,
+        'general',
+        'tl',
+        undefined,
+        "client_comm",
+        newComm.id
       );
 
       setSubmissionConfirmation({
@@ -5912,12 +6118,15 @@ ${ttNotes}`
     setStorageItem("sched_client_comms", updated);
 
     const handledComm = updated.find((c) => c.id === commId);
-    if (handledComm) {
+    if (handledComm?.callCenterAgentName) {
       addSystemNotification(
-        "✅ Client Comm Request Completed",
-        `Your client communication request for ${handledComm.clinicName} has been handled by ${currentUser.name}. Notes: ${notes.substring(0, 100)}`,
+        "✅ Comm Request Handled",
+        `${currentUser.name} handled your request for ${handledComm.clinicName}. Notes: ${notes.substring(0, 120)}`,
         "general",
         handledComm.callCenterAgentName,
+        undefined,
+        "client_comm",
+        commId
       );
     }
 
@@ -5951,12 +6160,15 @@ ${ttNotes}`
     setStorageItem("sched_client_comms", updated);
 
     const doneComm = updated.find((c) => c.id === commId);
-    if (doneComm) {
+    if (doneComm?.callCenterAgentName) {
       addSystemNotification(
-        "✅ Client Comm Request Closed",
-        `Your client communication request for ${doneComm.clinicName} has been marked as done by ${currentUser.name}.`,
+        "✅ Your Comm Request Was Closed",
+        `${currentUser.name} has closed your client communication request for ${doneComm.clinicName}. Patient has been contacted.`,
         "general",
         doneComm.callCenterAgentName,
+        undefined,
+        "client_comm",
+        commId
       );
     }
 
@@ -5991,12 +6203,15 @@ ${ttNotes}`
     setStorageItem("sched_client_comms", updated);
 
     const takenComm = updated.find((c) => c.id === commId);
-    if (takenComm) {
+    if (takenComm?.callCenterAgentName) {
       addSystemNotification(
-        "🔄 Request In Progress",
-        `${currentUser.name} has taken your client communication request and is working on it now.`,
+        "🔄 Your Request Is Being Handled",
+        `${currentUser.name} has taken your client communication request for ${takenComm.clinicName} and is working on it now.`,
         "general",
         takenComm.callCenterAgentName,
+        undefined,
+        "client_comm",
+        commId
       );
     }
 
@@ -6195,53 +6410,52 @@ ${ttNotes}`
       return;
     }
 
-    const confirmed = window.confirm(
-      "CRITICAL WARNING: This will permanently delete ALL organization data including schedules, requests, cases, and logs. This cannot be undone. Are you absolutely sure?",
-    );
-    if (!confirmed) return;
+    showConfirm(
+      'Reset All Data', 
+      'This will permanently wipe all local data. This cannot be undone.', 
+      'Yes, Wipe All', 
+      'bg-rose-700 hover:bg-rose-600', 
+      async () => {
+        setIsSyncingCalendar(true); // Reusing sync state for loading
+        try {
+          // 1. Delete Firestore Collections
+          const collectionsToWipe = [
+            "schedules",
+            "requests",
+            "inquiries",
+            "clientComms",
+            "cases",
+            "timeLogs",
+            "announcements",
+            "orders",
+          ];
 
-    const secondConfirm = window.confirm(
-      "FINAL CONFIRMATION: Type 'RESET' in your mind and click OK to wipe everything.",
-    );
-    if (!secondConfirm) return;
+          for (const colName of collectionsToWipe) {
+            const q = query(collection(db, colName));
+            const snapshot = await getDocs(q);
+            const batch = writeBatch(db);
+            snapshot.docs.forEach((doc) => {
+              batch.delete(doc.ref);
+            });
+            await batch.commit();
+          }
 
-    setIsSyncingCalendar(true); // Reusing sync state for loading
-    try {
-      // 1. Delete Firestore Collections
-      const collectionsToWipe = [
-        "schedules",
-        "requests",
-        "inquiries",
-        "clientComms",
-        "cases",
-        "timeLogs",
-        "announcements",
-        "orders",
-      ];
+          // Also clear all local data
+          localStorage.clear();
 
-      for (const colName of collectionsToWipe) {
-        const q = query(collection(db, colName));
-        const snapshot = await getDocs(q);
-        const batch = writeBatch(db);
-        snapshot.docs.forEach((doc) => {
-          batch.delete(doc.ref);
-        });
-        await batch.commit();
+          toast.success(
+            "System wipe successful. All organizational data has been reset.",
+          );
+          window.location.reload(); // Hard refresh to clear all local states
+        } catch (error) {
+          console.error("Reset failed:", error);
+          toast.error("Reset failed. Check console for details.");
+        } finally {
+          setIsSyncingCalendar(false);
+        }
       }
-
-      // Also clear all local data
-      localStorage.clear();
-
-      toast.success(
-        "System wipe successful. All organizational data has been reset.",
-      );
-      window.location.reload(); // Hard refresh to clear all local states
-    } catch (error) {
-      console.error("Reset failed:", error);
-      toast.error("Reset failed. Check console for details.");
-    } finally {
-      setIsSyncingCalendar(false);
-    }
+    );
+    return;
   };
 
   const downloadFullXLSX = () => {
@@ -6292,80 +6506,84 @@ ${ttNotes}`
       return;
     }
 
-    try {
-      setIsSyncingCalendar(true);
-      const todayStr = getLocalISOString();
-      const myShifts = schedules.filter(
-        (s) =>
-          s.agentName?.toLowerCase() === currentUser?.name?.toLowerCase() &&
-          s.date >= todayStr,
-      );
+    setIsSyncingCalendar(true);
+    const todayStr = getLocalISOString();
+    const myShifts = schedules.filter(
+      (s) =>
+        s.agentName?.toLowerCase() === currentUser?.name?.toLowerCase() &&
+        s.date >= todayStr,
+    );
 
-      if (myShifts.length === 0) {
-        toast.error("No upcoming shifts found to sync.");
-        return;
-      }
-
-      const confirmed = window.confirm(
-        `Found ${myShifts.length} upcoming shifts. Sync to Google Calendar?`,
-      );
-      if (!confirmed) return;
-
-      let successCount = 0;
-      for (const shift of myShifts) {
-        const [startTime, endTime] = shift.shiftLabel.split(" - ");
-
-        // Handle night shift crossing midnight
-        const startDateTime = new Date(`${shift.date}T${startTime}:00`);
-        const endDateTime = new Date(`${shift.date}T${endTime}:00`);
-        if (endTime < startTime) {
-          endDateTime.setDate(endDateTime.getDate() + 1);
-        }
-
-        const event = {
-          summary: `Work Shift: ${shift.shiftLabel}`,
-          description: `Scheduled shift at Call Center via Synq Portal.`,
-          start: {
-            dateTime: startDateTime.toISOString(),
-            timeZone: "Africa/Cairo",
-          },
-          end: {
-            dateTime: endDateTime.toISOString(),
-            timeZone: "Africa/Cairo",
-          },
-          reminders: {
-            useDefault: false,
-            overrides: [
-              { method: "popup", minutes: 60 },
-              { method: "email", minutes: 120 },
-            ],
-          },
-        };
-
-        const res = await fetch(
-          "https://www.googleapis.com/calendar/v3/calendars/primary/events",
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(event),
-          },
-        );
-
-        if (res.ok) successCount++;
-      }
-
-      toast.success(
-        `Successfully synced ${successCount} shifts to your Google Calendar!`,
-      );
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to sync. Please check your connection.");
-    } finally {
+    if (myShifts.length === 0) {
+      toast.error("No upcoming shifts found to sync.");
       setIsSyncingCalendar(false);
+      return;
     }
+
+    showConfirm(
+        'Sync Calendar',
+        `Found ${myShifts.length} upcoming shifts. Sync to Google Calendar?`,
+        'Sync',
+        'bg-indigo-600 hover:bg-indigo-500',
+        async () => {
+          let successCount = 0;
+          try {
+            for (const shift of myShifts) {
+              const [startTime, endTime] = shift.shiftLabel.split(" - ");
+
+              // Handle night shift crossing midnight
+              const startDateTime = new Date(`${shift.date}T${startTime}:00`);
+              const endDateTime = new Date(`${shift.date}T${endTime}:00`);
+              if (endTime < startTime) {
+                endDateTime.setDate(endDateTime.getDate() + 1);
+              }
+
+              const event = {
+                summary: `Work Shift: ${shift.shiftLabel}`,
+                description: `Scheduled shift at Call Center via Synq Portal.`,
+                start: {
+                  dateTime: startDateTime.toISOString(),
+                  timeZone: "Africa/Cairo",
+                },
+                end: {
+                  dateTime: endDateTime.toISOString(),
+                  timeZone: "Africa/Cairo",
+                },
+                reminders: {
+                  useDefault: false,
+                  overrides: [
+                    { method: "popup", minutes: 60 },
+                    { method: "email", minutes: 120 },
+                  ],
+                },
+              };
+
+              const res = await fetch(
+                "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+                {
+                  method: "POST",
+                  headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(event),
+                },
+              );
+
+              if (res.ok) successCount++;
+            }
+
+            toast.success(
+              `Successfully synced ${successCount} shifts to your Google Calendar!`,
+            );
+          } catch (err) {
+            console.error(err);
+            toast.error("Failed to sync. Please check your connection.");
+          } finally {
+            setIsSyncingCalendar(false);
+          }
+        }
+      );
   };
 
   const uploadToDrive = async (
@@ -6382,57 +6600,64 @@ ${ttNotes}`
       return;
     }
 
-    try {
-      setIsUploadingToDrive(true);
-      const confirmed = window.confirm(
-        `Upload "${filename}" to your Google Drive?`,
-      );
-      if (!confirmed) return;
+    showConfirm(
+      'Upload to Google Drive',
+      `Upload "${filename}" to your Google Drive?`,
+      'Upload',
+      'bg-indigo-600 hover:bg-indigo-500',
+      async () => {
+        try {
+          setIsUploadingToDrive(true);
+          const metadata = {
+            name: filename,
+            mimeType: contentType,
+          };
 
-      const metadata = {
-        name: filename,
-        mimeType: contentType,
-      };
+          const form = new FormData();
+          form.append(
+            "metadata",
+            new Blob([JSON.stringify(metadata)], { type: "application/json" }),
+          );
+          form.append("file", new Blob([content], { type: contentType }));
 
-      const form = new FormData();
-      form.append(
-        "metadata",
-        new Blob([JSON.stringify(metadata)], { type: "application/json" }),
-      );
-      form.append("file", new Blob([content], { type: contentType }));
+          const res = await fetch(
+            "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+              body: form,
+            },
+          );
 
-      const res = await fetch(
-        "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: form,
-        },
-      );
-
-      if (!res.ok) throw new Error("Upload failed");
-      toast.success(`Successfully uploaded "${filename}" to Google Drive!`);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to upload to Drive.");
-    } finally {
-      setIsUploadingToDrive(false);
-    }
+          if (!res.ok) throw new Error("Upload failed");
+          toast.success(`Successfully uploaded "${filename}" to Google Drive!`);
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to upload to Drive.");
+        } finally {
+          setIsUploadingToDrive(false);
+        }
+      }
+    );
   };
 
   const handleDeleteClientComms = (commId: string) => {
-    const doubleCheck = window.confirm(
-      "Are you sure you want to delete this communication request?",
-    );
-    if (!doubleCheck) return;
-    const updated = clientComms.filter((c) => c.id !== commId);
-    setClientComms(updated);
-    setStorageItem("sched_client_comms", updated);
-    // Sync to Firestore
-    deleteDoc(doc(db, "client_comms", commId)).catch((e) =>
-      console.error("Client Comm Delete Error:", e),
+    showConfirm(
+      'Delete Record',
+      'Are you sure you want to delete this communication request?',
+      'Delete',
+      'bg-rose-700 hover:bg-rose-600',
+      () => {
+        const updated = clientComms.filter((c) => c.id !== commId);
+        setClientComms(updated);
+        setStorageItem("sched_client_comms", updated);
+        // Sync to Firestore
+        deleteDoc(doc(db, "client_comms", commId)).catch((e) =>
+          console.error("Client Comm Delete Error:", e),
+        );
+      }
     );
   };
 
@@ -6462,6 +6687,9 @@ ${ttNotes}`
           `Your complaint for ${c.patientName} has been evaluated by ${currentUser.name}. Please contact the client now.`,
           "general",
           c.agentName,
+          undefined,
+          "tt_complaint",
+          complaintId
         );
 
         return updatedComplaint;
@@ -6517,22 +6745,30 @@ ${ttNotes}`
         `Your complaint for ${comp.patientName} has been marked as resolved (patient contacted).`,
         "general",
         comp.agentName,
+        undefined,
+        "tt_complaint",
+        complaintId
       );
     }
   };
 
   const handleDeleteComplaint = (complaintId: string) => {
-    const doubleCheck = window.confirm(
-      "Are you sure you want to delete this complaint record?",
+    showConfirm(
+      'Delete Complaint', 
+      'Permanently delete this complaint record? This cannot be undone.', 
+      'Delete', 
+      'bg-rose-700 hover:bg-rose-600', 
+      () => {
+        const updated = tabbyTamaraComplaints.filter((c) => c.id !== complaintId);
+        setTabbyTamaraComplaints(updated);
+        setStorageItem("sched_tt_complaints", updated);
+        // Sync to Firestore
+        deleteDoc(doc(db, "tt_complaints", complaintId)).catch((e) =>
+          console.error("TT Complaint Delete Error:", e),
+        );
+      }
     );
-    if (!doubleCheck) return;
-    const updated = tabbyTamaraComplaints.filter((c) => c.id !== complaintId);
-    setTabbyTamaraComplaints(updated);
-    setStorageItem("sched_tt_complaints", updated);
-    // Sync to Firestore
-    deleteDoc(doc(db, "tt_complaints", complaintId)).catch((e) =>
-      console.error("TT Complaint Delete Error:", e),
-    );
+    return;
   };
 
   const handleCopyCSVReport = () => {
@@ -6593,10 +6829,7 @@ ${ttNotes}`
 `;
     });
 
-    navigator.clipboard.writeText(csv);
-    toast.success(
-      "Master Agent Attendance CSV report compiled and copied to clipboard successfully! You can directly paste it (Ctrl+V) into Excel or Google Sheets.",
-    );
+    copyToClipboard(csv, "Master Agent Attendance CSV report compiled and copied to clipboard successfully! You can directly paste it (Ctrl+V) into Excel or Google Sheets.");
   };
 
   const handleExportCloudBackup = () => {
@@ -7492,13 +7725,15 @@ ${ttNotes}`
                     Update App (Force Sync)
                   </button>
 
-                  <button
-                    onClick={() => setIsResetPasswordModalOpen(true)}
-                    className="w-full px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/10 text-blue-300 rounded-lg text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-2"
-                  >
-                    <Key className="w-3.5 h-3.5" />
-                    Reset Password
-                  </button>
+                  {currentUser?.name?.toLowerCase() === "hesham sobhy" || currentUser?.name?.toLowerCase() === "h.sobhy" ? (
+                    <button
+                      onClick={() => setIsResetPasswordModalOpen(true)}
+                      className="w-full px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/10 text-blue-300 rounded-lg text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-2"
+                    >
+                      <Key className="w-3.5 h-3.5" />
+                      Reset Password
+                    </button>
+                  ) : null}
 
                   <button
                     id="signout-button"
@@ -7511,41 +7746,43 @@ ${ttNotes}`
                   {currentUser?.name === "Hesham Sobhy" && (
                     <button
                       onClick={() => {
-                        if (
-                          window.confirm(
-                            "WARNING: This will factory reset and erase ALL data across all devices! Continue?",
-                          )
-                        ) {
-                          const keys = [
-                            "sched_inquiries",
-                            "sched_tabby_tamara",
-                            "sched_tt_complaints",
-                            "sched_requests",
-                            "sched_time_logs",
-                            "sched_schedules",
-                            "sched_support_assignments",
-                            "sched_cases",
-                            "sched_client_comms",
-                          ];
-                          keys.forEach((k) => {
-                            setStorageItem(k, []);
-                          });
+                        showConfirm(
+                          'Factory Reset',
+                          'WARNING: This will factory reset and erase ALL data! Continue?',
+                          'Reset All Data',
+                          'bg-rose-700 hover:bg-rose-600',
+                          () => {
+                            const keys = [
+                              "sched_inquiries",
+                              "sched_tabby_tamara",
+                              "sched_tt_complaints",
+                              "sched_requests",
+                              "sched_time_logs",
+                              "sched_schedules",
+                              "sched_support_assignments",
+                              "sched_cases",
+                              "sched_client_comms",
+                            ];
+                            keys.forEach((k) => {
+                              setStorageItem(k, []);
+                            });
 
-                          // Clear local states to update UI immediately
-                          setInquiries([]);
-                          setTabbyTamaraRequests([]);
-                          setTabbyTamaraComplaints([]);
-                          setRequests([]);
-                          setTimeLogs([]);
-                          setSchedules([]);
-                          setSupportAssignments({});
-                          setCases([]);
-                          setClientComms([]);
+                            // Clear local states to update UI immediately
+                            setInquiries([]);
+                            setTabbyTamaraRequests([]);
+                            setTabbyTamaraComplaints([]);
+                            setRequests([]);
+                            setTimeLogs([]);
+                            setSchedules([]);
+                            setSupportAssignments({});
+                            setCases([]);
+                            setClientComms([]);
 
-                          toast.success(
-                            "System Factory Reset: All local data cleared!",
-                          );
-                        }
+                            toast.success(
+                              "System Factory Reset: All local data cleared!",
+                            );
+                          }
+                        );
                       }}
                       className="w-full px-3 py-1.5 bg-red-950 border border-red-500/50 text-red-200 hover:bg-red-900 rounded-lg text-[10px] font-bold transition-all mt-2 uppercase cursor-pointer shadow-lg shadow-red-900/20"
                     >
@@ -7789,6 +8026,12 @@ ${ttNotes}`
                           <CheckCircle2 className="w-4 h-4 text-green-500" />,
                           "My QA Scorecards",
                           "bg-green-500/20 border-green-500/30 text-green-100",
+                        )}
+                        {buildBtn(
+                          "kpi-calculator",
+                          <Calculator className="w-4 h-4 text-purple-400" />,
+                          "KPIs Calculator",
+                          "bg-purple-500/20 border-purple-500/30 text-purple-100",
                         )}
 
                         {groupTitle(
@@ -8153,6 +8396,7 @@ ${ttNotes}`
                           .map((inq) => (
                             <div
                               key={inq.id}
+                              id={`inquiry-${inq.id}`}
                               className="relative overflow-hidden p-5 rounded-3xl border backdrop-blur-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-2xl bg-gradient-to-r from-indigo-950/40 via-purple-950/20 to-slate-950/80 border-indigo-500/30"
                             >
                               {/* Glow indicator line */}
@@ -8205,9 +8449,7 @@ ${ttNotes}`
                                         by Team Leader{" "}
                                         <strong>{inq.answeredBy}</strong>!
                                       </p>
-                                      <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-indigo-200 italic leading-relaxed">
-                                        "{inq.answer}"
-                                      </div>
+                                      <InquiryRepliesViewer inquiry={inq} />
                                     </div>
                                   )}
                                 </div>
@@ -12812,8 +13054,7 @@ ${ttNotes}`
                                                 photoLines, linkLines,
                                               ].filter(Boolean).join('\n');
 
-                                              navigator.clipboard.writeText(text);
-                                              toast.success('Request copied to clipboard!');
+                                              copyToClipboard(text, 'Request copied to clipboard!');
                                             }}
                                             className="p-1.5 hover:bg-white/10 text-slate-300 hover:text-slate-100 rounded-lg transition-all cursor-pointer flex items-center justify-center border border-white/5 hover:border-white/15"
                                             title="Copy Request details"
@@ -14213,6 +14454,7 @@ ${ttNotes}`
                         clientComms={clientComms}
                         canEditItem={canEditItem}
                         getRemainingEditTime={getRemainingEditTime}
+                        editLimitMs={getEditLimitMs()}
                         setEditingItem={setEditingItem}
                         handleCancelRequest={handleCancelRequest}
                         addSystemNotification={addSystemNotification}
@@ -14429,13 +14671,12 @@ ${ttNotes}`
                                 />
                               </div>
 
-                              {/* Photos Upload & URLs Section */}
-                              <MultiAttachmentUpload
-                                photos={inquiryPhotos}
+                              {/* Attachments & URLs Section */}
+                              <ProfessionalAttachmentUploader
+                                attachments={inquiryAttachments}
                                 links={inquiryLinks}
-                                onPhotosChange={setInquiryPhotos}
+                                onAttachmentsChange={setInquiryAttachments}
                                 onLinksChange={setInquiryLinks}
-                                photosLabel="Attach Photos / Screenshots"
                               />
 
                               {/* Submit Action */}
@@ -14562,6 +14803,7 @@ ${ttNotes}`
                                         return (
                                           <div
                                             key={inq.id}
+                                            id={`inquiry-${inq.id}`}
                                             className="p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl space-y-3 hover:border-white/10 transition-all relative"
                                           >
                                             {/* Top Info row */}
@@ -14582,12 +14824,7 @@ ${ttNotes}`
                                                 {inq.clinicName && (
                                                   <span
                                                     onClick={() => {
-                                                      navigator.clipboard.writeText(
-                                                        inq.clinicName || "",
-                                                      );
-                                                      toast.success(
-                                                        "Clinic name copied!",
-                                                      );
+                                                      copyToClipboard(inq.clinicName || "", "Clinic name copied!");
                                                     }}
                                                     className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 border border-indigo-500/30 rounded-lg font-bold flex items-center gap-1 cursor-pointer hover:bg-indigo-500/30 transition-colors"
                                                     title="Copy Clinic"
@@ -14598,14 +14835,7 @@ ${ttNotes}`
                                                 {inq.phoneNumber && (
                                                   <span
                                                     onClick={() => {
-                                                      navigator.clipboard.writeText(
-                                                        (
-                                                          inq.phoneNumber || ""
-                                                        ).replace(/^0+/, ""),
-                                                      );
-                                                      toast.success(
-                                                        "Phone copied (no leading zero)",
-                                                      );
+                                                      copyToClipboard((inq.phoneNumber || "").replace(/^0+/, ""), "Phone copied (no leading zero)");
                                                     }}
                                                     className="text-[10px] bg-sky-500/10 text-sky-300 px-2.5 py-0.5 border border-sky-500/20 rounded-lg font-mono flex items-center gap-1 cursor-pointer hover:bg-sky-500/20 transition-colors"
                                                     title="Copy Phone Number"
@@ -14671,6 +14901,32 @@ ${ttNotes}`
                                                     )
                                                   </button>
                                                 )}
+                                                <button
+                                                  onClick={() => {
+                                                    const photoLines = (inq.photos || []).length > 0
+                                                      ? `Attachments: ${inq.photos.length} photo(s) attached`
+                                                      : '';
+                                                    const linkLines = (inq.links || []).length > 0
+                                                      ? `Links:\n${(inq.links || []).join('\n')}`
+                                                      : '';
+                                                    const text = [
+                                                      `📋 Inquiry`,
+                                                      `Ref: ${formatCaseRef(inq.id, 'inq')}`,
+                                                      `Clinic: ${inq.clinicName}`,
+                                                      `Phone: ${normalizePhone(inq.phoneNumber || '')}`,
+                                                      `Inquiry: ${inq.text}`,
+                                                      `Status: ${inq.status}`,
+                                                      inq.answer ? `TL Answer: ${inq.answer}` : '',
+                                                      inq.answeredBy ? `Answered by: ${inq.answeredBy}` : '',
+                                                      photoLines, linkLines,
+                                                    ].filter(Boolean).join('\n');
+                                                    navigator.clipboard.writeText(text);
+                                                    toast.success('Inquiry copied!');
+                                                  }}
+                                                  className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                                                >
+                                                  <Copy className="w-3 h-3" /> Copy Details
+                                                </button>
                                               </div>
                                             </div>
 
@@ -14682,7 +14938,8 @@ ${ttNotes}`
 
                                               {/* Display Photos */}
                                               <AttachmentsDisplay
-                                                photos={inq.photos}
+                                                photos={[...(inq.photos || []), ...((inq as any).screenshot ? [(inq as any).screenshot] : []), ...((inq as any).imageUrl ? [(inq as any).imageUrl] : []), ...((inq as any).attachment ? [(inq as any).attachment] : [])]}
+                                                attachments={inq.attachments}
                                                 links={inq.links}
                                               />
 
@@ -14714,30 +14971,7 @@ ${ttNotes}`
                                               </div>
                                             )}
 
-                                            {inq.status === "answered" && (
-                                              <div className="p-4 bg-emerald-500/5 border border-emerald-500/15 rounded-xl space-y-1.5">
-                                                <div className="flex justify-between items-center border-b border-emerald-500/10 pb-1.5">
-                                                  <p className="text-[10px] font-mono font-bold text-emerald-400 flex items-center gap-1">
-                                                    <CheckCircle2 className="w-3.5 h-3.5" />
-                                                    INQUIRY ANSWERED
-                                                  </p>
-                                                  <span className="text-[9px] text-slate-500">
-                                                    {new Date(
-                                                      inq.answeredAt || "",
-                                                    ).toLocaleString()}
-                                                  </span>
-                                                </div>
-                                                <div className="text-xs text-emerald-200 font-semibold italic leading-relaxed font-sans">
-                                                  "{inq.answer}"
-                                                </div>
-                                                <p className="text-[9px] text-slate-400 text-right">
-                                                  Answered by Leader{" "}
-                                                  <strong>
-                                                    {inq.answeredBy}
-                                                  </strong>
-                                                </p>
-                                              </div>
-                                            )}
+                                            <InquiryRepliesViewer inquiry={inq} />
 
                                             {/* Customer Contacted Status Dropdown */}
                                             <div className="flex flex-wrap items-center gap-2.5 pt-3 border-t border-white/5">
@@ -14888,18 +15122,14 @@ ${ttNotes}`
                                     return results.map((inq) => (
                                       <div
                                         key={inq.id}
+                                        id={`inquiry-${inq.id}`}
                                         className="p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl hover:border-indigo-500/30 transition-all font-sans text-left space-y-3"
                                       >
                                         <div className="flex flex-wrap gap-2 items-center justify-between text-[10px] pb-2 border-b border-white/5">
                                           <div className="flex items-center gap-2">
                                             <span
                                               onClick={() => {
-                                                navigator.clipboard.writeText(
-                                                  inq.agentName || "",
-                                                );
-                                                toast.success(
-                                                  "Agent name copied!",
-                                                );
+                                                copyToClipboard(inq.agentName || "", "Agent name copied!");
                                               }}
                                               className="bg-white/10 backdrop-blur-md text-slate-300 font-bold px-2 py-0.5 rounded-lg border border-slate-700 cursor-pointer hover:bg-white/20 backdrop-blur-md transition-colors"
                                               title="Copy Agent Name"
@@ -14909,12 +15139,7 @@ ${ttNotes}`
                                             {inq.clinicName && (
                                               <span
                                                 onClick={() => {
-                                                  navigator.clipboard.writeText(
-                                                    inq.clinicName || "",
-                                                  );
-                                                  toast.success(
-                                                    "Clinic name copied!",
-                                                  );
+                                                  copyToClipboard(inq.clinicName || "", "Clinic name copied!");
                                                 }}
                                                 className="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2.5 py-0.5 rounded-lg cursor-pointer hover:bg-indigo-500/20 transition-colors"
                                                 title="Copy Clinic"
@@ -14925,14 +15150,7 @@ ${ttNotes}`
                                             {inq.phoneNumber && (
                                               <span
                                                 onClick={() => {
-                                                  navigator.clipboard.writeText(
-                                                    (
-                                                      inq.phoneNumber || ""
-                                                    ).replace(/^0+/, ""),
-                                                  );
-                                                  toast.success(
-                                                    "Phone copied (no leading zero)",
-                                                  );
+                                                  copyToClipboard((inq.phoneNumber || "").replace(/^0+/, ""), "Phone copied (no leading zero)");
                                                 }}
                                                 className="bg-sky-500/10 text-sky-300 border border-sky-500/20 px-2.5 py-0.5 rounded-lg font-mono tracking-wider cursor-pointer hover:bg-sky-500/20 transition-colors"
                                                 title="Copy Phone Number"
@@ -14955,19 +15173,7 @@ ${ttNotes}`
                                           {inq.text}
                                         </p>
 
-                                        {inq.status === "answered" &&
-                                          inq.answer && (
-                                            <div className="mt-3 p-3 bg-emerald-500/10 border-l-2 border-emerald-500/50 rounded-r-xl space-y-1 text-left">
-                                              <p className="text-[10px] font-mono font-bold text-emerald-400 mb-1 flex items-center gap-1">
-                                                <CheckCircle2 className="w-3 h-3" />{" "}
-                                                TL RESOLUTION:{" "}
-                                                {inq.answeredBy || "Leader"}
-                                              </p>
-                                              <p className="text-xs text-emerald-200">
-                                                {inq.answer}
-                                              </p>
-                                            </div>
-                                          )}
+                                        <InquiryRepliesViewer inquiry={inq} />
                                         {inq.status === "sent" && (
                                           <div className="mt-3 p-2 bg-orange-500/10 border-l-2 border-orange-500/50 rounded-r-xl">
                                             <p className="text-[10px] font-mono text-orange-400">
@@ -16076,6 +16282,7 @@ ${ttNotes}`
                                   return (
                                     <div
                                       key={inq.id}
+                                      id={`inquiry-${inq.id}`}
                                       className="p-5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl hover:border-white/10 transition-all space-y-4 relative"
                                     >
                                       {/* Agent info, LOB and date */}
@@ -16091,12 +16298,7 @@ ${ttNotes}`
                                             <div className="flex items-center gap-2 flex-wrap">
                                               <span
                                                 onClick={() => {
-                                                  navigator.clipboard.writeText(
-                                                    inq.agentName || "",
-                                                  );
-                                                  toast.success(
-                                                    "Agent name copied!",
-                                                  );
+                                                  copyToClipboard(inq.agentName || "", "Agent name copied!");
                                                 }}
                                                 className="text-xs font-bold text-slate-100 uppercase tracking-wide cursor-pointer hover:text-indigo-300 transition-colors"
                                                 title="Copy Agent Name"
@@ -16109,12 +16311,7 @@ ${ttNotes}`
                                               {inq.clinicName && (
                                                 <span
                                                   onClick={() => {
-                                                    navigator.clipboard.writeText(
-                                                      inq.clinicName || "",
-                                                    );
-                                                    toast.success(
-                                                      "Clinic name copied!",
-                                                    );
+                                                    copyToClipboard(inq.clinicName || "", "Clinic name copied!");
                                                   }}
                                                   className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 border border-indigo-500/30 rounded font-sans font-bold flex items-center gap-1 cursor-pointer hover:bg-indigo-500/30 transition-colors"
                                                   title="Copy Clinic"
@@ -16125,14 +16322,7 @@ ${ttNotes}`
                                               {inq.phoneNumber && (
                                                 <span
                                                   onClick={() => {
-                                                    navigator.clipboard.writeText(
-                                                      (
-                                                        inq.phoneNumber || ""
-                                                      ).replace(/^0+/, ""),
-                                                    );
-                                                    toast.success(
-                                                      "Phone copied (no leading zero)",
-                                                    );
+                                                    copyToClipboard((inq.phoneNumber || "").replace(/^0+/, ""), "Phone copied (no leading zero)");
                                                   }}
                                                   className="text-[10px] bg-sky-500/10 text-sky-300 px-2 py-0.5 border border-sky-500/20 rounded font-mono font-bold flex items-center gap-1 cursor-pointer hover:bg-sky-500/20 transition-colors"
                                                   title="Copy Phone Number"
@@ -16183,24 +16373,30 @@ ${ttNotes}`
                                         <div className="flex items-center gap-2">
                                           <button
                                             onClick={() => {
-                                              const details = `*Agent Name:* ${inq.agentName}
-*Clinic:* ${inq.clinicName || "N/A"}
-*Phone:* ${inq.phoneNumber || "N/A"}
-*Inquiry:*
-_ ${inq.text} _
-*Answer:*
-_ ${inq.answer || "No answer yet"} _`;
-                                              navigator.clipboard.writeText(
-                                                details,
-                                              );
-                                              toast.success(
-                                                "Inquiry details copied!",
-                                              );
+                                              const photoLines = (inq.photos || []).length > 0
+                                                ? `Attachments: ${inq.photos.length} photo(s) attached`
+                                                : '';
+                                              const linkLines = (inq.links || []).length > 0
+                                                ? `Links:\n${(inq.links || []).join('\n')}`
+                                                : '';
+                                              const text = [
+                                                `📋 Inquiry`,
+                                                `Ref: ${formatCaseRef(inq.id, 'inq')}`,
+                                                `Clinic: ${inq.clinicName}`,
+                                                `Phone: ${normalizePhone(inq.phoneNumber || '')}`,
+                                                `Inquiry: ${inq.text}`,
+                                                `Status: ${inq.status}`,
+                                                inq.answer ? `TL Answer: ${inq.answer}` : '',
+                                                inq.answeredBy ? `Answered by: ${inq.answeredBy}` : '',
+                                                photoLines, linkLines,
+                                              ].filter(Boolean).join('\n');
+                                              navigator.clipboard.writeText(text);
+                                              toast.success('Inquiry copied!');
                                             }}
-                                            className="p-1 hover:bg-white/10 text-slate-300 hover:text-slate-100 rounded-md transition-all shrink-0 flex items-center gap-1 cursor-pointer"
-                                            title="Copy Inquiry Details"
+                                            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                                            title="Copy Details"
                                           >
-                                            <Copy className="w-3.5 h-3.5" />
+                                            <Copy className="w-3 h-3" /> Copy Details
                                           </button>
                                           <span
                                             className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg uppercase tracking-wider shrink-0 ${statusColor}`}
@@ -16236,7 +16432,8 @@ _ ${inq.answer || "No answer yet"} _`;
 
                                         {/* Render attachments */}
                                         <AttachmentsDisplay
-                                          photos={inq.photos}
+                                          photos={[...(inq.photos || []), ...((inq as any).screenshot ? [(inq as any).screenshot] : []), ...((inq as any).imageUrl ? [(inq as any).imageUrl] : []), ...((inq as any).attachment ? [(inq as any).attachment] : [])]}
+                                          attachments={inq.attachments}
                                           links={inq.links}
                                         />
 
@@ -16336,34 +16533,20 @@ _ ${inq.answer || "No answer yet"} _`;
                                           </div>
                                         )}
 
-                                        {inq.status === "answered" && (
-                                          <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl space-y-2">
-                                            <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 border-b border-emerald-500/5 pb-1 max-sm:flex-wrap gap-1">
-                                              <span className="text-emerald-400 font-bold font-sans uppercase">
-                                                ✓ Answered by {inq.answeredBy}
-                                              </span>
-                                              <span>
-                                                {new Date(
-                                                  inq.answeredAt || "",
-                                                ).toLocaleString()}
-                                              </span>
-                                            </div>
-                                            <p className="text-xs text-emerald-200 italic font-medium leading-relaxed font-sans">
-                                              "{inq.answer}"
-                                            </p>
+                                        <div className="relative">
+                                          <InquiryRepliesViewer inquiry={inq} />
+                                          {inq.status === "answered" && (
                                             <button
                                               onClick={() => {
                                                 setAnsweringInquiryId(inq.id);
-                                                setCurrentAnswerText(
-                                                  inq.answer || "",
-                                                );
+                                                setCurrentAnswerText(inq.answer || "");
                                               }}
-                                              className="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold block"
+                                              className="mt-2 text-[10px] text-indigo-400 hover:text-indigo-300 font-bold block"
                                             >
-                                              Edit Response
+                                              Reply Again / Edit
                                             </button>
-                                          </div>
-                                        )}
+                                          )}
+                                        </div>
 
                                         {/* Reassign Agent Option */}
                                         <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/5">
@@ -16404,6 +16587,8 @@ _ ${inq.answer || "No answer yet"} _`;
                                                 onClick={() => {
                                                   setAnsweringInquiryId(null);
                                                   setCurrentAnswerText("");
+                                                  setCurrentAnswerAttachments([]);
+                                                  setCurrentAnswerLinks([]);
                                                 }}
                                                 className="text-slate-400 text-xs hover:text-slate-100"
                                               >
@@ -16421,16 +16606,25 @@ _ ${inq.answer || "No answer yet"} _`;
                                               rows={3}
                                               className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-emerald-500 transition-all font-sans resize-none"
                                             />
+                                            
+                                            <ProfessionalAttachmentUploader
+                                                attachments={currentAnswerAttachments}
+                                                links={currentAnswerLinks}
+                                                onAttachmentsChange={setCurrentAnswerAttachments}
+                                                onLinksChange={setCurrentAnswerLinks}
+                                            />
+
                                             <button
                                               onClick={() =>
-                                                handleSetInquiryAnswered(
-                                                  inq.id,
-                                                  currentAnswerText,
-                                                )
+                                                handleSetInquiryAnswered(inq.id)
                                               }
-                                              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow cursor-pointer transition-all active:scale-95 text-center block w-max"
+                                              disabled={isSubmittingAnswer}
+                                              className={`px-4 py-2 text-white font-bold text-xs rounded-lg shadow transition-all flex items-center justify-center gap-2 ${isSubmittingAnswer ? 'bg-emerald-800 opacity-50 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 cursor-pointer active:scale-95'}`}
                                             >
-                                              Submit Final Answer
+                                              {isSubmittingAnswer ? (
+                                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                              ) : null}
+                                              {isSubmittingAnswer ? "Submitting..." : "Submit Final Answer"}
                                             </button>
                                           </div>
                                         )}
@@ -16441,6 +16635,179 @@ _ ${inq.answer || "No answer yet"} _`;
                               )}
                             </div>
                           </div>
+                        );
+                      })()}
+                    </div>
+                  )}
+
+                  {/* Team Leader Time Logs Review panel */}
+                  {activeTab === "cases" && (
+                    <div className="space-y-6 animate-fade-in">
+                      {/* Header */}
+                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-4">
+                        <div>
+                          <h2 className="text-3xl font-bold text-slate-100 font-display">
+                            {currentUser.role === "tl" ? "All Cases" : "My Cases"}
+                          </h2>
+                          <p className="text-slate-400 text-sm">
+                            {currentUser.role === "tl"
+                              ? "All case records submitted by agents."
+                              : "Your submitted case records."}
+                          </p>
+                        </div>
+                        <div className="flex gap-2 items-center">
+                          <input
+                            type="text"
+                            placeholder="Search cases..."
+                            value={casesSearch ?? ""}
+                            onChange={(e) => setCasesSearch(e.target.value)}
+                            className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans w-48"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Stats */}
+                      {(() => {
+                        const myCases = cases.filter(
+                          (c) =>
+                            currentUser.role === "tl" ||
+                            c.agentName?.toLowerCase() === currentUser.name.toLowerCase()
+                        );
+                        const search = (casesSearch ?? "").toLowerCase();
+                        const filtered = myCases
+                          .filter(
+                            (c) =>
+                              !search ||
+                              c.patientName?.toLowerCase().includes(search) ||
+                              c.phoneNumber?.includes(search) ||
+                              c.inquiry?.toLowerCase().includes(search) ||
+                              c.agentName?.toLowerCase().includes(search)
+                          )
+                          .sort(
+                            (a, b) =>
+                              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                          );
+
+                        return (
+                          <>
+                            <div className="flex gap-2 flex-wrap">
+                              <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-slate-300">
+                                📋 {myCases.length} Total
+                              </span>
+                              <span className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-xs font-bold text-indigo-400">
+                                🔍 {filtered.length} Shown
+                              </span>
+                            </div>
+
+                            {filtered.length === 0 ? (
+                              <div className="text-center py-20 text-slate-500">
+                                <p className="text-4xl mb-3">📁</p>
+                                <p className="font-bold">No cases found.</p>
+                                <p className="text-xs mt-1">Cases you submit will appear here.</p>
+                              </div>
+                            ) : (
+                              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                                {filtered.map((c) => (
+                                  <div
+                                    key={c.id}
+                                    className="bg-white/[0.02] border border-white/10 rounded-2xl p-4 space-y-3 hover:border-white/20 transition-all"
+                                  >
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div>
+                                        <p className="font-black text-slate-100 text-sm">
+                                          {c.patientName || "Unknown Patient"}
+                                        </p>
+                                        <p className="text-[10px] text-slate-500 font-mono">
+                                          {formatCaseRef(c.id, "case")} ·{" "}
+                                          {new Date(c.createdAt).toLocaleDateString()}
+                                        </p>
+                                      </div>
+                                      {c.status && (
+                                        <span
+                                          className={`px-2 py-0.5 rounded text-[9px] font-black border uppercase ${
+                                            c.status === "closed"
+                                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                              : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                                          }`}
+                                        >
+                                          {c.status}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <div
+                                        className="bg-white/[0.02] border border-white/5 rounded-lg p-2 cursor-pointer hover:bg-white/[0.04]"
+                                        onClick={() => {
+                                          navigator.clipboard.writeText(
+                                            normalizePhone(c.phoneNumber || "")
+                                          );
+                                          toast.success("Phone copied!");
+                                        }}
+                                      >
+                                        <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-0.5">
+                                          Phone
+                                        </p>
+                                        <p className="text-xs text-slate-200 font-semibold font-mono">
+                                          {c.phoneNumber || "N/A"}
+                                        </p>
+                                      </div>
+                                      <div className="bg-white/[0.02] border border-white/5 rounded-lg p-2">
+                                        <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-0.5">
+                                          Agent
+                                        </p>
+                                        <p className="text-xs text-slate-200 font-semibold">
+                                          {c.agentName}
+                                        </p>
+                                      </div>
+                                      {c.service && (
+                                        <div className="bg-white/[0.02] border border-white/5 rounded-lg p-2">
+                                          <p className="text-[9px] text-slate-500 uppercase font-bold mb-0.5">
+                                            Service
+                                          </p>
+                                          <p className="text-xs text-slate-200">{c.service}</p>
+                                        </div>
+                                      )}
+                                      {c.branch && (
+                                        <div className="bg-white/[0.02] border border-white/5 rounded-lg p-2">
+                                          <p className="text-[9px] text-slate-500 uppercase font-bold mb-0.5">
+                                            Branch
+                                          </p>
+                                          <p className="text-xs text-slate-200">{c.branch}</p>
+                                        </div>
+                                      )}
+                                    </div>
+                                    {c.inquiry && (
+                                      <p className="text-xs text-slate-400 bg-white/[0.02] border border-white/5 rounded-lg p-2 leading-relaxed">
+                                        {c.inquiry}
+                                      </p>
+                                    )}
+                                    <button
+                                      onClick={() => {
+                                        const text = [
+                                          `📋 Case Record`,
+                                          `Ref: ${formatCaseRef(c.id, "case")}`,
+                                          `Patient: ${c.patientName}`,
+                                          `Phone: ${normalizePhone(c.phoneNumber || "")}`,
+                                          `Agent: ${c.agentName}`,
+                                          c.service ? `Service: ${c.service}` : "",
+                                          c.branch ? `Branch: ${c.branch}` : "",
+                                          c.inquiry ? `Inquiry: ${c.inquiry}` : "",
+                                          `Date: ${new Date(c.createdAt).toLocaleString()}`,
+                                        ]
+                                          .filter(Boolean)
+                                          .join("\n");
+                                        navigator.clipboard.writeText(text);
+                                        toast.success("Case copied!");
+                                      }}
+                                      className="w-full px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 text-[10px] font-bold transition-all flex items-center justify-center gap-1.5"
+                                    >
+                                      <Copy className="w-3 h-3" /> Copy Case Details
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </>
                         );
                       })()}
                     </div>
@@ -16486,16 +16853,19 @@ _ ${inq.answer || "No answer yet"} _`;
                           {isSuperAdmin && (
                             <button
                               onClick={() => {
-                                const doubleVal = window.confirm(
-                                  "Are you absolutely sure you want to delete all historical logs? This cannot be undone.",
+                                showConfirm(
+                                  'Purge ALL Logs',
+                                  'Are you absolutely sure you want to delete all historical logs? This cannot be undone.',
+                                  'Purge',
+                                  'bg-rose-700 hover:bg-rose-600',
+                                  () => {
+                                    setTimeLogs([]);
+                                    setStorageItem("sched_time_logs", []);
+                                    toast.success(
+                                      "Successfully purged all agent time card logs.",
+                                    );
+                                  }
                                 );
-                                if (doubleVal) {
-                                  setTimeLogs([]);
-                                  setStorageItem("sched_time_logs", []);
-                                  toast.success(
-                                    "Successfully purged all agent time card logs.",
-                                  );
-                                }
                               }}
                               className="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans"
                             >
@@ -21373,18 +21743,27 @@ _ ${inq.answer || "No answer yet"} _`;
                                                   handleMarkPatientContactedTT={(
                                                     id,
                                                     status,
+                                                    notes,
+                                                    screenshot,
+                                                    attachments
                                                   ) => {
                                                     if (status) {
                                                       // Undo Contact case uses status
                                                       handleContactTabbyTamara(
                                                         id,
                                                         status,
+                                                        notes,
+                                                        screenshot,
+                                                        attachments
                                                       );
                                                     } else {
                                                       // Mark contacted uses default param in this structure logic
                                                       handleContactTabbyTamara(
                                                         id,
                                                         "contacted",
+                                                        notes,
+                                                        screenshot,
+                                                        attachments
                                                       );
                                                     }
                                                   }}
@@ -21398,6 +21777,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                                   getRemainingEditTime={
                                                     getRemainingEditTime
                                                   }
+                                                  editLimitMs={getEditLimitMs()}
                                                   setEditingItem={
                                                     setEditingItem
                                                   }
@@ -21921,8 +22301,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                                             photoLines, screenshotLine, linkLines,
                                                           ].filter(Boolean).join('\n');
 
-                                                          navigator.clipboard.writeText(text);
-                                                          toast.success('Complaint details copied — including attachments info!');
+                                                          copyToClipboard(text, 'Complaint details copied — including attachments info!');
                                                         }}
                                                         className="mr-auto px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-slate-100 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                                                         title="Copy Complaint details"
@@ -22008,12 +22387,7 @@ _ ${inq.answer || "No answer yet"} _`;
                                                           .filter(Boolean)
                                                           .join("\n");
 
-                                                        navigator.clipboard.writeText(
-                                                          text,
-                                                        );
-                                                        toast.success(
-                                                          "Complaint details copied — including attachments info!",
-                                                        );
+                                                        copyToClipboard(text, "Complaint details copied — including attachments info!");
                                                       }}
                                                       className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-slate-100 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                                                       title="Copy Complaint details"
@@ -22636,12 +23010,7 @@ _ ${inq.answer || "No answer yet"} _`;
 _ ${req.notes} _
 *Resolution Notes:*
 _ ${req.handlingNotes || "Pending response"} _`;
-                                                        navigator.clipboard.writeText(
-                                                          details,
-                                                        );
-                                                        toast.success(
-                                                          "Client communication details copied!",
-                                                        );
+                                                        copyToClipboard(details, "Client communication details copied!");
                                                       }}
                                                       className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-slate-100 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                                                       title="Copy Request details"
@@ -23243,6 +23612,43 @@ _ ${req.handlingNotes || "Pending response"} _`;
                       );
                     })()}
 
+                  {/* QA Scorecards Tab */}
+                  {activeTab === 'qa-scorecard' && (
+                    <div className='animate-fade-in'>
+                      <QAScorecards
+                        currentUser={currentUser}
+                        qaScores={qaScores}
+                        agentsList={agentsList}
+                        qaTemplate={qaTemplate}
+                        onUpdateQATemplate={(newTemplate) => {
+                          setQaTemplate(newTemplate);
+                          setDoc(doc(db, 'qa_config', 'template'), { questions: newTemplate }).catch(console.error);
+                        }}
+                        addSystemNotification={addSystemNotification}
+                        onSubmitScore={(score) => {
+                          const updated = [score, ...qaScores.filter(s => s.id !== score.id)];
+                          setQaScores(updated);
+                          setDoc(doc(db, 'qa_scores', score.id), score).catch(console.error);
+                          toast.success('QA Score submitted!');
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {activeTab === 'kpi-calculator' && (
+                    <div className='space-y-6 animate-fade-in'>
+                      <div className='border-b border-white/5 pb-4'>
+                        <h2 className='text-3xl font-bold text-slate-100 font-display'>KPIs Calculator</h2>
+                        <p className='text-slate-400 text-sm'>Calculate your performance metrics for any period.</p>
+                      </div>
+
+                      {(() => {
+                        // All state managed inline via refs / local component
+                        return <KPICalculatorPanel />;
+                      })()}
+                    </div>
+                  )}
+
                   {/* Super Admin Control Panel */}
                   {activeTab === "admin" && (
                     <SuperAdminControl
@@ -23542,6 +23948,55 @@ _ ${req.handlingNotes || "Pending response"} _`;
           </div>
         </div>
       )}
+
+      <AnimatePresence>
+        {confirmDialog.isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-[#0f0f13] border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4 mx-4"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-slate-500/10 flex items-center justify-center border border-slate-500/20">
+                  <AlertTriangle className="w-5 h-5 text-slate-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-slate-100 text-sm">
+                    {confirmDialog.title}
+                  </h3>
+                </div>
+              </div>
+              <p className="text-xs text-slate-400 pl-1">
+                {confirmDialog.message}
+              </p>
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  onClick={closeConfirm}
+                  className="px-4 py-2 text-xs border border-white/10 rounded-xl text-slate-300 hover:bg-white/5 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    confirmDialog.onConfirm();
+                    closeConfirm();
+                  }}
+                  className={`px-4 py-2 text-white rounded-xl text-xs font-black transition-colors cursor-pointer ${confirmDialog.confirmButtonClass}`}
+                >
+                  {confirmDialog.confirmText}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -6,15 +6,17 @@ import {
 } from 'lucide-react';
 import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
-import { formatCaseRef, normalizePhone, getSLAStatus } from '../utils';
+import { formatCaseRef, normalizePhone, getSLAStatus, copyToClipboard, extractLinks } from '../utils';
 
 const CopyButton = ({ text, tooltip, icon: Icon = Copy }: { text: string, tooltip: string, icon?: any }) => {
   const [copied, setCopied] = useState(false);
-  const handleCopy = (e: React.MouseEvent) => {
+  const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    const ok = await copyToClipboard(text, `${tooltip} copied!`);
+    if (ok) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
   };
   return (
     <button 
@@ -28,9 +30,16 @@ const CopyButton = ({ text, tooltip, icon: Icon = Copy }: { text: string, toolti
   );
 };
 
-const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, setEditingItem, handleCancelRequest, addSystemNotification }: any) => {
+const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, editLimitMs, setEditingItem, handleCancelRequest, addSystemNotification }: any) => {
   const [expanded, setExpanded] = useState(false);
   const [showReply, setShowReply] = useState(false);
+
+  // Compute expiry time if editLimitMs is present and not infinity
+  let expiryTimeStr = '';
+  if (editLimitMs && editLimitMs !== Infinity && req.createdAt) {
+      const expiryDate = new Date(new Date(req.createdAt).getTime() + editLimitMs);
+      expiryTimeStr = expiryDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
 
   const STATUS_LABELS: Record<string, string> = {
     pending: 'Pending', pending_partner: 'Awaiting Partner',
@@ -201,11 +210,25 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, setE
     tt_complaint: 'tt_complaints', comm: 'client_comms'
   };
 
-  const hasAttachments = (req.photos && req.photos.length > 0) || (req.links && req.links.length > 0) || req.screenshot || req.imageUrl || req.paymentScreenshot;
+  const allLinks = [];
+  if (req.links && Array.isArray(req.links)) {
+    allLinks.push(...req.links);
+  } else if (typeof req.links === 'string') {
+    allLinks.push(req.links);
+  }
+  if (req.paymentLink) {
+    allLinks.push(req.paymentLink);
+  }
+  if (req.tlLinks) {
+    allLinks.push(req.tlLinks);
+  }
+  const extractedLinks = extractLinks(allLinks);
+
+  const hasAttachments = (req.photos && req.photos.length > 0) || (extractedLinks && extractedLinks.length > 0) || req.screenshot || req.imageUrl || req.paymentScreenshot || (req.attachments && req.attachments.length > 0);
   const handlerLabel = req.tlName || req.actionBy || req.handledBy;
 
   return (
-    <div className="flex flex-col bg-[#1a1f2e] border border-white/10 rounded-xl overflow-hidden shadow-sm transition-all hover:border-white/20">
+    <div id={`request-${req.id}`} className="flex flex-col bg-[#1a1f2e] border border-white/10 rounded-xl overflow-hidden shadow-sm transition-all hover:border-white/20">
       
       {/* Header */}
       <div className="p-4 border-b border-white/5 bg-white/[0.02] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -247,7 +270,11 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, setE
             {hasAttachments && (
                <div>
                   <p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider mb-2">Attachments & Links</p>
-                  <AttachmentsDisplay photos={[...(req.photos || []), ...(req.screenshot ? [req.screenshot] : []), ...(req.imageUrl ? [req.imageUrl] : []), ...(req.paymentScreenshot ? [req.paymentScreenshot] : [])]} links={req.links} />
+                  <AttachmentsDisplay 
+                     photos={[...(req.photos || []), ...(req.screenshot ? [req.screenshot] : []), ...(req.imageUrl ? [req.imageUrl] : []), ...(req.paymentScreenshot ? [req.paymentScreenshot] : [])]} 
+                     attachments={(req as any).attachments}
+                     links={extractedLinks} 
+                  />
                </div>
             )}
             {handlerLabel && (
@@ -266,18 +293,10 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, setE
         <div className="flex items-center gap-1">
           <CopyButton text={copyData} tooltip="Copy Full Request" icon={ClipboardList} />
           {req.phoneNumber && <CopyButton text={req.phoneNumber} tooltip="Copy Phone" icon={Phone} />}
-          {(req.links || []).map((lnk: string, idx: number) => (
-             <React.Fragment key={idx}>
-               <CopyButton text={lnk} tooltip={`Copy Link`} icon={LinkIcon} />
-               <a href={lnk} target="_blank" rel="noopener noreferrer" className="p-1.5 hover:bg-white/10 rounded text-slate-400 hover:text-slate-200 transition-colors flex items-center justify-center gap-1 cursor-pointer" title={`Open Link`}>
-                 <ExternalLink className="w-3.5 h-3.5" />
-               </a>
-             </React.Fragment>
-          ))}
         </div>
         
         <div className="flex items-center gap-1">
-          {canShowEdit && (
+          {canShowEdit ? (
             <>
               <button 
                 onClick={() => {
@@ -310,7 +329,21 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, setE
                 <span className="hidden sm:inline">Attach</span>
               </button>
             </>
-          )}
+          ) : (!resolvedStatuses.includes(req.status) && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-rose-500/5 border border-rose-500/10 rounded-lg">
+              <span className="text-[10px] text-rose-400/80 font-mono tracking-wider uppercase font-semibold flex items-center gap-1">
+                 <Clock className="w-3 h-3" />
+                 Editing period expired {expiryTimeStr && `at ${expiryTimeStr}`}
+              </span>
+              <span className="text-[10px] text-slate-400 border-l border-white/5 pl-2">Use</span>
+              <button 
+                onClick={() => document.getElementById(`reply-input-${req.id}`)?.focus()}
+                className="text-[10px] text-sky-400 hover:text-sky-300 hover:underline font-bold transition-colors cursor-pointer flex items-center gap-1"
+              >
+                Reply / Add Update
+              </button>
+            </div>
+          ))}
 
           {isCancellable && (
             <button 

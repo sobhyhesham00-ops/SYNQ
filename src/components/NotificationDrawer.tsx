@@ -17,7 +17,7 @@ export const NotificationDrawer = ({
   const handleClearNotif = (id: string, currentClearedBy: string[]) => {
     if (!currentUser) return;
     const seenSet = new Set(currentClearedBy || []);
-    seenSet.add(currentUser.name);
+    seenSet.add(currentUser.id);
     updateDoc(doc(db, "notifications", id), {
       clearedByUsers: Array.from(seenSet)
     }).catch(e => console.error("Clear Notif Error:", e));
@@ -30,14 +30,22 @@ export const NotificationDrawer = ({
   // Filter sortedNotifs by typeFilter before rendering
   const displayNotifs = typeFilter === 'all' ? sortedNotifs : sortedNotifs.filter(n => n.type === typeFilter);
 
-  const getNavTab = (type: string) => {
-    if (type === 'inquiry') return 'inquiries';
-    if (type === 'schedule') return 'my-requests';
-    if (type === 'feedback') return 'tl-feedback';
+  const getNavTab = (notif: any) => {
+    if (notif.entityType === 'inquiry') return 'inquiries';
+    if (notif.entityType === 'scheduling_request') return 'my-requests';
+    if (notif.entityType === 'case') return 'daily-cases';
+    if (notif.entityType === 'tt_request') return 'fintech';
+    if (notif.entityType === 'tt_complaint') return 'fintech';
+    if (notif.entityType === 'client_comm') return 'fintech';
+    
+    // fallbacks based on type string for older notifications:
+    if (notif.type === 'inquiry') return 'inquiries';
+    if (notif.type === 'schedule') return 'my-requests';
+    if (notif.type === 'feedback') return 'tl-feedback';
     return null;
   };
 
-  const unreadCount = sortedNotifs.filter(n => !n.seenByUsers?.includes(currentUser?.name)).length;
+  const unreadCount = sortedNotifs.filter(n => !n.seenByUsers?.includes(currentUser?.id)).length;
 
   return (
     <AnimatePresence mode="wait">
@@ -149,10 +157,24 @@ export const NotificationDrawer = ({
                           key={notif.id}
                           onClick={() => {
                             if (isUnread && handleMarkSingleNotifAsRead) handleMarkSingleNotifAsRead(notif.id);
-                            const tab = getNavTab(notif.type);
+                            const tab = getNavTab(notif);
                             if (tab && setActiveTab) {
                               setActiveTab(tab);
                               onClose();
+                            }
+                            
+                            // Scroll to entity
+                            if (notif.entityId) {
+                                setTimeout(() => {
+                                    const element = document.getElementById(`request-${notif.entityId}`) || document.getElementById(`inquiry-${notif.entityId}`);
+                                    if (element) {
+                                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        element.classList.add('ring-2', 'ring-indigo-500', 'ring-offset-2', 'ring-offset-[#0f0f13]', 'transition-all', 'duration-500');
+                                        setTimeout(() => {
+                                            element.classList.remove('ring-2', 'ring-indigo-500', 'ring-offset-2', 'ring-offset-[#0f0f13]');
+                                        }, 3000);
+                                    }
+                                }, 300); // Wait for tab change
                             }
                           }}
                           className={`relative p-4 rounded-2xl border transition-all cursor-pointer hover:border-white/10 select-none ${getBgClass()}`}

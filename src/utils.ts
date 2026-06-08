@@ -3,6 +3,93 @@ import { SchedulingRequest, SHIFTS, TEAM_LEADERS, INITIAL_AGENTS, SwapRequest, A
 // Simple client-side storage helpers
 import { db, wrappedSetDoc as setDoc, wrappedDeleteDoc as deleteDoc } from './firebase';
 import { doc } from 'firebase/firestore';
+import { toast } from "sonner";
+
+export const normalizeUrl = (value: string | undefined | null): string | null => {
+  if (!value) return null;
+  let cleanValue = value.trim();
+  if (cleanValue === '') return null;
+  
+  if (!/^https?:\/\//i.test(cleanValue)) {
+    cleanValue = 'https://' + cleanValue;
+  }
+  
+  try {
+    new URL(cleanValue);
+    return cleanValue;
+  } catch (e) {
+    return null;
+  }
+};
+
+export const extractLinks = (linksData: any): string[] => {
+  let result: string[] = [];
+  if (Array.isArray(linksData)) {
+    linksData.forEach(l => {
+      if (typeof l === 'string') result.push(...l.split(/[\n,]+/));
+    });
+  } else if (typeof linksData === 'string') {
+    result = linksData.split(/[\n,]+/);
+  }
+  return result.map(l => l.trim()).filter(Boolean);
+};
+
+export const copyToClipboard = async (value: string, successMessage: string = "Copied to clipboard", htmlValue?: string): Promise<boolean> => {
+  if (!value) {
+    toast.error("Nothing to copy");
+    return false;
+  }
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      if (htmlValue && typeof ClipboardItem !== 'undefined') {
+        try {
+          const textBlob = new Blob([value], { type: "text/plain" });
+          const htmlBlob = new Blob([htmlValue], { type: "text/html" });
+          const item = new ClipboardItem({
+             "text/plain": textBlob,
+             "text/html": htmlBlob
+          });
+          await navigator.clipboard.write([item]);
+          toast.success(successMessage);
+          return true;
+        } catch (itemErr) {
+          console.warn("Rich text copy failed, falling back to plain text", itemErr);
+          await navigator.clipboard.writeText(value);
+          toast.success(successMessage);
+          return true;
+        }
+      } else {
+        await navigator.clipboard.writeText(value);
+        toast.success(successMessage);
+        return true;
+      }
+    } else {
+      const textArea = document.createElement("textarea");
+      textArea.value = value;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      const successful = document.execCommand('copy');
+      textArea.remove();
+      
+      if (successful) {
+        toast.success(successMessage);
+        return true;
+      } else {
+        toast.error("Failed to copy to clipboard.");
+        return false;
+      }
+    }
+  } catch (err) {
+    console.error("Clipboard copy failed:", err);
+    toast.error("Failed to copy to clipboard.");
+    return false;
+  }
+};
 
 export const compressPastedImage = (base64Str: string, maxWidth = 1024, quality = 0.7): Promise<string> => {
   return new Promise((resolve) => {
