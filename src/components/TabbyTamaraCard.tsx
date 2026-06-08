@@ -55,7 +55,7 @@ const ProviderGlowBadge = ({ platform, className = "" }: any) => {
   }
 
   return (
-    <span className={`px-2.5 py-1 rounded-md text-[10px] font-black tracking-widest uppercase border bg-gradient-to-r flex items-center gap-1 ${colorClass} ${className}`}>
+    <span className={`px-3 py-1.5 rounded-lg text-[11px] font-black tracking-widest uppercase border bg-gradient-to-r flex items-center gap-1 ${colorClass} ${className}`}>
       {label}
     </span>
   );
@@ -80,7 +80,7 @@ const CRMField = ({ icon: Icon, label, value, isBold, onClick, valueClass = "tex
   };
 
   return (
-    <div className="flex flex-col gap-1.5 p-3 rounded-xl hover:bg-white/[0.03] transition-colors cursor-pointer group text-left border border-transparent hover:border-white/5" onClick={handleCopy}>
+    <div className="flex flex-col gap-1.5 p-3 rounded-xl hover:bg-white/[0.03] transition-colors cursor-pointer group text-left border border-transparent hover:border-slate-700/40" onClick={handleCopy}>
       <div className="flex items-center justify-between text-[11px] text-slate-500 font-bold tracking-widest uppercase">
         <span className="flex items-center gap-1.5"><Icon className="w-3.5 h-3.5 text-slate-600" /> {label}</span>
         {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity" />}
@@ -305,22 +305,29 @@ export const TabbyTamaraCard = ({
   const isRejected = req.status === "rejected";
   const isContacted = req.customerContacted === "contacted";
 
-  let borderColor = "border-t-slate-500";
-  if (req.platform === "tabby") borderColor = "border-t-amber-500";
-  else if (req.platform === "tamara") borderColor = "border-t-rose-500";
-  else if (req.platform === "one_time_payment") borderColor = "border-t-blue-500";
+  let borderColor = "border-t-slate-500/80 shadow-[0_4px_24px_rgba(15,15,25,0.4)]";
+  if (req.platform === "tabby") borderColor = "border-t-amber-500/80 shadow-[0_4px_24px_rgba(245,158,11,0.03)]";
+  else if (req.platform === "tamara") borderColor = "border-t-rose-500/80 shadow-[0_4px_24px_rgba(244,63,94,0.03)]";
+  else if (req.platform === "one_time_payment") borderColor = "border-t-blue-500/80 shadow-[0_4px_24px_rgba(59,130,246,0.03)]";
 
   const amountTax = !isNaN(Number(req.priceWithoutTax)) ? (Number(req.priceWithoutTax) * 1.05).toFixed(2) : "-";
 
   return (
-    <div id={`request-${req.id}`} className={`bg-[#0d0d10] border-x border-b border-t-2 border-x-white/10 border-b-white/10 ${borderColor} rounded-2xl flex flex-col relative overflow-hidden transition-all shadow-lg max-w-full group/card`}>
+    <div id={`request-${req.id}`} className="bg-[#18181c] border border-slate-700/60 rounded-2xl shadow-xl shadow-black/40 hover:shadow-black/60 hover:border-slate-600/80 transition-all duration-200 flex flex-col relative overflow-hidden max-w-full group/card">
+      {/* Platform color strip */}
+      <div className={`h-1.5 w-full rounded-t-2xl ${
+        req.platform === 'tabby' ? 'bg-gradient-to-r from-amber-400 to-amber-600' :
+        req.platform === 'tamara' ? 'bg-gradient-to-r from-rose-400 to-rose-600' :
+        req.platform === 'one_time_payment' ? 'bg-gradient-to-r from-blue-400 to-blue-600' :
+        'bg-gradient-to-r from-slate-500 to-slate-700'
+      }`} />
       {/* SLA Accent Row */}
       {isPendingContact && (
-        <div className={`h-1 w-full ${isOverdue ? 'bg-red-500' : isWarning ? 'bg-amber-500' : 'bg-emerald-500'} absolute top-0 left-0`} />
+        <div className={`h-0.5 w-full ${isOverdue ? 'bg-red-500' : isWarning ? 'bg-amber-500' : 'bg-emerald-500'}`} />
       )}
 
       {/* HEADER STRIP */}
-      <div className='flex items-center justify-between px-4 pt-3 pb-2'>
+      <div className='flex items-center justify-between px-5 pt-4 pb-2.5'>
          <div className="flex items-center gap-3">
            <ProviderGlowBadge platform={req.platform} />
          </div>
@@ -330,7 +337,7 @@ export const TabbyTamaraCard = ({
                 <AlertCircle className="w-3.5 h-3.5 animate-pulse" /> {getElapsedTimerString(req.confirmedAt || req.createdAt)}
               </span>
            )}
-           <div className="font-mono text-[10px] text-slate-600 uppercase tracking-wider hidden sm:block mr-2">
+           <div className="font-mono text-[10px] text-slate-500 uppercase tracking-wider hidden sm:block mr-2">
              Ref: {formatCaseRef(req.id, 'tt_request')}
            </div>
            <StatusBadge status={req.status} customerContacted={req.customerContacted} />
@@ -338,60 +345,63 @@ export const TabbyTamaraCard = ({
       </div>
 
       {/* BODY */}
-      <div className='px-4 pb-3 border-b border-white/[0.05]'>
+      <div className='px-5 pb-4 border-b border-slate-700/40'>
         <h3 
-          className='text-lg md:text-xl font-black text-white tracking-tight cursor-pointer hover:text-amber-100 transition-colors w-fit flex items-center gap-2 group/name'  
+          className='text-2xl font-black text-white tracking-tight cursor-pointer hover:text-amber-100 transition-colors w-fit flex items-center gap-2 group/name'  
           onClick={() => copyToClipboard(req.patientName || "Unknown", "Patient name copied!")}
           title="Copy Patient Name"
         >
           {req.patientName || "Unknown"}
           <Copy className="w-4 h-4 opacity-0 group-hover/name:opacity-100 transition-opacity text-amber-100/50" />
         </h3>
-        <div className='flex items-center flex-wrap gap-2 mt-1'>
-          <span className='text-[10px] text-slate-400 font-mono'>File: {req.fileNumber || req.idNumber || 'N/A'}</span>
+        <div className='flex items-center flex-wrap gap-2 mt-1.5'>
+          <span className='text-[10px] text-slate-400 font-mono bg-white/[0.04] px-2 py-0.5 rounded-md'>File: {req.fileNumber || req.idNumber || 'N/A'}</span>
           <span className='w-1 h-1 rounded-full bg-slate-700' />
           {req.isOldCustomer && (
             <>
-              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase bg-slate-800 text-slate-300 border border-slate-700">Returning Pt</span>
+              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase bg-slate-800 text-slate-300 border border-slate-700/50">Returning Pt</span>
               <span className='w-1 h-1 rounded-full bg-slate-700' />
             </>
           )}
-          <span className='text-[10px] text-slate-400 font-semibold flex items-center gap-1'><User className="w-3 h-3"/> By {req.agentName}</span>
+          <span className='text-[10px] text-slate-400 font-semibold flex items-center gap-1 bg-white/[0.04] px-2 py-0.5 rounded-md'><User className="w-3 h-3 text-slate-500"/> By {req.agentName}</span>
         </div>
       </div>
 
-      <div className='grid grid-cols-3 divide-x divide-white/[0.05] border-b border-white/[0.05]'>
+      <div className='grid grid-cols-3 divide-x divide-slate-700/40 border-b border-slate-700/40'>
         <div
-          className="px-3 py-2 cursor-pointer hover:bg-white/[0.02] transition-colors group/phone"
+          className="px-4 py-3 cursor-pointer hover:bg-slate-700/30 transition-colors group/phone"
           onClick={() => copyToClipboard(req.phoneNumber, "Phone number copied!")}
           title="Copy Phone"
         >
           <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1"><Phone className="w-3 h-3 text-blue-400" /> Phone</span>
-            <span className="text-[13px] font-bold text-slate-200 mt-0.5 truncate">{req.phoneNumber || "N/A"}</span>
+            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1"><Phone className="w-3 h-3 text-blue-400" /> Phone</span>
+            <span className="text-sm font-semibold text-slate-100 mt-1 truncate">{req.phoneNumber || "N/A"}</span>
           </div>
         </div>
-        <div className="px-3 py-2 flex flex-col overflow-hidden">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1"><Hospital className="w-3 h-3 text-emerald-400" /> Clinic</span>
-          <span className="text-[13px] font-bold text-slate-200 mt-0.5 truncate">{req.clinicName || "N/A"}</span>
+        <div className="px-4 py-3 flex flex-col overflow-hidden">
+          <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1"><Hospital className="w-3 h-3 text-emerald-500" /> Clinic</span>
+          <span className="text-sm font-semibold text-slate-100 mt-1 truncate">{req.clinicName || "N/A"}</span>
         </div>
-        <div className="px-3 py-2 flex flex-col">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1"><Calendar className="w-3 h-3 text-slate-400" /> Date</span>
-          <span className="text-[13px] font-bold text-slate-200 mt-0.5 truncate">{new Date(req.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+        <div className="px-4 py-3 flex flex-col">
+          <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1"><Calendar className="w-3 h-3 text-slate-400" /> Date</span>
+          <span className="text-sm font-semibold text-slate-100 mt-1 truncate">{new Date(req.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
         </div>
       </div>
       
-      <div className='px-4 py-2.5 flex flex-wrap items-baseline justify-between border-b border-white/[0.05] bg-white/[0.01]'>
+      <div className='px-5 py-4 flex flex-wrap items-center justify-between border-b border-slate-700/40 bg-slate-800/30'>
         <div className='flex items-baseline gap-1.5'>
-          <span className='text-[11px] text-emerald-500 font-bold'>AED</span>
-          <span className='text-xl md:text-2xl font-black text-white font-mono'>{req.priceWithoutTax || 0}</span>
-          {req.paymentLength && <span className="ml-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest bg-white/[0.05] px-2 py-0.5 rounded-full">{req.paymentLength} Mo. Plan</span>}
+          <span className='text-sm text-emerald-400 font-bold'>AED</span>
+          <span className='text-3xl font-black text-white font-mono tracking-tight'>{req.priceWithoutTax || 0}</span>
+          {req.paymentLength && <span className="ml-[10px] text-[10px] text-slate-400 font-bold uppercase tracking-widest bg-slate-700/60 border border-slate-600 px-2 py-0.5 rounded-full">{req.paymentLength} Mo. Plan</span>}
         </div>
-        <span className='text-[10px] text-slate-500 font-mono font-medium'>w/tax: AED {amountTax}</span>
+        <div className='text-right'>
+          <p className='text-[9px] text-slate-600 uppercase tracking-widest'>incl. VAT 5%</p>
+          <p className='text-sm font-bold text-slate-400 font-mono'>AED {amountTax}</p>
+        </div>
       </div>
 
       {/* PROGRESS TIMELINE */}
-      <div className='px-4 py-3 border-b border-white/[0.05]'>
+      <div className='px-5 py-4 border-b border-slate-700/40 bg-slate-950/20'>
         <div className='flex items-center gap-0'>
           {[
             { label: 'Submitted', done: true },
@@ -399,14 +409,14 @@ export const TabbyTamaraCard = ({
             { label: 'Pt Contacted', done: req.customerContacted === 'contacted' },
           ].map((step, i, arr) => (
             <React.Fragment key={step.label}>
-              <div className='flex flex-col items-center gap-1 w-20 shrink-0'>
-                <div className={`w-5 h-5 rounded-full flex items-center justify-center border-2 transition-all ${step.done ? 'bg-indigo-500 border-indigo-400' : 'bg-transparent border-slate-700'}`}>
-                  {step.done && <Check className='w-2.5 h-2.5 text-white' />}
+              <div className='flex flex-col items-center gap-1 w-24 shrink-0'>
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center border transition-all ${step.done ? 'bg-indigo-500 border-indigo-300 shadow-sm shadow-indigo-500/50' : 'bg-transparent border-slate-800'}`}>
+                  {step.done && <Check className='w-3.5 h-3.5 text-white' />}
                 </div>
-                <span className={`text-[9px] font-bold uppercase tracking-wider whitespace-nowrap ${step.done ? 'text-indigo-400' : 'text-slate-500'}`}>{step.label}</span>
+                <span className={`text-[10px] font-bold uppercase tracking-wide whitespace-nowrap ${step.done ? 'text-indigo-400' : 'text-slate-500'}`}>{step.label}</span>
               </div>
               {i < arr.length - 1 && (
-                <div className={`flex-1 h-0.5 mb-4 mx-1 sm:mx-2 transition-all ${arr[i+1].done ? 'bg-indigo-500' : 'bg-slate-800'}`} />
+                <div className={`flex-1 h-1 rounded-full mb-5 mx-1 transition-all ${arr[i+1].done ? 'bg-indigo-500' : 'bg-slate-800'}`} />
               )}
             </React.Fragment>
           ))}
@@ -414,11 +424,11 @@ export const TabbyTamaraCard = ({
       </div>
 
       {/* NOTES & ATTACHMENTS (COLLAPSIBLE) */}
-      <div className="border-b border-white/5 bg-white/[0.02]">
-        <button onClick={() => setExpandedNotes(!expandedNotes)} className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-white/[0.02] transition-colors group">
+      <div className="border-b border-slate-700/40 bg-slate-800/20">
+        <button onClick={() => setExpandedNotes(!expandedNotes)} className="w-full px-5 py-3 flex items-center justify-between text-left hover:bg-white/[0.02] transition-colors group">
           <div className="flex items-center gap-3">
              <span className="text-[10px] font-bold text-slate-400 group-hover:text-slate-300 uppercase tracking-widest flex items-center gap-2">
-                <FileText className="w-4 h-4" /> Notes & Attachments
+                <FileText className="w-4 h-4 text-slate-500" /> Notes & Attachments
              </span>
              {hasAttachments && <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-lg text-[10px] font-bold tracking-widest uppercase">Has Files</span>}
           </div>
@@ -427,7 +437,7 @@ export const TabbyTamaraCard = ({
         {expandedNotes && (
           <div className="px-5 pb-5 space-y-5">
              {req.notes && (
-               <div className="p-4 bg-black/40 border border-white/5 rounded-xl text-sm text-slate-300 font-medium leading-relaxed">
+               <div className="p-4 bg-slate-900/60 border border-slate-700/40 rounded-xl text-xs text-slate-300 font-medium leading-relaxed">
                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Agent Notes</span> 
                  {req.notes}
                </div>
@@ -444,14 +454,14 @@ export const TabbyTamaraCard = ({
 
       {/* TL NOTES SECTION */}
       {req.status === "confirmed" && (
-        <div className="p-4 md:p-5 border-b border-white/5 bg-indigo-950/5 relative overflow-hidden">
+        <div className="p-4 md:p-5 border-b border-slate-700/40 bg-amber-950/20 relative overflow-hidden">
            <div className="absolute top-0 left-0 bottom-0 w-1 bg-amber-400"></div>
            <div className="flex flex-col gap-4 pl-3">
              <div className="flex flex-col gap-1.5 w-full">
                <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest flex items-center gap-1.5 mb-1 opacity-80">
                  <CheckCircle2 className="w-3 h-3" /> Link Issued by TL
                </span>
-               <div className="flex items-center group/link relative w-full border border-white/5 bg-black/20 rounded-lg p-3 hover:border-amber-500/30 transition-colors">
+               <div className="flex items-center group/link relative w-full border border-amber-500/20 bg-amber-950/20 rounded-xl p-3 hover:border-amber-500/30 transition-colors">
                   <ExternalLink className="w-4 h-4 text-amber-500/50 mr-3 shrink-0" />
                   <a href={normalizeUrl(req.paymentLink) || req.paymentLink} target="_blank" rel="noreferrer" onClick={() => copyToClipboard(req.paymentLink, "Payment Link Copied!")} className="flex-1 truncate text-sm text-amber-100 font-mono hover:text-white transition-colors cursor-pointer block pr-10">
                     {normalizeUrl(req.paymentLink) || req.paymentLink || "No payment link generated"}
@@ -463,9 +473,9 @@ export const TabbyTamaraCard = ({
              </div>
 
              {req.tlNotes && (
-               <div className="p-4 bg-emerald-950/20 border border-emerald-500/10 rounded-xl mt-1">
-                 <div className="text-[10px] font-bold text-emerald-500/70 mb-2 flex justify-between items-center">
-                   <span className="uppercase tracking-widest">TL NOTES — {req.confirmedBy || "System"}</span>
+                <div className="p-4 bg-slate-800/60 border border-emerald-500/20 rounded-xl mt-1">
+                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex justify-between items-center">
+                   <span className="uppercase tracking-widest">TL Notes ({req.confirmedBy || "System"})</span>
                    <span className="text-emerald-500/40 font-mono">{new Date(req.confirmedAt || req.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'})}</span>
                  </div>
                  <div className="text-sm text-emerald-100/90 font-medium leading-relaxed">
@@ -476,7 +486,7 @@ export const TabbyTamaraCard = ({
              
              {req.tlLinks && (
                 <div className="mt-1 space-y-2">
-                   <span className="text-[10px] font-bold text-emerald-500/60 uppercase tracking-widest block">TL Links</span>
+                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">TL Links</span>
                    <div className="flex flex-col gap-2">
                      {extractLinks(req.tlLinks).map((link: string, idx: number) => (
                        <a key={idx} href={normalizeUrl(link)} target="_blank" rel="noreferrer" className="flex gap-3 text-sm bg-black/40 border border-emerald-500/10 p-3 rounded-xl items-center text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/30 transition-colors">
@@ -492,11 +502,11 @@ export const TabbyTamaraCard = ({
       )}
 
       {req.status === 'confirmed' && (
-         <div className='border-t border-white/[0.05]'>
+         <div className='border-t border-slate-700/40'>
            {/* Show existing follow-up replies */}
            {(req.agentFollowUps || []).length > 0 && (
-             <div className='px-4 pt-3 pb-0 space-y-2'>
-               <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold'>
+             <div className='px-5 pt-4 pb-0 space-y-2'>
+               <p className='text-[10px] text-slate-400 uppercase tracking-widest font-bold'>
                  💬 Post-Confirmation Notes ({(req.agentFollowUps || []).length})
                </p>
                {(req.agentFollowUps || []).map((fu: any, i: number) => (
@@ -535,7 +545,7 @@ export const TabbyTamaraCard = ({
                  value={followUpText}
                  onChange={e => setFollowUpText(e.target.value)}
                  placeholder='Add a note, update, or question about this confirmed request...'
-                 className='w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 resize-none h-20 font-sans'
+                 className='w-full bg-black/40 border border-slate-600/50 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 resize-none h-20 font-sans'
                />
                <MultiAttachmentUpload
                  photos={followUpPhotos}
@@ -587,12 +597,12 @@ export const TabbyTamaraCard = ({
        )}
 
       {req.status === "rejected" && (
-        <div className="p-4 md:p-5 border-b border-white/5 bg-red-950/5 relative overflow-hidden">
+        <div className="p-4 md:p-5 border-b border-slate-700/40 bg-red-950/5 relative overflow-hidden">
            <div className="absolute top-0 left-0 bottom-0 w-1 bg-red-500"></div>
            <div className="pl-3">
              <div className="p-4 bg-red-950/20 border border-red-500/10 rounded-xl">
-               <div className="text-[10px] font-bold text-red-500/70 mb-2 flex justify-between items-center">
-                 <span className="uppercase tracking-widest">REJECTION REASON — {req.confirmedBy || "System"}</span>
+               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex justify-between items-center">
+                 <span className="uppercase tracking-widest">Rejection Reason ({req.confirmedBy || "System"})</span>
                  <span className="text-red-500/40 font-mono">{new Date(req.confirmedAt || req.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'})}</span>
                </div>
                <div className="text-sm text-red-100/90 font-medium leading-relaxed">
@@ -605,32 +615,32 @@ export const TabbyTamaraCard = ({
 
       {/* TL INLINE HANDLING FORM */}
       {activeFintechHandlingId === req.id && isTLOreSupport && req.status === "not_confirmed" && (
-        <div className="bg-[#0f0f15] border-y border-indigo-500/20 p-5 space-y-4">
+        <div className="bg-slate-900/80 border-y border-indigo-500/30 p-5 space-y-4">
            <h4 className="text-xs font-black text-indigo-400 flex items-center gap-2 mb-3 uppercase tracking-widest"><CornerDownRight className="w-4 h-4" /> Processing Panel</h4>
            <div className="space-y-4">
              <div>
                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5 flex justify-between">
                  <span>Payment Link <span className="text-red-400">*</span></span>
                </label>
-               <input type="text" value={tlFintechPaymentLink} onChange={(e) => setTlFintechPaymentLink(e.target.value)} placeholder="https://payment..." className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-all" />
+               <input type="text" value={tlFintechPaymentLink} onChange={(e) => setTlFintechPaymentLink(e.target.value)} placeholder="https://payment..." className="w-full bg-slate-900 border border-slate-600/60 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-all" />
              </div>
              <div>
                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5 flex justify-between">
                  <span>Guidance Notes</span>
                </label>
-               <textarea value={tlFintechNotes} onChange={(e) => setTlFintechNotes(e.target.value)} placeholder="Add remarks..." className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none min-h-[80px] resize-none transition-all" />
+               <textarea value={tlFintechNotes} onChange={(e) => setTlFintechNotes(e.target.value)} placeholder="Add remarks..." className="w-full bg-slate-900 border border-slate-600/60 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none min-h-[80px] resize-none transition-all" />
              </div>
              <div>
                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5 flex justify-between">
                  <span>Supporting Links <span className="text-slate-600 font-medium">(Optional)</span></span>
                </label>
-               <input type="text" value={tlFintechLinks} onChange={(e) => setTlFintechLinks(e.target.value)} placeholder="https://link1.com, https://link2.com" className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-all" />
+               <input type="text" value={tlFintechLinks} onChange={(e) => setTlFintechLinks(e.target.value)} placeholder="https://link1.com, https://link2.com" className="w-full bg-slate-900 border border-slate-600/60 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-all" />
              </div>
-             <div className="flex gap-3 justify-end pt-3 border-t border-white/5">
-               <button onClick={() => { handleConfirmTabbyTamara(req.id, tlFintechPaymentLink, tlFintechNotes, tlFintechLinks, "rejected"); setActiveFintechHandlingId(null); }} className="px-5 py-2.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 font-bold text-xs tracking-wider uppercase rounded-xl transition-colors flex items-center gap-1.5 shrink-0">
+             <div className="flex gap-3 justify-end pt-3 border-t border-slate-700/40">
+               <button onClick={() => { handleConfirmTabbyTamara(req.id, tlFintechPaymentLink, tlFintechNotes, tlFintechLinks, "rejected"); setActiveFintechHandlingId(null); }} className="px-5 py-2.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 font-bold text-[10px] uppercase tracking-widest rounded-xl transition-colors flex items-center gap-1.5 shrink-0">
                  <Trash2 className="w-4 h-4" /> Reject
                </button>
-               <button onClick={() => { handleConfirmTabbyTamara(req.id, tlFintechPaymentLink, tlFintechNotes, tlFintechLinks, "confirmed"); setActiveFintechHandlingId(null); }} className="px-6 py-2.5 bg-indigo-600 text-white hover:bg-indigo-500 font-bold text-xs tracking-wider uppercase rounded-xl transition-all shadow-lg hover:shadow-indigo-500/20 flex items-center gap-1.5 w-full sm:w-auto justify-center">
+               <button onClick={() => { handleConfirmTabbyTamara(req.id, tlFintechPaymentLink, tlFintechNotes, tlFintechLinks, "confirmed"); setActiveFintechHandlingId(null); }} className="px-6 py-2.5 bg-indigo-600 text-white hover:bg-indigo-500 font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all shadow-lg hover:shadow-indigo-500/20 flex items-center gap-1.5 w-full sm:w-auto justify-center">
                  <CheckCircle2 className="w-4 h-4" /> Issue Link
                </button>
              </div>
@@ -639,7 +649,7 @@ export const TabbyTamaraCard = ({
       )}
 
       {/* ACTION FOOTER */}
-      <div className="px-4 py-3 flex items-center gap-2 flex-wrap bg-white/[0.01] border-t border-white/5">
+      <div className="px-5 py-3 flex items-center gap-2 flex-wrap bg-slate-800/40 border-t border-slate-700/40">
         {/* LEFT group: delete and edit */}
         <div className='mr-auto flex items-center gap-2'>
           {isSuperAdmin && (
@@ -673,7 +683,7 @@ export const TabbyTamaraCard = ({
           </button>
         )}
 
-        <button onClick={handleCopyTextOnly} className="px-3 py-1.5 text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-700/80 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-widest border border-white/5">
+        <button onClick={handleCopyTextOnly} className="px-3 py-1.5 text-slate-400 hover:text-white bg-slate-700/60 hover:bg-slate-600/80 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-widest border border-slate-600/40">
           <Copy className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Copy</span>
         </button>
 
@@ -697,7 +707,7 @@ export const TabbyTamaraCard = ({
                    setTlFintechLinks(req.tlLinks || "");
                  }
                }}
-               className={`px-4 py-1.5 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 transition-all ${activeFintechHandlingId === req.id ? 'bg-slate-700 text-white shadow-inner' : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg shadow-indigo-500/20'}`}
+               className={`px-4 py-1.5 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 transition-all ${activeFintechHandlingId === req.id ? 'bg-slate-700 text-white shadow-inner' : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg shadow-indigo-500/30 ring-1 ring-indigo-500/30'}`}
             >
               <PenTool className="w-3.5 h-3.5" /> {activeFintechHandlingId === req.id ? "Cancel" : "TL Handle"}
             </button>
@@ -707,7 +717,7 @@ export const TabbyTamaraCard = ({
         {(isTLOreSupport || currentUser?.role === "agent") && req.status === "confirmed" && req.customerContacted !== "contacted" && (
            <button
               onClick={() => setIsContactingMode(!isContactingMode)}
-              className={`px-4 py-1.5 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 transition-all ${isContactingMode ? 'bg-slate-700 text-white shadow-inner' : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-lg shadow-emerald-500/20'}`}
+              className={`px-4 py-1.5 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 transition-all ${isContactingMode ? 'bg-slate-700 text-white shadow-inner' : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-lg shadow-emerald-500/30 ring-1 ring-emerald-500/30'}`}
            >
               <CheckCircle2 className="w-3.5 h-3.5" /> <span className="hidden sm:inline">{isContactingMode ? 'Cancel' : 'Mark Contacted'}</span>
            </button>
@@ -716,7 +726,7 @@ export const TabbyTamaraCard = ({
         {currentUser?.role === "agent" && req.status === "confirmed" && req.customerContacted === "contacted" && (
           <button
              onClick={() => handleMarkPatientContactedTT?.(req.id, "not_contacted")} 
-             className="px-3 py-1.5 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 transition-colors border border-white/5"
+             className="px-3 py-1.5 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 transition-colors border border-slate-700/40"
           >
              <AlertCircle className="w-3.5 h-3.5 opacity-70" /> Undo Contact
           </button>
@@ -759,7 +769,7 @@ export const TabbyTamaraCard = ({
                        setContactNotes("");
                        setContactPhotos([]);
                     }}
-                    className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-500/20 uppercase tracking-widest flex items-center gap-2"
+                    className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-[10px] font-bold transition-all shadow-lg shadow-emerald-500/20 uppercase tracking-widest flex items-center gap-2"
                  >
                    {isContactingUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                    Confirm Contacted
@@ -770,7 +780,7 @@ export const TabbyTamaraCard = ({
       )}
 
       {/* ALWAYS VISIBLE REPLY THREAD */}
-      <div className="bg-black/20 pt-4 pb-5 px-4 md:px-5">
+      <div className="bg-slate-800/20 pt-4 pb-5 px-5 border-t border-slate-700/40">
         <RequestReplyThread
           request={req}
           currentUser={currentUser}
