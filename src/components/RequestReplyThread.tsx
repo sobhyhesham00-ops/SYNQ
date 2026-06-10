@@ -6,6 +6,8 @@ import { db, wrappedUpdateDoc as updateDoc } from '../firebase';
 import { toast } from 'sonner';
 import { compressImage } from '../utils';
 import { processAttachments } from '../services/attachmentService';
+import { AttachmentsDisplay } from './AttachmentsDisplay';
+import { MultiAttachmentUpload } from './MultiAttachmentUpload';
 
 interface ThreadReply {
   id: string;
@@ -50,6 +52,7 @@ export function RequestReplyThread({
   const [linkInput, setLinkInput] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [replyPhotos, setReplyPhotos] = useState<string[]>([]);
 
   const newReplies = (request.replies || []).filter(r => r.senderName !== currentUser.name).length;
 
@@ -119,13 +122,13 @@ export function RequestReplyThread({
 
   const handleReply = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!String(text || '').trim() && attachments.length === 0 && links.length === 0) return;
+    if (!String(text || '').trim() && attachments.length === 0 && links.length === 0 && replyPhotos.length === 0) return;
 
     try {
       const eType = collectionName === 'inquiries' ? 'inquiry' :
-                    collectionName === 'requests' ? 'scheduling' :
+                    collectionName === 'scheduling_requests' ? 'scheduling' :
                     collectionName === 'tt_complaints' ? 'tt_complaint' :
-                    collectionName === 'client_comms' ? 'client_comm' : 'tabby_tamara';
+                    collectionName === 'client_comms' ? 'client_comm' : 'tt_request';
 
       const processedAttachments = await processAttachments(
         attachments,
@@ -134,6 +137,8 @@ export function RequestReplyThread({
         "reply"
       );
 
+      const safeAttachments = processedAttachments.map(({ file, ...rest }) => rest);
+
       const newReply: ThreadReply = {
         id: `rpl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         authorId: currentUser.id,
@@ -141,14 +146,16 @@ export function RequestReplyThread({
         authorRole: currentUser.role,
         text,
         createdAt: new Date().toISOString(),
-        attachments: processedAttachments,
-        links
+        attachments: safeAttachments,
+        links,
+        screenshot: replyPhotos[0] || undefined,  // backward compat
+        photos: replyPhotos,                       // new field
       };
 
       // Fallbacks for notifications if props were not provided
       const computedRequestType = requestType || (
-        collectionName === 'requests' ? 'Scheduling' :
-        collectionName === 'tabby_tamara' ? 'Tabby/Tamara' :
+        collectionName === 'scheduling_requests' ? 'Scheduling' :
+        collectionName === 'tt_requests' ? 'Tabby/Tamara' :
         collectionName === 'tt_complaints' ? 'Complaint' :
         collectionName === 'client_comms' ? 'Client Comm' :
         'Request'
@@ -184,6 +191,7 @@ export function RequestReplyThread({
       setText('');
       setAttachments([]);
       setLinks([]);
+      setReplyPhotos([]);
     } catch(err) {
       console.error(err);
       toast.error("Failed to add reply");
@@ -249,128 +257,34 @@ export function RequestReplyThread({
                 </div>
                 {r.text && <p className="text-xs text-slate-300 leading-relaxed font-sans whitespace-pre-line text-left">{r.text}</p>}
                 
-                {/* Modern FileAttachments */}
-                {r.attachments && r.attachments.length > 0 && (
-                  <div className={`mt-2 flex flex-wrap gap-2 ${r.senderName === currentUser.name ? 'justify-end' : 'justify-start'}`}>
-                    {r.attachments.map((att) => {
-                      const isImage = att.type?.startsWith('image/') || att.url?.startsWith('data:image/');
-                      return (
-                        <div key={att.id} className="relative group rounded-xl overflow-hidden border border-white/10 bg-slate-900/60 p-2 flex items-center gap-2 max-w-[190px] text-left">
-                          {isImage ? (
-                            <div className="relative w-10 h-10 rounded overflow-hidden flex-shrink-0 bg-slate-800">
-                              <img referrerPolicy="no-referrer" src={att.url} alt={att.name} className="w-full h-full object-cover" />
-                              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <button type="button" onClick={() => triggerDownload(att.url, att.name)} className="text-emerald-300 hover:text-emerald-200 p-0.5 bg-black/40 rounded-full">
-                                  <Download className="w-3 h-3" />
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="w-10 h-10 rounded bg-slate-800 flex items-center justify-center text-slate-400 flex-shrink-0">
-                              <File className="w-4 h-4 text-slate-300" />
-                            </div>
-                          )}
-                          <div className="min-w-0 flex-grow">
-                            <p className="text-[9px] text-slate-200 font-bold truncate max-w-[100px]" title={att.name}>{att.name}</p>
-                            <p className="text-[8px] text-slate-500 font-mono">{(att.size / 1024).toFixed(0)} KB</p>
-                          </div>
-                          {!isImage && (
-                            <button type="button" onClick={() => triggerDownload(att.url, att.name)} className="text-slate-400 hover:text-indigo-400 p-1 flex-shrink-0">
-                              <Download className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* Legacy Screenshot Fields (screenshot or photos or imageUrl) */}
-                {r.screenshot && (
-                  <div className={`mt-2 ${r.senderName === currentUser.name ? 'flex justify-end' : 'flex justify-start'}`}>
-                    <div className="relative group rounded-lg overflow-hidden border border-white/10 max-w-[200px]">
-                      <img referrerPolicy="no-referrer" src={r.screenshot} alt="Screenshot" className="w-full h-auto object-contain max-h-48" />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                        <button onClick={() => triggerDownload(r.screenshot!, 'screenshot.png')} className="bg-emerald-500/20 text-emerald-300 p-2 rounded-full hover:bg-emerald-500/40 transition-colors" title="Download">
-                           <Download className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {r.imageUrl && (
-                  <div className={`mt-2 ${r.senderName === currentUser.name ? 'flex justify-end' : 'flex justify-start'}`}>
-                    <div className="relative group rounded-lg overflow-hidden border border-white/10 max-w-[200px]">
-                      <img referrerPolicy="no-referrer" src={r.imageUrl} alt="Legacy Image" className="w-full h-auto object-contain max-h-48" />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                        <button onClick={() => triggerDownload(r.imageUrl!, 'legacy_image.png')} className="bg-emerald-500/20 text-emerald-300 p-2 rounded-full hover:bg-emerald-500/40 transition-colors" title="Download">
-                           <Download className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {r.photos && Array.isArray(r.photos) && r.photos.length > 0 && (
-                  <div className={`mt-2 flex flex-wrap gap-1.5 ${r.senderName === currentUser.name ? 'justify-end' : 'justify-start'}`}>
-                    {r.photos.map((ph, idx) => (
-                      <div key={idx} className="relative group rounded-lg overflow-hidden border border-white/10 max-w-[120px]">
-                        <img referrerPolicy="no-referrer" src={ph} alt={`Attachment ${idx}`} className="w-full h-auto object-contain max-h-32" />
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                          <button onClick={() => triggerDownload(ph, `photo_${idx}.png`)} className="bg-emerald-500/20 text-emerald-300 p-1.5 rounded-full hover:bg-emerald-500/40 transition-colors">
-                             <Download className="w-3 w-3" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Legacy attachmentsStrings or any attachments list rendered as text */}
-                {r.attachmentsStrings && Array.isArray(r.attachmentsStrings) && r.attachmentsStrings.length > 0 && (
-                  <div className="mt-1 flex flex-col gap-1 items-start text-left text-xs bg-black/20 p-1.5 rounded">
-                     {r.attachmentsStrings.map((attStr, attIdx) => (
-                       <span key={attIdx} className="text-slate-400 font-mono truncate max-w-xs">{attStr}</span>
-                     ))}
-                  </div>
-                )}
-
-                {/* Legacy attachment string if stored under name attachments but is array of strings */}
-                {r.attachments && Array.isArray(r.attachments) && r.attachments.some(a => typeof a === 'string') && (
-                  <div className="mt-1 flex flex-col gap-1 items-start text-left text-xs bg-black/20 p-1.5 rounded">
-                    {r.attachments.map((attVal, attIdx) => {
-                      if (typeof attVal === 'string') {
-                        return <span key={attIdx} className="text-slate-400 font-mono truncate max-w-xs">{attVal}</span>;
-                      }
-                      return null;
-                    })}
-                  </div>
-                )}
-
-                {/* Links list */}
-                {r.links && r.links.length > 0 && (
-                  <div className={`mt-2 space-y-1 block max-w-full ${r.senderName === currentUser.name ? 'text-right' : 'text-left'}`}>
-                    {r.links.map((linkStr, lIdx) => (
-                      <a
-                        key={lIdx}
-                        href={linkStr}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[10px] text-indigo-400 underline hover:text-indigo-300 inline-flex items-center gap-1 font-mono break-all"
-                      >
-                        <LinkIcon className="w-3 h-3 flex-shrink-0" />
-                        {linkStr}
-                      </a>
-                    ))}
-                  </div>
-                )}
+                {/* Unified Attachments Display */}
+                <div className={`${r.senderName === currentUser.name ? 'flex justify-end' : 'flex justify-start'}`}>
+                  <AttachmentsDisplay 
+                    photos={[
+                      ...(r.photos && Array.isArray(r.photos) ? r.photos : []),
+                      ...(r.screenshot ? [r.screenshot] : []),
+                      ...(r.attachments && Array.isArray(r.attachments) ? r.attachments : []),
+                    ].filter(Boolean)}
+                    links={r.links || []}
+                  />
+                </div>
              </div>
            ))
          )}
       </div>
 
       <form onSubmit={handleReply} className="pt-2 border-t border-white/10 flex flex-col gap-2 relative text-left">
+          {/* MultiAttachmentUpload for reply screenshots */}
+          <div className="bg-slate-900/50 p-4 border border-slate-700/40 rounded-xl mb-2">
+            <MultiAttachmentUpload
+              photos={replyPhotos}
+              links={[]}
+              onPhotosChange={setReplyPhotos}
+              onLinksChange={() => {}}
+              photosLabel='Attach screenshots to reply'
+            />
+          </div>
+
           {/* Active file attachments queue */}
           {attachments.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-1.5">
@@ -456,7 +370,7 @@ export function RequestReplyThread({
               placeholder="Reply or add notes..."
             />
             
-            <button type="submit" disabled={isUploading || (!String(text || '').trim() && attachments.length === 0 && links.length === 0)} className="w-10 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white flex items-center justify-center transition-colors shrink-0">
+            <button type="submit" disabled={isUploading || (!String(text || '').trim() && attachments.length === 0 && links.length === 0 && replyPhotos.length === 0)} className="w-10 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white flex items-center justify-center transition-colors shrink-0">
               <Send className="w-4 h-4" />
             </button>
           </div>

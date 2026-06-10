@@ -24,21 +24,44 @@ export const processAttachments = async (
 
   const processed = await Promise.all(
     attachments.map(async (att) => {
-      // If there's no file object, it means it's either an old base64 attachment,
-      // or an already uploaded file. Keep it exactly as is (metadata only).
+      // No file object = already uploaded or base64, keep as-is
       if (!att.file) return att;
 
-      // Ensure a clean clone without the File object for Firestore
       const { file, ...attMeta } = att;
-      
-      const { uploadTask } = createUploadTask(file, entityType, entityId, replyOrRoot);
-      await uploadTask;
-      const downloadUrl = await getAttachmentDownloadURL(uploadTask);
-      
-      return {
-        ...attMeta,
-        url: downloadUrl
-      };
+
+      try {
+        // Properly await upload using a Promise wrapper around UploadTask events
+        const downloadUrl = await new Promise<string>((resolve, reject) => {
+          const { uploadTask } = createUploadTask(
+            file, entityType, entityId, replyOrRoot
+          );
+          uploadTask.on(
+            'state_changed',
+            null, // progress handler not needed here
+            (error) => reject(error), // error handler
+            async () => {
+              // Called ONLY when upload is 100% complete
+              try {
+                const url = await getDownloadURL(uploadTask.snapshot.ref);
+                resolve(url);
+              } catch (e) {
+                reject(e);
+              }
+            }
+          );
+        });
+
+        return {
+          ...attMeta,
+          url: downloadUrl,
+          file: undefined, // remove File object - not Firestore-safe
+        };
+      } catch (err) {
+        console.error(`Failed to upload ${att.name}:`, err);
+        // Return the attachment with original URL (blob:// or base64) as fallback
+        // so the submission doesn't fail completely
+        return { ...attMeta, file: undefined };
+      }
     })
   );
 

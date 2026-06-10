@@ -47,9 +47,9 @@ interface CaseDetailDrawerProps {
     entityType?: any, 
     entityId?: string
   ) => void;
-  onAssignCase: (caseId: string, type: 'inquiry' | 'complaint' | 'tabby_tamara', agentName: string) => Promise<void>;
-  onClaimCase: (caseId: string, type: 'inquiry' | 'complaint' | 'tabby_tamara') => Promise<void>;
-  onDeleteCase: (caseId: string, type: 'inquiry' | 'complaint' | 'tabby_tamara') => Promise<void>;
+  onAssignCase: (caseId: string, type: 'inquiry' | 'complaint' | 'tabby_tamara' | 'client_comm', agentName: string) => Promise<void>;
+  onClaimCase: (caseId: string, type: 'inquiry' | 'complaint' | 'tabby_tamara' | 'client_comm') => Promise<void>;
+  onDeleteCase: (caseId: string, type: 'inquiry' | 'complaint' | 'tabby_tamara' | 'client_comm') => Promise<void>;
   onEditItem: (editingItem: { type: string; id: string; data: any }) => void;
   onSendToPartner: (caseId: string, notes: string, photos: string[]) => Promise<void>;
   onMarkInquirySent: (inquiryId: string) => Promise<void>;
@@ -193,7 +193,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
 
   const handleEditTrigger = () => {
     onEditItem({
-      type: caseData.crmType === 'inquiry' ? 'inquiry' : caseData.crmType === 'complaint' ? 'tt_complaint' : 'tt_request',
+      type: caseData.crmType === 'inquiry' ? 'inquiry' : caseData.crmType === 'complaint' ? 'tt_complaint' : caseData.crmType === 'client_comm' ? 'client_comm' : 'tt_request',
       id: caseData.id,
       data: caseData.raw,
     });
@@ -218,7 +218,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
       <div className="bg-[#121216] border-b border-white/5 p-4 flex items-center justify-between z-10 shrink-0">
         <div>
           <span className="text-[10px] uppercase font-black tracking-widest text-[#2effc3] bg-[#00e3a5]/5 px-2 py-0.5 rounded border border-[#00e3a5]/10 shrink-0">
-            {caseData.crmType === 'inquiry' ? 'Inquiry' : caseData.crmType === 'complaint' ? 'Complaint' : 'Tabby/Tamara'}
+            {caseData.crmType === 'inquiry' ? 'Inquiry' : caseData.crmType === 'complaint' ? 'Complaint' : caseData.crmType === 'client_comm' ? 'Client Comm' : 'Tabby/Tamara'}
           </span>
           <h2 className="text-sm font-black text-slate-100 font-mono mt-1.5 flex items-center gap-1">
             {caseData.referenceId}
@@ -376,23 +376,24 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
                   <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block">Resolution Method</label>
                   <div className="grid grid-cols-2 gap-2">
                     {[
-                      { value: "apology", label: "🙏 Apology" },
-                      { value: "refund", label: "💰 Refund" },
-                      { value: "replacement", label: "🔄 Replacement" },
-                      { value: "escalated", label: "⬆️ Escalated" },
-                      { value: "no_action", label: "🚫 No Action" },
-                      { value: "follow_up", label: "📞 Follow Up" }
+                      { value: "apology", label: "Apology", icon: <User className="w-3 h-3 text-slate-400" /> },
+                      { value: "refund", label: "Refund", icon: <CheckCircle className="w-3 h-3 text-emerald-400" /> },
+                      { value: "replacement", label: "Replacement", icon: <RefreshCw className="w-3 h-3 text-blue-400" /> },
+                      { value: "escalated", label: "Escalated", icon: <AlertOctagon className="w-3 h-3 text-rose-400" /> },
+                      { value: "no_action", label: "No Action", icon: <X className="w-3 h-3 text-slate-400" /> },
+                      { value: "follow_up", label: "Follow Up", icon: <Phone className="w-3 h-3 text-amber-400" /> }
                     ].map((opt) => (
                       <button
                         key={opt.value}
                         type="button"
                         onClick={() => setComplaintResType(opt.value)}
-                        className={`py-1.5 px-2 rounded-lg text-xs font-semibold text-left transition-all ${
+                        className={`py-1.5 px-2 rounded-lg text-xs font-semibold text-left transition-all flex items-center gap-1.5 ${
                           complaintResType === opt.value
                             ? "bg-rose-500 text-slate-950 font-bold"
                             : "bg-[#1b1b22] hover:bg-white/[0.04] text-slate-300 border border-white/5"
                         }`}
                       >
+                        {opt.icon}
                         {opt.label}
                       </button>
                     ))}
@@ -439,15 +440,15 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
                 <div className="grid grid-cols-2 gap-2.5 pt-1">
                   <button
                     onClick={() => handleMarkContacted('contacted')}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[10px] uppercase tracking-wider py-1.5 px-3 rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer"
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[10px] uppercase tracking-wider py-1.5 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    🚀 Got Contact
+                    <Check className="w-3.5 h-3.5" /> Got Contact
                   </button>
                   <button
                     onClick={() => handleMarkContacted('attempted')}
-                    className="bg-amber-600 hover:bg-amber-500 text-white font-black text-[10px] uppercase tracking-wider py-1.5 px-3 rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer"
+                    className="bg-amber-600 hover:bg-amber-500 text-white font-black text-[10px] uppercase tracking-wider py-1.5 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    ⏰ Attempted Dial
+                    <Clock className="w-3.5 h-3.5" /> Attempted Dial
                   </button>
                 </div>
               </div>
@@ -514,16 +515,16 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
                   </span>
                 </div>
 
-                {caseData.raw.priceWithoutTax && (
+                {caseData.crmType !== "client_comm" && caseData.raw.priceWithoutTax && (
                   <div>
                     <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider leading-none mb-1">Trx value</p>
                     <span className="text-xs font-black text-slate-200 block truncate">
-                      {caseData.raw.priceWithoutTax} AED
+                      {caseData.raw.priceWithTax || (!isNaN(Number(caseData.raw.priceWithoutTax)) ? (Number(caseData.raw.priceWithoutTax)*1.05).toFixed(2) : caseData.raw.priceWithoutTax)} AED <span className="text-[10px] text-slate-500 font-normal">(Base: {caseData.raw.priceWithoutTax} AED)</span>
                     </span>
                   </div>
                 )}
                 
-                {caseData.raw.platform && (
+                {caseData.crmType !== "client_comm" && caseData.raw.platform && (
                   <div>
                     <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider leading-none mb-1">Platform</p>
                     <span className="text-xs font-black text-[#00e3a5] block truncate">

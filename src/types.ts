@@ -5,8 +5,11 @@ export interface FileAttachment {
   name: string;
   type: string;
   size: number;
-  url: string; // data URL or http URL
-  file?: File; // Store original file for deferred upload
+  url: string;
+  storagePath?: string;
+  uploadedAt?: string;
+  uploadedBy?: string;
+  file?: globalThis.File; // Keep for deferred upload
 }
 
 export interface User {
@@ -51,6 +54,7 @@ export interface Shift {
 
 export interface SwapRequest {
   id: string;
+  caseRef?: string;
   agentName: string;
   type: 'swap';
   date: string; // Shift date (YYYY-MM-DD)
@@ -73,6 +77,7 @@ export interface SwapRequest {
 
 export interface AnnualRequest {
   id: string;
+  caseRef?: string;
   agentName: string;
   type: 'annual';
   startDate: string; // YYYY-MM-DD
@@ -105,11 +110,13 @@ export interface TodoItem {
 
 export interface Inquiry {
   id: string;
+  caseRef?: string;
   agentName: string;
   clinicName: string; // Mandatory dropdown value
   phoneNumber?: string;
   text: string;
   photos: string[]; // Base64 data-urls or image urls
+  screenshot?: string | null; // keep for backward compat
   attachments?: any[]; // Array of FileAttachment objects
   links: string[]; // URLs
   createdAt: string; // ISO timestamp
@@ -121,6 +128,7 @@ export interface Inquiry {
   answeredAt?: string;
   seenByAgent?: boolean; // Tracking if agent acknowledged the notification
   customerContacted?: 'not_contacted' | 'contacted' | 'attempted'; // Dropdown menu status for customer contact status
+  assignedTo?: string;
   replies?: {
     id: string;
     authorId?: string;
@@ -153,12 +161,18 @@ export interface AssignmentInfo {
 
 export interface TabbyTamaraRequest {
   id: string;
+  caseRef?: string;
   agentName: string;
   patientName: string;
   fileNumber: string;
   isOldCustomer: boolean;
   idNumber?: string;
   priceWithoutTax: string;
+  priceWithTax?: string;
+  feeRate?: number;
+  feeAmount?: number;
+  finalPriceWithFee?: number;
+  currency?: "AED";
   phoneNumber: string;
   notes?: string;
   createdAt: string;
@@ -176,6 +190,8 @@ export interface TabbyTamaraRequest {
   links?: string[];
   tlNotes?: string;
   tlLinks?: string;
+  tlPhotos?: string[];
+  tlSupportingLinks?: string[];
   attachments?: string[];
   screenshot?: string;
   imageUrl?: string;
@@ -189,6 +205,7 @@ export interface TabbyTamaraRequest {
   submittedByName?: string;
   assignedToId?: string;
   assignedToName?: string;
+  assignedTo?: string;
   assignedAt?: string;
   assignedById?: string;
   assignedByName?: string;
@@ -203,6 +220,7 @@ export interface TabbyTamaraRequest {
 
 export interface TabbyTamaraComplaint {
   id: string;
+  caseRef?: string;
   agentName: string;
   patientName: string;
   fileNumber: string;
@@ -228,10 +246,12 @@ export interface TabbyTamaraComplaint {
   closedAt?: string;
   text?: string;
   tlResolutionType?: string;
+  assignedTo?: string;
 }
 
 export interface ClientCommunicationRequest {
   id: string;
+  caseRef?: string;
   callCenterAgentName: string;
   clinicName: string;
   phoneNumber: string;
@@ -250,10 +270,12 @@ export interface ClientCommunicationRequest {
   links?: string[];
   replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
   patientName?: string;
+  assignedTo?: string;
 }
 
 export interface CaseRecord {
   id: string;
+  caseRef?: string;
   agentName: string;
   patientName: string;
   phoneNumber: string;

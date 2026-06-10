@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { ExternalLink, Copy, Download, Link as LinkIcon, CheckCircle2, Image as ImageIcon, FileText } from 'lucide-react';
-import { extractLinks, normalizeUrl, copyToClipboard } from '../utils';
+import { extractLinks, normalizeUrl, copyToClipboard, normalizeAttachments } from '../utils';
 import { toast } from 'sonner';
+import { FileAttachment } from '../types';
 
 interface AttachmentsDisplayProps {
-  photos?: string[];
+  photos?: any[];
   attachments?: any[];
   links?: any;
 }
@@ -53,11 +54,12 @@ const LinkItem = ({ link }: { link: string }) => {
 
 export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({ photos, attachments, links }) => {
   const extractedLinks = extractLinks(links);
-  const hasPhotos = photos && photos.length > 0;
-  const hasAttachments = attachments && attachments.length > 0;
+  const normalizedAttachments = normalizeAttachments(photos, attachments);
+  
+  const hasAttachments = normalizedAttachments.length > 0;
   const hasLinks = extractedLinks.length > 0;
 
-  if (!hasPhotos && !hasAttachments && !hasLinks) return null;
+  if (!hasAttachments && !hasLinks) return null;
 
   const handleCopyImage = async (imageUrl: string) => {
     try {
@@ -99,42 +101,26 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({ photos, 
 
   const downloadAll = async () => {
     toast.info("Downloading attachments...");
-    if (photos) {
-      for (let i = 0; i < photos.length; i++) {
-          const photo = photos[i];
-          const isPdf = photo.includes('application/pdf') || photo.includes('.pdf');
-          const a = document.createElement('a');
-          a.href = photo;
-          a.download = `attachment-${i + 1}${isPdf ? '.pdf' : '.jpg'}`;
-          a.target = "_blank";
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          await new Promise(r => setTimeout(r, 300));
-      }
-    }
-    if (attachments) {
-      for (let i = 0; i < attachments.length; i++) {
-          const att = attachments[i];
-          const a = document.createElement('a');
-          a.href = att.url;
-          a.download = att.name;
-          a.target = "_blank";
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          await new Promise(r => setTimeout(r, 300));
-      }
+    for (let i = 0; i < normalizedAttachments.length; i++) {
+        const att = normalizedAttachments[i];
+        const a = document.createElement('a');
+        a.href = att.url;
+        a.download = att.name || `attachment-${i + 1}`;
+        a.target = "_blank";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        await new Promise(r => setTimeout(r, 300));
     }
   };
 
   return (
     <div className="space-y-3 mt-3 border-t border-white/5 pt-3">
       {/* Display Photos & Attachments */}
-      {(hasPhotos || hasAttachments) && (
+      {hasAttachments && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-400 font-mono block">Attached Files ({(photos?.length || 0) + (attachments?.length || 0)}):</span>
+            <span className="text-[10px] text-slate-400 font-mono block">Attached Files ({normalizedAttachments.length}):</span>
             <button 
               onClick={downloadAll} 
               className="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold uppercase tracking-wider flex items-center gap-1 bg-indigo-500/10 hover:bg-indigo-500/20 px-2 py-1 rounded transition-colors"
@@ -143,48 +129,9 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({ photos, 
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
-            {photos && photos.map((photo, pIdx) => {
-              const isPdf = typeof photo === 'string' && (photo.includes('application/pdf') || photo.includes('.pdf'));
-              const isImage = typeof photo === 'string' && (photo.startsWith('data:image/') || (!isPdf && photo.startsWith('http')));
-              const fileTitle = `attachment-${pIdx + 1}${isPdf ? '.pdf' : '.jpg'}`;
-
-              return (
-              <div key={pIdx} className="relative group/photo shrink-0 w-full max-w-[280px] bg-black/55 rounded-lg border border-white/10 hover:border-indigo-500/50 transition-all overflow-hidden flex flex-col">
-                {isImage ? (
-                  <div className="w-full flex-1 min-h-[140px] flex items-center justify-center p-1 relative">
-                    <img referrerPolicy="no-referrer" src={photo} alt={fileTitle} className="w-full h-auto object-contain max-h-[180px] rounded" />
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/photo:opacity-100 transition-opacity flex flex-wrap items-center justify-center gap-2 p-2 backdrop-blur-sm">
-                       <a href={photo} target="_blank" rel="noreferrer" className="px-2 py-1.5 bg-white/10 hover:bg-white/20 rounded font-bold text-xs text-white flex items-center gap-1.5">
-                         <ExternalLink className="w-3.5 h-3.5" /> Open
-                       </a>
-                       <button onClick={() => handleCopyImage(photo)} className="px-2 py-1.5 bg-white/10 hover:bg-white/20 rounded font-bold text-xs text-white flex items-center gap-1.5">
-                         <Copy className="w-3.5 h-3.5" /> Copy Image
-                       </button>
-                       <a href={photo} download={fileTitle} className="px-2 py-1.5 bg-indigo-500 hover:bg-indigo-400 rounded font-bold text-xs text-slate-900 flex items-center gap-1.5">
-                         <Download className="w-3.5 h-3.5" /> Download
-                       </a>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center p-6 w-full flex-1">
-                    <FileText className="w-8 h-8 text-indigo-400 mb-2" />
-                    <span className="text-xs text-slate-300 font-medium font-sans mb-3 text-center truncate w-full px-2" title={fileTitle}>{fileTitle}</span>
-                    <div className="flex items-center gap-2">
-                       <a href={photo} target="_blank" rel="noreferrer" className="px-2.5 py-1.5 bg-white/10 hover:bg-white/20 rounded font-bold text-xs text-white flex items-center gap-1.5">
-                         <ExternalLink className="w-3 h-3" /> Open
-                       </a>
-                       <a href={photo} download={fileTitle} className="px-2.5 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 rounded font-bold text-xs flex items-center gap-1.5 border border-indigo-500/30">
-                         <Download className="w-3 h-3" /> Download
-                       </a>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )})}
-            
-            {attachments && attachments.map((att) => {
+            {normalizedAttachments.map((att) => {
               const fileTitle = att.name;
-              const isImage = att.type?.startsWith('image/');
+              const isImage = att.type?.startsWith('image/') || att.url.startsWith('data:image/') || (!att.type?.includes('pdf') && att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i));
               
               return (
               <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[280px] bg-black/55 rounded-lg border border-white/10 hover:border-indigo-500/50 transition-all overflow-hidden flex flex-col">
@@ -196,7 +143,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({ photos, 
                          <ExternalLink className="w-3.5 h-3.5" /> Open
                        </a>
                        <button onClick={() => handleCopyImage(att.url)} className="px-2 py-1.5 bg-white/10 hover:bg-white/20 rounded font-bold text-xs text-white flex items-center gap-1.5">
-                         <Copy className="w-3.5 h-3.5" /> Copy Image
+                         <Copy className="w-3.5 h-3.5" /> Copy
                        </button>
                        <a href={att.url} download={fileTitle} className="px-2 py-1.5 bg-indigo-500 hover:bg-indigo-400 rounded font-bold text-xs text-slate-900 flex items-center gap-1.5">
                          <Download className="w-3.5 h-3.5" /> Download

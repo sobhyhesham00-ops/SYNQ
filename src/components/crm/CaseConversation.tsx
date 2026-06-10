@@ -23,7 +23,7 @@ export const CaseConversation: React.FC<CaseConversationProps> = ({
   addSystemNotification,
 }) => {
   // Map our unified crmType to the Firestore collectionName
-  const getCollectionName = (type: 'inquiry' | 'complaint' | 'tabby_tamara') => {
+  const getCollectionName = (type: 'inquiry' | 'complaint' | 'tabby_tamara' | 'client_comm') => {
     switch (type) {
       case 'inquiry':
         return 'inquiries';
@@ -31,16 +31,19 @@ export const CaseConversation: React.FC<CaseConversationProps> = ({
         return 'tt_complaints';
       case 'tabby_tamara':
         return 'tt_requests';
+      case 'client_comm':
+        return 'client_comms';
       default:
         return 'inquiries';
     }
   };
 
-  const getRequestType = (type: 'inquiry' | 'complaint' | 'tabby_tamara') => {
+  const getRequestType = (type: 'inquiry' | 'complaint' | 'tabby_tamara' | 'client_comm') => {
     switch (type) {
       case 'inquiry': return 'inquiry';
       case 'complaint': return 'tt_complaint';
       case 'tabby_tamara': return 'tt_request';
+      case 'client_comm': return 'client_comm';
       default: return 'inquiry';
     }
   };

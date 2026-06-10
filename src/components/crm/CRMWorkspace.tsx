@@ -9,18 +9,20 @@ import { db } from "../../firebase";
 import { toast } from "sonner";
 
 interface CRMWorkspaceProps {
-  activeTab: "inquiries" | "complaints" | "tabby-tamara";
+  activeTab: "inquiries" | "complaints" | "tabby-tamara" | "client-comms";
   currentUser: any;
   isTLOreSupport: boolean;
   inquiries: any[];
   tabbyTamaraRequests: any[];
   tabbyTamaraComplaints: any[];
+  clientComms?: any[];
   addSystemNotification?: any;
   onEditItem: (item: any) => void;
   // Firestore reactive state setters so CRM changes reflect instantly
   setInquiries: React.Dispatch<React.SetStateAction<any[]>>;
   setTabbyTamaraRequests: React.Dispatch<React.SetStateAction<any[]>>;
   setTabbyTamaraComplaints: React.Dispatch<React.SetStateAction<any[]>>;
+  setClientComms?: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
 export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
@@ -30,16 +32,19 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
   inquiries,
   tabbyTamaraRequests,
   tabbyTamaraComplaints,
+  clientComms,
   addSystemNotification,
   onEditItem,
   setInquiries,
   setTabbyTamaraRequests,
   setTabbyTamaraComplaints,
+  setClientComms,
 }) => {
   // 1. Initial workspace status
   const initialType = useMemo(() => {
     if (activeTab === "inquiries") return "inquiry";
     if (activeTab === "complaints") return "complaint";
+    if (activeTab === "client-comms") return "client_comm";
     return "tabby_tamara";
   }, [activeTab]);
 
@@ -79,7 +84,7 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
       list.push({
         id: inq.id,
         crmType: "inquiry",
-        referenceId: formatCaseRef(inq.id, "inq"),
+        referenceId: formatCaseRef(inq.id, "inq", inq.createdAt, inq.caseRef),
         status: inq.status || "submitted",
         clinicName: inq.clinicName || "",
         subject: inq.text || "",
@@ -99,7 +104,7 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
       list.push({
         id: comp.id,
         crmType: "complaint",
-        referenceId: formatCaseRef(comp.id, "tt_complaint"),
+        referenceId: formatCaseRef(comp.id, "tt_complaint", comp.createdAt, comp.caseRef),
         status: comp.status || "submitted",
         clinicName: comp.clinicName || "",
         subject: comp.complaintDetails || "No statement prompt",
@@ -122,7 +127,7 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
       list.push({
         id: req.id,
         crmType: "tabby_tamara",
-        referenceId: formatCaseRef(req.id, "tt_request"),
+        referenceId: formatCaseRef(req.id, "tt_request", req.createdAt, req.caseRef),
         status: req.workflowStatus || "submitted",
         clinicName: req.clinicName || "",
         subject: `Payment processing request validation for ${req.patientName || "Customer"}`,
@@ -140,8 +145,33 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
       });
     });
 
+    // Map Client Comms (if passed)
+    if (clientComms) {
+      clientComms.forEach((comm) => {
+        list.push({
+          id: comm.id,
+          crmType: "client_comm",
+          referenceId: formatCaseRef(comm.id, "client_comm", comm.createdAt, comm.caseRef),
+          status: comm.status || "new",
+          clinicName: comm.clinicName || "",
+          subject: typeof comm.notes === 'string' ? comm.notes.substring(0, 50) + "..." : "Client Communication Request",
+          patientName: comm.patientName || comm.patientRef || "",
+          phoneNumber: comm.phoneNumber || "",
+          agentName: comm.agentName || comm.callCenterAgentName || "Agent",
+          assignedToName: comm.assignedToName,
+          assignedToId: comm.assignedToId,
+          createdAt: comm.createdAt || new Date().toISOString(),
+          updatedAt: comm.handledAt || comm.createdAt,
+          attachmentCount: (comm.photos?.length || 0) + (comm.handlingPhotos?.length || 0) + (comm.attachments?.length || 0),
+          replyCount: comm.replies?.length || 0,
+          unread: false,
+          raw: comm,
+        });
+      });
+    }
+
     return list;
-  }, [inquiries, tabbyTamaraRequests, tabbyTamaraComplaints]);
+  }, [inquiries, tabbyTamaraRequests, tabbyTamaraComplaints, clientComms]);
 
   // 3. Unique dropdown collections for Filters CommandBar
   const uniqueClinics = useMemo(() => {
@@ -259,7 +289,7 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
   };
 
   // 5. Firebase Mutations proxying through reactive state setters
-  const handleAssignCase = async (caseId: string, type: 'inquiry' | 'complaint' | 'tabby_tamara', agentName: string) => {
+  const handleAssignCase = async (caseId: string, type: 'inquiry' | 'complaint' | 'tabby_tamara' | 'client_comm', agentName: string) => {
     const assignActivity = {
       id: "act_" + Math.random().toString(36).substring(2, 11),
       senderName: "System",
@@ -284,7 +314,7 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
 
       if (addSystemNotification) {
         addSystemNotification(
-          "💬 Inquiry Reassigned",
+          "Inquiry Reassigned",
           `TL ${currentUser.name} reassigned your inquiry regarding case reference to ${agentName}.`,
           "inquiry",
           agentName,
@@ -294,9 +324,8 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
         );
       }
       toast.success(`Inquiry assigned to ${agentName}!`);
-    } else {
-      const coll = type === "complaint" ? "tt_complaints" : "tt_requests";
-      const targetDoc = doc(db, coll, caseId);
+    } else if (type === "client_comm") {
+      const targetDoc = doc(db, "client_comms", caseId);
       
       const payload: any = {
         assignedToId: "usr_" + agentName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
@@ -307,45 +336,112 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
         replies: arrayUnion(assignActivity)
       };
 
-      // Set workflow status automatically for Tabby/Tamara Requests
-      if (type === "tabby_tamara") {
-        payload.workflowStatus = "awaiting_client_contact";
+      await updateDoc(targetDoc, payload);
+
+      if (setClientComms) {
+        setClientComms((prev) =>
+          prev.map((item) => (item.id === caseId ? { ...item, ...payload, replies: [...(item.replies || []), assignActivity] } : item))
+        );
       }
+
+      if (addSystemNotification) {
+        addSystemNotification(
+          `Assigned: Client Communication`,
+          `You have been assigned to handle this communication request.`,
+          "general",
+          agentName,
+          undefined,
+          "client_comm",
+          caseId
+        );
+      }
+      toast.success(`Communication assigned to ${agentName}!`);
+    } else if (type === "complaint") {
+      const targetDoc = doc(db, "tt_complaints", caseId);
+      
+      const payload: any = {
+        assignedToId: "usr_" + agentName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
+        assignedToName: agentName,
+        assignedAt: new Date().toISOString(),
+        assignedById: currentUser.id || currentUser.uid || "usr_" + currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
+        assignedByName: currentUser.name,
+        replies: arrayUnion(assignActivity)
+      };
 
       await updateDoc(targetDoc, payload);
 
-      // Re-map parent states
-      const stateUpdater = type === "complaint" ? setTabbyTamaraComplaints : setTabbyTamaraRequests;
-      stateUpdater((prev: any[]) =>
+      setTabbyTamaraComplaints((prev) =>
         prev.map((item) => (item.id === caseId ? { ...item, ...payload, replies: [...(item.replies || []), assignActivity] } : item))
       );
 
       if (addSystemNotification) {
         addSystemNotification(
-          `Assigned: ${type === 'complaint' ? 'Complaint' : 'Installment request'}`,
+          `Assigned: Complaint`,
           `You have been assigned to handle this case reference.`,
           "general",
           agentName,
           undefined,
-          coll === "tt_complaints" ? "tt_complaint" : "tt_request",
+          "tt_complaint",
           caseId
         );
       }
 
       toast.success(`Case assigned to ${agentName}!`);
+    } else if (type === "tabby_tamara") {
+      const targetDoc = doc(db, "tt_requests", caseId);
+      
+      const payload: any = {
+        assignedToId: "usr_" + agentName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
+        assignedToName: agentName,
+        assignedAt: new Date().toISOString(),
+        assignedById: currentUser.id || currentUser.uid || "usr_" + currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
+        assignedByName: currentUser.name,
+        replies: arrayUnion(assignActivity),
+        workflowStatus: "awaiting_client_contact"
+      };
+
+      await updateDoc(targetDoc, payload);
+
+      setTabbyTamaraRequests((prev) =>
+        prev.map((item) => (item.id === caseId ? { ...item, ...payload, replies: [...(item.replies || []), assignActivity] } : item))
+      );
+
+      if (addSystemNotification) {
+        addSystemNotification(
+          `Assigned: Installment request`,
+          `You have been assigned to handle this case reference.`,
+          "general",
+          agentName,
+          undefined,
+          "tt_request",
+          caseId
+        );
+      }
+
+      toast.success(`Case assigned to ${agentName}!`);
+    } else {
+      toast.error(`Unknown entity type: ${type}`);
     }
   };
 
-  const handleClaimCase = async (caseId: string, type: 'inquiry' | 'complaint' | 'tabby_tamara') => {
+  const handleClaimCase = async (caseId: string, type: 'inquiry' | 'complaint' | 'tabby_tamara' | 'client_comm') => {
     await handleAssignCase(caseId, type, currentUser.name);
   };
 
-  const handleDeleteCase = async (caseId: string, type: 'inquiry' | 'complaint' | 'tabby_tamara') => {
-    const collName = type === 'inquiry' ? 'inquiries' : type === 'complaint' ? 'tt_complaints' : 'tt_requests';
+  const handleDeleteCase = async (caseId: string, type: 'inquiry' | 'complaint' | 'tabby_tamara' | 'client_comm') => {
+    let collName = 'tt_requests';
+    if (type === 'inquiry') collName = 'inquiries';
+    else if (type === 'complaint') collName = 'tt_complaints';
+    else if (type === 'client_comm') collName = 'client_comms';
+    else if (type === 'tabby_tamara') collName = 'tt_requests';
+    else throw new Error("Unknown entity type for deletion.");
+
     await deleteDoc(doc(db, collName, caseId));
 
     if (type === "inquiry") {
       setInquiries((prev) => prev.filter((i) => i.id !== caseId));
+    } else if (type === "client_comm") {
+      if (setClientComms) setClientComms((prev) => prev.filter((i) => i.id !== caseId));
     } else if (type === "complaint") {
       setTabbyTamaraComplaints((prev) => prev.filter((i) => i.id !== caseId));
     } else {
@@ -404,7 +500,11 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
   };
 
   const handleMarkPatientContactedTT = async (caseId: string, type: 'complaint' | 'tabby_tamara', contactedStatus: 'contacted' | 'attempted' | 'not_contacted') => {
-    const coll = type === "complaint" ? "tt_complaints" : "tt_requests";
+    let coll = 'tt_requests';
+    if (type === 'complaint') coll = 'tt_complaints';
+    else if (type === 'tabby_tamara') coll = 'tt_requests';
+    else throw new Error("Unknown entity type for marking patient contacted");
+
     const targetDoc = doc(db, coll, caseId);
     
     const payload: any = {

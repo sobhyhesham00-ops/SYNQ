@@ -157,7 +157,7 @@ export function PatientSearchHub({
               {statusLabel}
             </span>
             <span className="text-slate-400 text-xs font-mono bg-black/20 px-2 py-1 rounded inline-block max-w-[150px] sm:max-w-max truncate">
-               <CopyWrap text={item.id || ''}>{formatCaseRef(item.id, item._type)}</CopyWrap>
+               <CopyWrap text={item.id || ''}>{formatCaseRef(item.id, item._type, item.createdAt, r.caseRef)}</CopyWrap>
             </span>
             {onViewRecord && (
               <button

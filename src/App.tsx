@@ -1,4 +1,5 @@
 import { ScheduleUpload } from "./components/ScheduleUpload";
+import { purgeAllTimeLogs } from "./services/timelogService";
 import { EditModal } from "./components/EditModal";
 import { ResetPasswordModal } from "./components/ResetPasswordModal";
 import { AgentRequestsLogs } from "./components/AgentRequestsLogs";
@@ -100,6 +101,7 @@ import {
   Edit,
   Pencil,
   Key,
+  Database,
   PenTool,
   Loader2,
 } from "lucide-react";
@@ -125,6 +127,7 @@ import { OrdersTab } from "./components/OrdersTab";
 import { ArticleManager } from "./components/ArticleManager";
 import { RequestReplyThread } from "./components/RequestReplyThread";
 import { EnvironmentBadge } from "./components/EnvironmentBadge";
+import { ComplaintsWorkspace } from "./components/ComplaintsWorkspace";
 import { processAttachments } from "./services/attachmentService";
 import * as XLSX from "xlsx";
 import {
@@ -163,6 +166,7 @@ import {
   compressImage,
   handleGlobalImagePaste,
   formatCaseRef,
+  calculateTabbyTamaraPrice,
   normalizePhone,
   copyToClipboard,
   extractLinks,
@@ -610,9 +614,9 @@ const ActiveTimer = ({ startTime }: { startTime: string }) => {
 };
 
 const compStatusLabels: Record<string, string> = {
-  pending_tl: "🕐 Pending TL Review",
-  need_contact: "📞 Action Required: Contact Patient",
-  closed: "✅ Resolved & Closed",
+  pending_tl: " Pending TL Review",
+  need_contact: " Action Required: Contact Patient",
+  closed: " Resolved & Closed",
 };
 
 export default function App() {
@@ -709,7 +713,7 @@ export default function App() {
           prev.map((item) => (item.id === id ? { ...item, ...updatedData } : item)),
         );
         toast.success("Inquiry updated successfully!");
-        addSystemNotification("✏️ Request Updated", `Inquiry updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "inquiry", id);
+        addSystemNotification("Request Updated", `Inquiry updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "inquiry", id);
       } else if (type === "scheduling_request") {
         const docRef = doc(db, "scheduling_requests", id);
         await setDoc(docRef, updatedData, { merge: true });
@@ -717,7 +721,7 @@ export default function App() {
           prev.map((item) => (item.id === id ? { ...item, ...updatedData } : item)),
         );
         toast.success("Scheduling request updated successfully!");
-        addSystemNotification("✏️ Request Updated", `Scheduling request updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "scheduling_request", id);
+        addSystemNotification("Request Updated", `Scheduling request updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "scheduling_request", id);
       } else if (type === "tt_request") {
         const docRef = doc(db, "tt_requests", id);
         await setDoc(docRef, updatedData, { merge: true });
@@ -725,7 +729,7 @@ export default function App() {
           prev.map((item) => (item.id === id ? { ...item, ...updatedData } : item)),
         );
         toast.success("Installment request updated successfully!");
-        addSystemNotification("✏️ Request Updated", `Installment request updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "tt_request", id);
+        addSystemNotification("Request Updated", `Installment request updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "tt_request", id);
       } else if (type === "tt_complaint") {
         const docRef = doc(db, "tt_complaints", id);
         await setDoc(docRef, updatedData, { merge: true });
@@ -733,7 +737,7 @@ export default function App() {
           prev.map((item) => (item.id === id ? { ...item, ...updatedData } : item)),
         );
         toast.success("Installment complaint updated successfully!");
-        addSystemNotification("✏️ Request Updated", `Installment complaint updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "tt_complaint", id);
+        addSystemNotification("Request Updated", `Installment complaint updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "tt_complaint", id);
       } else if (type === "client_comm") {
         const docRef = doc(db, "client_comms", id);
         await setDoc(docRef, updatedData, { merge: true });
@@ -741,7 +745,7 @@ export default function App() {
           prev.map((item) => (item.id === id ? { ...item, ...updatedData } : item)),
         );
         toast.success("Communication request updated successfully!");
-        addSystemNotification("✏️ Request Updated", `Communication request updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "client_comm", id);
+        addSystemNotification("Request Updated", `Communication request updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "client_comm", id);
       } else if (type === "case") {
         const docRef = doc(db, "cases", id);
         await setDoc(docRef, updatedData, { merge: true });
@@ -749,7 +753,7 @@ export default function App() {
           prev.map((item) => (item.id === id ? { ...item, ...updatedData } : item)),
         );
         toast.success("Case record updated successfully!");
-        addSystemNotification("✏️ Request Updated", `Case record updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "case", id);
+        addSystemNotification("Request Updated", `Case record updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "case", id);
       }
       setEditingItem(null);
     } catch (error) {
@@ -1045,7 +1049,7 @@ export default function App() {
                       </div>
                       <div className="flex-1">
                         <h4 className="font-bold text-sm text-amber-400">
-                          📢 New Broadcast Posted!
+                           New Broadcast Posted!
                         </h4>
                         <p className="text-[10px] text-slate-400 font-bold mt-0.5">
                           By {latest.author || "System"}
@@ -1287,7 +1291,21 @@ export default function App() {
             u?.name?.toLowerCase() === prevUser.name.toLowerCase(),
         );
         if (liveUserInfo) {
-          return { ...prevUser, ...liveUserInfo };
+          const hasChanged = 
+            prevUser.id !== liveUserInfo.id ||
+            prevUser.name !== liveUserInfo.name ||
+            prevUser.role !== liveUserInfo.role ||
+            prevUser.password !== liveUserInfo.password ||
+            prevUser.avatarUrl !== liveUserInfo.avatarUrl ||
+            prevUser.status !== liveUserInfo.status ||
+            prevUser.statusNote !== liveUserInfo.statusNote ||
+            prevUser.bio !== liveUserInfo.bio ||
+            prevUser.dailyUpdate !== liveUserInfo.dailyUpdate ||
+            prevUser.email !== liveUserInfo.email ||
+            (prevUser as any).phone !== liveUserInfo.phone;
+          if (hasChanged) {
+            return { ...prevUser, ...liveUserInfo };
+          }
         }
         return prevUser;
       });
@@ -1439,9 +1457,20 @@ export default function App() {
     );
 
     // 2. Notifications Real-time Sync
+    const normalizedName = currentUser.name.trim().toLowerCase();
+    const cleanedName = normalizedName.replace(/[^a-zA-Z0-9]/g, "");
+    const selfTargets = Array.from(new Set([
+      currentUser.id,
+      `usr_${cleanedName}`,
+      `usr_${normalizedName}`,
+      `usr_${currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}`,
+      "all",
+      currentUser.role
+    ].filter(Boolean)));
+
     const qNotifs = query(
       collection(db, "notifications"),
-      where("targetGroups", "array-contains-any", [currentUser.id, "all", currentUser.role]),
+      where("targetGroups", "array-contains-any", selfTargets),
     );
     let isNotifsInitialized = false;
     const unsubNotifs = onSnapshot(
@@ -1474,7 +1503,7 @@ export default function App() {
                 toast.info(
                   <div className="flex flex-col gap-1 text-left">
                     <span className="font-bold text-sm text-indigo-400">
-                      🔔 {latest.title}
+                       {latest.title}
                     </span>
                     <span className="text-xs text-slate-200 line-clamp-2">
                       {latest.message}
@@ -1815,7 +1844,13 @@ export default function App() {
     } else if (targetAgent === "qa") {
       targetGroups = ["qa"];
     } else {
-      targetGroups = [`usr_${targetAgent.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}`];
+      const normalizedAgent = targetAgent.trim().toLowerCase();
+      const cleanedAgent = normalizedAgent.replace(/[^a-zA-Z0-9]/g, "");
+      targetGroups = Array.from(new Set([
+        `usr_${cleanedAgent}`,
+        `usr_${normalizedAgent}`,
+        `usr_${targetAgent.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}`
+      ]));
     }
 
     const newNotif: SystemNotification = {
@@ -1874,7 +1909,7 @@ export default function App() {
         if (!notifiedSet.has(name)) {
           notifiedSet.add(name);
           addSystemNotification(
-            `💬 Mentioned by ${sourceAuthorName}`,
+            `Mentioned by ${sourceAuthorName}`,
             `You were mentioned in ${contextTitle}: "${text.substring(0, 100)}${text.length > 100 ? "..." : ""}"`,
             "general",
             name,
@@ -1925,7 +1960,7 @@ export default function App() {
     });
 
     addSystemNotification(
-      "👑 Director Feedback Received",
+      "Director Feedback Received",
       `Amira Hassan left feedback for you: "${notes.substring(0, 60)}${notes.length > 60 ? "..." : ""}"`,
       "feedback",
       tlName,
@@ -1993,8 +2028,8 @@ export default function App() {
 
       addSystemNotification(
         isDirector
-          ? "👑 Director Feedback Updates"
-          : "✉️ Reply to Director Feedback",
+          ? " Director Feedback Updates"
+          : " Reply to Director Feedback",
         `${senderName} replied to feedback: "${text.substring(0, 60)}${text.length > 60 ? "..." : ""}"`,
         "feedback",
         targetUser,
@@ -2835,6 +2870,66 @@ ${pageText}
     }
   };
 
+  const [isMigratingRefs, setIsMigratingRefs] = useState(false);
+
+  const handleMigrateRefs = async () => {
+    if (!isSuperAdmin) {
+      toast.error("Unauthorized.");
+      return;
+    }
+    
+    setIsMigratingRefs(true);
+    let updatedCount = 0;
+    toast.info("Migration started. Please wait...");
+    
+    try {
+      const dbInstance = db;
+      
+      const collectionsToMigrate = [
+        { name: "inquiries", prefix: "inq", typeField: "inquiry" },
+        { name: "tt_requests", prefix: "tt_request", typeField: "tt_request" },
+        { name: "tt_complaints", prefix: "tt_complaint", typeField: "tt_complaint" },
+      ];
+
+      for (const coll of collectionsToMigrate) {
+        const querySnapshot = await getDocs(collection(dbInstance, coll.name));
+        let batch = writeBatch(dbInstance);
+        let currentBatchSize = 0;
+
+        for (const docSnap of querySnapshot.docs) {
+          const data = docSnap.data() as any;
+          if (!data.caseRef) {
+            const newRef = formatCaseRef(docSnap.id, coll.prefix as any, data.createdAt);
+            batch.update(docSnap.ref, { caseRef: newRef });
+            updatedCount++;
+            currentBatchSize++;
+
+            if (currentBatchSize >= 450) {
+              await batch.commit();
+              batch = writeBatch(dbInstance);
+              currentBatchSize = 0;
+            }
+          }
+        }
+        
+        if (currentBatchSize > 0) {
+          await batch.commit();
+        }
+      }
+      
+      if (updatedCount > 0) {
+        toast.success(`Migration completed. ${updatedCount} records updated.`);
+      } else {
+        toast.info("No records needed updating.");
+      }
+    } catch (error) {
+      console.error("Migration Error:", error);
+      toast.error("Migration failed.");
+    } finally {
+      setIsMigratingRefs(false);
+    }
+  };
+
   const handlePurgeTimeLogs = async () => {
     if (!isSuperAdmin) {
       toast.error("Unauthorized: Only Super Administrators can purge logs.");
@@ -2842,33 +2937,16 @@ ${pageText}
     }
     
     setIsPurgingTimeLogs(true);
-    let deletedCount = 0;
     try {
-      const snapshot = await getDocs(collection(db, "timelogs"));
-      const docs = snapshot.docs;
-      
-      if (docs.length === 0) {
-        setTimeLogs([]);
-        setStorageItem("sched_time_logs", []);
-        toast.info("No logs found in Firestore.");
-        setIsPurgingTimeLogs(false);
-        return;
-      }
-      
-      const batchSize = 450;
-      for (let i = 0; i < docs.length; i += batchSize) {
-        const chunk = docs.slice(i, i + batchSize);
-        const batch = writeBatch(db);
-        chunk.forEach((docSnap) => {
-          batch.delete(docSnap.ref);
-        });
-        await batch.commit();
-        deletedCount += chunk.length;
-      }
+      const deletedCount = await purgeAllTimeLogs(true);
       
       setTimeLogs([]);
       setStorageItem("sched_time_logs", []);
-      toast.success(`Successfully purged ${deletedCount} logs from Firestore and CRM storage.`);
+      if (deletedCount === 0) {
+        toast.info("No logs found in Firestore.");
+      } else {
+        toast.success(`Successfully purged ${deletedCount} logs from Firestore and CRM storage.`);
+      }
     } catch (error) {
       console.error("Purge Error:", error);
       toast.error(
@@ -2886,6 +2964,9 @@ ${pageText}
 
   // Tabby/Tamara search and filter states
   const [compSearch, setCompSearch] = useState("");
+  const [selectedComplaintId, setSelectedComplaintId] = useState<string | null>(null);
+  const [complaintListFilter, setComplaintListFilter] = useState<'all'|'pending_tl'|'need_contact'|'closed'>('all');
+  const [complaintSearch, setComplaintSearch] = useState('');
   const [compDateFilter, setCompDateFilter] = useState("");
   const [commSearch, setCommSearch] = useState("");
   const [commLangFilter, setCommLangFilter] = useState<
@@ -2926,6 +3007,18 @@ ${pageText}
       } catch (e) {}
     };
   }, []);
+
+  useEffect(() => {
+    if (!viewingRecord) return;
+    const expectedType =
+      activeTab === "client-comms" ? "client_comm" :
+      activeTab === "tabby-tamara" ? "tt_request" :
+      activeTab === "complaints" ? "tt_complaint" :
+      null;
+    if (expectedType && viewingRecord.type !== expectedType) {
+      setViewingRecord(null);
+    }
+  }, [activeTab, viewingRecord]);
   const [selectedDashboardDate, setSelectedDashboardDate] = useState<string>(
     () => getLocalISOString(),
   );
@@ -2935,10 +3028,10 @@ ${pageText}
 
   // Initialize correct active tab based on role
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser && !activeTab) {
       setActiveTab("dashboard");
     }
-  }, [currentUser]);
+  }, [currentUser, activeTab]);
 
   // Request Form States
   const [swapDate, setSwapDate] = useState("");
@@ -3546,7 +3639,7 @@ ${pageText}
 
           // 1. Notify the agent
           addSystemNotification(
-            `⚠️ Activity Warning: Exceeding ${readableType}`,
+            `Activity Warning: Exceeding ${readableType}`,
             `You have been on ${readableType} for ${!isNaN(Math.floor(elapsed.duration)) ? Math.floor(elapsed.duration) : 0} minutes, exceeding the standard limit of ${elapsed.limit} minutes. Please resume working.`,
             "compliance",
             agent,
@@ -3557,7 +3650,7 @@ ${pageText}
           const targetNotifUser =
             assignedTL !== "Unassigned" ? assignedTL : "tl";
           addSystemNotification(
-            `🚨 Alert: ${formatAgentName(agent)} overstaying ${readableType}`,
+            `Alert: ${formatAgentName(agent)} overstaying ${readableType}`,
             `Agent ${formatAgentName(agent)} has exceeded the standard ${elapsed.limit} minutes limit for ${readableType}. Current duration: ${!isNaN(Math.floor(elapsed.duration)) ? Math.floor(elapsed.duration) : 0} minutes.`,
             "compliance",
             targetNotifUser,
@@ -3622,7 +3715,7 @@ ${pageText}
             const targetNotifUser =
               assignedTL !== "Unassigned" ? assignedTL : "tl";
             addSystemNotification(
-              `❌ Absence Warning: ${formatAgentName(agent)} did not clock in`,
+              `Absence Warning: ${formatAgentName(agent)} did not clock in`,
               `Agent ${formatAgentName(agent)} was scheduled for shift ${shiftLabel} today starting at ${startHourStr}, but has failed to clock in within 30 minutes of shift commencement.`,
               "absence",
               targetNotifUser,
@@ -3696,8 +3789,18 @@ ${swapTargetAgent}'s LOB: ${targetLOB}`);
 
     setIsFormSubmitting(true);
     try {
+      const createdAt = new Date().toISOString();
+      let safeId = "swap_";
+      if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+        safeId += `${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+      } else {
+        safeId += `${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+      }
+      const id = safeId;
+      
       const newRequest: SwapRequest = {
-        id: `swap_${Date.now()}`,
+        id,
+        caseRef: formatCaseRef(id, "scheduling_request", createdAt),
         agentName: name,
         type: "swap",
         date: swapDate,
@@ -3722,7 +3825,7 @@ ${swapTargetAgent}'s LOB: ${targetLOB}`);
       await setDoc(doc(db, "scheduling_requests", newRequest.id), newRequest);
 
       addSystemNotification(
-        `🔄 New Swap Request: ${formatAgentName(name)}`,
+        `New Swap Request: ${formatAgentName(name)}`,
         `${formatAgentName(name)} requested a shift swap with ${formatAgentName(swapTargetAgent)} for ${swapDate}.`,
         "schedule",
         "tl",
@@ -3742,7 +3845,7 @@ ${swapTargetAgent}'s LOB: ${targetLOB}`);
       setSwapTargetShift(SHIFTS[1].label);
 
       setSubmissionConfirmation({
-        title: "Swap Filed Successfully! 🔄",
+        title: "Swap Filed Successfully! ",
         message: `Your shift swap application has been submitted to your partner agent (${swapTargetAgent}). Once approved by them, Team Leaders will review for final approval. Double-Submission check holds.`,
         type: "swap_request",
         referenceId: newRequest.id,
@@ -3784,8 +3887,18 @@ ${swapTargetAgent}'s LOB: ${targetLOB}`);
 
     setIsFormSubmitting(true);
     try {
+      const createdAt = new Date().toISOString();
+      let safeId = "ann_";
+      if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+        safeId += `${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+      } else {
+        safeId += `${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+      }
+      const id = safeId;
+
       const newRequest: AnnualRequest = {
-        id: `ann_${Date.now()}`,
+        id,
+        caseRef: formatCaseRef(id, "scheduling_request", createdAt),
         agentName: name,
         type: "annual",
         startDate: annualStart,
@@ -3808,7 +3921,7 @@ ${swapTargetAgent}'s LOB: ${targetLOB}`);
       await setDoc(doc(db, "scheduling_requests", newRequest.id), newRequest);
 
       addSystemNotification(
-        `✈️ New Annual Leave: ${formatAgentName(name)}`,
+        `New Annual Leave: ${formatAgentName(name)}`,
         `${formatAgentName(name)} requested an annual leave from ${annualStart} to ${annualEnd}.`,
         "schedule",
         "tl",
@@ -3826,7 +3939,7 @@ ${swapTargetAgent}'s LOB: ${targetLOB}`);
       setAnnualLinks([]);
 
       setSubmissionConfirmation({
-        title: "Annual Leave Filed! ✈️",
+        title: "Annual Leave Filed! ",
         message: `Your annual leave request from ${annualStart} to ${annualEnd} has been submitted to the Team Leader for approval. Double-Submission guard is active.`,
         type: "annual_leave",
         referenceId: newRequest.id,
@@ -4008,7 +4121,7 @@ ${swapTargetAgent}'s LOB: ${targetLOB}`);
     const decidedReq = updated.find((r) => r.id === requestId);
     if (decidedReq) {
       addSystemNotification(
-        approve ? "✅ Leave/Swap Approved" : "❌ Leave/Swap Declined",
+        approve ? " Leave/Swap Approved" : " Leave/Swap Declined",
         approve
           ? `Your ${decidedReq.type === "swap" ? "shift swap" : "annual leave"} request has been approved by ${currentUser.name}.`
           : `Your ${decidedReq.type === "swap" ? "shift swap" : "annual leave"} request was declined by ${currentUser.name}.`,
@@ -5166,7 +5279,7 @@ ${result.errors.slice(0, 5).join("\n")}${
     const fromStatusLabel = friendlyNameMap[previousStatus] || previousStatus;
     const toStatusLabel = friendlyNameMap[type] || type;
     addSystemNotification(
-      `🔄 Status Switch: ${formatAgentName(name)}`,
+      `Status Switch: ${formatAgentName(name)}`,
       `${formatAgentName(name)} switched AUX status from **${fromStatusLabel}** to **${toStatusLabel}**.`,
       "compliance",
       "tl",
@@ -5235,7 +5348,7 @@ ${result.errors.slice(0, 5).join("\n")}${
     };
     const actLabel = friendlyNameMap[currentType] || currentType;
     addSystemNotification(
-      `🟢 Agent Back Online: ${formatAgentName(name)}`,
+      `Agent Back Online: ${formatAgentName(name)}`,
       `${formatAgentName(name)} completed their ${actLabel} session and is now **Active Work**.`,
       "compliance",
       "tl",
@@ -5465,7 +5578,14 @@ ${result.errors.slice(0, 5).join("\n")}${
 
     setIsFormSubmitting(true);
     try {
-      const inquiryId = `inq_${Date.now()}`;
+      const createdAt = new Date().toISOString();
+      let safeId = "inq_";
+      if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+        safeId += `${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+      } else {
+        safeId += `${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+      }
+      const inquiryId = safeId;
       
       const processedAttachments = await processAttachments(
         inquiryAttachments,
@@ -5474,16 +5594,26 @@ ${result.errors.slice(0, 5).join("\n")}${
         "root"
       );
 
+      const allPhotos = [
+        ...(inquiryPhotos || []),
+        ...(activeScreenshot ? [activeScreenshot] : []),
+      ];
+
+      // Strip non-serializable File objects before Firestore write
+      const firestoreAttachments = processedAttachments.map(({ file, ...rest }) => rest);
+
       const newInquiry: Inquiry = {
         id: inquiryId,
+        caseRef: formatCaseRef(inquiryId, "inquiry", createdAt),
         agentName: currentUser.name,
         clinicName: inquiryClinicName,
         phoneNumber: String(inquiryPhoneNumber || "").trim() || undefined,
         text: String(inquiryText || "").trim(),
-        photos: inquiryPhotos,
-        attachments: processedAttachments,
+        photos: allPhotos,
+        screenshot: activeScreenshot || null, // keep for backward compat
+        attachments: firestoreAttachments,   // ← use sanitized version
         links: inquiryLinks,
-        createdAt: new Date().toISOString(),
+        createdAt,
         status: "submitted",
         seenByAgent: false,
       };
@@ -5494,8 +5624,13 @@ ${result.errors.slice(0, 5).join("\n")}${
         return updated;
       });
 
-      // Sync to Firestore
-      await setDoc(doc(db, "inquiries", newInquiry.id), newInquiry);
+      // Write to Firestore with 10-second timeout
+      await Promise.race([
+        setDoc(doc(db, "inquiries", newInquiry.id), newInquiry),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Firestore write timed out after 10s")), 10000)
+        )
+      ]);
 
       // Reset fields
       setInquiryText("");
@@ -5513,7 +5648,7 @@ ${result.errors.slice(0, 5).join("\n")}${
         currentUser.name,
       );
       addSystemNotification(
-        "❓ New Inquiry Submitted",
+        "New Inquiry Submitted",
         `${currentUser.name} has submitted a new inquiry for clinic: ${inquiryClinicName}.`,
         "general",
         "tl",
@@ -5523,15 +5658,22 @@ ${result.errors.slice(0, 5).join("\n")}${
       );
 
       setSubmissionConfirmation({
-        title: "Inquiry Logged Successfully! 🎉",
+        title: "Inquiry Logged Successfully! ",
         message: `Your inquiry has been successfully transmitted to the database. The Team Leaders have been notified and will reply shortly.`,
         type: "inquiry",
         referenceId: newInquiry.id,
       });
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err) {
-      console.error(err);
-      toast.error("An error occurred while submitting. Please try again.");
+    } catch (err: any) {
+      console.error("Inquiry submission error:", err);
+      const msg = err?.message || String(err);
+      if (msg.includes("timed out")) {
+        toast.error("Submission timed out. Check your connection and try again.");
+      } else if (msg.includes("permission") || msg.includes("PERMISSION_DENIED")) {
+        toast.error("Permission denied. Please refresh and log in again.");
+      } else {
+        toast.error("An error occurred while submitting. Please try again.");
+      }
     } finally {
       setIsFormSubmitting(false);
     }
@@ -5566,7 +5708,7 @@ ${result.errors.slice(0, 5).join("\n")}${
 
     if (sentInquiry) {
       addSystemNotification(
-        "📨 Inquiry Forwarded to Partner",
+        "Inquiry Forwarded to Partner",
         `Your inquiry for clinic ${sentInquiry.clinicName} has been forwarded to the partner by ${currentUser.name}.`,
         "inquiry",
         sentInquiry.agentName,
@@ -5596,6 +5738,7 @@ ${result.errors.slice(0, 5).join("\n")}${
         inquiryId,
         "reply"
       );
+      const safeAttachments = processedAttachments.map(({ file, ...rest }) => rest);
 
       let targetAgentName = "";
       let clinicName = "";
@@ -5613,7 +5756,7 @@ ${result.errors.slice(0, 5).join("\n")}${
             senderName: currentUser.name,
             authorRole: currentUser.role,
             text: answerText,
-            attachments: processedAttachments.length > 0 ? processedAttachments : undefined,
+            attachments: safeAttachments.length > 0 ? safeAttachments : undefined,
             links: currentAnswerLinks.length > 0 ? currentAnswerLinks : undefined,
             createdAt: new Date().toISOString()
           };
@@ -5645,7 +5788,7 @@ ${result.errors.slice(0, 5).join("\n")}${
 
       if (targetAgentName) {
         addSystemNotification(
-          "💬 Inquiry Answered by TL",
+          "Inquiry Answered by TL",
           `Your inquiry regarding clinic "${clinicName}" has been answered by ${currentUser.name}.`,
           "inquiry",
           targetAgentName,
@@ -5777,11 +5920,14 @@ ${result.errors.slice(0, 5).join("\n")}${
 
     setIsFormSubmitting(true);
     try {
-      const calculatedPrice =
-        ttPriceWithoutTax && !isNaN(Number(ttPriceWithoutTax))
-          ? (Number(ttPriceWithoutTax) * 1.05).toFixed(2)
-          : "-";
-      const autoNote = `[5% added to price. Final: AED ${calculatedPrice}]`;
+      const pricing = calculateTabbyTamaraPrice(ttPriceWithoutTax);
+      if (!pricing.valid) {
+        toast.error("Enter a valid price greater than zero.");
+        setIsFormSubmitting(false);
+        return;
+      }
+
+      const autoNote = `[5% added to price. Final: ${pricing.finalPriceFormatted}]`;
       const finalNotes = ttNotes
         ? `${autoNote}
 
@@ -5792,17 +5938,34 @@ ${ttNotes}`
       const isCc = userLob === 'Call Center';
       const channelLabel = isCc ? 'call_center' : 'chat';
 
+      const createdAt = new Date().toISOString();
+      let safeId = "tt_";
+      if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+        safeId += `${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+      } else {
+        safeId += `${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+      }
+      const id = safeId;
+
       const newRequest: any = {
-        id: "tt_" + Math.random().toString(36).substr(2, 9),
+        id,
+        caseRef: formatCaseRef(id, "tt_request", createdAt),
         agentName: currentUser.name,
         patientName: ttPatientName,
         fileNumber: ttFileNumber,
         isOldCustomer: ttIsOldCustomer,
         idNumber: !ttIsOldCustomer ? ttIdNumber : null,
         priceWithoutTax: ttPriceWithoutTax,
+        priceWithTax: (!isNaN(Number(ttPriceWithoutTax))
+          ? (Number(ttPriceWithoutTax) * 1.05).toFixed(2)
+          : ttPriceWithoutTax),
+        feeRate: 0.05,
+        feeAmount: pricing.feeAmount,
+        finalPriceWithFee: pricing.finalPrice,
+        currency: "AED",
         phoneNumber: ttPhoneNumber,
         notes: finalNotes,
-        createdAt: new Date().toISOString(),
+        createdAt,
         status: "not_confirmed",
         customerContacted: "not_contacted",
 
@@ -5833,8 +5996,13 @@ ${ttNotes}`
         return updated;
       });
 
-      // Sync to Firestore
-      await setDoc(doc(db, "tt_requests", newRequest.id), newRequest);
+      // Sync to Firestore with 10-second timeout
+      await Promise.race([
+        setDoc(doc(db, "tt_requests", newRequest.id), newRequest),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Firestore write timed out")), 10000)
+        )
+      ]);
 
       // Clear form
       setTtPatientName("");
@@ -5869,7 +6037,7 @@ ${ttNotes}`
       }
 
       addSystemNotification(
-        `💳 New ${ttPlatform.toUpperCase()} Request`,
+        `New ${ttPlatform.toUpperCase()} Request`,
         `${currentUser.name} submitted a new request for ${ttPatientName} (${ttPhoneNumber})`,
         "general",
         "tl",
@@ -5879,15 +6047,22 @@ ${ttNotes}`
       );
 
       setSubmissionConfirmation({
-        title: "Fintech Request Confirmed! 💳",
+        title: "Fintech Request Confirmed! ",
         message: `Your ${ttPlatform === "tabby" ? "Tabby" : ttPlatform === "tamara" ? "Tamara" : "One Time Payment"} link request was successfully filed. The Team Leader has been notified to generate the installment link. Do not submit this request twice.`,
         type: "fintech_request",
         referenceId: newRequest.id,
       });
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err) {
-      console.error(err);
-      toast.error("Fintech error: " + (err.message || err));
+    } catch (err: any) {
+      console.error("Fintech request submission error:", err);
+      const msg = err?.message || String(err);
+      if (msg.includes("timed out")) {
+        toast.error("Submission timed out. Check your connection and try again.");
+      } else if (msg.includes("permission") || msg.includes("PERMISSION_DENIED")) {
+        toast.error("Permission denied. Please refresh and log in again.");
+      } else {
+        toast.error("Fintech error: " + (err.message || err));
+      }
     } finally {
       setIsFormSubmitting(false);
     }
@@ -5899,6 +6074,8 @@ ${ttNotes}`
     tlNotes?: string,
     tlLinks?: string,
     status: "confirmed" | "rejected" = "confirmed",
+    tlPhotos?: string[],
+    tlSupportingLinks?: string[],
   ) => {
     if (!currentUser) return;
     const updated = tabbyTamaraRequests.map((r) => {
@@ -5931,6 +6108,8 @@ ${ttNotes}`
           paymentLink: paymentLink || null,
           tlNotes: tlNotes || null,
           tlLinks: tlLinks || undefined,
+          tlPhotos: tlPhotos || r.tlPhotos || [],
+          tlSupportingLinks: tlSupportingLinks || [],
           workflowStatus: newWorkflowStatus,
           replies: [...existingReplies, activityEntry],
           updatedAt: new Date().toISOString()
@@ -5944,8 +6123,8 @@ ${ttNotes}`
 
         addSystemNotification(
           status === "confirmed"
-            ? `✅ Payment Link Ready`
-            : `❌ Fintech Request Rejected`,
+            ? ` Payment Link Ready`
+            : ` Fintech Request Rejected`,
           status === "confirmed"
             ? `Your ${r.platform} request for ${r.patientName} has been confirmed. ${tlNotes ? `Notes: ${tlNotes}` : ""}`
             : `Your ${r.platform} request for ${r.patientName} has been rejected. ${tlNotes ? `Notes: ${tlNotes}` : ""}`,
@@ -5955,6 +6134,41 @@ ${ttNotes}`
           "tt_request",
           r.id
         );
+
+        // If confirmed with payment link AND submitter is Call Center → notify all Social Media agents
+        if (status === "confirmed" && paymentLink) {
+          const submitterLOB = getAgentLOB(r.agentName);
+          if (submitterLOB === "Call Center") {
+            const socialMediaAgents = Object.entries(AGENT_LOBS)
+              .filter(([name, lob]) => lob === "Social Media")
+              .map(([name]) => name);
+
+            socialMediaAgents.forEach((targetAgent) => {
+              addSystemNotification(
+                "💳 Payment Link Ready — Contact Patient Now",
+                `TL ${currentUser?.name} confirmed a ${r.platform?.toUpperCase()} request.\n` +
+                  `Patient: ${r.patientName}\n` +
+                  `📞 Phone: ${(r.phoneNumber || "").replace(/^0+/, "")} (starts from 5)\n` +
+                  `🏥 Clinic: ${r.clinicName}\n` +
+                  `🔗 Payment Link: ${paymentLink}` +
+                  (tlNotes ? `\n📝 TL Notes: ${tlNotes}` : ""),
+                "general",
+                targetAgent,
+                undefined,
+                "tt_request",
+                requestId
+              );
+            });
+          }
+
+          // Always notify TL confirmation went through
+          addSystemNotification(
+            "✅ TT Request Confirmed",
+            `${r.platform?.toUpperCase()} request for ${r.patientName} confirmed with payment link.`,
+            "general",
+            "tl"
+          );
+        }
 
         return updatedReq;
       }
@@ -5969,6 +6183,43 @@ ${ttNotes}`
       );
     } else {
       toast.success("Request successfully marked as rejected with notes!");
+    }
+  };
+
+  const handleAssignRecord = async (
+    recordId: string,
+    collectionName: string,
+    toAgent: string,
+    recordType: string,
+    fromAgent: string
+  ) => {
+    if (!currentUser) return;
+    try {
+      const { updateDoc, doc } = await import('firebase/firestore');
+      await updateDoc(doc(db, collectionName, recordId), { assignedTo: toAgent });
+
+      // Update local state based on collectionName
+      if (collectionName === 'inquiries') {
+        setInquiries(prev => prev.map(i => i.id === recordId ? { ...i, assignedTo: toAgent } : i));
+      } else if (collectionName === 'tt_requests') {
+        setTabbyTamaraRequests(prev => prev.map(r => r.id === recordId ? { ...r, assignedTo: toAgent } : r));
+      } else if (collectionName === 'tt_complaints') {
+        setTabbyTamaraComplaints(prev => prev.map(c => c.id === recordId ? { ...c, assignedTo: toAgent } : c));
+      } else if (collectionName === 'client_comms') {
+        setClientComms(prev => prev.map(c => c.id === recordId ? { ...c, assignedTo: toAgent } : c));
+      }
+
+      // Notify assigned agent
+      addSystemNotification(
+        `📌 ${recordType} Assigned to You`,
+        `TL ${currentUser.name} assigned a ${recordType} to you. Previously handled by ${fromAgent}. Please review and action.`,
+        'general',
+        toAgent
+      );
+      toast.success(`Assigned to ${toAgent}!`);
+    } catch (err: any) {
+      console.error(err);
+      toast.error('Failed to assign record.');
     }
   };
 
@@ -5998,6 +6249,9 @@ ${ttNotes}`
       requestId,
       "payment_proof"
     );
+
+    const safeClientIdAttachments = processedClientIdAttachments.map(({ file, ...rest }) => rest);
+    const safePaymentProofAttachments = processedPaymentProofAttachments.map(({ file, ...rest }) => rest);
 
     const updated = tabbyTamaraRequests.map((r) => {
       if (r.id === requestId) {
@@ -6036,8 +6290,8 @@ ${ttNotes}`
           agentContactNotes: notes || r.agentContactNotes || "",
           paymentScreenshot: screenshot || r.paymentScreenshot || null,
           attachments: (attachments && attachments.length > 0) ? [...(r.attachments || []), ...attachments] : (r.attachments || []),
-          clientIdAttachments: processedClientIdAttachments.length > 0 ? processedClientIdAttachments : (r.clientIdAttachments || []),
-          paymentProofAttachments: processedPaymentProofAttachments.length > 0 ? processedPaymentProofAttachments : (r.paymentProofAttachments || []),
+          clientIdAttachments: safeClientIdAttachments.length > 0 ? safeClientIdAttachments : (r.clientIdAttachments || []),
+          paymentProofAttachments: safePaymentProofAttachments.length > 0 ? safePaymentProofAttachments : (r.paymentProofAttachments || []),
           workflowStatus: derivedStatus,
           replies: [...existingReplies, ...activityEntries],
           updatedAt: new Date().toISOString()
@@ -6046,7 +6300,7 @@ ${ttNotes}`
         // Notify TL/support when ready_for_partner
         if (derivedStatus === 'ready_for_partner') {
           addSystemNotification(
-            `📦 Fintech Ready for Partner`,
+            `Fintech Ready for Partner`,
             `${currentUser.name} completed client contact and uploaded materials for ${r.patientName}. Request is ready for partner.`,
             "general",
             "tl",
@@ -6119,8 +6373,18 @@ ${ttNotes}`
 
     setIsFormSubmitting(true);
     try {
+      const createdAt = new Date().toISOString();
+      let safeId = "tc_";
+      if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+        safeId += `${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+      } else {
+        safeId += `${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+      }
+      const id = safeId;
+
       const newComplaint: any = {
-        id: "tc_" + Math.random().toString(36).substr(2, 9),
+        id,
+        caseRef: formatCaseRef(id, "tt_complaint", createdAt),
         agentName: currentUser.name,
         patientName: tcPatientName,
         fileNumber: tcFileNumber,
@@ -6131,7 +6395,7 @@ ${ttNotes}`
         links: activeLinks,
         phoneNumber: tcPhoneNumber,
         complaintDetails: tcComplaintDetails,
-        createdAt: new Date().toISOString(),
+        createdAt,
         status: "pending_tl",
         customerContacted: "not_contacted",
         clinicName: tcClinicName,
@@ -6146,8 +6410,13 @@ ${ttNotes}`
         return updated;
       });
 
-      // Sync to Firestore
-      await setDoc(doc(db, "tt_complaints", newComplaint.id), newComplaint);
+      // Sync to Firestore with 10-second timeout
+      await Promise.race([
+        setDoc(doc(db, "tt_complaints", newComplaint.id), newComplaint),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Firestore write timed out")), 10000)
+        )
+      ]);
 
       // Clear form
       setTcPatientName("");
@@ -6163,7 +6432,7 @@ ${ttNotes}`
       setActiveLinks([]);
 
       addSystemNotification(
-        `⚠️ New Complaint`,
+        `New Complaint`,
         `${currentUser.name} submitted a new complaint for ${tcPatientName} (${tcPhoneNumber})`,
         "general",
         "tl",
@@ -6173,17 +6442,24 @@ ${ttNotes}`
       );
 
       setSubmissionConfirmation({
-        title: "Complaint Registered! ⚠️",
+        title: "Complaint Registered! ",
         message: `Your installment complaint for ${tcPatientName} has been recorded. Team Leaders will review the issue and initiate contact.`,
         type: "fintech_complaint",
         referenceId: newComplaint.id,
       });
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err) {
-      console.error(err);
-      toast.error(
-        "An error occurred while submitting complaint. Please try again.",
-      );
+    } catch (err: any) {
+      console.error("Complaint submission error:", err);
+      const msg = err?.message || String(err);
+      if (msg.includes("timed out")) {
+        toast.error("Submission timed out. Check your connection and try again.");
+      } else if (msg.includes("permission") || msg.includes("PERMISSION_DENIED")) {
+        toast.error("Permission denied. Please refresh and log in again.");
+      } else {
+        toast.error(
+          "An error occurred while submitting complaint. Please try again.",
+        );
+      }
     } finally {
       setIsFormSubmitting(false);
     }
@@ -6203,14 +6479,24 @@ ${ttNotes}`
 
     setIsFormSubmitting(true);
     try {
+      const createdAt = new Date().toISOString();
+      let safeId = "cc_";
+      if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+        safeId += `${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+      } else {
+        safeId += `${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+      }
+      const id = safeId;
+
       const newComm: any = {
-        id: "cc_" + Math.random().toString(36).substr(2, 9),
+        id,
+        caseRef: formatCaseRef(id, "client_comm", createdAt),
         callCenterAgentName: currentUser.name,
         clinicName: ccClinicName,
         phoneNumber: ccPhoneNumber,
         language: ccLanguage,
         notes: ccNotes,
-        createdAt: new Date().toISOString(),
+        createdAt,
         status: "pending",
         screenshot: activeScreenshot || null,
         photos: activePhotos,
@@ -6226,8 +6512,13 @@ ${ttNotes}`
         return updated;
       });
 
-      // Sync to Firestore
-      await setDoc(doc(db, "client_comms", newComm.id), newComm);
+      // Sync to Firestore with 10-second timeout
+      await Promise.race([
+        setDoc(doc(db, "client_comms", newComm.id), newComm),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Firestore write timed out")), 10000)
+        )
+      ]);
 
       // Clear form
       setCcClinicName("");
@@ -6245,7 +6536,7 @@ ${ttNotes}`
 
       socialMediaAgents.forEach(agentName => {
         addSystemNotification(
-          '📞 New Client Comm Request — Action Required',
+          'New Client Comm Request — Action Required',
           `${currentUser?.name} (Call Center) submitted a comm request.\nClinic: ${ccClinicName} | Phone: ${ccPhoneNumber} | Language: ${ccLanguage}\n\n${ccNotes.substring(0, 120)}`,
           'general',
           agentName,
@@ -6257,7 +6548,7 @@ ${ttNotes}`
 
       // Also notify TL
       addSystemNotification(
-        '📋 Client Comm Submitted',
+        'Client Comm Submitted',
         `${currentUser?.name} submitted a client comm request for ${ccClinicName}.`,
         'general',
         'tl',
@@ -6267,15 +6558,22 @@ ${ttNotes}`
       );
 
       setSubmissionConfirmation({
-        title: "Communication Request Submitted! 💬",
+        title: "Communication Request Submitted! ",
         message: `Your request has been dispatched to other agents successfully. They will initiate contact and keep you updated.`,
         type: "client_comm",
         referenceId: newComm.id,
       });
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err) {
-      console.error(err);
-      toast.error("An error occurred while submitting. Please try again.");
+    } catch (err: any) {
+      console.error("Client comm submission error:", err);
+      const msg = err?.message || String(err);
+      if (msg.includes("timed out")) {
+        toast.error("Submission timed out. Check your connection and try again.");
+      } else if (msg.includes("permission") || msg.includes("PERMISSION_DENIED")) {
+        toast.error("Permission denied. Please refresh and log in again.");
+      } else {
+        toast.error("An error occurred while submitting. Please try again.");
+      }
     } finally {
       setIsFormSubmitting(false);
     }
@@ -6319,7 +6617,7 @@ ${ttNotes}`
     const handledComm = updated.find((c) => c.id === commId);
     if (handledComm?.callCenterAgentName) {
       addSystemNotification(
-        "✅ Comm Request Handled",
+        "Comm Request Handled",
         `${currentUser.name} handled your request for ${handledComm.clinicName}. Notes: ${notes.substring(0, 120)}`,
         "general",
         handledComm.callCenterAgentName,
@@ -6361,7 +6659,7 @@ ${ttNotes}`
     const doneComm = updated.find((c) => c.id === commId);
     if (doneComm?.callCenterAgentName) {
       addSystemNotification(
-        "✅ Your Comm Request Was Closed",
+        "Your Comm Request Was Closed",
         `${currentUser.name} has closed your client communication request for ${doneComm.clinicName}. Patient has been contacted.`,
         "general",
         doneComm.callCenterAgentName,
@@ -6404,7 +6702,7 @@ ${ttNotes}`
     const takenComm = updated.find((c) => c.id === commId);
     if (takenComm?.callCenterAgentName) {
       addSystemNotification(
-        "🔄 Your Request Is Being Handled",
+        "Your Request Is Being Handled",
         `${currentUser.name} has taken your client communication request for ${takenComm.clinicName} and is working on it now.`,
         "general",
         takenComm.callCenterAgentName,
@@ -6548,7 +6846,7 @@ ${ttNotes}`
 
     // Automatically trigger notification
     addSystemNotification(
-      "📅 New Schedule Released & Published!",
+      "New Schedule Released & Published!",
       `A new shift schedule has been successfully uploaded and automatically published by ${currentUser?.name || "Leadership"}. System state is now updated.`,
       "schedule",
       "all",
@@ -6891,6 +7189,8 @@ ${ttNotes}`
       return c;
     });
 
+    const comp = updated.find((c) => c.id === complaintId);
+
     setTabbyTamaraComplaints(updated);
     setStorageItem("sched_tt_complaints", updated);
 
@@ -6899,13 +7199,12 @@ ${ttNotes}`
     setTlComplaintResolutionType("");
     setActiveComplaintHandlingId(null);
 
-    const comp = updated.find((c) => c.id === complaintId);
     if (comp) {
       addSystemNotification(
         "📋 Complaint Reviewed by TL",
         `Your complaint for ${comp.patientName} has been reviewed. Resolution: ${resolutionType || "See TL comment"}. Action required: contact the patient.`,
         "general",
-        comp.agentName,
+        (comp.agentName || "").trim(),
         undefined,
         "tt_complaint",
         complaintId
@@ -6945,11 +7244,22 @@ ${ttNotes}`
     setStorageItem("sched_tt_complaints", updated);
 
     if (comp && status === "contacted") {
+      // Notify the agent
       addSystemNotification(
-        "✅ Complaint Resolved",
+        "Complaint Resolved",
         `Your complaint for ${comp.patientName} has been marked as resolved (patient contacted).`,
         "general",
-        comp.agentName,
+        (comp.agentName || "").trim(),
+        undefined,
+        "tt_complaint",
+        complaintId
+      );
+      // Also notify TL that complaint was closed
+      addSystemNotification(
+        "✅ Complaint Marked Contacted",
+        `${comp.patientName}'s complaint has been closed by ${currentUser?.name || "Agent"}. Patient was contacted.`,
+        "general",
+        "tl",
         undefined,
         "tt_complaint",
         complaintId
@@ -7509,7 +7819,7 @@ ${ttNotes}`
                     <Info className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
                     <div className="text-left">
                       <p className="font-bold text-slate-100 mb-0.5">
-                        📢 Important Notice: New Login Style!
+                         Important Notice: New Login Style!
                       </p>
                       <p className="mb-1.5 text-slate-300">
                         Sessions were reset for a simpler login structure. Use
@@ -7728,16 +8038,16 @@ ${ttNotes}`
                       onClick={() => {
                         setIsDarkMode(!isDarkMode);
                         toast.success(
-                          `Theme switched to ${!isDarkMode ? "Dark" : "Light"} Mode! 🎨`,
+                          `Theme switched to ${!isDarkMode ? "Dark" : "Light"} Mode! `,
                         );
                       }}
                       className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-slate-300 hover:text-slate-100 cursor-pointer flex items-center justify-center"
                       title="Toggle Dark/Light Mode"
                     >
                       {isDarkMode ? (
-                        <span className="text-xs leading-none">☀️</span>
+                        <span className="text-xs leading-none"></span>
                       ) : (
-                        <span className="text-xs leading-none">🌙</span>
+                        <span className="text-xs leading-none"></span>
                       )}
                     </button>
 
@@ -7774,10 +8084,10 @@ ${ttNotes}`
                       </p>
                       <p className="text-[10px] uppercase tracking-widest font-mono text-indigo-300 font-semibold">
                         {currentUser.role === "tl"
-                          ? "👑 Team Leader"
+                          ? " Team Leader"
                           : supportAssignments[currentUser.name]
-                            ? "⚡ Support"
-                            : "👤 Agent"}
+                            ? " Support"
+                            : " Agent"}
                       </p>
                     </div>
                   </div>
@@ -7785,7 +8095,7 @@ ${ttNotes}`
                   {/* Spotlight Profile Window - Bio & Daily Updates with real-time Firebase syncing */}
                   <div className="mt-3 pt-3 border-t border-white/5 space-y-2.5 font-sans">
                     <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-slate-500 font-bold">
-                      <span>My Spotlight 🌟</span>
+                      <span>My Spotlight </span>
                       <span
                         className={`px-1.5 py-0.5 rounded text-[8px] font-black tracking-normal uppercase ${
                           (currentUser.status || "online") === "online"
@@ -7831,7 +8141,7 @@ ${ttNotes}`
                     {/* Daily Updates small window */}
                     <div className="space-y-1">
                       <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">
-                        Daily Updates / Focus: 📝
+                        Daily Updates / Focus: 
                       </label>
                       <textarea
                         value={currentUser.dailyUpdate || ""}
@@ -7862,7 +8172,7 @@ ${ttNotes}`
                         Support Assigned By
                       </p>
                       <p className="text-slate-100 font-semibold flex items-center gap-1">
-                        👑 {supportAssignments[currentUser.name].assignedBy}
+                         {supportAssignments[currentUser.name].assignedBy}
                       </p>
                       <p className="text-[8px] text-slate-400">
                         {new Date(
@@ -8036,7 +8346,7 @@ ${ttNotes}`
                       <>
                         {groupTitle(
                           "Operations & Triage",
-                          "📋",
+                          "",
                           "text-teal-600",
                         )}
                         {buildBtn(
@@ -8090,7 +8400,7 @@ ${ttNotes}`
 
                         {groupTitle(
                           "Core Analytics & RTM",
-                          "📊",
+                          "",
                           "text-indigo-600",
                         )}
                         {buildBtn(
@@ -8120,7 +8430,7 @@ ${ttNotes}`
 
                         {groupTitle(
                           "Workforce Management",
-                          "📅",
+                          "",
                           "text-blue-600",
                         )}
                         {buildBtn(
@@ -8136,7 +8446,7 @@ ${ttNotes}`
                           "bg-blue-500/20 border-blue-500/30 text-blue-100",
                         )}
 
-                        {groupTitle("System Controls", "⚙️", "text-slate-400")}
+                        {groupTitle("System Controls", "", "text-slate-400")}
                         {buildBtn(
                           "integrations",
                           <Sparkles className="w-4 h-4 text-amber-400" />,
@@ -8181,7 +8491,7 @@ ${ttNotes}`
                       <>
                         {groupTitle(
                           "Operations & Triage",
-                          "📋",
+                          "",
                           "text-teal-600",
                         )}
                         {buildBtn(
@@ -8241,7 +8551,7 @@ ${ttNotes}`
 
                         {groupTitle(
                           "My Core Workspace",
-                          "📊",
+                          "",
                           "text-indigo-600",
                         )}
                         {buildBtn(
@@ -8265,7 +8575,7 @@ ${ttNotes}`
 
                         {groupTitle(
                           "My Planning & Leave",
-                          "📅",
+                          "",
                           "text-blue-600",
                         )}
                         {buildBtn(
@@ -8287,7 +8597,7 @@ ${ttNotes}`
                           "bg-blue-500/20 border-blue-500/30 text-blue-100",
                         )}
 
-                        {groupTitle("Shared Goodies", "☕", "text-fuchsia-400")}
+                        {groupTitle("Shared Goodies", "", "text-fuchsia-400")}
                         {buildBtn(
                           "tl-feedback",
                           <MessageCircle className="w-4 h-4 text-pink-500" />,
@@ -8647,7 +8957,7 @@ ${ttNotes}`
                                   ) : (
                                     <div className="space-y-1.5">
                                       <p className="text-sm text-slate-100">
-                                        🎉 Your inquiry has been{" "}
+                                         Your inquiry has been{" "}
                                         <strong className="text-emerald-400 font-bold uppercase">
                                           Answered
                                         </strong>{" "}
@@ -8707,7 +9017,7 @@ ${ttNotes}`
                                 <div className="space-y-1 w-full text-left">
                                   <div className="flex flex-wrap items-center gap-2">
                                     <span className="text-[9px] font-mono uppercase tracking-wider bg-amber-500/20 text-yellow-300 px-2 py-0.5 rounded-lg font-bold">
-                                      ⚠️ Customer Contact Required
+                                       Customer Contact Required
                                     </span>
                                     <span className="text-[10px] text-emerald-400 font-extrabold uppercase bg-emerald-500/10 px-2 py-1.5 rounded border border-emerald-500/20">
                                       Confirmed by {req.confirmedBy}
@@ -8754,7 +9064,7 @@ ${ttNotes}`
                                   }
                                   className="px-4 py-2.5 bg-gradient-to-r from-emerald-400 to-teal-500 hover:brightness-110 active:scale-95 text-xs text-black font-extrabold font-sans rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
                                 >
-                                  📞 Mark as Contacted
+                                   Mark as Contacted
                                 </button>
                               </div>
                             </div>
@@ -8796,7 +9106,7 @@ ${ttNotes}`
                                 <div className="space-y-1 w-full text-left">
                                   <div className="flex flex-wrap items-center gap-2">
                                     <span className="text-[9px] font-mono uppercase tracking-wider bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded-lg font-bold">
-                                      🚨 Complaint Resolution & Contact Required
+                                       Complaint Resolution & Contact Required
                                     </span>
                                     <span className="text-[10px] text-amber-300 font-extrabold uppercase bg-amber-500/10 px-2 py-1.5 rounded border border-amber-500/20">
                                       TL Commented by {comp.tlHandledBy}
@@ -8815,7 +9125,7 @@ ${ttNotes}`
                                     has been processed by the TL!
                                     <br />
                                     <span className="text-amber-300 font-semibold block mt-1.5 bg-black/30 p-2.5 rounded-xl border border-white/5">
-                                      💬 TL Comment: "{comp.tlComment}"
+                                       TL Comment: "{comp.tlComment}"
                                     </span>
                                   </p>
                                 </div>
@@ -8831,7 +9141,7 @@ ${ttNotes}`
                                   }
                                   className="px-4 py-2.5 bg-gradient-to-r from-emerald-400 to-teal-500 hover:brightness-110 active:scale-95 text-xs text-black font-extrabold font-sans rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
                                 >
-                                  📞 Mark as Contacted & Close
+                                   Mark as Contacted & Close
                                 </button>
                               </div>
                             </div>
@@ -8949,7 +9259,7 @@ ${ttNotes}`
                             )}
                             <label className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 rounded-full cursor-pointer transition-opacity backdrop-blur-sm">
                               <span className="text-[10px] uppercase font-bold text-white tracking-wider flex items-center gap-1">
-                                <Upload className="w-3 h-3" /> Edit 📸
+                                <Upload className="w-3 h-3" /> Edit 
                               </span>
                               <input
                                 type="file"
@@ -8986,8 +9296,8 @@ ${ttNotes}`
                                         { merge: true },
                                       ).catch(console.error);
                                       addSystemNotification(
-                                        "🖼️ Profile Updated!",
-                                        "Your profile picture has been updated across the workspace! 😎",
+                                        "Profile Updated!",
+                                        "Your profile picture has been updated across the workspace! ",
                                         "general",
                                         "personal",
                                       );
@@ -9002,18 +9312,18 @@ ${ttNotes}`
                             <div className="flex flex-col sm:flex-row sm:items-end gap-3 justify-center sm:justify-start">
                               <h2 className="text-3xl font-display font-black text-slate-100">
                                 {formatAgentName(currentUser.name)}{" "}
-                                {currentUser.role === "tl" ? "👑" : "🌟"}
+                                {currentUser.role === "tl" ? "" : ""}
                               </h2>
                               <p className="text-xs font-mono text-slate-500 uppercase tracking-widest bg-[#1e1e1e]/40 backdrop-blur-lg/50 px-2 py-1 rounded mb-1">
-                                LOB: {getAgentLOB(currentUser.name)} 🏢
+                                LOB: {getAgentLOB(currentUser.name)} 
                               </p>
                             </div>
                             <p className="text-slate-400 font-medium mt-1">
                               {currentUser.role === "tl"
-                                ? "Team Leader & Operations Supervisor 📊"
+                                ? "Team Leader & Operations Supervisor "
                                 : supportAssignments[currentUser.name]
-                                  ? "Line Support Specialist ⚡"
-                                  : "Customer Service Representative 🎧"}
+                                  ? "Line Support Specialist "
+                                  : "Customer Service Representative "}
                             </p>
 
                             <div className="mt-4 flex flex-wrap gap-2 justify-center sm:justify-start">
@@ -9058,7 +9368,7 @@ ${ttNotes}`
                                 }}
                                 className="text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-slate-300 hover:bg-white/10 transition-all cursor-pointer"
                               >
-                                📞 Edit Phone
+                                 Edit Phone
                               </button>
                               <button
                                 onClick={() => {
@@ -9092,7 +9402,7 @@ ${ttNotes}`
                                 }}
                                 className="text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-slate-300 hover:bg-white/10 transition-all cursor-pointer"
                               >
-                                ✉️ Edit Email
+                                 Edit Email
                               </button>
                               <button
                                 onClick={() => {
@@ -9103,8 +9413,8 @@ ${ttNotes}`
                                 className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 border rounded-lg transition-all cursor-pointer ${soundEnabled ? "bg-indigo-500/20 border-indigo-500/30 text-indigo-300" : "bg-white/10 backdrop-blur-md/80 border-slate-700 text-slate-500 hover:text-slate-300"}`}
                               >
                                 {soundEnabled
-                                  ? "🔊 Sound: ON"
-                                  : "🔈 Sound: OFF"}
+                                  ? " Sound: ON"
+                                  : " Sound: OFF"}
                               </button>
                             </div>
                           </div>
@@ -9113,18 +9423,18 @@ ${ttNotes}`
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                           <div className="bg-white/5 border border-white/10 rounded-2xl p-5 relative overflow-hidden group">
                             <h3 className="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">
-                              📝 My Personal Inbox & Notes
+                               My Personal Inbox & Notes
                             </h3>
                             <textarea
                               className="w-full h-32 bg-white/5 backdrop-blur-xl border border-white/20 text-slate-100 p-3 rounded-xl focus:border-indigo-500 outline-none resize-none text-sm font-medium"
-                              placeholder="Write anything... scratchpad... thoughts... 💭"
+                              placeholder="Write anything... scratchpad... thoughts... "
                             ></textarea>
                           </div>
 
                           <div className="bg-white/5 border border-white/10 rounded-2xl p-5 relative overflow-hidden shadow-inner flex flex-col h-full">
                             <div className="flex justify-between items-center mb-4">
                               <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                                ⏱️ Smart To-Do List
+                                ⏱ Smart To-Do List
                               </h3>
                               <select
                                 value={todoFilter}
@@ -9167,8 +9477,8 @@ ${ttNotes}`
                                 ).catch(console.error);
                                 e.currentTarget.reset();
                                 addSystemNotification(
-                                  "📋 Task Added!",
-                                  `Added: "${text}" ${minutes ? "with a reminder set!" : ""} ✅`,
+                                  "Task Added!",
+                                  `Added: "${text}" ${minutes ? "with a reminder set!" : ""} `,
                                   "general",
                                   "personal",
                                 );
@@ -9209,18 +9519,18 @@ ${ttNotes}`
                             <div className="flex-1 overflow-y-auto space-y-2 max-h-[200px] pr-1">
                               {todos.filter(
                                 (t) =>
-                                  t.agentName === currentUser.name &&
+                                  t.agentName?.toLowerCase() === currentUser?.name?.toLowerCase() &&
                                   (todoFilter === "All" ||
                                     t.category === todoFilter),
                               ).length === 0 ? (
                                 <div className="text-center text-slate-500 text-xs py-6 italic">
-                                  No tasks yet. Enjoy your free time! 🏖️
+                                  No tasks yet. Enjoy your free time! 
                                 </div>
                               ) : (
                                 todos
                                   .filter(
                                     (t) =>
-                                      t.agentName === currentUser.name &&
+                                      t.agentName?.toLowerCase() === currentUser?.name?.toLowerCase() &&
                                       (todoFilter === "All" ||
                                         t.category === todoFilter),
                                   )
@@ -9239,8 +9549,8 @@ ${ttNotes}`
                                           }).catch(console.error);
                                           if (done)
                                             addSystemNotification(
-                                              "🎉 Goal Reached!",
-                                              `You completed: "${t.text}" Awesome job! 🚀`,
+                                              "Goal Reached!",
+                                              `You completed: "${t.text}" Awesome job! `,
                                               "general",
                                               "personal",
                                             );
@@ -9357,7 +9667,7 @@ ${ttNotes}`
                                     document.body.removeChild(a);
                                     URL.revokeObjectURL(url);
                                     toast.success(
-                                      "Device backup downloaded successfully! 🔐",
+                                      "Device backup downloaded successfully! ",
                                     );
                                   } catch (e) {
                                     toast.error("Failed to generate backup.");
@@ -9577,7 +9887,7 @@ ${ttNotes}`
                                 </div>
                                 <div className="text-left space-y-1">
                                   <h3 className="text-sm font-bold text-slate-100 flex items-center gap-1.5">
-                                    📢 Important Account Notice: New Log In
+                                     Important Account Notice: New Log In
                                     Format!
                                   </h3>
                                   <p className="text-xs text-slate-300 leading-relaxed">
@@ -9739,7 +10049,7 @@ ${ttNotes}`
                                       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                         <div className="space-y-1">
                                           <div className="flex items-center gap-2">
-                                            <span className="text-xl">🏆</span>
+                                            <span className="text-xl"></span>
                                             <h3 className="font-extrabold text-slate-100 text-base font-display">
                                               Agent Prestige & Gamification Room
                                             </h3>
@@ -9874,10 +10184,10 @@ ${ttNotes}`
                                             </span>
                                             <p className="text-xl font-bold text-slate-100 font-display">
                                               {agentLevel >= 3
-                                                ? "🏆 Platinum Synq Master"
+                                                ? " Platinum Synq Master"
                                                 : agentLevel >= 2
-                                                  ? "🎖️ Gold Operator"
-                                                  : "🥉 Elite Core Agent"}
+                                                  ? " Gold Operator"
+                                                  : " Elite Core Agent"}
                                             </p>
                                             <p className="text-[9px] text-slate-450">
                                               Continuous ranking metric updated
@@ -10380,7 +10690,7 @@ ${ttNotes}`
                                                     {myDailyLog
                                                       ? isLate
                                                         ? "⏰ Over Grace Period"
-                                                        : "✓ Standard On Time"
+                                                        : " Standard On Time"
                                                       : "No shift logged"}
                                                   </p>
                                                 </div>
@@ -10731,7 +11041,7 @@ ${ttNotes}`
                                             </div>
 
                                             <div className="border-t border-white/5 mt-6 pt-4 text-xs text-slate-400 font-medium">
-                                              ✓ Average of{" "}
+                                               Average of{" "}
                                               <strong className="text-slate-100">
                                                 {(totalWeeklyCount / 7).toFixed(
                                                   1,
@@ -10874,7 +11184,7 @@ ${ttNotes}`
                                         : 96;
 
                                     let badgeTitle = "Sync Core Agent";
-                                    let badgeIcon = "🏆";
+                                    let badgeIcon = "";
                                     let badgeGradient =
                                       "from-slate-400 to-slate-500 border-slate-400/30 bg-slate-500/10";
                                     let badgeDesc =
@@ -10885,7 +11195,7 @@ ${ttNotes}`
                                       punctScore >= 95
                                     ) {
                                       badgeTitle = "Master Sync Communicator";
-                                      badgeIcon = "💎";
+                                      badgeIcon = "";
                                       badgeGradient =
                                         "from-indigo-400 via-pink-400 to-cyan-400 border-pink-500/30 bg-indigo-500/10 shadow shadow-indigo-500/20 text-indigo-200";
                                       badgeDesc =
@@ -10893,7 +11203,7 @@ ${ttNotes}`
                                     } else if (myMonthlyTotalCount >= 60) {
                                       badgeTitle =
                                         "High-Yield Resolving Champion";
-                                      badgeIcon = "⚡";
+                                      badgeIcon = "";
                                       badgeGradient =
                                         "from-cyan-400 to-indigo-500 border-indigo-500/30 bg-indigo-500/10 text-cyan-200";
                                       badgeDesc =
@@ -11193,7 +11503,7 @@ ${ttNotes}`
                                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-3">
                                     <div>
                                       <h3 className="font-extrabold text-transparent bg-gradient-to-r from-yellow-300 via-indigo-200 to-amber-300 bg-clip-text text-lg font-display flex items-center gap-2">
-                                        <span>🏆</span>
+                                        <span></span>
                                         Team Prestige Leaderboard
                                       </h3>
                                       <p className="text-xs text-slate-400 mt-0.5 font-sans">
@@ -11295,7 +11605,7 @@ ${ttNotes}`
                                             {top3[1] && (
                                               <div className="flex flex-col items-center space-y-2">
                                                 <div className="w-10 h-10 rounded-full bg-slate-400/20 border-2 border-slate-700 flex items-center justify-center font-bold text-slate-100 text-sm relative">
-                                                  🥈
+                                                  
                                                 </div>
                                                 <div className="bg-gradient-to-t from-slate-400/10 to-slate-400/20 border border-slate-400/20 rounded-t-xl p-2 w-full text-center space-y-0.5">
                                                   <p className="text-[10px] font-black text-slate-200 truncate">
@@ -11314,7 +11624,7 @@ ${ttNotes}`
                                             {top3[0] && (
                                               <div className="flex flex-col items-center space-y-2">
                                                 <div className="w-12 h-12 rounded-full bg-yellow-400/20 border-2 border-yellow-400 flex items-center justify-center font-bold text-slate-100 text-base relative -top-1 shadow-lg shadow-yellow-500/10">
-                                                  👑
+                                                  
                                                 </div>
                                                 <div className="bg-gradient-to-t from-yellow-500/10 to-yellow-500/20 border border-yellow-400/30 rounded-t-2xl p-3 w-full text-center space-y-0.5 scale-105 relative z-10">
                                                   <p className="text-xs font-black text-yellow-300 truncate">
@@ -11333,7 +11643,7 @@ ${ttNotes}`
                                             {top3[2] && (
                                               <div className="flex flex-col items-center space-y-2">
                                                 <div className="w-9 h-9 rounded-full bg-amber-600/20 border-2 border-amber-600 flex items-center justify-center font-bold text-slate-100 text-xs relative">
-                                                  🥉
+                                                  
                                                 </div>
                                                 <div className="bg-gradient-to-t from-amber-600/10 to-amber-600/20 border border-amber-600/20 rounded-t-xl p-2 w-full text-center space-y-0.5">
                                                   <p className="text-[9px] font-black text-amber-300 truncate">
@@ -13246,8 +13556,8 @@ ${ttNotes}`
                                                 : '';
 
                                               const text = [
-                                                `📋 Scheduling Request`,
-                                                `Ref: ${formatCaseRef(r.id, 'sched')}`,
+                                                ` Scheduling Request`,
+                                                `Ref: ${formatCaseRef(r.id, 'sched', r.createdAt, (r as any).caseRef)}`,
                                                 `Agent: ${r.agentName}`,
                                                 `Type: ${r.type === 'swap' ? 'Shift Swap' : 'Annual Leave'}`,
                                                 r.type === 'swap'
@@ -13357,7 +13667,7 @@ ${ttNotes}`
 
                           <input
                             type="text"
-                            placeholder="🔍 Search by agent name..."
+                            placeholder=" Search by agent name..."
                             className="flex-1 w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
                             value={searchQuery}
                             onChange={(e) => {
@@ -13434,7 +13744,7 @@ ${ttNotes}`
                                         className="border-b border-white/5 hover:bg-white/20 backdrop-blur-md transition-colors"
                                       >
                                         <td className="px-6 py-4 font-mono text-[10px] text-slate-400">
-                                          {formatCaseRef(req.id, "sched")}
+                                          {formatCaseRef(req.id, "sched", req.createdAt, (req as any).caseRef)}
                                         </td>
                                         <td className="px-6 py-4 font-bold text-slate-100">
                                           {req.agentName}
@@ -13539,7 +13849,7 @@ ${ttNotes}`
                                               </p>
                                               {req.ruleViolation && (
                                                 <p className="text-[10px] text-rose-400 bg-rose-500/10 p-1.5 rounded border border-rose-500/20">
-                                                  ⚠️ Violation flag:{" "}
+                                                   Violation flag:{" "}
                                                   {req.violationMessage}
                                                 </p>
                                               )}
@@ -14495,7 +14805,7 @@ ${ttNotes}`
                                 <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
                                 <div>
                                   <p className="font-bold">
-                                    ⚠️ Notice Rule Violation Detected
+                                     Notice Rule Violation Detected
                                   </p>
                                   <p className="mt-0.5 text-[11px] leading-relaxed text-rose-200">
                                     {swapWarning}
@@ -14619,7 +14929,7 @@ ${ttNotes}`
                                 <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
                                 <div>
                                   <p className="font-bold">
-                                    ⚠️ Notice Rule Violation Detected
+                                     Notice Rule Violation Detected
                                   </p>
                                   <p className="mt-0.5 text-[11px] leading-relaxed text-rose-200">
                                     {annualWarning}
@@ -14734,7 +15044,7 @@ ${ttNotes}`
                               <div className="space-y-1.5">
                                 <label className="text-xs font-semibold text-slate-300 block flex items-center justify-between">
                                   <span className="flex items-center gap-1">
-                                    🏥 Clinic Name{" "}
+                                     Clinic Name{" "}
                                     <span className="text-rose-400 font-extrabold">
                                       *
                                     </span>
@@ -14837,7 +15147,7 @@ ${ttNotes}`
                                       className={`px-2 py-0.5 rounded cursor-pointer transition-all ${inquiryLanguageDir === "auto" ? "bg-indigo-600 text-white font-bold" : "text-slate-400 hover:text-slate-100"}`}
                                       title="Auto Detect Language Direction"
                                     >
-                                      Auto 🌐
+                                      Auto 
                                     </button>
                                     <button
                                       type="button"
@@ -14847,7 +15157,7 @@ ${ttNotes}`
                                       className={`px-2 py-0.5 rounded cursor-pointer transition-all ${inquiryLanguageDir === "ltr" ? "bg-indigo-600 text-white font-bold" : "text-slate-400 hover:text-slate-100"}`}
                                       title="Force English Mode (LTR)"
                                     >
-                                      English 🇺🇸
+                                      English 
                                     </button>
                                     <button
                                       type="button"
@@ -14857,7 +15167,7 @@ ${ttNotes}`
                                       className={`px-2 py-0.5 rounded cursor-pointer transition-all ${inquiryLanguageDir === "rtl" ? "bg-indigo-600 text-white font-bold" : "text-slate-400 hover:text-slate-100"}`}
                                       title="Force Arabic Mode (RTL)"
                                     >
-                                      العربية 🇸🇦
+                                      العربية 
                                     </button>
                                   </div>
                                 </div>
@@ -14916,6 +15226,7 @@ ${ttNotes}`
                               inquiries={inquiries}
                               tabbyTamaraRequests={tabbyTamaraRequests}
                               tabbyTamaraComplaints={tabbyTamaraComplaints}
+                              clientComms={clientComms}
                               addSystemNotification={addSystemNotification}
                               onEditItem={(item) => {
                                 setEditingItem({ type: item.type as any, id: item.id, data: item.data });
@@ -14923,6 +15234,7 @@ ${ttNotes}`
                               setInquiries={setInquiries}
                               setTabbyTamaraRequests={setTabbyTamaraRequests}
                               setTabbyTamaraComplaints={setTabbyTamaraComplaints}
+                              setClientComms={setClientComms}
                             />
                           </div>
                           {/* Legacy code skipped dynamically */}
@@ -15055,7 +15367,7 @@ ${ttNotes}`
                                                     className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 border border-indigo-500/30 rounded-lg font-bold flex items-center gap-1 cursor-pointer hover:bg-indigo-500/30 transition-colors"
                                                     title="Copy Clinic"
                                                   >
-                                                    🏥 {inq.clinicName}
+                                                     {inq.clinicName}
                                                   </span>
                                                 )}
                                                 {inq.phoneNumber && (
@@ -15066,11 +15378,11 @@ ${ttNotes}`
                                                     className="text-[10px] bg-sky-500/10 text-sky-300 px-2.5 py-0.5 border border-sky-500/20 rounded-lg font-mono flex items-center gap-1 cursor-pointer hover:bg-sky-500/20 transition-colors"
                                                     title="Copy Phone Number"
                                                   >
-                                                    📞 {inq.phoneNumber}
+                                                     {inq.phoneNumber}
                                                   </span>
                                                 )}
                                                 <span className="font-mono text-[10px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded mr-1">
-                                                  {formatCaseRef(inq.id)}
+                                                  {formatCaseRef(inq.id, "inquiry", inq.createdAt, inq.caseRef)}
                                                 </span>
                                                 <span className="text-[10px] text-slate-400">
                                                   {new Date(
@@ -15142,8 +15454,8 @@ ${ttNotes}`
                                                       ? `Links:\n${(inq.links || []).join('\n')}`
                                                       : '';
                                                     const text = [
-                                                      `📋 Inquiry`,
-                                                      `Ref: ${formatCaseRef(inq.id, 'inq')}`,
+                                                      ` Inquiry`,
+                                                      `Ref: ${formatCaseRef(inq.id, 'inq', inq.createdAt, inq.caseRef)}`,
                                                       `Clinic: ${inq.clinicName}`,
                                                       `Phone: ${normalizePhone(inq.phoneNumber || '')}`,
                                                       `Inquiry: ${inq.text}`,
@@ -15170,9 +15482,13 @@ ${ttNotes}`
 
                                               {/* Display Photos */}
                                               <AttachmentsDisplay
-                                                photos={[...(inq.photos || []), ...((inq as any).screenshot ? [(inq as any).screenshot] : []), ...((inq as any).imageUrl ? [(inq as any).imageUrl] : []), ...((inq as any).attachment ? [(inq as any).attachment] : [])]}
+                                                photos={[
+                                                  ...(inq.photos || []),
+                                                  ...((inq.screenshot) ? [inq.screenshot] : []),
+                                                  ...(((inq as any).imageUrl) ? [(inq as any).imageUrl] : []),
+                                                ].filter(Boolean)}
                                                 attachments={inq.attachments}
-                                                links={inq.links}
+                                                links={inq.links || []}
                                               />
 
                                               {/* Done with attachments */}
@@ -15227,13 +15543,13 @@ ${ttNotes}`
                                                   value="not_contacted"
                                                   className="bg-white/10 backdrop-blur-md text-slate-100 backdrop-blur-lg  font-sans"
                                                 >
-                                                  ❌ Not Contacted
+                                                   Not Contacted
                                                 </option>
                                                 <option
                                                   value="contacted"
                                                   className="bg-white/10 backdrop-blur-md text-slate-100 backdrop-blur-lg  font-sans"
                                                 >
-                                                  📞 Contacted
+                                                   Contacted
                                                 </option>
                                                 <option
                                                   value="attempted"
@@ -15366,7 +15682,7 @@ ${ttNotes}`
                                               className="bg-white/10 backdrop-blur-md text-slate-300 font-bold px-2 py-0.5 rounded-lg border border-slate-700 cursor-pointer hover:bg-white/20 backdrop-blur-md transition-colors"
                                               title="Copy Agent Name"
                                             >
-                                              👤 {inq.agentName}
+                                               {inq.agentName}
                                             </span>
                                             {inq.clinicName && (
                                               <span
@@ -15376,7 +15692,7 @@ ${ttNotes}`
                                                 className="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2.5 py-0.5 rounded-lg cursor-pointer hover:bg-indigo-500/20 transition-colors"
                                                 title="Copy Clinic"
                                               >
-                                                🏥 {inq.clinicName}
+                                                 {inq.clinicName}
                                               </span>
                                             )}
                                             {inq.phoneNumber && (
@@ -15387,12 +15703,12 @@ ${ttNotes}`
                                                 className="bg-sky-500/10 text-sky-300 border border-sky-500/20 px-2.5 py-0.5 rounded-lg font-mono tracking-wider cursor-pointer hover:bg-sky-500/20 transition-colors"
                                                 title="Copy Phone Number"
                                               >
-                                                📞 {inq.phoneNumber}
+                                                 {inq.phoneNumber}
                                               </span>
                                             )}
                                           </div>
                                           <span className="font-mono text-[10px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded mr-1">
-                                            {formatCaseRef(inq.id)}
+                                            {formatCaseRef(inq.id, "inquiry", inq.createdAt, inq.caseRef)}
                                           </span>
                                           <span className="text-slate-500">
                                             {new Date(
@@ -15666,7 +15982,7 @@ ${ttNotes}`
                                     {conf.limit > 0 &&
                                       progressPercentage >= 100 && (
                                         <p className="text-[10px] text-rose-400 font-bold animate-pulse text-center font-sans">
-                                          ⚠️ Overtime! You have exceeded your
+                                           Overtime! You have exceeded your
                                           allocated {conf.limit}-minute{" "}
                                           {conf.name.toLowerCase()} limit.
                                         </p>
@@ -16381,6 +16697,7 @@ ${ttNotes}`
                           inquiries={inquiries}
                           tabbyTamaraRequests={tabbyTamaraRequests}
                           tabbyTamaraComplaints={tabbyTamaraComplaints}
+                          clientComms={clientComms}
                           addSystemNotification={addSystemNotification}
                           onEditItem={(item) => {
                             setEditingItem({ type: item.type as any, id: item.id, data: item.data });
@@ -16388,6 +16705,7 @@ ${ttNotes}`
                           setInquiries={setInquiries}
                           setTabbyTamaraRequests={setTabbyTamaraRequests}
                           setTabbyTamaraComplaints={setTabbyTamaraComplaints}
+                          setClientComms={setClientComms}
                         />
                       </div>
 
@@ -16571,7 +16889,7 @@ ${ttNotes}`
                                                   className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 border border-indigo-500/30 rounded font-sans font-bold flex items-center gap-1 cursor-pointer hover:bg-indigo-500/30 transition-colors"
                                                   title="Copy Clinic"
                                                 >
-                                                  🏥 {inq.clinicName}
+                                                   {inq.clinicName}
                                                 </span>
                                               )}
                                               {inq.phoneNumber && (
@@ -16582,7 +16900,7 @@ ${ttNotes}`
                                                   className="text-[10px] bg-sky-500/10 text-sky-300 px-2 py-0.5 border border-sky-500/20 rounded font-mono font-bold flex items-center gap-1 cursor-pointer hover:bg-sky-500/20 transition-colors"
                                                   title="Copy Phone Number"
                                                 >
-                                                  📞 {inq.phoneNumber}
+                                                   {inq.phoneNumber}
                                                 </span>
                                               )}
                                               {inq.customerContacted ===
@@ -16591,7 +16909,7 @@ ${ttNotes}`
                                                   className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 border border-emerald-500/30 rounded font-sans font-bold flex items-center gap-1"
                                                   title="Customer is Contacted"
                                                 >
-                                                  📞 Contacted
+                                                   Contacted
                                                 </span>
                                               )}
                                               {inq.customerContacted ===
@@ -16610,12 +16928,12 @@ ${ttNotes}`
                                                   className="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.5 border border-rose-500/30 rounded font-sans font-bold flex items-center gap-1"
                                                   title="Customer not contacted yet"
                                                 >
-                                                  ❌ Not Contacted
+                                                   Not Contacted
                                                 </span>
                                               )}
                                             </div>
                                             <span className="font-mono text-[10px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded mr-1">
-                                              {formatCaseRef(inq.id)}
+                                              {formatCaseRef(inq.id, "inquiry", inq.createdAt, inq.caseRef)}
                                             </span>
                                             <span className="text-[9px] text-slate-500 font-mono">
                                               {new Date(
@@ -16635,8 +16953,8 @@ ${ttNotes}`
                                                 ? `Links:\n${(inq.links || []).join('\n')}`
                                                 : '';
                                               const text = [
-                                                `📋 Inquiry`,
-                                                `Ref: ${formatCaseRef(inq.id, 'inq')}`,
+                                                ` Inquiry`,
+                                                `Ref: ${formatCaseRef(inq.id, 'inq', inq.createdAt, inq.caseRef)}`,
                                                 `Clinic: ${inq.clinicName}`,
                                                 `Phone: ${normalizePhone(inq.phoneNumber || '')}`,
                                                 `Inquiry: ${inq.text}`,
@@ -16687,9 +17005,13 @@ ${ttNotes}`
 
                                         {/* Render attachments */}
                                         <AttachmentsDisplay
-                                          photos={[...(inq.photos || []), ...((inq as any).screenshot ? [(inq as any).screenshot] : []), ...((inq as any).imageUrl ? [(inq as any).imageUrl] : []), ...((inq as any).attachment ? [(inq as any).attachment] : [])]}
+                                          photos={[
+                                            ...(inq.photos || []),
+                                            ...((inq.screenshot) ? [inq.screenshot] : []),
+                                            ...(((inq as any).imageUrl) ? [(inq as any).imageUrl] : []),
+                                          ].filter(Boolean)}
                                           attachments={inq.attachments}
-                                          links={inq.links}
+                                          links={inq.links || []}
                                         />
 
                                         {/* TL customerContacted quick update buttons */}
@@ -16703,7 +17025,7 @@ ${ttNotes}`
                                             }
                                             className={`text-[10px] px-2 py-1 rounded transition-colors ${!inq.customerContacted || inq.customerContacted === "not_contacted" ? "bg-rose-500/20 text-rose-300 font-bold" : "text-slate-400 hover:bg-white/5"}`}
                                           >
-                                            ❌ Not Contacted
+                                             Not Contacted
                                           </button>
                                           <button
                                             onClick={() =>
@@ -16725,7 +17047,7 @@ ${ttNotes}`
                                             }
                                             className={`text-[10px] px-2 py-1 rounded transition-colors ${inq.customerContacted === "contacted" ? "bg-emerald-500/20 text-emerald-300 font-bold" : "text-slate-400 hover:bg-white/5"}`}
                                           >
-                                            ✅ Contacted
+                                             Contacted
                                           </button>
                                         </div>
 
@@ -16806,7 +17128,7 @@ ${ttNotes}`
                                         {/* Reassign Agent Option */}
                                         <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/5">
                                           <span className="text-[11px] text-slate-400 font-semibold flex items-center gap-1">
-                                            👤 Reassign Agent:
+                                             Reassign Agent:
                                           </span>
                                           <select
                                             value={inq.agentName}
@@ -16927,7 +17249,7 @@ ${ttNotes}`
                         const myCases = cases.filter(
                           (c) =>
                             currentUser.role === "tl" ||
-                            c.agentName?.toLowerCase() === currentUser.name.toLowerCase()
+                            c.agentName?.toLowerCase() === currentUser?.name?.toLowerCase()
                         );
                         const search = (casesSearch ?? "").toLowerCase();
                         const filtered = myCases
@@ -16948,16 +17270,16 @@ ${ttNotes}`
                           <>
                             <div className="flex gap-2 flex-wrap">
                               <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-slate-300">
-                                📋 {myCases.length} Total
+                                 {myCases.length} Total
                               </span>
                               <span className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-xs font-bold text-indigo-400">
-                                🔍 {filtered.length} Shown
+                                 {filtered.length} Shown
                               </span>
                             </div>
 
                             {filtered.length === 0 ? (
                               <div className="text-center py-20 text-slate-500">
-                                <p className="text-4xl mb-3">📁</p>
+                                <p className="text-4xl mb-3"></p>
                                 <p className="font-bold">No cases found.</p>
                                 <p className="text-xs mt-1">Cases you submit will appear here.</p>
                               </div>
@@ -16974,7 +17296,7 @@ ${ttNotes}`
                                           {c.patientName || "Unknown Patient"}
                                         </p>
                                         <p className="text-[10px] text-slate-500 font-mono">
-                                          {formatCaseRef(c.id, "case")} ·{" "}
+                                          {formatCaseRef(c.id, "case", c.createdAt, c.caseRef)} ·{" "}
                                           {new Date(c.createdAt).toLocaleDateString()}
                                         </p>
                                       </div>
@@ -17040,8 +17362,8 @@ ${ttNotes}`
                                     <button
                                       onClick={() => {
                                         const text = [
-                                          `📋 Case Record`,
-                                          `Ref: ${formatCaseRef(c.id, "case")}`,
+                                          ` Case Record`,
+                                          `Ref: ${formatCaseRef(c.id, "case", c.createdAt, c.caseRef)}`,
                                           `Patient: ${c.patientName}`,
                                           `Phone: ${normalizePhone(c.phoneNumber || "")}`,
                                           `Agent: ${c.agentName}`,
@@ -17107,27 +17429,50 @@ ${ttNotes}`
                           </button>
 
                            {isSuperAdmin && (
-                            <button
-                              disabled={isPurgingTimeLogs}
-                              onClick={() => {
-                                showConfirm(
-                                  'Purge ALL Logs',
-                                  'Are you absolutely sure you want to delete all historical logs? This cannot be undone.',
-                                  'Purge',
-                                  'bg-rose-700 hover:bg-rose-600',
-                                  handlePurgeTimeLogs
-                                );
-                              }}
-                              className="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans disabled:opacity-50"
-                            >
-                              {isPurgingTimeLogs ? (
-                                <Loader2 className="w-4 h-4 text-rose-400 animate-spin shrink-0" />
-                              ) : (
-                                <XCircle className="w-4 h-4 text-rose-400 shrink-0" />
-                              )}
-                              {isPurgingTimeLogs ? "Purging..." : "Purge All Logs"}
-                            </button>
-                          )}
+                            <div className="flex flex-col sm:flex-row gap-2">
+                             <button
+                               disabled={isMigratingRefs}
+                               onClick={() => {
+                                 showConfirm(
+                                   'Migrate References',
+                                   'This will backfill the missing caseRef on all historical documents in the database.',
+                                   'Start Migration',
+                                   'bg-indigo-600 hover:bg-indigo-500',
+                                   handleMigrateRefs
+                                 );
+                               }}
+                               className="px-4 py-2.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans disabled:opacity-50"
+                             >
+                               {isMigratingRefs ? (
+                                 <Loader2 className="w-4 h-4 text-indigo-400 animate-spin shrink-0" />
+                               ) : (
+                                 <Database className="w-4 h-4 text-indigo-400 shrink-0" />
+                               )}
+                               {isMigratingRefs ? "Migrating..." : "Backfill Refs"}
+                             </button>
+
+                             <button
+                               disabled={isPurgingTimeLogs}
+                               onClick={() => {
+                                 showConfirm(
+                                   'Purge ALL Logs',
+                                   'Are you absolutely sure you want to delete all historical logs? This cannot be undone.',
+                                   'Purge',
+                                   'bg-rose-700 hover:bg-rose-600',
+                                   handlePurgeTimeLogs
+                                 );
+                               }}
+                               className="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans disabled:opacity-50"
+                             >
+                               {isPurgingTimeLogs ? (
+                                 <Loader2 className="w-4 h-4 text-rose-400 animate-spin shrink-0" />
+                               ) : (
+                                 <XCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                               )}
+                               {isPurgingTimeLogs ? "Purging..." : "Purge All Logs"}
+                             </button>
+                            </div>
+                           )}
                         </div>
                       </div>
 
@@ -17286,19 +17631,19 @@ ${ttNotes}`
                                           : active.status.toUpperCase()
                                         : "Clocked Out / Offline";
 
-                                      let compliance = "✅ Compliant";
+                                      let compliance = " Compliant";
                                       if (stats.breakMins > 15) {
-                                        compliance = `⚠️ Exceed Break (+${(stats.breakMins - 15).toFixed(1)}m)`;
+                                        compliance = ` Exceed Break (+${(stats.breakMins - 15).toFixed(1)}m)`;
                                       } else if (stats.lunchMins > 30) {
-                                        compliance = `⚠️ Exceed Lunch (+${(stats.lunchMins - 30).toFixed(1)}m)`;
+                                        compliance = ` Exceed Lunch (+${(stats.lunchMins - 30).toFixed(1)}m)`;
                                       } else if (stats.restroomMins > 10) {
-                                        compliance = `⚠️ Exceed Restroom (+${(stats.restroomMins - 10).toFixed(1)}m)`;
+                                        compliance = ` Exceed Restroom (+${(stats.restroomMins - 10).toFixed(1)}m)`;
                                       } else if (stats.meetingMins > 60) {
-                                        compliance = `⚠️ Exceed Meeting (+${(stats.meetingMins - 60).toFixed(1)}m)`;
+                                        compliance = ` Exceed Meeting (+${(stats.meetingMins - 60).toFixed(1)}m)`;
                                       } else if (stats.oneOnOneMins > 30) {
-                                        compliance = `⚠️ Exceed 1:1 (+${(stats.oneOnOneMins - 30).toFixed(1)}m)`;
+                                        compliance = ` Exceed 1:1 (+${(stats.oneOnOneMins - 30).toFixed(1)}m)`;
                                       } else if (stats.personalMins > 15) {
-                                        compliance = `⚠️ Exceed Personal (+${(stats.personalMins - 15).toFixed(1)}m)`;
+                                        compliance = ` Exceed Personal (+${(stats.personalMins - 15).toFixed(1)}m)`;
                                       }
 
                                       return (
@@ -17389,7 +17734,7 @@ ${ttNotes}`
                                           <td className="px-4 py-3 text-right font-semibold">
                                             <span
                                               className={
-                                                compliance.startsWith("✅")
+                                                compliance.startsWith("")
                                                   ? "text-emerald-400"
                                                   : "text-rose-400 animate-pulse"
                                               }
@@ -17998,7 +18343,7 @@ ${ttNotes}`
                                     {complianceViolations.length === 0 ? (
                                       <div className="flex items-center gap-3.5 p-4 bg-emerald-950/20 border border-emerald-500/20 rounded-2xl">
                                         <span className="flex h-6 w-6 shrink-0 bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 rounded-full items-center justify-center font-bold text-xs select-none">
-                                          ✓
+                                          
                                         </span>
                                         <div className="text-left">
                                           <p className="text-xs font-bold text-emerald-300 font-sans">
@@ -18086,7 +18431,7 @@ ${ttNotes}`
                                                     .map((v) => v.type)
                                                     .join(", ");
                                                 addSystemNotification(
-                                                  "🚨 Compliance Warning: Auxiliary Limit Exceeded",
+                                                  "Compliance Warning: Auxiliary Limit Exceeded",
                                                   `Hello ${entry.agentName}. Your daily total or session threshold for ${violationTypes} has exceeded allowed limits. Please coordinate with your Team Leader immediately.`,
                                                   "compliance",
                                                   entry.agentName,
@@ -18530,7 +18875,7 @@ ${ttNotes}`
                                                 <td className="px-5 py-4 text-right">
                                                   {isCurrentlyExceeded && (
                                                     <span className="px-2 py-0.5 rounded bg-rose-500/20 border border-rose-500/40 text-rose-300 font-bold text-[9px] uppercase tracking-wide select-none animate-pulse block text-center max-w-[130px] ml-auto">
-                                                      🚨 Overtime Now (+
+                                                       Overtime Now (+
                                                       {currentExceedBy.toFixed(
                                                         1,
                                                       )}
@@ -18540,13 +18885,13 @@ ${ttNotes}`
                                                   {!isCurrentlyExceeded &&
                                                     exceededLimit && (
                                                       <span className="px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/20 text-rose-300/80 font-bold text-[9px] uppercase tracking-wide block text-center max-w-[130px] ml-auto">
-                                                        ⚠️ Limit Exceeded
+                                                         Limit Exceeded
                                                       </span>
                                                     )}
                                                   {!isCurrentlyExceeded &&
                                                     !exceededLimit && (
                                                       <span className="px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 font-bold text-[9px] uppercase tracking-wide block text-center max-w-[130px] ml-auto">
-                                                        ✅ Compliant
+                                                         Compliant
                                                       </span>
                                                     )}
                                                 </td>
@@ -18644,8 +18989,8 @@ ${ttNotes}`
                           <div className="flex items-center gap-3">
                             <span className="text-xs font-black uppercase text-slate-400 font-mono">
                               {isRosterPublished
-                                ? "🟢 Published"
-                                : "🟡 Draft Only"}
+                                ? " Published"
+                                : " Draft Only"}
                             </span>
                             <label className="relative inline-flex items-center cursor-pointer select-none">
                               <input
@@ -18657,7 +19002,7 @@ ${ttNotes}`
                                   setStorageItem("sched_roster_published", val);
                                   if (val) {
                                     addSystemNotification(
-                                      "✨ New Schedule Published!",
+                                      "New Schedule Published!",
                                       `The direct schedule roster has been published by ${currentUser?.name || "Leadership"}! You can now view your active shifts in the Schedules tab and request shift swaps.`,
                                       "schedule",
                                       "all",
@@ -19229,7 +19574,7 @@ ${ttNotes}`
                                         <div className="p-4 bg-[#1e1e1e]/40 backdrop-blur-lg/40 rounded-2xl border border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-5 text-left transition-all">
                                           <div className="space-y-2">
                                             <label className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
-                                              🌅 Morning Shift Target (07-16)
+                                               Morning Shift Target (07-16)
                                             </label>
                                             <div className="flex items-center gap-2">
                                               <button
@@ -19275,7 +19620,7 @@ ${ttNotes}`
 
                                           <div className="space-y-2">
                                             <label className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
-                                              ☀️ Afternoon Shift Target (13-22)
+                                               Afternoon Shift Target (13-22)
                                             </label>
                                             <div className="flex items-center gap-2">
                                               <button
@@ -19325,7 +19670,7 @@ ${ttNotes}`
 
                                           <div className="space-y-2">
                                             <label className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
-                                              🌙 Night Shift Target (22-07)
+                                               Night Shift Target (22-07)
                                             </label>
                                             <div className="flex items-center gap-2">
                                               <button
@@ -19411,25 +19756,25 @@ ${ttNotes}`
                                           {[
                                             {
                                               key: "morning",
-                                              label: "🌅 Morning Shift",
+                                              label: " Morning Shift",
                                               target: heatmapMorningTarget,
                                               term: "M",
                                             },
                                             {
                                               key: "afternoon",
-                                              label: "☀️ Afternoon Shift",
+                                              label: " Afternoon Shift",
                                               target: heatmapAfternoonTarget,
                                               term: "A",
                                             },
                                             {
                                               key: "night",
-                                              label: "🌙 Night Shift",
+                                              label: " Night Shift",
                                               target: heatmapNightTarget,
                                               term: "N",
                                             },
                                             {
                                               key: "total",
-                                              label: "📊 Total Staff",
+                                              label: " Total Staff",
                                               target:
                                                 heatmapMorningTarget +
                                                 heatmapAfternoonTarget +
@@ -19509,7 +19854,7 @@ ${ttNotes}`
                                                           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 hidden group-hover:block bg-transparent border border-indigo-500/30 text-slate-100 rounded-xl p-3 shadow-2xl z-50 text-[10px] leading-relaxed backdrop-blur-md">
                                                             <p className="font-extrabold text-indigo-300 border-b border-indigo-500/20 pb-0.5 mb-1.5 flex items-center justify-between">
                                                               <span>
-                                                                📋 Coverage
+                                                                 Coverage
                                                                 Details
                                                               </span>
                                                               <span className="text-[8px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.2 rounded font-mono uppercase tracking-widest">
@@ -19583,7 +19928,7 @@ ${ttNotes}`
                                           </span>
                                           <span className="flex items-center gap-1">
                                             <span className="w-2.5 h-2.5 rounded bg-emerald-500/20 border border-emerald-500/40 inline-block text-[7px] text-center font-bold">
-                                              ✓
+                                              
                                             </span>
                                             Optimal (100%+)
                                           </span>
@@ -19595,13 +19940,13 @@ ${ttNotes}`
                                           </span>
                                           <span className="flex items-center gap-1">
                                             <span className="w-2.5 h-2.5 rounded bg-orange-500/15 border border-orange-500/35 inline-block text-[7px] text-center font-bold">
-                                              ⚠
+                                              
                                             </span>
                                             Understaffed (&lt;50%)
                                           </span>
                                           <span className="flex items-center gap-1">
                                             <span className="w-2.5 h-2.5 rounded bg-rose-500/10 border border-rose-500/30 inline-block text-[7px] text-center font-bold">
-                                              ✗
+                                              
                                             </span>
                                             0 Coverage
                                           </span>
@@ -19645,7 +19990,7 @@ ${ttNotes}`
                                           ) {
                                             return (
                                               <span className="text-emerald-400 font-bold flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-lg font-sans">
-                                                ✓ Optimal Coverage Across
+                                                 Optimal Coverage Across
                                                 Display Horizon
                                               </span>
                                             );
@@ -19661,7 +20006,7 @@ ${ttNotes}`
                                                 )
                                                 .join(", ")}
                                             >
-                                              ⚠️ Understaffed on{" "}
+                                               Understaffed on{" "}
                                               {understaffedEntries.length} shift
                                               {understaffedEntries.length > 1
                                                 ? "s"
@@ -19825,7 +20170,7 @@ ${ttNotes}`
                                                       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block bg-[#1e1e1e]/40 backdrop-blur-lg border border-indigo-400/40 text-slate-100 rounded-xl p-3 shadow-2xl z-50 text-[10px] leading-relaxed backdrop-blur-md">
                                                         <p className="font-extrabold text-indigo-300 border-b border-indigo-400/20 pb-0.5 mb-1.5 flex items-center justify-between font-display">
                                                           <span>
-                                                            📌 Details
+                                                             Details
                                                           </span>
                                                           <span className="text-slate-400 font-mono scale-75">
                                                             {dateStr}
@@ -20004,7 +20349,7 @@ ${ttNotes}`
                                                     {findShift?.shiftNotes && (
                                                       <div className="mt-1.5 border-t border-white/5 pt-1 text-[9px] text-indigo-300 font-sans italic break-words flex items-start gap-1 leading-normal text-left">
                                                         <span className="shrink-0 text-[10px]">
-                                                          📝
+                                                          
                                                         </span>
                                                         <span>
                                                           {findShift.shiftNotes}
@@ -20301,8 +20646,18 @@ ${ttNotes}`
                                         ? myShift.shiftLabel
                                         : "Off";
 
+                                      const createdAt = new Date().toISOString();
+                                      let safeId = "req_";
+                                      if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+                                        safeId += `${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+                                      } else {
+                                        safeId += `${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+                                      }
+                                      const id = safeId;
+
                                       const newReq: SwapRequest = {
-                                        id: "req_" + Date.now(),
+                                        id,
+                                        caseRef: formatCaseRef(id, "scheduling_request", createdAt),
                                         agentName: currentUser.name,
                                         type: "swap",
                                         date: p2pSelectedDate,
@@ -20674,7 +21029,7 @@ ${ttNotes}`
 
                               <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl backdrop-blur-sm">
                                 <p className="text-[10px] uppercase tracking-widest text-rose-300 font-bold mb-1">
-                                  📞 Confirmed / Pending Contact
+                                   Confirmed / Pending Contact
                                 </p>
                                 <p className="text-2xl font-black text-rose-400">
                                   {isTLOreSupport
@@ -20700,7 +21055,7 @@ ${ttNotes}`
 
                               <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl backdrop-blur-sm">
                                 <p className="text-[10px] uppercase tracking-widest text-emerald-300 font-bold mb-1">
-                                  ✅ Successfully Contacted
+                                   Successfully Contacted
                                 </p>
                                 <p className="text-2xl font-black text-emerald-400">
                                   {isTLOreSupport
@@ -20764,7 +21119,7 @@ ${ttNotes}`
 
                               <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl backdrop-blur-sm">
                                 <p className="text-[10px] uppercase tracking-widest text-rose-300 font-bold mb-1">
-                                  📞 Pending Client Contact
+                                   Pending Client Contact
                                 </p>
                                 <p className="text-2xl font-black text-rose-400">
                                   {isTLOreSupport
@@ -20785,7 +21140,7 @@ ${ttNotes}`
 
                               <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl backdrop-blur-sm">
                                 <p className="text-[10px] uppercase tracking-widest text-emerald-300 font-bold mb-1">
-                                  ✅ Successfully Closed
+                                   Successfully Closed
                                 </p>
                                 <p className="text-2xl font-black text-emerald-400">
                                   {isTLOreSupport
@@ -20974,16 +21329,25 @@ ${ttNotes}`
                                             required
                                           />
                                         </div>
-                                        {ttPriceWithoutTax &&
-                                          !isNaN(Number(ttPriceWithoutTax)) && (
-                                            <p className="text-[10px] text-indigo-300 font-medium">
-                                              * Note: 5% automatically added on
-                                              this price. Total: AED{" "}
-                                              {(
-                                                Number(ttPriceWithoutTax) * 1.05
-                                              ).toFixed(2)}{" "}
+                                        {ttPriceWithoutTax && calculateTabbyTamaraPrice(ttPriceWithoutTax).valid && (
+                                          <div className="mt-2 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-xs space-y-1 font-mono">
+                                            <p className="text-indigo-300 font-bold mb-1.5 pb-1.5 border-b border-indigo-500/20">
+                                              5% will be added. Final amount: {calculateTabbyTamaraPrice(ttPriceWithoutTax).finalPriceFormatted}
                                             </p>
-                                          )}
+                                            <div className="flex justify-between text-slate-400">
+                                              <span>Entered amount:</span>
+                                              <span>{calculateTabbyTamaraPrice(ttPriceWithoutTax).priceBeforeFeeFormatted}</span>
+                                            </div>
+                                            <div className="flex justify-between text-slate-400">
+                                              <span>5% amount:</span>
+                                              <span>{calculateTabbyTamaraPrice(ttPriceWithoutTax).feeAmountFormatted}</span>
+                                            </div>
+                                            <div className="flex justify-between text-indigo-300 font-bold mt-1 pt-1 border-t border-indigo-500/20">
+                                              <span>Final amount:</span>
+                                              <span>{calculateTabbyTamaraPrice(ttPriceWithoutTax).finalPriceFormatted}</span>
+                                            </div>
+                                          </div>
+                                        )}
                                       </div>
 
                                       {/* Phone Number */}
@@ -21033,7 +21397,7 @@ ${ttNotes}`
                                                 : "bg-black/25 border-white/5 text-slate-400 hover:bg-white/20 backdrop-blur-md"
                                             }`}
                                           >
-                                            💳 Tabby
+                                             Tabby
                                           </button>
                                           <button
                                             type="button"
@@ -21046,7 +21410,7 @@ ${ttNotes}`
                                                 : "bg-black/25 border-white/5 text-slate-400 hover:bg-white/20 backdrop-blur-md"
                                             }`}
                                           >
-                                            💳 Tamara
+                                             Tamara
                                           </button>
                                           <button
                                             type="button"
@@ -21062,7 +21426,7 @@ ${ttNotes}`
                                                 : "bg-black/25 border-white/5 text-slate-400 hover:bg-white/20 backdrop-blur-md"
                                             }`}
                                           >
-                                            💰 One Time
+                                             One Time
                                           </button>
                                         </div>
                                       </div>
@@ -21581,6 +21945,7 @@ ${ttNotes}`
                                 inquiries={inquiries}
                                 tabbyTamaraRequests={tabbyTamaraRequests}
                                 tabbyTamaraComplaints={tabbyTamaraComplaints}
+                                clientComms={clientComms}
                                 addSystemNotification={addSystemNotification}
                                 onEditItem={(item) => {
                                   setEditingItem({ type: item.type as any, id: item.id, data: item.data });
@@ -21588,6 +21953,7 @@ ${ttNotes}`
                                 setInquiries={setInquiries}
                                 setTabbyTamaraRequests={setTabbyTamaraRequests}
                                 setTabbyTamaraComplaints={setTabbyTamaraComplaints}
+                                setClientComms={setClientComms}
                               />
                             </div>
 
@@ -21641,15 +22007,16 @@ ${ttNotes}`
                                         }
                                         value={
                                           localSubTab === "complaints"
-                                            ? compSearch
+                                            ? complaintSearch
                                             : localSubTab === "client-comms"
                                               ? commSearch
                                               : ttSearchQuery
                                         }
                                         onChange={(e) => {
-                                          if (localSubTab === "complaints")
-                                            setCompSearch(e.target.value);
-                                          else if (
+                                          if (localSubTab === "complaints") {
+                                            setComplaintSearch(e.target.value);
+                                            setSelectedComplaintId(null);
+                                          } else if (
                                             localSubTab === "client-comms"
                                           )
                                             setCommSearch(e.target.value);
@@ -21667,9 +22034,10 @@ ${ttNotes}`
                                           <input
                                             type="date"
                                             value={compDateFilter}
-                                            onChange={(e) =>
-                                              setCompDateFilter(e.target.value)
-                                            }
+                                            onChange={(e) => {
+                                              setCompDateFilter(e.target.value);
+                                              setSelectedComplaintId(null);
+                                            }}
                                             className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium [color-scheme:dark]"
                                           />
                                         </div>
@@ -21712,54 +22080,103 @@ ${ttNotes}`
                                       </div>
                                     </>
                                   )}
-                                  <span className="text-slate-400 font-semibold font-sans">
-                                    Filter status:
-                                  </span>
-                                  <div className="flex items-center gap-1.5 bg-black/35 p-1 rounded-xl border border-white/5">
-                                    <button
-                                      onClick={() => setTtFilterStatus("all")}
-                                      className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "all" ? "bg-indigo-600 text-white font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
-                                    >
-                                      <History className="w-3 h-3" />
-                                      All History
-                                    </button>
-                                    <button
-                                      onClick={() =>
-                                        setTtFilterStatus("not_confirmed")
-                                      }
-                                      className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "not_confirmed" ? "bg-amber-400/20 text-amber-300 border border-amber-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
-                                    >
-                                      {localSubTab === "requests"
-                                        ? "⏳ Pending Confirm"
-                                        : localSubTab === "complaints"
-                                          ? "⏳ Pending TL"
-                                          : "⏳ Pending Contact"}
-                                    </button>
-                                    <button
-                                      onClick={() =>
-                                        setTtFilterStatus("confirmed")
-                                      }
-                                      className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "confirmed" ? "bg-rose-500/20 text-rose-300 border border-rose-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
-                                    >
-                                      {localSubTab === "requests"
-                                        ? "📞 Pending Contact"
-                                        : localSubTab === "complaints"
-                                          ? "📞 Pending Contact"
-                                          : "✅ Contacted"}
-                                    </button>
-                                    {localSubTab !== "client-comms" && (
-                                      <button
-                                        onClick={() =>
-                                          setTtFilterStatus("contacted")
-                                        }
-                                        className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "contacted" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
-                                      >
-                                        {localSubTab === "requests"
-                                          ? "✅ Contacted"
-                                          : "✅ Closed"}
-                                      </button>
-                                    )}
-                                  </div>
+                                  {localSubTab === "complaints" ? (
+                                    <>
+                                      <span className="text-slate-400 font-semibold font-sans">
+                                        Filter status:
+                                      </span>
+                                      <div className="flex items-center gap-1.5 bg-black/35 p-1 rounded-xl border border-white/5 animate-fade-in">
+                                        <button
+                                          onClick={() => {
+                                            setComplaintListFilter("all");
+                                            setSelectedComplaintId(null);
+                                          }}
+                                          className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${complaintListFilter === "all" ? "bg-indigo-600 text-white font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                        >
+                                          <History className="w-3 h-3" />
+                                          All
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            setComplaintListFilter("pending_tl");
+                                            setSelectedComplaintId(null);
+                                          }}
+                                          className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${complaintListFilter === "pending_tl" ? "bg-amber-400/20 text-amber-300 border border-amber-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                        >
+                                          ⏳ Pending TL
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            setComplaintListFilter("need_contact");
+                                            setSelectedComplaintId(null);
+                                          }}
+                                          className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${complaintListFilter === "need_contact" ? "bg-rose-500/20 text-rose-300 border border-rose-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                        >
+                                          ⏳ Need Contact
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            setComplaintListFilter("closed");
+                                            setSelectedComplaintId(null);
+                                          }}
+                                          className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${complaintListFilter === "closed" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                        >
+                                          Closed
+                                        </button>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span className="text-slate-400 font-semibold font-sans">
+                                        Filter status:
+                                      </span>
+                                      <div className="flex items-center gap-1.5 bg-black/35 p-1 rounded-xl border border-white/5">
+                                        <button
+                                          onClick={() => setTtFilterStatus("all")}
+                                          className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "all" ? "bg-indigo-600 text-white font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                        >
+                                          <History className="w-3 h-3" />
+                                          All History
+                                        </button>
+                                        <button
+                                          onClick={() =>
+                                            setTtFilterStatus("not_confirmed")
+                                          }
+                                          className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "not_confirmed" ? "bg-amber-400/20 text-amber-300 border border-amber-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                        >
+                                          {localSubTab === "requests"
+                                            ? "⏳ Pending Confirm"
+                                            : localSubTab === "complaints"
+                                              ? "⏳ Pending TL"
+                                              : "⏳ Pending Contact"}
+                                        </button>
+                                        <button
+                                          onClick={() =>
+                                            setTtFilterStatus("confirmed")
+                                          }
+                                          className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "confirmed" ? "bg-rose-500/20 text-rose-300 border border-rose-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                        >
+                                          {localSubTab === "requests"
+                                            ? " Pending Contact"
+                                            : localSubTab === "complaints"
+                                              ? " Pending Contact"
+                                              : " Contacted"}
+                                        </button>
+                                        {localSubTab !== "client-comms" && (
+                                          <button
+                                            onClick={() =>
+                                              setTtFilterStatus("contacted")
+                                            }
+                                            className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "contacted" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                          >
+                                            {localSubTab === "requests"
+                                              ? " Contacted"
+                                              : " Closed"}
+                                          </button>
+                                        )}
+                                      </div>
+                                    </>
+                                  )}
 
                                   {localSubTab === "requests" && (
                                     <>
@@ -22074,6 +22491,34 @@ ${ttNotes}`
                                       );
                                     })()
                                   ) : localSubTab === "complaints" ? (
+                                    <ComplaintsWorkspace
+                                      tabbyTamaraComplaints={tabbyTamaraComplaints}
+                                      currentUser={currentUser}
+                                      isTLOreSupport={isTLOreSupport}
+                                      isSuperAdmin={isSuperAdmin}
+                                      complaintSearch={complaintSearch}
+                                      selectedComplaintId={selectedComplaintId}
+                                      setSelectedComplaintId={setSelectedComplaintId}
+                                      complaintListFilter={complaintListFilter}
+                                      compDateFilter={compDateFilter}
+                                      tcFilterClinic={tcFilterClinic}
+                                      activeComplaintHandlingId={activeComplaintHandlingId}
+                                      setActiveComplaintHandlingId={setActiveComplaintHandlingId}
+                                      tlComplaintResolutionType={tlComplaintResolutionType}
+                                      setTlComplaintResolutionType={setTlComplaintResolutionType}
+                                      tlComplaintComment={tlComplaintComment}
+                                      setTlComplaintComment={setTlComplaintComment}
+                                      handleTLCommentComplaint={handleTLCommentComplaint}
+                                      handleToggleContactComplaint={handleToggleContactComplaint}
+                                      handleDeleteComplaint={handleDeleteComplaint}
+                                      handleAssignRecord={handleAssignRecord}
+                                      addSystemNotification={addSystemNotification}
+                                      canEditItem={canEditItem}
+                                      getRemainingEditTime={getRemainingEditTime}
+                                      setEditingItem={setEditingItem}
+                                      getElapsedTimerString={getElapsedTimerString}
+                                    />
+                                  ) : false ? (
                                     <>
                                       {tabbyTamaraComplaints.filter((c) => {
                                         const isMyComplaint =
@@ -22143,7 +22588,7 @@ ${ttNotes}`
                                           </p>
                                         </div>
                                       ) : (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in font-sans">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in font-sans font-sans">
                                           {tabbyTamaraComplaints
                                             .filter((c) => {
                                               const isMyComplaint =
@@ -22275,7 +22720,7 @@ ${ttNotes}`
                                                         </span>
                                                         {comp.clinicName && (
                                                           <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-slate-300">
-                                                            🏥 {comp.clinicName}
+                                                             {comp.clinicName}
                                                           </span>
                                                         )}
                                                       </div>
@@ -22335,9 +22780,48 @@ ${ttNotes}`
                                                         </p>
                                                         <p className="text-slate-200 font-bold font-sans">
                                                           {comp.isOldCustomer
-                                                            ? "👤 Old Customer"
+                                                            ? " Old Customer"
                                                             : "🆕 New Customer"}
                                                         </p>
+                                                      </div>
+                                                    </div>
+
+                                                    {/* Assign to agent */}
+                                                    <div className="border-t border-white/5 pt-1.5 flex items-center justify-between gap-2">
+                                                      <span className="text-[9px] text-slate-400 uppercase tracking-wider font-bold">
+                                                        Assigned Agent:
+                                                      </span>
+                                                      <div className="flex items-center gap-2">
+                                                        <select
+                                                          className="bg-slate-800 border border-slate-600/60 rounded-lg px-2 py-1 text-[10px] text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
+                                                          defaultValue=""
+                                                          onChange={(e) => {
+                                                            if (e.target.value) {
+                                                              handleAssignRecord(
+                                                                comp.id,
+                                                                "tt_complaints",
+                                                                e.target.value,
+                                                                "Complaint",
+                                                                comp.agentName || "Unknown"
+                                                              );
+                                                              e.target.value = "";
+                                                            }
+                                                          }}
+                                                        >
+                                                          <option value="">📌 Assign to...</option>
+                                                          {INITIAL_AGENTS.filter(
+                                                            (a) => a !== comp.agentName
+                                                          ).map((a) => (
+                                                            <option key={a} value={a}>
+                                                              {a}
+                                                            </option>
+                                                          ))}
+                                                        </select>
+                                                        {comp.assignedTo && (
+                                                          <span className="text-[9px] text-indigo-400 font-bold bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded">
+                                                            📌 {comp.assignedTo}
+                                                          </span>
+                                                        )}
                                                       </div>
                                                     </div>
 
@@ -22425,16 +22909,16 @@ ${ttNotes}`
                                                       <div className="border-t border-rose-500/20 pt-1.5 text-xs text-amber-300">
                                                         <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
                                                           <p className="text-[9px] text-rose-400 uppercase tracking-wider font-bold">
-                                                            💬 Team Leader Answer ({comp.tlName || "TL"}):
+                                                             Team Leader Answer ({comp.tlName || "TL"}):
                                                           </p>
                                                           {comp.tlResolutionType && (
                                                             <span className="inline-flex items-center px-1.5 py-0.5 bg-rose-500/10 border border-rose-500/20 rounded-md text-[9px] font-black uppercase text-rose-400">
-                                                              {comp.tlResolutionType === "refund" ? "💰 Refund" :
-                                                               comp.tlResolutionType === "replacement" ? "🔄 Replacement" :
-                                                               comp.tlResolutionType === "apology" ? "🙏 Apology" :
-                                                               comp.tlResolutionType === "escalated" ? "⬆️ Escalated" :
-                                                               comp.tlResolutionType === "no_action" ? "🚫 No Action" :
-                                                               comp.tlResolutionType === "follow_up" ? "📞 Follow Up" : comp.tlResolutionType}
+                                                              {comp.tlResolutionType === "refund" ? " Refund" :
+                                                               comp.tlResolutionType === "replacement" ? " Replacement" :
+                                                               comp.tlResolutionType === "apology" ? " Apology" :
+                                                               comp.tlResolutionType === "escalated" ? "⬆ Escalated" :
+                                                               comp.tlResolutionType === "no_action" ? " No Action" :
+                                                               comp.tlResolutionType === "follow_up" ? " Follow Up" : comp.tlResolutionType}
                                                             </span>
                                                           )}
                                                         </div>
@@ -22531,12 +23015,12 @@ ${ttNotes}`
                                                           </label>
                                                           <div className="grid grid-cols-2 gap-2">
                                                             {[
-                                                              { value: "refund", label: "💰 Refund" },
-                                                              { value: "replacement", label: "🔄 Replacement" },
-                                                              { value: "apology", label: "🙏 Apology" },
-                                                              { value: "escalated", label: "⬆️ Escalated" },
-                                                              { value: "no_action", label: "🚫 No Action" },
-                                                              { value: "follow_up", label: "📞 Follow Up Required" },
+                                                              { value: "refund", label: " Refund" },
+                                                              { value: "replacement", label: " Replacement" },
+                                                              { value: "apology", label: " Apology" },
+                                                              { value: "escalated", label: "⬆ Escalated" },
+                                                              { value: "no_action", label: " No Action" },
+                                                              { value: "follow_up", label: " Follow Up Required" },
                                                             ].map((opt) => (
                                                               <button
                                                                 key={opt.value}
@@ -22605,8 +23089,8 @@ ${ttNotes}`
                                                             : '';
 
                                                           const text = [
-                                                            `📋 Complaint`,
-                                                            `Ref: ${formatCaseRef(comp.id, 'tt_complaint')}`,
+                                                            ` Complaint`,
+                                                            `Ref: ${formatCaseRef(comp.id, "tt_complaint", comp.createdAt, comp.caseRef)}`,
                                                             `Patient: ${comp.patientName} | File: ${comp.fileNumber || 'N/A'}`,
                                                             `Phone: ${normalizePhone(comp.phoneNumber || '')}`,
                                                             `ID Type: ${comp.idNumber || (comp.isOldCustomer ? 'Old Customer' : 'New Customer')}`,
@@ -22685,8 +23169,8 @@ ${ttNotes}`
                                                             : "";
 
                                                         const text = [
-                                                          `📋 Complaint`,
-                                                          `Ref: ${formatCaseRef(comp.id, "tt_complaint")}`,
+                                                          ` Complaint`,
+                                                          `Ref: ${formatCaseRef(comp.id, "tt_complaint", comp.createdAt, comp.caseRef)}`,
                                                           `Patient: ${comp.patientName} | File: ${comp.fileNumber || "N/A"}`,
                                                           `Phone: ${normalizePhone(comp.phoneNumber || "")}`,
                                                           `ID Type: ${comp.idNumber || (comp.isOldCustomer ? "Old Customer" : "New Customer")}`,
@@ -22728,7 +23212,7 @@ ${ttNotes}`
                                                           }}
                                                           className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-sans font-black text-xs rounded-xl shadow-lg cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
                                                         >
-                                                          👑 Reply and Comment
+                                                           Reply and Comment
                                                         </button>
                                                       )}
 
@@ -22745,7 +23229,7 @@ ${ttNotes}`
                                                         }
                                                         className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 active:scale-95 text-black font-extrabold font-sans text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-1"
                                                       >
-                                                        📞{" "}
+                                                        {" "}
                                                         {isNeedContact
                                                           ? "Mark Case Closed"
                                                           : "Force Close"}
@@ -23000,12 +23484,12 @@ ${ttNotes}`
                                                         <span
                                                           className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border ${getClinicBadgeColor(req.clinicName)}`}
                                                         >
-                                                          🏥 {req.clinicName}
+                                                           {req.clinicName}
                                                         </span>
                                                         <span
                                                           className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border border-white/10 ${req.language === "Arabic" ? "bg-emerald-500/10 text-emerald-300" : "bg-blue-500/10 text-blue-300"}`}
                                                         >
-                                                          🗣️ {req.language}
+                                                           {req.language}
                                                         </span>
                                                       </div>
                                                     </div>
@@ -23027,13 +23511,13 @@ ${ttNotes}`
                                                       )}
                                                       {isInProgress && (
                                                         <span className="text-[9px] uppercase tracking-wide font-extrabold bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 px-2 py-0.5 rounded-md animate-pulse">
-                                                          ⚡ IN PROGRESS (
+                                                           IN PROGRESS (
                                                           {req.openedBy})
                                                         </span>
                                                       )}
                                                       {isClosed && (
                                                         <span className="text-[9px] uppercase tracking-wide font-extrabold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-2 py-0.5 rounded-md">
-                                                          ✅ CONTACTED
+                                                           CONTACTED
                                                         </span>
                                                       )}
                                                     </div>
@@ -23121,7 +23605,7 @@ ${ttNotes}`
                                                         {req.handlingNotes && (
                                                           <>
                                                             <p className="text-[9px] text-indigo-400 uppercase tracking-wider mb-0.5 font-bold">
-                                                              💬 Resolution
+                                                               Resolution
                                                               Notes (
                                                               {req.handledBy}):
                                                             </p>
@@ -23268,7 +23752,7 @@ ${ttNotes}`
                                                           }}
                                                           className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 active:scale-95 text-slate-950 text-[10px] font-black rounded-lg shadow cursor-pointer transition-all flex items-center gap-1"
                                                         >
-                                                          Confirm Handled ✅
+                                                          Confirm Handled 
                                                         </button>
                                                       </div>
                                                     </div>
@@ -23344,7 +23828,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
                                                         }
                                                         className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-sans font-black text-xs rounded-xl shadow-lg cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
                                                       >
-                                                        🔍 Open Request
+                                                         Open Request
                                                       </button>
                                                     )}
 
@@ -23362,7 +23846,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
                                                           }}
                                                           className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 text-slate-100 font-sans font-black text-xs rounded-xl shadow-lg cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
                                                         >
-                                                          📞 Finalize Handled
+                                                           Finalize Handled
                                                         </button>
                                                       )}
 
@@ -23713,11 +24197,11 @@ _ ${req.handlingNotes || "Pending response"} _`;
                                       <div>
                                         {f.status === "pending_reply" ? (
                                           <span className="px-3 py-1 text-[10px] font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-full animate-pulse">
-                                            📥 Pending Reply
+                                             Pending Reply
                                           </span>
                                         ) : (
                                           <span className="px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
-                                            ✅ Replied
+                                             Replied
                                           </span>
                                         )}
                                       </div>
@@ -23822,8 +24306,8 @@ _ ${req.handlingNotes || "Pending response"} _`;
                                                     className={`text-xs font-bold ${isSenderAmira ? "text-indigo-300" : "text-amber-400"}`}
                                                   >
                                                     {isSenderAmira
-                                                      ? "👑 "
-                                                      : "👤 "}{" "}
+                                                      ? " "
+                                                      : " "}{" "}
                                                     {r.senderName}
                                                   </span>
                                                   <span className="text-[9px] text-slate-500 font-mono">
@@ -23937,9 +24421,9 @@ _ ${req.handlingNotes || "Pending response"} _`;
                         qaScores={qaScores}
                         agentsList={agentsList}
                         qaTemplate={qaTemplate}
-                        onUpdateQATemplate={(newTemplate) => {
-                          setQaTemplate(newTemplate);
-                          setDoc(doc(db, 'qa_config', 'template'), { questions: newTemplate }).catch(console.error);
+                        onUpdateQATemplate={(t) => {
+                          setQaTemplate(t);
+                          setDoc(doc(db, 'qa_config', 'template'), { questions: t }).catch(console.error);
                         }}
                         addSystemNotification={addSystemNotification}
                         onSubmitScore={(score) => {
@@ -23948,7 +24432,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
                           setDoc(doc(db, 'qa_scores', score.id), score).catch(console.error);
                           addSystemNotification(
                             '📊 QA Score Submitted',
-                            `${currentUser.name} submitted a QA evaluation for ${score.agentName} — Score: ${score.totalScore}/${score.maxTotalScore}`,
+                            `${currentUser?.name || ''} evaluated ${score.agentName} — Score: ${score.totalScore}/${score.maxTotalScore}`,
                             'feedback',
                             score.agentName
                           );
@@ -24236,6 +24720,25 @@ _ ${req.handlingNotes || "Pending response"} _`;
         handleMarkAllNotifsAsRead={handleMarkAllNotifsAsRead}
         handleMarkSingleNotifAsRead={handleMarkSingleNotifAsRead}
         setActiveTab={setActiveTab}
+        getRecordByEntity={(entityType, entityId) => {
+          switch (entityType) {
+            case "client_comm":
+              return { type: "client_comm", data: clientComms.find(r => r.id === entityId) };
+            case "tt_request":
+              return { type: "tt_request", data: tabbyTamaraRequests.find(r => r.id === entityId) };
+            case "tt_complaint":
+              return { type: "tt_complaint", data: tabbyTamaraComplaints.find(r => r.id === entityId) };
+            case "inquiry":
+              return { type: "inq", data: inquiries.find(r => r.id === entityId) };
+            case "scheduling_request":
+              return { type: "sched", data: requests.find(r => r.id === entityId) };
+            case "case":
+              return { type: "case", data: cases.find(r => r.id === entityId) };
+            default:
+              return undefined;
+          }
+        }}
+        setViewingRecord={setViewingRecord}
       />
 
       {viewingRecord && (
@@ -24257,7 +24760,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
                 }`}>
                   {viewingRecord.type === 'inq' ? 'Inquiry' : viewingRecord.type === 'tt_request' ? 'TT Request' : viewingRecord.type === 'tt_complaint' ? 'Complaint' : viewingRecord.type === 'comm' ? 'Client Comm' : viewingRecord.type === 'sched' ? 'Scheduling' : 'Case'}
                 </span>
-                <span className='font-mono text-[11px] text-slate-500'>{formatCaseRef(viewingRecord.data.id, viewingRecord.type)}</span>
+                <span className='font-mono text-[11px] text-slate-500'>{formatCaseRef(viewingRecord.data.id, viewingRecord.type, viewingRecord.data.createdAt, viewingRecord.data.caseRef)}</span>
               </div>
               <button onClick={() => setViewingRecord(null)} className='p-2 hover:bg-white/10 rounded-xl transition-colors text-slate-400 hover:text-white'>
                 <X className='w-4 h-4' />
@@ -24277,19 +24780,19 @@ _ ${req.handlingNotes || "Pending response"} _`;
                 {viewingRecord.data.phoneNumber && (
                   <div className='bg-white/[0.02] border border-white/5 rounded-xl p-3 cursor-pointer hover:bg-white/[0.04]'
                     onClick={() => { copyToClipboard(normalizePhone(viewingRecord.data.phoneNumber), 'Phone copied!'); }}>
-                    <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1'>📞 Phone</p>
+                    <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1'> Phone</p>
                     <p className='text-sm font-bold text-slate-200 font-mono'>{viewingRecord.data.phoneNumber}</p>
                   </div>
                 )}
                 {viewingRecord.data.clinicName && (
                   <div className='bg-white/[0.02] border border-white/5 rounded-xl p-3'>
-                    <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1'>🏥 Clinic</p>
+                    <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1'> Clinic</p>
                     <p className='text-sm font-bold text-slate-200'>{viewingRecord.data.clinicName}</p>
                   </div>
                 )}
                 {viewingRecord.data.agentName && (
                   <div className='bg-white/[0.02] border border-white/5 rounded-xl p-3'>
-                    <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1'>👤 Agent</p>
+                    <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1'> Agent</p>
                     <p className='text-sm font-bold text-slate-200'>{viewingRecord.data.agentName}</p>
                   </div>
                 )}
@@ -24300,7 +24803,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
                   </div>
                 )}
                 <div className='bg-white/[0.02] border border-white/5 rounded-xl p-3'>
-                  <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1'>📅 Submitted</p>
+                  <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1'> Submitted</p>
                   <p className='text-xs font-bold text-slate-200'>{new Date(viewingRecord.data.createdAt).toLocaleString()}</p>
                 </div>
               </div>
@@ -24321,7 +24824,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
               {(viewingRecord.data.answer || viewingRecord.data.tlNotes || viewingRecord.data.tlComment) && (
                 <div className='bg-emerald-500/5 border border-emerald-500/15 rounded-xl p-4 text-left'>
                   <p className='text-[9px] text-emerald-400 uppercase tracking-widest font-bold mb-2'>
-                    {viewingRecord.data.answer ? '✅ TL Answer' : '📝 TL Notes / Comment'}
+                    {viewingRecord.data.answer ? ' TL Answer' : ' TL Notes / Comment'}
                   </p>
                   <p className='text-sm text-slate-200 leading-relaxed'>
                     {viewingRecord.data.answer || viewingRecord.data.tlNotes || viewingRecord.data.tlComment}
@@ -24337,7 +24840,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
                 (viewingRecord.data.attachments && viewingRecord.data.attachments.length > 0) ||
                 (viewingRecord.data.links && viewingRecord.data.links.length > 0)) && (
                 <div className='space-y-2 text-left'>
-                  <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold'>📎 Attachments</p>
+                  <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold'> Attachments</p>
                   <AttachmentsDisplay 
                     photos={[
                       ...(viewingRecord.data.photos || []), 
@@ -24354,7 +24857,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
               {/* Replies thread if any */}
               {viewingRecord.data.replies && viewingRecord.data.replies.length > 0 && (
                 <div className='space-y-2 text-left'>
-                  <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold'>💬 Thread ({viewingRecord.data.replies.length})</p>
+                  <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold'> Thread ({viewingRecord.data.replies.length})</p>
                   {viewingRecord.data.replies.map((r: any, i: number) => (
                     <div key={i} className='bg-white/[0.02] border border-white/5 rounded-xl p-3'>
                       <div className='flex items-center justify-between mb-1'>
@@ -24362,12 +24865,15 @@ _ ${req.handlingNotes || "Pending response"} _`;
                         <p className='text-[9px] text-slate-600 font-mono'>{new Date(r.createdAt).toLocaleString()}</p>
                       </div>
                       <p className='text-xs text-slate-400 whitespace-pre-line'>{r.text}</p>
-                      {((r.photos && r.photos.length > 0) || r.screenshot || r.imageUrl || r.attachments) && (
+                      {((r.photos && r.photos.length > 0) || r.screenshot || r.attachments || (r.links && r.links.length > 0)) && (
                         <div className="mt-2 text-left">
                           <AttachmentsDisplay 
-                            photos={[...(r.photos || []), ...(r.screenshot ? [r.screenshot] : []), ...(r.imageUrl ? [r.imageUrl] : [])]} 
-                            attachments={r.attachments || []}
-                            links={[]} 
+                            photos={[
+                              ...(r.photos && Array.isArray(r.photos) ? r.photos : []),
+                              ...(r.screenshot ? [r.screenshot] : []),
+                              ...(r.attachments && Array.isArray(r.attachments) ? r.attachments : []),
+                            ].filter(Boolean)}
+                            links={r.links || []} 
                           />
                         </div>
                       )}
@@ -24400,7 +24906,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
                   }
 
                   const text = [
-                    `📋 [${viewingRecord.type.toUpperCase()}] ${formatCaseRef(d.id, viewingRecord.type)}`,
+                    ` [${viewingRecord.type.toUpperCase()}] ${formatCaseRef(d.id, viewingRecord.type, d.createdAt, d.caseRef)}`,
                     d.patientName ? `Patient: ${d.patientName}` : '',
                     d.phoneNumber ? `Phone: ${normalizePhone(d.phoneNumber)}` : '',
                     d.clinicName ? `Clinic: ${d.clinicName}` : '',
@@ -24416,7 +24922,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
                     `\nDate: ${new Date(d.createdAt).toLocaleString()}`,
                   ].filter(Boolean).join('\n');
 
-                  let html = `<div><strong>📋 [${viewingRecord.type.toUpperCase()}] ${formatCaseRef(d.id, viewingRecord.type)}</strong><br/>`;
+                  let html = `<div><strong> [${viewingRecord.type.toUpperCase()}] ${formatCaseRef(d.id, viewingRecord.type, d.createdAt, d.caseRef)}</strong><br/>`;
                   if (d.patientName) html += `Patient: ${d.patientName}<br/>`;
                   if (d.phoneNumber) html += `Phone: ${normalizePhone(d.phoneNumber)}<br/>`;
                   if (d.clinicName) html += `Clinic: ${d.clinicName}<br/>`;

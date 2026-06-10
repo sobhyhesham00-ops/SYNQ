@@ -11,7 +11,9 @@ export const NotificationDrawer = ({
   currentUser,
   handleMarkAllNotifsAsRead,
   handleMarkSingleNotifAsRead,
-  setActiveTab
+  setActiveTab,
+  getRecordByEntity,
+  setViewingRecord,
 }: any) => {
 
   const handleClearNotif = (id: string, currentClearedBy: string[]) => {
@@ -31,16 +33,14 @@ export const NotificationDrawer = ({
   const displayNotifs = typeFilter === 'all' ? sortedNotifs : sortedNotifs.filter(n => n.type === typeFilter);
 
   const getNavTab = (notif: any) => {
-    if (notif.entityType === 'inquiry') return 'inquiries';
-    if (notif.entityType === 'scheduling_request') return 'my-requests';
+    if (notif.entityType === 'inquiry' || notif.type === 'inquiry') return 'inquiries';
+    if (notif.entityType === 'scheduling_request' || notif.type === 'schedule') return 'my-requests';
     if (notif.entityType === 'case') return 'daily-cases';
-    if (notif.entityType === 'tt_request') return 'tabby-tamara';
-    if (notif.entityType === 'tt_complaint') return 'complaints';
+    if (notif.entityType === 'tt_request' || notif.type === 'fintech_request') return 'tabby-tamara';
+    if (notif.entityType === 'tt_complaint' || notif.type === 'fintech_complaint') return 'complaints';
     if (notif.entityType === 'client_comm') return 'client-comms';
     
     // fallbacks based on type string for older notifications:
-    if (notif.type === 'inquiry') return 'inquiries';
-    if (notif.type === 'schedule') return 'my-requests';
     if (notif.type === 'feedback') return 'tl-feedback';
     return null;
   };
@@ -165,16 +165,23 @@ export const NotificationDrawer = ({
                             
                             // Scroll to entity
                             if (notif.entityId) {
-                                setTimeout(() => {
-                                    const element = document.getElementById(`request-${notif.entityId}`) || document.getElementById(`inquiry-${notif.entityId}`);
-                                    if (element) {
-                                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                        element.classList.add('ring-2', 'ring-indigo-500', 'ring-offset-2', 'ring-offset-[#0f0f13]', 'transition-all', 'duration-500');
-                                        setTimeout(() => {
-                                            element.classList.remove('ring-2', 'ring-indigo-500', 'ring-offset-2', 'ring-offset-[#0f0f13]');
-                                        }, 3000);
+                                if (getRecordByEntity && setViewingRecord && notif.entityType) {
+                                    const record = getRecordByEntity(notif.entityType, notif.entityId);
+                                    if (record && record.data) {
+                                      setViewingRecord(record);
                                     }
-                                }, 300); // Wait for tab change
+                                } else {
+                                  setTimeout(() => {
+                                      const element = document.getElementById(`request-${notif.entityId}`) || document.getElementById(`inquiry-${notif.entityId}`);
+                                      if (element) {
+                                          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                          element.classList.add('ring-2', 'ring-indigo-500', 'ring-offset-2', 'ring-offset-[#0f0f13]', 'transition-all', 'duration-500');
+                                          setTimeout(() => {
+                                              element.classList.remove('ring-2', 'ring-indigo-500', 'ring-offset-2', 'ring-offset-[#0f0f13]');
+                                          }, 3000);
+                                      }
+                                  }, 300); // Wait for tab change
+                                }
                             }
                           }}
                           className={`relative p-4 rounded-2xl border transition-all cursor-pointer hover:border-white/10 select-none ${getBgClass()}`}

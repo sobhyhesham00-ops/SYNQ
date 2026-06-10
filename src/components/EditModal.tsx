@@ -2,6 +2,7 @@ import React from "react";
 import { X, Save } from "lucide-react";
 import { MultiAttachmentUpload } from "./MultiAttachmentUpload";
 import { ProfessionalAttachmentUploader } from "./ProfessionalAttachmentUploader";
+import { calculateTabbyTamaraPrice } from "../utils";
 
 const CLINICS = [
   "dermadent",
@@ -104,11 +105,48 @@ const EditModalContent = ({
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >,
   ) => {
+    let newNotes = data.notes || "";
+    let feeAmount = data.feeAmount;
+    let finalPriceWithFee = data.finalPriceWithFee;
+    let feeRate = data.feeRate;
+    let currency = data.currency;
+    let priceWithTax = data.priceWithTax;
+
+    if (e.target.name === "priceWithoutTax") {
+      const pricing = calculateTabbyTamaraPrice(e.target.value);
+      priceWithTax = (!isNaN(Number(e.target.value)) && e.target.value.trim() !== ""
+        ? (Number(e.target.value) * 1.05).toFixed(2)
+        : e.target.value);
+      if (pricing.valid) {
+        feeRate = 0.05;
+        feeAmount = pricing.feeAmount;
+        finalPriceWithFee = pricing.finalPrice;
+        currency = "AED";
+
+        const newNote = `[5% added to price. Final: ${pricing.finalPriceFormatted}]`;
+        if (newNotes.includes("[5% added to price. Final: ")) {
+          newNotes = newNotes.replace(/\[5% added to price\. Final: [^\]]+\]/g, newNote);
+        } else {
+          newNotes = newNotes ? `${newNote}\n\n${newNotes}` : newNote;
+        }
+      }
+    }
+
+    if (e.target.name === "notes") {
+      newNotes = e.target.value;
+    }
+
     setEditingItem({
       ...editingItem,
       data: {
         ...data,
         [e.target.name]: e.target.value,
+        notes: newNotes,
+        feeAmount,
+        finalPriceWithFee,
+        feeRate,
+        currency,
+        priceWithTax
       },
     });
   };
@@ -219,6 +257,25 @@ const EditModalContent = ({
                 onChange={handleChange}
                 className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
               />
+              {data.priceWithoutTax && calculateTabbyTamaraPrice(data.priceWithoutTax).valid && (
+                <div className="mt-2 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-xs space-y-1 font-mono">
+                  <p className="text-indigo-300 font-bold mb-1.5 pb-1.5 border-b border-indigo-500/20">
+                    5% will be added. Final amount: {calculateTabbyTamaraPrice(data.priceWithoutTax).finalPriceFormatted}
+                  </p>
+                  <div className="flex justify-between text-slate-400">
+                    <span>Entered amount:</span>
+                    <span>{calculateTabbyTamaraPrice(data.priceWithoutTax).priceBeforeFeeFormatted}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-400">
+                    <span>5% amount:</span>
+                    <span>{calculateTabbyTamaraPrice(data.priceWithoutTax).feeAmountFormatted}</span>
+                  </div>
+                  <div className="flex justify-between text-indigo-300 font-bold mt-1 pt-1 border-t border-indigo-500/20">
+                    <span>Final amount:</span>
+                    <span>{calculateTabbyTamaraPrice(data.priceWithoutTax).finalPriceFormatted}</span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -455,7 +512,7 @@ const EditModalContent = ({
 
           {/* Attachments Section */}
           <div className="pt-4 border-t border-white/10">
-            <p className="text-xs font-bold text-slate-300 mb-3 uppercase tracking-wider">📎 Attachments & Links</p>
+            <p className="text-xs font-bold text-slate-300 mb-3 uppercase tracking-wider"> Attachments & Links</p>
 
             {type === "inquiry" ? (
               <ProfessionalAttachmentUploader

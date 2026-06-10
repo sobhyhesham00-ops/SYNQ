@@ -5,6 +5,47 @@ import { db, wrappedSetDoc as setDoc, wrappedDeleteDoc as deleteDoc } from './fi
 import { doc } from 'firebase/firestore';
 import { toast } from "sonner";
 
+export const TABBY_TAMARA_FEE_RATE = 0.05;
+
+export const calculateTabbyTamaraPrice = (
+  rawPrice: string | number,
+): {
+  valid: boolean;
+  priceBeforeFee: number;
+  feeAmount: number;
+  finalPrice: number;
+  priceBeforeFeeFormatted: string;
+  feeAmountFormatted: string;
+  finalPriceFormatted: string;
+} => {
+  const normalized =
+    typeof rawPrice === "string"
+      ? rawPrice.replace(/,/g, "").trim()
+      : String(rawPrice);
+  const priceBeforeFee = Number(normalized);
+  const valid = Number.isFinite(priceBeforeFee) && priceBeforeFee > 0;
+  const safePrice = valid ? priceBeforeFee : 0;
+  const feeAmount = Math.round(safePrice * TABBY_TAMARA_FEE_RATE * 100) / 100;
+  const finalPrice = Math.round((safePrice + feeAmount) * 100) / 100;
+  const format = (value: number) =>
+    new Intl.NumberFormat("en-AE", {
+      style: "currency",
+      currency: "AED",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+
+  return {
+    valid,
+    priceBeforeFee: safePrice,
+    feeAmount,
+    finalPrice,
+    priceBeforeFeeFormatted: format(safePrice),
+    feeAmountFormatted: format(feeAmount),
+    finalPriceFormatted: format(finalPrice),
+  };
+};
+
 export const normalizeUrl = (value: string | undefined | null): string | null => {
   if (!value) return null;
   let cleanValue = value.trim();
@@ -369,7 +410,7 @@ export const formatAgentName = (name: string): string => {
   const fullName = findAgentByUsername(name) || name;
   const normalized = capitalizeName(fullName);
   if (normalized?.toLowerCase() === 'amira hassan') {
-    return 'Amira Hassan 👑';
+    return 'Amira Hassan ';
   }
   return normalized;
 };
@@ -714,7 +755,7 @@ export const generateTextReport = (
         lines.push(`   Actioned : ${r.status === 'approved' ? 'Approved' : 'Declined'} by ${r.actionBy} on ${new Date(r.actionAt || '').toLocaleDateString()}`);
       }
       if (r.ruleViolation) {
-        lines.push(`   ⚠️ Violation: ${r.violationMessage || 'Notice interval violation'}`);
+        lines.push(`    Violation: ${r.violationMessage || 'Notice interval violation'}`);
       }
       if (r.notes) {
         lines.push(`   Remarks  : ${r.notes}`);
@@ -1271,7 +1312,9 @@ export const generateFintechRequestsCSV = (requests: TabbyTamaraRequest[]): stri
     'File Number',
     'Is Old Customer',
     'ID Number',
-    'Price Without Tax',
+    'Entered Amount',
+    '5% Added Amount',
+    'Final Amount (AED)',
     'Phone Number',
     'Platform',
     'Clinic Name',
@@ -1286,27 +1329,32 @@ export const generateFintechRequestsCSV = (requests: TabbyTamaraRequest[]): stri
     'Confirmed By'
   ];
 
-  const rows = requests.map(r => [
-    r.id,
-    `"${(r.agentName || '').replace(/"/g, '""')}"`,
-    `"${(r.patientName || '').replace(/"/g, '""')}"`,
-    `"${(r.fileNumber || '').replace(/"/g, '""')}"`,
-    r.isOldCustomer ? 'YES' : 'NO',
-    `"${(r.idNumber || '').replace(/"/g, '""')}"`,
-    `"${(r.priceWithoutTax || '').replace(/"/g, '""')}"`,
-    `"${(r.phoneNumber || '').replace(/"/g, '""')}"`,
-    r.platform.toUpperCase(),
-    `"${(r.clinicName || '').replace(/"/g, '""')}"`,
-    r.status.toUpperCase(),
-    (r.customerContacted || 'not_contacted').toUpperCase(),
-    `"${(r.paymentLink || '').replace(/"/g, '""')}"`,
-    `"${(r.notes || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
-    `"${(r.agentContactNotes || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
-    r.createdAt || '',
-    r.contactedAt || '',
-    r.confirmedAt || '',
-    r.confirmedBy ? `"${r.confirmedBy.replace(/"/g, '""')}"` : ''
-  ]);
+  const rows = requests.map(r => {
+    const pricing = calculateTabbyTamaraPrice(r.priceWithoutTax || 0);
+    return [
+      r.id,
+      `"${(r.agentName || '').replace(/"/g, '""')}"`,
+      `"${(r.patientName || '').replace(/"/g, '""')}"`,
+      `"${(r.fileNumber || '').replace(/"/g, '""')}"`,
+      r.isOldCustomer ? 'YES' : 'NO',
+      `"${(r.idNumber || '').replace(/"/g, '""')}"`,
+      `"${(pricing.priceBeforeFee).toString()}"`,
+      `"${(pricing.feeAmount).toString()}"`,
+      `"${(pricing.finalPrice).toString()}"`,
+      `"${(r.phoneNumber || '').replace(/"/g, '""')}"`,
+      r.platform.toUpperCase(),
+      `"${(r.clinicName || '').replace(/"/g, '""')}"`,
+      r.status.toUpperCase(),
+      (r.customerContacted || 'not_contacted').toUpperCase(),
+      `"${(r.paymentLink || '').replace(/"/g, '""')}"`,
+      `"${(r.notes || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+      `"${(r.agentContactNotes || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+      r.createdAt || '',
+      r.contactedAt || '',
+      r.confirmedAt || '',
+      r.confirmedBy ? `"${r.confirmedBy.replace(/"/g, '""')}"` : ''
+    ];
+  });
 
   return [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
 };
@@ -1527,22 +1575,110 @@ export const compressImage = (base64Str: string, maxDimension = 800, quality = 0
   });
 };
 
-export const formatCaseRef = (id: string, cType: string = 'inq'): string => {
-  const typeMap: Record<string, string> = {
-    sched: 'SCH',
-    inq: 'INQ',
-    inquiry: 'INQ',
-    tt_request: 'TTR',
-    tt_complaint: 'TTC',
-    comm: 'COM',
-    case: 'CAS'
-  };
-  const prefix = typeMap[cType] || 'REF';
-  const tsMatch = id.match(/(\d{10,13})/);
-  if (!tsMatch) return `${prefix}-??????`;
-  const d = new Date(parseInt(tsMatch[1]));
-  const ymd = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
-  return `${prefix}-${ymd}-${tsMatch[1].slice(-4)}`;
+export const CASE_CONFIG = {
+  inquiry: {
+    collection: "inquiries",
+    activeTab: "inquiries",
+    prefix: "INQ",
+  },
+  tt_request: {
+    collection: "tt_requests",
+    activeTab: "tabby-tamara",
+    prefix: "TTR",
+  },
+  tt_complaint: {
+    collection: "tt_complaints",
+    activeTab: "complaints",
+    prefix: "TTC",
+  },
+  client_comm: {
+    collection: "client_comms",
+    activeTab: "client-comms",
+    prefix: "COM",
+  },
+  scheduling_request: {
+    collection: "scheduling_requests",
+    activeTab: "my-requests",
+    prefix: "SCH",
+  },
+  case: {
+    collection: "cases",
+    activeTab: "daily-cases",
+    prefix: "CAS",
+  },
+} as const;
+
+export type CaseEntityType =
+  | "inq"
+  | "inquiry"
+  | "tt_request"
+  | "tt_complaint"
+  | "client_comm"
+  | "comm"
+  | "scheduling_request"
+  | "sched"
+  | "case";
+
+const CASE_PREFIX: Record<CaseEntityType, string> = {
+  inq: CASE_CONFIG.inquiry.prefix,
+  inquiry: CASE_CONFIG.inquiry.prefix,
+  tt_request: CASE_CONFIG.tt_request.prefix,
+  tt_complaint: CASE_CONFIG.tt_complaint.prefix,
+  client_comm: CASE_CONFIG.client_comm.prefix,
+  comm: CASE_CONFIG.client_comm.prefix,
+  scheduling_request: CASE_CONFIG.scheduling_request.prefix,
+  sched: CASE_CONFIG.scheduling_request.prefix,
+  case: CASE_CONFIG.case.prefix,
+};
+
+export const compactDate = (value?: string | number | Date): string => {
+  const date = value ? new Date(value) : new Date();
+  const safeDate = Number.isNaN(date.getTime()) ? new Date() : date;
+  return [
+    safeDate.getFullYear(),
+    String(safeDate.getMonth() + 1).padStart(2, "0"),
+    String(safeDate.getDate()).padStart(2, "0"),
+  ].join("");
+};
+
+export const stableReferenceSuffix = (id: string): string => {
+  const cleanId = String(id || "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
+
+  if (!cleanId) return "000000";
+
+  // Deterministic hash: the same Firestore ID always produces the same suffix.
+  let hash = 2166136261;
+  for (let index = 0; index < cleanId.length; index += 1) {
+    hash ^= cleanId.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return Math.abs(hash >>> 0).toString(36).toUpperCase().padStart(6, "0").slice(-6);
+};
+
+export const formatCaseRef = (
+  id: string,
+  entityType?: string,
+  createdAt?: string | number | Date,
+  persistedCaseRef?: string,
+): string => {
+  if (persistedCaseRef?.trim()) return persistedCaseRef.trim().toUpperCase();
+
+  const cType = (entityType || "inq") as CaseEntityType;
+  const prefix = CASE_PREFIX[cType] || "REF";
+  const timestampMatch = String(id || "").match(/(\d{10,13})/);
+  
+  let referenceDate: Date;
+  if (timestampMatch) {
+     referenceDate = new Date(Number(timestampMatch[1]));
+  } else if (createdAt) {
+     referenceDate = new Date(createdAt);
+  } else {
+     referenceDate = new Date();
+  }
+
+  return `${prefix}-${compactDate(referenceDate)}-${stableReferenceSuffix(id)}`;
 };
 
 export const normalizePhone = (phone: string): string => {
@@ -1563,32 +1699,39 @@ export const getSLAStatus = (createdAt: string, status: string, resolvedStatuses
   return { label, color, isResolved, ageMs };
 };
 
-export const normalizeAttachments = (attachments: any[] | undefined | null): FileAttachment[] => {
-  if (!attachments || !Array.isArray(attachments)) return [];
-  return attachments
-    .map((att, index) => {
-      if (!att) return null;
-      if (typeof att === 'string') {
-        const isDataUrl = att.startsWith('data:');
-        return {
-          id: `att_${index}_${Date.now()}`,
-          name: isDataUrl ? `Attachment ${index + 1}` : att,
-          type: isDataUrl ? (att.split(';')[0]?.replace('data:', '') || 'image/png') : 'application/octet-stream',
-          size: 0,
-          url: att
-        };
-      } else if (typeof att === 'object') {
-        return {
-          id: att.id || att.uid || `att_${index}_${Date.now()}`,
-          name: att.name || att.filename || `Attachment ${index + 1}`,
-          type: att.type || att.mimeType || 'application/octet-stream',
-          size: typeof att.size === 'number' ? att.size : 0,
-          url: att.url || att.dataUrl || ''
-        };
-      }
-      return null;
-    })
-    .filter((v): v is FileAttachment => !!v);
+export const normalizeAttachments = (...sources: unknown[]): FileAttachment[] => {
+  const flattened = sources.flatMap((source: any) =>
+    Array.isArray(source) ? source : source ? [source] : []
+  );
+  const seen = new Set<string>();
+  return flattened.flatMap((item: any, index) => {
+    const isString = typeof item === "string";
+    const isDataUrl = isString && item.startsWith("data:");
+    const normalized: FileAttachment | null =
+      isString
+        ? {
+            id: `legacy_${index}_${item.slice(-16)}`,
+            name: isDataUrl ? `Attachment ${index + 1}` : item,
+            type: isDataUrl ? item.slice(5, item.indexOf(";")) : "application/octet-stream",
+            size: 0,
+            url: item,
+          }
+        : item?.url || item?.dataUrl
+          ? {
+              id: item.id || item.uid || `legacy_${index}_${String(item.url || item.dataUrl).slice(-16)}`,
+              name: item.name || item.filename || `Attachment ${index + 1}`,
+              type: item.type || item.mimeType || "application/octet-stream",
+              size: Number(item.size || 0),
+              url: item.url || item.dataUrl,
+              storagePath: item.storagePath,
+              uploadedAt: item.uploadedAt,
+              uploadedBy: item.uploadedBy,
+            }
+          : null;
+    if (!normalized || !normalized.url || seen.has(normalized.url)) return [];
+    seen.add(normalized.url);
+    return [normalized];
+  });
 };
 
 export const getSafeTTWorkflowStatus = (req: TabbyTamaraRequest): TTWorkflowStatus => {
@@ -1627,33 +1770,23 @@ export const buildCaseClipboardPayload = (request: TabbyTamaraRequest): Clipboar
     .replace(/_/g, ' ')
     .toUpperCase();
   const paymentLink = request.paymentLink || 'No link generated';
+  const pricing = calculateTabbyTamaraPrice(request.priceWithoutTax || 0);
+  const amountTax = request.priceWithTax ||
+    (!isNaN(Number(request.priceWithoutTax))
+      ? (Number(request.priceWithoutTax) * 1.05).toFixed(2)
+      : '-');
 
   // Extract all attachments across different arrays
-  const attachmentsList: { name: string; url: string }[] = [];
-  const addAttachment = (url: string | undefined | null, defaultName: string) => {
-    if (!url) return;
-    attachmentsList.push({ name: defaultName, url });
-  };
-
-  const addAttachmentsArray = (arr: any[] | undefined | null, prefix: string) => {
-    if (!arr || !Array.isArray(arr)) return;
-    arr.forEach((item, index) => {
-      if (typeof item === 'string') {
-        addAttachment(item, `${prefix} ${index + 1}`);
-      } else if (item && typeof item === 'object') {
-        addAttachment(item.url || item.dataUrl, item.name || `${prefix} ${index + 1}`);
-      }
-    });
-  };
-
-  addAttachment(request.paymentScreenshot, 'Payment Screenshot');
-  addAttachment(request.screenshot, 'Screenshot');
-  addAttachment(request.imageUrl, 'Image URL');
-  addAttachmentsArray(request.photos, 'Attached Photo');
-  addAttachmentsArray(request.attachments, 'File Attachment');
-  addAttachmentsArray(request.clientIdAttachments, 'Client ID');
-  addAttachmentsArray(request.paymentProofAttachments, 'Payment Proof');
-  addAttachmentsArray(request.partnerAttachments, 'Partner Attachment');
+  let rawAttachments = [
+     request.paymentScreenshot,
+     request.screenshot,
+     request.imageUrl,
+     ...(request.photos || []),
+     ...(request.attachments || []),
+     ...(request.clientIdAttachments || []),
+     ...(request.paymentProofAttachments || []),
+     ...(request.partnerAttachments || [])
+  ];
 
   // Collect replies
   const repliesList: string[] = [];
@@ -1664,13 +1797,15 @@ export const buildCaseClipboardPayload = (request: TabbyTamaraRequest): Clipboar
       repliesList.push(`[${timeStr}] ${rep.senderName}: ${rep.text}`);
       repliesHtmlList.push(`<li><strong>${rep.senderName}</strong> <span style="font-size: 11px; color: #888;">(${timeStr})</span>: ${rep.text}</li>`);
       // Also grab attachments from replies
-      if (rep.photos) addAttachmentsArray(rep.photos, `${rep.senderName} Reply Photo`);
-      if (rep.attachments) addAttachmentsArray(rep.attachments, `${rep.senderName} Reply Attachment`);
-      if (rep.screenshot) addAttachment(rep.screenshot, `${rep.senderName} Reply Screenshot`);
-      if (rep.imageUrl) addAttachment(rep.imageUrl, `${rep.senderName} Reply Image`);
-      if (rep.attachmentsObjects) addAttachmentsArray(rep.attachmentsObjects, `${rep.senderName} Reply Attachment`);
+      if (rep.photos) rawAttachments.push(...rep.photos);
+      if (rep.attachments) rawAttachments.push(...rep.attachments);
+      if (rep.screenshot) rawAttachments.push(rep.screenshot);
+      if (rep.imageUrl) rawAttachments.push(rep.imageUrl);
+      if (rep.attachmentsObjects) rawAttachments.push(...rep.attachmentsObjects);
     });
   }
+
+  const attachmentsList = normalizeAttachments(rawAttachments);
 
   // Text version
   const textLines = [
@@ -1681,6 +1816,8 @@ export const buildCaseClipboardPayload = (request: TabbyTamaraRequest): Clipboar
     `File/ID Number: ${fileNum}`,
     `Phone Number: ${phone}`,
     `Clinic: ${clinic}`,
+    `Total Amount (+5%): AED ${amountTax}`,
+    `Base: AED ${request.priceWithoutTax || 0}`,
     `Source Channel: ${channel}`,
     `Assignee: ${assignee}`,
     `Current Status: ${workflowStatusLabel}`,
@@ -1692,7 +1829,7 @@ export const buildCaseClipboardPayload = (request: TabbyTamaraRequest): Clipboar
     repliesList.length > 0 ? `\n[Activity & Correspondence History]\n${repliesList.join('\n')}` : '',
     attachmentsList.length > 0
       ? `\n[Attachments (${attachmentsList.length})]\n` +
-        attachmentsList.map((att) => `- ${att.name}: ${att.url}`).join('\n')
+        attachmentsList.map((att) => `- ${att.name || 'Attachment'}: ${att.url}`).join('\n')
       : '',
   ].filter(Boolean).join('\n');
 
@@ -1702,6 +1839,8 @@ export const buildCaseClipboardPayload = (request: TabbyTamaraRequest): Clipboar
   html += `<p style="margin: 6px 0;"><strong>Reference:</strong> ${refCode}</p>`;
   html += `<p style="margin: 6px 0;"><strong>Patient:</strong> ${patient} | <strong>File/ID:</strong> ${fileNum}</p>`;
   html += `<p style="margin: 6px 0;"><strong>Phone:</strong> ${phone} | <strong>Clinic:</strong> ${clinic}</p>`;
+  html += `<p style="margin: 6px 0;"><strong>Total Amount (+5%):</strong> <span style="font-size: 1.1em; font-weight: bold; color: #b91c1c;">AED ${amountTax}</span></p>`;
+  html += `<p style="margin: 6px 0; font-size: 11px; color: #64748b;">Base: AED ${request.priceWithoutTax || 0}</p>`;
   html += `<p style="margin: 6px 0;"><strong>Channel:</strong> ${channel} | <strong>Assignee:</strong> ${assignee}</p>`;
   html += `<p style="margin: 6px 0;"><strong>Status:</strong> <span style="background-color: #dbeafe; color: #1e40af; font-weight: bold; padding: 2px 8px; border-radius: 6px; font-size: 11px;">${workflowStatusLabel}</span></p>`;
   
@@ -1732,7 +1871,7 @@ export const buildCaseClipboardPayload = (request: TabbyTamaraRequest): Clipboar
     attachmentsList.forEach((att) => {
       const isImg = att.url.startsWith('data:image/') || att.url.toLowerCase().match(/\.(jpeg|jpg|gif|png|webp)/);
       html += `<div style="margin-bottom: 10px;">`;
-      html += `<a href="${att.url}" style="color: #2563eb; font-weight: bold; font-size: 13px; text-decoration: none;">📎 ${att.name}</a>`;
+      html += `<a href="${att.url}" style="color: #2563eb; font-weight: bold; font-size: 13px; text-decoration: none;"> ${att.name}</a>`;
       if (isImg) {
         html += `<br/><img src="${att.url}" alt="${att.name}" style="max-width: 100%; max-height: 250px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1;" />`;
       }

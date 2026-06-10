@@ -2,7 +2,7 @@ import { FileAttachment, TTWorkflowStatus } from '../../types';
 
 export interface CRMCase {
   id: string;
-  crmType: 'inquiry' | 'complaint' | 'tabby_tamara';
+  crmType: 'inquiry' | 'complaint' | 'tabby_tamara' | 'client_comm';
   referenceId: string; // Formatted case reference, e.g., INQ-YMD-XXXX
   status: string; // Raw status from standard collections
   clinicName: string;

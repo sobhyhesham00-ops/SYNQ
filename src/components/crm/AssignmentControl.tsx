@@ -7,8 +7,8 @@ interface AssignmentControlProps {
   caseData: CRMCase;
   currentUser: any;
   isTLOreSupport: boolean;
-  onAssign: (caseId: string, type: 'inquiry' | 'complaint' | 'tabby_tamara', agentName: string) => Promise<void> | void;
-  onClaim: (caseId: string, type: 'inquiry' | 'complaint' | 'tabby_tamara') => Promise<void> | void;
+  onAssign: (caseId: string, type: 'inquiry' | 'complaint' | 'tabby_tamara' | 'client_comm', agentName: string) => Promise<void> | void;
+  onClaim: (caseId: string, type: 'inquiry' | 'complaint' | 'tabby_tamara' | 'client_comm') => Promise<void> | void;
 }
 
 export const AssignmentControl: React.FC<AssignmentControlProps> = ({
