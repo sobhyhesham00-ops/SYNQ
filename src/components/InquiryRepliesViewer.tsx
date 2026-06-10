@@ -32,21 +32,11 @@ export const InquiryRepliesViewer: React.FC<InquiryRepliesViewerProps> = ({ inqu
                    </div>
                  )}
                  {/* Display Attachments for this reply */}
-                 <AttachmentsDisplay
-                    photos={[
-                      ...(Array.isArray(reply.photos) ? reply.photos : []),
-                      ...(reply.screenshot ? [reply.screenshot] : []),
-                      ...(reply.imageUrl ? [reply.imageUrl] : []),
-                    ].filter(Boolean)}
-                    attachments={
-                      Array.isArray(reply.attachments)
-                        ? reply.attachments
-                        : Array.isArray(reply.attachmentsObjects)
-                        ? reply.attachmentsObjects
-                        : undefined
-                    }
-                    links={reply.links || []}
-                  />
+                 <AttachmentsDisplay 
+                   attachments={[...(reply.attachments || []), ...(reply.attachmentsObjects || []), reply.imageUrl, reply.screenshot].filter(Boolean)} 
+                   photos={reply.photos}
+                   links={reply.links} 
+                 />
               </div>
            ))}
          </div>

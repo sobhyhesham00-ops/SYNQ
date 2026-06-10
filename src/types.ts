@@ -116,6 +116,7 @@ export interface Inquiry {
   phoneNumber?: string;
   text: string;
   photos: string[]; // Base64 data-urls or image urls
+  screenshot?: string | null; // keep for backward compat
   attachments?: any[]; // Array of FileAttachment objects
   links: string[]; // URLs
   createdAt: string; // ISO timestamp
@@ -127,6 +128,7 @@ export interface Inquiry {
   answeredAt?: string;
   seenByAgent?: boolean; // Tracking if agent acknowledged the notification
   customerContacted?: 'not_contacted' | 'contacted' | 'attempted'; // Dropdown menu status for customer contact status
+  assignedTo?: string;
   replies?: {
     id: string;
     authorId?: string;
@@ -187,6 +189,8 @@ export interface TabbyTamaraRequest {
   links?: string[];
   tlNotes?: string;
   tlLinks?: string;
+  tlPhotos?: string[];
+  tlSupportingLinks?: string[];
   attachments?: string[];
   screenshot?: string;
   imageUrl?: string;
@@ -200,6 +204,7 @@ export interface TabbyTamaraRequest {
   submittedByName?: string;
   assignedToId?: string;
   assignedToName?: string;
+  assignedTo?: string;
   assignedAt?: string;
   assignedById?: string;
   assignedByName?: string;
@@ -240,6 +245,7 @@ export interface TabbyTamaraComplaint {
   closedAt?: string;
   text?: string;
   tlResolutionType?: string;
+  assignedTo?: string;
 }
 
 export interface ClientCommunicationRequest {
@@ -263,6 +269,7 @@ export interface ClientCommunicationRequest {
   links?: string[];
   replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
   patientName?: string;
+  assignedTo?: string;
 }
 
 export interface CaseRecord {

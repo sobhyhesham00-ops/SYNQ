@@ -20,10 +20,8 @@ import {
 } from "firebase/firestore";
 import { 
   db, 
-  auth,
   initAuth, 
   googleSignIn, 
-  signInAnonymously,
   getAccessToken, 
   logout,
   wrappedOnSnapshot as onSnapshot,
@@ -628,7 +626,6 @@ export default function App() {
   const [showKillSwitchPassword, setShowKillSwitchPassword] =
     useState<boolean>(false);
   const [killSwitchCar, setKillSwitchCar] = useState<string>("");
-  const [authError, setAuthError] = useState<string | null>(null);
 
   // Live clock state for real-time timers (updates once a second)
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
@@ -867,34 +864,28 @@ export default function App() {
 
   // Standard standalone offline compliant sync listener for multiple tabs and real-time Firestore
   useEffect(() => {
-    // Declare all unsub functions initially as no-op to allow safe synchronous cleanup
-    let unsubInquiries = () => {};
-    let unsubQa = () => {};
-    let unsubQATemplate = () => {};
-    let unsubTT = () => {};
-    let unsubComp = () => {};
-    let unsubComms = () => {};
-    let unsubReq = () => {};
-    let unsubTime = () => {};
-    let unsubSched = () => {};
-    let unsubAnnouncements = () => {};
-    let unsubAppStatus = () => {};
-    let unsubSupp = () => {};
-    let unsubCases = () => {};
-    let unsubOrders = () => {};
-    let unsubAgents = () => {};
-    let unsubMeta = () => {};
-    let unsubDir = () => {};
-    let unsubDirHeaders = () => {};
-    let unsubRosterPub = () => {};
-    let unsubCredentials = () => {};
-    let unsubLockedAccounts = () => {};
-    let unsubFailedAttempts = () => {};
-    let unsubNotifs = () => {};
-    let unsubFeedbacks = () => {};
-    let unsubAppVersion = () => {};
-    let unsubTodos = () => {};
-    let unsubUsers = () => {};
+    // 0. Auto-unlock explicitly incorrect admins to fix legacy locking bugs
+    try {
+      const getCreds = localStorage.getItem("sched_locked_accounts");
+      if (getCreds) {
+        let arr = JSON.parse(getCreds) as string[];
+        const filtered = arr.filter(
+          (name) =>
+            !name.includes("amira.hassan") &&
+            !name.includes("hesham.sobhy") &&
+            !name.includes("hesso.sobhy"),
+        );
+        if (filtered.length !== arr.length) {
+          localStorage.setItem(
+            "sched_locked_accounts",
+            JSON.stringify(filtered),
+          );
+          setDoc(doc(db, "system", "sched_locked_accounts"), {
+            data: filtered,
+          }).catch((e) => console.error(e));
+        }
+      }
+    } catch (e) {}
 
     // 1. Local storage event listener (for legacy/offline tab sync)
     const handleStorage = (e: StorageEvent) => {
@@ -915,149 +906,112 @@ export default function App() {
     };
     window.addEventListener("storage", handleStorage);
 
-    const run = async () => {
-      // MUST establish Firebase Auth before any Firestore operations
-      if (!auth.currentUser) {
-        try {
-          await signInAnonymously(auth);
-          console.log("[Auth] Anonymous session established for Firestore access");
-          setAuthError(null);
-        } catch (e: any) {
-          console.error('[Auth] signInAnonymously failed:', e);
-          setAuthError(e?.message || String(e));
-          return; // Skip initiating Firestore snap subscriptions when unauthenticated
+    // 2. Real-time Firestore Sync via Collections!
+    const unsubInquiries = onSnapshot(collection(db, "inquiries"), (snap) => {
+      const arr = snap.docs.map((d) => d.data() as Inquiry);
+      arr.sort(
+        (a, b) =>
+          new Date(b.createdAt || 0).getTime() -
+          new Date(a.createdAt || 0).getTime(),
+      );
+      setInquiries(arr);
+      setStorageItem("sched_inquiries", arr);
+    });
+
+    const unsubQa = onSnapshot(collection(db, "qa_scores"), (snap) => {
+      const arr = snap.docs.map((d) => d.data() as QAScore);
+      arr.sort(
+        (a, b) =>
+          new Date(b.createdAt || 0).getTime() -
+          new Date(a.createdAt || 0).getTime(),
+      );
+      setQaScores(arr);
+      setStorageItem("sched_qa_scores", arr);
+    });
+
+    const unsubQATemplate = onSnapshot(
+      doc(db, "system", "sched_qa_template"),
+      (snap) => {
+        if (snap.exists()) {
+          const data = snap.data().data;
+          setQaTemplate(data);
+          setStorageItem("sched_qa_template", data);
         }
-      }
-
-      // 0. Auto-unlock explicitly incorrect admins to fix legacy locking bugs
-      try {
-        const getCreds = localStorage.getItem("sched_locked_accounts");
-        if (getCreds) {
-          let arr = JSON.parse(getCreds) as string[];
-          const filtered = arr.filter(
-            (name) =>
-              !name.includes("amira.hassan") &&
-              !name.includes("hesham.sobhy") &&
-              !name.includes("hesso.sobhy"),
-          );
-          if (filtered.length !== arr.length) {
-            localStorage.setItem(
-              "sched_locked_accounts",
-              JSON.stringify(filtered),
-            );
-            await setDoc(doc(db, "system", "sched_locked_accounts"), {
-              data: filtered,
-            });
+      },
+    );
+    const unsubTT = onSnapshot(collection(db, "tt_requests"), (snap) => {
+      const arr = snap.docs.map((d) => d.data() as TabbyTamaraRequest);
+      arr.sort(
+        (a, b) =>
+          new Date(b.createdAt || 0).getTime() -
+          new Date(a.createdAt || 0).getTime(),
+      );
+      setTabbyTamaraRequests(arr);
+      setStorageItem("sched_tabby_tamara", arr);
+    });
+    const unsubComp = onSnapshot(collection(db, "tt_complaints"), (snap) => {
+      const arr = snap.docs.map((d) => d.data() as TabbyTamaraComplaint);
+      arr.sort(
+        (a, b) =>
+          new Date(b.createdAt || 0).getTime() -
+          new Date(a.createdAt || 0).getTime(),
+      );
+      setTabbyTamaraComplaints(arr);
+      setStorageItem("sched_tt_complaints", arr);
+    });
+    const unsubComms = onSnapshot(collection(db, "client_comms"), (snap) => {
+      const arr = snap.docs.map((d) => d.data() as ClientCommunicationRequest);
+      arr.sort(
+        (a, b) =>
+          new Date(b.createdAt || 0).getTime() -
+          new Date(a.createdAt || 0).getTime(),
+      );
+      setClientComms(arr);
+      setStorageItem("sched_client_comms", arr);
+    });
+    const unsubReq = onSnapshot(
+      collection(db, "scheduling_requests"),
+      (snap) => {
+        const arr = snap.docs.map((d) => d.data() as SchedulingRequest);
+        arr.sort(
+          (a, b) =>
+            new Date(b.createdAt || 0).getTime() -
+            new Date(a.createdAt || 0).getTime(),
+        );
+        setRequests(arr);
+        setStorageItem("sched_requests", arr);
+      },
+    );
+    const unsubTime = onSnapshot(
+      collection(db, "timelogs"),
+      (snap) => {
+        console.log("Got timelogs snapshot, docs =", snap.size);
+        const arr = snap.docs.map((d) => d.data() as TimeLog);
+        arr.sort((a, b) => {
+          const d1 = a.date ? new Date(a.date).getTime() : 0;
+          const d2 = b.date ? new Date(b.date).getTime() : 0;
+          const dateDiff = (isNaN(d2) ? 0 : d2) - (isNaN(d1) ? 0 : d1);
+          if (dateDiff !== 0) return dateDiff;
+          const tsA = parseInt((a.id || "").split("_")[1] || "0", 10);
+          const tsB = parseInt((b.id || "").split("_")[1] || "0", 10);
+          if (!isNaN(tsA) && !isNaN(tsB)) {
+            return tsB - tsA;
           }
-        }
-      } catch (e) {}
-
-      // NOW start all Firestore listeners — auth is ready
-      unsubInquiries = onSnapshot(collection(db, "inquiries"), (snap) => {
-        const arr = snap.docs.map((d) => d.data() as Inquiry);
-        arr.sort(
-          (a, b) =>
-            new Date(b.createdAt || 0).getTime() -
-            new Date(a.createdAt || 0).getTime(),
-        );
-        setInquiries(arr);
-        setStorageItem("sched_inquiries", arr);
-      });
-
-      unsubQa = onSnapshot(collection(db, "qa_scores"), (snap) => {
-        const arr = snap.docs.map((d) => d.data() as QAScore);
-        arr.sort(
-          (a, b) =>
-            new Date(b.createdAt || 0).getTime() -
-            new Date(a.createdAt || 0).getTime(),
-        );
-        setQaScores(arr);
-        setStorageItem("sched_qa_scores", arr);
-      });
-
-      unsubQATemplate = onSnapshot(
-        doc(db, "system", "sched_qa_template"),
-        (snap) => {
-          if (snap.exists()) {
-            const data = snap.data().data;
-            setQaTemplate(data);
-            setStorageItem("sched_qa_template", data);
-          }
-        },
-      );
-      unsubTT = onSnapshot(collection(db, "tt_requests"), (snap) => {
-        const arr = snap.docs.map((d) => d.data() as TabbyTamaraRequest);
-        arr.sort(
-          (a, b) =>
-            new Date(b.createdAt || 0).getTime() -
-            new Date(a.createdAt || 0).getTime(),
-        );
-        setTabbyTamaraRequests(arr);
-        setStorageItem("sched_tabby_tamara", arr);
-      });
-      unsubComp = onSnapshot(collection(db, "tt_complaints"), (snap) => {
-        const arr = snap.docs.map((d) => d.data() as TabbyTamaraComplaint);
-        arr.sort(
-          (a, b) =>
-            new Date(b.createdAt || 0).getTime() -
-            new Date(a.createdAt || 0).getTime(),
-        );
-        setTabbyTamaraComplaints(arr);
-        setStorageItem("sched_tt_complaints", arr);
-      });
-      unsubComms = onSnapshot(collection(db, "client_comms"), (snap) => {
-        const arr = snap.docs.map((d) => d.data() as ClientCommunicationRequest);
-        arr.sort(
-          (a, b) =>
-            new Date(b.createdAt || 0).getTime() -
-            new Date(a.createdAt || 0).getTime(),
-        );
-        setClientComms(arr);
-        setStorageItem("sched_client_comms", arr);
-      });
-      unsubReq = onSnapshot(
-        collection(db, "scheduling_requests"),
-        (snap) => {
-          const arr = snap.docs.map((d) => d.data() as SchedulingRequest);
-          arr.sort(
-            (a, b) =>
-              new Date(b.createdAt || 0).getTime() -
-              new Date(a.createdAt || 0).getTime(),
-          );
-          setRequests(arr);
-          setStorageItem("sched_requests", arr);
-        },
-      );
-      unsubTime = onSnapshot(
-        collection(db, "timelogs"),
-        (snap) => {
-          console.log("Got timelogs snapshot, docs =", snap.size);
-          const arr = snap.docs.map((d) => d.data() as TimeLog);
-          arr.sort((a, b) => {
-            const d1 = a.date ? new Date(a.date).getTime() : 0;
-            const d2 = b.date ? new Date(b.date).getTime() : 0;
-            const dateDiff = (isNaN(d2) ? 0 : d2) - (isNaN(d1) ? 0 : d1);
-            if (dateDiff !== 0) return dateDiff;
-            const tsA = parseInt((a.id || "").split("_")[1] || "0", 10);
-            const tsB = parseInt((b.id || "").split("_")[1] || "0", 10);
-            if (!isNaN(tsA) && !isNaN(tsB)) {
-              return tsB - tsA;
-            }
-            return (b.id || "").localeCompare(a.id || "");
-          });
-          setTimeLogs(arr);
-          setStorageItem("sched_time_logs", arr);
-        },
-        (error) => {
-          if (error && error.code === "resource-exhausted") return;
-          console.error("TimeLogs Sync Error:", error);
-          toast.error("Sync error on timelogs. They may not appear updated.");
-        },
-      );
-      unsubSched = () => {};
-      let isAnnouncementsInitialized = false;
-      unsubAnnouncements = onSnapshot(
-        collection(db, "announcements"),
+          return (b.id || "").localeCompare(a.id || "");
+        });
+        setTimeLogs(arr);
+        setStorageItem("sched_time_logs", arr);
+      },
+      (error) => {
+        if (error && error.code === "resource-exhausted") return;
+        console.error("TimeLogs Sync Error:", error);
+        toast.error("Sync error on timelogs. They may not appear updated.");
+      },
+    );
+    const unsubSched = () => {};
+    let isAnnouncementsInitialized = false;
+    const unsubAnnouncements = onSnapshot(
+      collection(db, "announcements"),
       (snap) => {
         console.log("Got announcement snapshot, document size:", snap.size);
         const arr = snap.docs.map((d) => d.data() as Announcement);
@@ -1140,215 +1094,207 @@ export default function App() {
         );
       },
     );
-      unsubAppStatus = onSnapshot(
-        doc(db, "system", "app_status"),
-        (snap) => {
-          if (snap.exists() && snap.data().isKilled === true) {
-            setIsAppKilled(true);
-          } else {
-            setIsAppKilled(false);
-          }
-        },
-      );
+    const unsubAppStatus = onSnapshot(
+      doc(db, "system", "app_status"),
+      (snap) => {
+        if (snap.exists() && snap.data().isKilled === true) {
+          setIsAppKilled(true);
+        } else {
+          setIsAppKilled(false);
+        }
+      },
+    );
 
-      unsubSupp = onSnapshot(
-        doc(db, "system", "sched_support_assignments"),
-        (snap) => {
-          if (snap.exists()) {
-            const data = snap.data().data;
-            setSupportAssignments(data);
-            setStorageItem("sched_support_assignments", data);
-          }
-        },
+    const unsubSupp = onSnapshot(
+      doc(db, "system", "sched_support_assignments"),
+      (snap) => {
+        if (snap.exists()) {
+          const data = snap.data().data;
+          setSupportAssignments(data);
+          setStorageItem("sched_support_assignments", data);
+        }
+      },
+    );
+    const unsubCases = onSnapshot(collection(db, "cases"), (snap) => {
+      const arr = snap.docs.map((d) => d.data() as CaseRecord);
+      arr.sort(
+        (a, b) =>
+          new Date(b.createdAt || 0).getTime() -
+          new Date(a.createdAt || 0).getTime(),
       );
-      unsubCases = onSnapshot(collection(db, "cases"), (snap) => {
-        const arr = snap.docs.map((d) => d.data() as CaseRecord);
+      setCases(arr);
+      setStorageItem("sched_cases", arr);
+    });
+    const unsubOrders = () => {};
+    const unsubAgents = onSnapshot(
+      doc(db, "system", "sched_agents_list"),
+      (snap) => {
+        // Intentionally empty or minimal - we prefer the dynamic list from unsubUsers/directory
+      },
+    );
+    const unsubMeta = onSnapshot(
+      doc(db, "system", "sched_agent_meta"),
+      (snap) => {
+        if (snap.exists()) {
+          const data = snap.data().data as Record<
+            string,
+            { roleType: string; tlName: string }
+          >;
+          setAgentMeta(data);
+          setStorageItem("sched_agent_meta", data);
+        }
+      },
+    );
+    const unsubDir = onSnapshot(
+      doc(db, "system", "sched_agent_directory"),
+      (snap) => {
+        if (snap.exists()) {
+          const data = snap.data().data as AgentDirectoryRow[];
+          setAgentDirectory(data);
+          setStorageItem("sched_agent_directory", data);
+        }
+      },
+    );
+    const unsubDirHeaders = onSnapshot(
+      doc(db, "system", "sched_agent_directory_headers"),
+      (snap) => {
+        if (snap.exists()) {
+          const data = snap.data().data as string[];
+          setDirectoryHeaders(data);
+          setStorageItem("sched_agent_directory_headers", data);
+        }
+      },
+    );
+
+    const unsubRosterPub = onSnapshot(
+      doc(db, "system", "sched_roster_published"),
+      (snap) => {
+        if (snap.exists()) {
+          const data = snap.data().data as boolean;
+          setIsRosterPublished(data);
+          setStorageItem("sched_roster_published", data);
+        }
+      },
+    );
+
+    const unsubCredentials = onSnapshot(
+      doc(db, "system", "sched_credentials"),
+      (snap) => {
+        if (snap.exists()) {
+          const data = snap.data().data || {};
+          setCredentials(data);
+          setStorageItem("sched_credentials", data);
+        }
+      },
+    );
+
+    const unsubLockedAccounts = onSnapshot(
+      doc(db, "system", "sched_locked_accounts"),
+      (snap) => {
+        if (snap.exists()) {
+          const data = snap.data().data || [];
+          setLockedAccounts(data);
+          setStorageItem("sched_locked_accounts", data);
+        }
+      },
+    );
+
+    const unsubFailedAttempts = onSnapshot(
+      doc(db, "system", "sched_failed_attempts"),
+      (snap) => {
+        if (snap.exists()) {
+          const data = snap.data().data || {};
+          setFailedAttempts(data);
+          setStorageItem("sched_failed_attempts", data);
+        }
+      },
+    );
+
+    const unsubNotifs = () => {};
+
+    const unsubFeedbacks = onSnapshot(
+      collection(db, "tl_feedbacks"),
+      (snap) => {
+        const arr = snap.docs.map((d) => d.data() as TlFeedback);
         arr.sort(
           (a, b) =>
             new Date(b.createdAt || 0).getTime() -
             new Date(a.createdAt || 0).getTime(),
         );
-        setCases(arr);
-        setStorageItem("sched_cases", arr);
-      });
-      unsubOrders = () => {};
-      unsubAgents = onSnapshot(
-        doc(db, "system", "sched_agents_list"),
-        (snap) => {
-          // Intentionally empty or minimal - we prefer the dynamic list from unsubUsers/directory
-        },
-      );
-      unsubMeta = onSnapshot(
-        doc(db, "system", "sched_agent_meta"),
-        (snap) => {
-          if (snap.exists()) {
-            const data = snap.data().data as Record<
-              string,
-              { roleType: string; tlName: string }
-            >;
-            setAgentMeta(data);
-            setStorageItem("sched_agent_meta", data);
-          }
-        },
-      );
-      unsubDir = onSnapshot(
-        doc(db, "system", "sched_agent_directory"),
-        (snap) => {
-          if (snap.exists()) {
-            const data = snap.data().data as AgentDirectoryRow[];
-            setAgentDirectory(data);
-            setStorageItem("sched_agent_directory", data);
-          }
-        },
-      );
-      unsubDirHeaders = onSnapshot(
-        doc(db, "system", "sched_agent_directory_headers"),
-        (snap) => {
-          if (snap.exists()) {
-            const data = snap.data().data as string[];
-            setDirectoryHeaders(data);
-            setStorageItem("sched_agent_directory_headers", data);
-          }
-        },
-      );
+        setTlFeedbacks(arr);
+        setStorageItem("sched_tl_feedbacks", arr);
+      },
+    );
 
-      unsubRosterPub = onSnapshot(
-        doc(db, "system", "sched_roster_published"),
-        (snap) => {
-          if (snap.exists()) {
-            const data = snap.data().data as boolean;
-            setIsRosterPublished(data);
-            setStorageItem("sched_roster_published", data);
-          }
-        },
-      );
-
-      unsubCredentials = onSnapshot(
-        doc(db, "system", "sched_credentials"),
-        (snap) => {
-          if (snap.exists()) {
-            const data = snap.data().data || {};
-            setCredentials(data);
-            setStorageItem("sched_credentials", data);
-          }
-        },
-      );
-
-      unsubLockedAccounts = onSnapshot(
-        doc(db, "system", "sched_locked_accounts"),
-        (snap) => {
-          if (snap.exists()) {
-            const data = snap.data().data || [];
-            setLockedAccounts(data);
-            setStorageItem("sched_locked_accounts", data);
-          }
-        },
-      );
-
-      unsubFailedAttempts = onSnapshot(
-        doc(db, "system", "sched_failed_attempts"),
-        (snap) => {
-          if (snap.exists()) {
-            const data = snap.data().data || {};
-            setFailedAttempts(data);
-            setStorageItem("sched_failed_attempts", data);
-          }
-        },
-      );
-
-      unsubNotifs = () => {};
-
-      unsubFeedbacks = onSnapshot(
-        collection(db, "tl_feedbacks"),
-        (snap) => {
-          const arr = snap.docs.map((d) => d.data() as TlFeedback);
-          arr.sort(
-            (a, b) =>
-              new Date(b.createdAt || 0).getTime() -
-              new Date(a.createdAt || 0).getTime(),
-          );
-          setTlFeedbacks(arr);
-          setStorageItem("sched_tl_feedbacks", arr);
-        },
-      );
-
-      unsubAppVersion = onSnapshot(
-        doc(db, "system", "app_version"),
-        (snap) => {
-          if (snap.exists()) {
-            const remoteVersion = snap.data().version || 0;
-            if (CURRENT_APP_VERSION > remoteVersion) {
-              setDoc(
-                doc(db, "system", "app_version"),
-                { version: CURRENT_APP_VERSION },
-                { merge: true },
-              ).catch(console.error);
-            } else if (remoteVersion > CURRENT_APP_VERSION) {
-              // Safeguard against infinite reload loops
-              const key = `reloaded_for_version_${remoteVersion}`;
-              if (!sessionStorage.getItem(key)) {
-                sessionStorage.setItem(key, "true");
-                toast.loading(
-                  "A new system update was published! Refreshing to apply...",
-                );
-                setTimeout(() => {
-                  if ("caches" in window) {
-                    caches
-                      .keys()
-                      .then((names) => {
-                        for (let name of names) caches.delete(name);
-                      })
-                      .catch((e) =>
-                        console.error("Cache flush on reload error:", e),
-                      );
-                  }
-                  window.location.reload();
-                }, 3000);
-              } else {
-                console.warn(
-                  `Already attempted reload for version ${remoteVersion}, but local bundle version is still ${CURRENT_APP_VERSION}. Suppressing loop to let user open the app.`,
-                );
-              }
-            }
-          } else {
-            setDoc(doc(db, "system", "app_version"), {
-              version: CURRENT_APP_VERSION,
-            }).catch(console.error);
-          }
-        },
-      );
-
-      unsubTodos = () => {};
-
-      unsubUsers = onSnapshot(collection(db, "users"), (snap) => {
-        const dbUsers = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as any);
-        setRegisteredUsers(dbUsers);
-
-        // Optionally update currentUser if their document was updated
-        setCurrentUser((prevUser) => {
-          if (!prevUser) return null;
-          const liveUserInfo = dbUsers.find(
-            (u) =>
-              u &&
-              u.name &&
-              prevUser &&
-              prevUser.name &&
-              u?.name?.toLowerCase() === prevUser.name.toLowerCase(),
-          );
-          if (liveUserInfo) {
-            const isSame = Object.keys(liveUserInfo).every(
-              (key) => JSON.stringify((liveUserInfo as any)[key]) === JSON.stringify((prevUser as any)[key])
-            );
-            if (!isSame) {
-              return { ...prevUser, ...liveUserInfo };
+    const unsubAppVersion = onSnapshot(
+      doc(db, "system", "app_version"),
+      (snap) => {
+        if (snap.exists()) {
+          const remoteVersion = snap.data().version || 0;
+          if (CURRENT_APP_VERSION > remoteVersion) {
+            setDoc(
+              doc(db, "system", "app_version"),
+              { version: CURRENT_APP_VERSION },
+              { merge: true },
+            ).catch(console.error);
+          } else if (remoteVersion > CURRENT_APP_VERSION) {
+            // Safeguard against infinite reload loops
+            const key = `reloaded_for_version_${remoteVersion}`;
+            if (!sessionStorage.getItem(key)) {
+              sessionStorage.setItem(key, "true");
+              toast.loading(
+                "A new system update was published! Refreshing to apply...",
+              );
+              setTimeout(() => {
+                if ("caches" in window) {
+                  caches
+                    .keys()
+                    .then((names) => {
+                      for (let name of names) caches.delete(name);
+                    })
+                    .catch((e) =>
+                      console.error("Cache flush on reload error:", e),
+                    );
+                }
+                window.location.reload();
+              }, 3000);
+            } else {
+              console.warn(
+                `Already attempted reload for version ${remoteVersion}, but local bundle version is still ${CURRENT_APP_VERSION}. Suppressing loop to let user open the app.`,
+              );
             }
           }
-          return prevUser;
-        });
-      });
-    };
+        } else {
+          setDoc(doc(db, "system", "app_version"), {
+            version: CURRENT_APP_VERSION,
+          }).catch(console.error);
+        }
+      },
+    );
 
-    run();
+    const unsubTodos = () => {};
+
+    const unsubUsers = onSnapshot(collection(db, "users"), (snap) => {
+      const dbUsers = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as any);
+      setRegisteredUsers(dbUsers);
+
+      // Optionally update currentUser if their document was updated
+      setCurrentUser((prevUser) => {
+        if (!prevUser) return null;
+        const liveUserInfo = dbUsers.find(
+          (u) =>
+            u &&
+            u.name &&
+            prevUser &&
+            prevUser.name &&
+            u?.name?.toLowerCase() === prevUser.name.toLowerCase(),
+        );
+        if (liveUserInfo) {
+          return { ...prevUser, ...liveUserInfo };
+        }
+        return prevUser;
+      });
+    });
 
     return () => {
       unsubTodos();
@@ -1477,25 +1423,7 @@ export default function App() {
     } else {
       localStorage.removeItem("sched_current_user");
     }
-  }, [JSON.stringify(currentUser)]);
-
-
-
-  // Ensure firestore.rules getUserRole() has matching UID
-  useEffect(() => {
-    const unsub = auth.onAuthStateChanged((user) => {
-      if (user && currentUser) {
-        setDoc(doc(db, "users", user.uid), {
-          id: user.uid,
-          name: currentUser.name,
-          role: currentUser.role
-        }, { merge: true }).catch(err => {
-          console.warn("Failed to map user role:", err);
-        });
-      }
-    });
-    return () => unsub();
-  }, [currentUser?.id, currentUser?.role, currentUser?.name]);
+  }, [currentUser]);
 
   // Real-time Firestore Sync with [currentUser] dependency for Schedules, Notifications, Orders, and Todos as requested
   useEffect(() => {
@@ -1514,9 +1442,20 @@ export default function App() {
     );
 
     // 2. Notifications Real-time Sync
+    const normalizedName = currentUser.name.trim().toLowerCase();
+    const cleanedName = normalizedName.replace(/[^a-zA-Z0-9]/g, "");
+    const selfTargets = Array.from(new Set([
+      currentUser.id,
+      `usr_${cleanedName}`,
+      `usr_${normalizedName}`,
+      `usr_${currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}`,
+      "all",
+      currentUser.role
+    ].filter(Boolean)));
+
     const qNotifs = query(
       collection(db, "notifications"),
-      where("targetGroups", "array-contains-any", [currentUser.id, "all", currentUser.role]),
+      where("targetGroups", "array-contains-any", selfTargets),
     );
     let isNotifsInitialized = false;
     const unsubNotifs = onSnapshot(
@@ -1564,7 +1503,7 @@ export default function App() {
 
         setNotifications(arr);
       },
-      (error: any) => {
+      (error) => {
         console.error("Notifications Real-time Sync Error:", error);
       },
     );
@@ -1572,11 +1511,11 @@ export default function App() {
     // 3. Orders/Requests Real-time Sync
     const unsubOrders = onSnapshot(
       collection(db, "orders"),
-      (snapshot: any) => {
-        const data = snapshot.docs.map((d: any) => d.data() as Order);
+      (snapshot) => {
+        const data = snapshot.docs.map((d) => d.data() as Order);
         setOrders(data);
       },
-      (error: any) => {
+      (error) => {
         console.error("Orders Real-time Sync Error:", error);
       },
     );
@@ -1584,11 +1523,11 @@ export default function App() {
     // 4. Todos Real-time Alignment Sync
     const unsubTodos = onSnapshot(
       collection(db, "todos"),
-      (snapshot: any) => {
-        const data = snapshot.docs.map((d: any) => ({ id: d.id, ...d.data() }));
+      (snapshot) => {
+        const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
         setTodos(data);
       },
-      (error: any) => {
+      (error) => {
         console.error("Todos Real-time Sync Error:", error);
       },
     );
@@ -1599,7 +1538,7 @@ export default function App() {
       unsubOrders();
       unsubTodos();
     };
-  }, [currentUser?.id, currentUser?.role]);
+  }, [currentUser]);
 
   const isMasterAdmin = currentUser
     ? currentUser?.name?.toLowerCase() === "hesham sobhy" ||
@@ -1890,7 +1829,13 @@ export default function App() {
     } else if (targetAgent === "qa") {
       targetGroups = ["qa"];
     } else {
-      targetGroups = [`usr_${targetAgent.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}`];
+      const normalizedAgent = targetAgent.trim().toLowerCase();
+      const cleanedAgent = normalizedAgent.replace(/[^a-zA-Z0-9]/g, "");
+      targetGroups = Array.from(new Set([
+        `usr_${cleanedAgent}`,
+        `usr_${normalizedAgent}`,
+        `usr_${targetAgent.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}`
+      ]));
     }
 
     const newNotif: SystemNotification = {
@@ -3068,7 +3013,7 @@ ${pageText}
     if (currentUser) {
       setActiveTab("dashboard");
     }
-  }, [currentUser?.id]);
+  }, [currentUser]);
 
   // Request Form States
   const [swapDate, setSwapDate] = useState("");
@@ -5624,18 +5569,17 @@ ${result.errors.slice(0, 5).join("\n")}${
       }
       const inquiryId = safeId;
       
-      // Convert File objects to base64 locally — no Firebase Storage needed
-      const processedAttachments = await Promise.all(
-        (inquiryAttachments || []).map(async (att: any) => {
-          if (!att.file) return { ...att };
-          return new Promise<any>((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve({ ...att, url: e.target?.result as string, file: undefined });
-            reader.onerror = () => resolve({ ...att, url: att.url || '', file: undefined });
-            reader.readAsDataURL(att.file);
-          });
-        })
+      const processedAttachments = await processAttachments(
+        inquiryAttachments,
+        "inquiry",
+        inquiryId,
+        "root"
       );
+
+      const allPhotos = [
+        ...(inquiryPhotos || []),
+        ...(activeScreenshot ? [activeScreenshot] : []),
+      ];
 
       const newInquiry: Inquiry = {
         id: inquiryId,
@@ -5644,7 +5588,8 @@ ${result.errors.slice(0, 5).join("\n")}${
         clinicName: inquiryClinicName,
         phoneNumber: String(inquiryPhoneNumber || "").trim() || undefined,
         text: String(inquiryText || "").trim(),
-        photos: inquiryPhotos,
+        photos: allPhotos,
+        screenshot: activeScreenshot || null, // keep for backward compat
         attachments: processedAttachments,
         links: inquiryLinks,
         createdAt,
@@ -6080,6 +6025,8 @@ ${ttNotes}`
     tlNotes?: string,
     tlLinks?: string,
     status: "confirmed" | "rejected" = "confirmed",
+    tlPhotos?: string[],
+    tlSupportingLinks?: string[],
   ) => {
     if (!currentUser) return;
     const updated = tabbyTamaraRequests.map((r) => {
@@ -6109,9 +6056,11 @@ ${ttNotes}`
           status: status,
           confirmedAt: new Date().toISOString(),
           confirmedBy: currentUser.name,
-          paymentLink: paymentLink || undefined,
-          tlNotes: tlNotes || undefined,
+          paymentLink: paymentLink || null,
+          tlNotes: tlNotes || null,
           tlLinks: tlLinks || undefined,
+          tlPhotos: tlPhotos || r.tlPhotos || [],
+          tlSupportingLinks: tlSupportingLinks || [],
           workflowStatus: newWorkflowStatus,
           replies: [...existingReplies, activityEntry],
           updatedAt: new Date().toISOString()
@@ -6137,29 +6086,28 @@ ${ttNotes}`
           r.id
         );
 
-        // Cross-LOB: if submitter is Call Center & request is confirmed with payment link
-        // → notify ALL Social Media / Chat agents so they can contact the patient
-        if (status === 'confirmed' && paymentLink) {
-          const submitterLOB = getAgentLOB(r.agentName || '');
-          if (submitterLOB === 'Call Center') {
+        // If submitter is Call Center, notify all Social Media agents to contact patient
+        if (status === "confirmed" && paymentLink) {
+          const submitterLOB = AGENT_LOBS[r.agentName] || "Unknown";
+          if (submitterLOB === "Call Center") {
             const socialMediaAgents = Object.entries(AGENT_LOBS)
-              .filter(([name, lob]) => lob === 'Social Media')
+              .filter(([name, lob]) => lob === "Social Media")
               .map(([name]) => name);
 
-            socialMediaAgents.forEach(targetAgentName => {
+            socialMediaAgents.forEach((agentName) => {
               addSystemNotification(
-                '💳 Payment Link Ready — Contact Patient',
-                `TL ${currentUser?.name} approved a ${(r.platform || '').toUpperCase()} request.\n` +
-                `👤 Patient: ${r.patientName || 'N/A'}\n` +
-                `📞 Phone: ${(r.phoneNumber || '').replace(/^0+/, '')} (starts from 5)\n` +
-                `🏥 Clinic: ${r.clinicName || 'N/A'}\n` +
-                `🔗 ${paymentLink}` +
-                (tlNotes ? `\n📝 Notes: ${tlNotes}` : ''),
-                'general',
-                targetAgentName,
+                "💳 Payment Link Ready — Please Contact Patient",
+                `TL ${currentUser.name} confirmed a ${r.platform?.toUpperCase()} request.\n` +
+                  `Patient: ${r.patientName}\n` +
+                  `Phone: ${(r.phoneNumber || "").replace(/^0+/, "")} (starts from 5)\n` +
+                  `Clinic: ${r.clinicName}\n` +
+                  `Payment Link: ${paymentLink}\n` +
+                  `${tlNotes ? "Notes: " + tlNotes : ""}`,
+                "general",
+                agentName,
                 undefined,
-                'tt_request',
-                r.id
+                "tt_request",
+                requestId
               );
             });
           }
@@ -6178,6 +6126,43 @@ ${ttNotes}`
       );
     } else {
       toast.success("Request successfully marked as rejected with notes!");
+    }
+  };
+
+  const handleAssignRecord = async (
+    recordId: string,
+    collectionName: string,
+    toAgent: string,
+    recordType: string,
+    fromAgent: string
+  ) => {
+    if (!currentUser) return;
+    try {
+      const { updateDoc, doc } = await import('firebase/firestore');
+      await updateDoc(doc(db, collectionName, recordId), { assignedTo: toAgent });
+
+      // Update local state based on collectionName
+      if (collectionName === 'inquiries') {
+        setInquiries(prev => prev.map(i => i.id === recordId ? { ...i, assignedTo: toAgent } : i));
+      } else if (collectionName === 'tt_requests') {
+        setTabbyTamaraRequests(prev => prev.map(r => r.id === recordId ? { ...r, assignedTo: toAgent } : r));
+      } else if (collectionName === 'tt_complaints') {
+        setTabbyTamaraComplaints(prev => prev.map(c => c.id === recordId ? { ...c, assignedTo: toAgent } : c));
+      } else if (collectionName === 'client_comms') {
+        setClientComms(prev => prev.map(c => c.id === recordId ? { ...c, assignedTo: toAgent } : c));
+      }
+
+      // Notify assigned agent
+      addSystemNotification(
+        `📌 ${recordType} Assigned to You`,
+        `TL ${currentUser.name} assigned a ${recordType} to you. Previously handled by ${fromAgent}. Please review and action.`,
+        'general',
+        toAgent
+      );
+      toast.success(`Assigned to ${toAgent}!`);
+    } catch (err: any) {
+      console.error(err);
+      toast.error('Failed to assign record.');
     }
   };
 
@@ -6243,7 +6228,7 @@ ${ttNotes}`
           customerContacted: status,
           contactedAt: status === "contacted" ? new Date().toISOString() : undefined,
           agentContactNotes: notes || r.agentContactNotes || "",
-          paymentScreenshot: screenshot || r.paymentScreenshot || undefined,
+          paymentScreenshot: screenshot || r.paymentScreenshot || null,
           attachments: (attachments && attachments.length > 0) ? [...(r.attachments || []), ...attachments] : (r.attachments || []),
           clientIdAttachments: processedClientIdAttachments.length > 0 ? processedClientIdAttachments : (r.clientIdAttachments || []),
           paymentProofAttachments: processedPaymentProofAttachments.length > 0 ? processedPaymentProofAttachments : (r.paymentProofAttachments || []),
@@ -7120,6 +7105,8 @@ ${ttNotes}`
       return c;
     });
 
+    const comp = updated.find((c) => c.id === complaintId);
+
     setTabbyTamaraComplaints(updated);
     setStorageItem("sched_tt_complaints", updated);
 
@@ -7128,13 +7115,12 @@ ${ttNotes}`
     setTlComplaintResolutionType("");
     setActiveComplaintHandlingId(null);
 
-    const comp = updated.find((c) => c.id === complaintId);
     if (comp) {
       addSystemNotification(
         "Complaint Reviewed by TL",
         `Your complaint for ${comp.patientName} has been reviewed. Resolution: ${resolutionType || "See TL comment"}. Action required: contact the patient.`,
         "general",
-        comp.agentName,
+        (comp.agentName || "").trim(),
         undefined,
         "tt_complaint",
         complaintId
@@ -7174,11 +7160,22 @@ ${ttNotes}`
     setStorageItem("sched_tt_complaints", updated);
 
     if (comp && status === "contacted") {
+      // Notify the agent
       addSystemNotification(
         "Complaint Resolved",
         `Your complaint for ${comp.patientName} has been marked as resolved (patient contacted).`,
         "general",
-        comp.agentName,
+        (comp.agentName || "").trim(),
+        undefined,
+        "tt_complaint",
+        complaintId
+      );
+      // Notify TL
+      addSystemNotification(
+        "Complaint Contacted",
+        `Agent ${comp.agentName || "Agent"} has marked complaint for ${comp.patientName} as contacted.`,
+        "general",
+        "tl",
         undefined,
         "tt_complaint",
         complaintId
@@ -7652,82 +7649,6 @@ ${ttNotes}`
       <Toaster theme="dark" position="bottom-right" />
       <AIChatWidget />
       <EnvironmentBadge currentUser={currentUser} setCurrentUser={setCurrentUser} />
-
-      {authError && (
-        <div className="z-50 mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 mt-4 animate-fade-in">
-          <div className="bg-rose-500/10 border border-rose-500/30 backdrop-blur-md rounded-2xl p-6 text-slate-100 shadow-xl space-y-4">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-rose-500/20 rounded-xl text-rose-400 shrink-0">
-                <AlertTriangle className="w-6 h-6" />
-              </div>
-              <div className="space-y-1">
-                <h2 className="text-lg font-bold text-rose-400">
-                  Firebase Anonymous Authentication Required
-                </h2>
-                <p className="text-sm text-slate-300">
-                  The application utilizes Firebase Anonymous sign-in to securely synchronize calendars, rosters, inquiries, and schedules. However, anonymous authentication is currently disabled in your Firebase project (<code className="bg-white/10 px-1.5 py-0.5 rounded text-rose-300 text-xs">operating-nebula-7sjh2</code>).
-                </p>
-              </div>
-            </div>
-            
-            <div className="bg-slate-900/40 rounded-xl p-4 border border-white/5 space-y-3">
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
-                How to Enable in Firebase Console:
-              </p>
-              <ol className="list-decimal list-inside text-sm text-slate-300 space-y-2">
-                <li>
-                  Open the{" "}
-                  <a
-                    href="https://console.firebase.google.com/project/operating-nebula-7sjh2/authentication/providers"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-indigo-400 hover:text-indigo-300 underline font-medium inline-flex items-center gap-1"
-                  >
-                    Firebase Auth Providers Console <ExternalLink className="w-3.5 h-3.5 inline" />
-                  </a>.
-                </li>
-                <li>
-                  Click on the <strong className="text-white">Sign-in method</strong> tab (if not redirected automatically).
-                </li>
-                <li>
-                  Click <strong className="text-white">Add new provider</strong> under Sign-in providers, select <strong className="text-white">Anonymous</strong>, toggle <strong className="text-white">Enable</strong>, and click <strong className="text-white">Save</strong>.
-                </li>
-                <li>
-                  Once enabled, click the button below to retry or refresh this page to establish a secure database session.
-                </li>
-              </ol>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3 pt-1">
-              <button
-                onClick={async () => {
-                  try {
-                    await signInAnonymously(auth);
-                    console.log("[Auth] Session recovered on click.");
-                    setAuthError(null);
-                    toast.success("Successfully authenticated anonymously with Firebase!");
-                  } catch (err: any) {
-                    console.warn("Retried authentication failed:", err);
-                    setAuthError(err?.message || String(err));
-                    toast.error("Authentication failed. Ensure Anonymous provider is enabled.");
-                  }
-                }}
-                className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white font-semibold text-sm rounded-xl shadow-lg shadow-rose-500/25 transition-all active:scale-95 cursor-pointer"
-              >
-                Retry Authentication
-              </button>
-              <a
-                href="https://console.firebase.google.com/project/operating-nebula-7sjh2/authentication/providers"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-semibold text-sm rounded-xl border border-white/10 transition-colors inline-flex items-center gap-1.5"
-              >
-                Go to Firebase Console <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Background aesthetic blobs */}
       <div className="fixed top-[-10%] -left-32 w-[600px] h-[600px] bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none"></div>
@@ -15477,20 +15398,14 @@ ${ttNotes}`
 
                                               {/* Display Photos */}
                                               <AttachmentsDisplay
-                                          photos={[
-                                            ...(Array.isArray(inq.photos) ? inq.photos : []),
-                                            ...((inq as any).screenshot ? [(inq as any).screenshot] : []),
-                                            ...((inq as any).imageUrl ? [(inq as any).imageUrl] : []),
-                                          ].filter(Boolean)}
-                                          attachments={
-                                            Array.isArray(inq.attachments)
-                                              ? inq.attachments
-                                              : Array.isArray((inq as any).attachmentsObjects)
-                                              ? (inq as any).attachmentsObjects
-                                              : undefined
-                                          }
-                                          links={inq.links || []}
-                                        />
+                                                photos={[
+                                                  ...(inq.photos || []),
+                                                  ...((inq.screenshot) ? [inq.screenshot] : []),
+                                                  ...(((inq as any).imageUrl) ? [(inq as any).imageUrl] : []),
+                                                ].filter(Boolean)}
+                                                attachments={inq.attachments}
+                                                links={inq.links || []}
+                                              />
 
                                               {/* Done with attachments */}
                                             </div>
@@ -17007,17 +16922,11 @@ ${ttNotes}`
                                         {/* Render attachments */}
                                         <AttachmentsDisplay
                                           photos={[
-                                            ...(Array.isArray(inq.photos) ? inq.photos : []),
-                                            ...((inq as any).screenshot ? [(inq as any).screenshot] : []),
-                                            ...((inq as any).imageUrl ? [(inq as any).imageUrl] : []),
+                                            ...(inq.photos || []),
+                                            ...((inq.screenshot) ? [inq.screenshot] : []),
+                                            ...(((inq as any).imageUrl) ? [(inq as any).imageUrl] : []),
                                           ].filter(Boolean)}
-                                          attachments={
-                                            Array.isArray(inq.attachments)
-                                              ? inq.attachments
-                                              : Array.isArray((inq as any).attachmentsObjects)
-                                              ? (inq as any).attachmentsObjects
-                                              : undefined
-                                          }
+                                          attachments={inq.attachments}
                                           links={inq.links || []}
                                         />
 
@@ -19815,7 +19724,7 @@ ${ttNotes}`
                                                       const coverage =
                                                         getCoverageForDate(
                                                           dateStr,
-                                                        )[row.key as keyof ReturnType<typeof getCoverageForDate>];
+                                                        )[row.key];
                                                       const count =
                                                         coverage.count;
                                                       const target = row.target;
@@ -22714,6 +22623,45 @@ ${ttNotes}`
                                                       </div>
                                                     </div>
 
+                                                    {/* Assign to agent */}
+                                                    <div className="border-t border-white/5 pt-1.5 flex items-center justify-between gap-2">
+                                                      <span className="text-[9px] text-slate-400 uppercase tracking-wider font-bold">
+                                                        Assigned Agent:
+                                                      </span>
+                                                      <div className="flex items-center gap-2">
+                                                        <select
+                                                          className="bg-slate-800 border border-slate-600/60 rounded-lg px-2 py-1 text-[10px] text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
+                                                          defaultValue=""
+                                                          onChange={(e) => {
+                                                            if (e.target.value) {
+                                                              handleAssignRecord(
+                                                                comp.id,
+                                                                "tt_complaints",
+                                                                e.target.value,
+                                                                "Complaint",
+                                                                comp.agentName || "Unknown"
+                                                              );
+                                                              e.target.value = "";
+                                                            }
+                                                          }}
+                                                        >
+                                                          <option value="">📌 Assign to...</option>
+                                                          {INITIAL_AGENTS.filter(
+                                                            (a) => a !== comp.agentName
+                                                          ).map((a) => (
+                                                            <option key={a} value={a}>
+                                                              {a}
+                                                            </option>
+                                                          ))}
+                                                        </select>
+                                                        {comp.assignedTo && (
+                                                          <span className="text-[9px] text-indigo-400 font-bold bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded">
+                                                            📌 {comp.assignedTo}
+                                                          </span>
+                                                        )}
+                                                      </div>
+                                                    </div>
+
                                                     {!comp.isOldCustomer &&
                                                       comp.idNumber && (
                                                         <div className="border-t border-white/5 pt-1">
@@ -24730,21 +24678,15 @@ _ ${req.handlingNotes || "Pending response"} _`;
                 (viewingRecord.data.links && viewingRecord.data.links.length > 0)) && (
                 <div className='space-y-2 text-left'>
                   <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold'> Attachments</p>
-                  <AttachmentsDisplay
+                  <AttachmentsDisplay 
                     photos={[
-                      ...(Array.isArray(viewingRecord.data.photos) ? viewingRecord.data.photos : []),
+                      ...(viewingRecord.data.photos || []), 
                       ...(viewingRecord.data.screenshot ? [viewingRecord.data.screenshot] : []),
                       ...(viewingRecord.data.paymentScreenshot ? [viewingRecord.data.paymentScreenshot] : []),
                       ...(viewingRecord.data.imageUrl ? [viewingRecord.data.imageUrl] : [])
-                    ].filter(Boolean)}
-                    attachments={
-                      Array.isArray(viewingRecord.data.attachments)
-                        ? viewingRecord.data.attachments
-                        : Array.isArray(viewingRecord.data.attachmentsObjects)
-                        ? viewingRecord.data.attachmentsObjects
-                        : undefined
-                    }
-                    links={viewingRecord.data.links || []}
+                    ]} 
+                    attachments={viewingRecord.data.attachments || []}
+                    links={viewingRecord.data.links || []} 
                   />
                 </div>
               )}
@@ -24760,22 +24702,15 @@ _ ${req.handlingNotes || "Pending response"} _`;
                         <p className='text-[9px] text-slate-600 font-mono'>{new Date(r.createdAt).toLocaleString()}</p>
                       </div>
                       <p className='text-xs text-slate-400 whitespace-pre-line'>{r.text}</p>
-                      {((r.photos && r.photos.length > 0) || r.screenshot || r.imageUrl || r.attachments) && (
+                      {((r.photos && r.photos.length > 0) || r.screenshot || r.attachments || (r.links && r.links.length > 0)) && (
                         <div className="mt-2 text-left">
-                          <AttachmentsDisplay
+                          <AttachmentsDisplay 
                             photos={[
-                              ...(Array.isArray(r.photos) ? r.photos : []),
                               ...(r.screenshot ? [r.screenshot] : []),
-                              ...(r.imageUrl ? [r.imageUrl] : []),
-                            ].filter(Boolean)}
-                            attachments={
-                              Array.isArray(r.attachments)
-                                ? r.attachments
-                                : Array.isArray(r.attachmentsObjects)
-                                ? r.attachmentsObjects
-                                : undefined
-                            }
-                            links={[]}
+                              ...(r.photos || []),
+                            ]}
+                            attachments={r.attachments || []}
+                            links={r.links || []} 
                           />
                         </div>
                       )}

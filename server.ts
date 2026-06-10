@@ -15,8 +15,7 @@ const GEMINI_MODEL = "gemini-2.0-flash";
 
 async function startServer() {
   const app = express();
-  const parsedPort = Number.parseInt(process.env.PORT ?? "3000", 10);
-  const PORT = Number.isInteger(parsedPort) && parsedPort > 0 ? parsedPort : 3000;
+  const PORT = 3000;
 
   // Middleware to parse JSON bodies
   app.use(express.json({ limit: "15mb" }));

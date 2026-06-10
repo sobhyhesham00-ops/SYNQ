@@ -85,7 +85,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({ photos, 
            ctx.fillStyle = '#FFFFFF';
            ctx.fillRect(0, 0, canvas.width, canvas.height);
            ctx.drawImage(img, 0, 0);
-           writeBlob = await new Promise((resolve) => canvas.toBlob((b) => resolve(b as Blob), 'image/png')) as Blob;
+           writeBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png')) as Blob;
          }
       }
 

@@ -158,6 +158,9 @@ export const TabbyTamaraCard = ({
   const [paymentProofPhotos, setPaymentProofPhotos] = useState<string[]>([]);
   const [isClientIdUploading, setIsClientIdUploading] = useState(false);
   const [isPaymentProofUploading, setIsPaymentProofUploading] = useState(false);
+
+  const [tlFormPhotos, setTlFormPhotos] = useState<string[]>([]);
+  const [tlFormLinks, setTlFormLinks] = useState<string[]>([]);
   const [crmContactNotes, setCrmContactNotes] = useState("");
 
   // Sent To Partner Panel
@@ -784,13 +787,27 @@ export const TabbyTamaraCard = ({
                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">TL Links</span>
                    <div className="flex flex-col gap-2">
                      {extractLinks(req.tlLinks).map((link: string, idx: number) => (
-                       <a key={idx} href={normalizeUrl(link) || undefined} target="_blank" rel="noreferrer" className="flex gap-3 text-sm bg-black/40 border border-emerald-500/10 p-3 rounded-xl items-center text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/30 transition-colors">
+                       <a key={idx} href={normalizeUrl(link)} target="_blank" rel="noreferrer" className="flex gap-3 text-sm bg-black/40 border border-emerald-500/10 p-3 rounded-xl items-center text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/30 transition-colors">
                          <LinkIcon className="w-4 h-4 shrink-0 text-emerald-500/50" />
                          <span className="truncate">{link}</span>
                        </a>
                      ))}
                    </div>
                 </div>
+             )}
+
+             {(req.tlPhotos && req.tlPhotos.length > 0) && (
+                <div className='mt-2'>
+                  <p className='text-[9px] text-amber-400/70 uppercase tracking-widest font-bold mb-1'>TL Attachments</p>
+                  <AttachmentsDisplay photos={req.tlPhotos} links={[]} />
+                </div>
+             )}
+
+             {(req.tlSupportingLinks && req.tlSupportingLinks.length > 0) && (
+                <div className="mt-2 space-y-1">
+                   <span className="text-[9px] text-slate-400 uppercase tracking-widest font-bold block mb-1">TL Supporting Links</span>
+                   <AttachmentsDisplay photos={[]} links={req.tlSupportingLinks} />
+                 </div>
              )}
            </div>
         </div>
@@ -931,11 +948,23 @@ export const TabbyTamaraCard = ({
                </label>
                <input type="text" value={tlFintechLinks} onChange={(e) => setTlFintechLinks(e.target.value)} placeholder="https://link1.com, https://link2.com" className="w-full bg-slate-900 border border-slate-600/60 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-all" />
              </div>
+             <div className="border-t border-white/10 pt-3">
+               <p className="text-[9px] text-slate-400 uppercase tracking-widest font-bold mb-2">
+                 📎 Attach Payment Confirmation / ID (optional)
+               </p>
+               <MultiAttachmentUpload
+                 photos={tlFormPhotos}
+                 links={tlFormLinks}
+                 onPhotosChange={setTlFormPhotos}
+                 onLinksChange={setTlFormLinks}
+                 photosLabel="Payment screenshot, ID, or any supporting file"
+               />
+             </div>
              <div className="flex gap-3 justify-end pt-3 border-t border-slate-700/40">
-               <button onClick={() => { handleConfirmTabbyTamara(req.id, tlFintechPaymentLink, tlFintechNotes, tlFintechLinks, "rejected"); setActiveFintechHandlingId(null); }} className="px-5 py-2.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 font-bold text-[10px] uppercase tracking-widest rounded-xl transition-colors flex items-center gap-1.5 shrink-0">
+               <button onClick={() => { handleConfirmTabbyTamara(req.id, tlFintechPaymentLink, tlFintechNotes, tlFintechLinks, "rejected", tlFormPhotos, tlFormLinks); setTlFormPhotos([]); setTlFormLinks([]); setActiveFintechHandlingId(null); }} className="px-5 py-2.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 font-bold text-[10px] uppercase tracking-widest rounded-xl transition-colors flex items-center gap-1.5 shrink-0">
                  <Trash2 className="w-4 h-4" /> Reject
                </button>
-               <button onClick={() => { handleConfirmTabbyTamara(req.id, tlFintechPaymentLink, tlFintechNotes, tlFintechLinks, "confirmed"); setActiveFintechHandlingId(null); }} className="px-6 py-2.5 bg-indigo-600 text-white hover:bg-indigo-500 font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all shadow-lg hover:shadow-indigo-500/20 flex items-center gap-1.5 w-full sm:w-auto justify-center">
+               <button onClick={() => { handleConfirmTabbyTamara(req.id, tlFintechPaymentLink, tlFintechNotes, tlFintechLinks, "confirmed", tlFormPhotos, tlFormLinks); setTlFormPhotos([]); setTlFormLinks([]); setActiveFintechHandlingId(null); }} className="px-6 py-2.5 bg-indigo-600 text-white hover:bg-indigo-500 font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all shadow-lg hover:shadow-indigo-500/20 flex items-center gap-1.5 w-full sm:w-auto justify-center">
                  <CheckCircle2 className="w-4 h-4" /> Issue Link
                </button>
              </div>
