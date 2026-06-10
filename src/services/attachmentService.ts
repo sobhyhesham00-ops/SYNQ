@@ -18,7 +18,8 @@ export const processAttachments = async (
   attachments: FileAttachment[] | undefined,
   entityType: string,
   entityId: string,
-  replyOrRoot: string
+  replyOrRoot: string,
+  onProgress?: (progress: UploadProgress) => void
 ): Promise<FileAttachment[]> => {
   if (!attachments || attachments.length === 0) return [];
 
@@ -40,7 +41,16 @@ export const processAttachments = async (
           );
           uploadTask.on(
             'state_changed',
-            null, 
+            (snapshot) => {
+              if (onProgress) {
+                onProgress({
+                  progress: (snapshot.bytesTransferred / snapshot.totalBytes) * 100,
+                  fileName: file.name,
+                  bytesTransferred: snapshot.bytesTransferred,
+                  totalBytes: snapshot.totalBytes,
+                });
+              }
+            }, 
             (error) => {
               clearTimeout(timeoutId);
               reject(error);

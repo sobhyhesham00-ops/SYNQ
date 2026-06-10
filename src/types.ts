@@ -110,6 +110,8 @@ export interface TodoItem {
 
 export interface Inquiry {
   id: string;
+  submittedById?: string;
+  submittedByName?: string;
   caseRef?: string;
   agentName: string;
   clinicName: string; // Mandatory dropdown value

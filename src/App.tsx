@@ -130,7 +130,7 @@ import { ArticleManager } from "./components/ArticleManager";
 import { RequestReplyThread } from "./components/RequestReplyThread";
 import { EnvironmentBadge } from "./components/EnvironmentBadge";
 import { ComplaintsWorkspace } from "./components/ComplaintsWorkspace";
-import { processAttachments } from "./services/attachmentService";
+import { processAttachments, validateFile } from "./services/attachmentService";
 import * as XLSX from "xlsx";
 import {
   isTLName,
@@ -1410,6 +1410,7 @@ export default function App() {
   }, [isDarkMode]);
 
   // Auth States
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     const saved = getStorageItem<User | null>("sched_current_user", null);
     if (saved) {
@@ -1437,33 +1438,37 @@ export default function App() {
   // and sync their credentials profile to /users/{uid} to satisfy firestore.rules
   useEffect(() => {
     const unsubSession = auth.onAuthStateChanged(async (firebaseUser) => {
-      if (!firebaseUser) {
-        try {
-          await signInAnonymously(auth);
-        } catch (err) {
-          console.error("[Auth] Silent anonymous session init failed:", err);
-        }
-      } else {
-        const savedUser = getStorageItem<User | null>("sched_current_user", null);
-        if (savedUser) {
-          const uid = firebaseUser.uid;
+      try {
+        if (!firebaseUser) {
           try {
-            await setDoc(doc(db, "users", uid), {
-              id: uid,
-              name: savedUser.name,
-              role: savedUser.role || "agent",
-              avatarUrl: savedUser.avatarUrl || null,
-              status: savedUser.status || null,
-              statusNote: savedUser.statusNote || null,
-              bio: savedUser.bio || null,
-              dailyUpdate: savedUser.dailyUpdate || null,
-              email: savedUser.email || null,
-              phone: (savedUser as any).phone || null,
-            }, { merge: true });
-          } catch (e) {
-            console.error("[Auth] User profile registration sync failed for " + uid + ":", e);
+            await signInAnonymously(auth);
+          } catch (err) {
+            console.error("[Auth] Silent anonymous session init failed:", err);
+          }
+        } else {
+          const savedUser = getStorageItem<User | null>("sched_current_user", null);
+          if (savedUser) {
+            const uid = firebaseUser.uid;
+            try {
+              await setDoc(doc(db, "users", uid), {
+                id: uid,
+                name: savedUser.name,
+                role: savedUser.role || "agent",
+                avatarUrl: savedUser.avatarUrl || null,
+                status: savedUser.status || null,
+                statusNote: savedUser.statusNote || null,
+                bio: savedUser.bio || null,
+                dailyUpdate: savedUser.dailyUpdate || null,
+                email: savedUser.email || null,
+                phone: (savedUser as any).phone || null,
+              }, { merge: true });
+            } catch (e) {
+              console.error("[Auth] User profile registration sync failed for " + uid + ":", e);
+            }
           }
         }
+      } finally {
+        setIsAuthLoading(false);
       }
     });
     return () => unsubSession();
@@ -2706,6 +2711,7 @@ ${pageText}
 
   // Form submission and confirmation states
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
+  const [uploadProgressMsg, setUploadProgressMsg] = useState("");
   const [submissionConfirmation, setSubmissionConfirmation] = useState<{
     title: string;
     message: string;
@@ -5598,10 +5604,14 @@ ${result.errors.slice(0, 5).join("\n")}${
 
   const handleSubmitInquiry = async (e: FormEvent) => {
     e.preventDefault();
+    if (!auth.currentUser) {
+      toast.error("You must be logged in to submit an inquiry.");
+      return;
+    }
     if (!currentUser) return;
     if (isFormSubmitting) return;
 
-    if (!inquiryClinicName) {
+    if (!inquiryClinicName || !inquiryClinicName.trim()) {
       toast.error("Please select a Clinic Name! This is a mandatory field.");
       return;
     }
@@ -5612,6 +5622,7 @@ ${result.errors.slice(0, 5).join("\n")}${
     }
 
     setIsFormSubmitting(true);
+    setUploadProgressMsg("Preparing files...");
     try {
       const createdAt = new Date().toISOString();
       let safeId = "inq_";
@@ -5621,53 +5632,112 @@ ${result.errors.slice(0, 5).join("\n")}${
         safeId += `${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
       }
       const inquiryId = safeId;
+
+      const newAttachments: any[] = [...(inquiryAttachments || [])];
+      const base64Photos = (inquiryPhotos || []).filter((p) => p.startsWith("data:"));
+      const normalPhotos = (inquiryPhotos || []).filter((p) => !p.startsWith("data:"));
+      
+      let photoCounter = 1;
+
+      // Extract base64 photos to file attachments
+      for (const b64 of base64Photos) {
+        try {
+          const arr = b64.split(",");
+          const mimeMatch = arr[0].match(/:(.*?);/);
+          const mime = mimeMatch ? mimeMatch[1] : "application/octet-stream";
+          const bstr = atob(arr[1]);
+          let n = bstr.length;
+          const u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          const file = new globalThis.File([u8arr], `photo_${photoCounter++}.png`, { type: mime });
+          newAttachments.push({
+            id: `p_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            file: file,
+          });
+        } catch (e) {
+          console.error("Failed to parse base64 photo", e);
+        }
+      }
+
+      // Extract activeScreenshot base64 to file attachment
+      if (activeScreenshot && activeScreenshot.startsWith("data:")) {
+        try {
+          const arr = activeScreenshot.split(",");
+          const mimeMatch = arr[0].match(/:(.*?);/);
+          const mime = mimeMatch ? mimeMatch[1] : "application/octet-stream";
+          const bstr = atob(arr[1]);
+          let n = bstr.length;
+          const u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          const file = new globalThis.File([u8arr], `screenshot.png`, { type: mime });
+          newAttachments.push({
+            id: `s_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            file: file,
+          });
+        } catch (e) {
+          console.error("Failed to parse base64 screenshot", e);
+        }
+      }
+
+      // Validate all files
+      for (const att of newAttachments) {
+        if (att.file) {
+          const v = validateFile(att.file);
+          if (!v.valid) {
+            toast.error(v.error);
+            setIsFormSubmitting(false);
+            setUploadProgressMsg("");
+            return;
+          }
+        }
+      }
       
       const processedAttachments = await processAttachments(
-        inquiryAttachments,
+        newAttachments,
         "inquiry",
         inquiryId,
-        "root"
+        "root",
+        (prog) => setUploadProgressMsg(`Uploading ${prog.fileName} (${Math.round(prog.progress)}%)`)
       );
-
-      const allPhotos = [
-        ...(inquiryPhotos || []),
-        ...(activeScreenshot ? [activeScreenshot] : []),
-      ];
+      
+      setUploadProgressMsg("Saving record...");
 
       // Strip non-serializable File objects before Firestore write
       const firestoreAttachments = processedAttachments.map(({ file, ...rest }) => rest);
 
+      const agentNameStr = currentUser.name;
       const newInquiry: Inquiry = {
         id: inquiryId,
+        submittedById: auth.currentUser.uid,
+        submittedByName: agentNameStr,
         caseRef: formatCaseRef(inquiryId, "inquiry", createdAt),
-        agentName: currentUser.name,
-        clinicName: inquiryClinicName,
+        agentName: agentNameStr,
+        clinicName: inquiryClinicName.trim(),
         phoneNumber: String(inquiryPhoneNumber || "").trim() || undefined,
         text: String(inquiryText || "").trim(),
-        photos: allPhotos,
-        screenshot: activeScreenshot || null, // keep for backward compat
-        attachments: firestoreAttachments,   // ← use sanitized version
+        photos: normalPhotos, // Exclude base64 strings
+        screenshot: null, // Keep for backward compat but do not store base64 string
+        attachments: firestoreAttachments,
         links: inquiryLinks,
         createdAt,
         status: "submitted",
         seenByAgent: false,
       };
 
-      setInquiries((prev) => {
-        const updated = [newInquiry, ...prev];
-        setStorageItem("sched_inquiries", updated);
-        return updated;
-      });
+      // Write direct to Firestore first (without Promise.race timeout or optimistic local writes)
+      await setDoc(doc(db, "inquiries", newInquiry.id), newInquiry);
 
-      // Write to Firestore with 10-second timeout
-      await Promise.race([
-        setDoc(doc(db, "inquiries", newInquiry.id), newInquiry),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Firestore write timed out after 10s")), 10000)
-        )
-      ]);
-
-      // Reset fields
+      // Reset fields ONLY after successful Firestore write
       setInquiryText("");
       setInquiryClinicName("");
       setInquiryPhoneNumber("");
@@ -5676,15 +5746,17 @@ ${result.errors.slice(0, 5).join("\n")}${
       setInquiryLinks([]);
       setTempLinkInput("");
       setTempPhotoUrlInput("");
+      setActiveScreenshot(null);
 
       handleMentionsInText(
         String(inquiryText || "").trim(),
         "Agent Inquiry Description",
-        currentUser.name,
+        agentNameStr,
       );
+
       addSystemNotification(
         "New Inquiry Submitted",
-        `${currentUser.name} has submitted a new inquiry for clinic: ${inquiryClinicName}.`,
+        `${agentNameStr} has submitted a new inquiry for clinic: ${inquiryClinicName}.`,
         "general",
         "tl",
         undefined,
@@ -5701,16 +5773,25 @@ ${result.errors.slice(0, 5).join("\n")}${
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: any) {
       console.error("Inquiry submission error:", err);
-      const msg = err?.message || String(err);
-      if (msg.includes("timed out")) {
-        toast.error("Submission timed out. Check your connection and try again.");
-      } else if (msg.includes("permission") || msg.includes("PERMISSION_DENIED")) {
-        toast.error("Permission denied. Please refresh and log in again.");
-      } else {
-        toast.error("An error occurred while submitting. Please try again.");
+      let errorCode = "";
+      let errorMessage = err?.message || String(err);
+      try {
+        const errorParsed = JSON.parse(err.message);
+        if (errorParsed && errorParsed.error) {
+          errorMessage = errorParsed.error;
+        }
+      } catch (e) {
+        // Not a JSON error
       }
+      if (err?.code) {
+        errorCode = ` [Code: ${err.code}]`;
+      } else if (errorMessage.toLowerCase().includes("permission") || errorMessage.includes("PERMISSION_DENIED")) {
+        errorCode = " [Code: permission-denied]";
+      }
+      toast.error(`Submission failed. ${errorMessage}${errorCode}`);
     } finally {
       setIsFormSubmitting(false);
+      setUploadProgressMsg("");
     }
   };
 
@@ -15237,13 +15318,18 @@ ${ttNotes}`
                               {/* Submit Action */}
                               <button
                                 type="submit"
-                                disabled={isFormSubmitting}
-                                className={`w-full py-2.5 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 ${isFormSubmitting ? "bg-indigo-800 pointer-events-none opacity-60" : "bg-indigo-600 hover:bg-indigo-500 shadow-indigo-500/10 active:scale-[0.98]"}`}
+                                disabled={isFormSubmitting || isAuthLoading}
+                                className={`w-full py-2.5 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 ${(isFormSubmitting || isAuthLoading) ? "bg-indigo-800 pointer-events-none opacity-60" : "bg-indigo-600 hover:bg-indigo-500 shadow-indigo-500/10 active:scale-[0.98]"}`}
                               >
                                 {isFormSubmitting ? (
                                   <>
                                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    Submitting Inquiry...
+                                    {uploadProgressMsg || "Submitting Inquiry..."}
+                                  </>
+                                ) : isAuthLoading ? (
+                                  <>
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    Initializing Auth...
                                   </>
                                 ) : (
                                   <>

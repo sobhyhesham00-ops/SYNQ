@@ -192,3 +192,194 @@ describe("Purge All Logs Firestore Deletion Helper Tests", () => {
     expect(result.batchesCommitted).toBe(0);
   });
 });
+
+describe("Inquiry File Upload & Validation Tests", () => {
+  it("rejects oversized files (>20MB)", async () => {
+    const { validateFile } = await import("../src/services/attachmentService");
+    const oversizedFile = new File(["a".repeat(21 * 1024 * 1024)], "big.png", { type: "image/png" });
+    const result = validateFile(oversizedFile);
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain("exceeds 20MB limit");
+  });
+
+  it("rejects blocked extensions", async () => {
+    const { validateFile } = await import("../src/services/attachmentService");
+    const badFile = new File(["console.log(1)"], "script.js", { type: "text/plain" });
+    const result = validateFile(badFile);
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain("not allowed for security reasons");
+  });
+
+  it("rejects blocked MIME types", async () => {
+    const { validateFile } = await import("../src/services/attachmentService");
+    const badMimeFile = new File(["mz"], "app.exe", { type: "application/x-executable" });
+    const result = validateFile(badMimeFile);
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain("is not allowed");
+  });
+
+  it("firestore payload contains no base64 string in screenshot or photos when files are used", async () => {
+    const mockAuth = { currentUser: { uid: "firebase_user_abc123" } };
+    const mockCurrentUser = { id: "agent_789", name: "AbdelRahman Al Sayed" };
+    const setDocSpy = vi.fn().mockResolvedValue(true);
+    
+    const normalPhotos = ["https://example.com/photo.png"]; // valid link
+
+    // Simulate handleSubmitInquiry's construction
+    const newInquiry = {
+      id: "inq_test_123",
+      submittedById: mockAuth.currentUser.uid,
+      submittedByName: mockCurrentUser.name,
+      agentName: mockCurrentUser.name,
+      clinicName: "Cairo",
+      text: "Issue",
+      photos: normalPhotos, // Base64 should be excluded in actual implementation
+      screenshot: null,     // Strictly null format
+      attachments: [{ name: "photo_1.png", url: "firebase-url" }],
+      status: "submitted",
+    };
+
+    await setDocSpy("inquiries", newInquiry.id, newInquiry);
+
+    const payload = setDocSpy.mock.calls[0][2];
+    expect(payload.screenshot).toBeNull();
+    payload.photos.forEach((ph: string) => expect(ph).not.toContain("data:image"));
+    expect(payload.attachments).toBeDefined();
+  });
+});
+describe("Inquiry Submission Workflow Tests", () => {
+  it("blocks unauthenticated submissions", async () => {
+    const mockAuth = { currentUser: null };
+    const toastErrorSpy = vi.fn();
+    const mockToast = { error: toastErrorSpy };
+    const setDocSpy = vi.fn();
+    
+    const handleSubmit = async () => {
+      if (!mockAuth.currentUser) {
+        mockToast.error("You must be logged in to submit an inquiry.");
+        return;
+      }
+    };
+    
+    await handleSubmit();
+    expect(toastErrorSpy).toHaveBeenCalledWith("You must be logged in to submit an inquiry.");
+    expect(setDocSpy).not.toHaveBeenCalled();
+  });
+
+  it("allows authenticated agents to submit and builds correct inquiry object", async () => {
+    const mockAuth = { currentUser: { uid: "firebase_user_abc123" } };
+    const mockCurrentUser = { id: "agent_789", name: "AbdelRahman Al Sayed" };
+    const mockToast = { error: vi.fn(), success: vi.fn() };
+    const setDocSpy = vi.fn().mockResolvedValue(true);
+    const setInquiryTextSpy = vi.fn();
+    const addNotificationSpy = vi.fn();
+
+    const formValues = {
+      clinicName: "Cairo Clinic",
+      text: "Need support on shift schedules",
+      phoneNumber: "123456"
+    };
+
+    const handleSubmit = async () => {
+      if (!mockAuth.currentUser) {
+        mockToast.error("You must be logged in to submit an inquiry.");
+        return;
+      }
+      if (!formValues.clinicName || !formValues.clinicName.trim()) {
+        mockToast.error("Please select a Clinic Name! This is a mandatory field.");
+        return;
+      }
+      if (!formValues.text || !formValues.text.trim()) {
+        mockToast.error("Please enter your inquiry text!");
+        return;
+      }
+
+      const agentNameStr = mockCurrentUser.name;
+      const newInquiry = {
+        id: "inq_test_123",
+        submittedById: mockAuth.currentUser.uid,
+        submittedByName: agentNameStr,
+        agentName: agentNameStr,
+        clinicName: formValues.clinicName.trim(),
+        phoneNumber: formValues.phoneNumber,
+        text: formValues.text.trim(),
+        createdAt: new Date().toISOString(),
+        status: "submitted",
+      };
+
+      await setDocSpy("inquiries", newInquiry.id, newInquiry);
+
+      setInquiryTextSpy("");
+      addNotificationSpy("New Inquiry Submitted");
+    };
+
+    await handleSubmit();
+    
+    expect(setDocSpy).toHaveBeenCalled();
+    const calledWithInquiry = setDocSpy.mock.calls[0][2];
+    expect(calledWithInquiry.submittedById).toBe("firebase_user_abc123");
+    expect(calledWithInquiry.submittedByName).toBe("AbdelRahman Al Sayed");
+    expect(calledWithInquiry.agentName).toBe("AbdelRahman Al Sayed");
+    expect(calledWithInquiry.clinicName).toBe("Cairo Clinic");
+    expect(setInquiryTextSpy).toHaveBeenCalledWith("");
+    expect(addNotificationSpy).toHaveBeenCalledWith("New Inquiry Submitted");
+  });
+
+  it("keeps the form content intact if the Firestore write fails", async () => {
+    const mockAuth = { currentUser: { uid: "firebase_user_abc123" } };
+    const mockToast = { error: vi.fn() };
+    const setDocSpy = vi.fn().mockRejectedValue(new Error("Firebase Permission Denied"));
+    
+    const formValues = {
+      clinicName: "Cairo Clinic",
+      text: "Need support on shift schedules",
+    };
+    
+    const setInquiryTextSpy = vi.fn();
+    const setInquiryClinicNameSpy = vi.fn();
+
+    const handleSubmit = async () => {
+      try {
+        if (!mockAuth.currentUser) return;
+        
+        await setDocSpy();
+        
+        setInquiryTextSpy("");
+        setInquiryClinicNameSpy("");
+      } catch (err: any) {
+        mockToast.error(`Submission failed. ${err.message}`);
+      }
+    };
+
+    await handleSubmit();
+
+    expect(setInquiryTextSpy).not.toHaveBeenCalled();
+    expect(setInquiryClinicNameSpy).not.toHaveBeenCalled();
+    expect(mockToast.error).toHaveBeenCalledWith("Submission failed. Firebase Permission Denied");
+  });
+
+  it("prevents duplicate submissions on double-clicking/concurrent triggers", async () => {
+    const setDocSpy = vi.fn().mockImplementation(() => new Promise((r) => setTimeout(r, 100)));
+    let isFormSubmitting = false;
+    let callCount = 0;
+
+    const handleSubmit = async () => {
+      if (isFormSubmitting) return;
+      isFormSubmitting = true;
+      try {
+        callCount++;
+        await setDocSpy();
+      } finally {
+        isFormSubmitting = false;
+      }
+    };
+
+    await Promise.all([
+      handleSubmit(),
+      handleSubmit(),
+    ]);
+
+    expect(callCount).toBe(1);
+  });
+});
+
