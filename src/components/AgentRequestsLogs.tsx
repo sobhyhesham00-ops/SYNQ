@@ -271,11 +271,22 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
             {hasAttachments && (
                <div>
                   <p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider mb-2">Attachments & Links</p>
-                  <AttachmentsDisplay 
-                     photos={[...(req.photos || []), ...(req.screenshot ? [req.screenshot] : []), ...(req.imageUrl ? [req.imageUrl] : []), ...(req.paymentScreenshot ? [req.paymentScreenshot] : [])]} 
-                     attachments={(req as any).attachments}
-                     links={extractedLinks} 
-                  />
+                  <AttachmentsDisplay
+                      photos={[
+                        ...(Array.isArray(req.photos) ? req.photos : []),
+                        ...((req as any).screenshot ? [(req as any).screenshot] : []),
+                        ...((req as any).imageUrl ? [(req as any).imageUrl] : []),
+                        ...((req as any).paymentScreenshot ? [(req as any).paymentScreenshot] : [])
+                      ].filter(Boolean)}
+                      attachments={
+                        Array.isArray((req as any).attachments)
+                          ? (req as any).attachments
+                          : Array.isArray((req as any).attachmentsObjects)
+                          ? (req as any).attachmentsObjects
+                          : undefined
+                      }
+                      links={extractedLinks || []}
+                   />
                </div>
             )}
             {handlerLabel && (

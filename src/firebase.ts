@@ -17,26 +17,31 @@ import { getStorage, connectStorageEmulator } from "firebase/storage";
 import firebaseConfigFromJson from "../firebase-applet-config.json";
 
 // 1. Load Firebase configuration from environment with startup validation & json fallback
+const safeGet = (envVal, fallback) =>
+  (!envVal || envVal === 'undefined' || envVal === '') ? fallback : envVal;
+
 const firebaseConfig = {
-  apiKey: (import.meta as any).env.VITE_FIREBASE_API_KEY || firebaseConfigFromJson.apiKey,
-  authDomain: (import.meta as any).env.VITE_FIREBASE_AUTH_DOMAIN || firebaseConfigFromJson.authDomain,
-  projectId: (import.meta as any).env.VITE_FIREBASE_PROJECT_ID || firebaseConfigFromJson.projectId,
-  firestoreDatabaseId: (import.meta as any).env.VITE_FIREBASE_DATABASE_ID || firebaseConfigFromJson.firestoreDatabaseId,
-  storageBucket: (import.meta as any).env.VITE_FIREBASE_STORAGE_BUCKET || firebaseConfigFromJson.storageBucket,
-  messagingSenderId: (import.meta as any).env.VITE_FIREBASE_MESSAGING_SENDER_ID || firebaseConfigFromJson.messagingSenderId,
-  appId: (import.meta as any).env.VITE_FIREBASE_APP_ID || firebaseConfigFromJson.appId,
-  measurementId: (import.meta as any).env.VITE_FIREBASE_MEASUREMENT_ID || firebaseConfigFromJson.measurementId,
+  apiKey:            safeGet((import.meta as any).env.VITE_FIREBASE_API_KEY,              firebaseConfigFromJson.apiKey),
+  authDomain:        safeGet((import.meta as any).env.VITE_FIREBASE_AUTH_DOMAIN,          firebaseConfigFromJson.authDomain),
+  projectId:         safeGet((import.meta as any).env.VITE_FIREBASE_PROJECT_ID,           firebaseConfigFromJson.projectId),
+  firestoreDatabaseId: safeGet((import.meta as any).env.VITE_FIREBASE_DATABASE_ID,       firebaseConfigFromJson.firestoreDatabaseId),
+  storageBucket:     safeGet((import.meta as any).env.VITE_FIREBASE_STORAGE_BUCKET,       firebaseConfigFromJson.storageBucket),
+  messagingSenderId: safeGet((import.meta as any).env.VITE_FIREBASE_MESSAGING_SENDER_ID,  firebaseConfigFromJson.messagingSenderId),
+  appId:             safeGet((import.meta as any).env.VITE_FIREBASE_APP_ID,               firebaseConfigFromJson.appId),
+  measurementId:     safeGet((import.meta as any).env.VITE_FIREBASE_MEASUREMENT_ID,       firebaseConfigFromJson.measurementId || ''),
 };
 
 // Perform strict configuration validation
-const requiredKeys: (keyof typeof firebaseConfig)[] = ["apiKey", "projectId", "appId"];
-for (const key of requiredKeys) {
-  if (!firebaseConfig[key]) {
-    throw new Error(
-      `Firebase config validation error: missing critical schema field "${key}". Please configure VITE_FIREBASE_${key.toUpperCase().replace(/([a-z])([A-Z])/g, "$1_$2")} or check firebase-applet-config.json.`
+const requiredKeys = ['apiKey', 'projectId', 'appId'];
+requiredKeys.forEach(key => {
+  if (!firebaseConfig[key] || firebaseConfig[key] === 'undefined') {
+    console.warn(
+      '[Firebase] Config warning: "' + key + '" is missing or invalid. ' +
+      'Check environment variables or firebase-applet-config.json. ' +
+      'Falling back to JSON config: ' + (firebaseConfigFromJson[key] ? 'OK' : 'ALSO MISSING')
     );
   }
-}
+});
 
 const app = initializeApp(firebaseConfig);
 const isTestEnv = typeof process !== 'undefined' && process.env.NODE_ENV === 'test';

@@ -6077,6 +6077,34 @@ ${ttNotes}`
           r.id
         );
 
+        // Cross-LOB: if submitter is Call Center & request is confirmed with payment link
+        // → notify ALL Social Media / Chat agents so they can contact the patient
+        if (status === 'confirmed' && paymentLink) {
+          const submitterLOB = getAgentLOB(r.agentName || '');
+          if (submitterLOB === 'Call Center') {
+            const socialMediaAgents = Object.entries(AGENT_LOBS)
+              .filter(([name, lob]) => lob === 'Social Media')
+              .map(([name]) => name);
+
+            socialMediaAgents.forEach(targetAgentName => {
+              addSystemNotification(
+                '💳 Payment Link Ready — Contact Patient',
+                `TL ${currentUser?.name} approved a ${(r.platform || '').toUpperCase()} request.\n` +
+                `👤 Patient: ${r.patientName || 'N/A'}\n` +
+                `📞 Phone: ${(r.phoneNumber || '').replace(/^0+/, '')} (starts from 5)\n` +
+                `🏥 Clinic: ${r.clinicName || 'N/A'}\n` +
+                `🔗 ${paymentLink}` +
+                (tlNotes ? `\n📝 Notes: ${tlNotes}` : ''),
+                'general',
+                targetAgentName,
+                undefined,
+                'tt_request',
+                r.id
+              );
+            });
+          }
+        }
+
         return updatedReq;
       }
       return r;
@@ -15313,10 +15341,20 @@ ${ttNotes}`
 
                                               {/* Display Photos */}
                                               <AttachmentsDisplay
-                                                photos={[...(inq.photos || []), ...((inq as any).screenshot ? [(inq as any).screenshot] : []), ...((inq as any).imageUrl ? [(inq as any).imageUrl] : []), ...((inq as any).attachment ? [(inq as any).attachment] : [])]}
-                                                attachments={inq.attachments}
-                                                links={inq.links}
-                                              />
+                                          photos={[
+                                            ...(Array.isArray(inq.photos) ? inq.photos : []),
+                                            ...((inq as any).screenshot ? [(inq as any).screenshot] : []),
+                                            ...((inq as any).imageUrl ? [(inq as any).imageUrl] : []),
+                                          ].filter(Boolean)}
+                                          attachments={
+                                            Array.isArray(inq.attachments)
+                                              ? inq.attachments
+                                              : Array.isArray((inq as any).attachmentsObjects)
+                                              ? (inq as any).attachmentsObjects
+                                              : undefined
+                                          }
+                                          links={inq.links || []}
+                                        />
 
                                               {/* Done with attachments */}
                                             </div>
@@ -16832,9 +16870,19 @@ ${ttNotes}`
 
                                         {/* Render attachments */}
                                         <AttachmentsDisplay
-                                          photos={[...(inq.photos || []), ...((inq as any).screenshot ? [(inq as any).screenshot] : []), ...((inq as any).imageUrl ? [(inq as any).imageUrl] : []), ...((inq as any).attachment ? [(inq as any).attachment] : [])]}
-                                          attachments={inq.attachments}
-                                          links={inq.links}
+                                          photos={[
+                                            ...(Array.isArray(inq.photos) ? inq.photos : []),
+                                            ...((inq as any).screenshot ? [(inq as any).screenshot] : []),
+                                            ...((inq as any).imageUrl ? [(inq as any).imageUrl] : []),
+                                          ].filter(Boolean)}
+                                          attachments={
+                                            Array.isArray(inq.attachments)
+                                              ? inq.attachments
+                                              : Array.isArray((inq as any).attachmentsObjects)
+                                              ? (inq as any).attachmentsObjects
+                                              : undefined
+                                          }
+                                          links={inq.links || []}
                                         />
 
                                         {/* TL customerContacted quick update buttons */}
@@ -24546,15 +24594,21 @@ _ ${req.handlingNotes || "Pending response"} _`;
                 (viewingRecord.data.links && viewingRecord.data.links.length > 0)) && (
                 <div className='space-y-2 text-left'>
                   <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold'> Attachments</p>
-                  <AttachmentsDisplay 
+                  <AttachmentsDisplay
                     photos={[
-                      ...(viewingRecord.data.photos || []), 
+                      ...(Array.isArray(viewingRecord.data.photos) ? viewingRecord.data.photos : []),
                       ...(viewingRecord.data.screenshot ? [viewingRecord.data.screenshot] : []),
                       ...(viewingRecord.data.paymentScreenshot ? [viewingRecord.data.paymentScreenshot] : []),
                       ...(viewingRecord.data.imageUrl ? [viewingRecord.data.imageUrl] : [])
-                    ]} 
-                    attachments={viewingRecord.data.attachments || []}
-                    links={viewingRecord.data.links || []} 
+                    ].filter(Boolean)}
+                    attachments={
+                      Array.isArray(viewingRecord.data.attachments)
+                        ? viewingRecord.data.attachments
+                        : Array.isArray(viewingRecord.data.attachmentsObjects)
+                        ? viewingRecord.data.attachmentsObjects
+                        : undefined
+                    }
+                    links={viewingRecord.data.links || []}
                   />
                 </div>
               )}
@@ -24572,10 +24626,20 @@ _ ${req.handlingNotes || "Pending response"} _`;
                       <p className='text-xs text-slate-400 whitespace-pre-line'>{r.text}</p>
                       {((r.photos && r.photos.length > 0) || r.screenshot || r.imageUrl || r.attachments) && (
                         <div className="mt-2 text-left">
-                          <AttachmentsDisplay 
-                            photos={[...(r.photos || []), ...(r.screenshot ? [r.screenshot] : []), ...(r.imageUrl ? [r.imageUrl] : [])]} 
-                            attachments={r.attachments || []}
-                            links={[]} 
+                          <AttachmentsDisplay
+                            photos={[
+                              ...(Array.isArray(r.photos) ? r.photos : []),
+                              ...(r.screenshot ? [r.screenshot] : []),
+                              ...(r.imageUrl ? [r.imageUrl] : []),
+                            ].filter(Boolean)}
+                            attachments={
+                              Array.isArray(r.attachments)
+                                ? r.attachments
+                                : Array.isArray(r.attachmentsObjects)
+                                ? r.attachmentsObjects
+                                : undefined
+                            }
+                            links={[]}
                           />
                         </div>
                       )}

@@ -252,9 +252,19 @@ export function RequestReplyThread({
                 
                 {/* Unified Attachments Display */}
                 <div className={`${r.senderName === currentUser.name ? 'flex justify-end' : 'flex justify-start'}`}>
-                  <AttachmentsDisplay 
-                    attachments={[...(r.attachments || []), ...(r.attachmentsObjects || []), r.imageUrl, r.screenshot].filter(Boolean)}
-                    photos={r.photos || []}
+                  <AttachmentsDisplay
+                    photos={[
+                      ...(Array.isArray(r.photos) ? r.photos : []),
+                      ...(r.screenshot ? [r.screenshot] : []),
+                      ...(r.imageUrl ? [r.imageUrl] : []),
+                    ].filter(Boolean)}
+                    attachments={
+                      Array.isArray(r.attachments)
+                        ? r.attachments
+                        : Array.isArray(r.attachmentsObjects)
+                        ? r.attachmentsObjects
+                        : undefined
+                    }
                     links={r.links || []}
                   />
                 </div>
