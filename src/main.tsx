@@ -16,7 +16,7 @@ const originalCreateElement = React.createElement;
             args[i] = cleanChildren(args[i]);
         }
     }
-    return originalCreateElement.apply(null, args);
+    return originalCreateElement.apply(null, args as any);
 };
 
 import App from './App.tsx'

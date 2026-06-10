@@ -7,7 +7,6 @@ import { toast } from 'sonner';
 import { compressImage } from '../utils';
 import { processAttachments } from '../services/attachmentService';
 import { AttachmentsDisplay } from './AttachmentsDisplay';
-import { MultiAttachmentUpload } from './MultiAttachmentUpload';
 
 interface ThreadReply {
   id: string;
@@ -39,7 +38,7 @@ export function RequestReplyThread({
   requestAgentName
 }: { 
   request: BaseRequest, 
-  currentUser: User,
+  currentUser: User | null,
   collectionName: string,
   addSystemNotification?: (title: string, message: string, type: any, target: string, stableId?: string, entityType?: any, entityId?: string) => void,
   requestType?: string,
@@ -52,7 +51,6 @@ export function RequestReplyThread({
   const [linkInput, setLinkInput] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [replyPhotos, setReplyPhotos] = useState<string[]>([]);
 
   const newReplies = (request.replies || []).filter(r => r.senderName !== currentUser.name).length;
 
@@ -122,7 +120,7 @@ export function RequestReplyThread({
 
   const handleReply = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!String(text || '').trim() && attachments.length === 0 && links.length === 0 && replyPhotos.length === 0) return;
+    if (!String(text || '').trim() && attachments.length === 0 && links.length === 0) return;
 
     try {
       const eType = collectionName === 'inquiries' ? 'inquiry' :
@@ -137,8 +135,6 @@ export function RequestReplyThread({
         "reply"
       );
 
-      const safeAttachments = processedAttachments.map(({ file, ...rest }) => rest);
-
       const newReply: ThreadReply = {
         id: `rpl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         authorId: currentUser.id,
@@ -146,10 +142,8 @@ export function RequestReplyThread({
         authorRole: currentUser.role,
         text,
         createdAt: new Date().toISOString(),
-        attachments: safeAttachments,
-        links,
-        screenshot: replyPhotos[0] || undefined,  // backward compat
-        photos: replyPhotos,                       // new field
+        attachments: processedAttachments,
+        links
       };
 
       // Fallbacks for notifications if props were not provided
@@ -191,7 +185,6 @@ export function RequestReplyThread({
       setText('');
       setAttachments([]);
       setLinks([]);
-      setReplyPhotos([]);
     } catch(err) {
       console.error(err);
       toast.error("Failed to add reply");
@@ -260,11 +253,8 @@ export function RequestReplyThread({
                 {/* Unified Attachments Display */}
                 <div className={`${r.senderName === currentUser.name ? 'flex justify-end' : 'flex justify-start'}`}>
                   <AttachmentsDisplay 
-                    photos={[
-                      ...(r.photos && Array.isArray(r.photos) ? r.photos : []),
-                      ...(r.screenshot ? [r.screenshot] : []),
-                      ...(r.attachments && Array.isArray(r.attachments) ? r.attachments : []),
-                    ].filter(Boolean)}
+                    attachments={[...(r.attachments || []), ...(r.attachmentsObjects || []), r.imageUrl, r.screenshot].filter(Boolean)}
+                    photos={r.photos || []}
                     links={r.links || []}
                   />
                 </div>
@@ -274,17 +264,6 @@ export function RequestReplyThread({
       </div>
 
       <form onSubmit={handleReply} className="pt-2 border-t border-white/10 flex flex-col gap-2 relative text-left">
-          {/* MultiAttachmentUpload for reply screenshots */}
-          <div className="bg-slate-900/50 p-4 border border-slate-700/40 rounded-xl mb-2">
-            <MultiAttachmentUpload
-              photos={replyPhotos}
-              links={[]}
-              onPhotosChange={setReplyPhotos}
-              onLinksChange={() => {}}
-              photosLabel='Attach screenshots to reply'
-            />
-          </div>
-
           {/* Active file attachments queue */}
           {attachments.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-1.5">
@@ -370,7 +349,7 @@ export function RequestReplyThread({
               placeholder="Reply or add notes..."
             />
             
-            <button type="submit" disabled={isUploading || (!String(text || '').trim() && attachments.length === 0 && links.length === 0 && replyPhotos.length === 0)} className="w-10 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white flex items-center justify-center transition-colors shrink-0">
+            <button type="submit" disabled={isUploading || (!String(text || '').trim() && attachments.length === 0 && links.length === 0)} className="w-10 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white flex items-center justify-center transition-colors shrink-0">
               <Send className="w-4 h-4" />
             </button>
           </div>

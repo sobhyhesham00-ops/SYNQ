@@ -20,12 +20,10 @@ import {
 } from "firebase/firestore";
 import { 
   db, 
-  auth,
   initAuth, 
   googleSignIn, 
   getAccessToken, 
   logout,
-  signInAnonymously,
   wrappedOnSnapshot as onSnapshot,
   wrappedSetDoc as setDoc,
   wrappedUpdateDoc as updateDoc,
@@ -129,8 +127,7 @@ import { OrdersTab } from "./components/OrdersTab";
 import { ArticleManager } from "./components/ArticleManager";
 import { RequestReplyThread } from "./components/RequestReplyThread";
 import { EnvironmentBadge } from "./components/EnvironmentBadge";
-import { ComplaintsWorkspace } from "./components/ComplaintsWorkspace";
-import { processAttachments, validateFile } from "./services/attachmentService";
+import { processAttachments } from "./services/attachmentService";
 import * as XLSX from "xlsx";
 import {
   isTLName,
@@ -769,7 +766,7 @@ export default function App() {
       const now = new Date();
       setCurrentTime(now);
       setSystemTime(now);
-    }, 60000);
+    }, 1000);
     return () => clearInterval(timer);
   }, []);
 
@@ -833,8 +830,6 @@ export default function App() {
     );
     return () => unsubscribe();
   }, []);
-
-
 
   const handleGoogleLogin = async () => {
     setIsLoggingInGoogle(true);
@@ -1295,10 +1290,7 @@ export default function App() {
             u?.name?.toLowerCase() === prevUser.name.toLowerCase(),
         );
         if (liveUserInfo) {
-          const merged = { ...prevUser, ...liveUserInfo };
-          if (JSON.stringify(prevUser) !== JSON.stringify(merged)) {
-            return merged;
-          }
+          return { ...prevUser, ...liveUserInfo };
         }
         return prevUser;
       });
@@ -1410,7 +1402,6 @@ export default function App() {
   }, [isDarkMode]);
 
   // Auth States
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     const saved = getStorageItem<User | null>("sched_current_user", null);
     if (saved) {
@@ -1434,46 +1425,6 @@ export default function App() {
     }
   }, [currentUser]);
 
-  // Ensure active Firebase Auth session for standard password logged-in agents
-  // and sync their credentials profile to /users/{uid} to satisfy firestore.rules
-  useEffect(() => {
-    const unsubSession = auth.onAuthStateChanged(async (firebaseUser) => {
-      try {
-        if (!firebaseUser) {
-          try {
-            await signInAnonymously(auth);
-          } catch (err) {
-            console.error("[Auth] Silent anonymous session init failed:", err);
-          }
-        } else {
-          const savedUser = getStorageItem<User | null>("sched_current_user", null);
-          if (savedUser) {
-            const uid = firebaseUser.uid;
-            try {
-              await setDoc(doc(db, "users", uid), {
-                id: uid,
-                name: savedUser.name,
-                role: savedUser.role || "agent",
-                avatarUrl: savedUser.avatarUrl || null,
-                status: savedUser.status || null,
-                statusNote: savedUser.statusNote || null,
-                bio: savedUser.bio || null,
-                dailyUpdate: savedUser.dailyUpdate || null,
-                email: savedUser.email || null,
-                phone: (savedUser as any).phone || null,
-              }, { merge: true });
-            } catch (e) {
-              console.error("[Auth] User profile registration sync failed for " + uid + ":", e);
-            }
-          }
-        }
-      } finally {
-        setIsAuthLoading(false);
-      }
-    });
-    return () => unsubSession();
-  }, [currentUser]);
-
   // Real-time Firestore Sync with [currentUser] dependency for Schedules, Notifications, Orders, and Todos as requested
   useEffect(() => {
     if (!currentUser || !currentUser.id) return;
@@ -1491,20 +1442,9 @@ export default function App() {
     );
 
     // 2. Notifications Real-time Sync
-    const normalizedName = currentUser.name.trim().toLowerCase();
-    const cleanedName = normalizedName.replace(/[^a-zA-Z0-9]/g, "");
-    const selfTargets = Array.from(new Set([
-      currentUser.id,
-      `usr_${cleanedName}`,
-      `usr_${normalizedName}`,
-      `usr_${currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}`,
-      "all",
-      currentUser.role
-    ].filter(Boolean)));
-
     const qNotifs = query(
       collection(db, "notifications"),
-      where("targetGroups", "array-contains-any", selfTargets),
+      where("targetGroups", "array-contains-any", [currentUser.id, "all", currentUser.role]),
     );
     let isNotifsInitialized = false;
     const unsubNotifs = onSnapshot(
@@ -1552,7 +1492,7 @@ export default function App() {
 
         setNotifications(arr);
       },
-      (error) => {
+      (error: any) => {
         console.error("Notifications Real-time Sync Error:", error);
       },
     );
@@ -1560,11 +1500,11 @@ export default function App() {
     // 3. Orders/Requests Real-time Sync
     const unsubOrders = onSnapshot(
       collection(db, "orders"),
-      (snapshot) => {
-        const data = snapshot.docs.map((d) => d.data() as Order);
+      (snapshot: any) => {
+        const data = snapshot.docs.map((d: any) => d.data() as Order);
         setOrders(data);
       },
-      (error) => {
+      (error: any) => {
         console.error("Orders Real-time Sync Error:", error);
       },
     );
@@ -1572,11 +1512,11 @@ export default function App() {
     // 4. Todos Real-time Alignment Sync
     const unsubTodos = onSnapshot(
       collection(db, "todos"),
-      (snapshot) => {
-        const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      (snapshot: any) => {
+        const data = snapshot.docs.map((d: any) => ({ id: d.id, ...d.data() }));
         setTodos(data);
       },
-      (error) => {
+      (error: any) => {
         console.error("Todos Real-time Sync Error:", error);
       },
     );
@@ -1878,13 +1818,7 @@ export default function App() {
     } else if (targetAgent === "qa") {
       targetGroups = ["qa"];
     } else {
-      const normalizedAgent = targetAgent.trim().toLowerCase();
-      const cleanedAgent = normalizedAgent.replace(/[^a-zA-Z0-9]/g, "");
-      targetGroups = Array.from(new Set([
-        `usr_${cleanedAgent}`,
-        `usr_${normalizedAgent}`,
-        `usr_${targetAgent.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}`
-      ]));
+      targetGroups = [`usr_${targetAgent.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}`];
     }
 
     const newNotif: SystemNotification = {
@@ -2711,7 +2645,6 @@ ${pageText}
 
   // Form submission and confirmation states
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
-  const [uploadProgressMsg, setUploadProgressMsg] = useState("");
   const [submissionConfirmation, setSubmissionConfirmation] = useState<{
     title: string;
     message: string;
@@ -2999,9 +2932,6 @@ ${pageText}
 
   // Tabby/Tamara search and filter states
   const [compSearch, setCompSearch] = useState("");
-  const [selectedComplaintId, setSelectedComplaintId] = useState<string | null>(null);
-  const [complaintListFilter, setComplaintListFilter] = useState<'all'|'pending_tl'|'need_contact'|'closed'>('all');
-  const [complaintSearch, setComplaintSearch] = useState('');
   const [compDateFilter, setCompDateFilter] = useState("");
   const [commSearch, setCommSearch] = useState("");
   const [commLangFilter, setCommLangFilter] = useState<
@@ -3063,10 +2993,10 @@ ${pageText}
 
   // Initialize correct active tab based on role
   useEffect(() => {
-    if (currentUser && !activeTab) {
+    if (currentUser) {
       setActiveTab("dashboard");
     }
-  }, [currentUser, activeTab]);
+  }, [currentUser]);
 
   // Request Form States
   const [swapDate, setSwapDate] = useState("");
@@ -3857,10 +3787,7 @@ ${swapTargetAgent}'s LOB: ${targetLOB}`);
       });
 
       // Sync to Firestore
-      await Promise.race([
-        setDoc(doc(db, "scheduling_requests", newRequest.id), newRequest),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore write timed out")), 10000))
-      ]);
+      await setDoc(doc(db, "scheduling_requests", newRequest.id), newRequest);
 
       addSystemNotification(
         `New Swap Request: ${formatAgentName(name)}`,
@@ -3956,10 +3883,7 @@ ${swapTargetAgent}'s LOB: ${targetLOB}`);
       });
 
       // Sync to Firestore
-      await Promise.race([
-        setDoc(doc(db, "scheduling_requests", newRequest.id), newRequest),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore write timed out")), 10000))
-      ]);
+      await setDoc(doc(db, "scheduling_requests", newRequest.id), newRequest);
 
       addSystemNotification(
         `New Annual Leave: ${formatAgentName(name)}`,
@@ -5604,14 +5528,10 @@ ${result.errors.slice(0, 5).join("\n")}${
 
   const handleSubmitInquiry = async (e: FormEvent) => {
     e.preventDefault();
-    if (!auth.currentUser) {
-      toast.error("You must be logged in to submit an inquiry.");
-      return;
-    }
     if (!currentUser) return;
     if (isFormSubmitting) return;
 
-    if (!inquiryClinicName || !inquiryClinicName.trim()) {
+    if (!inquiryClinicName) {
       toast.error("Please select a Clinic Name! This is a mandatory field.");
       return;
     }
@@ -5622,7 +5542,6 @@ ${result.errors.slice(0, 5).join("\n")}${
     }
 
     setIsFormSubmitting(true);
-    setUploadProgressMsg("Preparing files...");
     try {
       const createdAt = new Date().toISOString();
       let safeId = "inq_";
@@ -5632,112 +5551,39 @@ ${result.errors.slice(0, 5).join("\n")}${
         safeId += `${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
       }
       const inquiryId = safeId;
-
-      const newAttachments: any[] = [...(inquiryAttachments || [])];
-      const base64Photos = (inquiryPhotos || []).filter((p) => p.startsWith("data:"));
-      const normalPhotos = (inquiryPhotos || []).filter((p) => !p.startsWith("data:"));
-      
-      let photoCounter = 1;
-
-      // Extract base64 photos to file attachments
-      for (const b64 of base64Photos) {
-        try {
-          const arr = b64.split(",");
-          const mimeMatch = arr[0].match(/:(.*?);/);
-          const mime = mimeMatch ? mimeMatch[1] : "application/octet-stream";
-          const bstr = atob(arr[1]);
-          let n = bstr.length;
-          const u8arr = new Uint8Array(n);
-          while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-          }
-          const file = new globalThis.File([u8arr], `photo_${photoCounter++}.png`, { type: mime });
-          newAttachments.push({
-            id: `p_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            file: file,
-          });
-        } catch (e) {
-          console.error("Failed to parse base64 photo", e);
-        }
-      }
-
-      // Extract activeScreenshot base64 to file attachment
-      if (activeScreenshot && activeScreenshot.startsWith("data:")) {
-        try {
-          const arr = activeScreenshot.split(",");
-          const mimeMatch = arr[0].match(/:(.*?);/);
-          const mime = mimeMatch ? mimeMatch[1] : "application/octet-stream";
-          const bstr = atob(arr[1]);
-          let n = bstr.length;
-          const u8arr = new Uint8Array(n);
-          while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-          }
-          const file = new globalThis.File([u8arr], `screenshot.png`, { type: mime });
-          newAttachments.push({
-            id: `s_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            file: file,
-          });
-        } catch (e) {
-          console.error("Failed to parse base64 screenshot", e);
-        }
-      }
-
-      // Validate all files
-      for (const att of newAttachments) {
-        if (att.file) {
-          const v = validateFile(att.file);
-          if (!v.valid) {
-            toast.error(v.error);
-            setIsFormSubmitting(false);
-            setUploadProgressMsg("");
-            return;
-          }
-        }
-      }
       
       const processedAttachments = await processAttachments(
-        newAttachments,
+        inquiryAttachments,
         "inquiry",
         inquiryId,
-        "root",
-        (prog) => setUploadProgressMsg(`Uploading ${prog.fileName} (${Math.round(prog.progress)}%)`)
+        "root"
       );
-      
-      setUploadProgressMsg("Saving record...");
 
-      // Strip non-serializable File objects before Firestore write
-      const firestoreAttachments = processedAttachments.map(({ file, ...rest }) => rest);
-
-      const agentNameStr = currentUser.name;
       const newInquiry: Inquiry = {
         id: inquiryId,
-        submittedById: auth.currentUser.uid,
-        submittedByName: agentNameStr,
         caseRef: formatCaseRef(inquiryId, "inquiry", createdAt),
-        agentName: agentNameStr,
-        clinicName: inquiryClinicName.trim(),
+        agentName: currentUser.name,
+        clinicName: inquiryClinicName,
         phoneNumber: String(inquiryPhoneNumber || "").trim() || undefined,
         text: String(inquiryText || "").trim(),
-        photos: normalPhotos, // Exclude base64 strings
-        screenshot: null, // Keep for backward compat but do not store base64 string
-        attachments: firestoreAttachments,
+        photos: inquiryPhotos,
+        attachments: processedAttachments,
         links: inquiryLinks,
         createdAt,
         status: "submitted",
         seenByAgent: false,
       };
 
-      // Write direct to Firestore first (without Promise.race timeout or optimistic local writes)
+      setInquiries((prev) => {
+        const updated = [newInquiry, ...prev];
+        setStorageItem("sched_inquiries", updated);
+        return updated;
+      });
+
+      // Sync to Firestore
       await setDoc(doc(db, "inquiries", newInquiry.id), newInquiry);
 
-      // Reset fields ONLY after successful Firestore write
+      // Reset fields
       setInquiryText("");
       setInquiryClinicName("");
       setInquiryPhoneNumber("");
@@ -5746,17 +5592,15 @@ ${result.errors.slice(0, 5).join("\n")}${
       setInquiryLinks([]);
       setTempLinkInput("");
       setTempPhotoUrlInput("");
-      setActiveScreenshot(null);
 
       handleMentionsInText(
         String(inquiryText || "").trim(),
         "Agent Inquiry Description",
-        agentNameStr,
+        currentUser.name,
       );
-
       addSystemNotification(
         "New Inquiry Submitted",
-        `${agentNameStr} has submitted a new inquiry for clinic: ${inquiryClinicName}.`,
+        `${currentUser.name} has submitted a new inquiry for clinic: ${inquiryClinicName}.`,
         "general",
         "tl",
         undefined,
@@ -5771,27 +5615,11 @@ ${result.errors.slice(0, 5).join("\n")}${
         referenceId: newInquiry.id,
       });
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err: any) {
-      console.error("Inquiry submission error:", err);
-      let errorCode = "";
-      let errorMessage = err?.message || String(err);
-      try {
-        const errorParsed = JSON.parse(err.message);
-        if (errorParsed && errorParsed.error) {
-          errorMessage = errorParsed.error;
-        }
-      } catch (e) {
-        // Not a JSON error
-      }
-      if (err?.code) {
-        errorCode = ` [Code: ${err.code}]`;
-      } else if (errorMessage.toLowerCase().includes("permission") || errorMessage.includes("PERMISSION_DENIED")) {
-        errorCode = " [Code: permission-denied]";
-      }
-      toast.error(`Submission failed. ${errorMessage}${errorCode}`);
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occurred while submitting. Please try again.");
     } finally {
       setIsFormSubmitting(false);
-      setUploadProgressMsg("");
     }
   };
 
@@ -5854,7 +5682,6 @@ ${result.errors.slice(0, 5).join("\n")}${
         inquiryId,
         "reply"
       );
-      const safeAttachments = processedAttachments.map(({ file, ...rest }) => rest);
 
       let targetAgentName = "";
       let clinicName = "";
@@ -5872,7 +5699,7 @@ ${result.errors.slice(0, 5).join("\n")}${
             senderName: currentUser.name,
             authorRole: currentUser.role,
             text: answerText,
-            attachments: safeAttachments.length > 0 ? safeAttachments : undefined,
+            attachments: processedAttachments.length > 0 ? processedAttachments : undefined,
             links: currentAnswerLinks.length > 0 ? currentAnswerLinks : undefined,
             createdAt: new Date().toISOString()
           };
@@ -5897,10 +5724,7 @@ ${result.errors.slice(0, 5).join("\n")}${
          return;
       }
 
-      await Promise.race([
-        setDoc(doc(db, "inquiries", inquiryId), updatedInqObject),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore write timed out")), 10000))
-      ]);
+      await setDoc(doc(db, "inquiries", inquiryId), updatedInqObject);
 
       setInquiries(updated);
       setStorageItem("sched_inquiries", updated);
@@ -6075,9 +5899,6 @@ ${ttNotes}`
         isOldCustomer: ttIsOldCustomer,
         idNumber: !ttIsOldCustomer ? ttIdNumber : null,
         priceWithoutTax: ttPriceWithoutTax,
-        priceWithTax: (!isNaN(Number(ttPriceWithoutTax))
-          ? (Number(ttPriceWithoutTax) * 1.05).toFixed(2)
-          : ttPriceWithoutTax),
         feeRate: 0.05,
         feeAmount: pricing.feeAmount,
         finalPriceWithFee: pricing.finalPrice,
@@ -6115,13 +5936,8 @@ ${ttNotes}`
         return updated;
       });
 
-      // Sync to Firestore with 10-second timeout
-      await Promise.race([
-        setDoc(doc(db, "tt_requests", newRequest.id), newRequest),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Firestore write timed out")), 10000)
-        )
-      ]);
+      // Sync to Firestore
+      await setDoc(doc(db, "tt_requests", newRequest.id), newRequest);
 
       // Clear form
       setTtPatientName("");
@@ -6172,16 +5988,9 @@ ${ttNotes}`
         referenceId: newRequest.id,
       });
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err: any) {
-      console.error("Fintech request submission error:", err);
-      const msg = err?.message || String(err);
-      if (msg.includes("timed out")) {
-        toast.error("Submission timed out. Check your connection and try again.");
-      } else if (msg.includes("permission") || msg.includes("PERMISSION_DENIED")) {
-        toast.error("Permission denied. Please refresh and log in again.");
-      } else {
-        toast.error("Fintech error: " + (err.message || err));
-      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Fintech error: " + (err.message || err));
     } finally {
       setIsFormSubmitting(false);
     }
@@ -6193,8 +6002,6 @@ ${ttNotes}`
     tlNotes?: string,
     tlLinks?: string,
     status: "confirmed" | "rejected" = "confirmed",
-    tlPhotos?: string[],
-    tlSupportingLinks?: string[],
   ) => {
     if (!currentUser) return;
     const updated = tabbyTamaraRequests.map((r) => {
@@ -6224,11 +6031,9 @@ ${ttNotes}`
           status: status,
           confirmedAt: new Date().toISOString(),
           confirmedBy: currentUser.name,
-          paymentLink: paymentLink || null,
-          tlNotes: tlNotes || null,
+          paymentLink: paymentLink || undefined,
+          tlNotes: tlNotes || undefined,
           tlLinks: tlLinks || undefined,
-          tlPhotos: tlPhotos || r.tlPhotos || [],
-          tlSupportingLinks: tlSupportingLinks || [],
           workflowStatus: newWorkflowStatus,
           replies: [...existingReplies, activityEntry],
           updatedAt: new Date().toISOString()
@@ -6254,41 +6059,6 @@ ${ttNotes}`
           r.id
         );
 
-        // If confirmed with payment link AND submitter is Call Center → notify all Social Media agents
-        if (status === "confirmed" && paymentLink) {
-          const submitterLOB = getAgentLOB(r.agentName);
-          if (submitterLOB === "Call Center") {
-            const socialMediaAgents = Object.entries(AGENT_LOBS)
-              .filter(([name, lob]) => lob === "Social Media")
-              .map(([name]) => name);
-
-            socialMediaAgents.forEach((targetAgent) => {
-              addSystemNotification(
-                "💳 Payment Link Ready — Contact Patient Now",
-                `TL ${currentUser?.name} confirmed a ${r.platform?.toUpperCase()} request.\n` +
-                  `Patient: ${r.patientName}\n` +
-                  `📞 Phone: ${(r.phoneNumber || "").replace(/^0+/, "")} (starts from 5)\n` +
-                  `🏥 Clinic: ${r.clinicName}\n` +
-                  `🔗 Payment Link: ${paymentLink}` +
-                  (tlNotes ? `\n📝 TL Notes: ${tlNotes}` : ""),
-                "general",
-                targetAgent,
-                undefined,
-                "tt_request",
-                requestId
-              );
-            });
-          }
-
-          // Always notify TL confirmation went through
-          addSystemNotification(
-            "✅ TT Request Confirmed",
-            `${r.platform?.toUpperCase()} request for ${r.patientName} confirmed with payment link.`,
-            "general",
-            "tl"
-          );
-        }
-
         return updatedReq;
       }
       return r;
@@ -6302,43 +6072,6 @@ ${ttNotes}`
       );
     } else {
       toast.success("Request successfully marked as rejected with notes!");
-    }
-  };
-
-  const handleAssignRecord = async (
-    recordId: string,
-    collectionName: string,
-    toAgent: string,
-    recordType: string,
-    fromAgent: string
-  ) => {
-    if (!currentUser) return;
-    try {
-      const { updateDoc, doc } = await import('firebase/firestore');
-      await updateDoc(doc(db, collectionName, recordId), { assignedTo: toAgent });
-
-      // Update local state based on collectionName
-      if (collectionName === 'inquiries') {
-        setInquiries(prev => prev.map(i => i.id === recordId ? { ...i, assignedTo: toAgent } : i));
-      } else if (collectionName === 'tt_requests') {
-        setTabbyTamaraRequests(prev => prev.map(r => r.id === recordId ? { ...r, assignedTo: toAgent } : r));
-      } else if (collectionName === 'tt_complaints') {
-        setTabbyTamaraComplaints(prev => prev.map(c => c.id === recordId ? { ...c, assignedTo: toAgent } : c));
-      } else if (collectionName === 'client_comms') {
-        setClientComms(prev => prev.map(c => c.id === recordId ? { ...c, assignedTo: toAgent } : c));
-      }
-
-      // Notify assigned agent
-      addSystemNotification(
-        `📌 ${recordType} Assigned to You`,
-        `TL ${currentUser.name} assigned a ${recordType} to you. Previously handled by ${fromAgent}. Please review and action.`,
-        'general',
-        toAgent
-      );
-      toast.success(`Assigned to ${toAgent}!`);
-    } catch (err: any) {
-      console.error(err);
-      toast.error('Failed to assign record.');
     }
   };
 
@@ -6368,9 +6101,6 @@ ${ttNotes}`
       requestId,
       "payment_proof"
     );
-
-    const safeClientIdAttachments = processedClientIdAttachments.map(({ file, ...rest }) => rest);
-    const safePaymentProofAttachments = processedPaymentProofAttachments.map(({ file, ...rest }) => rest);
 
     const updated = tabbyTamaraRequests.map((r) => {
       if (r.id === requestId) {
@@ -6407,10 +6137,10 @@ ${ttNotes}`
           customerContacted: status,
           contactedAt: status === "contacted" ? new Date().toISOString() : undefined,
           agentContactNotes: notes || r.agentContactNotes || "",
-          paymentScreenshot: screenshot || r.paymentScreenshot || null,
+          paymentScreenshot: screenshot || r.paymentScreenshot || undefined,
           attachments: (attachments && attachments.length > 0) ? [...(r.attachments || []), ...attachments] : (r.attachments || []),
-          clientIdAttachments: safeClientIdAttachments.length > 0 ? safeClientIdAttachments : (r.clientIdAttachments || []),
-          paymentProofAttachments: safePaymentProofAttachments.length > 0 ? safePaymentProofAttachments : (r.paymentProofAttachments || []),
+          clientIdAttachments: processedClientIdAttachments.length > 0 ? processedClientIdAttachments : (r.clientIdAttachments || []),
+          paymentProofAttachments: processedPaymentProofAttachments.length > 0 ? processedPaymentProofAttachments : (r.paymentProofAttachments || []),
           workflowStatus: derivedStatus,
           replies: [...existingReplies, ...activityEntries],
           updatedAt: new Date().toISOString()
@@ -6529,13 +6259,8 @@ ${ttNotes}`
         return updated;
       });
 
-      // Sync to Firestore with 10-second timeout
-      await Promise.race([
-        setDoc(doc(db, "tt_complaints", newComplaint.id), newComplaint),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Firestore write timed out")), 10000)
-        )
-      ]);
+      // Sync to Firestore
+      await setDoc(doc(db, "tt_complaints", newComplaint.id), newComplaint);
 
       // Clear form
       setTcPatientName("");
@@ -6567,18 +6292,11 @@ ${ttNotes}`
         referenceId: newComplaint.id,
       });
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err: any) {
-      console.error("Complaint submission error:", err);
-      const msg = err?.message || String(err);
-      if (msg.includes("timed out")) {
-        toast.error("Submission timed out. Check your connection and try again.");
-      } else if (msg.includes("permission") || msg.includes("PERMISSION_DENIED")) {
-        toast.error("Permission denied. Please refresh and log in again.");
-      } else {
-        toast.error(
-          "An error occurred while submitting complaint. Please try again.",
-        );
-      }
+    } catch (err) {
+      console.error(err);
+      toast.error(
+        "An error occurred while submitting complaint. Please try again.",
+      );
     } finally {
       setIsFormSubmitting(false);
     }
@@ -6631,13 +6349,8 @@ ${ttNotes}`
         return updated;
       });
 
-      // Sync to Firestore with 10-second timeout
-      await Promise.race([
-        setDoc(doc(db, "client_comms", newComm.id), newComm),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Firestore write timed out")), 10000)
-        )
-      ]);
+      // Sync to Firestore
+      await setDoc(doc(db, "client_comms", newComm.id), newComm);
 
       // Clear form
       setCcClinicName("");
@@ -6683,16 +6396,9 @@ ${ttNotes}`
         referenceId: newComm.id,
       });
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err: any) {
-      console.error("Client comm submission error:", err);
-      const msg = err?.message || String(err);
-      if (msg.includes("timed out")) {
-        toast.error("Submission timed out. Check your connection and try again.");
-      } else if (msg.includes("permission") || msg.includes("PERMISSION_DENIED")) {
-        toast.error("Permission denied. Please refresh and log in again.");
-      } else {
-        toast.error("An error occurred while submitting. Please try again.");
-      }
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occurred while submitting. Please try again.");
     } finally {
       setIsFormSubmitting(false);
     }
@@ -7308,8 +7014,6 @@ ${ttNotes}`
       return c;
     });
 
-    const comp = updated.find((c) => c.id === complaintId);
-
     setTabbyTamaraComplaints(updated);
     setStorageItem("sched_tt_complaints", updated);
 
@@ -7318,12 +7022,13 @@ ${ttNotes}`
     setTlComplaintResolutionType("");
     setActiveComplaintHandlingId(null);
 
+    const comp = updated.find((c) => c.id === complaintId);
     if (comp) {
       addSystemNotification(
-        "📋 Complaint Reviewed by TL",
+        "Complaint Reviewed by TL",
         `Your complaint for ${comp.patientName} has been reviewed. Resolution: ${resolutionType || "See TL comment"}. Action required: contact the patient.`,
         "general",
-        (comp.agentName || "").trim(),
+        comp.agentName,
         undefined,
         "tt_complaint",
         complaintId
@@ -7363,22 +7068,11 @@ ${ttNotes}`
     setStorageItem("sched_tt_complaints", updated);
 
     if (comp && status === "contacted") {
-      // Notify the agent
       addSystemNotification(
         "Complaint Resolved",
         `Your complaint for ${comp.patientName} has been marked as resolved (patient contacted).`,
         "general",
-        (comp.agentName || "").trim(),
-        undefined,
-        "tt_complaint",
-        complaintId
-      );
-      // Also notify TL that complaint was closed
-      addSystemNotification(
-        "✅ Complaint Marked Contacted",
-        `${comp.patientName}'s complaint has been closed by ${currentUser?.name || "Agent"}. Patient was contacted.`,
-        "general",
-        "tl",
+        comp.agentName,
         undefined,
         "tt_complaint",
         complaintId
@@ -9638,7 +9332,7 @@ ${ttNotes}`
                             <div className="flex-1 overflow-y-auto space-y-2 max-h-[200px] pr-1">
                               {todos.filter(
                                 (t) =>
-                                  t.agentName?.toLowerCase() === currentUser?.name?.toLowerCase() &&
+                                  t.agentName === currentUser.name &&
                                   (todoFilter === "All" ||
                                     t.category === todoFilter),
                               ).length === 0 ? (
@@ -9649,7 +9343,7 @@ ${ttNotes}`
                                 todos
                                   .filter(
                                     (t) =>
-                                      t.agentName?.toLowerCase() === currentUser?.name?.toLowerCase() &&
+                                      t.agentName === currentUser.name &&
                                       (todoFilter === "All" ||
                                         t.category === todoFilter),
                                   )
@@ -15318,18 +15012,13 @@ ${ttNotes}`
                               {/* Submit Action */}
                               <button
                                 type="submit"
-                                disabled={isFormSubmitting || isAuthLoading}
-                                className={`w-full py-2.5 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 ${(isFormSubmitting || isAuthLoading) ? "bg-indigo-800 pointer-events-none opacity-60" : "bg-indigo-600 hover:bg-indigo-500 shadow-indigo-500/10 active:scale-[0.98]"}`}
+                                disabled={isFormSubmitting}
+                                className={`w-full py-2.5 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 ${isFormSubmitting ? "bg-indigo-800 pointer-events-none opacity-60" : "bg-indigo-600 hover:bg-indigo-500 shadow-indigo-500/10 active:scale-[0.98]"}`}
                               >
                                 {isFormSubmitting ? (
                                   <>
                                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    {uploadProgressMsg || "Submitting Inquiry..."}
-                                  </>
-                                ) : isAuthLoading ? (
-                                  <>
-                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    Initializing Auth...
+                                    Submitting Inquiry...
                                   </>
                                 ) : (
                                   <>
@@ -15606,13 +15295,9 @@ ${ttNotes}`
 
                                               {/* Display Photos */}
                                               <AttachmentsDisplay
-                                                photos={[
-                                                  ...(inq.photos || []),
-                                                  ...((inq.screenshot) ? [inq.screenshot] : []),
-                                                  ...(((inq as any).imageUrl) ? [(inq as any).imageUrl] : []),
-                                                ].filter(Boolean)}
+                                                photos={[...(inq.photos || []), ...((inq as any).screenshot ? [(inq as any).screenshot] : []), ...((inq as any).imageUrl ? [(inq as any).imageUrl] : []), ...((inq as any).attachment ? [(inq as any).attachment] : [])]}
                                                 attachments={inq.attachments}
-                                                links={inq.links || []}
+                                                links={inq.links}
                                               />
 
                                               {/* Done with attachments */}
@@ -17129,13 +16814,9 @@ ${ttNotes}`
 
                                         {/* Render attachments */}
                                         <AttachmentsDisplay
-                                          photos={[
-                                            ...(inq.photos || []),
-                                            ...((inq.screenshot) ? [inq.screenshot] : []),
-                                            ...(((inq as any).imageUrl) ? [(inq as any).imageUrl] : []),
-                                          ].filter(Boolean)}
+                                          photos={[...(inq.photos || []), ...((inq as any).screenshot ? [(inq as any).screenshot] : []), ...((inq as any).imageUrl ? [(inq as any).imageUrl] : []), ...((inq as any).attachment ? [(inq as any).attachment] : [])]}
                                           attachments={inq.attachments}
-                                          links={inq.links || []}
+                                          links={inq.links}
                                         />
 
                                         {/* TL customerContacted quick update buttons */}
@@ -17373,7 +17054,7 @@ ${ttNotes}`
                         const myCases = cases.filter(
                           (c) =>
                             currentUser.role === "tl" ||
-                            c.agentName?.toLowerCase() === currentUser?.name?.toLowerCase()
+                            c.agentName?.toLowerCase() === currentUser.name.toLowerCase()
                         );
                         const search = (casesSearch ?? "").toLowerCase();
                         const filtered = myCases
@@ -19932,7 +19613,7 @@ ${ttNotes}`
                                                       const coverage =
                                                         getCoverageForDate(
                                                           dateStr,
-                                                        )[row.key];
+                                                        )[row.key as keyof ReturnType<typeof getCoverageForDate>];
                                                       const count =
                                                         coverage.count;
                                                       const target = row.target;
@@ -22131,16 +21812,15 @@ ${ttNotes}`
                                         }
                                         value={
                                           localSubTab === "complaints"
-                                            ? complaintSearch
+                                            ? compSearch
                                             : localSubTab === "client-comms"
                                               ? commSearch
                                               : ttSearchQuery
                                         }
                                         onChange={(e) => {
-                                          if (localSubTab === "complaints") {
-                                            setComplaintSearch(e.target.value);
-                                            setSelectedComplaintId(null);
-                                          } else if (
+                                          if (localSubTab === "complaints")
+                                            setCompSearch(e.target.value);
+                                          else if (
                                             localSubTab === "client-comms"
                                           )
                                             setCommSearch(e.target.value);
@@ -22158,10 +21838,9 @@ ${ttNotes}`
                                           <input
                                             type="date"
                                             value={compDateFilter}
-                                            onChange={(e) => {
-                                              setCompDateFilter(e.target.value);
-                                              setSelectedComplaintId(null);
-                                            }}
+                                            onChange={(e) =>
+                                              setCompDateFilter(e.target.value)
+                                            }
                                             className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium [color-scheme:dark]"
                                           />
                                         </div>
@@ -22204,103 +21883,54 @@ ${ttNotes}`
                                       </div>
                                     </>
                                   )}
-                                  {localSubTab === "complaints" ? (
-                                    <>
-                                      <span className="text-slate-400 font-semibold font-sans">
-                                        Filter status:
-                                      </span>
-                                      <div className="flex items-center gap-1.5 bg-black/35 p-1 rounded-xl border border-white/5 animate-fade-in">
-                                        <button
-                                          onClick={() => {
-                                            setComplaintListFilter("all");
-                                            setSelectedComplaintId(null);
-                                          }}
-                                          className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${complaintListFilter === "all" ? "bg-indigo-600 text-white font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
-                                        >
-                                          <History className="w-3 h-3" />
-                                          All
-                                        </button>
-                                        <button
-                                          onClick={() => {
-                                            setComplaintListFilter("pending_tl");
-                                            setSelectedComplaintId(null);
-                                          }}
-                                          className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${complaintListFilter === "pending_tl" ? "bg-amber-400/20 text-amber-300 border border-amber-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
-                                        >
-                                          ⏳ Pending TL
-                                        </button>
-                                        <button
-                                          onClick={() => {
-                                            setComplaintListFilter("need_contact");
-                                            setSelectedComplaintId(null);
-                                          }}
-                                          className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${complaintListFilter === "need_contact" ? "bg-rose-500/20 text-rose-300 border border-rose-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
-                                        >
-                                          ⏳ Need Contact
-                                        </button>
-                                        <button
-                                          onClick={() => {
-                                            setComplaintListFilter("closed");
-                                            setSelectedComplaintId(null);
-                                          }}
-                                          className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${complaintListFilter === "closed" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
-                                        >
-                                          Closed
-                                        </button>
-                                      </div>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <span className="text-slate-400 font-semibold font-sans">
-                                        Filter status:
-                                      </span>
-                                      <div className="flex items-center gap-1.5 bg-black/35 p-1 rounded-xl border border-white/5">
-                                        <button
-                                          onClick={() => setTtFilterStatus("all")}
-                                          className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "all" ? "bg-indigo-600 text-white font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
-                                        >
-                                          <History className="w-3 h-3" />
-                                          All History
-                                        </button>
-                                        <button
-                                          onClick={() =>
-                                            setTtFilterStatus("not_confirmed")
-                                          }
-                                          className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "not_confirmed" ? "bg-amber-400/20 text-amber-300 border border-amber-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
-                                        >
-                                          {localSubTab === "requests"
-                                            ? "⏳ Pending Confirm"
-                                            : localSubTab === "complaints"
-                                              ? "⏳ Pending TL"
-                                              : "⏳ Pending Contact"}
-                                        </button>
-                                        <button
-                                          onClick={() =>
-                                            setTtFilterStatus("confirmed")
-                                          }
-                                          className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "confirmed" ? "bg-rose-500/20 text-rose-300 border border-rose-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
-                                        >
-                                          {localSubTab === "requests"
-                                            ? " Pending Contact"
-                                            : localSubTab === "complaints"
-                                              ? " Pending Contact"
-                                              : " Contacted"}
-                                        </button>
-                                        {localSubTab !== "client-comms" && (
-                                          <button
-                                            onClick={() =>
-                                              setTtFilterStatus("contacted")
-                                            }
-                                            className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "contacted" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
-                                          >
-                                            {localSubTab === "requests"
-                                              ? " Contacted"
-                                              : " Closed"}
-                                          </button>
-                                        )}
-                                      </div>
-                                    </>
-                                  )}
+                                  <span className="text-slate-400 font-semibold font-sans">
+                                    Filter status:
+                                  </span>
+                                  <div className="flex items-center gap-1.5 bg-black/35 p-1 rounded-xl border border-white/5">
+                                    <button
+                                      onClick={() => setTtFilterStatus("all")}
+                                      className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "all" ? "bg-indigo-600 text-white font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                    >
+                                      <History className="w-3 h-3" />
+                                      All History
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        setTtFilterStatus("not_confirmed")
+                                      }
+                                      className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "not_confirmed" ? "bg-amber-400/20 text-amber-300 border border-amber-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                    >
+                                      {localSubTab === "requests"
+                                        ? "⏳ Pending Confirm"
+                                        : localSubTab === "complaints"
+                                          ? "⏳ Pending TL"
+                                          : "⏳ Pending Contact"}
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        setTtFilterStatus("confirmed")
+                                      }
+                                      className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "confirmed" ? "bg-rose-500/20 text-rose-300 border border-rose-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                    >
+                                      {localSubTab === "requests"
+                                        ? " Pending Contact"
+                                        : localSubTab === "complaints"
+                                          ? " Pending Contact"
+                                          : " Contacted"}
+                                    </button>
+                                    {localSubTab !== "client-comms" && (
+                                      <button
+                                        onClick={() =>
+                                          setTtFilterStatus("contacted")
+                                        }
+                                        className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "contacted" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                      >
+                                        {localSubTab === "requests"
+                                          ? " Contacted"
+                                          : " Closed"}
+                                      </button>
+                                    )}
+                                  </div>
 
                                   {localSubTab === "requests" && (
                                     <>
@@ -22615,34 +22245,6 @@ ${ttNotes}`
                                       );
                                     })()
                                   ) : localSubTab === "complaints" ? (
-                                    <ComplaintsWorkspace
-                                      tabbyTamaraComplaints={tabbyTamaraComplaints}
-                                      currentUser={currentUser}
-                                      isTLOreSupport={isTLOreSupport}
-                                      isSuperAdmin={isSuperAdmin}
-                                      complaintSearch={complaintSearch}
-                                      selectedComplaintId={selectedComplaintId}
-                                      setSelectedComplaintId={setSelectedComplaintId}
-                                      complaintListFilter={complaintListFilter}
-                                      compDateFilter={compDateFilter}
-                                      tcFilterClinic={tcFilterClinic}
-                                      activeComplaintHandlingId={activeComplaintHandlingId}
-                                      setActiveComplaintHandlingId={setActiveComplaintHandlingId}
-                                      tlComplaintResolutionType={tlComplaintResolutionType}
-                                      setTlComplaintResolutionType={setTlComplaintResolutionType}
-                                      tlComplaintComment={tlComplaintComment}
-                                      setTlComplaintComment={setTlComplaintComment}
-                                      handleTLCommentComplaint={handleTLCommentComplaint}
-                                      handleToggleContactComplaint={handleToggleContactComplaint}
-                                      handleDeleteComplaint={handleDeleteComplaint}
-                                      handleAssignRecord={handleAssignRecord}
-                                      addSystemNotification={addSystemNotification}
-                                      canEditItem={canEditItem}
-                                      getRemainingEditTime={getRemainingEditTime}
-                                      setEditingItem={setEditingItem}
-                                      getElapsedTimerString={getElapsedTimerString}
-                                    />
-                                  ) : false ? (
                                     <>
                                       {tabbyTamaraComplaints.filter((c) => {
                                         const isMyComplaint =
@@ -22712,7 +22314,7 @@ ${ttNotes}`
                                           </p>
                                         </div>
                                       ) : (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in font-sans font-sans">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in font-sans">
                                           {tabbyTamaraComplaints
                                             .filter((c) => {
                                               const isMyComplaint =
@@ -22907,45 +22509,6 @@ ${ttNotes}`
                                                             ? " Old Customer"
                                                             : "🆕 New Customer"}
                                                         </p>
-                                                      </div>
-                                                    </div>
-
-                                                    {/* Assign to agent */}
-                                                    <div className="border-t border-white/5 pt-1.5 flex items-center justify-between gap-2">
-                                                      <span className="text-[9px] text-slate-400 uppercase tracking-wider font-bold">
-                                                        Assigned Agent:
-                                                      </span>
-                                                      <div className="flex items-center gap-2">
-                                                        <select
-                                                          className="bg-slate-800 border border-slate-600/60 rounded-lg px-2 py-1 text-[10px] text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
-                                                          defaultValue=""
-                                                          onChange={(e) => {
-                                                            if (e.target.value) {
-                                                              handleAssignRecord(
-                                                                comp.id,
-                                                                "tt_complaints",
-                                                                e.target.value,
-                                                                "Complaint",
-                                                                comp.agentName || "Unknown"
-                                                              );
-                                                              e.target.value = "";
-                                                            }
-                                                          }}
-                                                        >
-                                                          <option value="">📌 Assign to...</option>
-                                                          {INITIAL_AGENTS.filter(
-                                                            (a) => a !== comp.agentName
-                                                          ).map((a) => (
-                                                            <option key={a} value={a}>
-                                                              {a}
-                                                            </option>
-                                                          ))}
-                                                        </select>
-                                                        {comp.assignedTo && (
-                                                          <span className="text-[9px] text-indigo-400 font-bold bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded">
-                                                            📌 {comp.assignedTo}
-                                                          </span>
-                                                        )}
                                                       </div>
                                                     </div>
 
@@ -24545,9 +24108,9 @@ _ ${req.handlingNotes || "Pending response"} _`;
                         qaScores={qaScores}
                         agentsList={agentsList}
                         qaTemplate={qaTemplate}
-                        onUpdateQATemplate={(t) => {
-                          setQaTemplate(t);
-                          setDoc(doc(db, 'qa_config', 'template'), { questions: t }).catch(console.error);
+                        onUpdateQATemplate={(newTemplate) => {
+                          setQaTemplate(newTemplate);
+                          setDoc(doc(db, 'qa_config', 'template'), { questions: newTemplate }).catch(console.error);
                         }}
                         addSystemNotification={addSystemNotification}
                         onSubmitScore={(score) => {
@@ -24555,8 +24118,8 @@ _ ${req.handlingNotes || "Pending response"} _`;
                           setQaScores(updated);
                           setDoc(doc(db, 'qa_scores', score.id), score).catch(console.error);
                           addSystemNotification(
-                            '📊 QA Score Submitted',
-                            `${currentUser?.name || ''} evaluated ${score.agentName} — Score: ${score.totalScore}/${score.maxTotalScore}`,
+                            'QA Score Submitted',
+                            `${currentUser.name} submitted a QA evaluation for ${score.agentName} — Score: ${score.totalScore}/${score.maxTotalScore}`,
                             'feedback',
                             score.agentName
                           );
@@ -24989,15 +24552,12 @@ _ ${req.handlingNotes || "Pending response"} _`;
                         <p className='text-[9px] text-slate-600 font-mono'>{new Date(r.createdAt).toLocaleString()}</p>
                       </div>
                       <p className='text-xs text-slate-400 whitespace-pre-line'>{r.text}</p>
-                      {((r.photos && r.photos.length > 0) || r.screenshot || r.attachments || (r.links && r.links.length > 0)) && (
+                      {((r.photos && r.photos.length > 0) || r.screenshot || r.imageUrl || r.attachments) && (
                         <div className="mt-2 text-left">
                           <AttachmentsDisplay 
-                            photos={[
-                              ...(r.photos && Array.isArray(r.photos) ? r.photos : []),
-                              ...(r.screenshot ? [r.screenshot] : []),
-                              ...(r.attachments && Array.isArray(r.attachments) ? r.attachments : []),
-                            ].filter(Boolean)}
-                            links={r.links || []} 
+                            photos={[...(r.photos || []), ...(r.screenshot ? [r.screenshot] : []), ...(r.imageUrl ? [r.imageUrl] : [])]} 
+                            attachments={r.attachments || []}
+                            links={[]} 
                           />
                         </div>
                       )}

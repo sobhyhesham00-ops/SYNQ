@@ -1770,11 +1770,6 @@ export const buildCaseClipboardPayload = (request: TabbyTamaraRequest): Clipboar
     .replace(/_/g, ' ')
     .toUpperCase();
   const paymentLink = request.paymentLink || 'No link generated';
-  const pricing = calculateTabbyTamaraPrice(request.priceWithoutTax || 0);
-  const amountTax = request.priceWithTax ||
-    (!isNaN(Number(request.priceWithoutTax))
-      ? (Number(request.priceWithoutTax) * 1.05).toFixed(2)
-      : '-');
 
   // Extract all attachments across different arrays
   let rawAttachments = [
@@ -1816,8 +1811,6 @@ export const buildCaseClipboardPayload = (request: TabbyTamaraRequest): Clipboar
     `File/ID Number: ${fileNum}`,
     `Phone Number: ${phone}`,
     `Clinic: ${clinic}`,
-    `Total Amount (+5%): AED ${amountTax}`,
-    `Base: AED ${request.priceWithoutTax || 0}`,
     `Source Channel: ${channel}`,
     `Assignee: ${assignee}`,
     `Current Status: ${workflowStatusLabel}`,
@@ -1839,8 +1832,6 @@ export const buildCaseClipboardPayload = (request: TabbyTamaraRequest): Clipboar
   html += `<p style="margin: 6px 0;"><strong>Reference:</strong> ${refCode}</p>`;
   html += `<p style="margin: 6px 0;"><strong>Patient:</strong> ${patient} | <strong>File/ID:</strong> ${fileNum}</p>`;
   html += `<p style="margin: 6px 0;"><strong>Phone:</strong> ${phone} | <strong>Clinic:</strong> ${clinic}</p>`;
-  html += `<p style="margin: 6px 0;"><strong>Total Amount (+5%):</strong> <span style="font-size: 1.1em; font-weight: bold; color: #b91c1c;">AED ${amountTax}</span></p>`;
-  html += `<p style="margin: 6px 0; font-size: 11px; color: #64748b;">Base: AED ${request.priceWithoutTax || 0}</p>`;
   html += `<p style="margin: 6px 0;"><strong>Channel:</strong> ${channel} | <strong>Assignee:</strong> ${assignee}</p>`;
   html += `<p style="margin: 6px 0;"><strong>Status:</strong> <span style="background-color: #dbeafe; color: #1e40af; font-weight: bold; padding: 2px 8px; border-radius: 6px; font-size: 11px;">${workflowStatusLabel}</span></p>`;
   

@@ -158,9 +158,6 @@ export const TabbyTamaraCard = ({
   const [paymentProofPhotos, setPaymentProofPhotos] = useState<string[]>([]);
   const [isClientIdUploading, setIsClientIdUploading] = useState(false);
   const [isPaymentProofUploading, setIsPaymentProofUploading] = useState(false);
-
-  const [tlFormPhotos, setTlFormPhotos] = useState<string[]>([]);
-  const [tlFormLinks, setTlFormLinks] = useState<string[]>([]);
   const [crmContactNotes, setCrmContactNotes] = useState("");
 
   // Sent To Partner Panel
@@ -376,18 +373,15 @@ export const TabbyTamaraCard = ({
       ? `\nTL Links:\n${extractLinks(request.tlLinks).map(normalizeUrl).join('\n')}` : '';
 
     const pricing = calculateTabbyTamaraPrice(request.priceWithoutTax || 0);
-    const amountTax = request.priceWithTax ||
-      (!isNaN(Number(request.priceWithoutTax))
-        ? (Number(request.priceWithoutTax) * 1.05).toFixed(2)
-        : '-');
 
     return [
       `[${request.platform?.toUpperCase() || 'N/A'}] Request - ${request.patientName || 'Unknown'}`,
       `Ref: ${formatCaseRef(request.id, 'tt_request', request.createdAt, request.caseRef)}`,
       `File: ${request.fileNumber || 'N/A'} | Phone: ${normalizePhone(request.phoneNumber)}`,
       `Clinic: ${request.clinicName || 'N/A'}`,
-      `Amount w/o Tax: AED ${request.priceWithoutTax || 0}`,
-      `Amount w/ Tax: AED ${amountTax}`,
+      `Entered Amount: ${pricing.priceBeforeFeeFormatted}`,
+      `5% Added: ${pricing.feeAmountFormatted}`,
+      `Final Amount: ${pricing.finalPriceFormatted}`,
       `Status: ${request.status}`,
       request.agentName ? `Agent: ${request.agentName}` : '',
       request.paymentLink ? `Payment Link: ${normalizeUrl(request.paymentLink)}` : '',
@@ -407,12 +401,9 @@ export const TabbyTamaraCard = ({
     html += `Clinic: ${request.clinicName || 'N/A'}<br/>`;
     
     const pricing = calculateTabbyTamaraPrice(request.priceWithoutTax || 0);
-    const amountTax = request.priceWithTax ||
-      (!isNaN(Number(request.priceWithoutTax))
-        ? (Number(request.priceWithoutTax) * 1.05).toFixed(2)
-        : '-');
-    html += `Final Price (incl. 5% VAT): AED ${amountTax}<br/>`;
-    html += `Pre-tax: AED ${request.priceWithoutTax || 0}<br/>`;
+    html += `Entered Amount: ${pricing.priceBeforeFeeFormatted}<br/>`;
+    html += `5% Added: ${pricing.feeAmountFormatted}<br/>`;
+    html += `Final Amount: ${pricing.finalPriceFormatted}<br/>`;
     html += `Status: ${request.status}<br/>`;
     
     if (request.agentName) html += `Agent: ${request.agentName}<br/>`;
@@ -517,10 +508,6 @@ export const TabbyTamaraCard = ({
   else if (req.platform === "one_time_payment") borderColor = "border-t-blue-500/80 shadow-[0_4px_24px_rgba(59,130,246,0.03)]";
 
   const pricing = calculateTabbyTamaraPrice(req.priceWithoutTax || 0);
-  const amountTax = req.priceWithTax ||
-    (!isNaN(Number(req.priceWithoutTax))
-      ? (Number(req.priceWithoutTax) * 1.05).toFixed(2)
-      : '-');
 
   return (
     <div id={`request-${req.id}`} className="bg-[#18181c] border border-slate-700/60 rounded-2xl shadow-xl shadow-black/40 hover:shadow-black/60 hover:border-slate-600/80 transition-all duration-200 flex flex-col relative overflow-hidden max-w-full group/card">
@@ -618,31 +605,15 @@ export const TabbyTamaraCard = ({
       </div>
       
       <div className='px-5 py-4 flex flex-wrap items-center justify-between border-b border-slate-700/40 bg-slate-800/30'>
-
-        {/* LEFT: Final price (with VAT) — the HERO number */}
-        <div className='flex flex-col'>
-          <span className='text-[9px] text-emerald-400/70 uppercase tracking-widest font-bold mb-0.5'>
-            Final Price (incl. 5% VAT)
-          </span>
-          <div className='flex items-baseline gap-1.5'>
-            <span className='text-sm text-emerald-400 font-bold'>AED</span>
-            <span className='text-3xl font-black text-white font-mono tracking-tight'>
-              {req.priceWithTax || amountTax}
-            </span>
-          </div>
+        <div className='flex items-baseline gap-1.5'>
+          <span className='text-sm text-slate-400 font-bold'>Entered</span>
+          <span className='text-3xl font-black text-slate-300 font-mono tracking-tight'>{pricing.priceBeforeFeeFormatted}</span>
+          {req.paymentLength && <span className="ml-[10px] text-[10px] text-slate-400 font-bold uppercase tracking-widest bg-slate-700/60 border border-slate-600 px-2 py-0.5 rounded-full">{req.paymentLength} Mo. Plan</span>}
         </div>
-
-        {/* RIGHT: Pre-tax price — secondary, muted */}
         <div className='text-right'>
-          <p className='text-[9px] text-slate-600 uppercase tracking-widest'>Before VAT</p>
-          <p className='text-sm font-bold text-slate-500 font-mono line-through decoration-slate-600'>
-            AED {req.priceWithoutTax || 0}
-          </p>
-          {req.paymentLength && (
-            <span className='text-[10px] text-slate-400 font-bold uppercase tracking-widest bg-slate-700/60 border border-slate-600 px-2 py-0.5 rounded-full mt-1 inline-block'>
-              {req.paymentLength} Mo. Plan
-            </span>
-          )}
+           <p className='text-[9px] text-indigo-400 uppercase tracking-widest font-bold'>Final Amount</p>
+           <p className='text-2xl font-black text-white font-mono tracking-tight'>{pricing.finalPriceFormatted}</p>
+           <p className='text-[9px] text-slate-500 uppercase tracking-widest mt-0.5'>Inc. 5% Fee ({pricing.feeAmountFormatted})</p>
         </div>
       </div>
 
@@ -813,27 +784,13 @@ export const TabbyTamaraCard = ({
                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">TL Links</span>
                    <div className="flex flex-col gap-2">
                      {extractLinks(req.tlLinks).map((link: string, idx: number) => (
-                       <a key={idx} href={normalizeUrl(link)} target="_blank" rel="noreferrer" className="flex gap-3 text-sm bg-black/40 border border-emerald-500/10 p-3 rounded-xl items-center text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/30 transition-colors">
+                       <a key={idx} href={normalizeUrl(link) || undefined} target="_blank" rel="noreferrer" className="flex gap-3 text-sm bg-black/40 border border-emerald-500/10 p-3 rounded-xl items-center text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/30 transition-colors">
                          <LinkIcon className="w-4 h-4 shrink-0 text-emerald-500/50" />
                          <span className="truncate">{link}</span>
                        </a>
                      ))}
                    </div>
                 </div>
-             )}
-
-             {(req.tlPhotos && req.tlPhotos.length > 0) && (
-                <div className='mt-2'>
-                  <p className='text-[9px] text-amber-400/70 uppercase tracking-widest font-bold mb-1'>TL Attachments</p>
-                  <AttachmentsDisplay photos={req.tlPhotos} links={[]} />
-                </div>
-             )}
-
-             {(req.tlSupportingLinks && req.tlSupportingLinks.length > 0) && (
-                <div className="mt-2 space-y-1">
-                   <span className="text-[9px] text-slate-400 uppercase tracking-widest font-bold block mb-1">TL Supporting Links</span>
-                   <AttachmentsDisplay photos={[]} links={req.tlSupportingLinks} />
-                 </div>
              )}
            </div>
         </div>
@@ -974,23 +931,11 @@ export const TabbyTamaraCard = ({
                </label>
                <input type="text" value={tlFintechLinks} onChange={(e) => setTlFintechLinks(e.target.value)} placeholder="https://link1.com, https://link2.com" className="w-full bg-slate-900 border border-slate-600/60 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-all" />
              </div>
-             <div className="border-t border-white/10 pt-3">
-               <p className="text-[9px] text-slate-400 uppercase tracking-widest font-bold mb-2">
-                 📎 Attach Payment Confirmation / ID (optional)
-               </p>
-               <MultiAttachmentUpload
-                 photos={tlFormPhotos}
-                 links={tlFormLinks}
-                 onPhotosChange={setTlFormPhotos}
-                 onLinksChange={setTlFormLinks}
-                 photosLabel="Payment screenshot, ID, or any supporting file"
-               />
-             </div>
              <div className="flex gap-3 justify-end pt-3 border-t border-slate-700/40">
-               <button onClick={() => { handleConfirmTabbyTamara(req.id, tlFintechPaymentLink, tlFintechNotes, tlFintechLinks, "rejected", tlFormPhotos, tlFormLinks); setTlFormPhotos([]); setTlFormLinks([]); setActiveFintechHandlingId(null); }} className="px-5 py-2.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 font-bold text-[10px] uppercase tracking-widest rounded-xl transition-colors flex items-center gap-1.5 shrink-0">
+               <button onClick={() => { handleConfirmTabbyTamara(req.id, tlFintechPaymentLink, tlFintechNotes, tlFintechLinks, "rejected"); setActiveFintechHandlingId(null); }} className="px-5 py-2.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 font-bold text-[10px] uppercase tracking-widest rounded-xl transition-colors flex items-center gap-1.5 shrink-0">
                  <Trash2 className="w-4 h-4" /> Reject
                </button>
-               <button onClick={() => { handleConfirmTabbyTamara(req.id, tlFintechPaymentLink, tlFintechNotes, tlFintechLinks, "confirmed", tlFormPhotos, tlFormLinks); setTlFormPhotos([]); setTlFormLinks([]); setActiveFintechHandlingId(null); }} className="px-6 py-2.5 bg-indigo-600 text-white hover:bg-indigo-500 font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all shadow-lg hover:shadow-indigo-500/20 flex items-center gap-1.5 w-full sm:w-auto justify-center">
+               <button onClick={() => { handleConfirmTabbyTamara(req.id, tlFintechPaymentLink, tlFintechNotes, tlFintechLinks, "confirmed"); setActiveFintechHandlingId(null); }} className="px-6 py-2.5 bg-indigo-600 text-white hover:bg-indigo-500 font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all shadow-lg hover:shadow-indigo-500/20 flex items-center gap-1.5 w-full sm:w-auto justify-center">
                  <CheckCircle2 className="w-4 h-4" /> Issue Link
                </button>
              </div>

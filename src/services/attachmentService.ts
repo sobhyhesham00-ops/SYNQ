@@ -18,65 +18,27 @@ export const processAttachments = async (
   attachments: FileAttachment[] | undefined,
   entityType: string,
   entityId: string,
-  replyOrRoot: string,
-  onProgress?: (progress: UploadProgress) => void
+  replyOrRoot: string
 ): Promise<FileAttachment[]> => {
   if (!attachments || attachments.length === 0) return [];
 
-  const uploadTimeoutMs = 15000; // 15s timeout for attachments
-
   const processed = await Promise.all(
     attachments.map(async (att) => {
+      // If there's no file object, it means it's either an old base64 attachment,
+      // or an already uploaded file. Keep it exactly as is (metadata only).
       if (!att.file) return att;
+
+      // Ensure a clean clone without the File object for Firestore
       const { file, ...attMeta } = att;
-
-      try {
-        const downloadUrl = await new Promise<string>((resolve, reject) => {
-          const timeoutId = setTimeout(() => {
-            reject(new Error(`Upload timed out after ${uploadTimeoutMs}ms`));
-          }, uploadTimeoutMs);
-
-          const { uploadTask } = createUploadTask(
-            file, entityType, entityId, replyOrRoot
-          );
-          uploadTask.on(
-            'state_changed',
-            (snapshot) => {
-              if (onProgress) {
-                onProgress({
-                  progress: (snapshot.bytesTransferred / snapshot.totalBytes) * 100,
-                  fileName: file.name,
-                  bytesTransferred: snapshot.bytesTransferred,
-                  totalBytes: snapshot.totalBytes,
-                });
-              }
-            }, 
-            (error) => {
-              clearTimeout(timeoutId);
-              reject(error);
-            },
-            async () => {
-              try {
-                const url = await getDownloadURL(uploadTask.snapshot.ref);
-                clearTimeout(timeoutId);
-                resolve(url);
-              } catch (e) {
-                clearTimeout(timeoutId);
-                reject(e);
-              }
-            }
-          );
-        });
-
-        return {
-          ...attMeta,
-          url: downloadUrl,
-          file: undefined,
-        };
-      } catch (err) {
-        console.error(`Failed to upload ${att.name}:`, err);
-        return { ...attMeta, file: undefined };
-      }
+      
+      const { uploadTask } = createUploadTask(file, entityType, entityId, replyOrRoot);
+      await uploadTask;
+      const downloadUrl = await getAttachmentDownloadURL(uploadTask);
+      
+      return {
+        ...attMeta,
+        url: downloadUrl
+      };
     })
   );
 

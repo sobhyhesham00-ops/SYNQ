@@ -519,7 +519,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
                   <div>
                     <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider leading-none mb-1">Trx value</p>
                     <span className="text-xs font-black text-slate-200 block truncate">
-                      {caseData.raw.priceWithTax || (!isNaN(Number(caseData.raw.priceWithoutTax)) ? (Number(caseData.raw.priceWithoutTax)*1.05).toFixed(2) : caseData.raw.priceWithoutTax)} AED <span className="text-[10px] text-slate-500 font-normal">(Base: {caseData.raw.priceWithoutTax} AED)</span>
+                      {caseData.raw.priceWithoutTax} AED
                     </span>
                   </div>
                 )}

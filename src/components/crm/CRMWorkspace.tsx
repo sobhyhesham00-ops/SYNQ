@@ -183,7 +183,7 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
   }, [cases]);
 
   const uniqueAssignees = useMemo(() => {
-    return Array.from(new Set(cases.map((c) => c.assignedToName))).filter(Boolean);
+    return Array.from(new Set(cases.map((c) => c.assignedToName))).filter((n): n is string => !!n);
   }, [cases]);
 
   // 4. Process Case filter logic

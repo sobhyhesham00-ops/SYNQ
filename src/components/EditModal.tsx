@@ -110,13 +110,9 @@ const EditModalContent = ({
     let finalPriceWithFee = data.finalPriceWithFee;
     let feeRate = data.feeRate;
     let currency = data.currency;
-    let priceWithTax = data.priceWithTax;
 
     if (e.target.name === "priceWithoutTax") {
       const pricing = calculateTabbyTamaraPrice(e.target.value);
-      priceWithTax = (!isNaN(Number(e.target.value)) && e.target.value.trim() !== ""
-        ? (Number(e.target.value) * 1.05).toFixed(2)
-        : e.target.value);
       if (pricing.valid) {
         feeRate = 0.05;
         feeAmount = pricing.feeAmount;
@@ -145,8 +141,7 @@ const EditModalContent = ({
         feeAmount,
         finalPriceWithFee,
         feeRate,
-        currency,
-        priceWithTax
+        currency
       },
     });
   };
