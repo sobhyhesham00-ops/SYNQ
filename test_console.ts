@@ -29,7 +29,17 @@ async function check() {
     });
 
     console.log('Navigating to app...');
-    await page.goto('http://localhost:3000', { waitUntil: 'networkidle0' });
+    await page.goto('http://localhost:3000', { waitUntil: 'networkidle2' });
+    
+    // Check if there is anything rendered
+    const bodyContent = await page.evaluate(() => document.body.innerHTML);
+    if (!bodyContent || bodyContent.trim() === '<div id="root"></div>' || bodyContent.trim() === '') {
+       console.log('APP IS BLANK', bodyContent);
+    } else {
+       console.log('APP HTML LENGTH:', bodyContent.length);
+       // grab up to first 200 chars
+       console.log('START OF HTML:', bodyContent.substring(0, 500));
+    }
     
     console.log('--- ERRORS FOUND ---');
     if (errors.length > 0) {

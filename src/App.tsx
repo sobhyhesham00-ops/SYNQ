@@ -20,8 +20,10 @@ import {
 } from "firebase/firestore";
 import { 
   db, 
+  auth,
   initAuth, 
   googleSignIn, 
+  signInAnonymously,
   getAccessToken, 
   logout,
   wrappedOnSnapshot as onSnapshot,
@@ -1423,6 +1425,22 @@ export default function App() {
     } else {
       localStorage.removeItem("sched_current_user");
     }
+  }, [currentUser]);
+
+  // Ensure firestore.rules getUserRole() has matching UID
+  useEffect(() => {
+    const unsub = auth.onAuthStateChanged((user) => {
+      if (user && currentUser) {
+        setDoc(doc(db, "users", user.uid), {
+          id: user.uid,
+          name: currentUser.name,
+          role: currentUser.role
+        }, { merge: true }).catch(err => {
+          console.warn("Failed to map user role:", err);
+        });
+      }
+    });
+    return () => unsub();
   }, [currentUser]);
 
   // Real-time Firestore Sync with [currentUser] dependency for Schedules, Notifications, Orders, and Todos as requested

@@ -12,7 +12,7 @@ import {
   getDoc as firestoreGetDoc,
   connectFirestoreEmulator
 } from "firebase/firestore";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, connectAuthEmulator } from "firebase/auth";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, connectAuthEmulator, signInAnonymously } from "firebase/auth";
 import { getStorage, connectStorageEmulator } from "firebase/storage";
 import firebaseConfigFromJson from "../firebase-applet-config.json";
 
@@ -132,6 +132,7 @@ googleProvider.addScope('https://www.googleapis.com/auth/drive.metadata.readonly
 let cachedAccessToken: string | null = null;
 let isSigningIn = false;
 
+export { signInAnonymously };
 export const initAuth = (onSuccess: (user: any, token: string | null) => void, onFail: () => void) => {
   return auth.onAuthStateChanged(async (user) => {
     if (user) {

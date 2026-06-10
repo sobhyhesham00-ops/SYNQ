@@ -1,29 +1,11 @@
 import './patch_console';
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
-
-import React from 'react';
-const originalCreateElement = React.createElement;
-(React as any).createElement = function(...args: any[]) {
-    if (args[2] !== undefined) {
-        // recursively check children
-        const cleanChildren = (child: any): any => {
-            if (typeof child === 'number' && isNaN(child)) return 0;
-            if (Array.isArray(child)) return child.map(cleanChildren);
-            return child;
-        };
-        for (let i = 2; i < args.length; i++) {
-            args[i] = cleanChildren(args[i]);
-        }
-    }
-    return originalCreateElement.apply(null, args as any);
-};
-
-import App from './App.tsx'
-;
+import App from './App.tsx';
 import './index.css';
 
 const originalConsoleError = console.error;
+
 console.error = function(...args) {
   if (typeof args[0] === 'string' && args[0].includes('Received NaN')) {
      const stack = args.join('\n');
