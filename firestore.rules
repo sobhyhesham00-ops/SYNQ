@@ -104,7 +104,7 @@ service cloud.firestore {
     match /todos/{todoId} { allow read, write: if isSignedIn(); }
     match /qa_scores/{scoreId} { allow read, write: if isSignedIn(); }
     match /system/{docId} { allow read, write: if isSignedIn(); }
-    match /announcements/{annId} { allow read: if isSignedIn(); allow write: if isSignedIn() && isSuperAdmin(); }
+    match /announcements/{annId} { allow read: if isSignedIn(); allow write: if isSignedIn(); }
     match /tl_feedbacks/{fbId} { allow read, write: if isSignedIn(); }
     match /schedules/{schedId} { allow read, write: if isSignedIn(); }
     match /orders/{orderId} { allow read, write: if isSignedIn(); }
