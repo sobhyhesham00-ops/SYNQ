@@ -1292,7 +1292,12 @@ export default function App() {
             u?.name?.toLowerCase() === prevUser.name.toLowerCase(),
         );
         if (liveUserInfo) {
-          return { ...prevUser, ...liveUserInfo };
+          const isSame = Object.keys(liveUserInfo).every(
+            (key) => JSON.stringify((liveUserInfo as any)[key]) === JSON.stringify((prevUser as any)[key])
+          );
+          if (!isSame) {
+            return { ...prevUser, ...liveUserInfo };
+          }
         }
         return prevUser;
       });
@@ -1425,7 +1430,7 @@ export default function App() {
     } else {
       localStorage.removeItem("sched_current_user");
     }
-  }, [currentUser]);
+  }, [JSON.stringify(currentUser)]);
 
   // Ensure firestore.rules getUserRole() has matching UID
   useEffect(() => {
@@ -1441,7 +1446,7 @@ export default function App() {
       }
     });
     return () => unsub();
-  }, [currentUser]);
+  }, [currentUser?.id, currentUser?.role, currentUser?.name]);
 
   // Real-time Firestore Sync with [currentUser] dependency for Schedules, Notifications, Orders, and Todos as requested
   useEffect(() => {
@@ -1545,7 +1550,7 @@ export default function App() {
       unsubOrders();
       unsubTodos();
     };
-  }, [currentUser]);
+  }, [currentUser?.id, currentUser?.role]);
 
   const isMasterAdmin = currentUser
     ? currentUser?.name?.toLowerCase() === "hesham sobhy" ||
@@ -3014,7 +3019,7 @@ ${pageText}
     if (currentUser) {
       setActiveTab("dashboard");
     }
-  }, [currentUser]);
+  }, [currentUser?.id]);
 
   // Request Form States
   const [swapDate, setSwapDate] = useState("");
