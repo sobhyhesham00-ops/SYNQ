@@ -1432,6 +1432,23 @@ export default function App() {
     }
   }, [JSON.stringify(currentUser)]);
 
+  // Establish Firebase Auth session synchronously for credential logins to satisfy security rules
+  useEffect(() => {
+    if (currentUser) {
+      const syncFirebaseAuth = async () => {
+        if (!auth.currentUser) {
+          try {
+            await signInAnonymously(auth);
+            console.log("[Firebase Auth] Synchronized anonymous session for credential login.");
+          } catch (e) {
+            console.error("[Firebase Auth] Failed to establish anonymous session:", e);
+          }
+        }
+      };
+      syncFirebaseAuth();
+    }
+  }, [currentUser]);
+
   // Ensure firestore.rules getUserRole() has matching UID
   useEffect(() => {
     const unsub = auth.onAuthStateChanged((user) => {
