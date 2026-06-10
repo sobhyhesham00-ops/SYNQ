@@ -628,6 +628,7 @@ export default function App() {
   const [showKillSwitchPassword, setShowKillSwitchPassword] =
     useState<boolean>(false);
   const [killSwitchCar, setKillSwitchCar] = useState<string>("");
+  const [authError, setAuthError] = useState<string | null>(null);
 
   // Live clock state for real-time timers (updates once a second)
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
@@ -908,112 +909,155 @@ export default function App() {
     };
     window.addEventListener("storage", handleStorage);
 
-    // 2. Real-time Firestore Sync via Collections!
-    const unsubInquiries = onSnapshot(collection(db, "inquiries"), (snap) => {
-      const arr = snap.docs.map((d) => d.data() as Inquiry);
-      arr.sort(
-        (a, b) =>
-          new Date(b.createdAt || 0).getTime() -
-          new Date(a.createdAt || 0).getTime(),
-      );
-      setInquiries(arr);
-      setStorageItem("sched_inquiries", arr);
-    });
+    // Declare all unsub functions initially as no-op to allow safe synchronous cleanup
+    let unsubInquiries = () => {};
+    let unsubQa = () => {};
+    let unsubQATemplate = () => {};
+    let unsubTT = () => {};
+    let unsubComp = () => {};
+    let unsubComms = () => {};
+    let unsubReq = () => {};
+    let unsubTime = () => {};
+    let unsubSched = () => {};
+    let unsubAnnouncements = () => {};
+    let unsubAppStatus = () => {};
+    let unsubSupp = () => {};
+    let unsubCases = () => {};
+    let unsubOrders = () => {};
+    let unsubAgents = () => {};
+    let unsubMeta = () => {};
+    let unsubDir = () => {};
+    let unsubDirHeaders = () => {};
+    let unsubRosterPub = () => {};
+    let unsubCredentials = () => {};
+    let unsubLockedAccounts = () => {};
+    let unsubFailedAttempts = () => {};
+    let unsubNotifs = () => {};
+    let unsubFeedbacks = () => {};
+    let unsubAppVersion = () => {};
+    let unsubTodos = () => {};
+    let unsubUsers = () => {};
 
-    const unsubQa = onSnapshot(collection(db, "qa_scores"), (snap) => {
-      const arr = snap.docs.map((d) => d.data() as QAScore);
-      arr.sort(
-        (a, b) =>
-          new Date(b.createdAt || 0).getTime() -
-          new Date(a.createdAt || 0).getTime(),
-      );
-      setQaScores(arr);
-      setStorageItem("sched_qa_scores", arr);
-    });
-
-    const unsubQATemplate = onSnapshot(
-      doc(db, "system", "sched_qa_template"),
-      (snap) => {
-        if (snap.exists()) {
-          const data = snap.data().data;
-          setQaTemplate(data);
-          setStorageItem("sched_qa_template", data);
+    const initializeListeners = async () => {
+      // STEP 1: Establish Firebase Auth first
+      if (!auth.currentUser) {
+        try {
+          await signInAnonymously(auth);
+          console.log("[Auth] Anonymous session established for Firestore access");
+          setAuthError(null);
+        } catch (authErr: any) {
+          console.warn("[Auth] Failed to establish anonymous session:", authErr);
+          setAuthError(authErr?.message || String(authErr));
+          return; // Skip initiating Firestore snap subscriptions when unauthenticated
         }
-      },
-    );
-    const unsubTT = onSnapshot(collection(db, "tt_requests"), (snap) => {
-      const arr = snap.docs.map((d) => d.data() as TabbyTamaraRequest);
-      arr.sort(
-        (a, b) =>
-          new Date(b.createdAt || 0).getTime() -
-          new Date(a.createdAt || 0).getTime(),
-      );
-      setTabbyTamaraRequests(arr);
-      setStorageItem("sched_tabby_tamara", arr);
-    });
-    const unsubComp = onSnapshot(collection(db, "tt_complaints"), (snap) => {
-      const arr = snap.docs.map((d) => d.data() as TabbyTamaraComplaint);
-      arr.sort(
-        (a, b) =>
-          new Date(b.createdAt || 0).getTime() -
-          new Date(a.createdAt || 0).getTime(),
-      );
-      setTabbyTamaraComplaints(arr);
-      setStorageItem("sched_tt_complaints", arr);
-    });
-    const unsubComms = onSnapshot(collection(db, "client_comms"), (snap) => {
-      const arr = snap.docs.map((d) => d.data() as ClientCommunicationRequest);
-      arr.sort(
-        (a, b) =>
-          new Date(b.createdAt || 0).getTime() -
-          new Date(a.createdAt || 0).getTime(),
-      );
-      setClientComms(arr);
-      setStorageItem("sched_client_comms", arr);
-    });
-    const unsubReq = onSnapshot(
-      collection(db, "scheduling_requests"),
-      (snap) => {
-        const arr = snap.docs.map((d) => d.data() as SchedulingRequest);
+      }
+
+      // STEP 2: THEN start all Firestore listeners
+      unsubInquiries = onSnapshot(collection(db, "inquiries"), (snap) => {
+        const arr = snap.docs.map((d) => d.data() as Inquiry);
         arr.sort(
           (a, b) =>
             new Date(b.createdAt || 0).getTime() -
             new Date(a.createdAt || 0).getTime(),
         );
-        setRequests(arr);
-        setStorageItem("sched_requests", arr);
-      },
-    );
-    const unsubTime = onSnapshot(
-      collection(db, "timelogs"),
-      (snap) => {
-        console.log("Got timelogs snapshot, docs =", snap.size);
-        const arr = snap.docs.map((d) => d.data() as TimeLog);
-        arr.sort((a, b) => {
-          const d1 = a.date ? new Date(a.date).getTime() : 0;
-          const d2 = b.date ? new Date(b.date).getTime() : 0;
-          const dateDiff = (isNaN(d2) ? 0 : d2) - (isNaN(d1) ? 0 : d1);
-          if (dateDiff !== 0) return dateDiff;
-          const tsA = parseInt((a.id || "").split("_")[1] || "0", 10);
-          const tsB = parseInt((b.id || "").split("_")[1] || "0", 10);
-          if (!isNaN(tsA) && !isNaN(tsB)) {
-            return tsB - tsA;
+        setInquiries(arr);
+        setStorageItem("sched_inquiries", arr);
+      });
+
+      unsubQa = onSnapshot(collection(db, "qa_scores"), (snap) => {
+        const arr = snap.docs.map((d) => d.data() as QAScore);
+        arr.sort(
+          (a, b) =>
+            new Date(b.createdAt || 0).getTime() -
+            new Date(a.createdAt || 0).getTime(),
+        );
+        setQaScores(arr);
+        setStorageItem("sched_qa_scores", arr);
+      });
+
+      unsubQATemplate = onSnapshot(
+        doc(db, "system", "sched_qa_template"),
+        (snap) => {
+          if (snap.exists()) {
+            const data = snap.data().data;
+            setQaTemplate(data);
+            setStorageItem("sched_qa_template", data);
           }
-          return (b.id || "").localeCompare(a.id || "");
-        });
-        setTimeLogs(arr);
-        setStorageItem("sched_time_logs", arr);
-      },
-      (error) => {
-        if (error && error.code === "resource-exhausted") return;
-        console.error("TimeLogs Sync Error:", error);
-        toast.error("Sync error on timelogs. They may not appear updated.");
-      },
-    );
-    const unsubSched = () => {};
-    let isAnnouncementsInitialized = false;
-    const unsubAnnouncements = onSnapshot(
-      collection(db, "announcements"),
+        },
+      );
+      unsubTT = onSnapshot(collection(db, "tt_requests"), (snap) => {
+        const arr = snap.docs.map((d) => d.data() as TabbyTamaraRequest);
+        arr.sort(
+          (a, b) =>
+            new Date(b.createdAt || 0).getTime() -
+            new Date(a.createdAt || 0).getTime(),
+        );
+        setTabbyTamaraRequests(arr);
+        setStorageItem("sched_tabby_tamara", arr);
+      });
+      unsubComp = onSnapshot(collection(db, "tt_complaints"), (snap) => {
+        const arr = snap.docs.map((d) => d.data() as TabbyTamaraComplaint);
+        arr.sort(
+          (a, b) =>
+            new Date(b.createdAt || 0).getTime() -
+            new Date(a.createdAt || 0).getTime(),
+        );
+        setTabbyTamaraComplaints(arr);
+        setStorageItem("sched_tt_complaints", arr);
+      });
+      unsubComms = onSnapshot(collection(db, "client_comms"), (snap) => {
+        const arr = snap.docs.map((d) => d.data() as ClientCommunicationRequest);
+        arr.sort(
+          (a, b) =>
+            new Date(b.createdAt || 0).getTime() -
+            new Date(a.createdAt || 0).getTime(),
+        );
+        setClientComms(arr);
+        setStorageItem("sched_client_comms", arr);
+      });
+      unsubReq = onSnapshot(
+        collection(db, "scheduling_requests"),
+        (snap) => {
+          const arr = snap.docs.map((d) => d.data() as SchedulingRequest);
+          arr.sort(
+            (a, b) =>
+              new Date(b.createdAt || 0).getTime() -
+              new Date(a.createdAt || 0).getTime(),
+          );
+          setRequests(arr);
+          setStorageItem("sched_requests", arr);
+        },
+      );
+      unsubTime = onSnapshot(
+        collection(db, "timelogs"),
+        (snap) => {
+          console.log("Got timelogs snapshot, docs =", snap.size);
+          const arr = snap.docs.map((d) => d.data() as TimeLog);
+          arr.sort((a, b) => {
+            const d1 = a.date ? new Date(a.date).getTime() : 0;
+            const d2 = b.date ? new Date(b.date).getTime() : 0;
+            const dateDiff = (isNaN(d2) ? 0 : d2) - (isNaN(d1) ? 0 : d1);
+            if (dateDiff !== 0) return dateDiff;
+            const tsA = parseInt((a.id || "").split("_")[1] || "0", 10);
+            const tsB = parseInt((b.id || "").split("_")[1] || "0", 10);
+            if (!isNaN(tsA) && !isNaN(tsB)) {
+              return tsB - tsA;
+            }
+            return (b.id || "").localeCompare(a.id || "");
+          });
+          setTimeLogs(arr);
+          setStorageItem("sched_time_logs", arr);
+        },
+        (error) => {
+          if (error && error.code === "resource-exhausted") return;
+          console.error("TimeLogs Sync Error:", error);
+          toast.error("Sync error on timelogs. They may not appear updated.");
+        },
+      );
+      unsubSched = () => {};
+      let isAnnouncementsInitialized = false;
+      unsubAnnouncements = onSnapshot(
+        collection(db, "announcements"),
       (snap) => {
         console.log("Got announcement snapshot, document size:", snap.size);
         const arr = snap.docs.map((d) => d.data() as Announcement);
@@ -1096,212 +1140,215 @@ export default function App() {
         );
       },
     );
-    const unsubAppStatus = onSnapshot(
-      doc(db, "system", "app_status"),
-      (snap) => {
-        if (snap.exists() && snap.data().isKilled === true) {
-          setIsAppKilled(true);
-        } else {
-          setIsAppKilled(false);
-        }
-      },
-    );
-
-    const unsubSupp = onSnapshot(
-      doc(db, "system", "sched_support_assignments"),
-      (snap) => {
-        if (snap.exists()) {
-          const data = snap.data().data;
-          setSupportAssignments(data);
-          setStorageItem("sched_support_assignments", data);
-        }
-      },
-    );
-    const unsubCases = onSnapshot(collection(db, "cases"), (snap) => {
-      const arr = snap.docs.map((d) => d.data() as CaseRecord);
-      arr.sort(
-        (a, b) =>
-          new Date(b.createdAt || 0).getTime() -
-          new Date(a.createdAt || 0).getTime(),
+      unsubAppStatus = onSnapshot(
+        doc(db, "system", "app_status"),
+        (snap) => {
+          if (snap.exists() && snap.data().isKilled === true) {
+            setIsAppKilled(true);
+          } else {
+            setIsAppKilled(false);
+          }
+        },
       );
-      setCases(arr);
-      setStorageItem("sched_cases", arr);
-    });
-    const unsubOrders = () => {};
-    const unsubAgents = onSnapshot(
-      doc(db, "system", "sched_agents_list"),
-      (snap) => {
-        // Intentionally empty or minimal - we prefer the dynamic list from unsubUsers/directory
-      },
-    );
-    const unsubMeta = onSnapshot(
-      doc(db, "system", "sched_agent_meta"),
-      (snap) => {
-        if (snap.exists()) {
-          const data = snap.data().data as Record<
-            string,
-            { roleType: string; tlName: string }
-          >;
-          setAgentMeta(data);
-          setStorageItem("sched_agent_meta", data);
-        }
-      },
-    );
-    const unsubDir = onSnapshot(
-      doc(db, "system", "sched_agent_directory"),
-      (snap) => {
-        if (snap.exists()) {
-          const data = snap.data().data as AgentDirectoryRow[];
-          setAgentDirectory(data);
-          setStorageItem("sched_agent_directory", data);
-        }
-      },
-    );
-    const unsubDirHeaders = onSnapshot(
-      doc(db, "system", "sched_agent_directory_headers"),
-      (snap) => {
-        if (snap.exists()) {
-          const data = snap.data().data as string[];
-          setDirectoryHeaders(data);
-          setStorageItem("sched_agent_directory_headers", data);
-        }
-      },
-    );
 
-    const unsubRosterPub = onSnapshot(
-      doc(db, "system", "sched_roster_published"),
-      (snap) => {
-        if (snap.exists()) {
-          const data = snap.data().data as boolean;
-          setIsRosterPublished(data);
-          setStorageItem("sched_roster_published", data);
-        }
-      },
-    );
-
-    const unsubCredentials = onSnapshot(
-      doc(db, "system", "sched_credentials"),
-      (snap) => {
-        if (snap.exists()) {
-          const data = snap.data().data || {};
-          setCredentials(data);
-          setStorageItem("sched_credentials", data);
-        }
-      },
-    );
-
-    const unsubLockedAccounts = onSnapshot(
-      doc(db, "system", "sched_locked_accounts"),
-      (snap) => {
-        if (snap.exists()) {
-          const data = snap.data().data || [];
-          setLockedAccounts(data);
-          setStorageItem("sched_locked_accounts", data);
-        }
-      },
-    );
-
-    const unsubFailedAttempts = onSnapshot(
-      doc(db, "system", "sched_failed_attempts"),
-      (snap) => {
-        if (snap.exists()) {
-          const data = snap.data().data || {};
-          setFailedAttempts(data);
-          setStorageItem("sched_failed_attempts", data);
-        }
-      },
-    );
-
-    const unsubNotifs = () => {};
-
-    const unsubFeedbacks = onSnapshot(
-      collection(db, "tl_feedbacks"),
-      (snap) => {
-        const arr = snap.docs.map((d) => d.data() as TlFeedback);
+      unsubSupp = onSnapshot(
+        doc(db, "system", "sched_support_assignments"),
+        (snap) => {
+          if (snap.exists()) {
+            const data = snap.data().data;
+            setSupportAssignments(data);
+            setStorageItem("sched_support_assignments", data);
+          }
+        },
+      );
+      unsubCases = onSnapshot(collection(db, "cases"), (snap) => {
+        const arr = snap.docs.map((d) => d.data() as CaseRecord);
         arr.sort(
           (a, b) =>
             new Date(b.createdAt || 0).getTime() -
             new Date(a.createdAt || 0).getTime(),
         );
-        setTlFeedbacks(arr);
-        setStorageItem("sched_tl_feedbacks", arr);
-      },
-    );
+        setCases(arr);
+        setStorageItem("sched_cases", arr);
+      });
+      unsubOrders = () => {};
+      unsubAgents = onSnapshot(
+        doc(db, "system", "sched_agents_list"),
+        (snap) => {
+          // Intentionally empty or minimal - we prefer the dynamic list from unsubUsers/directory
+        },
+      );
+      unsubMeta = onSnapshot(
+        doc(db, "system", "sched_agent_meta"),
+        (snap) => {
+          if (snap.exists()) {
+            const data = snap.data().data as Record<
+              string,
+              { roleType: string; tlName: string }
+            >;
+            setAgentMeta(data);
+            setStorageItem("sched_agent_meta", data);
+          }
+        },
+      );
+      unsubDir = onSnapshot(
+        doc(db, "system", "sched_agent_directory"),
+        (snap) => {
+          if (snap.exists()) {
+            const data = snap.data().data as AgentDirectoryRow[];
+            setAgentDirectory(data);
+            setStorageItem("sched_agent_directory", data);
+          }
+        },
+      );
+      unsubDirHeaders = onSnapshot(
+        doc(db, "system", "sched_agent_directory_headers"),
+        (snap) => {
+          if (snap.exists()) {
+            const data = snap.data().data as string[];
+            setDirectoryHeaders(data);
+            setStorageItem("sched_agent_directory_headers", data);
+          }
+        },
+      );
 
-    const unsubAppVersion = onSnapshot(
-      doc(db, "system", "app_version"),
-      (snap) => {
-        if (snap.exists()) {
-          const remoteVersion = snap.data().version || 0;
-          if (CURRENT_APP_VERSION > remoteVersion) {
-            setDoc(
-              doc(db, "system", "app_version"),
-              { version: CURRENT_APP_VERSION },
-              { merge: true },
-            ).catch(console.error);
-          } else if (remoteVersion > CURRENT_APP_VERSION) {
-            // Safeguard against infinite reload loops
-            const key = `reloaded_for_version_${remoteVersion}`;
-            if (!sessionStorage.getItem(key)) {
-              sessionStorage.setItem(key, "true");
-              toast.loading(
-                "A new system update was published! Refreshing to apply...",
-              );
-              setTimeout(() => {
-                if ("caches" in window) {
-                  caches
-                    .keys()
-                    .then((names) => {
-                      for (let name of names) caches.delete(name);
-                    })
-                    .catch((e) =>
-                      console.error("Cache flush on reload error:", e),
-                    );
-                }
-                window.location.reload();
-              }, 3000);
-            } else {
-              console.warn(
-                `Already attempted reload for version ${remoteVersion}, but local bundle version is still ${CURRENT_APP_VERSION}. Suppressing loop to let user open the app.`,
-              );
+      unsubRosterPub = onSnapshot(
+        doc(db, "system", "sched_roster_published"),
+        (snap) => {
+          if (snap.exists()) {
+            const data = snap.data().data as boolean;
+            setIsRosterPublished(data);
+            setStorageItem("sched_roster_published", data);
+          }
+        },
+      );
+
+      unsubCredentials = onSnapshot(
+        doc(db, "system", "sched_credentials"),
+        (snap) => {
+          if (snap.exists()) {
+            const data = snap.data().data || {};
+            setCredentials(data);
+            setStorageItem("sched_credentials", data);
+          }
+        },
+      );
+
+      unsubLockedAccounts = onSnapshot(
+        doc(db, "system", "sched_locked_accounts"),
+        (snap) => {
+          if (snap.exists()) {
+            const data = snap.data().data || [];
+            setLockedAccounts(data);
+            setStorageItem("sched_locked_accounts", data);
+          }
+        },
+      );
+
+      unsubFailedAttempts = onSnapshot(
+        doc(db, "system", "sched_failed_attempts"),
+        (snap) => {
+          if (snap.exists()) {
+            const data = snap.data().data || {};
+            setFailedAttempts(data);
+            setStorageItem("sched_failed_attempts", data);
+          }
+        },
+      );
+
+      unsubNotifs = () => {};
+
+      unsubFeedbacks = onSnapshot(
+        collection(db, "tl_feedbacks"),
+        (snap) => {
+          const arr = snap.docs.map((d) => d.data() as TlFeedback);
+          arr.sort(
+            (a, b) =>
+              new Date(b.createdAt || 0).getTime() -
+              new Date(a.createdAt || 0).getTime(),
+          );
+          setTlFeedbacks(arr);
+          setStorageItem("sched_tl_feedbacks", arr);
+        },
+      );
+
+      unsubAppVersion = onSnapshot(
+        doc(db, "system", "app_version"),
+        (snap) => {
+          if (snap.exists()) {
+            const remoteVersion = snap.data().version || 0;
+            if (CURRENT_APP_VERSION > remoteVersion) {
+              setDoc(
+                doc(db, "system", "app_version"),
+                { version: CURRENT_APP_VERSION },
+                { merge: true },
+              ).catch(console.error);
+            } else if (remoteVersion > CURRENT_APP_VERSION) {
+              // Safeguard against infinite reload loops
+              const key = `reloaded_for_version_${remoteVersion}`;
+              if (!sessionStorage.getItem(key)) {
+                sessionStorage.setItem(key, "true");
+                toast.loading(
+                  "A new system update was published! Refreshing to apply...",
+                );
+                setTimeout(() => {
+                  if ("caches" in window) {
+                    caches
+                      .keys()
+                      .then((names) => {
+                        for (let name of names) caches.delete(name);
+                      })
+                      .catch((e) =>
+                        console.error("Cache flush on reload error:", e),
+                      );
+                  }
+                  window.location.reload();
+                }, 3000);
+              } else {
+                console.warn(
+                  `Already attempted reload for version ${remoteVersion}, but local bundle version is still ${CURRENT_APP_VERSION}. Suppressing loop to let user open the app.`,
+                );
+              }
+            }
+          } else {
+            setDoc(doc(db, "system", "app_version"), {
+              version: CURRENT_APP_VERSION,
+            }).catch(console.error);
+          }
+        },
+      );
+
+      unsubTodos = () => {};
+
+      unsubUsers = onSnapshot(collection(db, "users"), (snap) => {
+        const dbUsers = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as any);
+        setRegisteredUsers(dbUsers);
+
+        // Optionally update currentUser if their document was updated
+        setCurrentUser((prevUser) => {
+          if (!prevUser) return null;
+          const liveUserInfo = dbUsers.find(
+            (u) =>
+              u &&
+              u.name &&
+              prevUser &&
+              prevUser.name &&
+              u?.name?.toLowerCase() === prevUser.name.toLowerCase(),
+          );
+          if (liveUserInfo) {
+            const isSame = Object.keys(liveUserInfo).every(
+              (key) => JSON.stringify((liveUserInfo as any)[key]) === JSON.stringify((prevUser as any)[key])
+            );
+            if (!isSame) {
+              return { ...prevUser, ...liveUserInfo };
             }
           }
-        } else {
-          setDoc(doc(db, "system", "app_version"), {
-            version: CURRENT_APP_VERSION,
-          }).catch(console.error);
-        }
-      },
-    );
-
-    const unsubTodos = () => {};
-
-    const unsubUsers = onSnapshot(collection(db, "users"), (snap) => {
-      const dbUsers = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as any);
-      setRegisteredUsers(dbUsers);
-
-      // Optionally update currentUser if their document was updated
-      setCurrentUser((prevUser) => {
-        if (!prevUser) return null;
-        const liveUserInfo = dbUsers.find(
-          (u) =>
-            u &&
-            u.name &&
-            prevUser &&
-            prevUser.name &&
-            u?.name?.toLowerCase() === prevUser.name.toLowerCase(),
-        );
-        if (liveUserInfo) {
-          const isSame = Object.keys(liveUserInfo).every(
-            (key) => JSON.stringify((liveUserInfo as any)[key]) === JSON.stringify((prevUser as any)[key])
-          );
-          if (!isSame) {
-            return { ...prevUser, ...liveUserInfo };
-          }
-        }
-        return prevUser;
+          return prevUser;
+        });
       });
-    });
+    };
+
+    initializeListeners();
 
     return () => {
       unsubTodos();
@@ -1440,8 +1487,10 @@ export default function App() {
           try {
             await signInAnonymously(auth);
             console.log("[Firebase Auth] Synchronized anonymous session for credential login.");
-          } catch (e) {
-            console.error("[Firebase Auth] Failed to establish anonymous session:", e);
+            setAuthError(null);
+          } catch (e: any) {
+            console.warn("[Firebase Auth] Failed to establish anonymous session:", e);
+            setAuthError(e?.message || String(e));
           }
         }
       };
@@ -5592,11 +5641,23 @@ ${result.errors.slice(0, 5).join("\n")}${
       }
       const inquiryId = safeId;
       
-      const processedAttachments = await processAttachments(
-        inquiryAttachments,
-        "inquiry",
-        inquiryId,
-        "root"
+      // Skip Firebase Storage upload for inquiries
+      // Photos are already base64 via FileReader (inquiryPhotos + activeScreenshot)
+      // inquiryAttachments with File objects are converted to base64 inline:
+      const processedAttachments = await Promise.all(
+        (inquiryAttachments || []).map(async (att: any) => {
+          if (!att.file) return att; // already processed
+          return new Promise<any>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve({
+              ...att,
+              url: e.target?.result as string,
+              file: undefined,
+            });
+            reader.onerror = () => resolve({ ...att, file: undefined }); // skip on error
+            reader.readAsDataURL(att.file);
+          });
+        })
       );
 
       const newInquiry: Inquiry = {
@@ -7614,6 +7675,82 @@ ${ttNotes}`
       <Toaster theme="dark" position="bottom-right" />
       <AIChatWidget />
       <EnvironmentBadge currentUser={currentUser} setCurrentUser={setCurrentUser} />
+
+      {authError && (
+        <div className="z-50 mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 mt-4 animate-fade-in">
+          <div className="bg-rose-500/10 border border-rose-500/30 backdrop-blur-md rounded-2xl p-6 text-slate-100 shadow-xl space-y-4">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-rose-500/20 rounded-xl text-rose-400 shrink-0">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-lg font-bold text-rose-400">
+                  Firebase Anonymous Authentication Required
+                </h2>
+                <p className="text-sm text-slate-300">
+                  The application utilizes Firebase Anonymous sign-in to securely synchronize calendars, rosters, inquiries, and schedules. However, anonymous authentication is currently disabled in your Firebase project (<code className="bg-white/10 px-1.5 py-0.5 rounded text-rose-300 text-xs">operating-nebula-7sjh2</code>).
+                </p>
+              </div>
+            </div>
+            
+            <div className="bg-slate-900/40 rounded-xl p-4 border border-white/5 space-y-3">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
+                How to Enable in Firebase Console:
+              </p>
+              <ol className="list-decimal list-inside text-sm text-slate-300 space-y-2">
+                <li>
+                  Open the{" "}
+                  <a
+                    href="https://console.firebase.google.com/project/operating-nebula-7sjh2/authentication/providers"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-indigo-400 hover:text-indigo-300 underline font-medium inline-flex items-center gap-1"
+                  >
+                    Firebase Auth Providers Console <ExternalLink className="w-3.5 h-3.5 inline" />
+                  </a>.
+                </li>
+                <li>
+                  Click on the <strong className="text-white">Sign-in method</strong> tab (if not redirected automatically).
+                </li>
+                <li>
+                  Click <strong className="text-white">Add new provider</strong> under Sign-in providers, select <strong className="text-white">Anonymous</strong>, toggle <strong className="text-white">Enable</strong>, and click <strong className="text-white">Save</strong>.
+                </li>
+                <li>
+                  Once enabled, click the button below to retry or refresh this page to establish a secure database session.
+                </li>
+              </ol>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <button
+                onClick={async () => {
+                  try {
+                    await signInAnonymously(auth);
+                    console.log("[Auth] Session recovered on click.");
+                    setAuthError(null);
+                    toast.success("Successfully authenticated anonymously with Firebase!");
+                  } catch (err: any) {
+                    console.warn("Retried authentication failed:", err);
+                    setAuthError(err?.message || String(err));
+                    toast.error("Authentication failed. Ensure Anonymous provider is enabled.");
+                  }
+                }}
+                className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white font-semibold text-sm rounded-xl shadow-lg shadow-rose-500/25 transition-all active:scale-95 cursor-pointer"
+              >
+                Retry Authentication
+              </button>
+              <a
+                href="https://console.firebase.google.com/project/operating-nebula-7sjh2/authentication/providers"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-semibold text-sm rounded-xl border border-white/10 transition-colors inline-flex items-center gap-1.5"
+              >
+                Go to Firebase Console <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Background aesthetic blobs */}
       <div className="fixed top-[-10%] -left-32 w-[600px] h-[600px] bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none"></div>

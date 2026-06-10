@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "dev:emulator": "concurrently -k -n \"emulator,dev\" -c \"yellow,blue\" \"firebase emulators:start --only auth,firestore\" \"VITE_USE_EMULATOR=true npm run dev\"",
     "build": "vite build",
     "start": "node server.ts",
     "preview": "vite preview",
