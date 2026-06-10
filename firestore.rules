@@ -1,69 +1,19 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Fallback deny
     match /{document=**} {
       allow read, write: if false;
     }
-
-    // Helper: user must have a Firebase Auth session (anonymous or Google)
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    // Helper: check ownership without a Firestore read (use request data, not resource)
-    function isOwner() {
-      return request.auth != null && (
-        resource.data.agentName == request.auth.token.name ||
-        resource.data.submittedByName == request.auth.token.name ||
-        resource.data.assignedToName == request.auth.token.name ||
-        resource.data.callCenterAgentName == request.auth.token.name
-      );
-    }
-
-    // Users — allow signed-in users to read and write their own doc
-    match /users/{userId} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn() && (request.auth.uid == userId || resource == null);
-    }
-
-    // Core CRM collections — any authenticated user can read/create
-    // Updates/deletes require ownership OR the user being in users collection with tl/admin role
-    match /inquiries/{docId} {
-      allow read, create: if isSignedIn();
-      allow update, delete: if isSignedIn();
-    }
-    match /tt_requests/{docId} {
-      allow read, create: if isSignedIn();
-      allow update, delete: if isSignedIn();
-    }
-    match /tt_complaints/{docId} {
-      allow read, create: if isSignedIn();
-      allow update, delete: if isSignedIn();
-    }
-    match /client_comms/{docId} {
-      allow read, create: if isSignedIn();
-      allow update, delete: if isSignedIn();
-    }
-    match /scheduling_requests/{docId} {
-      allow read, create: if isSignedIn();
-      allow update, delete: if isSignedIn();
-    }
-    match /cases/{docId} {
-      allow read, create: if isSignedIn();
-      allow update, delete: if isSignedIn();
-    }
-    match /case_activity/{docId} {
-      allow read, create: if isSignedIn();
-      allow update, delete: if false;
-    }
-    match /notifications/{notifId} {
-      allow read, create: if isSignedIn();
-      allow update, delete: if isSignedIn();
-    }
-
-    // All other operational collections
+    function isSignedIn() { return request.auth != null; }
+    match /users/{userId} { allow read, write: if isSignedIn(); }
+    match /inquiries/{docId} { allow read, write: if isSignedIn(); }
+    match /tt_requests/{docId} { allow read, write: if isSignedIn(); }
+    match /tt_complaints/{docId} { allow read, write: if isSignedIn(); }
+    match /client_comms/{docId} { allow read, write: if isSignedIn(); }
+    match /scheduling_requests/{docId} { allow read, write: if isSignedIn(); }
+    match /cases/{docId} { allow read, write: if isSignedIn(); }
+    match /case_activity/{docId} { allow read, create: if isSignedIn(); allow update, delete: if false; }
+    match /notifications/{notifId} { allow read, write: if isSignedIn(); }
     match /timelogs/{logId} { allow read, write: if isSignedIn(); }
     match /todos/{todoId} { allow read, write: if isSignedIn(); }
     match /qa_scores/{scoreId} { allow read, write: if isSignedIn(); }
@@ -76,11 +26,8 @@ service cloud.firestore {
     match /agents/{agentId} { allow read, write: if isSignedIn(); }
     match /agents/{agentId}/schedules/{schedId} { allow read, write: if isSignedIn(); }
     match /credentials/{docId} { allow read, write: if isSignedIn(); }
-    match /locked_accounts/{docId} { allow read, write: if isSignedIn(); }
-    match /failed_attempts/{docId} { allow read, write: if isSignedIn(); }
     match /meta/{docId} { allow read, write: if isSignedIn(); }
     match /directory/{docId} { allow read, write: if isSignedIn(); }
-    match /directory_headers/{docId} { allow read, write: if isSignedIn(); }
     match /roster_published/{docId} { allow read, write: if isSignedIn(); }
   }
 }

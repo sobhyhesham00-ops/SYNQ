@@ -867,48 +867,6 @@ export default function App() {
 
   // Standard standalone offline compliant sync listener for multiple tabs and real-time Firestore
   useEffect(() => {
-    // 0. Auto-unlock explicitly incorrect admins to fix legacy locking bugs
-    try {
-      const getCreds = localStorage.getItem("sched_locked_accounts");
-      if (getCreds) {
-        let arr = JSON.parse(getCreds) as string[];
-        const filtered = arr.filter(
-          (name) =>
-            !name.includes("amira.hassan") &&
-            !name.includes("hesham.sobhy") &&
-            !name.includes("hesso.sobhy"),
-        );
-        if (filtered.length !== arr.length) {
-          localStorage.setItem(
-            "sched_locked_accounts",
-            JSON.stringify(filtered),
-          );
-          setDoc(doc(db, "system", "sched_locked_accounts"), {
-            data: filtered,
-          }).catch((e) => console.error(e));
-        }
-      }
-    } catch (e) {}
-
-    // 1. Local storage event listener (for legacy/offline tab sync)
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === "sched_inquiries" && e.newValue)
-        setInquiries(JSON.parse(e.newValue));
-      if (e.key === "sched_tabby_tamara" && e.newValue)
-        setTabbyTamaraRequests(JSON.parse(e.newValue));
-      if (e.key === "sched_tt_complaints" && e.newValue)
-        setTabbyTamaraComplaints(JSON.parse(e.newValue));
-      if (e.key === "sched_requests" && e.newValue)
-        setRequests(JSON.parse(e.newValue));
-      if (e.key === "sched_time_logs" && e.newValue)
-        setTimeLogs(JSON.parse(e.newValue));
-      if (e.key === "sched_support_assignments" && e.newValue)
-        setSupportAssignments(JSON.parse(e.newValue));
-      if (e.key === "sched_announcements" && e.newValue)
-        setAnnouncements(JSON.parse(e.newValue));
-    };
-    window.addEventListener("storage", handleStorage);
-
     // Declare all unsub functions initially as no-op to allow safe synchronous cleanup
     let unsubInquiries = () => {};
     let unsubQa = () => {};
@@ -938,21 +896,63 @@ export default function App() {
     let unsubTodos = () => {};
     let unsubUsers = () => {};
 
-    const initializeListeners = async () => {
-      // STEP 1: Establish Firebase Auth first
+    // 1. Local storage event listener (for legacy/offline tab sync)
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "sched_inquiries" && e.newValue)
+        setInquiries(JSON.parse(e.newValue));
+      if (e.key === "sched_tabby_tamara" && e.newValue)
+        setTabbyTamaraRequests(JSON.parse(e.newValue));
+      if (e.key === "sched_tt_complaints" && e.newValue)
+        setTabbyTamaraComplaints(JSON.parse(e.newValue));
+      if (e.key === "sched_requests" && e.newValue)
+        setRequests(JSON.parse(e.newValue));
+      if (e.key === "sched_time_logs" && e.newValue)
+        setTimeLogs(JSON.parse(e.newValue));
+      if (e.key === "sched_support_assignments" && e.newValue)
+        setSupportAssignments(JSON.parse(e.newValue));
+      if (e.key === "sched_announcements" && e.newValue)
+        setAnnouncements(JSON.parse(e.newValue));
+    };
+    window.addEventListener("storage", handleStorage);
+
+    const run = async () => {
+      // MUST establish Firebase Auth before any Firestore operations
       if (!auth.currentUser) {
         try {
           await signInAnonymously(auth);
           console.log("[Auth] Anonymous session established for Firestore access");
           setAuthError(null);
-        } catch (authErr: any) {
-          console.warn("[Auth] Failed to establish anonymous session:", authErr);
-          setAuthError(authErr?.message || String(authErr));
+        } catch (e: any) {
+          console.error('[Auth] signInAnonymously failed:', e);
+          setAuthError(e?.message || String(e));
           return; // Skip initiating Firestore snap subscriptions when unauthenticated
         }
       }
 
-      // STEP 2: THEN start all Firestore listeners
+      // 0. Auto-unlock explicitly incorrect admins to fix legacy locking bugs
+      try {
+        const getCreds = localStorage.getItem("sched_locked_accounts");
+        if (getCreds) {
+          let arr = JSON.parse(getCreds) as string[];
+          const filtered = arr.filter(
+            (name) =>
+              !name.includes("amira.hassan") &&
+              !name.includes("hesham.sobhy") &&
+              !name.includes("hesso.sobhy"),
+          );
+          if (filtered.length !== arr.length) {
+            localStorage.setItem(
+              "sched_locked_accounts",
+              JSON.stringify(filtered),
+            );
+            await setDoc(doc(db, "system", "sched_locked_accounts"), {
+              data: filtered,
+            });
+          }
+        }
+      } catch (e) {}
+
+      // NOW start all Firestore listeners — auth is ready
       unsubInquiries = onSnapshot(collection(db, "inquiries"), (snap) => {
         const arr = snap.docs.map((d) => d.data() as Inquiry);
         arr.sort(
@@ -1348,7 +1348,7 @@ export default function App() {
       });
     };
 
-    initializeListeners();
+    run();
 
     return () => {
       unsubTodos();
@@ -1479,24 +1479,7 @@ export default function App() {
     }
   }, [JSON.stringify(currentUser)]);
 
-  // Establish Firebase Auth session synchronously for credential logins to satisfy security rules
-  useEffect(() => {
-    if (currentUser) {
-      const syncFirebaseAuth = async () => {
-        if (!auth.currentUser) {
-          try {
-            await signInAnonymously(auth);
-            console.log("[Firebase Auth] Synchronized anonymous session for credential login.");
-            setAuthError(null);
-          } catch (e: any) {
-            console.warn("[Firebase Auth] Failed to establish anonymous session:", e);
-            setAuthError(e?.message || String(e));
-          }
-        }
-      };
-      syncFirebaseAuth();
-    }
-  }, [currentUser]);
+
 
   // Ensure firestore.rules getUserRole() has matching UID
   useEffect(() => {
@@ -5641,20 +5624,14 @@ ${result.errors.slice(0, 5).join("\n")}${
       }
       const inquiryId = safeId;
       
-      // Skip Firebase Storage upload for inquiries
-      // Photos are already base64 via FileReader (inquiryPhotos + activeScreenshot)
-      // inquiryAttachments with File objects are converted to base64 inline:
+      // Convert File objects to base64 locally — no Firebase Storage needed
       const processedAttachments = await Promise.all(
         (inquiryAttachments || []).map(async (att: any) => {
-          if (!att.file) return att; // already processed
+          if (!att.file) return { ...att };
           return new Promise<any>((resolve) => {
             const reader = new FileReader();
-            reader.onload = (e) => resolve({
-              ...att,
-              url: e.target?.result as string,
-              file: undefined,
-            });
-            reader.onerror = () => resolve({ ...att, file: undefined }); // skip on error
+            reader.onload = (e) => resolve({ ...att, url: e.target?.result as string, file: undefined });
+            reader.onerror = () => resolve({ ...att, url: att.url || '', file: undefined });
             reader.readAsDataURL(att.file);
           });
         })
