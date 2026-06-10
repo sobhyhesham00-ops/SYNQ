@@ -20,10 +20,12 @@ import {
 } from "firebase/firestore";
 import { 
   db, 
+  auth,
   initAuth, 
   googleSignIn, 
   getAccessToken, 
   logout,
+  signInAnonymously,
   wrappedOnSnapshot as onSnapshot,
   wrappedSetDoc as setDoc,
   wrappedUpdateDoc as updateDoc,
@@ -832,6 +834,8 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
+
+
   const handleGoogleLogin = async () => {
     setIsLoggingInGoogle(true);
     try {
@@ -1438,6 +1442,42 @@ export default function App() {
     } else {
       localStorage.removeItem("sched_current_user");
     }
+  }, [currentUser]);
+
+  // Ensure active Firebase Auth session for standard password logged-in agents
+  // and sync their credentials profile to /users/{uid} to satisfy firestore.rules
+  useEffect(() => {
+    const unsubSession = auth.onAuthStateChanged(async (firebaseUser) => {
+      if (!firebaseUser) {
+        try {
+          await signInAnonymously(auth);
+        } catch (err) {
+          console.error("[Auth] Silent anonymous session init failed:", err);
+        }
+      } else {
+        const savedUser = getStorageItem<User | null>("sched_current_user", null);
+        if (savedUser) {
+          const uid = firebaseUser.uid;
+          try {
+            await setDoc(doc(db, "users", uid), {
+              id: uid,
+              name: savedUser.name,
+              role: savedUser.role || "agent",
+              avatarUrl: savedUser.avatarUrl || null,
+              status: savedUser.status || null,
+              statusNote: savedUser.statusNote || null,
+              bio: savedUser.bio || null,
+              dailyUpdate: savedUser.dailyUpdate || null,
+              email: savedUser.email || null,
+              phone: (savedUser as any).phone || null,
+            }, { merge: true });
+          } catch (e) {
+            console.error("[Auth] User profile registration sync failed for " + uid + ":", e);
+          }
+        }
+      }
+    });
+    return () => unsubSession();
   }, [currentUser]);
 
   // Real-time Firestore Sync with [currentUser] dependency for Schedules, Notifications, Orders, and Todos as requested
@@ -3822,7 +3862,10 @@ ${swapTargetAgent}'s LOB: ${targetLOB}`);
       });
 
       // Sync to Firestore
-      await setDoc(doc(db, "scheduling_requests", newRequest.id), newRequest);
+      await Promise.race([
+        setDoc(doc(db, "scheduling_requests", newRequest.id), newRequest),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore write timed out")), 10000))
+      ]);
 
       addSystemNotification(
         `New Swap Request: ${formatAgentName(name)}`,
@@ -3918,7 +3961,10 @@ ${swapTargetAgent}'s LOB: ${targetLOB}`);
       });
 
       // Sync to Firestore
-      await setDoc(doc(db, "scheduling_requests", newRequest.id), newRequest);
+      await Promise.race([
+        setDoc(doc(db, "scheduling_requests", newRequest.id), newRequest),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore write timed out")), 10000))
+      ]);
 
       addSystemNotification(
         `New Annual Leave: ${formatAgentName(name)}`,
@@ -5781,7 +5827,10 @@ ${result.errors.slice(0, 5).join("\n")}${
          return;
       }
 
-      await setDoc(doc(db, "inquiries", inquiryId), updatedInqObject);
+      await Promise.race([
+        setDoc(doc(db, "inquiries", inquiryId), updatedInqObject),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore write timed out")), 10000))
+      ]);
 
       setInquiries(updated);
       setStorageItem("sched_inquiries", updated);

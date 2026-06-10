@@ -22,29 +22,36 @@ export const processAttachments = async (
 ): Promise<FileAttachment[]> => {
   if (!attachments || attachments.length === 0) return [];
 
+  const uploadTimeoutMs = 15000; // 15s timeout for attachments
+
   const processed = await Promise.all(
     attachments.map(async (att) => {
-      // No file object = already uploaded or base64, keep as-is
       if (!att.file) return att;
-
       const { file, ...attMeta } = att;
 
       try {
-        // Properly await upload using a Promise wrapper around UploadTask events
         const downloadUrl = await new Promise<string>((resolve, reject) => {
+          const timeoutId = setTimeout(() => {
+            reject(new Error(`Upload timed out after ${uploadTimeoutMs}ms`));
+          }, uploadTimeoutMs);
+
           const { uploadTask } = createUploadTask(
             file, entityType, entityId, replyOrRoot
           );
           uploadTask.on(
             'state_changed',
-            null, // progress handler not needed here
-            (error) => reject(error), // error handler
+            null, 
+            (error) => {
+              clearTimeout(timeoutId);
+              reject(error);
+            },
             async () => {
-              // Called ONLY when upload is 100% complete
               try {
                 const url = await getDownloadURL(uploadTask.snapshot.ref);
+                clearTimeout(timeoutId);
                 resolve(url);
               } catch (e) {
+                clearTimeout(timeoutId);
                 reject(e);
               }
             }
@@ -54,12 +61,10 @@ export const processAttachments = async (
         return {
           ...attMeta,
           url: downloadUrl,
-          file: undefined, // remove File object - not Firestore-safe
+          file: undefined,
         };
       } catch (err) {
         console.error(`Failed to upload ${att.name}:`, err);
-        // Return the attachment with original URL (blob:// or base64) as fallback
-        // so the submission doesn't fail completely
         return { ...attMeta, file: undefined };
       }
     })

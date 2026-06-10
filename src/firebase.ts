@@ -12,7 +12,7 @@ import {
   getDoc as firestoreGetDoc,
   connectFirestoreEmulator
 } from "firebase/firestore";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, connectAuthEmulator } from "firebase/auth";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, connectAuthEmulator, signInAnonymously } from "firebase/auth";
 import { getStorage, connectStorageEmulator } from "firebase/storage";
 import firebaseConfigFromJson from "../firebase-applet-config.json";
 
@@ -180,6 +180,8 @@ export const logout = async () => {
   cachedAccessToken = null;
   return await signOut(auth);
 };
+
+export { signInAnonymously };
 
 // --- Firestore Hardened Error Interceptor ---
 
