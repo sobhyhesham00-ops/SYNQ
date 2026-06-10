@@ -28,11 +28,10 @@ service cloud.firestore {
 
     // Agent can only update if they are the author or assigned
     function isOwnerOrAssigned() {
-      let userName = getUserName();
-      return resource.data.agentName == userName || 
-             resource.data.assignedToName == userName ||
-             resource.data.openedBy == userName ||
-             resource.data.submittedByName == userName;
+      return resource.data.agentName == getUserName() || 
+             resource.data.assignedToName == getUserName() ||
+             resource.data.openedBy == getUserName() ||
+             resource.data.submittedByName == getUserName();
     }
 
     // Users
