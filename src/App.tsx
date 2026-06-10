@@ -769,7 +769,7 @@ export default function App() {
       const now = new Date();
       setCurrentTime(now);
       setSystemTime(now);
-    }, 1000);
+    }, 60000);
     return () => clearInterval(timer);
   }, []);
 
@@ -1295,20 +1295,9 @@ export default function App() {
             u?.name?.toLowerCase() === prevUser.name.toLowerCase(),
         );
         if (liveUserInfo) {
-          const hasChanged = 
-            prevUser.id !== liveUserInfo.id ||
-            prevUser.name !== liveUserInfo.name ||
-            prevUser.role !== liveUserInfo.role ||
-            prevUser.password !== liveUserInfo.password ||
-            prevUser.avatarUrl !== liveUserInfo.avatarUrl ||
-            prevUser.status !== liveUserInfo.status ||
-            prevUser.statusNote !== liveUserInfo.statusNote ||
-            prevUser.bio !== liveUserInfo.bio ||
-            prevUser.dailyUpdate !== liveUserInfo.dailyUpdate ||
-            prevUser.email !== liveUserInfo.email ||
-            (prevUser as any).phone !== liveUserInfo.phone;
-          if (hasChanged) {
-            return { ...prevUser, ...liveUserInfo };
+          const merged = { ...prevUser, ...liveUserInfo };
+          if (JSON.stringify(prevUser) !== JSON.stringify(merged)) {
+            return merged;
           }
         }
         return prevUser;
