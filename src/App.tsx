@@ -127,6 +127,7 @@ import { OrdersTab } from "./components/OrdersTab";
 import { ArticleManager } from "./components/ArticleManager";
 import { RequestReplyThread } from "./components/RequestReplyThread";
 import { EnvironmentBadge } from "./components/EnvironmentBadge";
+import { ComplaintsWorkspace } from "./components/ComplaintsWorkspace";
 import { processAttachments } from "./services/attachmentService";
 import * as XLSX from "xlsx";
 import {
@@ -2949,6 +2950,9 @@ ${pageText}
 
   // Tabby/Tamara search and filter states
   const [compSearch, setCompSearch] = useState("");
+  const [selectedComplaintId, setSelectedComplaintId] = useState<string | null>(null);
+  const [complaintListFilter, setComplaintListFilter] = useState<'all'|'pending_tl'|'need_contact'|'closed'>('all');
+  const [complaintSearch, setComplaintSearch] = useState('');
   const [compDateFilter, setCompDateFilter] = useState("");
   const [commSearch, setCommSearch] = useState("");
   const [commLangFilter, setCommLangFilter] = useState<
@@ -21923,15 +21927,16 @@ ${ttNotes}`
                                         }
                                         value={
                                           localSubTab === "complaints"
-                                            ? compSearch
+                                            ? complaintSearch
                                             : localSubTab === "client-comms"
                                               ? commSearch
                                               : ttSearchQuery
                                         }
                                         onChange={(e) => {
-                                          if (localSubTab === "complaints")
-                                            setCompSearch(e.target.value);
-                                          else if (
+                                          if (localSubTab === "complaints") {
+                                            setComplaintSearch(e.target.value);
+                                            setSelectedComplaintId(null);
+                                          } else if (
                                             localSubTab === "client-comms"
                                           )
                                             setCommSearch(e.target.value);
@@ -21949,9 +21954,10 @@ ${ttNotes}`
                                           <input
                                             type="date"
                                             value={compDateFilter}
-                                            onChange={(e) =>
-                                              setCompDateFilter(e.target.value)
-                                            }
+                                            onChange={(e) => {
+                                              setCompDateFilter(e.target.value);
+                                              setSelectedComplaintId(null);
+                                            }}
                                             className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium [color-scheme:dark]"
                                           />
                                         </div>
@@ -21994,54 +22000,103 @@ ${ttNotes}`
                                       </div>
                                     </>
                                   )}
-                                  <span className="text-slate-400 font-semibold font-sans">
-                                    Filter status:
-                                  </span>
-                                  <div className="flex items-center gap-1.5 bg-black/35 p-1 rounded-xl border border-white/5">
-                                    <button
-                                      onClick={() => setTtFilterStatus("all")}
-                                      className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "all" ? "bg-indigo-600 text-white font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
-                                    >
-                                      <History className="w-3 h-3" />
-                                      All History
-                                    </button>
-                                    <button
-                                      onClick={() =>
-                                        setTtFilterStatus("not_confirmed")
-                                      }
-                                      className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "not_confirmed" ? "bg-amber-400/20 text-amber-300 border border-amber-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
-                                    >
-                                      {localSubTab === "requests"
-                                        ? "⏳ Pending Confirm"
-                                        : localSubTab === "complaints"
-                                          ? "⏳ Pending TL"
-                                          : "⏳ Pending Contact"}
-                                    </button>
-                                    <button
-                                      onClick={() =>
-                                        setTtFilterStatus("confirmed")
-                                      }
-                                      className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "confirmed" ? "bg-rose-500/20 text-rose-300 border border-rose-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
-                                    >
-                                      {localSubTab === "requests"
-                                        ? " Pending Contact"
-                                        : localSubTab === "complaints"
-                                          ? " Pending Contact"
-                                          : " Contacted"}
-                                    </button>
-                                    {localSubTab !== "client-comms" && (
-                                      <button
-                                        onClick={() =>
-                                          setTtFilterStatus("contacted")
-                                        }
-                                        className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "contacted" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
-                                      >
-                                        {localSubTab === "requests"
-                                          ? " Contacted"
-                                          : " Closed"}
-                                      </button>
-                                    )}
-                                  </div>
+                                  {localSubTab === "complaints" ? (
+                                    <>
+                                      <span className="text-slate-400 font-semibold font-sans">
+                                        Filter status:
+                                      </span>
+                                      <div className="flex items-center gap-1.5 bg-black/35 p-1 rounded-xl border border-white/5 animate-fade-in">
+                                        <button
+                                          onClick={() => {
+                                            setComplaintListFilter("all");
+                                            setSelectedComplaintId(null);
+                                          }}
+                                          className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${complaintListFilter === "all" ? "bg-indigo-600 text-white font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                        >
+                                          <History className="w-3 h-3" />
+                                          All
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            setComplaintListFilter("pending_tl");
+                                            setSelectedComplaintId(null);
+                                          }}
+                                          className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${complaintListFilter === "pending_tl" ? "bg-amber-400/20 text-amber-300 border border-amber-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                        >
+                                          ⏳ Pending TL
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            setComplaintListFilter("need_contact");
+                                            setSelectedComplaintId(null);
+                                          }}
+                                          className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${complaintListFilter === "need_contact" ? "bg-rose-500/20 text-rose-300 border border-rose-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                        >
+                                          ⏳ Need Contact
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            setComplaintListFilter("closed");
+                                            setSelectedComplaintId(null);
+                                          }}
+                                          className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${complaintListFilter === "closed" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                        >
+                                          Closed
+                                        </button>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span className="text-slate-400 font-semibold font-sans">
+                                        Filter status:
+                                      </span>
+                                      <div className="flex items-center gap-1.5 bg-black/35 p-1 rounded-xl border border-white/5">
+                                        <button
+                                          onClick={() => setTtFilterStatus("all")}
+                                          className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "all" ? "bg-indigo-600 text-white font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                        >
+                                          <History className="w-3 h-3" />
+                                          All History
+                                        </button>
+                                        <button
+                                          onClick={() =>
+                                            setTtFilterStatus("not_confirmed")
+                                          }
+                                          className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "not_confirmed" ? "bg-amber-400/20 text-amber-300 border border-amber-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                        >
+                                          {localSubTab === "requests"
+                                            ? "⏳ Pending Confirm"
+                                            : localSubTab === "complaints"
+                                              ? "⏳ Pending TL"
+                                              : "⏳ Pending Contact"}
+                                        </button>
+                                        <button
+                                          onClick={() =>
+                                            setTtFilterStatus("confirmed")
+                                          }
+                                          className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "confirmed" ? "bg-rose-500/20 text-rose-300 border border-rose-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                        >
+                                          {localSubTab === "requests"
+                                            ? " Pending Contact"
+                                            : localSubTab === "complaints"
+                                              ? " Pending Contact"
+                                              : " Contacted"}
+                                        </button>
+                                        {localSubTab !== "client-comms" && (
+                                          <button
+                                            onClick={() =>
+                                              setTtFilterStatus("contacted")
+                                            }
+                                            className={`px-3 py-1 rounded-lg font-bold transition-all text-[11px] uppercase cursor-pointer ${ttFilterStatus === "contacted" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 font-sans" : "text-slate-400 hover:text-slate-100 font-sans"}`}
+                                          >
+                                            {localSubTab === "requests"
+                                              ? " Contacted"
+                                              : " Closed"}
+                                          </button>
+                                        )}
+                                      </div>
+                                    </>
+                                  )}
 
                                   {localSubTab === "requests" && (
                                     <>
@@ -22356,6 +22411,34 @@ ${ttNotes}`
                                       );
                                     })()
                                   ) : localSubTab === "complaints" ? (
+                                    <ComplaintsWorkspace
+                                      tabbyTamaraComplaints={tabbyTamaraComplaints}
+                                      currentUser={currentUser}
+                                      isTLOreSupport={isTLOreSupport}
+                                      isSuperAdmin={isSuperAdmin}
+                                      complaintSearch={complaintSearch}
+                                      selectedComplaintId={selectedComplaintId}
+                                      setSelectedComplaintId={setSelectedComplaintId}
+                                      complaintListFilter={complaintListFilter}
+                                      compDateFilter={compDateFilter}
+                                      tcFilterClinic={tcFilterClinic}
+                                      activeComplaintHandlingId={activeComplaintHandlingId}
+                                      setActiveComplaintHandlingId={setActiveComplaintHandlingId}
+                                      tlComplaintResolutionType={tlComplaintResolutionType}
+                                      setTlComplaintResolutionType={setTlComplaintResolutionType}
+                                      tlComplaintComment={tlComplaintComment}
+                                      setTlComplaintComment={setTlComplaintComment}
+                                      handleTLCommentComplaint={handleTLCommentComplaint}
+                                      handleToggleContactComplaint={handleToggleContactComplaint}
+                                      handleDeleteComplaint={handleDeleteComplaint}
+                                      handleAssignRecord={handleAssignRecord}
+                                      addSystemNotification={addSystemNotification}
+                                      canEditItem={canEditItem}
+                                      getRemainingEditTime={getRemainingEditTime}
+                                      setEditingItem={setEditingItem}
+                                      getElapsedTimerString={getElapsedTimerString}
+                                    />
+                                  ) : false ? (
                                     <>
                                       {tabbyTamaraComplaints.filter((c) => {
                                         const isMyComplaint =
@@ -22425,7 +22508,7 @@ ${ttNotes}`
                                           </p>
                                         </div>
                                       ) : (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in font-sans">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in font-sans font-sans">
                                           {tabbyTamaraComplaints
                                             .filter((c) => {
                                               const isMyComplaint =

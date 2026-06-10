@@ -229,7 +229,16 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     path
   };
   console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  
+  // Only throw if it is a write/update operation to prevent unhandled background exceptions on asynchronous read/list snapshots
+  if (
+    operationType === OperationType.CREATE ||
+    operationType === OperationType.UPDATE ||
+    operationType === OperationType.DELETE ||
+    operationType === OperationType.WRITE
+  ) {
+    throw new Error(JSON.stringify(errInfo));
+  }
 }
 
 // Helper to extract a path string from any document / collection reference or query
