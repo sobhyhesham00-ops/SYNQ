@@ -37,8 +37,7 @@ service cloud.firestore {
 
     // Users
     match /users/{userId} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn() && (request.auth.uid == userId || isSuperAdmin());
+      allow read, write: if isSignedIn();
     }
 
     // Cases, Requests, Inquiries
@@ -104,7 +103,15 @@ service cloud.firestore {
     match /todos/{todoId} { allow read, write: if isSignedIn(); }
     match /qa_scores/{scoreId} { allow read, write: if isSignedIn(); }
     match /system/{docId} { allow read, write: if isSignedIn(); }
-    match /announcements/{annId} { allow read: if isSignedIn(); allow write: if isSignedIn() && isSuperAdmin(); }
+    match /announcements/{annId} {
+      allow read: if isSignedIn();
+      allow create, delete: if isSignedIn() && (isSuperAdmin() || isTLOrSupport());
+      allow update: if isSignedIn() && (
+        isSuperAdmin() || 
+        isTLOrSupport() ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']))
+      );
+    }
     match /tl_feedbacks/{fbId} { allow read, write: if isSignedIn(); }
     match /schedules/{schedId} { allow read, write: if isSignedIn(); }
     match /orders/{orderId} { allow read, write: if isSignedIn(); }

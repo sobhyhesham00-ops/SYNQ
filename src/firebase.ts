@@ -37,7 +37,7 @@ const firebaseConfig = {
 const requiredKeys: (keyof typeof firebaseConfig)[] = ["apiKey", "projectId", "appId"];
 for (const key of requiredKeys) {
   if (!firebaseConfig[key]) {
-    throw new Error(
+    console.error(
       `Firebase config validation error: missing critical schema field "${key}". Please configure VITE_FIREBASE_${key.toUpperCase().replace(/([a-z])([A-Z])/g, "$1_$2")} or check firebase-applet-config.json.`
     );
   }

@@ -20,6 +20,7 @@ import {
 } from "firebase/firestore";
 import { 
   db, 
+  auth,
   initAuth, 
   googleSignIn, 
   getAccessToken, 
@@ -890,20 +891,24 @@ export default function App() {
 
     // 1. Local storage event listener (for legacy/offline tab sync)
     const handleStorage = (e: StorageEvent) => {
-      if (e.key === "sched_inquiries" && e.newValue)
-        setInquiries(JSON.parse(e.newValue));
-      if (e.key === "sched_tabby_tamara" && e.newValue)
-        setTabbyTamaraRequests(JSON.parse(e.newValue));
-      if (e.key === "sched_tt_complaints" && e.newValue)
-        setTabbyTamaraComplaints(JSON.parse(e.newValue));
-      if (e.key === "sched_requests" && e.newValue)
-        setRequests(JSON.parse(e.newValue));
-      if (e.key === "sched_time_logs" && e.newValue)
-        setTimeLogs(JSON.parse(e.newValue));
-      if (e.key === "sched_support_assignments" && e.newValue)
-        setSupportAssignments(JSON.parse(e.newValue));
-      if (e.key === "sched_announcements" && e.newValue)
-        setAnnouncements(JSON.parse(e.newValue));
+      try {
+        if (e.key === "sched_inquiries" && e.newValue)
+          setInquiries(JSON.parse(e.newValue));
+        if (e.key === "sched_tabby_tamara" && e.newValue)
+          setTabbyTamaraRequests(JSON.parse(e.newValue));
+        if (e.key === "sched_tt_complaints" && e.newValue)
+          setTabbyTamaraComplaints(JSON.parse(e.newValue));
+        if (e.key === "sched_requests" && e.newValue)
+          setRequests(JSON.parse(e.newValue));
+        if (e.key === "sched_time_logs" && e.newValue)
+          setTimeLogs(JSON.parse(e.newValue));
+        if (e.key === "sched_support_assignments" && e.newValue)
+          setSupportAssignments(JSON.parse(e.newValue));
+        if (e.key === "sched_announcements" && e.newValue)
+          setAnnouncements(JSON.parse(e.newValue));
+      } catch (err) {
+        console.error("Storage sync failed:", err);
+      }
     };
     window.addEventListener("storage", handleStorage);
 
@@ -3348,14 +3353,12 @@ ${pageText}
     setCurrentUser(authenticatedUser);
     setStorageItem("sched_current_user", authenticatedUser);
 
-    setDoc(
-      doc(
-        db,
-        "users",
-        correspondingFullName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
-      ),
-      authenticatedUser,
-    ).catch(console.error);
+    const userDocId = correspondingFullName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+    setDoc(doc(db, "users", userDocId), authenticatedUser).catch(console.error);
+
+    if (auth.currentUser?.uid) {
+      setDoc(doc(db, "users", auth.currentUser.uid), authenticatedUser).catch(console.error);
+    }
 
     // If agent is new or not in the cached list, add using corresponding fullName or username
     if (
