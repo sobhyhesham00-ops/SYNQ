@@ -23525,7 +23525,7 @@ ${ttNotes}`
 
                                                   {/* Core Detail Grid */}
                                                   <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl space-y-2 text-xs text-left">
-                                                    <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+                                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-2 gap-y-1">
                                                       <div>
                                                         <p className="text-[9px] text-slate-400 uppercase tracking-wider">
                                                           Requested By:
@@ -23540,6 +23540,24 @@ ${ttNotes}`
                                                           >
                                                             {
                                                               req.callCenterAgentName
+                                                            }
+                                                          </CopyWrap>
+                                                        </p>
+                                                      </div>
+                                                      <div>
+                                                        <p className="text-[9px] text-slate-400 uppercase tracking-wider">
+                                                          Patient Name:
+                                                        </p>
+                                                        <p className="text-slate-200 font-bold truncate">
+                                                          <CopyWrap
+                                                            text={
+                                                              req.patientName ||
+                                                              "N/A"
+                                                            }
+                                                            label="Patient Name"
+                                                          >
+                                                            {
+                                                              req.patientName || "N/A"
                                                             }
                                                           </CopyWrap>
                                                         </p>

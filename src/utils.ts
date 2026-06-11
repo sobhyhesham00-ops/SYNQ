@@ -1801,6 +1801,7 @@ export const buildCaseClipboardPayload = (request: TabbyTamaraRequest): Clipboar
   const textLines = [
     `=== ${provider} PAYMENT REQUEST ===`,
     `Patient Name: ${patient}`,
+    `Phone Number: ${phone}`,
     `Final Amount (incl. VAT): ${calculateTabbyTamaraPrice(request.priceWithoutTax || 0).finalPriceFormatted}`,
     `Payment Link: ${paymentLink}`
   ].filter(Boolean).join('\n');
@@ -1811,6 +1812,7 @@ export const buildCaseClipboardPayload = (request: TabbyTamaraRequest): Clipboar
   
   html += `<table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;">`;
   html += `<tr><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9; color: #64748b; width: 140px;">Patient Name</td><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">${patient}</td></tr>`;
+  html += `<tr><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9; color: #64748b; width: 140px;">Phone Number</td><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">${phone}</td></tr>`;
   html += `<tr><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9; color: #64748b; width: 140px;">Final Amount</td><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">${calculateTabbyTamaraPrice(request.priceWithoutTax || 0).finalPriceFormatted}</td></tr>`;
   html += `<tr><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9; color: #64748b;">Payment Link</td><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9;"><a href="${normalizeUrl(paymentLink)}" target="_blank" style="color: #2563eb; text-decoration: none; word-break: break-all;">${paymentLink}</a></td></tr>`;
   html += `</table></div>`;
