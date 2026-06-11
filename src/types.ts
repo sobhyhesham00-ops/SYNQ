@@ -23,6 +23,11 @@ export interface User {
   bio?: string;
   dailyUpdate?: string;
   email?: string;
+  phone?: string;
+  lob?: string;
+  lobTeam?: string;
+  teamLeader?: string;
+  directoryData?: Record<string, string>;
 }
 
 export interface QAQuestion {

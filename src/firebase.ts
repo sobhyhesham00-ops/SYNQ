@@ -71,6 +71,11 @@ export const storage = getStorage(app);
 // Enable Emulator Suite globally in local environment
 export const useEmulator = (import.meta as any).env.VITE_USE_EMULATOR === "true" || ((import.meta as any).env.DEV && window.location.hostname === "localhost");
 
+// Auto sign-in anonymously for Firestore access if not using Google Auth
+if (auth.currentUser === null && !useEmulator) {
+  signInAnonymously(auth).catch((e: any) => console.warn("Anonymous auth failed (OK for offline):", e));
+}
+
 if (useEmulator) {
   console.log("[Firebase Emulator] Local emulation active. Connecting to emulators...");
   try {

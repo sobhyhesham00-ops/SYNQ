@@ -23,9 +23,9 @@ interface CaseTableProps {
 
 const CLINIC_LABELS: Record<string, string> = {
   dermadent: "Dermadent",
-  onetouch_mo3tred: "One Touch Mo3tred",
-  onetouch_merkhnya: "One Touch Merkhnya",
-  welltouch: "WellTouch",
+  onetouch_mo3tred: "One Touch AlMutarid",
+  onetouch_merkhnya: "One Touch Markhaniya",
+  welltouch: "Well Touch",
   newage: "New Age",
 };
 

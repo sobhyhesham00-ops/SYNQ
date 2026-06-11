@@ -1380,11 +1380,13 @@ export default function App() {
           }
         },
         (error) => {
-          console.error(
-            "sched_agent_directory snapshot error:",
-            error.code,
-            error.message,
-          );
+          if (error.code === "permission-denied") {
+            console.warn(
+              "Directory sync blocked by Firestore rules. Check auth and security rules.",
+            );
+          } else {
+            console.error("Directory Real-time Sync Error:", error);
+          }
         },
       );
       const unsubDirHeaders = onSnapshot(
@@ -1397,11 +1399,9 @@ export default function App() {
           }
         },
         (error) => {
-          console.error(
-            "sched_agent_directory_headers snapshot error:",
-            error.code,
-            error.message,
-          );
+          if (error.code !== "permission-denied") {
+            console.error("Directory Headers Sync Error:", error);
+          }
         },
       );
 
@@ -5110,65 +5110,27 @@ ${result.errors.slice(0, 5).join("\n")}${
               .replace(/[^a-z0-9]/g, "")
           : "";
         if (userDocId) {
+          // Extract email
           const emailVal = (() => {
             for (const k of Object.keys(a.data)) {
-              const lk = k
-                .toLowerCase()
-                .trim()
-                .replace(/[\s_-]+/g, "");
+              const lk = k.toLowerCase().trim().replace(/[\s_-]+/g, "");
               if (
-                [
-                  "email",
-                  "mail",
-                  "corpemail",
-                  "corporateemail",
-                  "emailaddress",
-                  "useremail",
-                  "workemail",
-                ].includes(lk) ||
-                (["email", "mail"].some((term) => lk.includes(term)) &&
-                  ![
-                    "teamleader",
-                    "tl",
-                    "lead",
-                    "leader",
-                    "manager",
-                    "supervisor",
-                  ].some((term) => lk.includes(term))) ||
-                (lk.includes("address") &&
-                  ![
-                    "home",
-                    "physical",
-                    "street",
-                    "ip",
-                    "residence",
-                    "residential",
-                    "location",
-                    "postal",
-                  ].some((term) => lk.includes(term)))
+                ["email", "mail", "corpemail", "corporateemail", "emailaddress", "useremail", "workemail"].includes(lk) ||
+                ([" email", "mail"].some((term) => lk.includes(term)) &&
+                  !["teamleader", "tl", "lead", "leader", "manager", "supervisor"].some((term) => lk.includes(term)))
               ) {
-                return a.data[k] !== undefined && a.data[k] !== null
-                  ? String(a.data[k]).trim()
-                  : "";
+                return a.data[k] !== undefined && a.data[k] !== null ? String(a.data[k]).trim() : "";
               }
             }
             return "";
           })();
+
+          // Extract phone
           const phoneVal = (() => {
             for (const k of Object.keys(a.data)) {
-              const lk = k
-                .toLowerCase()
-                .trim()
-                .replace(/[\s_-]+/g, "");
+              const lk = k.toLowerCase().trim().replace(/[\s_-]+/g, "");
               if (
-                [
-                  "phone",
-                  "mobile",
-                  "tel",
-                  "tele",
-                  "contact",
-                  "phonenumber",
-                ].some(
+                ["phone", "mobile", "tel", "tele", "contact", "phonenumber"].some(
                   (key) =>
                     lk === key ||
                     lk.startsWith("phone") ||
@@ -5177,154 +5139,75 @@ ${result.errors.slice(0, 5).join("\n")}${
                     lk.endsWith("mobile") ||
                     lk === "contactnumber" ||
                     (lk.includes("number") &&
-                      ![
-                        "badge",
-                        "serial",
-                        "id",
-                        "count",
-                        "index",
-                        "employee",
-                        "user",
-                        "emp",
-                        "role",
-                        "salary",
-                        "bank",
-                        "doc",
-                      ].some((term) => lk.includes(term))),
+                      !["badge", "serial", "id", "count", "index", "employee", "user", "emp"].some((t) => lk.includes(t)))
                 )
               ) {
-                return a.data[k] !== undefined && a.data[k] !== null
-                  ? String(a.data[k]).trim()
-                  : "";
+                return a.data[k] !== undefined && a.data[k] !== null ? String(a.data[k]).trim() : "";
               }
             }
             return "";
           })();
+
+          // Extract LOB (Line of Business)
           const lobVal = (() => {
             for (const k of Object.keys(a.data)) {
-              const lk = k
-                .toLowerCase()
-                .trim()
-                .replace(/[\s_-]+/g, "");
-              if (
-                [
-                  "lob",
-                  "lineofbusiness",
-                  "channel",
-                  "queue",
-                  "department",
-                  "function",
-                  "business",
-                ].some(
-                  (key) =>
-                    (lk.includes(key) || key.includes(lk)) &&
-                    !lk.includes("team") &&
-                    !lk.includes("group") &&
-                    !lk.includes("sub"),
-                )
-              ) {
-                return a.data[k] !== undefined && a.data[k] !== null
-                  ? String(a.data[k]).trim()
-                  : "";
+              const lk = k.toLowerCase().trim();
+              if (lk === "lob" || lk === "line of business" || lk.includes("lob")) {
+                return a.data[k] !== undefined && a.data[k] !== null ? String(a.data[k]).trim() : "";
               }
             }
             return "";
           })();
+
+          // Extract LOB Team
           const lobTeamVal = (() => {
             for (const k of Object.keys(a.data)) {
-              const lk = k
-                .toLowerCase()
-                .trim()
-                .replace(/[\s_-]+/g, "");
+              const lk = k.toLowerCase().trim();
               if (
-                ["lobteam", "team", "group", "teamname", "subteam"].some(
-                  (key) => lk.includes(key) || key.includes(lk),
-                )
+                lk === "lob team" || lk === "team" || lk === "lob_team" ||
+                (lk.includes("team") && lk.includes("lob")) ||
+                lk.includes("squad")
               ) {
-                return a.data[k] !== undefined && a.data[k] !== null
-                  ? String(a.data[k]).trim()
-                  : "";
-              }
-            }
-            return "";
-          })();
-          const rawRole = (() => {
-            for (const k of Object.keys(a.data)) {
-              const lk = k
-                .toLowerCase()
-                .trim()
-                .replace(/[\s_-]+/g, "");
-              if (
-                ["role", "designation", "jobtitle", "title", "position"].some(
-                  (key) => lk.includes(key) || key.includes(lk),
-                )
-              ) {
-                return a.data[k] !== undefined && a.data[k] !== null
-                  ? String(a.data[k]).trim()
-                  : "";
-              }
-            }
-            return "";
-          })();
-          const teamLeaderVal = (() => {
-            for (const k of Object.keys(a.data)) {
-              const lk = k
-                .toLowerCase()
-                .trim()
-                .replace(/[\s_-]+/g, "");
-              if (
-                [
-                  "teamleader",
-                  "tl",
-                  "supervisor",
-                  "leader",
-                  "manager",
-                  "lead",
-                  "tlname",
-                ].some((key) => lk.includes(key) || key.includes(lk))
-              ) {
-                return a.data[k] !== undefined && a.data[k] !== null
-                  ? String(a.data[k]).trim()
-                  : "";
+                return a.data[k] !== undefined && a.data[k] !== null ? String(a.data[k]).trim() : "";
               }
             }
             return "";
           })();
 
-          let roleVal: "agent" | "tl" | "qa" = "agent";
-          const rl = rawRole.toLowerCase();
-          if (
-            rl.includes("tl") ||
-            rl.includes("leader") ||
-            rl.includes("lead") ||
-            rl.includes("supervisor") ||
-            rl.includes("manager")
-          ) {
-            roleVal = "tl";
-          } else if (
-            rl.includes("qa") ||
-            rl.includes("quality") ||
-            rl.includes("analyst")
-          ) {
-            roleVal = "qa";
-          }
+          // Extract Team Leader
+          const tlVal = (() => {
+            for (const k of Object.keys(a.data)) {
+              const lk = k.toLowerCase().trim();
+              if (
+                lk === "tl" ||
+                lk === "team leader" ||
+                lk === "tl name" ||
+                lk === "manager" ||
+                lk === "supervisor" ||
+                (lk.includes("team") && lk.includes("leader")) ||
+                lk.includes("lead")
+              ) {
+                return a.data[k] !== undefined && a.data[k] !== null ? String(a.data[k]).trim() : "";
+              }
+            }
+            return "";
+          })();
 
-          const userProfile = {
-            id: `usr_import_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+          const userProfile: User = {
+            id: userDocId,
             name: a.agentName,
-            role: roleVal,
-            email: emailVal || undefined,
-            phone: phoneVal || undefined,
-            lob: lobVal || undefined,
-            lobTeam: lobTeamVal || undefined,
-            teamLeader: teamLeaderVal || undefined,
+            role: isTLName(a.agentName) ? "tl" : "agent",
+            email: emailVal,
+            phone: phoneVal,        // ← NEW
+            lob: lobVal,            // ← NEW
+            lobTeam: lobTeamVal,    // ← NEW
+            teamLeader: tlVal,      // ← NEW
+            directoryData: a.data,  // ← NEW: store full CSV row for reference
           };
 
-          setDoc(doc(db, "users", userDocId), userProfile, {
-            merge: true,
-          }).catch((err) => {
-            console.error("Failed to import user profile:", err);
-          });
+          setDoc(doc(db, "users", userDocId), userProfile).catch((e) =>
+            console.error("User profile sync error:", e),
+          );
         }
       });
 
@@ -15502,19 +15385,19 @@ ${ttNotes}`
                                     value="onetouch_mo3tred"
                                     className="bg-white/10 backdrop-blur-md text-slate-100 "
                                   >
-                                    One Touch Mo3tred
+                                    One Touch AlMutarid
                                   </option>
                                   <option
                                     value="onetouch_merkhnya"
                                     className="bg-white/10 backdrop-blur-md text-slate-100 "
                                   >
-                                    One Touch Merkhnya
+                                    One Touch Markhaniya
                                   </option>
                                   <option
                                     value="welltouch"
                                     className="bg-white/10 backdrop-blur-md text-slate-100 "
                                   >
-                                    WellTouch
+                                    Well Touch
                                   </option>
                                   <option
                                     value="newage"
@@ -17122,19 +17005,19 @@ ${ttNotes}`
                               },
                               {
                                 key: "onetouch_mo3tred",
-                                display: "One Touch Mo3tred",
+                                display: "One Touch AlMutarid",
                                 color: "from-teal-400 to-emerald-500",
                                 textCol: "text-emerald-300",
                               },
                               {
                                 key: "onetouch_merkhnya",
-                                display: "One Touch Merkhnya",
+                                display: "One Touch Markhaniya",
                                 color: "from-cyan-400 to-cyan-500",
                                 textCol: "text-cyan-300",
                               },
                               {
                                 key: "welltouch",
-                                display: "WellTouch",
+                                display: "Well Touch",
                                 color: "from-pink-500 to-rose-500",
                                 textCol: "text-rose-300",
                               },
@@ -17255,19 +17138,19 @@ ${ttNotes}`
                                   value="onetouch_mo3tred"
                                   className="bg-white/10 backdrop-blur-md text-slate-100 "
                                 >
-                                  One Touch Mo3tred
+                                  One Touch AlMutarid
                                 </option>
                                 <option
                                   value="onetouch_merkhnya"
                                   className="bg-white/10 backdrop-blur-md text-slate-100 "
                                 >
-                                  One Touch Merkhnya
+                                  One Touch Markhaniya
                                 </option>
                                 <option
                                   value="welltouch"
                                   className="bg-white/10 backdrop-blur-md text-slate-100 "
                                 >
-                                  WellTouch
+                                  Well Touch
                                 </option>
                                 <option
                                   value="newage"
@@ -22276,19 +22159,19 @@ ${ttNotes}`
                                             value="onetouch_mo3tred"
                                             className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
-                                            One Touch Mo3tred
+                                            One Touch AlMutarid
                                           </option>
                                           <option
                                             value="onetouch_merkhnya"
                                             className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
-                                            One Touch Merkhnya
+                                            One Touch Markhaniya
                                           </option>
                                           <option
                                             value="welltouch"
                                             className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
-                                            WellTouch
+                                            Well Touch
                                           </option>
                                           <option
                                             value="newage"
@@ -22509,19 +22392,19 @@ ${ttNotes}`
                                             value="onetouch_mo3tred"
                                             className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
-                                            One Touch Mo3tred
+                                            One Touch AlMutarid
                                           </option>
                                           <option
                                             value="onetouch_merkhnya"
                                             className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
-                                            One Touch Merkhnya
+                                            One Touch Markhaniya
                                           </option>
                                           <option
                                             value="welltouch"
                                             className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
-                                            WellTouch
+                                            Well Touch
                                           </option>
                                           <option
                                             value="newage"
@@ -22637,19 +22520,19 @@ ${ttNotes}`
                                             value="onetouch_mo3tred"
                                             className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
-                                            One Touch Mo3tred
+                                            One Touch AlMutarid
                                           </option>
                                           <option
                                             value="onetouch_merkhnya"
                                             className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
-                                            One Touch Merkhnya
+                                            One Touch Markhaniya
                                           </option>
                                           <option
                                             value="welltouch"
                                             className="bg-white/10 backdrop-blur-md text-slate-100 "
                                           >
-                                            WellTouch
+                                            Well Touch
                                           </option>
                                           <option
                                             value="newage"
@@ -23148,19 +23031,19 @@ ${ttNotes}`
                                         value="onetouch_mo3tred"
                                         className="bg-white/10 backdrop-blur-md text-slate-100 "
                                       >
-                                        One Touch Mo3tred
+                                        One Touch AlMutarid
                                       </option>
                                       <option
                                         value="onetouch_merkhnya"
                                         className="bg-white/10 backdrop-blur-md text-slate-100 "
                                       >
-                                        One Touch Merkhnya
+                                        One Touch Markhaniya
                                       </option>
                                       <option
                                         value="welltouch"
                                         className="bg-white/10 backdrop-blur-md text-slate-100 "
                                       >
-                                        WellTouch
+                                        Well Touch
                                       </option>
                                       <option
                                         value="newage"
@@ -25786,122 +25669,223 @@ ${ttNotes}`
                                   <th className="p-4 rounded-l-xl w-12">#</th>
                                   <th className="p-4">Agent Name</th>
                                   <th className="p-4">App Username</th>
-                                  <th className="p-4">Email</th>
-                                  <th className="p-4">Phone</th>
-                                  <th className="p-4">LOB</th>
-                                  <th className="p-4">LOB Team</th>
-                                  <th className="p-4">Role</th>
-                                  <th className="p-4 rounded-r-xl">
-                                    Team Leader
-                                  </th>
+                                  {(directoryHeaders || []).length > 0 ? (
+                                    (directoryHeaders || []).map((header, hIdx) => {
+                                      const isLast = hIdx === (directoryHeaders || []).length - 1;
+                                      return (
+                                        <th
+                                          key={hIdx}
+                                          className={`p-4 ${isLast ? "rounded-r-xl" : ""}`}
+                                        >
+                                          {header}
+                                        </th>
+                                      );
+                                    })
+                                  ) : (
+                                    <>
+                                      <th className="p-4">Email</th>
+                                      <th className="p-4">Phone</th>
+                                      <th className="p-4">LOB</th>
+                                      <th className="p-4">LOB Team</th>
+                                      <th className="p-4">Role</th>
+                                      <th className="p-4 rounded-r-xl">
+                                        Team Leader
+                                      </th>
+                                    </>
+                                  )}
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-white/5 font-medium">
-                                {registeredUsers
-                                  .filter((m) => {
-                                    if (!directorySearchQuery) return true;
-                                    const q =
-                                      directorySearchQuery.toLowerCase();
-                                    return (
-                                      m.name.toLowerCase().includes(q) ||
-                                      (m.email &&
-                                        m.email.toLowerCase().includes(q)) ||
-                                      (m.phone &&
-                                        String(m.phone)
+                                {agentDirectory && agentDirectory.length > 0 ? (
+                                  agentDirectory
+                                    .filter((row) => {
+                                      if (!directorySearchQuery) return true;
+                                      const q = directorySearchQuery.toLowerCase();
+                                      return (
+                                        row.agentName.toLowerCase().includes(q) ||
+                                        Object.values(row.data).some((v) =>
+                                          String(v || "").toLowerCase().includes(q)
+                                        ) ||
+                                        getUsernameFromFullName(row.agentName)
                                           .toLowerCase()
-                                          .includes(q)) ||
-                                      getUsernameFromFullName(m.name)
-                                        .toLowerCase()
-                                        .includes(q)
-                                    );
-                                  })
-                                  .map((meta, idx) => (
-                                    <tr
-                                      key={idx}
-                                      className="hover:bg-white/5 transition-all"
-                                    >
-                                      <td className="p-4 text-slate-500 font-mono text-[11px]">
-                                        {idx + 1}
-                                      </td>
-                                      <td className="p-4 text-slate-100 font-bold">
-                                        {meta.name}
-                                      </td>
-                                      <td className="p-4 text-cyan-400 font-black font-mono">
-                                        {getUsernameFromFullName(meta.name)}
-                                      </td>
-                                      <td className="p-4">
-                                        {meta.email || "-"}
-                                      </td>
-                                      <td className="p-4 font-mono text-[12px]">
-                                        {meta.phone ? (
-                                          <span className="text-emerald-400">
-                                            {meta.phone
-                                              .replace(/\s+/g, "")
-                                              .startsWith("+")
-                                              ? meta.phone.replace(/\s+/g, "")
-                                              : meta.phone}
-                                          </span>
-                                        ) : (
-                                          <span className="text-slate-600">
-                                            -
-                                          </span>
-                                        )}
-                                      </td>
-                                      <td className="p-4">
-                                        {meta.lob ? (
+                                          .includes(q)
+                                      );
+                                    })
+                                    .map((row, idx) => {
+                                      const directoryHeadersArray = directoryHeaders || [];
+                                      const tlHeader = directoryHeadersArray.find((h) => {
+                                        const lh = String(h || "").toLowerCase().trim();
+                                        return lh === "tl" || lh === "team leader" || lh.includes("manager") || lh.includes("supervisor") || lh.includes("lead");
+                                      });
+                                      const roleHeader = directoryHeadersArray.find((h) => {
+                                        const lh = String(h || "").toLowerCase().trim();
+                                        return lh === "role" || lh === "lob" || lh.includes("job title") || lh.includes("designation");
+                                      });
+                                      const lobHeader = directoryHeadersArray.find((h) => {
+                                        const lh = String(h || "").toLowerCase().trim();
+                                        return lh === "lob" || lh.includes("line") || lh.includes("account") || lh.includes("function");
+                                      });
+                                      const lobTeamHeader = directoryHeadersArray.find((h) => {
+                                        const lh = String(h || "").toLowerCase().trim();
+                                        return lh === "lob team" || lh === "team" || lh.includes("sub") || lh.includes("squad");
+                                      });
+                                      const emailHeader = directoryHeadersArray.find((h) => {
+                                        const lh = String(h || "").toLowerCase().trim();
+                                        return lh === "email" || lh === "mail" || lh === "corporate email" || lh === "work email";
+                                      });
+                                      const phoneHeader = directoryHeadersArray.find((h) => {
+                                        const lh = String(h || "").toLowerCase().trim();
+                                        return lh === "phone" || lh === "mobile" || lh === "contact" || lh === "tel";
+                                      });
+
+                                      const emailVal = emailHeader && row.data[emailHeader] ? row.data[emailHeader] : "-";
+                                      const phoneVal = phoneHeader && row.data[phoneHeader] ? row.data[phoneHeader] : "-";
+                                      const lobVal = lobHeader && row.data[lobHeader] ? row.data[lobHeader] : "";
+                                      const lobTeamVal = lobTeamHeader && row.data[lobTeamHeader] ? row.data[lobTeamHeader] : "-";
+                                      const roleVal = roleHeader && row.data[roleHeader] ? row.data[roleHeader] : "-";
+                                      const tlVal = tlHeader && row.data[tlHeader] ? row.data[tlHeader] : "-";
+
+                                      return (
+                                        <tr key={row.id} className="hover:bg-white/5 transition-all">
+                                          <td className="p-4 text-slate-500 font-mono text-[11px]">{idx + 1}</td>
+                                          <td className="p-4 text-slate-100 font-bold">{row.agentName}</td>
+                                          <td className="p-4 text-cyan-400 font-black font-mono">
+                                            {getUsernameFromFullName(row.agentName)}
+                                          </td>
+                                          {(directoryHeadersArray || []).length > 0 ? (
+                                            (directoryHeadersArray || []).map((header, hIdx) => (
+                                              <td key={hIdx} className="p-4">
+                                                {row.data[header] || "-"}
+                                              </td>
+                                            ))
+                                          ) : (
+                                            <>
+                                              <td className="p-4">{emailVal}</td>
+                                              <td className="p-4 font-mono text-[12px]">
+                                                {phoneVal !== "-" ? (
+                                                  <span className="text-emerald-400">
+                                                    {phoneVal.replace(/\s+/g, "").startsWith("+")
+                                                      ? phoneVal.replace(/\s+/g, "")
+                                                      : phoneVal}
+                                                  </span>
+                                                ) : (
+                                                  <span className="text-slate-600">-</span>
+                                                )}
+                                              </td>
+                                              <td className="p-4">
+                                                {lobVal ? (
+                                                  <span
+                                                    className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
+                                                      lobVal.toLowerCase().includes("call")
+                                                        ? "bg-blue-500/15 text-blue-300 border border-blue-500/20"
+                                                        : lobVal.toLowerCase().includes("chat")
+                                                          ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"
+                                                          : lobVal.toLowerCase().includes("social")
+                                                            ? "bg-pink-500/15 text-pink-300 border border-pink-500/20"
+                                                            : "bg-white/10 text-slate-300 border border-white/10"
+                                                    }`}
+                                                  >
+                                                    {lobVal}
+                                                  </span>
+                                                ) : (
+                                                  <span className="text-slate-600">-</span>
+                                                )}
+                                              </td>
+                                              <td className="p-4">{lobTeamVal}</td>
+                                              <td className="p-4">
+                                                <span
+                                                  className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${
+                                                    roleVal.toLowerCase() === "tl" || roleVal.toLowerCase() === "team leader"
+                                                      ? "bg-amber-950/30 text-amber-400 border-amber-500/20"
+                                                      : roleVal.toLowerCase() === "qa"
+                                                        ? "bg-purple-950/30 text-purple-400 border-purple-500/20"
+                                                        : "bg-slate-800 text-slate-400 border-slate-700"
+                                                  }`}
+                                                >
+                                                  {roleVal}
+                                                </span>
+                                              </td>
+                                              <td className="p-4 text-cyan-300 font-bold">{tlVal}</td>
+                                            </>
+                                          )}
+                                        </tr>
+                                      );
+                                    })
+                                ) : registeredUsers.length > 0 ? (
+                                  registeredUsers
+                                    .filter((m) => {
+                                      if (!directorySearchQuery) return true;
+                                      const q = directorySearchQuery.toLowerCase();
+                                      return (
+                                        m.name.toLowerCase().includes(q) ||
+                                        (m.email && m.email.toLowerCase().includes(q)) ||
+                                        (m.phone && String(m.phone).toLowerCase().includes(q)) ||
+                                        getUsernameFromFullName(m.name).toLowerCase().includes(q)
+                                      );
+                                    })
+                                    .map((meta, idx) => (
+                                      <tr key={idx} className="hover:bg-white/5 transition-all">
+                                        <td className="p-4 text-slate-500 font-mono text-[11px]">{idx + 1}</td>
+                                        <td className="p-4 text-slate-100 font-bold">{meta.name}</td>
+                                        <td className="p-4 text-cyan-400 font-black font-mono">
+                                          {getUsernameFromFullName(meta.name)}
+                                        </td>
+                                        <td className="p-4">{meta.email || "-"}</td>
+                                        <td className="p-4 font-mono text-[12px]">
+                                          {meta.phone ? (
+                                            <span className="text-emerald-400">
+                                              {meta.phone.replace(/\s+/g, "").startsWith("+")
+                                                ? meta.phone.replace(/\s+/g, "")
+                                                : meta.phone}
+                                            </span>
+                                          ) : (
+                                            <span className="text-slate-600">-</span>
+                                          )}
+                                        </td>
+                                        <td className="p-4">
+                                          {meta.lob ? (
+                                            <span
+                                              className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
+                                                meta.lob.toLowerCase().includes("call")
+                                                  ? "bg-blue-500/15 text-blue-300 border border-blue-500/20"
+                                                  : meta.lob.toLowerCase().includes("chat")
+                                                    ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"
+                                                    : meta.lob.toLowerCase().includes("social")
+                                                      ? "bg-pink-500/15 text-pink-300 border border-pink-500/20"
+                                                      : "bg-white/10 text-slate-300 border border-white/10"
+                                              }`}
+                                            >
+                                              {meta.lob}
+                                            </span>
+                                          ) : (
+                                            <span className="text-slate-600">-</span>
+                                          )}
+                                        </td>
+                                        <td className="p-4">{meta.lobTeam || "-"}</td>
+                                        <td className="p-4">
                                           <span
-                                            className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
-                                              meta.lob
-                                                .toLowerCase()
-                                                .includes("call")
-                                                ? "bg-blue-500/15 text-blue-300 border border-blue-500/20"
-                                                : meta.lob
-                                                      .toLowerCase()
-                                                      .includes("chat")
-                                                  ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"
-                                                  : meta.lob
-                                                        .toLowerCase()
-                                                        .includes("social")
-                                                    ? "bg-pink-500/15 text-pink-300 border border-pink-500/20"
-                                                    : "bg-white/10 text-slate-300 border border-white/10"
+                                            className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${
+                                              meta.role === "tl"
+                                                ? "bg-amber-950/30 text-amber-400 border-amber-500/20"
+                                                : meta.role === "qa"
+                                                  ? "bg-purple-950/30 text-purple-400 border-purple-500/20"
+                                                  : "bg-slate-800 text-slate-400 border-slate-700"
                                             }`}
                                           >
-                                            {meta.lob}
-                                          </span>
-                                        ) : (
-                                          <span className="text-slate-600">
-                                            -
-                                          </span>
-                                        )}
-                                      </td>
-                                      <td className="p-4">
-                                        {meta.lobTeam || "-"}
-                                      </td>
-                                      <td className="p-4">
-                                        <span
-                                          className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${
-                                            meta.role === "tl"
-                                              ? "bg-amber-950/30 text-amber-400 border-amber-500/20"
+                                            {meta.role === "tl"
+                                              ? "Team Leader"
                                               : meta.role === "qa"
-                                                ? "bg-purple-950/30 text-purple-400 border-purple-500/20"
-                                                : "bg-slate-800 text-slate-400 border-slate-700"
-                                          }`}
-                                        >
-                                          {meta.role === "tl"
-                                            ? "Team Leader"
-                                            : meta.role === "qa"
-                                              ? "QA"
-                                              : "Agent"}
-                                        </span>
-                                      </td>
-                                      <td className="p-4 text-cyan-300 font-bold">
-                                        {meta.teamLeader || "-"}
-                                      </td>
-                                    </tr>
-                                  ))}
+                                                ? "QA"
+                                                : "Agent"}
+                                          </span>
+                                        </td>
+                                        <td className="p-4 text-cyan-300 font-bold">{meta.teamLeader || "-"}</td>
+                                      </tr>
+                                    ))
+                                ) : null}
                               </tbody>
                             </table>
-                            {registeredUsers.length === 0 && (
+                            {(!agentDirectory || agentDirectory.length === 0) && registeredUsers.length === 0 && (
                               <div className="text-center p-8 text-slate-500 font-medium font-sans">
                                 No directory data active. Please upload a
                                 headcount file.
