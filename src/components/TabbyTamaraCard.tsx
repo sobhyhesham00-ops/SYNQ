@@ -929,6 +929,16 @@ export const TabbyTamaraCard = ({
       {activeFintechHandlingId === req.id && isTLOreSupport && req.status === "not_confirmed" && (
         <div className="bg-slate-900/80 border-y border-indigo-500/30 p-5 space-y-4">
            <h4 className="text-xs font-black text-indigo-400 flex items-center gap-2 mb-3 uppercase tracking-widest"><CornerDownRight className="w-4 h-4" /> Processing Panel</h4>
+           <div className="bg-indigo-950/20 border border-indigo-500/20 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 overflow-hidden mb-4">
+             <div className="flex flex-col">
+               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Generate Link For</span>
+               <span className="text-lg font-black text-white font-mono tracking-tight mt-0.5">{calculateTabbyTamaraPrice(req.priceWithoutTax || 0).finalPriceFormatted}</span>
+             </div>
+             <div className="flex flex-col sm:text-right">
+               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Base Target</span>
+               <span className="text-sm font-semibold text-slate-300 font-mono mt-0.5">{calculateTabbyTamaraPrice(req.priceWithoutTax || 0).priceBeforeFeeFormatted} <span className="text-slate-500 text-xs ml-1">+ {calculateTabbyTamaraPrice(req.priceWithoutTax || 0).feeAmountFormatted} VAT</span></span>
+             </div>
+           </div>
            <div className="space-y-4">
              <div>
                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5 flex justify-between">

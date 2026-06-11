@@ -1799,74 +1799,20 @@ export const buildCaseClipboardPayload = (request: TabbyTamaraRequest): Clipboar
 
   // Text version
   const textLines = [
-    `=== TABBY/TAMARA CASE REPORT ===`,
-    `Reference ID: ${refCode}`,
-    `Provider: ${provider}`,
+    `=== ${provider} PAYMENT REQUEST ===`,
     `Patient Name: ${patient}`,
-    `File/ID Number: ${fileNum}`,
-    `Phone Number: ${phone}`,
-    `Clinic: ${clinic}`,
-    `Source Channel: ${channel}`,
-    `Assignee: ${assignee}`,
-    `Current Status: ${workflowStatusLabel}`,
-    `Payment Link: ${paymentLink}`,
-    `=============================`,
-    request.notes ? `\n[Agent Notes]\n${request.notes}` : '',
-    request.tlNotes ? `\n[TL Notes]\n${request.tlNotes}` : '',
-    request.agentContactNotes ? `\n[Contact Notes]\n${request.agentContactNotes}` : '',
-    repliesList.length > 0 ? `\n[Activity & Correspondence History]\n${repliesList.join('\n')}` : '',
-    attachmentsList.length > 0
-      ? `\n[Attachments (${attachmentsList.length})]\n` +
-        attachmentsList.map((att) => `- ${att.name || 'Attachment'}: ${att.url}`).join('\n')
-      : '',
+    `Final Amount (incl. VAT): ${calculateTabbyTamaraPrice(request.priceWithoutTax || 0).finalPriceFormatted}`,
+    `Payment Link: ${paymentLink}`
   ].filter(Boolean).join('\n');
 
   // HTML version
   let html = `<div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; color: #333; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; background-color: #f8fafc;">`;
-  html += `<h2 style="margin-top: 0; color: #1e3a8a; border-bottom: 2px solid #3b82f6; padding-bottom: 8px;">[${provider}] Case Report: ${patient}</h2>`;
-  html += `<p style="margin: 6px 0;"><strong>Reference:</strong> ${refCode}</p>`;
-  html += `<p style="margin: 6px 0;"><strong>Patient:</strong> ${patient} | <strong>File/ID:</strong> ${fileNum}</p>`;
-  html += `<p style="margin: 6px 0;"><strong>Phone:</strong> ${phone} | <strong>Clinic:</strong> ${clinic}</p>`;
-  html += `<p style="margin: 6px 0;"><strong>Channel:</strong> ${channel} | <strong>Assignee:</strong> ${assignee}</p>`;
-  html += `<p style="margin: 6px 0;"><strong>Status:</strong> <span style="background-color: #dbeafe; color: #1e40af; font-weight: bold; padding: 2px 8px; border-radius: 6px; font-size: 11px;">${workflowStatusLabel}</span></p>`;
+  html += `<h2 style="margin-top: 0; color: #0f172a; font-size: 18px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">${provider} Payment Request</h2>`;
   
-  if (request.paymentLink) {
-    html += `<p style="margin: 10px 0; padding: 10px; background-color: #fef3c7; border: 1px dashed #f59e0b; border-radius: 8px;"><strong>Payment Link:</strong> <a href="${request.paymentLink}" style="color: #b45309; text-decoration: underline; font-weight: bold;">${request.paymentLink}</a></p>`;
-  } else {
-    html += `<p style="margin: 10px 0; color: #ef4444;"><strong>Payment Link:</strong> No link generated yet</p>`;
-  }
-
-  if (request.notes) {
-    html += `<div style="margin-top: 15px; padding: 12px; background-color: #ffffff; border-left: 4px solid #64748b; border-radius: 4px;"><strong>Agent Notes:</strong><br/>${request.notes.replace(/\n/g, '<br/>')}</div>`;
-  }
-  if (request.tlNotes) {
-    html += `<div style="margin-top: 15px; padding: 12px; background-color: #ffffff; border-left: 4px solid #10b981; border-radius: 4px;"><strong>TL Notes:</strong><br/>${request.tlNotes.replace(/\n/g, '<br/>')}</div>`;
-  }
-  if (request.agentContactNotes) {
-    html += `<div style="margin-top: 15px; padding: 12px; background-color: #ffffff; border-left: 4px solid #06b6d4; border-radius: 4px;"><strong>Contact Notes:</strong><br/>${request.agentContactNotes.replace(/\n/g, '<br/>')}</div>`;
-  }
-
-  if (repliesHtmlList.length > 0) {
-    html += `<h3 style="margin-top: 20px; color: #1e293b; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px;">Activity & Chat History</h3>`;
-    html += `<ul style="padding-left: 20px; margin: 8px 0; font-size: 13px;">${repliesHtmlList.join('')}</ul>`;
-  }
-
-  if (attachmentsList.length > 0) {
-    html += `<h3 style="margin-top: 20px; color: #1e293b; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px;">Attachments (${attachmentsList.length})</h3>`;
-    html += `<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">`;
-    attachmentsList.forEach((att) => {
-      const isImg = att.url.startsWith('data:image/') || att.url.toLowerCase().match(/\.(jpeg|jpg|gif|png|webp)/);
-      html += `<div style="margin-bottom: 10px;">`;
-      html += `<a href="${att.url}" style="color: #2563eb; font-weight: bold; font-size: 13px; text-decoration: none;"> ${att.name}</a>`;
-      if (isImg) {
-        html += `<br/><img src="${att.url}" alt="${att.name}" style="max-width: 100%; max-height: 250px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1;" />`;
-      }
-      html += `</div>`;
-    });
-    html += `</div>`;
-  }
-
-  html += `</div>`;
-
+  html += `<table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;">`;
+  html += `<tr><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9; color: #64748b; width: 140px;">Patient Name</td><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">${patient}</td></tr>`;
+  html += `<tr><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9; color: #64748b; width: 140px;">Final Amount</td><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">${calculateTabbyTamaraPrice(request.priceWithoutTax || 0).finalPriceFormatted}</td></tr>`;
+  html += `<tr><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9; color: #64748b;">Payment Link</td><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9;"><a href="${normalizeUrl(paymentLink)}" target="_blank" style="color: #2563eb; text-decoration: none; word-break: break-all;">${paymentLink}</a></td></tr>`;
+  html += `</table></div>`;
   return { text: textLines, html, attachmentsList };
 };
