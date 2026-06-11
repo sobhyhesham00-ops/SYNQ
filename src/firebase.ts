@@ -12,7 +12,7 @@ import {
   getDoc as firestoreGetDoc,
   connectFirestoreEmulator
 } from "firebase/firestore";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, connectAuthEmulator } from "firebase/auth";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, connectAuthEmulator, signInAnonymously } from "firebase/auth";
 import { getStorage, connectStorageEmulator } from "firebase/storage";
 import firebaseConfigFromJson from "../firebase-applet-config.json";
 
@@ -49,10 +49,23 @@ const isTestEnv = typeof process !== 'undefined' && process.env.NODE_ENV === 'te
 export const db = initializeFirestore(app, {
   localCache: isTestEnv ? undefined : persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
   ignoreUndefinedProperties: true,
-  experimentalForceLongPolling: true
 }, firebaseConfig.firestoreDatabaseId);
 
 export const auth = getAuth(app);
+
+export const ensureAuth = async () => {
+  try {
+    if (!auth.currentUser) {
+      console.log("[Firebase Auth] Attempting anonymous sign-in...");
+      const credential = await signInAnonymously(auth);
+      return credential.user;
+    }
+    return auth.currentUser;
+  } catch (error) {
+    console.error("[Firebase Auth] Anonymous sign-in failed:", error);
+    return null;
+  }
+};
 export const storage = getStorage(app);
 
 // Enable Emulator Suite globally in local environment

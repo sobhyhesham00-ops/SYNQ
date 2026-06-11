@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Bell, CheckCircle2, Info, AlertTriangle, X, Trash2 } from 'lucide-react';
 import { doc } from 'firebase/firestore'; 
-import { db, wrappedUpdateDoc as updateDoc } from '../firebase'; // verify path
+import { db, wrappedUpdateDoc as updateDoc } from '../firebase';
 
 export const NotificationDrawer = ({
   isOpen,
@@ -11,15 +11,17 @@ export const NotificationDrawer = ({
   currentUser,
   handleMarkAllNotifsAsRead,
   handleMarkSingleNotifAsRead,
+  isMarkingAll,
   setActiveTab,
   getRecordByEntity,
   setViewingRecord,
 }: any) => {
 
   const handleClearNotif = (id: string, currentClearedBy: string[]) => {
-    if (!currentUser) return;
+    if (!currentUser?.id) return;
+    const userId = currentUser.id; // capture before async boundary
     const seenSet = new Set(currentClearedBy || []);
-    seenSet.add(currentUser.id);
+    seenSet.add(userId);
     updateDoc(doc(db, "notifications", id), {
       clearedByUsers: Array.from(seenSet)
     }).catch(e => console.error("Clear Notif Error:", e));
@@ -35,13 +37,12 @@ export const NotificationDrawer = ({
   const getNavTab = (notif: any) => {
     if (notif.entityType === 'inquiry' || notif.type === 'inquiry') return 'inquiries';
     if (notif.entityType === 'scheduling_request' || notif.type === 'schedule') return 'my-requests';
-    if (notif.entityType === 'case') return 'daily-cases';
+    if (notif.entityType === 'case') return 'cases';
     if (notif.entityType === 'tt_request' || notif.type === 'fintech_request') return 'tabby-tamara';
     if (notif.entityType === 'tt_complaint' || notif.type === 'fintech_complaint') return 'complaints';
     if (notif.entityType === 'client_comm') return 'client-comms';
-    
-    // fallbacks based on type string for older notifications:
     if (notif.type === 'feedback') return 'tl-feedback';
+    if (notif.type === 'absence' || notif.type === 'compliance') return 'dashboard';
     return null;
   };
 
@@ -121,9 +122,14 @@ export const NotificationDrawer = ({
                     </span>
                     <button 
                       onClick={handleMarkAllNotifsAsRead}
-                      className="text-[10px] uppercase tracking-wider font-bold text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer"
+                      disabled={isMarkingAll || unreadCount === 0}
+                      className={`text-[10px] uppercase tracking-wider font-bold transition-colors ${
+                        isMarkingAll || unreadCount === 0
+                          ? 'text-slate-500 cursor-not-allowed opacity-50'
+                          : 'text-indigo-400 hover:text-indigo-300 cursor-pointer'
+                      }`}
                     >
-                      Mark all as read
+                      {isMarkingAll ? "Marking..." : "Mark all as read"}
                     </button>
                   </div>
 

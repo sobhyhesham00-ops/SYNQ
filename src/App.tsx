@@ -22,10 +22,12 @@ import {
   db, 
   auth,
   initAuth, 
+  ensureAuth,
   googleSignIn, 
   getAccessToken, 
   logout,
   wrappedOnSnapshot as onSnapshot,
+  wrappedOnSnapshot,
   wrappedSetDoc as setDoc,
   wrappedUpdateDoc as updateDoc,
   wrappedDeleteDoc as deleteDoc,
@@ -866,31 +868,13 @@ export default function App() {
 
   // Standard standalone offline compliant sync listener for multiple tabs and real-time Firestore
   useEffect(() => {
-    // 0. Auto-unlock explicitly incorrect admins to fix legacy locking bugs
-    try {
-      const getCreds = localStorage.getItem("sched_locked_accounts");
-      if (getCreds) {
-        let arr = JSON.parse(getCreds) as string[];
-        const filtered = arr.filter(
-          (name) =>
-            !name.includes("amira.hassan") &&
-            !name.includes("hesham.sobhy") &&
-            !name.includes("hesso.sobhy"),
-        );
-        if (filtered.length !== arr.length) {
-          localStorage.setItem(
-            "sched_locked_accounts",
-            JSON.stringify(filtered),
-          );
-          setDoc(doc(db, "system", "sched_locked_accounts"), {
-            data: filtered,
-          }).catch((e) => console.error(e));
-        }
-      }
-    } catch (e) {}
+    let active = true;
+    let unsubscribes: any[] = [];
+
+    let handleStorageListener: ((e: StorageEvent) => void) | null = null;
 
     // 1. Local storage event listener (for legacy/offline tab sync)
-    const handleStorage = (e: StorageEvent) => {
+    handleStorageListener = (e: StorageEvent) => {
       try {
         if (e.key === "sched_inquiries" && e.newValue)
           setInquiries(JSON.parse(e.newValue));
@@ -910,9 +894,46 @@ export default function App() {
         console.error("Storage sync failed:", err);
       }
     };
-    window.addEventListener("storage", handleStorage);
+    window.addEventListener("storage", handleStorageListener);
 
-    // 2. Real-time Firestore Sync via Collections!
+    // Trigger anonymous authentication if not already logged in
+    ensureAuth();
+
+    const unsubAuth = auth.onAuthStateChanged((firebaseUser) => {
+      if (!firebaseUser) return;
+      if (!active) return;
+
+      // Define local onSnapshot helper to register unsubscribes
+      const onSnapshot = (ref: any, ...args: any[]) => {
+        const unsub = wrappedOnSnapshot(ref, ...args);
+        unsubscribes.push(unsub);
+        return unsub;
+      };
+
+      // 0. Auto-unlock explicitly incorrect admins to fix legacy locking bugs
+      try {
+        const getCreds = localStorage.getItem("sched_locked_accounts");
+        if (getCreds) {
+          let arr = JSON.parse(getCreds) as string[];
+          const filtered = arr.filter(
+            (name) =>
+              !name.includes("amira.hassan") &&
+              !name.includes("hesham.sobhy") &&
+              !name.includes("hesso.sobhy"),
+          );
+          if (filtered.length !== arr.length) {
+            localStorage.setItem(
+              "sched_locked_accounts",
+              JSON.stringify(filtered),
+            );
+            setDoc(doc(db, "system", "sched_locked_accounts"), {
+              data: filtered,
+            }).catch((e) => console.error(e));
+          }
+        }
+      } catch (e) {}
+
+      // 2. Real-time Firestore Sync via Collections!
     const unsubInquiries = onSnapshot(collection(db, "inquiries"), (snap) => {
       const arr = snap.docs.map((d) => d.data() as Inquiry);
       arr.sort(
@@ -922,6 +943,8 @@ export default function App() {
       );
       setInquiries(arr);
       setStorageItem("sched_inquiries", arr);
+    }, (error) => {
+      console.error("inquiries snapshot error:", error.code, error.message);
     });
 
     const unsubQa = onSnapshot(collection(db, "qa_scores"), (snap) => {
@@ -933,6 +956,8 @@ export default function App() {
       );
       setQaScores(arr);
       setStorageItem("sched_qa_scores", arr);
+    }, (error) => {
+      console.error("qa_scores snapshot error:", error.code, error.message);
     });
 
     const unsubQATemplate = onSnapshot(
@@ -943,7 +968,9 @@ export default function App() {
           setQaTemplate(data);
           setStorageItem("sched_qa_template", data);
         }
-      },
+      }, (error) => {
+        console.error("sched_qa_template snapshot error:", error.code, error.message);
+      }
     );
     const unsubTT = onSnapshot(collection(db, "tt_requests"), (snap) => {
       const arr = snap.docs.map((d) => d.data() as TabbyTamaraRequest);
@@ -954,6 +981,8 @@ export default function App() {
       );
       setTabbyTamaraRequests(arr);
       setStorageItem("sched_tabby_tamara", arr);
+    }, (error) => {
+      console.error("tt_requests snapshot error:", error.code, error.message);
     });
     const unsubComp = onSnapshot(collection(db, "tt_complaints"), (snap) => {
       const arr = snap.docs.map((d) => d.data() as TabbyTamaraComplaint);
@@ -964,6 +993,8 @@ export default function App() {
       );
       setTabbyTamaraComplaints(arr);
       setStorageItem("sched_tt_complaints", arr);
+    }, (error) => {
+      console.error("tt_complaints snapshot error:", error.code, error.message);
     });
     const unsubComms = onSnapshot(collection(db, "client_comms"), (snap) => {
       const arr = snap.docs.map((d) => d.data() as ClientCommunicationRequest);
@@ -974,6 +1005,8 @@ export default function App() {
       );
       setClientComms(arr);
       setStorageItem("sched_client_comms", arr);
+    }, (error) => {
+      console.error("client_comms snapshot error:", error.code, error.message);
     });
     const unsubReq = onSnapshot(
       collection(db, "scheduling_requests"),
@@ -986,7 +1019,9 @@ export default function App() {
         );
         setRequests(arr);
         setStorageItem("sched_requests", arr);
-      },
+      }, (error) => {
+        console.error("scheduling_requests snapshot error:", error.code, error.message);
+      }
     );
     const unsubTime = onSnapshot(
       collection(db, "timelogs"),
@@ -994,8 +1029,12 @@ export default function App() {
         console.log("Got timelogs snapshot, docs =", snap.size);
         const arr = snap.docs.map((d) => d.data() as TimeLog);
         arr.sort((a, b) => {
-          const d1 = a.date ? new Date(a.date).getTime() : 0;
-          const d2 = b.date ? new Date(b.date).getTime() : 0;
+          const d1 = a.date
+            ? new Date(a.date).getTime()
+            : a.clockIn ? new Date(a.clockIn).getTime() : 0;
+          const d2 = b.date
+            ? new Date(b.date).getTime()
+            : b.clockIn ? new Date(b.clockIn).getTime() : 0;
           const dateDiff = (isNaN(d2) ? 0 : d2) - (isNaN(d1) ? 0 : d1);
           if (dateDiff !== 0) return dateDiff;
           const tsA = parseInt((a.id || "").split("_")[1] || "0", 10);
@@ -1014,7 +1053,6 @@ export default function App() {
         toast.error("Sync error on timelogs. They may not appear updated.");
       },
     );
-    const unsubSched = () => {};
     let isAnnouncementsInitialized = false;
     const unsubAnnouncements = onSnapshot(
       collection(db, "announcements"),
@@ -1108,7 +1146,9 @@ export default function App() {
         } else {
           setIsAppKilled(false);
         }
-      },
+      }, (error) => {
+        console.error("app_status snapshot error:", error.code, error.message);
+      }
     );
 
     const unsubSupp = onSnapshot(
@@ -1119,7 +1159,9 @@ export default function App() {
           setSupportAssignments(data);
           setStorageItem("sched_support_assignments", data);
         }
-      },
+      }, (error) => {
+        console.error("sched_support_assignments snapshot error:", error.code, error.message);
+      }
     );
     const unsubCases = onSnapshot(collection(db, "cases"), (snap) => {
       const arr = snap.docs.map((d) => d.data() as CaseRecord);
@@ -1130,13 +1172,16 @@ export default function App() {
       );
       setCases(arr);
       setStorageItem("sched_cases", arr);
+    }, (error) => {
+      console.error("cases snapshot error:", error.code, error.message);
     });
-    const unsubOrders = () => {};
     const unsubAgents = onSnapshot(
       doc(db, "system", "sched_agents_list"),
       (snap) => {
         // Intentionally empty or minimal - we prefer the dynamic list from unsubUsers/directory
-      },
+      }, (error) => {
+        console.error("sched_agents_list snapshot error:", error.code, error.message);
+      }
     );
     const unsubMeta = onSnapshot(
       doc(db, "system", "sched_agent_meta"),
@@ -1149,7 +1194,9 @@ export default function App() {
           setAgentMeta(data);
           setStorageItem("sched_agent_meta", data);
         }
-      },
+      }, (error) => {
+        console.error("sched_agent_meta snapshot error:", error.code, error.message);
+      }
     );
     const unsubDir = onSnapshot(
       doc(db, "system", "sched_agent_directory"),
@@ -1159,7 +1206,9 @@ export default function App() {
           setAgentDirectory(data);
           setStorageItem("sched_agent_directory", data);
         }
-      },
+      }, (error) => {
+        console.error("sched_agent_directory snapshot error:", error.code, error.message);
+      }
     );
     const unsubDirHeaders = onSnapshot(
       doc(db, "system", "sched_agent_directory_headers"),
@@ -1169,7 +1218,9 @@ export default function App() {
           setDirectoryHeaders(data);
           setStorageItem("sched_agent_directory_headers", data);
         }
-      },
+      }, (error) => {
+        console.error("sched_agent_directory_headers snapshot error:", error.code, error.message);
+      }
     );
 
     const unsubRosterPub = onSnapshot(
@@ -1180,7 +1231,9 @@ export default function App() {
           setIsRosterPublished(data);
           setStorageItem("sched_roster_published", data);
         }
-      },
+      }, (error) => {
+        console.error("sched_roster_published snapshot error:", error.code, error.message);
+      }
     );
 
     const unsubCredentials = onSnapshot(
@@ -1191,7 +1244,9 @@ export default function App() {
           setCredentials(data);
           setStorageItem("sched_credentials", data);
         }
-      },
+      }, (error) => {
+        console.error("sched_credentials snapshot error:", error.code, error.message);
+      }
     );
 
     const unsubLockedAccounts = onSnapshot(
@@ -1202,7 +1257,9 @@ export default function App() {
           setLockedAccounts(data);
           setStorageItem("sched_locked_accounts", data);
         }
-      },
+      }, (error) => {
+        console.error("sched_locked_accounts snapshot error:", error.code, error.message);
+      }
     );
 
     const unsubFailedAttempts = onSnapshot(
@@ -1213,10 +1270,10 @@ export default function App() {
           setFailedAttempts(data);
           setStorageItem("sched_failed_attempts", data);
         }
-      },
+      }, (error) => {
+        console.error("sched_failed_attempts snapshot error:", error.code, error.message);
+      }
     );
-
-    const unsubNotifs = () => {};
 
     const unsubFeedbacks = onSnapshot(
       collection(db, "tl_feedbacks"),
@@ -1229,7 +1286,9 @@ export default function App() {
         );
         setTlFeedbacks(arr);
         setStorageItem("sched_tl_feedbacks", arr);
-      },
+      }, (error) => {
+        console.error("tl_feedbacks snapshot error:", error.code, error.message);
+      }
     );
 
     const unsubAppVersion = onSnapshot(
@@ -1275,10 +1334,10 @@ export default function App() {
             version: CURRENT_APP_VERSION,
           }).catch(console.error);
         }
-      },
+      }, (error) => {
+        console.error("app_version snapshot error:", error.code, error.message);
+      }
     );
-
-    const unsubTodos = () => {};
 
     const unsubUsers = onSnapshot(collection(db, "users"), (snap) => {
       const dbUsers = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as any);
@@ -1296,42 +1355,31 @@ export default function App() {
             u?.name?.toLowerCase() === prevUser.name.toLowerCase(),
         );
         if (liveUserInfo) {
-          return { ...prevUser, ...liveUserInfo };
+          // Use Firestore doc ID as the canonical user ID
+          return { ...prevUser, ...liveUserInfo, id: liveUserInfo.id || prevUser.id };
         }
         return prevUser;
       });
+    }, (error) => {
+      console.error("users snapshot error:", error.code, error.message);
+    });
     });
 
     return () => {
-      unsubTodos();
-      unsubUsers();
-      unsubAppVersion();
-
-      window.removeEventListener("storage", handleStorage);
-      unsubInquiries();
-      unsubQa();
-      unsubQATemplate();
-      unsubTT();
-      unsubComp();
-      unsubComms();
-      unsubReq();
-      unsubTime();
-      unsubSched();
-      unsubAnnouncements();
-      unsubOrders();
-      unsubAppStatus();
-      unsubSupp();
-      unsubCases();
-      unsubAgents();
-      unsubMeta();
-      unsubDir();
-      unsubDirHeaders();
-      unsubRosterPub();
-      unsubNotifs();
-      unsubFeedbacks();
-      unsubCredentials();
-      unsubLockedAccounts();
-      unsubFailedAttempts();
+      active = false;
+      unsubAuth();
+      if (handleStorageListener) {
+        window.removeEventListener("storage", handleStorageListener);
+      }
+      unsubscribes.forEach((unsub) => {
+        if (typeof unsub === "function") {
+          try {
+            unsub();
+          } catch (e) {
+            console.error("Cleanup error:", e);
+          }
+        }
+      });
     };
   }, []);
 
@@ -1456,7 +1504,9 @@ export default function App() {
       `usr_${normalizedName}`,
       `usr_${currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}`,
       "all",
-      currentUser.role
+      currentUser.role,
+      currentUser.name,
+      currentUser.name.toLowerCase()
     ].filter(Boolean)));
 
     const qNotifs = query(
@@ -1475,16 +1525,11 @@ export default function App() {
         );
 
         const latest = arr[0];
-        if (latest) {
-          if (!isNotifsInitialized) {
-            isNotifsInitialized = true;
-            localStorage.setItem("sched_last_notified_notif_id", latest.id);
-          } else {
-            const lastNotifiedNotifId =
-              localStorage.getItem("sched_last_notified_notif_id") || "";
-            if (latest.id !== lastNotifiedNotifId) {
-              localStorage.setItem("sched_last_notified_notif_id", latest.id);
-
+        if (!isNotifsInitialized) {
+          isNotifsInitialized = true;
+          if (latest) {
+            const isUnreadByMe = !latest.seenByUsers?.includes(currentUser?.id || "");
+            if (isUnreadByMe) {
               const isAnnouncementNotification =
                 latest.title.toLowerCase().includes("announcement") ||
                 latest.title.toLowerCase().includes("broadcast");
@@ -1494,7 +1539,7 @@ export default function App() {
                 toast.info(
                   <div className="flex flex-col gap-1 text-left">
                     <span className="font-bold text-sm text-indigo-400">
-                       {latest.title}
+                      {latest.title}
                     </span>
                     <span className="text-xs text-slate-200 line-clamp-2">
                       {latest.message}
@@ -1503,6 +1548,37 @@ export default function App() {
                   { duration: 8000 },
                 );
               }
+            }
+            localStorage.setItem("sched_last_notified_notif_id", latest.id);
+          }
+          setNotifications(arr);
+          return;
+        }
+
+        const lastNotifiedNotifId =
+          localStorage.getItem("sched_last_notified_notif_id") || "";
+        if (latest && latest.id !== lastNotifiedNotifId) {
+          const isUnreadByMe = !latest.seenByUsers?.includes(currentUser?.id || "");
+          if (isUnreadByMe) {
+            localStorage.setItem("sched_last_notified_notif_id", latest.id);
+
+            const isAnnouncementNotification =
+              latest.title.toLowerCase().includes("announcement") ||
+              latest.title.toLowerCase().includes("broadcast");
+
+            if (!isAnnouncementNotification) {
+              triggerNotificationAlert();
+              toast.info(
+                <div className="flex flex-col gap-1 text-left">
+                  <span className="font-bold text-sm text-indigo-400">
+                     {latest.title}
+                  </span>
+                  <span className="text-xs text-slate-200 line-clamp-2">
+                    {latest.message}
+                  </span>
+                </div>,
+                { duration: 8000 },
+              );
             }
           }
         }
@@ -1758,6 +1834,7 @@ export default function App() {
 
   const [notifications, setNotifications] = useState<SystemNotification[]>([]);
   const [isNotifDrawerOpen, setIsNotifDrawerOpen] = useState(false);
+  const [isMarkingAll, setIsMarkingAll] = useState(false);
 
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallBtn, setShowInstallBtn] = useState(false);
@@ -1866,12 +1943,6 @@ export default function App() {
             audio.play().catch(() => {});
         } catch(e){}
     }
-    // Sync to state which forwards to firestore
-    setNotifications((prev) => {
-      const updated = [newNotif, ...prev];
-      return updated;
-    });
-
     // Auto-sync real-time to firestore
     setDoc(doc(db, "notifications", newNotif.id), newNotif).catch((e) =>
       console.error("Notif sync error:", e),
@@ -2039,59 +2110,65 @@ export default function App() {
     }
   };
 
-  const visibleNotifs = notifications.filter((notif) => {
-    if (!currentUser) return false;
-    if (notif.clearedByUsers && notif.clearedByUsers.includes(currentUser.id))
-      return false;
-    return true; // Already filtered by query (targetGroups)
-  });
+  const visibleNotifs = notifications
+    .filter((notif) => {
+      if (!currentUser) return false;
+      if (notif.clearedByUsers && notif.clearedByUsers.includes(currentUser.id))
+        return false;
+      return true; // Already filtered by query (targetGroups)
+    })
+    .filter((notif, index, self) => 
+      index === self.findIndex((n) => n.id === notif.id)
+    );
 
   const unreadCount = visibleNotifs.filter((notif) => {
+    const userId = currentUser?.id || "";
+    const userName = currentUser?.name || "";
     return (
-      !notif.seenByUsers || !notif.seenByUsers.includes(currentUser?.id || "")
+      !notif.seenByUsers || 
+      (!notif.seenByUsers.includes(userId) && !notif.seenByUsers.includes(userName))
     );
   }).length;
 
-  const handleMarkAllNotifsAsRead = () => {
-    if (!currentUser) return;
-    const updated = notifications.map((n) => {
-      // If it's in the list it should be visible based on our targetGroups, but let's check it's not cleared
-      if (n.clearedByUsers && n.clearedByUsers.includes(currentUser.id)) return n;
-      
-      const seenSet = new Set(n.seenByUsers || []);
-      if (!seenSet.has(currentUser.id)) {
+  const handleMarkAllNotifsAsRead = async () => {
+    if (!currentUser || isMarkingAll) return;
+    const unread = notifications.filter(n => 
+      !n.clearedByUsers?.includes(currentUser.id) &&
+      !n.seenByUsers?.includes(currentUser.id)
+    );
+    if (unread.length === 0) return;
+
+    setIsMarkingAll(true);
+    try {
+      const batch = writeBatch(db);
+      unread.forEach(n => {
+        const seenSet = new Set(n.seenByUsers || []);
         seenSet.add(currentUser.id);
-        const updatedNotif = { ...n, seenByUsers: Array.from(seenSet) };
-        // Sync to Firestore
-        updateDoc(doc(db, "notifications", n.id), {
-          seenByUsers: updatedNotif.seenByUsers,
-        }).catch((e) => console.error("Mark All Read Error:", e));
-        return updatedNotif;
-      }
-      return n;
-    });
-    setNotifications(updated);
-    toast.success("All notifications marked as read!");
+        batch.update(doc(db, "notifications", n.id), { seenByUsers: Array.from(seenSet) });
+      });
+      
+      await batch.commit();
+      toast.success("All notifications marked as read!");
+    } catch (e) {
+      console.error("Batch mark-read error:", e);
+      toast.error("Failed to mark all as read");
+    } finally {
+      setIsMarkingAll(false);
+    }
   };
 
   const handleMarkSingleNotifAsRead = (id: string) => {
     if (!currentUser) return;
-    const updated = notifications.map((n) => {
-      if (n.id === id) {
-        const seenSet = new Set(n.seenByUsers || []);
-        if (!seenSet.has(currentUser.id)) {
-          seenSet.add(currentUser.id);
-          const updatedNotif = { ...n, seenByUsers: Array.from(seenSet) };
-          // Sync to Firestore
-          updateDoc(doc(db, "notifications", n.id), {
-            seenByUsers: updatedNotif.seenByUsers,
-          }).catch((e) => console.error("Mark Single Read Error:", e));
-          return updatedNotif;
-        }
+    const n = notifications.find((item) => item.id === id);
+    if (n) {
+      const seenSet = new Set(n.seenByUsers || []);
+      if (!seenSet.has(currentUser.id)) {
+        seenSet.add(currentUser.id);
+        updateDoc(doc(db, "notifications", n.id), {
+          seenByUsers: Array.from(seenSet),
+        }).catch((e) => console.error("Mark Single Read Error:", e));
       }
-      return n;
-    });
-    setNotifications(updated);
+    }
   };
 
   useEffect(() => {
@@ -24642,6 +24719,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
         currentUser={currentUser}
         handleMarkAllNotifsAsRead={handleMarkAllNotifsAsRead}
         handleMarkSingleNotifAsRead={handleMarkSingleNotifAsRead}
+        isMarkingAll={isMarkingAll}
         setActiveTab={setActiveTab}
         getRecordByEntity={(entityType, entityId) => {
           switch (entityType) {
