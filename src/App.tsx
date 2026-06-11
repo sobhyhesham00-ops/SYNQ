@@ -2698,6 +2698,7 @@ ${pageText}
   const [tcClinicName, setTcClinicName] = useState("");
 
   // Client Communication Requests form inputs
+  const [ccPatientName, setCcPatientName] = useState("");
   const [ccClinicName, setCcClinicName] = useState("");
   const [ccPhoneNumber, setCcPhoneNumber] = useState("");
   const [ccLanguage, setCcLanguage] = useState<"Arabic" | "English">("Arabic");
@@ -6482,9 +6483,9 @@ ${ttNotes}`
     if (!currentUser) return;
     if (isFormSubmitting) return;
 
-    if (!ccClinicName || !ccPhoneNumber || !ccNotes) {
+    if (!ccClinicName || !ccPhoneNumber || !ccNotes || !ccPatientName) {
       toast.error(
-        "Please fill out all mandatory fields (Clinic Name, Phone Number, Inquiry/Notes).",
+        "Please fill out all mandatory fields (Patient Name, Clinic Name, Phone Number, Inquiry/Notes).",
       );
       return;
     }
@@ -6504,6 +6505,7 @@ ${ttNotes}`
         id,
         caseRef: formatCaseRef(id, "client_comm", createdAt),
         callCenterAgentName: currentUser.name,
+        patientName: ccPatientName,
         clinicName: ccClinicName,
         phoneNumber: ccPhoneNumber,
         language: ccLanguage,
@@ -6528,6 +6530,7 @@ ${ttNotes}`
       await setDoc(doc(db, "client_comms", newComm.id), newComm);
 
       // Clear form
+      setCcPatientName("");
       setCcClinicName("");
       setCcPhoneNumber("");
       setCcLanguage("Arabic");
@@ -21778,6 +21781,21 @@ ${ttNotes}`
                                       }
                                       className="space-y-4 pt-2 text-left"
                                     >
+                                      {/* Patient Name */}
+                                      <div className="space-y-1 sm:col-span-2 text-left">
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block ml-1">
+                                          Patient Name *
+                                        </label>
+                                        <input
+                                          type="text"
+                                          placeholder="Enter Patient Name"
+                                          value={ccPatientName}
+                                          onChange={(e) => setCcPatientName(e.target.value)}
+                                          className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-3 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans focus:ring-1 focus:ring-indigo-500/30"
+                                          required
+                                        />
+                                      </div>
+
                                       {/* Clinic Name */}
                                       <div className="space-y-1 sm:col-span-2">
                                         <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block ml-1">

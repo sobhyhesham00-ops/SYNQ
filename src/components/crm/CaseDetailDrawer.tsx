@@ -30,7 +30,7 @@ import { AssignmentControl } from "./AssignmentControl";
 import { CaseConversation } from "./CaseConversation";
 import { CaseAttachments } from "./CaseAttachments";
 import { CaseActivityTimeline } from "./CaseActivityTimeline";
-import { buildCaseClipboardPayload, copyToClipboard } from "../../utils";
+import { buildCaseClipboardPayload, copyToClipboard, calculateTabbyTamaraPrice } from "../../utils";
 import { toast } from "sonner";
 
 interface CaseDetailDrawerProps {
@@ -517,9 +517,9 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
 
                 {caseData.crmType !== "client_comm" && caseData.raw.priceWithoutTax && (
                   <div>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider leading-none mb-1">Trx value</p>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider leading-none mb-1">Trx value (incl. 5% VAT)</p>
                     <span className="text-xs font-black text-slate-200 block truncate">
-                      {caseData.raw.priceWithoutTax} AED
+                      {calculateTabbyTamaraPrice(caseData.raw.priceWithoutTax).finalPriceFormatted}
                     </span>
                   </div>
                 )}
