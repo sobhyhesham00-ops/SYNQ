@@ -1,7 +1,7 @@
 import { SchedulingRequest, SHIFTS, TEAM_LEADERS, INITIAL_AGENTS, SwapRequest, AnnualRequest, ScheduledShift, AGENT_LOBS, Inquiry, TimeLog, AgentDirectoryRow, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, CaseRecord, SystemNotification, Order, FileAttachment, TTWorkflowStatus } from './types';
 
 // Simple client-side storage helpers
-import { db, wrappedSetDoc as setDoc, wrappedDeleteDoc as deleteDoc } from './firebase';
+import { db, auth, wrappedSetDoc as setDoc, wrappedDeleteDoc as deleteDoc } from './firebase';
 import { doc } from 'firebase/firestore';
 import { toast } from "sonner";
 
@@ -289,7 +289,7 @@ export const setStorageItem = <T>(key: string, value: T): void => {
     }
     
     // Asynchronous mirror to Firestore (non-blocking, item-level delta sync)
-    if (key.startsWith('sched_')) {
+    if (key.startsWith('sched_') && auth.currentUser) {
       const colName = getCollectionName(key);
       
       // Do not duplicate array synchronization here! 
