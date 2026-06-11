@@ -1,0 +1,30 @@
+29:  wrappedOnSnapshot as onSnapshot,
+906:      // Define local onSnapshot helper to register unsubscribes
+907:      const onSnapshot = (ref: any, ...args: any[]) => {
+937:    const unsubInquiries = onSnapshot(collection(db, "inquiries"), (snap) => {
+950:    const unsubQa = onSnapshot(collection(db, "qa_scores"), (snap) => {
+963:    const unsubQATemplate = onSnapshot(
+975:    const unsubTT = onSnapshot(collection(db, "tt_requests"), (snap) => {
+987:    const unsubComp = onSnapshot(collection(db, "tt_complaints"), (snap) => {
+999:    const unsubComms = onSnapshot(collection(db, "client_comms"), (snap) => {
+1011:    const unsubReq = onSnapshot(
+1026:    const unsubTime = onSnapshot(
+1057:    const unsubAnnouncements = onSnapshot(
+1141:    const unsubAppStatus = onSnapshot(
+1154:    const unsubSupp = onSnapshot(
+1166:    const unsubCases = onSnapshot(collection(db, "cases"), (snap) => {
+1178:    const unsubAgents = onSnapshot(
+1186:    const unsubMeta = onSnapshot(
+1201:    const unsubDir = onSnapshot(
+1213:    const unsubDirHeaders = onSnapshot(
+1226:    const unsubRosterPub = onSnapshot(
+1239:    const unsubCredentials = onSnapshot(
+1252:    const unsubLockedAccounts = onSnapshot(
+1265:    const unsubFailedAttempts = onSnapshot(
+1278:    const unsubFeedbacks = onSnapshot(
+1294:    const unsubAppVersion = onSnapshot(
+1342:    const unsubUsers = onSnapshot(collection(db, "users"), (snap) => {
+1487:    const unsubSched = onSnapshot(
+1517:    const unsubNotifs = onSnapshot(
+1594:    const unsubOrders = onSnapshot(
+1606:    const unsubTodos = onSnapshot(

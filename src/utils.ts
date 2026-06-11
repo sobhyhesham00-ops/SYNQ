@@ -253,7 +253,7 @@ const stripLargeFields = (obj: any): any => {
   return obj;
 };
 
-export const setStorageItem = <T>(key: string, value: T): void => {
+export const setStorageItem = <T>(key: string, value: T, syncToFirestore: boolean = true): void => {
   try {
     const cleanedValue = stripLargeFields(value);
     
@@ -288,13 +288,8 @@ export const setStorageItem = <T>(key: string, value: T): void => {
       }
     }
     
-    // Asynchronous mirror to Firestore (non-blocking, item-level delta sync)
-    if (key.startsWith('sched_') && auth.currentUser) {
+    if (syncToFirestore && key.startsWith('sched_') && auth.currentUser) {
       const colName = getCollectionName(key);
-      
-      // Do not duplicate array synchronization here! 
-      // App.tsx independently performs setDoc, updateDoc, and deleteDoc 
-      // on individual items to avoid recursive max-backoff quotas.
       if (!colName || !Array.isArray(value)) {
         // Fallback for settings or config (e.g. system/sched_support_assignments)
         const cleanValue = JSON.parse(JSON.stringify(value));

@@ -1,0 +1,344 @@
+24-  initAuth, 
+25-  ensureAuth,
+26-  googleSignIn, 
+27-  getAccessToken, 
+28-  logout,
+29:  wrappedOnSnapshot as onSnapshot,
+30-  wrappedOnSnapshot,
+31-  wrappedSetDoc as setDoc,
+32-  wrappedUpdateDoc as updateDoc,
+33-  wrappedDeleteDoc as deleteDoc,
+34-  wrappedGetDocs as getDocs
+--
+901-
+902-    const unsubAuth = auth.onAuthStateChanged((firebaseUser) => {
+903-      if (!firebaseUser) return;
+904-      if (!active) return;
+905-
+906:      // Define local onSnapshot helper to register unsubscribes
+907:      const onSnapshot = (ref: any, ...args: any[]) => {
+908-        const unsub = wrappedOnSnapshot(ref, ...args);
+909-        unsubscribes.push(unsub);
+910-        return unsub;
+911-      };
+912-
+--
+932-          }
+933-        }
+934-      } catch (e) {}
+935-
+936-      // 2. Real-time Firestore Sync via Collections!
+937:    const unsubInquiries = onSnapshot(collection(db, "inquiries"), (snap) => {
+938-      const arr = snap.docs.map((d) => d.data() as Inquiry);
+939-      arr.sort(
+940-        (a, b) =>
+941-          new Date(b.createdAt || 0).getTime() -
+942-          new Date(a.createdAt || 0).getTime(),
+--
+945-      setStorageItem("sched_inquiries", arr, false);
+946-    }, (error) => {
+947-      console.error("inquiries snapshot error:", error.code, error.message);
+948-    });
+949-
+950:    const unsubQa = onSnapshot(collection(db, "qa_scores"), (snap) => {
+951-      const arr = snap.docs.map((d) => d.data() as QAScore);
+952-      arr.sort(
+953-        (a, b) =>
+954-          new Date(b.createdAt || 0).getTime() -
+955-          new Date(a.createdAt || 0).getTime(),
+--
+958-      setStorageItem("sched_qa_scores", arr, false);
+959-    }, (error) => {
+960-      console.error("qa_scores snapshot error:", error.code, error.message);
+961-    });
+962-
+963:    const unsubQATemplate = onSnapshot(
+964-      doc(db, "system", "sched_qa_template"),
+965-      (snap) => {
+966-        if (snap.exists()) {
+967-          const data = snap.data().data;
+968-          setQaTemplate(data);
+--
+970-        }
+971-      }, (error) => {
+972-        console.error("sched_qa_template snapshot error:", error.code, error.message);
+973-      }
+974-    );
+975:    const unsubTT = onSnapshot(collection(db, "tt_requests"), (snap) => {
+976-      const arr = snap.docs.map((d) => d.data() as TabbyTamaraRequest);
+977-      arr.sort(
+978-        (a, b) =>
+979-          new Date(b.createdAt || 0).getTime() -
+980-          new Date(a.createdAt || 0).getTime(),
+--
+982-      setTabbyTamaraRequests(arr);
+983-      setStorageItem("sched_tabby_tamara", arr, false);
+984-    }, (error) => {
+985-      console.error("tt_requests snapshot error:", error.code, error.message);
+986-    });
+987:    const unsubComp = onSnapshot(collection(db, "tt_complaints"), (snap) => {
+988-      const arr = snap.docs.map((d) => d.data() as TabbyTamaraComplaint);
+989-      arr.sort(
+990-        (a, b) =>
+991-          new Date(b.createdAt || 0).getTime() -
+992-          new Date(a.createdAt || 0).getTime(),
+--
+994-      setTabbyTamaraComplaints(arr);
+995-      setStorageItem("sched_tt_complaints", arr, false);
+996-    }, (error) => {
+997-      console.error("tt_complaints snapshot error:", error.code, error.message);
+998-    });
+999:    const unsubComms = onSnapshot(collection(db, "client_comms"), (snap) => {
+1000-      const arr = snap.docs.map((d) => d.data() as ClientCommunicationRequest);
+1001-      arr.sort(
+1002-        (a, b) =>
+1003-          new Date(b.createdAt || 0).getTime() -
+1004-          new Date(a.createdAt || 0).getTime(),
+--
+1006-      setClientComms(arr);
+1007-      setStorageItem("sched_client_comms", arr, false);
+1008-    }, (error) => {
+1009-      console.error("client_comms snapshot error:", error.code, error.message);
+1010-    });
+1011:    const unsubReq = onSnapshot(
+1012-      collection(db, "scheduling_requests"),
+1013-      (snap) => {
+1014-        const arr = snap.docs.map((d) => d.data() as SchedulingRequest);
+1015-        arr.sort(
+1016-          (a, b) =>
+--
+1021-        setStorageItem("sched_requests", arr, false);
+1022-      }, (error) => {
+1023-        console.error("scheduling_requests snapshot error:", error.code, error.message);
+1024-      }
+1025-    );
+1026:    const unsubTime = onSnapshot(
+1027-      collection(db, "timelogs"),
+1028-      (snap) => {
+1029-        console.log("Got timelogs snapshot, docs =", snap.size);
+1030-        const arr = snap.docs.map((d) => d.data() as TimeLog);
+1031-        arr.sort((a, b) => {
+--
+1052-        console.error("TimeLogs Sync Error:", error);
+1053-        toast.error("Sync error on timelogs. They may not appear updated.");
+1054-      },
+1055-    );
+1056-    let isAnnouncementsInitialized = false;
+1057:    const unsubAnnouncements = onSnapshot(
+1058-      collection(db, "announcements"),
+1059-      (snap) => {
+1060-        console.log("Got announcement snapshot, document size:", snap.size);
+1061-        const arr = snap.docs.map((d) => d.data() as Announcement);
+1062-        arr.sort(
+--
+1136-        toast.error(
+1137-          "Announcement sync issue. Please refresh if updates do not appear.",
+1138-        );
+1139-      },
+1140-    );
+1141:    const unsubAppStatus = onSnapshot(
+1142-      doc(db, "system", "app_status"),
+1143-      (snap) => {
+1144-        if (snap.exists() && snap.data().isKilled === true) {
+1145-          setIsAppKilled(true);
+1146-        } else {
+--
+1149-      }, (error) => {
+1150-        console.error("app_status snapshot error:", error.code, error.message);
+1151-      }
+1152-    );
+1153-
+1154:    const unsubSupp = onSnapshot(
+1155-      doc(db, "system", "sched_support_assignments"),
+1156-      (snap) => {
+1157-        if (snap.exists()) {
+1158-          const data = snap.data().data;
+1159-          setSupportAssignments(data);
+--
+1161-        }
+1162-      }, (error) => {
+1163-        console.error("sched_support_assignments snapshot error:", error.code, error.message);
+1164-      }
+1165-    );
+1166:    const unsubCases = onSnapshot(collection(db, "cases"), (snap) => {
+1167-      const arr = snap.docs.map((d) => d.data() as CaseRecord);
+1168-      arr.sort(
+1169-        (a, b) =>
+1170-          new Date(b.createdAt || 0).getTime() -
+1171-          new Date(a.createdAt || 0).getTime(),
+--
+1173-      setCases(arr);
+1174-      setStorageItem("sched_cases", arr, false);
+1175-    }, (error) => {
+1176-      console.error("cases snapshot error:", error.code, error.message);
+1177-    });
+1178:    const unsubAgents = onSnapshot(
+1179-      doc(db, "system", "sched_agents_list"),
+1180-      (snap) => {
+1181-        // Intentionally empty or minimal - we prefer the dynamic list from unsubUsers/directory
+1182-      }, (error) => {
+1183-        console.error("sched_agents_list snapshot error:", error.code, error.message);
+1184-      }
+1185-    );
+1186:    const unsubMeta = onSnapshot(
+1187-      doc(db, "system", "sched_agent_meta"),
+1188-      (snap) => {
+1189-        if (snap.exists()) {
+1190-          const data = snap.data().data as Record<
+1191-            string,
+--
+1196-        }
+1197-      }, (error) => {
+1198-        console.error("sched_agent_meta snapshot error:", error.code, error.message);
+1199-      }
+1200-    );
+1201:    const unsubDir = onSnapshot(
+1202-      doc(db, "system", "sched_agent_directory"),
+1203-      (snap) => {
+1204-        if (snap.exists()) {
+1205-          const data = snap.data().data as AgentDirectoryRow[];
+1206-          setAgentDirectory(data);
+--
+1208-        }
+1209-      }, (error) => {
+1210-        console.error("sched_agent_directory snapshot error:", error.code, error.message);
+1211-      }
+1212-    );
+1213:    const unsubDirHeaders = onSnapshot(
+1214-      doc(db, "system", "sched_agent_directory_headers"),
+1215-      (snap) => {
+1216-        if (snap.exists()) {
+1217-          const data = snap.data().data as string[];
+1218-          setDirectoryHeaders(data);
+--
+1221-      }, (error) => {
+1222-        console.error("sched_agent_directory_headers snapshot error:", error.code, error.message);
+1223-      }
+1224-    );
+1225-
+1226:    const unsubRosterPub = onSnapshot(
+1227-      doc(db, "system", "sched_roster_published"),
+1228-      (snap) => {
+1229-        if (snap.exists()) {
+1230-          const data = snap.data().data as boolean;
+1231-          setIsRosterPublished(data);
+--
+1234-      }, (error) => {
+1235-        console.error("sched_roster_published snapshot error:", error.code, error.message);
+1236-      }
+1237-    );
+1238-
+1239:    const unsubCredentials = onSnapshot(
+1240-      doc(db, "system", "sched_credentials"),
+1241-      (snap) => {
+1242-        if (snap.exists()) {
+1243-          const data = snap.data().data || {};
+1244-          setCredentials(data);
+--
+1247-      }, (error) => {
+1248-        console.error("sched_credentials snapshot error:", error.code, error.message);
+1249-      }
+1250-    );
+1251-
+1252:    const unsubLockedAccounts = onSnapshot(
+1253-      doc(db, "system", "sched_locked_accounts"),
+1254-      (snap) => {
+1255-        if (snap.exists()) {
+1256-          const data = snap.data().data || [];
+1257-          setLockedAccounts(data);
+--
+1260-      }, (error) => {
+1261-        console.error("sched_locked_accounts snapshot error:", error.code, error.message);
+1262-      }
+1263-    );
+1264-
+1265:    const unsubFailedAttempts = onSnapshot(
+1266-      doc(db, "system", "sched_failed_attempts"),
+1267-      (snap) => {
+1268-        if (snap.exists()) {
+1269-          const data = snap.data().data || {};
+1270-          setFailedAttempts(data);
+--
+1273-      }, (error) => {
+1274-        console.error("sched_failed_attempts snapshot error:", error.code, error.message);
+1275-      }
+1276-    );
+1277-
+1278:    const unsubFeedbacks = onSnapshot(
+1279-      collection(db, "tl_feedbacks"),
+1280-      (snap) => {
+1281-        const arr = snap.docs.map((d) => d.data() as TlFeedback);
+1282-        arr.sort(
+1283-          (a, b) =>
+--
+1289-      }, (error) => {
+1290-        console.error("tl_feedbacks snapshot error:", error.code, error.message);
+1291-      }
+1292-    );
+1293-
+1294:    const unsubAppVersion = onSnapshot(
+1295-      doc(db, "system", "app_version"),
+1296-      (snap) => {
+1297-        if (snap.exists()) {
+1298-          const remoteVersion = snap.data().version || 0;
+1299-          if (CURRENT_APP_VERSION > remoteVersion) {
+--
+1337-      }, (error) => {
+1338-        console.error("app_version snapshot error:", error.code, error.message);
+1339-      }
+1340-    );
+1341-
+1342:    const unsubUsers = onSnapshot(collection(db, "users"), (snap) => {
+1343-      const dbUsers = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as any);
+1344-      setRegisteredUsers(dbUsers);
+1345-
+1346-      // Optionally update currentUser if their document was updated
+1347-      setCurrentUser((prevUser) => {
+--
+1482-  // Real-time Firestore Sync with [currentUser] dependency for Schedules, Notifications, Orders, and Todos as requested
+1483-  useEffect(() => {
+1484-    if (!currentUser || !currentUser.id) return;
+1485-
+1486-    // 1. Schedules Real-time Sync
+1487:    const unsubSched = onSnapshot(
+1488-      collection(db, "schedules"),
+1489-      (snapshot) => {
+1490-        const data = snapshot.docs.map((d) => d.data() as ScheduledShift);
+1491-        setSchedules(data);
+1492-      },
+--
+1512-    const qNotifs = query(
+1513-      collection(db, "notifications"),
+1514-      where("targetGroups", "array-contains-any", selfTargets),
+1515-    );
+1516-    let isNotifsInitialized = false;
+1517:    const unsubNotifs = onSnapshot(
+1518-      qNotifs,
+1519-      (snapshot) => {
+1520-        const arr = snapshot.docs.map((d) => d.data() as SystemNotification);
+1521-        arr.sort(
+1522-          (a, b) =>
+--
+1589-        console.error("Notifications Real-time Sync Error:", error);
+1590-      },
+1591-    );
+1592-
+1593-    // 3. Orders/Requests Real-time Sync
+1594:    const unsubOrders = onSnapshot(
+1595-      collection(db, "orders"),
+1596-      (snapshot) => {
+1597-        const data = snapshot.docs.map((d) => d.data() as Order);
+1598-        setOrders(data);
+1599-      },
+--
+1601-        console.error("Orders Real-time Sync Error:", error);
+1602-      },
+1603-    );
+1604-
+1605-    // 4. Todos Real-time Alignment Sync
+1606:    const unsubTodos = onSnapshot(
+1607-      collection(db, "todos"),
+1608-      (snapshot) => {
+1609-        const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+1610-        setTodos(data);
+1611-      },

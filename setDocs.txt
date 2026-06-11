@@ -1,0 +1,794 @@
+709-          replies: [...(data.replies || []), systemReply]
+710-      };
+711-
+712-      if (type === "inquiry") {
+713-        const docRef = doc(db, "inquiries", id);
+714:        await setDoc(docRef, updatedData, { merge: true });
+715-        setInquiries((prev) =>
+716-          prev.map((item) => (item.id === id ? { ...item, ...updatedData } : item)),
+717-        );
+718-        toast.success("Inquiry updated successfully!");
+719-        addSystemNotification("Request Updated", `Inquiry updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "inquiry", id);
+720-      } else if (type === "scheduling_request") {
+721-        const docRef = doc(db, "scheduling_requests", id);
+722:        await setDoc(docRef, updatedData, { merge: true });
+723-        setRequests((prev) =>
+724-          prev.map((item) => (item.id === id ? { ...item, ...updatedData } : item)),
+725-        );
+726-        toast.success("Scheduling request updated successfully!");
+727-        addSystemNotification("Request Updated", `Scheduling request updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "scheduling_request", id);
+728-      } else if (type === "tt_request") {
+729-        const docRef = doc(db, "tt_requests", id);
+730:        await setDoc(docRef, updatedData, { merge: true });
+731-        setTabbyTamaraRequests((prev) =>
+732-          prev.map((item) => (item.id === id ? { ...item, ...updatedData } : item)),
+733-        );
+734-        toast.success("Installment request updated successfully!");
+735-        addSystemNotification("Request Updated", `Installment request updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "tt_request", id);
+736-      } else if (type === "tt_complaint") {
+737-        const docRef = doc(db, "tt_complaints", id);
+738:        await setDoc(docRef, updatedData, { merge: true });
+739-        setTabbyTamaraComplaints((prev) =>
+740-          prev.map((item) => (item.id === id ? { ...item, ...updatedData } : item)),
+741-        );
+742-        toast.success("Installment complaint updated successfully!");
+743-        addSystemNotification("Request Updated", `Installment complaint updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "tt_complaint", id);
+744-      } else if (type === "client_comm") {
+745-        const docRef = doc(db, "client_comms", id);
+746:        await setDoc(docRef, updatedData, { merge: true });
+747-        setClientComms((prev) =>
+748-          prev.map((item) => (item.id === id ? { ...item, ...updatedData } : item)),
+749-        );
+750-        toast.success("Communication request updated successfully!");
+751-        addSystemNotification("Request Updated", `Communication request updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "client_comm", id);
+752-      } else if (type === "case") {
+753-        const docRef = doc(db, "cases", id);
+754:        await setDoc(docRef, updatedData, { merge: true });
+755-        setCases((prev) =>
+756-          prev.map((item) => (item.id === id ? { ...item, ...updatedData } : item)),
+757-        );
+758-        toast.success("Case record updated successfully!");
+759-        addSystemNotification("Request Updated", `Case record updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "case", id);
+--
+924-          if (filtered.length !== arr.length) {
+925-            localStorage.setItem(
+926-              "sched_locked_accounts",
+927-              JSON.stringify(filtered),
+928-            );
+929:            setDoc(doc(db, "system", "sched_locked_accounts"), {
+930-              data: filtered,
+931-            }).catch((e) => console.error(e));
+932-          }
+933-        }
+934-      } catch (e) {}
+--
+1295-      doc(db, "system", "app_version"),
+1296-      (snap) => {
+1297-        if (snap.exists()) {
+1298-          const remoteVersion = snap.data().version || 0;
+1299-          if (CURRENT_APP_VERSION > remoteVersion) {
+1300:            setDoc(
+1301-              doc(db, "system", "app_version"),
+1302-              { version: CURRENT_APP_VERSION },
+1303-              { merge: true },
+1304-            ).catch(console.error);
+1305-          } else if (remoteVersion > CURRENT_APP_VERSION) {
+--
+1328-                `Already attempted reload for version ${remoteVersion}, but local bundle version is still ${CURRENT_APP_VERSION}. Suppressing loop to let user open the app.`,
+1329-              );
+1330-            }
+1331-          }
+1332-        } else {
+1333:          setDoc(doc(db, "system", "app_version"), {
+1334-            version: CURRENT_APP_VERSION,
+1335-          }).catch(console.error);
+1336-        }
+1337-      }, (error) => {
+1338-        console.error("app_version snapshot error:", error.code, error.message);
+--
+1942-            audio.volume = 0.5;
+1943-            audio.play().catch(() => {});
+1944-        } catch(e){}
+1945-    }
+1946-    // Auto-sync real-time to firestore
+1947:    setDoc(doc(db, "notifications", newNotif.id), newNotif).catch((e) =>
+1948-      console.error("Notif sync error:", e),
+1949-    );
+1950-  };
+1951-
+1952-  const handleMentionsInText = (
+--
+2012-    setTlFeedbacks((prev) => {
+2013-      const updated = [newFeedback, ...prev];
+2014-      setStorageItem("sched_tl_feedbacks", updated);
+2015-
+2016-      // Sync to Firestore
+2017:      setDoc(doc(db, "tl_feedbacks", newFeedback.id), newFeedback).catch((e) =>
+2018-        console.error("Feedback Write Error:", e),
+2019-      );
+2020-
+2021-      return updated;
+2022-    });
+--
+2068-            replies: [...f.replies, newReply],
+2069-            status: newStatus as any,
+2070-          };
+2071-
+2072-          // Sync to Firestore
+2073:          setDoc(doc(db, "tl_feedbacks", f.id), updatedFeedback).catch((e) =>
+2074-            console.error("Feedback Reply Error:", e),
+2075-          );
+2076-
+2077-          return updatedFeedback;
+2078-        }
+--
+3350-        ...failedAttempts,
+3351-        [formattedUsername]: currentAttempts,
+3352-      };
+3353-      setFailedAttempts(updatedAttempts);
+3354-      setStorageItem("sched_failed_attempts", updatedAttempts);
+3355:      setDoc(doc(db, "system", "sched_failed_attempts"), {
+3356-        data: updatedAttempts,
+3357-      }).catch(console.error);
+3358-
+3359-      if (currentAttempts >= 3) {
+3360-        if (isAdminUser) {
+3361-          // Admins don't get locked out, just reset their failed attempts to 0 or allow infinite retries without locking
+3362-          const resetAttempts = { ...failedAttempts, [formattedUsername]: 0 };
+3363-          setFailedAttempts(resetAttempts);
+3364-          setStorageItem("sched_failed_attempts", resetAttempts);
+3365:          setDoc(doc(db, "system", "sched_failed_attempts"), {
+3366-            data: resetAttempts,
+3367-          }).catch(console.error);
+3368-          setLoginError(
+3369-            "Incorrect password. Admin accounts are exempt from locking, please try again.",
+3370-          );
+3371-        } else {
+3372-          const updatedLocked = [...lockedAccounts, formattedUsername];
+3373-          setLockedAccounts(updatedLocked);
+3374-          setStorageItem("sched_locked_accounts", updatedLocked);
+3375:          setDoc(doc(db, "system", "sched_locked_accounts"), {
+3376-            data: updatedLocked,
+3377-          }).catch(console.error);
+3378-          setLoginError(
+3379-            "This account is now locked because of too many wrong password attempts. Please contact Hesham Sobhy or Amira Hassan to reset it.",
+3380-          );
+--
+3399-      needsLockUpdate = true;
+3400-    }
+3401-    if (needsLockUpdate) {
+3402-      setLockedAccounts(updatedLocked);
+3403-      setStorageItem("sched_locked_accounts", updatedLocked);
+3404:      setDoc(doc(db, "system", "sched_locked_accounts"), {
+3405-        data: updatedLocked,
+3406-      }).catch(console.error);
+3407-    }
+3408-
+3409-    if (failedAttempts[formattedUsername]) {
+3410-      const updatedAttempts = { ...failedAttempts };
+3411-      delete updatedAttempts[formattedUsername];
+3412-      setFailedAttempts(updatedAttempts);
+3413-      setStorageItem("sched_failed_attempts", updatedAttempts);
+3414:      setDoc(doc(db, "system", "sched_failed_attempts"), {
+3415-        data: updatedAttempts,
+3416-      }).catch(console.error);
+3417-    }
+3418-
+3419-    const userRole = isQAName(correspondingFullName)
+--
+3429-
+3430-    setCurrentUser(authenticatedUser);
+3431-    setStorageItem("sched_current_user", authenticatedUser);
+3432-
+3433-    const userDocId = correspondingFullName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+3434:    setDoc(doc(db, "users", userDocId), authenticatedUser).catch(console.error);
+3435-
+3436-    if (auth.currentUser?.uid) {
+3437:      setDoc(doc(db, "users", auth.currentUser.uid), authenticatedUser).catch(console.error);
+3438-    }
+3439-
+3440-    // If agent is new or not in the cached list, add using corresponding fullName or username
+3441-    if (
+3442-      userRole === "agent" &&
+--
+3474-        };
+3475-        const updated = [newLog, ...timeLogs];
+3476-        setTimeLogs(updated);
+3477-        setStorageItem("sched_time_logs", updated);
+3478-        // Sync to Firestore
+3479:        setDoc(doc(db, "timelogs", newLog.id), newLog).catch((e) =>
+3480-          console.error("Login Clock In Error:", e),
+3481-        );
+3482-      }
+3483-    }
+3484-
+--
+3508-      [finalName]: loginPassword,
+3509-      [correspondingFullName]: loginPassword,
+3510-    };
+3511-    setCredentials(updatedCreds);
+3512-    setStorageItem("sched_credentials", updatedCreds);
+3513:    setDoc(doc(db, "system", "sched_credentials"), {
+3514-      data: updatedCreds,
+3515-    }).catch(console.error);
+3516-
+3517-    if (failedAttempts[finalName]) {
+3518-      const updatedAttempts = { ...failedAttempts };
+3519-      delete updatedAttempts[finalName];
+3520-      setFailedAttempts(updatedAttempts);
+3521-      setStorageItem("sched_failed_attempts", updatedAttempts);
+3522:      setDoc(doc(db, "system", "sched_failed_attempts"), {
+3523-        data: updatedAttempts,
+3524-      }).catch(console.error);
+3525-    }
+3526-
+3527-    const userRole = isQAName(correspondingFullName)
+--
+3537-
+3538-    setCurrentUser(authenticatedUser);
+3539-    setStorageItem("sched_current_user", authenticatedUser);
+3540-
+3541-    // Explicitly write user to Firestore for real-time presence across devices
+3542:    setDoc(
+3543-      doc(
+3544-        db,
+3545-        "users",
+3546-        correspondingFullName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
+3547-      ),
+--
+3583-        };
+3584-        const updated = [newLog, ...timeLogs];
+3585-        setTimeLogs(updated);
+3586-        setStorageItem("sched_time_logs", updated);
+3587-        // Sync to Firestore
+3588:        setDoc(doc(db, "timelogs", newLog.id), newLog).catch((e) =>
+3589-          console.error("Registration Clock In Error:", e),
+3590-        );
+3591-      }
+3592-    }
+3593-
+--
+3616-      [currentUser.name]: newPasswordInput.trim(),
+3617-    };
+3618-
+3619-    setCredentials(updatedCreds);
+3620-    setStorageItem("sched_credentials", updatedCreds);
+3621:    setDoc(doc(db, "system", "sched_credentials"), {
+3622-      data: updatedCreds,
+3623-    }).catch(console.error);
+3624-
+3625-    toast.success("Password updated successfully!");
+3626-    setIsResetPasswordModalOpen(false);
+--
+3886-        setStorageItem("sched_requests", updated);
+3887-        return updated;
+3888-      });
+3889-
+3890-      // Sync to Firestore
+3891:      await setDoc(doc(db, "scheduling_requests", newRequest.id), newRequest);
+3892-
+3893-      addSystemNotification(
+3894-        `New Swap Request: ${formatAgentName(name)}`,
+3895-        `${formatAgentName(name)} requested a shift swap with ${formatAgentName(swapTargetAgent)} for ${swapDate}.`,
+3896-        "schedule",
+--
+3982-        setStorageItem("sched_requests", updated);
+3983-        return updated;
+3984-      });
+3985-
+3986-      // Sync to Firestore
+3987:      await setDoc(doc(db, "scheduling_requests", newRequest.id), newRequest);
+3988-
+3989-      addSystemNotification(
+3990-        `New Annual Leave: ${formatAgentName(name)}`,
+3991-        `${formatAgentName(name)} requested an annual leave from ${annualStart} to ${annualEnd}.`,
+3992-        "schedule",
+--
+4038-              ...swapReq,
+4039-              status: agree ? "pending" : "declined_by_partner",
+4040-              partnerActionAt: new Date().toISOString(),
+4041-            } as SwapRequest;
+4042-            // Sync to Firestore
+4043:            setDoc(doc(db, "scheduling_requests", req.id), updatedReq).catch(
+4044-              (e) => console.error("Partner Decision Error:", e),
+4045-            );
+4046-            return updatedReq;
+4047-          }
+4048-        }
+--
+4114-          actionAt: new Date().toISOString(),
+4115-          ruleViolation: violation,
+4116-          violationMessage: violation ? vMsg : undefined,
+4117-        };
+4118-        // Sync to Firestore
+4119:        setDoc(doc(db, "scheduling_requests", req.id), updatedReq).catch((e) =>
+4120-          console.error("TL Approval Error:", e),
+4121-        );
+4122-        return updatedReq;
+4123-      }
+4124-      return req;
+--
+4171-          actionAt: new Date().toISOString(),
+4172-          ruleViolation: violation,
+4173-          violationMessage: violation ? vMsg : undefined,
+4174-        };
+4175-        // Sync to Firestore
+4176:        setDoc(doc(db, "scheduling_requests", req.id), updatedReq).catch((e) =>
+4177-          console.error("TL Approval Error:", e),
+4178-        );
+4179-        return updatedReq;
+4180-      }
+4181-      return req;
+--
+4688-      setDirectoryHeaders(result.headers);
+4689-      setStorageItem("sched_agent_directory", result.directory);
+4690-      setStorageItem("sched_agent_directory_headers", result.headers);
+4691-
+4692-      // Write to Firestore system docs
+4693:      setDoc(doc(db, "system", "sched_agent_directory"), {
+4694-        data: result.directory,
+4695-      }).catch(console.error);
+4696:      setDoc(doc(db, "system", "sched_agent_directory_headers"), {
+4697-        data: result.headers,
+4698-      }).catch(console.error);
+4699-
+4700-      const allKnown = new Set(agentsList);
+4701-      result.directory.forEach((a) => allKnown.add(a.agentName));
+4702-      const updatedList = Array.from(allKnown);
+4703-      setAgentsList(updatedList);
+4704-      setStorageItem("sched_agents_list", updatedList);
+4705:      setDoc(doc(db, "system", "sched_agents_list"), {
+4706-        data: updatedList,
+4707-      }).catch(console.error);
+4708-
+4709-      const newMeta = { ...getAgentMeta() };
+4710-      let hasMetaUpdate = false;
+--
+4762-          }
+4763-          if (updated) hasMetaUpdate = true;
+4764-        });
+4765-        if (hasMetaUpdate) {
+4766-          setStorageItem("sched_agent_meta", newMeta);
+4767:          setDoc(doc(db, "system", "sched_agent_meta"), {
+4768-            data: newMeta,
+4769-          }).catch(console.error);
+4770-        }
+4771-      }
+4772-
+--
+4987-            lob: lobVal || undefined,
+4988-            lobTeam: lobTeamVal || undefined,
+4989-            teamLeader: teamLeaderVal || undefined,
+4990-          };
+4991-
+4992:          setDoc(doc(db, "users", userDocId), userProfile, {
+4993-            merge: true,
+4994-          }).catch((err) => {
+4995-            console.error("Failed to import user profile:", err);
+4996-          });
+4997-        }
+--
+5256-    const updated = [newLog, ...timeLogs];
+5257-    setTimeLogs(updated);
+5258-    setStorageItem("sched_time_logs", updated);
+5259-
+5260-    // Sync to Firestore
+5261:    setDoc(doc(db, "timelogs", newLog.id), newLog).catch((e) =>
+5262-      console.error("Clock In Error:", e),
+5263-    );
+5264-  };
+5265-
+5266-  const handleStartActivity = (
+--
+5328-          ...log,
+5329-          status: type,
+5330-          activities: [...updatedActivities, newAct],
+5331-        };
+5332-        // Sync to Firestore
+5333:        setDoc(doc(db, "timelogs", log.id), updatedLog).catch((e) =>
+5334-          console.error("AUX Start Error:", e),
+5335-        );
+5336-        return updatedLog;
+5337-      }
+5338-      return log;
+--
+5391-          ...log,
+5392-          status: "working" as const,
+5393-          activities: updatedActivities,
+5394-        };
+5395-        // Sync to Firestore
+5396:        setDoc(doc(db, "timelogs", log.id), updatedLog).catch((e) =>
+5397-          console.error("AUX End Error:", e),
+5398-        );
+5399-        return updatedLog;
+5400-      }
+5401-      return log;
+--
+5686-        setStorageItem("sched_inquiries", updated);
+5687-        return updated;
+5688-      });
+5689-
+5690-      // Sync to Firestore
+5691:      await setDoc(doc(db, "inquiries", newInquiry.id), newInquiry);
+5692-
+5693-      // Reset fields
+5694-      setInquiryText("");
+5695-      setInquiryClinicName("");
+5696-      setInquiryPhoneNumber("");
+--
+5744-          sentBy: currentUser.name,
+5745-          sentAt: new Date().toISOString(),
+5746-          seenByAgent: false,
+5747-        };
+5748-        // Sync to Firestore
+5749:        setDoc(doc(db, "inquiries", inq.id), updatedInq).catch((e) =>
+5750-          console.error("Inquiry Update Error:", e),
+5751-        );
+5752-        return updatedInq;
+5753-      }
+5754-      return inq;
+--
+5829-      if (!updatedInqObject) {
+5830-         setIsSubmittingAnswer(false);
+5831-         return;
+5832-      }
+5833-
+5834:      await setDoc(doc(db, "inquiries", inquiryId), updatedInqObject);
+5835-
+5836-      setInquiries(updated);
+5837-      setStorageItem("sched_inquiries", updated);
+5838-
+5839-      if (targetAgentName) {
+--
+5874-          ...inq,
+5875-          agentName: newAgentName,
+5876-          seenByAgent: false,
+5877-        };
+5878-        // Sync to Firestore
+5879:        setDoc(doc(db, "inquiries", inq.id), updatedInq).catch((e) =>
+5880-          console.error("Inquiry Reassign Error:", e),
+5881-        );
+5882-        return updatedInq;
+5883-      }
+5884-      return inq;
+--
+5897-        const updatedInq = {
+5898-          ...inq,
+5899-          customerContacted: status,
+5900-        };
+5901-        // Sync to Firestore
+5902:        setDoc(doc(db, "inquiries", inq.id), updatedInq).catch((e) =>
+5903-          console.error("Inquiry Contacted Status Error:", e),
+5904-        );
+5905-        return updatedInq;
+5906-      }
+5907-      return inq;
+--
+5913-  const handleMarkInquirySeen = (inquiryId: string) => {
+5914-    const updated = inquiries.map((inq) => {
+5915-      if (inq.id === inquiryId) {
+5916-        const updatedInq = { ...inq, seenByAgent: true };
+5917-        // Sync to Firestore
+5918:        setDoc(doc(db, "inquiries", inq.id), updatedInq).catch((e) =>
+5919-          console.error("Inquiry Mark Seen Error:", e),
+5920-        );
+5921-        return updatedInq;
+5922-      }
+5923-      return inq;
+--
+6042-        setStorageItem("sched_tabby_tamara", updated);
+6043-        return updated;
+6044-      });
+6045-
+6046-      // Sync to Firestore
+6047:      await setDoc(doc(db, "tt_requests", newRequest.id), newRequest);
+6048-
+6049-      // Clear form
+6050-      setTtPatientName("");
+6051-      setTtClinicName("");
+6052-      setTtFileNumber("");
+--
+6148-          workflowStatus: newWorkflowStatus,
+6149-          replies: [...existingReplies, activityEntry],
+6150-          updatedAt: new Date().toISOString()
+6151-        };
+6152-        // Sync to Firestore
+6153:        setDoc(doc(db, "tt_requests", r.id), updatedReq).catch((e) =>
+6154-          console.error("TT Confirm Error:", e),
+6155-        );
+6156-
+6157-        const notifyTarget = r.assignedToName || r.agentName;
+6158-
+--
+6333-            r.id
+6334-          );
+6335-        }
+6336-
+6337-        // Sync to Firestore
+6338:        setDoc(doc(db, "tt_requests", r.id), updatedReq).catch((e) =>
+6339-          console.error("TT Update Contact Error:", e),
+6340-        );
+6341-        return updatedReq;
+6342-      }
+6343-      return r;
+--
+6433-        setStorageItem("sched_tt_complaints", updated);
+6434-        return updated;
+6435-      });
+6436-
+6437-      // Sync to Firestore
+6438:      await setDoc(doc(db, "tt_complaints", newComplaint.id), newComplaint);
+6439-
+6440-      // Clear form
+6441-      setTcPatientName("");
+6442-      setTcClinicName("");
+6443-      setTcFileNumber("");
+--
+6523-        setStorageItem("sched_client_comms", updated);
+6524-        return updated;
+6525-      });
+6526-
+6527-      // Sync to Firestore
+6528:      await setDoc(doc(db, "client_comms", newComm.id), newComm);
+6529-
+6530-      // Clear form
+6531-      setCcClinicName("");
+6532-      setCcPhoneNumber("");
+6533-      setCcLanguage("Arabic");
+--
+6601-          handledAt: new Date().toISOString(),
+6602-          handlingNotes: notes,
+6603-          handlingPhotos: photos || [],
+6604-        };
+6605-        // Sync to Firestore
+6606:        setDoc(doc(db, "client_comms", c.id), updatedComm).catch((e) =>
+6607-          console.error("Client Comm Update Error:", e),
+6608-        );
+6609-        return updatedComm;
+6610-      }
+6611-      return c;
+--
+6643-          status: "contacted" as const,
+6644-          handledBy: currentUser.name,
+6645-          handledAt: new Date().toISOString(),
+6646-        };
+6647-        // Sync to Firestore
+6648:        setDoc(doc(db, "client_comms", c.id), updatedComm).catch((e) =>
+6649-          console.error("Client Comm Close Error:", e),
+6650-        );
+6651-        return updatedComm;
+6652-      }
+6653-      return c;
+--
+6687-          status: "in_progress" as const,
+6688-          openedBy: currentUser.name,
+6689-          openedAt: new Date().toISOString(),
+6690-        };
+6691-        // Sync to Firestore
+6692:        setDoc(doc(db, "client_comms", c.id), updatedComm).catch((e) =>
+6693-          console.error("Client Comm Take Error:", e),
+6694-        );
+6695-        return updatedComm;
+6696-      }
+6697-      return c;
+--
+6804-    // Save schedules
+6805-    setSchedules(mergedSchedules);
+6806-
+6807-    // Sync to Firestore (only the ones we changed/added)
+6808-    targetSchedules.forEach((s) => {
+6809:      setDoc(doc(db, "schedules", s.id), s).catch((e) =>
+6810-        console.error("Schedule Write Error:", e),
+6811-      );
+6812-
+6813-      // Auto assign shift to agent's user profile in Firestore
+6814-      const userDocId = s.agentName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+6815-      if (userDocId) {
+6816:        setDoc(
+6817-          doc(db, "users", userDocId),
+6818-          {
+6819-            assignedShifts: {
+6820-              [s.date]: s.shiftLabel,
+6821-            },
+--
+6828-        // As requested: write to agents collection
+6829-        const agentSchedulesRef = doc(
+6830-          collection(doc(collection(db, "agents"), userDocId), "schedules"),
+6831-          s.date,
+6832-        );
+6833:        setDoc(
+6834-          agentSchedulesRef,
+6835-          {
+6836-            shift: s.shiftLabel,
+6837-            date: s.date,
+6838-            agentId: userDocId,
+--
+6877-    });
+6878-    setStorageItem("sched_agent_meta", newMeta);
+6879-
+6880-    // Sync system docs to Firestore
+6881-    if (newAgentsList.length > 0) {
+6882:      setDoc(doc(db, "system", "sched_agents_list"), {
+6883-        data: agentsList,
+6884-      }).catch((e) => console.error("Agents List Sync Error:", e));
+6885-    }
+6886:    setDoc(doc(db, "system", "sched_agent_meta"), { data: newMeta }).catch(
+6887-      (e) => console.error("Agent Meta Sync Error:", e),
+6888-    );
+6889-
+6890-    toast.success(
+6891-      `Schedule system updated with ${targetSchedules.length} live shifts!`,
+--
+7179-          tlHandledBy: currentUser.name,
+7180-          tlHandledAt: now,
+7181-          commentedAt: now,
+7182-          status: "need_contact" as const,
+7183-        };
+7184:        setDoc(doc(db, "tt_complaints", c.id), updatedComp).catch((e) =>
+7185-          console.error("TT Complaint Comment Error:", e),
+7186-        );
+7187-        return updatedComp;
+7188-      }
+7189-      return c;
+--
+7230-              : ("need_contact" as const),
+7231-          contactedAt:
+7232-            status === "contacted" ? new Date().toISOString() : undefined,
+7233-        };
+7234-        // Sync to Firestore
+7235:        setDoc(doc(db, "tt_complaints", c.id), comp).catch((e) =>
+7236-          console.error("TT Complaint Contact Update Error:", e),
+7237-        );
+7238-        return comp;
+7239-      }
+7240-      return c;
+--
+7619-                    if (
+7620-                      killSwitchPassword &&
+7621-                      killSwitchPassword === correctAdminPass &&
+7622-                      killSwitchCar === "BMW"
+7623-                    ) {
+7624:                      setDoc(
+7625-                        doc(db, "system", "app_status"),
+7626-                        {
+7627-                          isKilled: false,
+7628-                          restoredAt: new Date().toISOString(),
+7629-                        },
+--
+7670-                  if (
+7671-                    killSwitchPassword &&
+7672-                    killSwitchPassword === correctAdminPass &&
+7673-                    killSwitchCar === "BMW"
+7674-                  ) {
+7675:                    setDoc(
+7676-                      doc(db, "system", "app_status"),
+7677-                      { isKilled: false, restoredAt: new Date().toISOString() },
+7678-                      { merge: true },
+7679-                    );
+7680-                    toast.success("System Restored.");
+--
+7701-                if (
+7702-                  killSwitchPassword &&
+7703-                  killSwitchPassword === correctAdminPass &&
+7704-                  killSwitchCar === "BMW"
+7705-                ) {
+7706:                  setDoc(
+7707-                    doc(db, "system", "app_status"),
+7708-                    { isKilled: false, restoredAt: new Date().toISOString() },
+7709-                    { merge: true },
+7710-                  );
+7711-                  toast.success("System Restored.");
+--
+8124-                            ?.toLowerCase()
+8125-                            .replace(/[^a-z0-9]/g, "");
+8126-                          setCurrentUser((prev) =>
+8127-                            prev ? { ...prev, bio: val } : null,
+8128-                          );
+8129:                          setDoc(
+8130-                            doc(db, "users", userDocId),
+8131-                            { bio: val },
+8132-                            { merge: true },
+8133-                          ).catch(console.error);
+8134-                        }}
+--
+8151-                            ?.toLowerCase()
+8152-                            .replace(/[^a-z0-9]/g, "");
+8153-                          setCurrentUser((prev) =>
+8154-                            prev ? { ...prev, dailyUpdate: val } : null,
+8155-                          );
+8156:                          setDoc(
+8157-                            doc(db, "users", userDocId),
+8158-                            { dailyUpdate: val },
+8159-                            { merge: true },
+8160-                          ).catch(console.error);
+8161-                        }}
+--
+8212-                      }
+8213-
+8214-                      if (isTLOreSupport) {
+8215-                        try {
+8216-                          const newVer = CURRENT_APP_VERSION + 1;
+8217:                          await setDoc(
+8218-                            doc(db, "system", "app_version"),
+8219-                            { version: newVer },
+8220-                            { merge: true },
+8221-                          );
+8222-                          toast.success(
+--
+9282-                                      setCurrentUser(updated);
+9283-                                      setStorageItem(
+9284-                                        "sched_current_user",
+9285-                                        updated,
+9286-                                      );
+9287:                                      setDoc(
+9288-                                        doc(
+9289-                                          db,
+9290-                                          "users",
+9291-                                          currentUser?.name
+9292-                                            ?.toLowerCase()
+--
+9350-                                    setCurrentUser(updated);
+9351-                                    setStorageItem(
+9352-                                      "sched_current_user",
+9353-                                      updated,
+9354-                                    );
+9355:                                    setDoc(
+9356-                                      doc(
+9357-                                        db,
+9358-                                        "users",
+9359-                                        currentUser?.name
+9360-                                          ?.toLowerCase()
+--
+9384-                                    setCurrentUser(updated);
+9385-                                    setStorageItem(
+9386-                                      "sched_current_user",
+9387-                                      updated,
+9388-                                    );
+9389:                                    setDoc(
+9390-                                      doc(
+9391-                                        db,
+9392-                                        "users",
+9393-                                        currentUser?.name
+9394-                                          ?.toLowerCase()
+--
+9469-                                  category,
+9470-                                  isCompleted: false,
+9471-                                  reminderTimeMs,
+9472-                                  createdAt: new Date().toISOString(),
+9473-                                };
+9474:                                setDoc(
+9475-                                  doc(db, "todos", newItem.id),
+9476-                                  newItem,
+9477-                                ).catch(console.error);
+9478-                                e.currentTarget.reset();
+9479-                                addSystemNotification(
+--
+20698-                                      setRequests(updatedRequests);
+20699-                                      setStorageItem(
+20700-                                        "sched_requests",
+20701-                                        updatedRequests,
+20702-                                      );
+20703:                                      setDoc(
+20704-                                        doc(
+20705-                                          db,
+20706-                                          "scheduling_requests",
+20707-                                          newReq.id,
+20708-                                        ),
+--
+24421-                        qaScores={qaScores}
+24422-                        agentsList={agentsList}
+24423-                        qaTemplate={qaTemplate}
+24424-                        onUpdateQATemplate={(newTemplate) => {
+24425-                          setQaTemplate(newTemplate);
+24426:                          setDoc(doc(db, 'qa_config', 'template'), { questions: newTemplate }).catch(console.error);
+24427-                        }}
+24428-                        addSystemNotification={addSystemNotification}
+24429-                        onSubmitScore={(score) => {
+24430-                          const updated = [score, ...qaScores.filter(s => s.id !== score.id)];
+24431-                          setQaScores(updated);
+24432:                          setDoc(doc(db, 'qa_scores', score.id), score).catch(console.error);
+24433-                          addSystemNotification(
+24434-                            'QA Score Submitted',
+24435-                            `${currentUser.name} submitted a QA evaluation for ${score.agentName} — Score: ${score.totalScore}/${score.maxTotalScore}`,
+24436-                            'feedback',
+24437-                            score.agentName

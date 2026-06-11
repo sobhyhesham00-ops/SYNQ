@@ -942,7 +942,7 @@ export default function App() {
           new Date(a.createdAt || 0).getTime(),
       );
       setInquiries(arr);
-      setStorageItem("sched_inquiries", arr);
+      setStorageItem("sched_inquiries", arr, false);
     }, (error) => {
       console.error("inquiries snapshot error:", error.code, error.message);
     });
@@ -955,7 +955,7 @@ export default function App() {
           new Date(a.createdAt || 0).getTime(),
       );
       setQaScores(arr);
-      setStorageItem("sched_qa_scores", arr);
+      setStorageItem("sched_qa_scores", arr, false);
     }, (error) => {
       console.error("qa_scores snapshot error:", error.code, error.message);
     });
@@ -966,7 +966,7 @@ export default function App() {
         if (snap.exists()) {
           const data = snap.data().data;
           setQaTemplate(data);
-          setStorageItem("sched_qa_template", data);
+          setStorageItem("sched_qa_template", data, false);
         }
       }, (error) => {
         console.error("sched_qa_template snapshot error:", error.code, error.message);
@@ -980,7 +980,7 @@ export default function App() {
           new Date(a.createdAt || 0).getTime(),
       );
       setTabbyTamaraRequests(arr);
-      setStorageItem("sched_tabby_tamara", arr);
+      setStorageItem("sched_tabby_tamara", arr, false);
     }, (error) => {
       console.error("tt_requests snapshot error:", error.code, error.message);
     });
@@ -992,7 +992,7 @@ export default function App() {
           new Date(a.createdAt || 0).getTime(),
       );
       setTabbyTamaraComplaints(arr);
-      setStorageItem("sched_tt_complaints", arr);
+      setStorageItem("sched_tt_complaints", arr, false);
     }, (error) => {
       console.error("tt_complaints snapshot error:", error.code, error.message);
     });
@@ -1004,7 +1004,7 @@ export default function App() {
           new Date(a.createdAt || 0).getTime(),
       );
       setClientComms(arr);
-      setStorageItem("sched_client_comms", arr);
+      setStorageItem("sched_client_comms", arr, false);
     }, (error) => {
       console.error("client_comms snapshot error:", error.code, error.message);
     });
@@ -1018,7 +1018,7 @@ export default function App() {
             new Date(a.createdAt || 0).getTime(),
         );
         setRequests(arr);
-        setStorageItem("sched_requests", arr);
+        setStorageItem("sched_requests", arr, false);
       }, (error) => {
         console.error("scheduling_requests snapshot error:", error.code, error.message);
       }
@@ -1045,7 +1045,7 @@ export default function App() {
           return (b.id || "").localeCompare(a.id || "");
         });
         setTimeLogs(arr);
-        setStorageItem("sched_time_logs", arr);
+        setStorageItem("sched_time_logs", arr, false);
       },
       (error) => {
         if (error && error.code === "resource-exhausted") return;
@@ -1128,7 +1128,7 @@ export default function App() {
         }
 
         setAnnouncements(arr);
-        setStorageItem("sched_announcements", arr);
+        setStorageItem("sched_announcements", arr, false);
       },
       (error) => {
         if (error && error.code === "resource-exhausted") return;
@@ -1157,7 +1157,7 @@ export default function App() {
         if (snap.exists()) {
           const data = snap.data().data;
           setSupportAssignments(data);
-          setStorageItem("sched_support_assignments", data);
+          setStorageItem("sched_support_assignments", data, false);
         }
       }, (error) => {
         console.error("sched_support_assignments snapshot error:", error.code, error.message);
@@ -1171,7 +1171,7 @@ export default function App() {
           new Date(a.createdAt || 0).getTime(),
       );
       setCases(arr);
-      setStorageItem("sched_cases", arr);
+      setStorageItem("sched_cases", arr, false);
     }, (error) => {
       console.error("cases snapshot error:", error.code, error.message);
     });
@@ -1192,7 +1192,7 @@ export default function App() {
             { roleType: string; tlName: string }
           >;
           setAgentMeta(data);
-          setStorageItem("sched_agent_meta", data);
+          setStorageItem("sched_agent_meta", data, false);
         }
       }, (error) => {
         console.error("sched_agent_meta snapshot error:", error.code, error.message);
@@ -1204,7 +1204,7 @@ export default function App() {
         if (snap.exists()) {
           const data = snap.data().data as AgentDirectoryRow[];
           setAgentDirectory(data);
-          setStorageItem("sched_agent_directory", data);
+          setStorageItem("sched_agent_directory", data, false);
         }
       }, (error) => {
         console.error("sched_agent_directory snapshot error:", error.code, error.message);
@@ -1216,7 +1216,7 @@ export default function App() {
         if (snap.exists()) {
           const data = snap.data().data as string[];
           setDirectoryHeaders(data);
-          setStorageItem("sched_agent_directory_headers", data);
+          setStorageItem("sched_agent_directory_headers", data, false);
         }
       }, (error) => {
         console.error("sched_agent_directory_headers snapshot error:", error.code, error.message);
@@ -1229,7 +1229,7 @@ export default function App() {
         if (snap.exists()) {
           const data = snap.data().data as boolean;
           setIsRosterPublished(data);
-          setStorageItem("sched_roster_published", data);
+          setStorageItem("sched_roster_published", data, false);
         }
       }, (error) => {
         console.error("sched_roster_published snapshot error:", error.code, error.message);
@@ -1242,7 +1242,7 @@ export default function App() {
         if (snap.exists()) {
           const data = snap.data().data || {};
           setCredentials(data);
-          setStorageItem("sched_credentials", data);
+          setStorageItem("sched_credentials", data, false);
         }
       }, (error) => {
         console.error("sched_credentials snapshot error:", error.code, error.message);
@@ -1255,7 +1255,7 @@ export default function App() {
         if (snap.exists()) {
           const data = snap.data().data || [];
           setLockedAccounts(data);
-          setStorageItem("sched_locked_accounts", data);
+          setStorageItem("sched_locked_accounts", data, false);
         }
       }, (error) => {
         console.error("sched_locked_accounts snapshot error:", error.code, error.message);
@@ -1268,7 +1268,7 @@ export default function App() {
         if (snap.exists()) {
           const data = snap.data().data || {};
           setFailedAttempts(data);
-          setStorageItem("sched_failed_attempts", data);
+          setStorageItem("sched_failed_attempts", data, false);
         }
       }, (error) => {
         console.error("sched_failed_attempts snapshot error:", error.code, error.message);
@@ -1285,7 +1285,7 @@ export default function App() {
             new Date(a.createdAt || 0).getTime(),
         );
         setTlFeedbacks(arr);
-        setStorageItem("sched_tl_feedbacks", arr);
+        setStorageItem("sched_tl_feedbacks", arr, false);
       }, (error) => {
         console.error("tl_feedbacks snapshot error:", error.code, error.message);
       }
