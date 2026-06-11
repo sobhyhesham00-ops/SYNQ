@@ -8,6 +8,9 @@ interface AttachmentsDisplayProps {
   photos?: string[];
   attachments?: any[];
   links?: any;
+  tlPhotos?: string[];
+  tlLinks?: any;
+  showSideBadges?: boolean;
 }
 
 const LinkItem = ({ link }: { link: string }) => {
@@ -52,14 +55,27 @@ const LinkItem = ({ link }: { link: string }) => {
   );
 };
 
-export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({ photos, attachments, links }) => {
+export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({ 
+  photos, 
+  attachments, 
+  links,
+  tlPhotos,
+  tlLinks,
+  showSideBadges = true
+}) => {
   const extractedLinks = extractLinks(links);
   const normalizedAttachments = normalizeAttachments(photos, attachments);
   
   const hasAttachments = normalizedAttachments.length > 0;
   const hasLinks = extractedLinks.length > 0;
 
-  if (!hasAttachments && !hasLinks) return null;
+  const extractedTlLinks = extractLinks(tlLinks);
+  const normalizedTlAttachments = normalizeAttachments(tlPhotos, undefined);
+
+  const hasTlAttachments = normalizedTlAttachments.length > 0;
+  const hasTlLinks = extractedTlLinks.length > 0;
+
+  if (!hasAttachments && !hasLinks && !hasTlAttachments && !hasTlLinks) return null;
 
   const handleCopyImage = async (imageUrl: string) => {
     try {
@@ -115,7 +131,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({ photos, 
   };
 
   return (
-    <div className="space-y-3 mt-3 border-t border-white/5 pt-3">
+    <div className="space-y-4 mt-3 border-t border-white/5 pt-3">
       {/* Display Photos & Attachments */}
       {hasAttachments && (
         <div className="space-y-2">
@@ -177,6 +193,84 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({ photos, 
           <div className="flex flex-col gap-2">
             {extractedLinks.map((link, lIdx) => (
               <LinkItem key={lIdx} link={link} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Display TL Photos & Attachments */}
+      {hasTlAttachments && (
+        <div className="space-y-2 border-t border-amber-500/15 pt-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-amber-400 font-mono font-black block uppercase tracking-wider">
+              ⚠️ TL / Supervisor Files ({normalizedTlAttachments.length}):
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {normalizedTlAttachments.map((att) => {
+              const fileTitle = att.name;
+              const isImage = att.type?.startsWith('image/') || att.url.startsWith('data:image/') || (!att.type?.includes('pdf') && att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i));
+              
+              return (
+              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[280px] bg-black/55 rounded-lg border border-amber-500/20 hover:border-amber-400/50 transition-all overflow-hidden flex flex-col">
+                {showSideBadges && (
+                  <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-amber-500 text-slate-950 font-black text-[9px] rounded uppercase shadow-md z-10 select-none">
+                    TL
+                  </div>
+                )}
+                {isImage ? (
+                  <div className="w-full flex-1 min-h-[140px] flex items-center justify-center p-1 relative">
+                    <img referrerPolicy="no-referrer" src={att.url} alt={fileTitle} className="w-full h-auto object-contain max-h-[180px] rounded" />
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/photo:opacity-100 transition-opacity flex flex-wrap items-center justify-center gap-2 p-2 backdrop-blur-sm">
+                       <a href={att.url} target="_blank" rel="noreferrer" className="px-2 py-1.5 bg-white/10 hover:bg-white/20 rounded font-bold text-xs text-white flex items-center gap-1.5">
+                         <ExternalLink className="w-3.5 h-3.5" /> Open
+                       </a>
+                       <button onClick={() => handleCopyImage(att.url)} className="px-2 py-1.5 bg-white/10 hover:bg-white/20 rounded font-bold text-xs text-white flex items-center gap-1.5">
+                         <Copy className="w-3.5 h-3.5" /> Copy
+                       </button>
+                       <a href={att.url} download={fileTitle} className="px-2 py-1.5 bg-amber-500 hover:bg-amber-400 rounded font-bold text-xs text-slate-900 flex items-center gap-1.5">
+                         <Download className="w-3.5 h-3.5" /> Download
+                       </a>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center p-6 w-full flex-1">
+                    <FileText className="w-8 h-8 text-amber-500 mb-2" />
+                    <span className="text-xs text-slate-300 font-medium font-sans mb-3 text-center truncate w-full px-2" title={fileTitle}>{fileTitle}</span>
+                    <div className="flex items-center gap-2">
+                       <a href={att.url} target="_blank" rel="noreferrer" className="px-2.5 py-1.5 bg-white/10 hover:bg-white/20 rounded font-bold text-xs text-white flex items-center gap-1.5">
+                         <ExternalLink className="w-3 h-3" /> Open
+                       </a>
+                       <a href={att.url} download={fileTitle} className="px-2.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded font-bold text-xs flex items-center gap-1.5 border border-amber-500/30">
+                         <Download className="w-3 h-3" /> Download
+                       </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )})}
+          </div>
+        </div>
+      )}
+
+      {/* Display TL Links */}
+      {hasTlLinks && (
+        <div className="space-y-1 border-t border-amber-500/15 pt-3">
+          <span className="text-[10px] text-amber-400 font-mono font-black block uppercase tracking-wider">
+            ⚠️ TL / Supervisor References & Links:
+          </span>
+          <div className="flex flex-col gap-2">
+            {extractedTlLinks.map((link, lIdx) => (
+              <div key={lIdx} className="relative">
+                {showSideBadges && (
+                  <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-amber-500 text-slate-950 font-black text-[9px] rounded uppercase shadow-md z-10 select-none">
+                    TL
+                  </span>
+                )}
+                <div className={showSideBadges ? "pl-11" : ""}>
+                  <LinkItem link={link} />
+                </div>
+              </div>
             ))}
           </div>
         </div>

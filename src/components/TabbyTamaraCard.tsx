@@ -10,7 +10,7 @@ import { db, wrappedUpdateDoc as updateDoc } from '../firebase';
 import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
 import { MultiAttachmentUpload } from './MultiAttachmentUpload';
-import { formatCaseRef, normalizePhone, copyToClipboard, extractLinks, normalizeUrl, getSafeTTWorkflowStatus, getSafeTTSourceChannel, getAgentLOB, buildCaseClipboardPayload, normalizeAttachments, calculateTabbyTamaraPrice } from '../utils';
+import { formatCaseRef, normalizePhone, formatPhoneForCopy, copyToClipboard, extractLinks, normalizeUrl, getSafeTTWorkflowStatus, getSafeTTSourceChannel, getAgentLOB, buildCaseClipboardPayload, normalizeAttachments, calculateTabbyTamaraPrice } from '../utils';
 import { AGENT_LOBS } from '../types';
 
 // REUSABLE COMPONENTS
@@ -380,13 +380,12 @@ export const TabbyTamaraCard = ({
     return [
       `[${request.platform?.toUpperCase() || 'N/A'}] Request - ${request.patientName || 'Unknown'}`,
       `Ref: ${formatCaseRef(request.id, 'tt_request', request.createdAt, request.caseRef)}`,
-      `File: ${request.fileNumber || 'N/A'} | Phone: ${normalizePhone(request.phoneNumber)}`,
+      `File: ${request.fileNumber || 'N/A'} | Phone: ${formatPhoneForCopy(request.phoneNumber)}`,
       `Clinic: ${request.clinicName || 'N/A'}`,
       `Entered Amount: ${pricing.priceBeforeFeeFormatted}`,
       `5% Added: ${pricing.feeAmountFormatted}`,
       `Final Amount: ${pricing.finalPriceFormatted}`,
       `Status: ${request.status}`,
-      request.agentName ? `Agent: ${request.agentName}` : '',
       request.paymentLink ? `Payment Link: ${normalizeUrl(request.paymentLink)}` : '',
       request.notes ? `Agent Notes:\n${request.notes}` : '',
       request.tlNotes ? `TL Notes:\n${request.tlNotes}` : '',
@@ -400,7 +399,7 @@ export const TabbyTamaraCard = ({
   const buildRequestHtml = (request: any, attachments: string[]) => {
     let html = `<div><strong>[${request.platform?.toUpperCase() || 'N/A'}] Request - ${request.patientName || 'Unknown'}</strong><br/>`;
     html += `Ref: ${formatCaseRef(request.id, 'tt_request', request.createdAt, request.caseRef)}<br/>`;
-    html += `File: ${request.fileNumber || 'N/A'} | Phone: ${normalizePhone(request.phoneNumber)}<br/>`;
+    html += `File: ${request.fileNumber || 'N/A'} | Phone: ${formatPhoneForCopy(request.phoneNumber)}<br/>`;
     html += `Clinic: ${request.clinicName || 'N/A'}<br/>`;
     
     const pricing = calculateTabbyTamaraPrice(request.priceWithoutTax || 0);
@@ -409,8 +408,7 @@ export const TabbyTamaraCard = ({
     html += `Final Amount: ${pricing.finalPriceFormatted}<br/>`;
     html += `Status: ${request.status}<br/>`;
     
-    if (request.agentName) html += `Agent: ${request.agentName}<br/>`;
-    if (request.paymentLink) html += `Payment Link: <a href="${normalizeUrl(request.paymentLink)}">${normalizeUrl(request.paymentLink)}</a><br/>`;
+    if (request.paymentLink) html += `Payment Link: <a href="${normalizeUrl(request.paymentLink)}" target="_blank" rel="noopener">${normalizeUrl(request.paymentLink)}</a><br/>`;
     if (request.notes) html += `Agent Notes:<br/>${request.notes.replace(/\n/g, '<br/>')}<br/>`;
     if (request.tlNotes) html += `TL Notes:<br/>${request.tlNotes.replace(/\n/g, '<br/>')}<br/>`;
     if (request.agentContactNotes) html += `Contact Notes:<br/>${request.agentContactNotes.replace(/\n/g, '<br/>')}<br/>`;

@@ -72,6 +72,8 @@ export interface SwapRequest {
   screenshot?: string; // Base64 screenshot
   photos?: string[];
   links?: string[];
+  tlPhotos?: string[];
+  tlLinks?: string[];
   replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
 }
 
@@ -92,6 +94,8 @@ export interface AnnualRequest {
   screenshot?: string; // Base64 screenshot
   photos?: string[];
   links?: string[];
+  tlPhotos?: string[];
+  tlLinks?: string[];
   replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
 }
 
@@ -140,6 +144,8 @@ export interface Inquiry {
     links?: string[];
     screenshot?: string;
   }[];
+  tlPhotos?: string[];
+  tlLinks?: string[];
 }
 
 export type TTWorkflowStatus =
@@ -246,6 +252,8 @@ export interface TabbyTamaraComplaint {
   text?: string;
   tlResolutionType?: string;
   assignedTo?: string;
+  tlPhotos?: string[];
+  tlLinks?: string[];
 }
 
 export interface ClientCommunicationRequest {
@@ -270,6 +278,10 @@ export interface ClientCommunicationRequest {
   replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
   patientName?: string;
   assignedTo?: string;
+  channel?: string;
+  sourceChannel?: string;
+  tlPhotos?: string[];
+  tlLinks?: string[];
 }
 
 export interface CaseRecord {
@@ -308,6 +320,10 @@ export interface ScheduledShift {
   shiftLabel: string; // e.g. "07:00 - 16:00"
   shiftNotes?: string;
   activities?: DailyActivity[];
+  breakTime?: string;  // e.g. "10:00"
+  lunchTime?: string;  // e.g. "13:00"
+  breakNotified?: boolean;
+  lunchNotified?: boolean;
 }
 
 export interface ActivityRecord {

@@ -15,6 +15,7 @@ export const NotificationDrawer = ({
   setActiveTab,
   getRecordByEntity,
   setViewingRecord,
+  handleClearAllNotifs,
 }: any) => {
 
   const handleClearNotif = (id: string, currentClearedBy: string[]) => {
@@ -120,17 +121,30 @@ export const NotificationDrawer = ({
                     <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
                       Showing {displayNotifs.length} items
                     </span>
-                    <button 
-                      onClick={handleMarkAllNotifsAsRead}
-                      disabled={isMarkingAll || unreadCount === 0}
-                      className={`text-[10px] uppercase tracking-wider font-bold transition-colors ${
-                        isMarkingAll || unreadCount === 0
-                          ? 'text-slate-500 cursor-not-allowed opacity-50'
-                          : 'text-indigo-400 hover:text-indigo-300 cursor-pointer'
-                      }`}
-                    >
-                      {isMarkingAll ? "Marking..." : "Mark all as read"}
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button 
+                        onClick={handleMarkAllNotifsAsRead}
+                        disabled={isMarkingAll || unreadCount === 0}
+                        className={`text-[10px] uppercase tracking-wider font-bold transition-colors ${
+                          isMarkingAll || unreadCount === 0
+                            ? 'text-slate-500 cursor-not-allowed opacity-50'
+                            : 'text-indigo-400 hover:text-indigo-300 cursor-pointer'
+                        }`}
+                      >
+                        {isMarkingAll ? "Marking..." : "Mark all as read"}
+                      </button>
+                      {handleClearAllNotifs && sortedNotifs.length > 0 && (
+                        <>
+                          <span className="h-2 w-[1px] bg-white/10" />
+                          <button
+                            onClick={handleClearAllNotifs}
+                            className="text-[10px] uppercase tracking-wider font-bold text-rose-400 hover:text-rose-300 transition-colors cursor-pointer flex items-center gap-1"
+                          >
+                            <Trash2 className="w-3 h-3" /> Delete All
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
 
                   {displayNotifs.length === 0 ? (

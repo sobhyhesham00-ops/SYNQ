@@ -1,8 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, XCircle, FileText, CheckCircle, AlertCircle, RefreshCw, Sparkles } from 'lucide-react';
+import { 
+  Upload, 
+  XCircle, 
+  FileText, 
+  CheckCircle, 
+  AlertCircle, 
+  RefreshCw, 
+  ChevronLeft, 
+  ChevronRight 
+} from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { parseScheduleCSV } from '../utils';
 
-// Ensure proper typing for our schedules
 export interface ScheduledShift {
   id: string;
   agentName: string;
@@ -12,19 +21,26 @@ export interface ScheduledShift {
 
 interface ScheduleUploadProps {
   onSchedulesImported: (schedules: ScheduledShift[]) => void;
+  agentsList?: string[];
 }
 
-export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({ onSchedulesImported }) => {
+export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({ 
+  onSchedulesImported, 
+  agentsList = [] 
+}) => {
   const [dragActive, setDragActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [warnings, setWarnings] = useState<string[]>([]);
   const [tempSchedules, setTempSchedules] = useState<ScheduledShift[]>([]);
-  const [aiAnalysisResult, setAiAnalysisResult] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string>('');
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   useEffect(() => {
-    // When the component unmounts or we clear, clean up
     return () => {
       setTempSchedules([]);
     };
@@ -62,14 +78,16 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({ onSchedulesImpor
     setIsProcessing(true);
     setUploadError(null);
     setUploadSuccess(null);
-    setAiAnalysisResult(null);
+    setWarnings([]);
+    setTempSchedules([]);
+    setFileName(file.name);
+    setCurrentPage(1);
     
-    // Quick validation
-    const validExts = ['.xlsx', '.xls', '.csv'];
     const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+    const validExts = ['.xlsx', '.xls', '.csv', '.tsv', '.txt'];
     
     if (!validExts.includes(ext)) {
-      setUploadError(`Invalid file format: ${ext}. Please upload a .xlsx, .xls, or .csv file.`);
+      setUploadError(`Invalid file format: ${ext}. Supported formats are .xlsx, .xls, .csv, .tsv, .txt.`);
       setIsProcessing(false);
       return;
     }
@@ -78,42 +96,49 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({ onSchedulesImpor
     reader.onload = (e) => {
       try {
         const data = e.target?.result;
-        const workbook = XLSX.read(data, { type: 'binary' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
+        let csvText = '';
         
-        // Convert sheet to JSON
-        const jsonData = XLSX.utils.sheet_to_json<any>(worksheet, { defval: "" });
-        
-        if (jsonData.length === 0) {
+        if (ext === '.xlsx' || ext === '.xls') {
+          const workbook = XLSX.read(data, { type: 'binary' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          csvText = XLSX.utils.sheet_to_csv(worksheet);
+        } else {
+          // csv, tsv, txt can be read as text
+          const textContent = data as string;
+          try {
+            const workbook = XLSX.read(textContent, { type: 'string' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            csvText = XLSX.utils.sheet_to_csv(worksheet);
+          } catch (xlsxErr) {
+            console.warn("XLSX parsing failed for text format, falling back to raw text reading", xlsxErr);
+            csvText = textContent;
+          }
+        }
+
+        // TSV / TXT delimiter support fallback if XLSX didn't process tab delimiter:
+        if (ext === '.tsv' || (ext === '.txt' && csvText.includes('\t') && !csvText.includes(','))) {
+          csvText = csvText.replace(/\t/g, ',');
+        }
+
+        if (!csvText || csvText.trim() === '') {
           throw new Error("No data found in the file.");
         }
 
-        // Generic parser for a list of shifts
-        // Assuming columns like 'Agent', 'Date', 'Shift'
-        const schedules: ScheduledShift[] = [];
+        // Call parseScheduleCSV from utils
+        const result = parseScheduleCSV(csvText, agentsList);
         
-        jsonData.forEach((row, index) => {
-          const agentName = row['Agent'] || row['Agent Name'] || row['Name'] || Object.values(row)[0] || '';
-          const dateStr = row['Date'] || Object.values(row)[1] || '';
-          const shift = row['Shift'] || Object.values(row)[2] || '';
-          
-          if (agentName && dateStr && shift) {
-             schedules.push({
-               id: `gen_${Date.now()}_${index}`,
-               agentName: String(agentName).trim(),
-               date: String(dateStr).trim(),
-               shiftLabel: String(shift).trim()
-             });
-          }
-        });
-
-        if (schedules.length === 0) {
-          throw new Error("Could not parse schedule format. Ensure columns 'Agent', 'Date', and 'Shift' exist.");
+        if (result.errors && result.errors.length > 0) {
+          setWarnings(result.errors);
         }
 
-        setTempSchedules(schedules);
-        setUploadSuccess(`Successfully parsed ${schedules.length} shifts.`);
+        if (!result.schedules || result.schedules.length === 0) {
+          throw new Error("Could not parse schedule format or no valid shifts were found. Please check columns.");
+        }
+
+        setTempSchedules(result.schedules);
+        setUploadSuccess(`Successfully parsed ${result.schedules.length} shift rows from "${file.name}".`);
       } catch (err: any) {
         setUploadError(err.message || 'Error processing the file.');
       } finally {
@@ -126,37 +151,83 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({ onSchedulesImpor
       setIsProcessing(false);
     };
     
-    reader.readAsBinaryString(file);
-  };
-
-  const handleSendToAI = () => {
-    setIsAnalyzing(true);
-    // Simulate AI request since we do not have an actual Gemini route provided in this task details 
-    // outside of a general simulated timeout
-    setTimeout(() => {
-      setIsAnalyzing(false);
-      setAiAnalysisResult(`AI Analysis Complete: The schedule for ${tempSchedules.length} shifts has optimal coverage with a few minor gaps during peak hours. Night shift adherence is within boundaries.`);
-    }, 2500);
-  };
-
-  const handleSave = () => {
-    if (tempSchedules.length > 0) {
-      onSchedulesImported(tempSchedules);
-      // Clean up
-      setTempSchedules([]);
-      setUploadSuccess("Schedule roster formally published to workspace.");
-      setAiAnalysisResult(null);
+    if (ext === '.xlsx' || ext === '.xls') {
+      reader.readAsBinaryString(file);
+    } else {
+      reader.readAsText(file);
     }
   };
 
+  const handleConfirm = () => {
+    if (tempSchedules.length > 0) {
+      onSchedulesImported(tempSchedules);
+      // Clean up local temp schedules and reset on success
+      setTempSchedules([]);
+      setUploadSuccess(`Schedule roster (${fileName}) confirmed and sent to workspace.`);
+    }
+  };
+
+  const handleClear = () => {
+    setTempSchedules([]);
+    setWarnings([]);
+    setUploadSuccess(null);
+    setUploadError(null);
+    setFileName('');
+    setCurrentPage(1);
+    onSchedulesImported([]); // clear parent temp changes as well
+  };
+
+  // Pagination Math
+  const totalPages = Math.ceil(tempSchedules.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedShifts = tempSchedules.slice(startIndex, startIndex + itemsPerPage);
+
+  const getShiftBadge = (label: string) => {
+    const norm = label.toLowerCase();
+    if (norm.includes('07:00') || norm.includes('morning')) {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono text-xs font-semibold">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          {label}
+        </span>
+      );
+    }
+    if (norm.includes('13:00') || norm.includes('afternoon')) {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono text-xs font-semibold">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+          {label}
+        </span>
+      );
+    }
+    if (norm.includes('22:00') || norm.includes('night')) {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-mono text-xs font-semibold">
+          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+          {label}
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-500/15 text-slate-400 border border-slate-500/20 font-mono text-xs">
+        <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+        {label}
+      </span>
+    );
+  };
+
   return (
-    <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-10 shadow-lg text-left">
-      <div className="mb-6">
-        <h2 className="text-2xl font-black text-slate-100 flex items-center gap-3 font-display">
-          <CalendarIcon className="w-8 h-8 text-indigo-400" />
-          Import Schedule Roster
-        </h2>
-        <p className="text-slate-400 text-sm mt-1">Upload a CSV or Excel file containing your agent shifts.</p>
+    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl text-left space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-black text-slate-100 flex items-center gap-2.5 font-display">
+            <CalendarIcon className="w-6 h-6 text-indigo-400" />
+            Import Schedule Roster
+          </h2>
+          <p className="text-slate-400 text-xs mt-0.5">
+            Supported formats: Excel (.xlsx, .xls) and Plain/Delimited (.csv, .tsv, .txt)
+          </p>
+        </div>
       </div>
 
       {/* File Dropzone */}
@@ -165,119 +236,161 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({ onSchedulesImpor
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
-        className={`relative border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center text-center transition-all ${
+        className={`relative border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center transition-all ${
           dragActive 
-            ? 'border-indigo-400 bg-indigo-500/10' 
-            : 'border-slate-600 hover:border-slate-500 bg-slate-800'
+            ? 'border-indigo-400 bg-indigo-500/5' 
+            : 'border-slate-800 hover:border-slate-700 bg-slate-950/40'
         }`}
       >
         <input
           type="file"
-          accept=".xlsx,.xls,.csv"
+          accept=".xlsx,.xls,.csv,.tsv,.txt"
           onChange={handleChange}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
         />
         
         {isProcessing ? (
-          <div className="flex flex-col items-center">
-            <RefreshCw className="w-10 h-10 text-indigo-400 animate-spin mb-4" />
-            <h4 className="text-slate-100 font-bold mb-1">Processing File...</h4>
+          <div className="flex flex-col items-center py-4">
+            <RefreshCw className="w-8 h-8 text-indigo-400 animate-spin mb-3" />
+            <h4 className="text-slate-200 font-semibold text-sm">Processing uploaded roster...</h4>
           </div>
         ) : (
           <>
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-transform ${dragActive ? 'bg-indigo-500 text-white scale-110' : 'bg-slate-700 text-slate-400'}`}>
-              <Upload className="w-8 h-8" />
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-transform ${dragActive ? 'bg-indigo-500 text-white scale-110' : 'bg-slate-800 text-slate-400'}`}>
+              <Upload className="w-5 h-5" />
             </div>
-            <h4 className="text-slate-100 font-bold text-lg mb-1">Drag & drop your file here</h4>
-            <p className="text-slate-400 text-sm mb-4">or click to browse from your computer</p>
-            <div className="flex gap-2">
-              <span className="px-3 py-1 bg-slate-900 rounded-full text-xs font-mono text-slate-300 border border-slate-700">.XLSX</span>
-              <span className="px-3 py-1 bg-slate-900 rounded-full text-xs font-mono text-slate-300 border border-slate-700">.CSV</span>
+            <h4 className="text-slate-200 font-bold text-sm mb-0.5">Drag & drop your roster file here</h4>
+            <p className="text-slate-500 text-xs mb-3">or click to browse from your device</p>
+            <div className="flex flex-wrap justify-center gap-1.5">
+              {['.XLSX', '.XLS', '.CSV', '.TSV', '.TXT'].map(fType => (
+                <span key={fType} className="px-2 py-0.5 bg-slate-900 rounded text-[9px] font-mono text-slate-400 border border-slate-800">
+                  {fType}
+                </span>
+              ))}
             </div>
           </>
         )}
       </div>
 
-      {/* Feedback & Preview */}
-      {(uploadSuccess || uploadError || tempSchedules.length > 0) && (
-        <div className="mt-8 space-y-4 animate-fade-in">
-          {/* Status Banners */}
+      {/* Status Messages & Warnings */}
+      {(uploadSuccess || uploadError || warnings.length > 0) && (
+        <div className="space-y-3.5">
           {uploadError && (
-             <div className="flex items-center gap-3 bg-rose-500/10 border border-rose-500/20 p-4 rounded-xl text-rose-300">
-               <AlertCircle className="w-5 h-5 shrink-0" />
-               <p className="text-sm font-medium">{uploadError}</p>
-             </div>
-          )}
-          
-          {uploadSuccess && tempSchedules.length > 0 && (
-             <div className="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl text-emerald-300">
-               <CheckCircle className="w-5 h-5 shrink-0" />
-               <p className="text-sm font-medium">{uploadSuccess}</p>
-             </div>
+            <div className="flex items-start gap-3 bg-rose-500/10 border border-rose-500/20 p-4 rounded-xl text-rose-300">
+              <AlertCircle className="w-5 h-5 shrink-0 text-rose-400 mt-0.5" />
+              <div>
+                <h5 className="font-bold text-xs text-rose-400 uppercase tracking-wide">Import Failed</h5>
+                <p className="text-xs mt-0.5 text-rose-300/95">{uploadError}</p>
+              </div>
+            </div>
           )}
 
-          {/* AI Feature Panel */}
-          {tempSchedules.length > 0 && (
-            <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
-               <div className="p-4 bg-slate-900 border-b border-slate-700 flex flex-wrap justify-between items-center gap-4">
-                  <h4 className="font-bold text-slate-200 flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-indigo-400" />
-                    Preview ({tempSchedules.length} standard shifts)
-                  </h4>
-                  
-                  <div className="flex items-center gap-3">
-                     <button 
-                       onClick={handleSendToAI}
-                       disabled={isAnalyzing}
-                       className="px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white rounded-lg text-sm font-bold flex items-center gap-2 transition-all disabled:opacity-50"
-                     >
-                       {isAnalyzing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                       {isAnalyzing ? 'Analyzing...' : 'Analyze with AI'}
-                     </button>
-                     
-                     <button 
-                       onClick={handleSave}
-                       className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-lg text-sm font-bold transition-colors"
-                     >
-                        Confirm & Publish
-                     </button>
-                  </div>
-               </div>
-               
-               {aiAnalysisResult && (
-                 <div className="p-5 bg-indigo-900/40 border-b border-indigo-500/30">
-                   <h5 className="text-xs font-black uppercase tracking-widest text-indigo-300 mb-2">Gemini AI Analysis</h5>
-                   <p className="text-slate-300 text-sm leading-relaxed">{aiAnalysisResult}</p>
-                 </div>
-               )}
+          {uploadSuccess && (
+            <div className="flex items-start gap-3 bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl text-emerald-300">
+              <CheckCircle className="w-5 h-5 shrink-0 text-emerald-400 mt-0.5" />
+              <div>
+                <h5 className="font-bold text-xs text-emerald-400 uppercase tracking-wide">Import Successful</h5>
+                <p className="text-xs mt-0.5 text-emerald-300/95">{uploadSuccess}</p>
+              </div>
+            </div>
+          )}
 
-               <div className="p-0 max-h-[300px] overflow-y-auto">
-                 <table className="w-full text-sm text-left">
-                   <thead className="text-xs text-slate-400 uppercase bg-slate-800/50 sticky top-0">
-                     <tr>
-                       <th className="px-4 py-3 font-semibold">Agent Name</th>
-                       <th className="px-4 py-3 font-semibold">Date</th>
-                       <th className="px-4 py-3 font-semibold">Shift Label</th>
-                     </tr>
-                   </thead>
-                   <tbody className="divide-y divide-slate-700">
-                      {tempSchedules.slice(0, 15).map((s, i) => (
-                        <tr key={i} className="hover:bg-white/5 transition-colors">
-                           <td className="px-4 py-3 font-medium text-slate-200">{s.agentName}</td>
-                           <td className="px-4 py-3 text-slate-400">{s.date}</td>
-                           <td className="px-4 py-3">
-                             <span className="px-2 py-1 rounded bg-slate-700/50 text-slate-300 font-mono text-xs">{s.shiftLabel}</span>
-                           </td>
-                        </tr>
-                      ))}
-                   </tbody>
-                 </table>
-                 {tempSchedules.length > 15 && (
-                    <div className="p-3 text-center text-xs text-slate-500 bg-slate-900/50">
-                       + {tempSchedules.length - 15} more rows not shown in preview
-                    </div>
-                 )}
-               </div>
+          {warnings.length > 0 && (
+            <div className="flex flex-col gap-1.5 bg-amber-500/10 border border-amber-500/25 p-4 rounded-xl text-amber-300">
+              <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider">
+                <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
+                Parsing Warnings ({warnings.length})
+              </div>
+              <ul className="list-disc pl-5 space-y-1 text-[11px] text-amber-200/90 max-h-[140px] overflow-y-auto">
+                {warnings.map((w, idx) => (
+                  <li key={idx} className="leading-normal">{w}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Preview Section */}
+      {tempSchedules.length > 0 && (
+        <div className="bg-slate-950/60 rounded-2xl border border-slate-800 overflow-hidden shadow-inner">
+          <div className="p-4 bg-slate-900 border-b border-slate-800 flex flex-wrap justify-between items-center gap-3">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-indigo-400" />
+              <h5 className="font-bold text-xs text-slate-200 uppercase tracking-wider">
+                Shift Preview ({tempSchedules.length} rows found)
+              </h5>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleConfirm}
+                className="px-3.5 py-1.5 bg-indigo-500 hover:bg-indigo-400 active:bg-indigo-600 text-white rounded-lg text-xs font-black tracking-wide uppercase transition-colors shadow-lg shadow-indigo-500/15 cursor-pointer"
+              >
+                Confirm & Use These Shifts
+              </button>
+              <button
+                type="button"
+                onClick={handleClear}
+                className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-slate-300 rounded-lg text-xs font-black tracking-wide uppercase transition-colors cursor-pointer"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead className="bg-slate-905 bg-slate-900 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                <tr>
+                  <th className="px-4 py-3 font-semibold">Agent Name</th>
+                  <th className="px-4 py-3 font-semibold">Date</th>
+                  <th className="px-4 py-3 font-semibold">Shift Label</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60">
+                {paginatedShifts.map((s) => (
+                  <tr key={s.id} className="hover:bg-slate-900/40 transition-colors">
+                    <td className="px-4 py-3 font-medium text-slate-200">{s.agentName}</td>
+                    <td className="px-4 py-3 text-slate-400 font-mono text-[11px]">{s.date}</td>
+                    <td className="px-4 py-3">{getShiftBadge(s.shiftLabel)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="p-3 bg-slate-900 border-t border-slate-800 flex items-center justify-between gap-4">
+              <span className="text-[11px] text-slate-500 font-mono">
+                Showing {startIndex + 1}–{Math.min(startIndex + itemsPerPage, tempSchedules.length)} of {tempSchedules.length} rows
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="p-1 px-2.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-300 rounded text-xs flex items-center gap-1 transition-colors font-semibold cursor-pointer"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  Prev
+                </button>
+                <span className="text-[11px] font-mono text-slate-400 px-1">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="p-1 px-2.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-300 rounded text-xs flex items-center gap-1 transition-colors font-semibold cursor-pointer"
+                >
+                  Next
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           )}
         </div>

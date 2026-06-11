@@ -10,6 +10,8 @@ export interface CRMCase {
   patientName?: string;
   phoneNumber?: string;
   agentName: string; // Submitter agent
+  submittedByName?: string;
+  callCenterAgentName?: string;
   assignedToName?: string;
   assignedToId?: string;
   assignedAt?: string;

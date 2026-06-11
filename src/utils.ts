@@ -1680,6 +1680,19 @@ export const normalizePhone = (phone: string): string => {
   return (phone || '').replace(/\D/g, '').replace(/^(971|00971|0)+/, '');
 };
 
+export const formatPhoneForCopy = (phone: string): string => {
+  if (!phone) return '';
+  const raw = (phone || '').trim();
+  if (raw.startsWith('+')) return raw.replace(/\s+/g, '');
+  if (raw.startsWith('00')) return '+' + raw.slice(2).replace(/\s+/g, '');
+  const digits = raw.replace(/\D/g, '');
+  if (digits.startsWith('20') && digits.length >= 11) return '+' + digits;
+  if (digits.startsWith('971') && digits.length >= 11) return '+' + digits;
+  const local = digits.replace(/^0+/, '');
+  if (local.length >= 9) return '+971' + local;
+  return raw.replace(/\s+/g, '');
+};
+
 export const getSLAStatus = (createdAt: string, status: string, resolvedStatuses: string[]) => {
   const ageMs = Date.now() - new Date(createdAt).getTime();
   const ageH = ageMs / 3600000;

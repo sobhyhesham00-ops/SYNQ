@@ -30,7 +30,7 @@ import { AssignmentControl } from "./AssignmentControl";
 import { CaseConversation } from "./CaseConversation";
 import { CaseAttachments } from "./CaseAttachments";
 import { CaseActivityTimeline } from "./CaseActivityTimeline";
-import { buildCaseClipboardPayload, copyToClipboard, calculateTabbyTamaraPrice } from "../../utils";
+import { buildCaseClipboardPayload, copyToClipboard, calculateTabbyTamaraPrice, formatCaseRef, formatPhoneForCopy } from "../../utils";
 import { toast } from "sonner";
 
 interface CaseDetailDrawerProps {
@@ -131,6 +131,69 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
           `<blockquote style="border-left: 3px solid #6366f1; padding-left: 10px; margin: 0; color: #475569; font-style: italic;">${inq.text || "N/A"}</blockquote>` +
           (inq.answer ? `<p style="font-weight: bold; margin: 10px 0 5px 0; color: #10b981;">Answer / Response:</p>` +
           `<blockquote style="border-left: 3px solid #10b981; padding-left: 10px; margin: 0; color: #475569;">${inq.answer}</blockquote>` : "") +
+          `</div>`;
+      } else if (caseData.crmType === "complaint") {
+        const comp = caseData.raw as any;
+        const refCode = formatCaseRef(comp.id, 'tt_complaint', comp.createdAt, comp.caseRef);
+        payloadText = [
+          `🚨 COMPLAINT — ${refCode}`,
+          `Patient: ${comp.patientName || 'N/A'} | File: ${comp.fileNumber || 'N/A'}`,
+          `Phone: ${comp.phoneNumber ? comp.phoneNumber.replace(/\s+/g, '') : 'N/A'}`,
+          `Clinic: ${comp.clinicName || 'N/A'}`,
+          comp.idNumber ? `ID: ${comp.idNumber}` : (comp.isOldCustomer ? 'Customer Type: Existing' : 'Customer Type: New'),
+          `Status: ${comp.status?.replace(/_/g, ' ').toUpperCase() || 'N/A'}`,
+          `Complaint Details:\n${comp.complaintDetails || 'N/A'}`,
+          comp.tlComment ? `TL Response:\n${comp.tlComment}` : '',
+          comp.tlName ? `Handled By: ${comp.tlName}` : '',
+          (comp.photos?.length > 0) ? `Attachments: ${comp.photos.length} file(s)` : '',
+          (comp.links?.length > 0) ? `Links:\n${comp.links.join('\n')}` : '',
+        ].filter(Boolean).join('\n');
+
+        payloadHtml = `<div style="font-family: sans-serif; font-size: 13px; color: #1e293b; line-height: 1.5;">` +
+          `<h3 style="margin: 0 0 10px 0; color: #ef4444; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">🚨 COMPLAINT — ${refCode}</h3>` +
+          `<table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">` +
+          `<tr><td style="font-weight: bold; width: 120px; padding: 4px 0;">Patient Name:</td><td>${comp.patientName || "N/A"}</td></tr>` +
+          `<tr><td style="font-weight: bold; padding: 4px 0;">File Number:</td><td>${comp.fileNumber || "N/A"}</td></tr>` +
+          `<tr><td style="font-weight: bold; padding: 4px 0;">Phone:</td><td style="font-family: monospace;">${comp.phoneNumber ? comp.phoneNumber.replace(/\s+/g, '') : "N/A"}</td></tr>` +
+          `<tr><td style="font-weight: bold; padding: 4px 0;">Clinic Name:</td><td>${comp.clinicName || "N/A"}</td></tr>` +
+          `<tr><td style="font-weight: bold; padding: 4px 0;">ID/Customer:</td><td>${comp.idNumber ? comp.idNumber : (comp.isOldCustomer ? 'Customer Type: Existing' : 'Customer Type: New')}</td></tr>` +
+          `<tr><td style="font-weight: bold; padding: 4px 0;">Status:</td><td><span style="background: #ffe4e6; color: #b91c1c; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold;">${comp.status?.replace(/_/g, ' ').toUpperCase() || "N/A"}</span></td></tr>` +
+          `</table>` +
+          `<p style="font-weight: bold; margin: 10px 0 5px 0;">Complaint Details:</p>` +
+          `<blockquote style="border-left: 3px solid #f43f5e; padding-left: 10px; margin: 0; color: #475569; font-style: italic;">${comp.complaintDetails || 'N/A'}</blockquote>` +
+          (comp.tlComment ? `<p style="font-weight: bold; margin: 10px 0 5px 0; color: #b91c1c;">TL Comment:</p>` +
+          `<blockquote style="border-left: 3px solid #b91c1c; padding-left: 10px; margin: 0; color: #475569;">${comp.tlComment}</blockquote>` : "") +
+          `</div>`;
+      } else if (caseData.crmType === "client_comm") {
+        const req = caseData.raw as any;
+        const refCode = req.caseRef || formatCaseRef(req.id, 'client_comm', req.createdAt, req.caseRef);
+        payloadText = [
+          `*Client Communication Request*`,
+          `*Ref:* ${refCode}`,
+          `*Patient:* ${req.patientName || "N/A"}`,
+          `*Clinic:* ${req.clinicName || "N/A"}`,
+          `*Language:* ${req.language || "N/A"}`,
+          `*Phone:* ${formatPhoneForCopy(req.phoneNumber || "")}`,
+          `*Status:* ${req.status}`,
+          req.notes ? `*Notes:*\n${req.notes}` : '',
+          req.handlingNotes ? `*Resolution:*\n${req.handlingNotes}` : '*Resolution:* Pending',
+          req.handledBy ? `*Handled By:* ${req.handledBy}` : '',
+          (req.photos?.length > 0) ? `*Attachments:* ${req.photos.length} file(s)` : '',
+        ].filter(Boolean).join('\n');
+
+        payloadHtml = `<div style="font-family: sans-serif; font-size: 13px; color: #1e293b; line-height: 1.5;">` +
+          `<h3 style="margin: 0 0 10px 0; color: #10b981; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">Client Communication Request — ${refCode}</h3>` +
+          `<table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">` +
+          `<tr><td style="font-weight: bold; width: 120px; padding: 4px 0;">Patient:</td><td>${req.patientName || "N/A"}</td></tr>` +
+          `<tr><td style="font-weight: bold; padding: 4px 0;">Clinic:</td><td>${req.clinicName || "N/A"}</td></tr>` +
+          `<tr><td style="font-weight: bold; padding: 4px 0;">Language:</td><td>${req.language || "N/A"}</td></tr>` +
+          `<tr><td style="font-weight: bold; padding: 4px 0;">Phone:</td><td style="font-family: monospace;">${formatPhoneForCopy(req.phoneNumber || "")}</td></tr>` +
+          `<tr><td style="font-weight: bold; padding: 4px 0;">Status:</td><td><span style="background: #d1fae5; color: #065f46; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold;">${req.status || "N/A"}</span></td></tr>` +
+          `</table>` +
+          `<p style="font-weight: bold; margin: 10px 0 5px 0;">Notes:</p>` +
+          `<blockquote style="border-left: 3px solid #10b981; padding-left: 10px; margin: 0; color: #475569;">${req.notes || "No notes"}</blockquote>` +
+          (req.handlingNotes ? `<p style="font-weight: bold; margin: 10px 0 5px 0; color: #059669;">Resolution:</p>` +
+          `<blockquote style="border-left: 3px solid #059669; padding-left: 10px; margin: 0; color: #475569;">${req.handlingNotes}</blockquote>` : "") +
           `</div>`;
       } else {
         const payload = buildCaseClipboardPayload(caseData.raw as any);

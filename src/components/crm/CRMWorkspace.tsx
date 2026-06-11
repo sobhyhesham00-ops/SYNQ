@@ -90,6 +90,8 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
         subject: inq.text || "",
         phoneNumber: inq.phoneNumber,
         agentName: inq.agentName || "Agent",
+        submittedByName: inq.submittedByName || inq.agentName || "Agent",
+        callCenterAgentName: inq.callCenterAgentName || undefined,
         createdAt: inq.createdAt || new Date().toISOString(),
         updatedAt: inq.answeredAt || inq.createdAt,
         attachmentCount: (inq.photos?.length || 0) + (inq.attachments?.length || 0),
@@ -111,6 +113,8 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
         patientName: comp.patientName,
         phoneNumber: comp.phoneNumber,
         agentName: comp.submittedByName || comp.agentName || "Agent",
+        submittedByName: comp.submittedByName || comp.agentName || "Agent",
+        callCenterAgentName: comp.callCenterAgentName || undefined,
         assignedToName: comp.assignedToName,
         assignedToId: comp.assignedToId,
         createdAt: comp.createdAt || new Date().toISOString(),
@@ -134,6 +138,8 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
         patientName: req.patientName,
         phoneNumber: req.phoneNumber,
         agentName: req.submittedByName || req.agentName || "Agent",
+        submittedByName: req.submittedByName || req.agentName || "Agent",
+        callCenterAgentName: req.callCenterAgentName || undefined,
         assignedToName: req.assignedToName,
         assignedToId: req.assignedToId,
         createdAt: req.createdAt || new Date().toISOString(),
@@ -158,6 +164,8 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
           patientName: comm.patientName || comm.patientRef || "",
           phoneNumber: comm.phoneNumber || "",
           agentName: comm.agentName || comm.callCenterAgentName || "Agent",
+          submittedByName: comm.submittedByName || comm.agentName || undefined,
+          callCenterAgentName: comm.callCenterAgentName || undefined,
           assignedToName: comm.assignedToName,
           assignedToId: comm.assignedToId,
           createdAt: comm.createdAt || new Date().toISOString(),
@@ -188,11 +196,30 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
 
   // 4. Process Case filter logic
   const filteredCases = useMemo(() => {
+    const isAgentRole = currentUser?.role === 'agent';
+
     return cases
       .filter((c) => {
+        const myName = currentUser?.name?.toLowerCase();
+        const query = filters.searchQuery.toLowerCase().trim();
+
+        if (isAgentRole) {
+          // Phone search (7+ digits) reveals all requests for that patient
+          const isPhoneSearch = query.replace(/\D/g, '').length >= 7;
+          if (!isPhoneSearch) {
+            // Only show own requests
+            const isMyRequest = (
+              c.agentName?.toLowerCase() === myName ||
+              c.assignedToName?.toLowerCase() === myName ||
+              c.submittedByName?.toLowerCase() === myName ||
+              c.callCenterAgentName?.toLowerCase() === myName
+            );
+            if (!isMyRequest) return false;
+          }
+        }
+
         // Quick view scoping
         if (quickView === "my_cases") {
-          const myName = currentUser?.name?.toLowerCase();
           const matchesAssignee = c.assignedToName?.toLowerCase() === myName;
           const matchesSubmitter = c.crmType === "inquiry" && c.agentName?.toLowerCase() === myName;
           if (!matchesAssignee && !matchesSubmitter) return false;
@@ -203,7 +230,6 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
         }
 
         // Search Query matches: reference, patient, phone, clinic, agent, assignee, text, text inside replies
-        const query = filters.searchQuery.toLowerCase().trim();
         if (query) {
           const mRef = c.referenceId.toLowerCase().includes(query);
           const mPatient = c.patientName?.toLowerCase().includes(query);

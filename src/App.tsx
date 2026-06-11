@@ -171,6 +171,7 @@ import {
   formatCaseRef,
   calculateTabbyTamaraPrice,
   normalizePhone,
+  formatPhoneForCopy,
   copyToClipboard,
   extractLinks,
 } from "./utils";
@@ -697,6 +698,16 @@ export default function App() {
     }
 
     try {
+      const originalItem = 
+        type === "inquiry" ? inquiries.find((item) => item.id === id) :
+        type === "scheduling_request" ? requests.find((item) => item.id === id) :
+        type === "tt_request" ? tabbyTamaraRequests.find((item) => item.id === id) :
+        type === "tt_complaint" ? tabbyTamaraComplaints.find((item) => item.id === id) :
+        type === "client_comm" ? clientComms.find((item) => item.id === id) :
+        type === "case" ? cases.find((item) => item.id === id) : null;
+
+      const oldTlPhotos = (originalItem as any)?.tlPhotos || [];
+
       const systemReply = {
         id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
         senderName: currentUser?.name || "System",
@@ -708,6 +719,9 @@ export default function App() {
           ...data,
           replies: [...(data.replies || []), systemReply]
       };
+
+      const tlPhotos = (updatedData as any).tlPhotos || [];
+      const req = { ...updatedData, agentName: (updatedData as any).agentName || (updatedData as any).submittedBy || (updatedData as any).callCenterAgentName };
 
       if (type === "inquiry") {
         const docRef = doc(db, "inquiries", id);
@@ -758,6 +772,16 @@ export default function App() {
         toast.success("Case record updated successfully!");
         addSystemNotification("Request Updated", `Case record updated by ${currentUser?.name || 'Agent'}`, "general", "tl", undefined, "case", id);
       }
+
+      if (tlPhotos.length > oldTlPhotos.length && req.agentName) {
+        addSystemNotification(
+          'TL Added Attachments',
+          `${currentUser?.name || "TL"} added ${tlPhotos.length} file(s) to your request.`,
+          'general',
+          req.agentName
+        );
+      }
+
       setEditingItem(null);
     } catch (error) {
       console.error("Error editing item:", error);
@@ -1839,6 +1863,26 @@ export default function App() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallBtn, setShowInstallBtn] = useState(false);
 
+  const [breakLunchEditorShift, setBreakLunchEditorShift] = useState<any>(null);
+  const [blBreakTime, setBlBreakTime] = useState('');
+  const [blLunchTime, setBlLunchTime] = useState('');
+
+  const handleUpdateShiftBreakLunch = async (shift: any, breakTime: string, lunchTime: string) => {
+    const updated = { ...shift, breakTime: breakTime || undefined, lunchTime: lunchTime || undefined };
+    setSchedules((prev: any) => prev.map((s: any) => s.id === shift.id ? updated : s));
+    await setDoc(doc(db, 'schedules', shift.id), updated, { merge: true });
+    
+    // Notify agent
+    addSystemNotification(
+      'Break & Lunch Time Assigned',
+      `Your TL assigned: Break ${breakTime || "Not set"}, Lunch ${lunchTime || "Not set"} for ${shift.date}`,
+      'schedule',
+      shift.agentName
+    );
+    setBreakLunchEditorShift(null);
+    toast.success(`Break/Lunch saved for ${shift.agentName}!`);
+  };
+
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
@@ -2168,6 +2212,24 @@ export default function App() {
           seenByUsers: Array.from(seenSet),
         }).catch((e) => console.error("Mark Single Read Error:", e));
       }
+    }
+  };
+
+  const handleClearAllNotifs = async () => {
+    if (!currentUser) return;
+    const myVisible = visibleNotifs;
+    if (myVisible.length === 0) return;
+    try {
+      const batch = writeBatch(db);
+      myVisible.forEach((n: any) => {
+        const clearedSet = new Set(n.clearedByUsers || []);
+        clearedSet.add(currentUser.id);
+        batch.update(doc(db, "notifications", n.id), { clearedByUsers: Array.from(clearedSet) });
+      });
+      await batch.commit();
+      toast.success("All notifications cleared!");
+    } catch (e) {
+      toast.error("Failed to clear notifications");
     }
   };
 
@@ -2703,6 +2765,7 @@ ${pageText}
   const [ccPhoneNumber, setCcPhoneNumber] = useState("");
   const [ccLanguage, setCcLanguage] = useState<"Arabic" | "English">("Arabic");
   const [ccNotes, setCcNotes] = useState("");
+  const [ccChannel, setCcChannel] = useState<"call_center" | "chat" | "social_media">("call_center");
   const [activeCcHandlingId, setActiveCcHandlingId] = useState<string | null>(
     null,
   );
@@ -6515,6 +6578,8 @@ ${ttNotes}`
         screenshot: activeScreenshot || null,
         photos: activePhotos,
         links: activeLinks,
+        channel: ccChannel,
+        sourceChannel: ccChannel,
       };
       Object.keys(newComm).forEach(
         (k) => newComm[k] === undefined && delete newComm[k],
@@ -6535,21 +6600,24 @@ ${ttNotes}`
       setCcPhoneNumber("");
       setCcLanguage("Arabic");
       setCcNotes("");
+      setCcChannel("call_center");
       setActiveScreenshot(null);
       setActivePhotos([]);
       setActiveLinks([]);
 
-      // Notify only Social Media / Chat agents — not the submitter, not Call Center
-      const socialMediaAgents = Object.entries(AGENT_LOBS)
-        .filter(([name, lob]) => lob === 'Social Media' && name !== currentUser?.name)
+      // Route notification to correct LOB team based on channel
+      const targetLob = ccChannel === 'social_media' ? 'Social Media' : ccChannel === 'chat' ? 'Chat' : 'Social Media';
+      const targetedAgents = Object.entries(AGENT_LOBS)
+        .filter(([name, lob]) => lob === targetLob && name !== currentUser?.name)
         .map(([name]) => name);
 
-      socialMediaAgents.forEach(agentName => {
+      const channelLabel = ccChannel === 'social_media' ? 'Social Media' : ccChannel === 'chat' ? 'Chat' : 'Call Center';
+      targetedAgents.forEach(targetAgentName => {
         addSystemNotification(
-          'New Client Comm Request — Action Required',
-          `${currentUser?.name} (Call Center) submitted a comm request.\nClinic: ${ccClinicName} | Phone: ${ccPhoneNumber} | Language: ${ccLanguage}\n\n${ccNotes.substring(0, 120)}`,
+          `New Client Comm — ${channelLabel} → ${targetLob}`,
+          `${currentUser?.name || "Agent"} submitted a comm request for ${ccClinicName}. Phone: ${ccPhoneNumber}`,
           'general',
-          agentName,
+          targetAgentName,
           undefined,
           "client_comm",
           newComm.id
@@ -6849,8 +6917,8 @@ ${ttNotes}`
 
     // Automatically trigger notification
     addSystemNotification(
-      "New Schedule Released & Published!",
-      `A new shift schedule has been successfully uploaded and automatically published by ${currentUser?.name || "Leadership"}. System state is now updated.`,
+      "New Schedule Released!",
+      `Schedule uploaded by ${currentUser?.name || "Leadership"}. Check your shifts.`,
       "schedule",
       "all",
     );
@@ -9340,12 +9408,12 @@ ${ttNotes}`
                                     let finalPhone = rawPhone.trim();
                                     if (
                                       finalPhone &&
-                                      !finalPhone.startsWith("+971 ")
+                                      !finalPhone.startsWith("+971")
                                     ) {
                                       finalPhone =
-                                        "+971 " + normalizePhone(finalPhone);
+                                        "+971" + normalizePhone(finalPhone);
                                     }
-                                    if (finalPhone === "+971 ") finalPhone = "";
+                                    if (finalPhone === "+971") finalPhone = "";
                                     const updated = {
                                       ...currentUser,
                                       phone: finalPhone,
@@ -13801,6 +13869,9 @@ ${ttNotes}`
                                                 : []),
                                             ]}
                                             links={req.links}
+                                            tlPhotos={req.tlPhotos}
+                                            tlLinks={req.tlLinks}
+                                            showSideBadges={true}
                                           />
                                         </td>
                                         <td className="px-6 py-4 text-xs font-mono text-slate-400">
@@ -15116,10 +15187,10 @@ ${ttNotes}`
                                   value={inquiryPhoneNumber}
                                   onChange={(e) => {
                                     let val = e.target.value;
-                                    if (val && !val.startsWith("+971 ")) {
-                                      val = "+971 " + normalizePhone(val);
+                                    if (val && !val.startsWith("+971")) {
+                                      val = "+971" + normalizePhone(val);
                                     }
-                                    if (val === "+971 ") val = "";
+                                    if (val === "+971") val = "";
                                     setInquiryPhoneNumber(val);
                                   }}
                                   className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-mono"
@@ -15460,7 +15531,7 @@ ${ttNotes}`
                                                       ` Inquiry`,
                                                       `Ref: ${formatCaseRef(inq.id, 'inq', inq.createdAt, inq.caseRef)}`,
                                                       `Clinic: ${inq.clinicName}`,
-                                                      `Phone: ${normalizePhone(inq.phoneNumber || '')}`,
+                                                      `Phone: ${formatPhoneForCopy(inq.phoneNumber || '')}`,
                                                       `Inquiry: ${inq.text}`,
                                                       `Status: ${inq.status}`,
                                                       inq.answer ? `TL Answer: ${inq.answer}` : '',
@@ -15492,6 +15563,9 @@ ${ttNotes}`
                                                 ].filter(Boolean)}
                                                 attachments={inq.attachments}
                                                 links={inq.links || []}
+                                                tlPhotos={inq.tlPhotos}
+                                                tlLinks={inq.tlLinks}
+                                                showSideBadges={true}
                                               />
 
                                               {/* Done with attachments */}
@@ -16959,7 +17033,7 @@ ${ttNotes}`
                                                 ` Inquiry`,
                                                 `Ref: ${formatCaseRef(inq.id, 'inq', inq.createdAt, inq.caseRef)}`,
                                                 `Clinic: ${inq.clinicName}`,
-                                                `Phone: ${normalizePhone(inq.phoneNumber || '')}`,
+                                                `Phone: ${formatPhoneForCopy(inq.phoneNumber || '')}`,
                                                 `Inquiry: ${inq.text}`,
                                                 `Status: ${inq.status}`,
                                                 inq.answer ? `TL Answer: ${inq.answer}` : '',
@@ -17015,6 +17089,9 @@ ${ttNotes}`
                                           ].filter(Boolean)}
                                           attachments={inq.attachments}
                                           links={inq.links || []}
+                                          tlPhotos={inq.tlPhotos}
+                                          tlLinks={inq.tlLinks}
+                                          showSideBadges={true}
                                         />
 
                                         {/* TL customerContacted quick update buttons */}
@@ -17368,7 +17445,7 @@ ${ttNotes}`
                                           ` Case Record`,
                                           `Ref: ${formatCaseRef(c.id, "case", c.createdAt, c.caseRef)}`,
                                           `Patient: ${c.patientName}`,
-                                          `Phone: ${normalizePhone(c.phoneNumber || "")}`,
+                                          `Phone: ${formatPhoneForCopy(c.phoneNumber || "")}`,
                                           `Agent: ${c.agentName}`,
                                           c.service ? `Service: ${c.service}` : "",
                                           c.branch ? `Branch: ${c.branch}` : "",
@@ -18948,6 +19025,7 @@ ${ttNotes}`
                       {isSuperAdmin && (
                         <div className="w-full">
                           <ScheduleUpload
+                            agentsList={agentsList}
                             onSchedulesImported={(parsedSchedules) => {
                               setTempSchedules(parsedSchedules as any);
                               setUploadSuccess(
@@ -19277,21 +19355,37 @@ ${ttNotes}`
                                     return (
                                       <div
                                         key={shift.id}
-                                        className="p-4 bg-white/10 backdrop-blur-md/[0.02] border border-white/5 rounded-2xl flex items-center justify-between shadow"
+                                        className="p-4 bg-white/10 backdrop-blur-md/[0.02] border border-white/5 rounded-2xl flex flex-col justify-between gap-3 shadow text-left"
                                       >
-                                        <div>
-                                          <p className="text-[10px] text-slate-400 font-mono font-medium">
-                                            {formatDateNice(shift.date)}
-                                          </p>
-                                          <p className="text-xs font-bold text-slate-100 mt-1 uppercase tracking-wide">
-                                            {shift.agentName}
-                                          </p>
+                                        <div className="flex items-center justify-between w-full">
+                                          <div>
+                                            <p className="text-[10px] text-slate-400 font-mono font-medium">
+                                              {formatDateNice(shift.date)}
+                                            </p>
+                                            <p className="text-xs font-bold text-slate-100 mt-1 uppercase tracking-wide">
+                                              {shift.agentName}
+                                            </p>
+                                          </div>
+                                          <span
+                                            className={`px-2 py-0.5 text-[10px] font-black rounded border uppercase tracking-wider ${style.bg}`}
+                                          >
+                                            {style.display}
+                                          </span>
                                         </div>
-                                        <span
-                                          className={`px-2 py-0.5 text-[10px] font-black rounded border uppercase tracking-wider ${style.bg}`}
-                                        >
-                                          {style.display}
-                                        </span>
+                                        {(shift.breakTime || shift.lunchTime) && (
+                                          <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
+                                            {shift.breakTime && (
+                                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono text-[9px]">
+                                                ☕ Break: {shift.breakTime}
+                                              </span>
+                                            )}
+                                            {shift.lunchTime && (
+                                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20 font-mono text-[9px]">
+                                                🍔 Lunch: {shift.lunchTime}
+                                              </span>
+                                            )}
+                                          </div>
+                                        )}
                                       </div>
                                     );
                                   })}
@@ -20442,6 +20536,139 @@ ${ttNotes}`
                             )}
                           </div>
 
+                          {/* Break & Lunch Time Assignment Panel (TL / Admin Only) */}
+                          {(currentUser?.role === "tl" || isSuperAdmin) && schedules.length > 0 && (
+                            <div className="bg-white/5 border border-amber-500/20 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-6 mt-6">
+                              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-4">
+                                <div>
+                                  <h3 className="font-extrabold text-transparent bg-gradient-to-r from-amber-400 to-orange-300 bg-clip-text text-lg font-display flex items-center gap-2 text-left">
+                                    <Clock className="w-5 h-5 text-amber-400" />
+                                    <span>Break & Lunch Time Assignment</span>
+                                  </h3>
+                                  <p className="text-xs text-slate-400 mt-0.5 font-sans text-left">
+                                    Assign break and lunch slots for agents scheduled today ({getLocalISOString(systemTime)}). Saved slots trigger push notifications.
+                                  </p>
+                                </div>
+                                <span className="px-2.5 py-1 text-[10px] font-black tracking-wider uppercase text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-full font-mono">
+                                  TL & Admin Control
+                                </span>
+                              </div>
+
+                              {(() => {
+                                const todayStr = getLocalISOString(systemTime);
+                                const todayShifts = schedules.filter(shift => shift.date === todayStr);
+                                if (todayShifts.length === 0) {
+                                  return (
+                                    <div className="text-center py-8 text-slate-500 text-xs italic font-sans">
+                                      No agents are scheduled for today ({todayStr}).
+                                    </div>
+                                  );
+                                }
+                                return (
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {todayShifts.map((shift) => {
+                                      const isEditing = breakLunchEditorShift?.id === shift.id;
+                                      const style = getShiftBadgeStyle(shift.shiftLabel);
+                                      return (
+                                        <div 
+                                          key={shift.id} 
+                                          className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between gap-3 hover:border-white/15 transition-all text-left"
+                                        >
+                                          <div className="flex justify-between items-start gap-2">
+                                            <div>
+                                              <h4 className="font-bold text-sm text-slate-100 font-display flex items-center gap-1.5">
+                                                <span>{shift.agentName}</span>
+                                              </h4>
+                                              <span className="text-[10px] text-slate-400 font-normal lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded-lg mt-1 inline-block">
+                                                {getAgentLOB(shift.agentName)}
+                                              </span>
+                                            </div>
+                                            <span className={`px-2 py-0.5 rounded border text-[10px] font-semibold ${style.bg}`}>
+                                              {style.display}
+                                            </span>
+                                          </div>
+
+                                          {/* Times Display or Editor Inputs */}
+                                          {isEditing ? (
+                                            <div className="space-y-3 pt-2 border-t border-white/5 mt-1">
+                                              <div className="grid grid-cols-2 gap-2">
+                                                <div className="space-y-1">
+                                                  <label className="text-[9px] text-slate-400 font-extrabold uppercase font-sans">Break Time</label>
+                                                  <input 
+                                                    type="time" 
+                                                    value={blBreakTime}
+                                                    onChange={(e) => setBlBreakTime(e.target.value)}
+                                                    className="w-full px-2.5 py-1.5 bg-slate-950 border border-white/10 rounded-lg text-xs text-slate-100 outline-none focus:border-indigo-500 font-sans"
+                                                  />
+                                                </div>
+                                                <div className="space-y-1">
+                                                  <label className="text-[9px] text-slate-400 font-extrabold uppercase font-sans">Lunch Time</label>
+                                                  <input 
+                                                    type="time" 
+                                                    value={blLunchTime}
+                                                    onChange={(e) => setBlLunchTime(e.target.value)}
+                                                    className="w-full px-2.5 py-1.5 bg-slate-950 border border-white/10 rounded-lg text-xs text-slate-100 outline-none focus:border-indigo-500 font-sans"
+                                                  />
+                                                </div>
+                                              </div>
+                                              <div className="flex justify-end gap-2 pt-1">
+                                                <button
+                                                  onClick={() => setBreakLunchEditorShift(null)}
+                                                  className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-slate-300 rounded-lg text-[10px] font-extrabold uppercase tracking-wide cursor-pointer transition-colors"
+                                                >
+                                                  Cancel
+                                                </button>
+                                                <button
+                                                  onClick={() => handleUpdateShiftBreakLunch(shift, blBreakTime, blLunchTime)}
+                                                  className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-lg text-[10px] uppercase tracking-wide cursor-pointer transition-colors"
+                                                >
+                                                  Save & Notify
+                                                </button>
+                                              </div>
+                                            </div>
+                                          ) : (
+                                            <div className="flex items-center justify-between pt-2 border-t border-white/5 mt-1 gap-2">
+                                              <div className="flex flex-wrap gap-2">
+                                                {shift.breakTime ? (
+                                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-mono leading-none">
+                                                    ☕ Break: {shift.breakTime}
+                                                  </span>
+                                                ) : (
+                                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/5 text-slate-650 border border-dashed border-white/10 text-[10px] leading-none">
+                                                    ☕ Break: Not set
+                                                  </span>
+                                                )}
+                                                {shift.lunchTime ? (
+                                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-orange-500/10 text-orange-400 border border-orange-500/20 text-[10px] font-mono leading-none">
+                                                    🍔 Lunch: {shift.lunchTime}
+                                                  </span>
+                                                ) : (
+                                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/5 text-slate-650 border border-dashed border-white/10 text-[10px] leading-none">
+                                                    🍔 Lunch: Not set
+                                                  </span>
+                                                )}
+                                              </div>
+                                              <button
+                                                onClick={() => {
+                                                  setBreakLunchEditorShift(shift);
+                                                  setBlBreakTime(shift.breakTime || "");
+                                                  setBlLunchTime(shift.lunchTime || "");
+                                                }}
+                                                className="px-3 py-1 bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-300 border border-white/5 hover:border-indigo-500/20 text-slate-300 rounded-lg text-[10px] font-extrabold uppercase tracking-wide cursor-pointer transition-all"
+                                              >
+                                                Assign
+                                              </button>
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          )}
+
                           {/* P2P Shift Swap Trade Market & Trade Hub */}
                           <div className="bg-white/5 border border-white/10 rounded-3xl shadow-sm text-slate-100 p-5 sm:p-6 shadow-2xl space-y-6 mt-6">
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-4">
@@ -21213,7 +21440,7 @@ ${ttNotes}`
                           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                             {/* Left Column: Submission Form for Agents (only show if role is agent, else show TL search helper on full-width or toggle) */}
                             {currentUser?.role === "agent" && (
-                              <div className="lg:col-span-4 space-y-4">
+                              <div className="lg:col-span-12 space-y-4">
                                 {localSubTab === "requests" ? (
                                   <div className="p-6 bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl space-y-4 shadow-2xl">
                                     <h3 className="text-lg font-bold text-slate-100 font-display flex items-center gap-2 text-left">
@@ -21366,12 +21593,12 @@ ${ttNotes}`
                                             let val = e.target.value;
                                             if (
                                               val &&
-                                              !val.startsWith("+971 ")
+                                              !val.startsWith("+971")
                                             ) {
                                               val =
-                                                "+971 " + normalizePhone(val);
+                                                "+971" + normalizePhone(val);
                                             }
-                                            if (val === "+971 ") val = "";
+                                            if (val === "+971") val = "";
                                             setTtPhoneNumber(val);
                                           }}
                                           className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
@@ -21650,12 +21877,12 @@ ${ttNotes}`
                                             let val = e.target.value;
                                             if (
                                               val &&
-                                              !val.startsWith("+971 ")
+                                              !val.startsWith("+971")
                                             ) {
                                               val =
-                                                "+971 " + normalizePhone(val);
+                                                "+971" + normalizePhone(val);
                                             }
-                                            if (val === "+971 ") val = "";
+                                            if (val === "+971") val = "";
                                             setTcPhoneNumber(val);
                                           }}
                                           className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-mono"
@@ -21861,12 +22088,12 @@ ${ttNotes}`
                                             let val = e.target.value;
                                             if (
                                               val &&
-                                              !val.startsWith("+971 ")
+                                              !val.startsWith("+971")
                                             ) {
                                               val =
-                                                "+971 " + normalizePhone(val);
+                                                "+971" + normalizePhone(val);
                                             }
-                                            if (val === "+971 ") val = "";
+                                            if (val === "+971") val = "";
                                             setCcPhoneNumber(val);
                                           }}
                                           className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
@@ -21913,6 +22140,51 @@ ${ttNotes}`
                                         </div>
                                       </div>
 
+                                      {/* Source Channel Selection */}
+                                      <div className="space-y-1.5 text-left">
+                                        <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                                          Source Channel *
+                                        </label>
+                                        <div className="grid grid-cols-3 gap-2">
+                                          <button
+                                            id="cc-channel-call-center"
+                                            type="button"
+                                            onClick={() => setCcChannel("call_center")}
+                                            className={`py-2 px-1 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center border cursor-pointer ${
+                                              ccChannel === "call_center"
+                                                ? "bg-indigo-600 border-indigo-500 text-white shadow"
+                                                : "bg-black/25 border-white/5 text-slate-400"
+                                            }`}
+                                          >
+                                            📞 Call Center
+                                          </button>
+                                          <button
+                                            id="cc-channel-chat"
+                                            type="button"
+                                            onClick={() => setCcChannel("chat")}
+                                            className={`py-2 px-1 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center border cursor-pointer ${
+                                              ccChannel === "chat"
+                                                ? "bg-indigo-600 border-indigo-500 text-white shadow"
+                                                : "bg-black/25 border-white/5 text-slate-400"
+                                            }`}
+                                          >
+                                            💬 Chat
+                                          </button>
+                                          <button
+                                            id="cc-channel-social-media"
+                                            type="button"
+                                            onClick={() => setCcChannel("social_media")}
+                                            className={`py-2 px-1 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center border cursor-pointer ${
+                                              ccChannel === "social_media"
+                                                ? "bg-indigo-600 border-indigo-500 text-white shadow"
+                                                : "bg-black/25 border-white/5 text-slate-400"
+                                             }`}
+                                          >
+                                            📱 Social Media
+                                          </button>
+                                        </div>
+                                      </div>
+
                                       {/* Notes */}
                                       <div className="space-y-1.5 text-left">
                                         <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
@@ -21954,7 +22226,7 @@ ${ttNotes}`
 
                             {/* Right Column: Listing & Administration using CRM Workspace */}
                             <div
-                              className={`${currentUser?.role === "agent" ? "lg:col-span-8" : "lg:col-span-12"} h-full flex flex-col min-h-[600px]`}
+                              className={`lg:col-span-12 h-full flex flex-col min-h-[600px]`}
                             >
                               <CRMWorkspace
                                 activeTab={activeTab as any}
@@ -22873,6 +23145,9 @@ ${ttNotes}`
                                                             : []),
                                                         ]}
                                                         links={comp.links}
+                                                        tlPhotos={comp.tlPhotos}
+                                                        tlLinks={comp.tlLinks}
+                                                        showSideBadges={true}
                                                       />
                                                       <div>
                                                         <p className="text-[9px] text-slate-400 uppercase tracking-wider">
@@ -22921,6 +23196,9 @@ ${ttNotes}`
                                                     <AttachmentsDisplay
                                                       photos={comp.photos}
                                                       links={comp.links}
+                                                      tlPhotos={comp.tlPhotos}
+                                                      tlLinks={comp.tlLinks}
+                                                      showSideBadges={true}
                                                     />
 
                                                     {comp.tlComment && (
@@ -23110,7 +23388,7 @@ ${ttNotes}`
                                                             ` Complaint`,
                                                             `Ref: ${formatCaseRef(comp.id, "tt_complaint", comp.createdAt, comp.caseRef)}`,
                                                             `Patient: ${comp.patientName} | File: ${comp.fileNumber || 'N/A'}`,
-                                                            `Phone: ${normalizePhone(comp.phoneNumber || '')}`,
+                                                            `Phone: ${formatPhoneForCopy(comp.phoneNumber || '')}`,
                                                             `ID Type: ${comp.idNumber || (comp.isOldCustomer ? 'Old Customer' : 'New Customer')}`,
                                                             `Clinic: ${comp.clinicName}`,
                                                             `Status: ${comp.status}`,
@@ -23190,7 +23468,7 @@ ${ttNotes}`
                                                           ` Complaint`,
                                                           `Ref: ${formatCaseRef(comp.id, "tt_complaint", comp.createdAt, comp.caseRef)}`,
                                                           `Patient: ${comp.patientName} | File: ${comp.fileNumber || "N/A"}`,
-                                                          `Phone: ${normalizePhone(comp.phoneNumber || "")}`,
+                                                          `Phone: ${formatPhoneForCopy(comp.phoneNumber || "")}`,
                                                           `ID Type: ${comp.idNumber || (comp.isOldCustomer ? "Old Customer" : "New Customer")}`,
                                                           `Clinic: ${comp.clinicName}`,
                                                           `Status: ${comp.status}`,
@@ -23509,6 +23787,14 @@ ${ttNotes}`
                                                         >
                                                            {req.language}
                                                         </span>
+                                                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border ${
+                                                          req.status === 'contacted' ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/25' :
+                                                          req.status === 'in_progress' ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/25' :
+                                                          'bg-amber-500/15 text-amber-300 border-amber-500/25'
+                                                        }`}>
+                                                          {req.status === 'contacted' ? '✓ Contacted' :
+                                                           req.status === 'in_progress' ? '⚡ In Progress' : '⏳ Pending'}
+                                                        </span>
                                                       </div>
                                                     </div>
 
@@ -23586,24 +23872,10 @@ ${ttNotes}`
                                                         </p>
                                                         <p className="text-indigo-300 font-mono font-bold truncate">
                                                           <CopyWrap
-                                                            text={
-                                                              req.phoneNumber
-                                                                ? "0" +
-                                                                  req.phoneNumber.replace(
-                                                                    /^0+/,
-                                                                    "",
-                                                                  )
-                                                                : ""
-                                                            }
+                                                            text={req.phoneNumber ? req.phoneNumber.replace(/\s+/g, '') : ""}
                                                             label="Phone"
                                                           >
-                                                            {req.phoneNumber
-                                                              ? "0" +
-                                                                req.phoneNumber.replace(
-                                                                  /^0+/,
-                                                                  "",
-                                                                )
-                                                              : ""}
+                                                            {req.phoneNumber ? req.phoneNumber.replace(/\s+/g, '') : ""}
                                                           </CopyWrap>
                                                         </p>
                                                       </div>
@@ -23618,7 +23890,7 @@ ${ttNotes}`
                                                           text={req.notes || ""}
                                                           label="Notes"
                                                         >
-                                                          "{req.notes}"
+                                                          {req.notes || <span className="text-slate-500 italic">No notes</span>}
                                                         </CopyWrap>
                                                       </div>
                                                     </div>
@@ -23631,6 +23903,9 @@ ${ttNotes}`
                                                           : []),
                                                       ]}
                                                       links={req.links}
+                                                      tlPhotos={req.tlPhotos}
+                                                      tlLinks={req.tlLinks}
+                                                      showSideBadges={true}
                                                     />
 
                                                     {(req.handlingNotes ||
@@ -23669,6 +23944,9 @@ ${ttNotes}`
                                                                   req.handlingPhotos
                                                                 }
                                                                 links={[]}
+                                                                tlPhotos={req.tlPhotos}
+                                                                tlLinks={req.tlLinks}
+                                                                showSideBadges={true}
                                                               />
                                                             </div>
                                                           )}
@@ -23836,16 +24114,19 @@ ${ttNotes}`
                                                     {/* Copy Option */}
                                                     <button
                                                       onClick={() => {
-                                                        const details = `*Communication Request ID:* ${req.id}
-*Requested By:* ${req.callCenterAgentName}
-*Patient Name:* ${req.patientName || "N/A"}
-*Clinic:* ${req.clinicName}
-*Language:* ${req.language}
-*Phone Number:* ${req.phoneNumber}
-*Notes:*
-_ ${req.notes} _
-*Resolution Notes:*
-_ ${req.handlingNotes || "Pending response"} _`;
+                                                        const details = [
+                                                          `*Client Communication Request*`,
+                                                          `*Ref:* ${req.caseRef || req.id}`,
+                                                          `*Patient:* ${req.patientName || "N/A"}`,
+                                                          `*Clinic:* ${req.clinicName || "N/A"}`,
+                                                          `*Language:* ${req.language || "N/A"}`,
+                                                          `*Phone:* ${formatPhoneForCopy(req.phoneNumber)}`,
+                                                          `*Status:* ${req.status}`,
+                                                          req.notes ? `*Notes:*\n${req.notes}` : '',
+                                                          req.handlingNotes ? `*Resolution:*\n${req.handlingNotes}` : '*Resolution:* Pending',
+                                                          req.handledBy ? `*Handled By:* ${req.handledBy}` : '',
+                                                          (req.photos?.length > 0) ? `*Attachments:* ${req.photos.length} file(s)` : '',
+                                                        ].filter(Boolean).join('\n');
                                                         copyToClipboard(details, "Client communication details copied!");
                                                       }}
                                                       className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-slate-100 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
@@ -24562,7 +24843,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
                                 <button
                                   onClick={() => {
                                     const csvContent =
-                                      "Agent Name,Email,Phone,LOB,LOB Team,Role,Team Leader\nJohn Doe,john@example.com,555-0199,Chat,Support,agent,Amira Hassan\nJane Smith,jane@example.com,555-0122,Social Media,Moderator,tl,Hesham Sobhy";
+                                      "Agent Name,Email,Phone,LOB,LOB Team,Role,Team Leader\nAhmed Mohamed,ahmed@company.com,+971501234567,Call Center,CC Team 1,agent,Hesham Sobhy";
                                     const blob = new Blob([csvContent], {
                                       type: "text/csv;charset=utf-8;",
                                     });
@@ -24650,7 +24931,8 @@ _ ${req.handlingNotes || "Pending response"} _`;
                             <table className="w-full text-left text-xs text-slate-300 whitespace-nowrap">
                               <thead className="text-slate-400 bg-white/5 text-[10px] uppercase font-bold tracking-wider">
                                 <tr>
-                                  <th className="p-4 rounded-l-xl">
+                                  <th className="p-4 rounded-l-xl w-12">#</th>
+                                  <th className="p-4">
                                     Agent Name
                                   </th>
                                   <th className="p-4">App Username</th>
@@ -24688,6 +24970,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
                                       key={idx}
                                       className="hover:bg-white/5 transition-all"
                                     >
+                                      <td className="p-4 text-slate-500 font-mono text-[11px]">{idx + 1}</td>
                                       <td className="p-4 text-slate-100 font-bold">
                                         {meta.name}
                                       </td>
@@ -24697,20 +24980,33 @@ _ ${req.handlingNotes || "Pending response"} _`;
                                       <td className="p-4">
                                         {meta.email || "-"}
                                       </td>
-                                      <td className="p-4">
-                                        {meta.phone || "-"}
+                                      <td className="p-4 font-mono text-[12px]">
+                                        {meta.phone ? (
+                                          <span className="text-emerald-400">
+                                            {meta.phone.replace(/\s+/g,'').startsWith('+') ? meta.phone.replace(/\s+/g,'') : meta.phone}
+                                          </span>
+                                        ) : <span className="text-slate-600">-</span>}
                                       </td>
                                       <td className="p-4">
-                                        <span className="bg-white/10 backdrop-blur-md text-slate-300 px-2 py-1 rounded-lg bg-opacity-40">
-                                          {meta.lob || "-"}
-                                        </span>
+                                        {meta.lob ? (
+                                          <span className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
+                                            meta.lob.toLowerCase().includes('call') ? 'bg-blue-500/15 text-blue-300 border border-blue-500/20' :
+                                            meta.lob.toLowerCase().includes('chat') ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/20' :
+                                            meta.lob.toLowerCase().includes('social') ? 'bg-pink-500/15 text-pink-300 border border-pink-500/20' :
+                                            'bg-white/10 text-slate-300 border border-white/10'
+                                          }`}>{meta.lob}</span>
+                                        ) : <span className="text-slate-600">-</span>}
                                       </td>
                                       <td className="p-4">
                                         {meta.lobTeam || "-"}
                                       </td>
                                       <td className="p-4">
-                                        <span className="bg-amber-950/30 text-amber-500 font-bold py-1 px-3 rounded-lg">
-                                          {meta.role === "tl" ? "TL" : "Agent"}
+                                        <span className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${
+                                          meta.role === "tl" ? "bg-amber-950/30 text-amber-400 border-amber-500/20" :
+                                          meta.role === "qa" ? "bg-purple-950/30 text-purple-400 border-purple-500/20" :
+                                          "bg-slate-800 text-slate-400 border-slate-700"
+                                        }`}>
+                                          {meta.role === "tl" ? "Team Leader" : meta.role === "qa" ? "QA" : "Agent"}
                                         </span>
                                       </td>
                                       <td className="p-4 text-cyan-300 font-bold">
@@ -24755,6 +25051,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
         currentUser={currentUser}
         handleMarkAllNotifsAsRead={handleMarkAllNotifsAsRead}
         handleMarkSingleNotifAsRead={handleMarkSingleNotifAsRead}
+        handleClearAllNotifs={handleClearAllNotifs}
         isMarkingAll={isMarkingAll}
         setActiveTab={setActiveTab}
         getRecordByEntity={(entityType, entityId) => {
@@ -24875,7 +25172,9 @@ _ ${req.handlingNotes || "Pending response"} _`;
                 (viewingRecord.data.paymentScreenshot) ||
                 (viewingRecord.data.imageUrl) ||
                 (viewingRecord.data.attachments && viewingRecord.data.attachments.length > 0) ||
-                (viewingRecord.data.links && viewingRecord.data.links.length > 0)) && (
+                (viewingRecord.data.links && viewingRecord.data.links.length > 0) ||
+                (viewingRecord.data.tlPhotos && viewingRecord.data.tlPhotos.length > 0) ||
+                (viewingRecord.data.tlLinks)) && (
                 <div className='space-y-2 text-left'>
                   <p className='text-[9px] text-slate-500 uppercase tracking-widest font-bold'> Attachments</p>
                   <AttachmentsDisplay 
@@ -24887,6 +25186,9 @@ _ ${req.handlingNotes || "Pending response"} _`;
                     ]} 
                     attachments={viewingRecord.data.attachments || []}
                     links={viewingRecord.data.links || []} 
+                    tlPhotos={viewingRecord.data.tlPhotos}
+                    tlLinks={viewingRecord.data.tlLinks}
+                    showSideBadges={true}
                   />
                 </div>
               )}
@@ -24911,6 +25213,9 @@ _ ${req.handlingNotes || "Pending response"} _`;
                             ]}
                             attachments={r.attachments || []}
                             links={r.links || []} 
+                            tlPhotos={(r as any).tlPhotos}
+                            tlLinks={(r as any).tlLinks}
+                            showSideBadges={true}
                           />
                         </div>
                       )}
@@ -24945,7 +25250,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
                   const text = [
                     ` [${viewingRecord.type.toUpperCase()}] ${formatCaseRef(d.id, viewingRecord.type, d.createdAt, d.caseRef)}`,
                     d.patientName ? `Patient: ${d.patientName}` : '',
-                    d.phoneNumber ? `Phone: ${normalizePhone(d.phoneNumber)}` : '',
+                    d.phoneNumber ? `Phone: ${formatPhoneForCopy(d.phoneNumber)}` : '',
                     d.clinicName ? `Clinic: ${d.clinicName}` : '',
                     d.agentName ? `Agent: ${d.agentName}` : '',
                     `Status: ${d.status}`,
@@ -24961,7 +25266,7 @@ _ ${req.handlingNotes || "Pending response"} _`;
 
                   let html = `<div><strong> [${viewingRecord.type.toUpperCase()}] ${formatCaseRef(d.id, viewingRecord.type, d.createdAt, d.caseRef)}</strong><br/>`;
                   if (d.patientName) html += `Patient: ${d.patientName}<br/>`;
-                  if (d.phoneNumber) html += `Phone: ${normalizePhone(d.phoneNumber)}<br/>`;
+                  if (d.phoneNumber) html += `Phone: ${formatPhoneForCopy(d.phoneNumber)}<br/>`;
                   if (d.clinicName) html += `Clinic: ${d.clinicName}<br/>`;
                   if (d.agentName) html += `Agent: ${d.agentName}<br/>`;
                   html += `Status: ${d.status}<br/>`;

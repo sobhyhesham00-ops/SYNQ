@@ -60,6 +60,9 @@ const EditModalContent = ({
     return data.attachments ? [...data.attachments] : [];
   });
 
+  const [tlPhotos, setTlPhotos] = React.useState<string[]>(() => [...(data.tlPhotos || [])]);
+  const [tlLinks, setTlLinks] = React.useState<string[]>(() => [...(data.tlLinks || [])]);
+
   const [isUploading, setIsUploading] = React.useState(false);
 
   // Sync back to editingItem when photos/links change
@@ -72,6 +75,8 @@ const EditModalContent = ({
               ...prev.data, 
               photos: editPhotos, 
               links: editLinks,
+              tlPhotos,
+              tlLinks,
               attachments: editAttachments,
               screenshot: null,
               imageUrl: null,
@@ -82,7 +87,7 @@ const EditModalContent = ({
           }
         : prev,
     );
-  }, [editPhotos, editLinks, editAttachments, setEditingItem]);
+  }, [editPhotos, editLinks, tlPhotos, tlLinks, editAttachments, setEditingItem]);
 
   const handleValidatedSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -506,27 +511,42 @@ const EditModalContent = ({
           )}
 
           {/* Attachments Section */}
-          <div className="pt-4 border-t border-white/10">
-            <p className="text-xs font-bold text-slate-300 mb-3 uppercase tracking-wider"> Attachments & Links</p>
+          <div className="pt-4 border-t border-white/10 space-y-4">
+            {/* Agent Attachments */}
+            <div>
+              <p className="text-xs font-bold text-slate-300 uppercase mb-2 block">Agent Attachments</p>
+              {type === "inquiry" ? (
+                <ProfessionalAttachmentUploader
+                  attachments={editAttachments}
+                  links={editLinks}
+                  onAttachmentsChange={setEditAttachments}
+                  onLinksChange={setEditLinks}
+                  onUploadStateChange={setIsUploading}
+                />
+              ) : (
+                <MultiAttachmentUpload
+                  photos={editPhotos}
+                  links={editLinks}
+                  onPhotosChange={setEditPhotos}
+                  onLinksChange={setEditLinks}
+                  photosLabel="Add / Remove Agent Screenshots"
+                  onUploadStateChange={setIsUploading}
+                />
+              )}
+            </div>
 
-            {type === "inquiry" ? (
-              <ProfessionalAttachmentUploader
-                attachments={editAttachments}
-                links={editLinks}
-                onAttachmentsChange={setEditAttachments}
-                onLinksChange={setEditLinks}
-                onUploadStateChange={setIsUploading}
-              />
-            ) : (
+            {/* TL Attachments */}
+            <div className="border-t border-white/5 pt-4">
+              <p className="text-xs font-bold text-amber-400 uppercase mb-2 block">TL / Supervisor Attachments</p>
               <MultiAttachmentUpload
-                photos={editPhotos}
-                links={editLinks}
-                onPhotosChange={setEditPhotos}
-                onLinksChange={setEditLinks}
-                photosLabel="Add / Remove Screenshots"
+                photos={tlPhotos}
+                links={tlLinks}
+                onPhotosChange={setTlPhotos}
+                onLinksChange={setTlLinks}
+                photosLabel="Add / Remove TL Screenshots"
                 onUploadStateChange={setIsUploading}
               />
-            )}
+            </div>
           </div>
 
           <div className="pt-4 flex justify-end gap-3">

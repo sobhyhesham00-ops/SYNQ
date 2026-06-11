@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
-import { formatCaseRef, normalizePhone, getSLAStatus, copyToClipboard, extractLinks, calculateTabbyTamaraPrice } from '../utils';
+import { formatCaseRef, normalizePhone, formatPhoneForCopy, getSLAStatus, copyToClipboard, extractLinks, calculateTabbyTamaraPrice } from '../utils';
 
 const CopyButton = ({ text, tooltip, icon: Icon = Copy }: { text: string, tooltip: string, icon?: any }) => {
   const [copied, setCopied] = useState(false);
@@ -95,7 +95,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
       title,
       `Ref: ${formatCaseRef(req.id, 'inq', req.createdAt, req.caseRef)}`,
       `Clinic: ${req.clinicName}`,
-      `Phone: ${normalizePhone(req.phoneNumber || '')}`,
+      `Phone: ${formatPhoneForCopy(req.phoneNumber || '')}`,
       `Inquiry: ${req.text}`,
       `Status: ${STATUS_LABELS[req.status] || req.status}`,
       req.answer ? `Answer: ${req.answer}` : '',
@@ -118,7 +118,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
       title,
       `Ref: ${formatCaseRef(req.id, 'tt_request', req.createdAt, req.caseRef)}`,
       `Patient: ${req.patientName} | File: ${req.fileNumber || 'N/A'}`,
-      `Phone: ${normalizePhone(req.phoneNumber || '')}`,
+      `Phone: ${formatPhoneForCopy(req.phoneNumber || '')}`,
       `Clinic: ${req.clinicName}`,
       `Platform: ${req.platform?.toUpperCase()}`,
       `Amount: ${pricing.finalPriceFormatted}`,
@@ -142,7 +142,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
       title,
       `Ref: ${formatCaseRef(req.id, 'tt_complaint', req.createdAt, req.caseRef)}`,
       `Patient: ${req.patientName} | File: ${req.fileNumber || 'N/A'}`,
-      `Phone: ${normalizePhone(req.phoneNumber || '')}`,
+      `Phone: ${formatPhoneForCopy(req.phoneNumber || '')}`,
       `Clinic: ${req.clinicName}`,
       `Complaint: ${req.complaintDetails}`,
       `Status: ${STATUS_LABELS[req.status] || req.status}`,
@@ -165,7 +165,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
       title,
       `Ref: ${formatCaseRef(req.id, 'comm', req.createdAt, req.caseRef)}`,
       `Patient: ${req.patientName || 'N/A'}`,
-      `Phone: ${normalizePhone(req.phoneNumber || '')}`,
+      `Phone: ${formatPhoneForCopy(req.phoneNumber || '')}`,
       `Clinic: ${req.clinicName}`,
       `Language: ${req.language || 'N/A'}`,
       `Notes: ${req.notes || 'N/A'}`,
@@ -220,12 +220,9 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
   if (req.paymentLink) {
     allLinks.push(req.paymentLink);
   }
-  if (req.tlLinks) {
-    allLinks.push(req.tlLinks);
-  }
   const extractedLinks = extractLinks(allLinks);
 
-  const hasAttachments = (req.photos && req.photos.length > 0) || (extractedLinks && extractedLinks.length > 0) || req.screenshot || req.imageUrl || req.paymentScreenshot || (req.attachments && req.attachments.length > 0);
+  const hasAttachments = (req.photos && req.photos.length > 0) || (extractedLinks && extractedLinks.length > 0) || req.screenshot || req.imageUrl || req.paymentScreenshot || (req.attachments && req.attachments.length > 0) || (req.tlPhotos && req.tlPhotos.length > 0) || req.tlLinks;
   const handlerLabel = req.tlName || req.actionBy || req.handledBy;
 
   return (
@@ -275,6 +272,9 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
                      photos={[...(req.photos || []), ...(req.screenshot ? [req.screenshot] : []), ...(req.imageUrl ? [req.imageUrl] : []), ...(req.paymentScreenshot ? [req.paymentScreenshot] : [])]} 
                      attachments={(req as any).attachments}
                      links={extractedLinks} 
+                     tlPhotos={req.tlPhotos}
+                     tlLinks={req.tlLinks}
+                     showSideBadges={true}
                   />
                </div>
             )}
@@ -429,14 +429,24 @@ export const AgentRequestsLogs = ({
   }, []);
   
   const allRequests = useMemo(() => {
-    if (!currentUser || currentUser.role !== 'agent') return [];
+    if (!currentUser) return [];
+    const isTlOrAdmin = currentUser.role === 'tl' || currentUser.role === 'qa' || currentUser.role === 'admin' || currentUser.role === 'super_admin';
+    const myName = currentUser.name;
     const res: any[] = [];
     
-    requests.filter((r: any) => r.agentName === currentUser.name).forEach((r: any) => res.push({...r, _cType: 'sched'}));
-    inquiries.filter((r: any) => r.agentName === currentUser.name).forEach((r: any) => res.push({...r, _cType: 'inq'}));
-    tabbyTamaraRequests.filter((r: any) => r.agentName === currentUser.name).forEach((r: any) => res.push({...r, _cType: 'tt_request'}));
-    complaints.filter((r: any) => r.agentName === currentUser.name).forEach((r: any) => res.push({...r, _cType: 'tt_complaint'}));
-    clientComms.filter((r: any) => r.callCenterAgentName === currentUser.name).forEach((r: any) => res.push({...r, _cType: 'comm'}));
+    const myReqs = (arr: any[], nameField: string) =>
+      isTlOrAdmin ? arr : arr.filter(r => (r[nameField] || '').toLowerCase() === myName.toLowerCase());
+
+    myReqs(requests, 'agentName').forEach(r => res.push({...r, _cType: 'sched'}));
+    myReqs(inquiries, 'agentName').forEach(r => res.push({...r, _cType: 'inq'}));
+    myReqs(tabbyTamaraRequests, 'agentName').forEach(r => res.push({...r, _cType: 'tt_request'}));
+    myReqs(complaints, 'agentName').forEach(r => res.push({...r, _cType: 'tt_complaint'}));
+    
+    // Client comms: check both fields
+    (isTlOrAdmin ? clientComms : clientComms.filter(r =>
+      (r.callCenterAgentName || '').toLowerCase() === myName.toLowerCase() ||
+      (r.agentName || '').toLowerCase() === myName.toLowerCase()
+    )).forEach(r => res.push({...r, _cType: 'comm'}));
     
     return res.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [requests, inquiries, tabbyTamaraRequests, complaints, clientComms, currentUser]);
@@ -481,7 +491,9 @@ export const AgentRequestsLogs = ({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold text-slate-100 font-display text-left">All My Requests</h2>
+        <h2 className="text-3xl font-bold text-slate-100 font-display text-left">
+          {currentUser?.role === "agent" ? "My Submissions Log" : "All Submissions Log"}
+        </h2>
         <p className="text-slate-400 text-[14px] text-left mt-1">Review status, details and track tickets effectively in your workspace.</p>
       </div>
 
@@ -556,7 +568,7 @@ export const AgentRequestsLogs = ({
           </div>
         </div>
 
-        <div className="space-y-4 max-h-[800px] overflow-y-auto pr-2">
+        <div className="space-y-4 max-h-[calc(100vh-20rem)] overflow-y-auto pr-2">
           {sorted.length === 0 ? (
             <div className="text-center py-12 text-slate-400 space-y-3">
               <ClipboardList className="w-12 h-12 mx-auto text-slate-600" />
