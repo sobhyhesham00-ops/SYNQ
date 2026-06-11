@@ -1,5 +1,5 @@
 import React from "react";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, MessageSquare, Clock, Shield } from "lucide-react";
 import { AttachmentsDisplay } from "./AttachmentsDisplay";
 
 interface InquiryRepliesViewerProps {
@@ -13,50 +13,88 @@ export const InquiryRepliesViewer: React.FC<InquiryRepliesViewerProps> = ({ inqu
   if (!hasLegacyAnswer && !hasReplies) return null;
 
   return (
-    <div className="space-y-3 mt-3">
-      {hasReplies ? (
-         <div className="space-y-3">
-           {inquiry.replies.map((reply: any, idx: number) => (
-              <div key={reply.id || idx} className="p-3 bg-emerald-500/10 border-l-2 border-emerald-500/50 rounded-r-xl space-y-2 text-left animate-fade-in">
-                 <div className="flex justify-between items-start gap-2">
-                    <p className="text-[10px] font-mono font-bold text-emerald-400 flex items-center gap-1 uppercase">
-                      <CheckCircle2 className="w-3 h-3" /> Reply from {reply.senderName}
-                    </p>
-                    <span className="text-[9px] text-slate-500 font-mono whitespace-nowrap">
+    <div className="mt-4 p-4 bg-slate-900/40 border border-emerald-500/15 rounded-xl space-y-4 text-left shadow-lg">
+      <div className="flex items-center gap-2 pb-2.5 border-b border-emerald-500/10">
+        <div className="p-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg">
+          <CheckCircle2 className="w-4 h-4" />
+        </div>
+        <div>
+          <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-widest block font-sans">Solutions & Activity Logs</span>
+          <span className="text-[9px] text-slate-400">Recorded client resolutions and correspondence</span>
+        </div>
+      </div>
+
+      <div className="relative border-l border-emerald-500/20 ml-4 pl-6 space-y-5 py-1">
+        {hasReplies ? (
+          inquiry.replies.map((reply: any, idx: number) => {
+            const isTL = reply.authorRole === 'tl' || reply.authorRole?.toUpperCase() === 'TEAM LEADER';
+            return (
+              <div key={reply.id || idx} className="relative group text-left animate-fade-in font-sans">
+                {/* Timeline Dot */}
+                <div className={`absolute -left-[33px] top-1 rounded-full w-6 h-6 flex items-center justify-center border shadow-sm ${isTL ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'}`}>
+                  {isTL ? <Shield className="w-3 h-3" /> : <MessageSquare className="w-3 h-3" />}
+                </div>
+
+                <div className="p-3 bg-slate-900/80 border border-slate-800/40 rounded-xl space-y-2 hover:bg-slate-900 duration-150">
+                  <div className="flex justify-between items-center gap-2 flex-wrap">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-slate-200">{reply.senderName}</span>
+                      <span className={`text-[8px] font-extrabold uppercase tracking-widest px-1.5 py-0.2 rounded border ${isTL ? 'text-amber-400 bg-amber-500/5 border-amber-500/20' : 'text-emerald-400 bg-emerald-500/5 border-emerald-500/20'}`}>
+                        {reply.authorRole || "Leader"}
+                      </span>
+                    </div>
+                    <span className="text-[9px] text-slate-500 font-mono flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
                       {new Date(reply.createdAt).toLocaleString()}
                     </span>
-                 </div>
-                 {reply.text && (
-                   <div className="text-xs text-emerald-100/90 whitespace-pre-wrap leading-relaxed font-sans">
-                     {reply.text}
-                   </div>
-                 )}
-                 {/* Display Attachments for this reply */}
-                 <AttachmentsDisplay 
-                   attachments={[...(reply.attachments || []), ...(reply.attachmentsObjects || []), reply.imageUrl, reply.screenshot].filter(Boolean)} 
-                   photos={reply.photos}
-                   links={reply.links} 
-                 />
+                  </div>
+                  {reply.text && (
+                    <p className="text-xs text-slate-300 leading-relaxed font-sans whitespace-pre-wrap">
+                      {reply.text}
+                    </p>
+                  )}
+                  {/* Display Attachments for this reply */}
+                  <div className="pt-1.5 border-t border-white/5">
+                    <AttachmentsDisplay 
+                      attachments={[...(reply.attachments || []), ...(reply.attachmentsObjects || []), reply.imageUrl, reply.screenshot].filter(Boolean)} 
+                      photos={reply.photos}
+                      links={reply.links} 
+                    />
+                  </div>
+                </div>
               </div>
-           ))}
-         </div>
-      ) : (
-         <div className="p-3 bg-emerald-500/10 border-l-2 border-emerald-500/50 rounded-r-xl space-y-1 text-left animate-fade-in">
-            <div className="flex justify-between items-start gap-2">
-               <p className="text-[10px] font-mono font-bold text-emerald-400 mb-1 flex items-center gap-1 uppercase">
-                 <CheckCircle2 className="w-3 h-3" /> TL RESOLUTION: {inquiry.answeredBy || "Leader"}
-               </p>
-               {inquiry.answeredAt && (
-                 <span className="text-[9px] text-slate-500 font-mono">
-                   {new Date(inquiry.answeredAt).toLocaleString()}
-                 </span>
-               )}
+            );
+          })
+        ) : (
+          /* Legacy single answer fallback styled beautifully */
+          <div className="relative group text-left animate-fade-in font-sans">
+            {/* Timeline Dot */}
+            <div className="absolute -left-[33px] top-1 rounded-full w-6 h-6 flex items-center justify-center border shadow-sm bg-emerald-500/10 border-emerald-500/30 text-emerald-400">
+              <Shield className="w-3 h-3" />
             </div>
-            <p className="text-xs text-emerald-200">
-              {inquiry.answer}
-            </p>
-         </div>
-      )}
+
+            <div className="p-3 bg-slate-900/80 border border-slate-800/40 rounded-xl space-y-2 hover:bg-slate-900 duration-150">
+              <div className="flex justify-between items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-bold text-slate-200">{inquiry.answeredBy || "Leader"}</span>
+                  <span className="text-[8px] font-extrabold uppercase tracking-widest px-1.5 py-0.2 rounded border text-emerald-400 bg-emerald-500/5 border-emerald-500/20">
+                    TEAM LEADER
+                  </span>
+                </div>
+                {inquiry.answeredAt && (
+                  <span className="text-[9px] text-slate-500 font-mono flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    {new Date(inquiry.answeredAt).toLocaleString()}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                {inquiry.answer}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -1809,25 +1809,55 @@ export const buildCaseClipboardPayload = (request: TabbyTamaraRequest): Clipboar
   }
 
   const attachmentsList = normalizeAttachments(rawAttachments);
+  const pricing = calculateTabbyTamaraPrice(request.priceWithoutTax || 0);
 
   // Text version
   const textLines = [
-    `=== ${provider} PAYMENT REQUEST ===`,
-    `Patient Name: ${patient}`,
-    `Phone Number: ${phone}`,
-    `Final Amount (incl. VAT): ${calculateTabbyTamaraPrice(request.priceWithoutTax || 0).finalPriceFormatted}`,
-    `Payment Link: ${paymentLink}`
+    `✨ *${provider} PAYMENT REQUEST* ✨`,
+    `--------------------------------------`,
+    `🆔 *Ref:* ${refCode}`,
+    `👤 *Patient:* ${patient}`,
+    `📞 *Phone:* ${formatPhoneForCopy(phone)}`,
+    `📁 *File/ID:* ${fileNum}`,
+    `🏥 *Clinic:* ${clinic}`,
+    `💰 *Final Amount (incl. VAT):* ${pricing.finalPriceFormatted} *(Entered: ${pricing.priceBeforeFeeFormatted} + 5% Fee: ${pricing.feeAmountFormatted})*`,
+    `📋 *Status:* ${workflowStatusLabel}`,
+    `🔗 *Payment Link:* ${paymentLink}`,
+    request.notes ? `💬 *Agent Notes:* ${request.notes}` : '',
+    request.tlNotes ? `💬 *TL Notes:* ${request.tlNotes}` : '',
+    `--------------------------------------`
   ].filter(Boolean).join('\n');
 
-  // HTML version
-  let html = `<div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; color: #333; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; background-color: #f8fafc;">`;
-  html += `<h2 style="margin-top: 0; color: #0f172a; font-size: 18px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">${provider} Payment Request</h2>`;
+  // HTML version with modern responsive styling & colored status badges
+  let statusColor = "#f59e0b"; // amber for pending
+  if (workflowStatusLabel.includes("CONTACTED") || workflowStatusLabel.includes("RESOLVED") || workflowStatusLabel.includes("CONFIRMED") || workflowStatusLabel.includes("PAID")) {
+    statusColor = "#10b981"; // green
+  } else if (workflowStatusLabel.includes("REJECTED") || workflowStatusLabel.includes("DECLINED") || workflowStatusLabel.includes("FAILED")) {
+    statusColor = "#ef4444"; // red
+  }
+
+  let providerColor = "#f59e0b"; // gold for tabby
+  if (provider.toLowerCase() === "tamara") {
+    providerColor = "#f43f5e"; // rose for tamara
+  } else if (provider.toLowerCase() === "one_time_payment") {
+    providerColor = "#3b82f6"; // blue
+  }
+
+  let html = `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 600px; color: #1e293b; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">`;
+  html += `<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px;">`;
+  html += `<span style="font-size: 14px; font-weight: 700; background-color: ${providerColor}20; color: ${providerColor}; padding: 6px 12px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.05em;">💳 ${provider} Request</span>`;
+  html += `<span style="font-size: 11px; font-weight: 700; background-color: #f1f5f9; color: #475569; padding: 4px 8px; border-radius: 6px; font-family: monospace;">${refCode}</span>`;
+  html += `</div>`;
   
-  html += `<table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;">`;
-  html += `<tr><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9; color: #64748b; width: 140px;">Patient Name</td><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">${patient}</td></tr>`;
-  html += `<tr><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9; color: #64748b; width: 140px;">Phone Number</td><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">${phone}</td></tr>`;
-  html += `<tr><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9; color: #64748b; width: 140px;">Final Amount</td><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">${calculateTabbyTamaraPrice(request.priceWithoutTax || 0).finalPriceFormatted}</td></tr>`;
-  html += `<tr><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9; color: #64748b;">Payment Link</td><td style="padding: 8px 4px; border-bottom: 1px solid #f1f5f9;"><a href="${normalizeUrl(paymentLink)}" target="_blank" style="color: #2563eb; text-decoration: none; word-break: break-all;">${paymentLink}</a></td></tr>`;
+  html += `<table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 15px;">`;
+  html += `<tr><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; color: #64748b; width: 150px;">👤 Patient Name</td><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; font-weight: 600; color: #0f172a;">${patient}</td></tr>`;
+  html += `<tr><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; color: #64748b;">📞 Phone Number</td><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; font-weight: 600; color: #0f172a; font-family: monospace;">${formatPhoneForCopy(phone)}</td></tr>`;
+  html += `<tr><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; color: #64748b;">📁 File / ID</td><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; font-weight: 600; color: #0f172a; font-family: monospace;">${fileNum}</td></tr>`;
+  html += `<tr><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; color: #64748b;">🏥 Clinic</td><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; font-weight: 600; color: #0f172a;">${clinic}</td></tr>`;
+  html += `<tr><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; color: #64748b;">💵 Amount (incl. VAT)</td><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; font-weight: 700; color: #10b981; font-size: 15px;">${pricing.finalPriceFormatted}</td></tr>`;
+  html += `<tr><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; color: #64748b;">📋 Status</td><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc;"><span style="font-size: 11px; font-weight: 800; background-color: ${statusColor}15; color: ${statusColor}; padding: 4px 10px; border-radius: 6px; text-transform: uppercase;">● ${workflowStatusLabel}</span></td></tr>`;
+  html += `<tr><td style="padding: 10px 0; color: #64748b;">🔗 Payment Link</td><td style="padding: 10px 0;"><a href="${normalizeUrl(paymentLink)}" target="_blank" style="color: #2563eb; text-decoration: none; font-weight: 600; word-break: break-all;">${paymentLink}</a></td></tr>`;
   html += `</table></div>`;
+
   return { text: textLines, html, attachmentsList };
 };
