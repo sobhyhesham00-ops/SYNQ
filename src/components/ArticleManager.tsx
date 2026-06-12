@@ -56,6 +56,8 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
       } else if (filtered.length === 0) {
         setSelectedArticleId(null);
       }
+    }, (error: any) => {
+      console.error("Articles Real-time Sync Error:", error.code, error.message);
     });
     return () => unsub();
   }, [category]);

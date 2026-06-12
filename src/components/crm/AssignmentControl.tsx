@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { User, Check, RefreshCw } from "lucide-react";
 import { AGENT_LOBS } from "../../types";
 import { CRMCase } from "./CRMTypes";
+import { assignCase } from "../../services/assignmentService";
+import { toast } from "sonner";
 
 interface AssignmentControlProps {
   caseData: CRMCase;
@@ -41,7 +43,16 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
     setDropdownOpen(false);
     setLoading(true);
     try {
-      await onAssign(caseData.id, caseData.crmType, agentName);
+      const mappedType = caseData.crmType === "tabby_tamara" ? "tt_request" : caseData.crmType === "complaint" ? "tt_complaint" : caseData.crmType;
+      const assigneeId = "usr_" + agentName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+      const success = await assignCase(mappedType, caseData.id, { id: assigneeId, name: agentName }, currentUser);
+      if (success) {
+        await onAssign(caseData.id, caseData.crmType, agentName);
+      } else {
+        toast.error("Failed to assign case.");
+      }
+    } catch (err: any) {
+      toast.error("Error during case assignment: " + err.message);
     } finally {
       setLoading(false);
     }

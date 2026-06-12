@@ -504,6 +504,7 @@ export interface Announcement {
 export interface ChatMessage {
   id: string;
   senderName: string;
+  senderId?: string;
   receiverName: string; // "all", "tl", or specific agent name
   text: string;
   attachment?: string; // base64 encoded

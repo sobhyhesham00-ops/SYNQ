@@ -3,12 +3,22 @@ import { collection, getDocs, doc, updateDoc, writeBatch } from "firebase/firest
 
 export const migrateData = async () => {
   try {
-    const batch = writeBatch(db);
+    const MAX_BATCH_SIZE = 450;
+    let batch = writeBatch(db);
+    let opsInBatch = 0;
     let migratedCount = 0;
+
+    const commitIfNeeded = async () => {
+      if (opsInBatch >= MAX_BATCH_SIZE) {
+        await batch.commit();
+        batch = writeBatch(db);
+        opsInBatch = 0;
+      }
+    };
 
     // 1. Migrate Inquiries
     const inqSnap = await getDocs(collection(db, "inquiries"));
-    inqSnap.forEach(snapDoc => {
+    for (const snapDoc of inqSnap.docs) {
       const data = snapDoc.data();
       let needsUpdate = false;
       const updates: any = {};
@@ -43,13 +53,15 @@ export const migrateData = async () => {
 
       if (needsUpdate) {
         batch.update(doc(db, "inquiries", snapDoc.id), updates);
+        opsInBatch++;
         migratedCount++;
+        await commitIfNeeded();
       }
-    });
+    }
 
     // 2. Migrate TT Requests
     const ttSnap = await getDocs(collection(db, "tt_requests"));
-    ttSnap.forEach(snapDoc => {
+    for (const snapDoc of ttSnap.docs) {
       const data = snapDoc.data();
       let needsUpdate = false;
       const updates: any = {};
@@ -84,12 +96,17 @@ export const migrateData = async () => {
 
       if (needsUpdate) {
         batch.update(doc(db, "tt_requests", snapDoc.id), updates);
+        opsInBatch++;
         migratedCount++;
+        await commitIfNeeded();
       }
-    });
+    }
+
+    if (opsInBatch > 0) {
+      await batch.commit();
+    }
 
     if (migratedCount > 0) {
-      await batch.commit();
       console.log(`Migrated ${migratedCount} documents.`);
     }
 

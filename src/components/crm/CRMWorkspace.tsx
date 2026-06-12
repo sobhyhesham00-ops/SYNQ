@@ -7,6 +7,7 @@ import { formatCaseRef, getSLAStatus } from "../../utils";
 import { updateDoc, doc, arrayUnion, setDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 import { toast } from "sonner";
+import { assignCase } from "../../services/assignmentService";
 
 interface CRMWorkspaceProps {
   activeTab: "inquiries" | "complaints" | "tabby-tamara" | "client-comms";
@@ -325,17 +326,33 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
       createdAt: new Date().toISOString()
     };
 
+    const assigneeId = "usr_" + agentName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+    const mappedType = type === "tabby_tamara" ? "tt_request" : type === "complaint" ? "tt_complaint" : type;
+
+    // Call central assignment service
+    await assignCase(mappedType, caseId, { id: assigneeId, name: agentName }, currentUser);
+
+    const basePayload = {
+      assignedToId: assigneeId,
+      assignedToName: agentName,
+      assignedAt: new Date().toISOString(),
+      assignedById: currentUser.id || currentUser.uid || assigneeId,
+      assignedByName: currentUser.name,
+      updatedAt: new Date().toISOString()
+    };
+
     if (type === "inquiry") {
       const targetDoc = doc(db, "inquiries", caseId);
       await updateDoc(targetDoc, {
         agentName: agentName,
         seenByAgent: false,
-        replies: arrayUnion(assignActivity)
+        replies: arrayUnion(assignActivity),
+        ...basePayload
       });
 
       // Update parent reactive state
       setInquiries((prev) =>
-        prev.map((item) => (item.id === caseId ? { ...item, agentName: agentName, seenByAgent: false, replies: [...(item.replies || []), assignActivity] } : item))
+        prev.map((item) => (item.id === caseId ? { ...item, agentName: agentName, seenByAgent: false, replies: [...(item.replies || []), assignActivity], ...basePayload } : item))
       );
 
       if (addSystemNotification) {
@@ -354,11 +371,7 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
       const targetDoc = doc(db, "client_comms", caseId);
       
       const payload: any = {
-        assignedToId: "usr_" + agentName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
-        assignedToName: agentName,
-        assignedAt: new Date().toISOString(),
-        assignedById: currentUser.id || currentUser.uid || "usr_" + currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
-        assignedByName: currentUser.name,
+        ...basePayload,
         replies: arrayUnion(assignActivity)
       };
 
@@ -386,11 +399,7 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
       const targetDoc = doc(db, "tt_complaints", caseId);
       
       const payload: any = {
-        assignedToId: "usr_" + agentName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
-        assignedToName: agentName,
-        assignedAt: new Date().toISOString(),
-        assignedById: currentUser.id || currentUser.uid || "usr_" + currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
-        assignedByName: currentUser.name,
+        ...basePayload,
         replies: arrayUnion(assignActivity)
       };
 
@@ -417,11 +426,7 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
       const targetDoc = doc(db, "tt_requests", caseId);
       
       const payload: any = {
-        assignedToId: "usr_" + agentName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
-        assignedToName: agentName,
-        assignedAt: new Date().toISOString(),
-        assignedById: currentUser.id || currentUser.uid || "usr_" + currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
-        assignedByName: currentUser.name,
+        ...basePayload,
         replies: arrayUnion(assignActivity),
         workflowStatus: "awaiting_client_contact"
       };

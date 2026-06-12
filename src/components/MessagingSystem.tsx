@@ -28,6 +28,7 @@ import {
   query, 
   orderBy, 
   limit, 
+  where,
   disableNetwork, 
   doc
 } from 'firebase/firestore';
@@ -116,7 +117,12 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
   // Firestore listener
   useEffect(() => {
     const messagesRef = collection(db, 'messages');
-    let q = query(messagesRef, orderBy('createdAt', 'desc'), limit(1500));
+    let q = query(
+      messagesRef,
+      where('participants', 'array-contains', currentUser.id),
+      orderBy('createdAt', 'desc'),
+      limit(500)
+    );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const msgs = snapshot.docs.map(doc => ({
@@ -163,6 +169,8 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
           updateDoc(doc(db, 'messages', d.id), { seen: true });
         }
       });
+    }, (error) => {
+      console.error("Messages Real-time Sync Error:", error.code, error.message);
     });
 
     return () => unsubscribe();
@@ -250,15 +258,57 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
     const finalVal = textToSend !== undefined ? textToSend : inputText;
     if (!String(finalVal || '').trim() && !attachment) return;
 
+    const rName = selectedRecipient.toLowerCase();
+    let pids = [currentUser.id];
+    
+    // Attempt to extract all relevant target IDs based on recipient logic
+    if (rName === 'all') {
+      pids = Array.from(new Set([
+        currentUser.id,
+        ...(registeredUsers || []).map(u => u.uid || u.id).filter(Boolean)
+      ]));
+    } else if (rName === 'tl') {
+      pids = Array.from(new Set([
+        currentUser.id,
+        ...(registeredUsers || []).filter(u => {
+          const uName = (u.name || '').toLowerCase();
+          return u.role === 'tl' || u.role === 'admin' || u.role === 'superadmin' || 
+                 uName === 'amira hassan' || uName === 'hesham sobhy' || uName === 'hesso';
+        }).map(u => u.uid || u.id).filter(Boolean)
+      ]));
+    } else if (rName.startsWith('team:')) {
+      const teamTL = rName.split(':')[1]?.toLowerCase() || '';
+      let meta: any = {};
+      try { meta = JSON.parse(localStorage.getItem('sched_agent_meta') || '{}'); } catch(e) {}
+      
+      pids = Array.from(new Set([
+        currentUser.id,
+        ...(registeredUsers || []).filter(u => {
+          const uN = (u.name || '').toLowerCase();
+          if (uN === teamTL) return true;
+          const uMetaTL = (meta[u.name]?.tlName || '').toLowerCase();
+          if (uMetaTL === teamTL) return true;
+          return false;
+        }).map(u => u.uid || u.id).filter(Boolean)
+      ]));
+    } else {
+      const target = (registeredUsers || []).find(u => (u.name || '').toLowerCase() === rName);
+      if (target && (target.uid || target.id)) {
+        pids.push(target.uid || target.id);
+      }
+    }
+
     const newMessage = {
       senderName: currentUser.name,
+      senderId: currentUser.id,
       receiverName: selectedRecipient,
       text: String(finalVal || '').trim(),
       attachment: attachment?.data || null,
       attachmentName: attachment?.name || null,
       createdAt: new Date().toISOString(),
       seen: false,
-      language: language
+      language: language,
+      participants: pids
     };
 
     try {

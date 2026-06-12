@@ -12,6 +12,7 @@ import { RequestReplyThread } from './RequestReplyThread';
 import { MultiAttachmentUpload } from './MultiAttachmentUpload';
 import { formatCaseRef, normalizePhone, formatPhoneForCopy, copyToClipboard, extractLinks, normalizeUrl, getSafeTTWorkflowStatus, getSafeTTSourceChannel, getAgentLOB, buildCaseClipboardPayload, normalizeAttachments, calculateTabbyTamaraPrice } from '../utils';
 import { AGENT_LOBS } from '../types';
+import { assignCase } from '../services/assignmentService';
 
 // REUSABLE COMPONENTS
 
@@ -238,12 +239,13 @@ export const TabbyTamaraCard = ({
         createdAt: new Date().toISOString()
       };
       
+      const assigneeId = "usr_" + agentName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+      
+      // Central assignment service call
+      await assignCase('tt_request', req.id, { id: assigneeId, name: agentName }, currentUser);
+
+      // Remaining doc updates specific to tabby tamara card
       await updateDoc(doc(db, "tt_requests", req.id), {
-        assignedToId: "usr_" + agentName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
-        assignedToName: agentName,
-        assignedAt: new Date().toISOString(),
-        assignedById: currentUser.id || currentUser.uid || "usr_" + currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
-        assignedByName: currentUser.name,
         workflowStatus: "awaiting_client_contact",
         replies: arrayUnion(assignActivity)
       });

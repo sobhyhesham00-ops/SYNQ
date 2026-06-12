@@ -115,7 +115,7 @@ export function PatientSearchHub({
       typeLab = <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 border border-blue-500/20 text-blue-300">{title}</span>;
       summary = item.notes || `Shift Date: ${item.date || item.startDate}`;
     } else if (item._type === 'inquiry') {
-      title = 'QA Inquiry';
+      title = 'Clinic Inquiry';
       typeLab = <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-purple-500/10 border border-purple-500/20 text-purple-300">{title}</span>;
       summary = item.text || 'No inquiry text';
     } else if (item._type === 'tt_request') {

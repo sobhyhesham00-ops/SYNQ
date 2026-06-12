@@ -6,19 +6,23 @@ service cloud.firestore {
     function isSignedIn() { return request.auth != null; }
 
     function getUserData() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      let path = /databases/$(database)/documents/users/$(request.auth.uid);
+      return exists(path) ? get(path).data : null;
     }
 
     function getUserName() {
-      return getUserData().name;
+      let data = getUserData();
+      return data != null ? data.name : null;
     }
 
     function getUserRole() {
-      return getUserData().role;
+      let data = getUserData();
+      return data != null ? data.role : null;
     }
 
     function isSuperAdmin() {
-      return getUserRole() == 'tl' || getUserRole() == 'admin' || getUserRole() == 'superadmin';
+      let role = getUserRole();
+      return role == 'tl' || role == 'admin' || role == 'superadmin';
     }
 
     function isTLOrSupport() {
@@ -102,5 +106,22 @@ service cloud.firestore {
     match /orders/{orderId} { allow read, write: if isSignedIn(); }
     match /agents/{agentId} { allow read, write: if isSignedIn(); }
     match /agents/{agentId}/schedules/{schedId} { allow read, write: if isSignedIn(); }
+
+    // Messages
+    match /messages/{msgId} {
+      allow read: if isSignedIn() && request.auth.uid in resource.data.participants;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && request.auth.uid in resource.data.participants;
+      allow delete: if isSignedIn() && request.auth.uid in resource.data.participants;
+    }
+
+    // Articles
+    match /articles/{articleId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn() && (
+        isSuperAdmin() || isTLOrSupport() ||
+        (request.auth.token.role == 'qa')
+      );
+    }
   }
 }

@@ -137,6 +137,35 @@
         "agentName": { "type": "string" },
         "tlName": { "type": "string" }
       }
+    },
+    "message": {
+      "title": "ChatMessage",
+      "description": "Chat messages sent between agents, channels, or TLs",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "senderName": { "type": "string" },
+        "senderId": { "type": "string" },
+        "receiverName": { "type": "string" },
+        "text": { "type": "string" },
+        "attachment": { "type": "string" },
+        "attachmentName": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "seen": { "type": "boolean" },
+        "language": { "type": "string" }
+      }
+    },
+    "article": {
+      "title": "Article",
+      "description": "Educational or dynamic clinic articles managed by management users",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "createdBy": { "type": "string" }
+      }
     }
   },
   "firestore": {
@@ -187,6 +216,14 @@
     "tl_feedbacks/{fbId}": {
       "schema": { "$ref": "#/entities/tl_feedback" },
       "description": "Team feedback sheets"
+    },
+    "messages/{msgId}": {
+      "schema": { "$ref": "#/entities/message" },
+      "description": "Real-time communication messages"
+    },
+    "articles/{articleId}": {
+      "schema": { "$ref": "#/entities/article" },
+      "description": "Stored clinic articles"
     }
   }
 }

@@ -1,12 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
-  Search, Filter, ClipboardList, Clock, CheckCircle2, XCircle, Pencil, Copy, Phone, 
-  Link as LinkIcon, ExternalLink, Paperclip, MessageSquare, ChevronDown, ChevronUp, Trash2,
-  AlertCircle
+  Search, Filter, ClipboardList, Clock, CheckCircle2, XCircle, Copy, Phone, 
+  MessageSquare, ChevronDown, ChevronUp, AlertCircle, User as UserIcon
 } from 'lucide-react';
 import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
-import { formatCaseRef, normalizePhone, formatPhoneForCopy, getSLAStatus, copyToClipboard, extractLinks, calculateTabbyTamaraPrice } from '../utils';
+import { formatCaseRef, formatPhoneForCopy, getSLAStatus, copyToClipboard, extractLinks, calculateTabbyTamaraPrice } from '../utils';
 
 const CopyButton = ({ text, tooltip, icon: Icon = Copy }: { text: string, tooltip: string, icon?: any }) => {
   const [copied, setCopied] = useState(false);
@@ -30,16 +29,9 @@ const CopyButton = ({ text, tooltip, icon: Icon = Copy }: { text: string, toolti
   );
 };
 
-const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, editLimitMs, setEditingItem, handleCancelRequest, addSystemNotification }: any) => {
+const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
   const [expanded, setExpanded] = useState(false);
   const [showReply, setShowReply] = useState(false);
-
-  // Compute expiry time if editLimitMs is present and not infinity
-  let expiryTimeStr = '';
-  if (editLimitMs && editLimitMs !== Infinity && req.createdAt) {
-      const expiryDate = new Date(new Date(req.createdAt).getTime() + editLimitMs);
-      expiryTimeStr = expiryDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
 
   const STATUS_LABELS: Record<string, string> = {
     pending: 'Pending', pending_partner: 'Awaiting Partner',
@@ -56,11 +48,13 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
   let primaryContent = null;
   let secondaryContent = null;
   let tlResponseContent = null;
+  const agentName = req.agentName || req.callCenterAgentName || "Unknown Agent";
 
   if (req._cType === 'sched') {
     title = req.type === 'swap' ? 'Shift Swap Request' : 'Annual Leave Request';
     copyData = [
       req.type === 'swap' ? '🔄 Shift Swap Request' : '🏖️ Annual Leave Request',
+      `👤 Agent: ${agentName}`,
       req.type === 'swap'
         ? `📅 Swap Date: ${req.date} | 🤝 With: ${req.swapWithAgent} | 🕐 Their Shift: ${req.swapWithShift}`
         : `📅 Leave: ${req.startDate} to ${req.endDate}`,
@@ -90,6 +84,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
     title = 'Clinic Inquiry';
     copyData = [
       '❓ Clinic Inquiry',
+      `👤 Agent: ${agentName}`,
       `🏥 Clinic: ${req.clinicName}`,
       `📞 Phone: ${formatPhoneForCopy(req.phoneNumber || '')}`,
       `💬 Inquiry: ${req.text}`,
@@ -111,6 +106,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
     const pricing = calculateTabbyTamaraPrice(req.priceWithoutTax || 0);
     copyData = [
       `💳 ${req.platform === 'tabby' ? 'Tabby' : req.platform === 'tamara' ? 'Tamara' : 'Tabby/Tamara'} Request`,
+      `👤 Agent: ${agentName}`,
       `👤 Patient: ${req.patientName} | 📁 File: ${req.fileNumber || 'N/A'}`,
       `📞 Phone: ${formatPhoneForCopy(req.phoneNumber || '')}`,
       `🏥 Clinic: ${req.clinicName}`,
@@ -132,6 +128,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
     title = 'Complaint';
     copyData = [
       '⚠️ Complaint',
+      `👤 Agent: ${agentName}`,
       `👤 Patient: ${req.patientName} | 📁 File: ${req.fileNumber || 'N/A'}`,
       `📞 Phone: ${formatPhoneForCopy(req.phoneNumber || '')}`,
       `🏥 Clinic: ${req.clinicName}`,
@@ -153,6 +150,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
     title = 'Client Communication';
     copyData = [
       '💬 Client Communication',
+      `👤 Agent: ${agentName}`,
       `👤 Patient: ${req.patientName || 'N/A'}`,
       `📞 Phone: ${formatPhoneForCopy(req.phoneNumber || '')}`,
       `🏥 Clinic: ${req.clinicName}`,
@@ -174,8 +172,6 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
   }
 
   const resolvedStatuses = ['approved', 'answered', 'confirmed', 'closed', 'contacted', 'rejected', 'declined', 'cancelled'];
-  const canShowEdit = canEditItem(req.createdAt) && !resolvedStatuses.includes(req.status);
-  const isCancellable = req._cType === 'sched' && (req.status === 'pending_partner' || req.status === 'pending');
   const sla = getSLAStatus(req.createdAt, req.status, resolvedStatuses);
   
   let statusClass = "bg-slate-800 text-slate-300 border-slate-700";
@@ -241,6 +237,13 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
         </div>
       </div>
 
+      {/* Prominent Agent Identification Bar */}
+      <div className="px-4 py-2 bg-indigo-500/10 border-b border-white/5 flex items-center gap-2">
+        <UserIcon className="w-3.5 h-3.5 text-indigo-400" />
+        <span className="text-xs font-semibold text-indigo-300">Agent:</span>
+        <span className="text-xs font-bold text-slate-200">{agentName}</span>
+      </div>
+
       {/* Body */}
       <div className="p-4">
         {primaryContent}
@@ -285,72 +288,13 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
         </div>
         
         <div className="flex items-center gap-1">
-          {canShowEdit ? (
-            <>
-              <button 
-                onClick={() => {
-                  let editType = 'scheduling_request';
-                  if (req._cType === 'inq') editType = 'inquiry';
-                  if (req._cType === 'tt_request') editType = 'tt_request';
-                  if (req._cType === 'tt_complaint') editType = 'tt_complaint';
-                  if (req._cType === 'comm') editType = 'client_comm';
-                  setEditingItem({ type: editType, id: req.id, data: { ...req } });
-                }} 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 text-[12px] font-semibold text-slate-300 transition-colors cursor-pointer"
-              >
-                <Pencil className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="hidden sm:inline">Edit ({getRemainingEditTime(req.createdAt)})</span>
-                <span className="sm:hidden">Edit</span>
-              </button>
-              <button 
-                onClick={() => {
-                  let editType = 'scheduling_request';
-                  if (req._cType === 'inq') editType = 'inquiry';
-                  if (req._cType === 'tt_request') editType = 'tt_request';
-                  if (req._cType === 'tt_complaint') editType = 'tt_complaint';
-                  if (req._cType === 'comm') editType = 'client_comm';
-                  setEditingItem({ type: editType, id: req.id, data: { ...req } });
-                }} 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 text-[12px] font-semibold text-slate-300 transition-colors cursor-pointer"
-                 title="Add Attachments"
-              >
-                <Paperclip className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Attach</span>
-              </button>
-            </>
-          ) : (!resolvedStatuses.includes(req.status) && (
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-rose-500/5 border border-rose-500/10 rounded-lg">
-              <span className="text-[10px] text-rose-400/80 font-mono tracking-wider uppercase font-semibold flex items-center gap-1">
-                 <Clock className="w-3 h-3" />
-                 Editing period expired {expiryTimeStr && `at ${expiryTimeStr}`}
-              </span>
-              <span className="text-[10px] text-slate-400 border-l border-white/5 pl-2">Use</span>
-              <button 
-                onClick={() => document.getElementById(`reply-input-${req.id}`)?.focus()}
-                className="text-[10px] text-sky-400 hover:text-sky-300 hover:underline font-bold transition-colors cursor-pointer flex items-center gap-1"
-              >
-                Reply / Add Update
-              </button>
-            </div>
-          ))}
-
-          {isCancellable && (
-            <button 
-              onClick={() => handleCancelRequest(req.id)} 
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-rose-500/10 hover:bg-rose-500/20 text-[12px] font-semibold text-rose-400 transition-colors cursor-pointer"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Cancel</span>
-            </button>
-          )}
-
           {collectionMap[req._cType] && (
             <button 
               onClick={() => setShowReply(!showReply)} 
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors text-[12px] font-semibold cursor-pointer ${showReply ? 'bg-indigo-500/20 text-indigo-300' : 'bg-white/5 hover:bg-white/10 text-slate-300'}`}
             >
               <MessageSquare className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Reply</span>
+              <span className="hidden sm:inline">Reply / Conversation</span>
             </button>
           )}
 
@@ -382,7 +326,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
             collectionName={collectionMap[req._cType]} 
             addSystemNotification={addSystemNotification}
             requestType={req._cType === 'sched' ? 'Scheduling' : req._cType === 'inq' ? 'Inquiry' : req._cType === 'tt_request' ? 'TT/Tamara' : req._cType === 'tt_complaint' ? 'Complaint' : 'Client Comm'}
-            requestAgentName={req.agentName || req.openedBy || req.callCenterAgentName || currentUser.name}
+            requestAgentName={agentName}
           />
         </div>
       )}
@@ -392,22 +336,19 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
 };
 
 
-export const AgentRequestsLogs = ({ 
+export const AllAgentSubmissionsLog = ({ 
   currentUser, 
   requests, 
   inquiries, 
   tabbyTamaraRequests, 
   complaints, 
   clientComms,
-  canEditItem,
-  getRemainingEditTime,
-  setEditingItem,
-  handleCancelRequest,
   addSystemNotification
 }: any) => {
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterDate, setFilterDate] = useState('');
+  const [filterAgent, setFilterAgent] = useState('all');
   const [sortBy, setSortBy] = useState<'date_desc'|'date_asc'|'status'>('date_desc');
 
   const [, forceUpdate] = useState(0);
@@ -417,27 +358,27 @@ export const AgentRequestsLogs = ({
   }, []);
   
   const allRequests = useMemo(() => {
-    if (!currentUser) return [];
-    const isTlOrAdmin = currentUser.role === 'tl' || currentUser.role === 'qa' || currentUser.role === 'admin' || currentUser.role === 'super_admin';
-    const myName = currentUser.name;
     const res: any[] = [];
     
-    const myReqs = (arr: any[], nameField: string) =>
-      isTlOrAdmin ? arr : arr.filter(r => (r[nameField] || '').toLowerCase() === myName.toLowerCase());
-
-    myReqs(requests, 'agentName').forEach(r => res.push({...r, _cType: 'sched'}));
-    myReqs(inquiries, 'agentName').forEach(r => res.push({...r, _cType: 'inq'}));
-    myReqs(tabbyTamaraRequests, 'agentName').forEach(r => res.push({...r, _cType: 'tt_request'}));
-    myReqs(complaints, 'agentName').forEach(r => res.push({...r, _cType: 'tt_complaint'}));
-    
-    // Client comms: check both fields
-    (isTlOrAdmin ? clientComms : clientComms.filter(r =>
-      (r.callCenterAgentName || '').toLowerCase() === myName.toLowerCase() ||
-      (r.agentName || '').toLowerCase() === myName.toLowerCase()
-    )).forEach(r => res.push({...r, _cType: 'comm'}));
+    requests.forEach(r => res.push({...r, _cType: 'sched'}));
+    inquiries.forEach(r => res.push({...r, _cType: 'inq'}));
+    tabbyTamaraRequests.forEach(r => res.push({...r, _cType: 'tt_request'}));
+    complaints.forEach(r => res.push({...r, _cType: 'tt_complaint'}));
+    clientComms.forEach(r => res.push({...r, _cType: 'comm'}));
     
     return res.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [requests, inquiries, tabbyTamaraRequests, complaints, clientComms, currentUser]);
+  }, [requests, inquiries, tabbyTamaraRequests, complaints, clientComms]);
+
+  const agentsList = useMemo(() => {
+    const namesSet = new Set<string>();
+    allRequests.forEach(r => {
+      const name = r.agentName || r.callCenterAgentName;
+      if (name) {
+        namesSet.add(name.trim());
+      }
+    });
+    return Array.from(namesSet).sort();
+  }, [allRequests]);
 
   const pendingCount = useMemo(() => {
     return allRequests.filter(r => ['pending','pending_partner','submitted','not_confirmed','pending_tl'].includes(r.status)).length;
@@ -449,8 +390,11 @@ export const AgentRequestsLogs = ({
 
   const filtered = allRequests.filter(r => {
     const s = search.toLowerCase();
+    const agentName = r.agentName || r.callCenterAgentName || "Unknown Agent";
+    
     const matchesSearch = !s || 
       (r.id && r.id.toLowerCase().includes(s)) ||
+      (agentName && agentName.toLowerCase().includes(s)) ||
       (r.phoneNumber && r.phoneNumber.toLowerCase().includes(s)) ||
       (r.patientName && r.patientName.toLowerCase().includes(s)) ||
       (r.text && r.text.toLowerCase().includes(s)) ||
@@ -460,6 +404,10 @@ export const AgentRequestsLogs = ({
       
     if (!matchesSearch) return false;
     if (filterType !== 'all' && r._cType !== filterType) return false;
+
+    if (filterAgent !== 'all' && agentName.toLowerCase() !== filterAgent.toLowerCase()) {
+      return false;
+    }
 
     if (filterDate) {
       const qDate = new Date(filterDate).toDateString();
@@ -480,9 +428,11 @@ export const AgentRequestsLogs = ({
     <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold text-slate-100 font-display text-left">
-          {currentUser?.role === "agent" ? "My Submissions Log" : "All Submissions Log"}
+          Agent Submissions Log (Management)
         </h2>
-        <p className="text-slate-400 text-[14px] text-left mt-1">Review status, details and track tickets effectively in your workspace.</p>
+        <p className="text-slate-400 text-[14px] text-left mt-1">
+          Monitor all agents' submission statuses, inquiries, and custom action requests in real-time.
+        </p>
       </div>
 
       {/* 4-Stat Summary Row */}
@@ -491,9 +441,9 @@ export const AgentRequestsLogs = ({
           <span className="text-2xl font-black text-slate-100">{allRequests.length}</span>
           <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-1">Total Lifetime</span>
         </div>
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col items-center justify-center shadow-lg">
+        <div className="bg-slate-900 border border-indigo-800 p-4 rounded-xl flex flex-col items-center justify-center shadow-lg">
           <span className="text-2xl font-black text-indigo-400">{filtered.length}</span>
-          <span className="text-[10px] text-indigo-500/70 uppercase tracking-widest font-bold mt-1">Matched</span>
+          <span className="text-[10px] text-indigo-500/70 uppercase tracking-widest font-bold mt-1">Matched Filtered</span>
         </div>
         <div className="bg-slate-900 border border-amber-900/40 p-4 rounded-xl flex flex-col items-center justify-center shadow-lg">
           <span className="text-2xl font-black text-amber-400">
@@ -524,20 +474,20 @@ export const AgentRequestsLogs = ({
             <span>{resolvedCount} Resolved</span>
           </div>
         </div>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-white/5">
+        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 pb-4 border-b border-white/5">
           <div className="relative flex-grow max-w-sm w-full">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input type="text" placeholder="Search by ID, Name, Phone..." value={search} onChange={e => setSearch(e.target.value)} className="w-full pl-9 pr-4 py-2.5 bg-white/5 border border-white/5 rounded-lg text-[13px] text-white focus:outline-none focus:border-indigo-500 font-sans" />
+            <input type="text" placeholder="Search ID, Agent, Phone, Patient..." value={search} onChange={e => setSearch(e.target.value)} className="w-full pl-9 pr-4 py-2.5 bg-white/5 border border-white/5 rounded-lg text-[13px] text-white focus:outline-none focus:border-indigo-500 font-sans" />
           </div>
-          <div className="flex gap-2 w-full md:w-auto items-center flex-wrap">
-            <input type="date" title="Filter by submission date" value={filterDate} onChange={e => setFilterDate(e.target.value)} className="w-full md:w-36 px-3 py-2.5 bg-white/5 border border-white/5 rounded-lg text-[13px] text-white focus:outline-none focus:border-indigo-500 font-sans cursor-pointer [color-scheme:dark]" />
+          <div className="flex gap-2 w-full xl:w-auto items-center flex-wrap">
+            <input type="date" title="Filter by submission date" value={filterDate} onChange={e => setFilterDate(e.target.value)} className="w-full xl:w-36 px-3 py-2.5 bg-white/5 border border-white/5 rounded-lg text-[13px] text-white focus:outline-none focus:border-indigo-500 font-sans cursor-pointer [color-scheme:dark]" />
             <Filter className="w-4 h-4 text-slate-400 flex-shrink-0" />
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="w-full md:w-36 px-3 py-2.5 bg-white/5 border border-white/5 rounded-lg text-[13px] text-white focus:outline-none focus:border-indigo-500 font-sans cursor-pointer">
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="w-full xl:w-36 xl:min-w-[140px] px-3 py-2.5 bg-white/5 border border-white/5 rounded-lg text-[13px] text-white focus:outline-none focus:border-indigo-500 font-sans cursor-pointer">
               <option value="date_desc" className="bg-slate-900">Newest First</option>
               <option value="date_asc" className="bg-slate-900">Oldest First</option>
               <option value="status" className="bg-slate-900">By Status</option>
             </select>
-            <select value={filterType} onChange={e => setFilterType(e.target.value)} className="w-full md:w-40 px-3 py-2.5 bg-white/5 border border-white/5 rounded-lg text-[13px] text-white focus:outline-none focus:border-indigo-500 font-sans cursor-pointer">
+            <select value={filterType} onChange={e => setFilterType(e.target.value)} className="w-full xl:w-40 xl:min-w-[150px] px-3 py-2.5 bg-white/5 border border-white/5 rounded-lg text-[13px] text-white focus:outline-none focus:border-indigo-500 font-sans cursor-pointer">
               <option value="all" className="bg-slate-900">All Types</option>
               <option value="sched" className="bg-slate-900">Leaves/Swaps</option>
               <option value="inq" className="bg-slate-900">Inquiries</option>
@@ -545,12 +495,21 @@ export const AgentRequestsLogs = ({
               <option value="tt_complaint" className="bg-slate-900">Complaints</option>
               <option value="comm" className="bg-slate-900">Client Comms</option>
             </select>
-            {filterDate && (
+            <select value={filterAgent} onChange={e => setFilterAgent(e.target.value)} className="w-full xl:w-48 xl:min-w-[180px] px-3 py-2.5 bg-white/5 border border-white/5 rounded-lg text-[13px] text-white focus:outline-none focus:border-indigo-500 font-sans cursor-pointer">
+              <option value="all" className="bg-slate-900">Filter By Agent</option>
+              {agentsList.map(name => (
+                <option key={name} value={name} className="bg-slate-900">{name}</option>
+              ))}
+            </select>
+            {(filterDate || filterAgent !== 'all') && (
               <button 
-                onClick={() => setFilterDate('')}
+                onClick={() => {
+                  setFilterDate('');
+                  setFilterAgent('all');
+                }}
                 className="px-3 py-2.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-lg text-[12px] font-bold hover:bg-rose-500/20 whitespace-nowrap cursor-pointer"
               >
-                Clear
+                Clear Filters
               </button>
             )}
           </div>
@@ -560,7 +519,7 @@ export const AgentRequestsLogs = ({
           {sorted.length === 0 ? (
             <div className="text-center py-12 text-slate-400 space-y-3">
               <ClipboardList className="w-12 h-12 mx-auto text-slate-600" />
-              <p className="text-[14px]">No requests found matching your filter.</p>
+              <p className="text-[14px]">No agent submissions matched your criteria.</p>
             </div>
           ) : (
             sorted.map((req) => (
@@ -568,10 +527,6 @@ export const AgentRequestsLogs = ({
                 key={req.id + req._cType} 
                 req={req} 
                 currentUser={currentUser} 
-                canEditItem={canEditItem} 
-                getRemainingEditTime={getRemainingEditTime} 
-                setEditingItem={setEditingItem} 
-                handleCancelRequest={handleCancelRequest} 
                 addSystemNotification={addSystemNotification}
               />
             ))
