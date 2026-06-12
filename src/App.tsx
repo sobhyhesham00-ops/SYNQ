@@ -8247,7 +8247,7 @@ ${ttNotes}`
           /* User Logged In Portal */
           <div className="flex-1 flex flex-col md:flex-row gap-6 md:gap-8 my-4 lg:my-6">
             {/* Navigation / Sidebar Menu */}
-            <aside className="w-full md:w-64 md:max-h-[calc(100vh-3rem)] border border-white/10 bg-white/5 backdrop-blur-xl flex flex-col p-5 rounded-2xl sm:rounded-3xl shadow-xl space-y-6 md:sticky md:top-4 overflow-y-auto">
+            <aside className="w-full md:w-64 border border-white/10 bg-white/5 backdrop-blur-xl flex flex-col p-5 rounded-2xl sm:rounded-3xl shadow-xl space-y-6">
               {/* Egypt Local Time & 10th of Ramadan Weather */}
               <div className="p-3.5 rounded-xl bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-cyan-500/10 border border-white/10 space-y-2">
                 <div className="flex justify-between items-center">
