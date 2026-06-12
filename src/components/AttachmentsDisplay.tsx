@@ -18,10 +18,10 @@ const LinkItem = ({ link }: { link: string }) => {
   const normalized = normalizeUrl(link) || link;
 
   return (
-    <div className="flex items-start justify-between gap-3 text-[12px] bg-slate-900/50 p-3 rounded-lg border border-white/5 break-words">
-      <div className="flex-1 break-all flex items-start gap-2 pt-1 font-mono text-slate-300">
-        <LinkIcon className="w-4 h-4 shrink-0 mt-0.5 text-indigo-400" />
-        <span className="whitespace-pre-wrap">{normalized}</span>
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm bg-slate-900/50 p-4 rounded-xl border border-white/10">
+      <div className="flex-1 break-all flex items-start gap-2.5 font-mono text-slate-200 leading-relaxed">
+        <LinkIcon className="w-5 h-5 shrink-0 mt-0.5 text-indigo-400" />
+        <span className="whitespace-pre-wrap text-sm">{normalized}</span>
       </div>
       <div className="flex items-center gap-2 shrink-0">
         <button
@@ -34,20 +34,20 @@ const LinkItem = ({ link }: { link: string }) => {
               setTimeout(() => setCopied(false), 2000);
             }
           }}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 text-slate-400 hover:text-slate-100 bg-white/5 rounded-md hover:bg-white/10 transition-colors font-semibold"
+          className="flex items-center gap-1.5 px-3 py-2 text-slate-300 hover:text-slate-100 bg-white/5 rounded-lg hover:bg-white/10 transition-colors font-semibold text-[13px]"
           title="Copy Link"
         >
-          {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+          {copied ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
           Copy
         </button>
         <a 
           href={normalized} 
           target="_blank" 
           rel="noreferrer"
-          className="flex items-center gap-1.5 px-2.5 py-1.5 text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-md transition-colors font-semibold"
+          className="flex items-center gap-1.5 px-3 py-2 text-indigo-300 hover:text-indigo-200 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-lg transition-colors font-semibold text-[13px]"
           title="Open Link"
         >
-          <ExternalLink className="w-3.5 h-3.5" />
+          <ExternalLink className="w-4 h-4" />
           Open
         </a>
       </div>
@@ -136,7 +136,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
       {hasAttachments && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-400 font-mono block">Attached Files ({normalizedAttachments.length}):</span>
+            <span className="text-xs text-slate-300 font-mono font-bold block">Attached Files ({normalizedAttachments.length}):</span>
             <button 
               onClick={downloadAll} 
               className="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold uppercase tracking-wider flex items-center gap-1 bg-indigo-500/10 hover:bg-indigo-500/20 px-2 py-1 rounded transition-colors"
@@ -150,10 +150,10 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
               const isImage = att.type?.startsWith('image/') || att.url.startsWith('data:image/') || (!att.type?.includes('pdf') && att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i));
               
               return (
-              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[280px] bg-black/55 rounded-lg border border-white/10 hover:border-indigo-500/50 transition-all overflow-hidden flex flex-col">
+              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[380px] bg-black/55 rounded-xl border border-white/10 hover:border-indigo-500/50 transition-all overflow-hidden flex flex-col">
                 {isImage ? (
                   <div className="w-full flex-1 min-h-[140px] flex items-center justify-center p-1 relative">
-                    <img referrerPolicy="no-referrer" src={att.url} alt={fileTitle} className="w-full h-auto object-contain max-h-[180px] rounded" />
+                    <img referrerPolicy="no-referrer" src={att.url} alt={fileTitle} className="w-full h-auto object-contain max-h-[320px] rounded" />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/photo:opacity-100 transition-opacity flex flex-wrap items-center justify-center gap-2 p-2 backdrop-blur-sm">
                        <a href={att.url} target="_blank" rel="noreferrer" className="px-2 py-1.5 bg-white/10 hover:bg-white/20 rounded font-bold text-xs text-white flex items-center gap-1.5">
                          <ExternalLink className="w-3.5 h-3.5" /> Open
@@ -169,7 +169,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
                 ) : (
                   <div className="flex flex-col items-center justify-center p-6 w-full flex-1">
                     <FileText className="w-8 h-8 text-indigo-400 mb-2" />
-                    <span className="text-xs text-slate-300 font-medium font-sans mb-3 text-center truncate w-full px-2" title={fileTitle}>{fileTitle}</span>
+                    <span className="text-sm text-slate-200 font-medium font-sans mb-3 text-center break-words w-full px-2 line-clamp-2" title={fileTitle}>{fileTitle}</span>
                     <div className="flex items-center gap-2">
                        <a href={att.url} target="_blank" rel="noreferrer" className="px-2.5 py-1.5 bg-white/10 hover:bg-white/20 rounded font-bold text-xs text-white flex items-center gap-1.5">
                          <ExternalLink className="w-3 h-3" /> Open
@@ -189,7 +189,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
       {/* Display Links */}
       {hasLinks && (
         <div className="space-y-1">
-          <span className="text-[10px] text-slate-400 font-mono block">References & Links:</span>
+          <span className="text-xs text-slate-300 font-mono font-bold block">References & Links:</span>
           <div className="flex flex-col gap-2">
             {extractedLinks.map((link, lIdx) => (
               <LinkItem key={lIdx} link={link} />
@@ -202,7 +202,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
       {hasTlAttachments && (
         <div className="space-y-2 border-t border-amber-500/15 pt-3">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-amber-400 font-mono font-black block uppercase tracking-wider">
+            <span className="text-xs text-amber-500 font-mono font-black block uppercase tracking-wider">
               ⚠️ TL / Supervisor Files ({normalizedTlAttachments.length}):
             </span>
           </div>
@@ -212,7 +212,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
               const isImage = att.type?.startsWith('image/') || att.url.startsWith('data:image/') || (!att.type?.includes('pdf') && att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i));
               
               return (
-              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[280px] bg-black/55 rounded-lg border border-amber-500/20 hover:border-amber-400/50 transition-all overflow-hidden flex flex-col">
+              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[380px] bg-black/55 rounded-xl border border-amber-500/20 hover:border-amber-400/50 transition-all overflow-hidden flex flex-col">
                 {showSideBadges && (
                   <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-amber-500 text-slate-950 font-black text-[9px] rounded uppercase shadow-md z-10 select-none">
                     TL
@@ -220,7 +220,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
                 )}
                 {isImage ? (
                   <div className="w-full flex-1 min-h-[140px] flex items-center justify-center p-1 relative">
-                    <img referrerPolicy="no-referrer" src={att.url} alt={fileTitle} className="w-full h-auto object-contain max-h-[180px] rounded" />
+                    <img referrerPolicy="no-referrer" src={att.url} alt={fileTitle} className="w-full h-auto object-contain max-h-[320px] rounded" />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/photo:opacity-100 transition-opacity flex flex-wrap items-center justify-center gap-2 p-2 backdrop-blur-sm">
                        <a href={att.url} target="_blank" rel="noreferrer" className="px-2 py-1.5 bg-white/10 hover:bg-white/20 rounded font-bold text-xs text-white flex items-center gap-1.5">
                          <ExternalLink className="w-3.5 h-3.5" /> Open
@@ -236,7 +236,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
                 ) : (
                   <div className="flex flex-col items-center justify-center p-6 w-full flex-1">
                     <FileText className="w-8 h-8 text-amber-500 mb-2" />
-                    <span className="text-xs text-slate-300 font-medium font-sans mb-3 text-center truncate w-full px-2" title={fileTitle}>{fileTitle}</span>
+                    <span className="text-sm text-slate-200 font-medium font-sans mb-3 text-center break-words w-full px-2 line-clamp-2" title={fileTitle}>{fileTitle}</span>
                     <div className="flex items-center gap-2">
                        <a href={att.url} target="_blank" rel="noreferrer" className="px-2.5 py-1.5 bg-white/10 hover:bg-white/20 rounded font-bold text-xs text-white flex items-center gap-1.5">
                          <ExternalLink className="w-3 h-3" /> Open
@@ -256,7 +256,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
       {/* Display TL Links */}
       {hasTlLinks && (
         <div className="space-y-1 border-t border-amber-500/15 pt-3">
-          <span className="text-[10px] text-amber-400 font-mono font-black block uppercase tracking-wider">
+          <span className="text-xs text-amber-500 font-mono font-black block uppercase tracking-wider">
             ⚠️ TL / Supervisor References & Links:
           </span>
           <div className="flex flex-col gap-2">

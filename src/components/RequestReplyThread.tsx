@@ -341,7 +341,7 @@ export function RequestReplyThread({
          </button>
       </div>
 
-      <div className="relative border-l border-slate-700/60 ml-5 pl-8 pr-1 space-y-6 max-h-[420px] overflow-y-auto custom-scrollbar py-2 text-left">
+      <div className="relative border-l border-slate-700/60 ml-5 pl-8 pr-1 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar py-2 text-left">
          {(sortedReplies.length === 0) ? (
             <div className="relative group text-left py-4">
               <div className="absolute -left-[45px] top-4.5 bg-slate-900 border border-dashed border-slate-600 rounded-full w-8 h-8 flex items-center justify-center text-slate-500">
@@ -365,27 +365,27 @@ export function RequestReplyThread({
                     /* Timeline Activity Log */
                     <div className="bg-slate-900/40 border border-slate-800/80 rounded-xl p-3.5 flex items-center justify-between text-left hover:bg-slate-900/60 transition-colors shadow-sm">
                       <div className="space-y-1">
-                        <span className="text-[9px] font-bold text-slate-500 font-mono tracking-wider uppercase block">{eventInfo.title}</span>
-                        <p className="text-xs text-slate-300 leading-relaxed font-sans">{r.text}</p>
+                        <span className="text-[11px] font-bold text-slate-400 font-mono tracking-wider uppercase block">{eventInfo.title}</span>
+                        <p className="text-sm text-slate-200 leading-relaxed font-sans">{r.text}</p>
                       </div>
-                      <span className="text-[9px] text-slate-500 font-mono self-start mt-0.5 shrink-0 ml-4 bg-slate-950/40 px-2 py-0.5 rounded-md border border-white/5">{new Date(r.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                      <span className="text-[10px] text-slate-400 font-mono self-start mt-0.5 shrink-0 ml-4 bg-slate-950/40 px-2.5 py-1 rounded-md border border-white/5">{new Date(r.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                     </div>
                   ) : (
                     /* User correspondency bubble / note */
                     <div className={`p-4 rounded-xl border transition-all hover:bg-slate-900/40 duration-200 hover:shadow-md ${r.senderName === currentUser.name ? 'bg-indigo-950/20 border-indigo-500/20' : 'bg-slate-900/50 border-slate-700/35'}`}>
                        <div className="flex items-center justify-between gap-3 border-b border-white/5 pb-2.5 mb-2.5 flex-wrap">
                          <div className="flex items-center gap-2">
-                           <span className={`font-bold text-xs truncate max-w-[140px] ${r.senderName === currentUser.name ? 'text-indigo-300' : 'text-slate-200'}`}>{r.senderName}</span>
+                           <span className={`font-bold text-sm ${r.senderName === currentUser.name ? 'text-indigo-300' : 'text-slate-200'}`}>{r.senderName}</span>
                            {r.authorRole && (
-                             <span className={`text-[8.5px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded-md border ${r.authorRole === 'tl' ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' : 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20'}`}>
+                             <span className={`text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-md border ${r.authorRole === 'tl' ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' : 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20'}`}>
                                {r.authorRole === 'tl' ? 'TEAM LEADER' : r.authorRole.toUpperCase()}
                              </span>
                            )}
                          </div>
-                         <span className="text-[9px] text-slate-500 font-mono bg-slate-950/30 px-2 py-0.5 rounded border border-white/5">{new Date(r.createdAt).toLocaleString()}</span>
+                         <span className="text-[11px] text-slate-400 font-mono bg-slate-950/30 px-2.5 py-1 rounded border border-white/5">{new Date(r.createdAt).toLocaleString()}</span>
                        </div>
                        
-                       {r.text && <p className="text-xs text-slate-200 leading-relaxed font-sans whitespace-pre-line break-words text-left">{r.text}</p>}
+                       {r.text && <p className="text-sm text-slate-100 leading-relaxed font-sans whitespace-pre-line break-words text-left">{r.text}</p>}
                        
                        {/* Unique CRM multi-attachments area */}
                        <div className="mt-3 pt-2.5 border-t border-white/5">

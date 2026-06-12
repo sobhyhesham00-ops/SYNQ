@@ -123,6 +123,7 @@ import { ProfessionalAttachmentUploader } from "./components/ProfessionalAttachm
 import { AttachmentsDisplay } from "./components/AttachmentsDisplay";
 import { DashboardSummary } from "./components/DashboardSummary";
 import { CopyWrap } from "./components/CopyWrap";
+import { SlideToConfirm } from "./components/SlideToConfirm";
 import { QAScorecards } from "./components/QAScorecards";
 import { KPICalculatorPanel } from "./components/KPICalculatorPanel";
 import { PatientSearchHub } from "./components/PatientSearchHub";
@@ -9333,18 +9334,19 @@ ${ttNotes}`
                                 </div>
                               </div>
 
-                              <div className="self-end sm:self-center shrink-0">
-                                <button
-                                  onClick={() =>
+                              <div className="self-end sm:self-center shrink-0 w-full sm:w-56">
+                                <SlideToConfirm
+                                  label="Slide to Mark Contacted"
+                                  confirmedLabel="Contacted!"
+                                  colorClass="from-emerald-400 to-teal-500"
+                                  icon={<CheckCircle2 className="w-5 h-5 text-black" />}
+                                  onConfirm={() =>
                                     handleContactTabbyTamara(
                                       req.id,
                                       "contacted",
                                     )
                                   }
-                                  className="px-4 py-2.5 bg-gradient-to-r from-emerald-400 to-teal-500 hover:brightness-110 active:scale-95 text-xs text-black font-extrabold font-sans rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
-                                >
-                                  Mark as Contacted
-                                </button>
+                                />
                               </div>
                             </div>
                           ))}
@@ -9410,18 +9412,19 @@ ${ttNotes}`
                                 </div>
                               </div>
 
-                              <div className="self-end sm:self-center shrink-0">
-                                <button
-                                  onClick={() =>
+                              <div className="self-end sm:self-center shrink-0 w-full sm:w-64">
+                                <SlideToConfirm
+                                  label="Slide to Contact & Close"
+                                  confirmedLabel="Closed!"
+                                  colorClass="from-emerald-400 to-teal-500"
+                                  icon={<CheckCircle2 className="w-5 h-5 text-black" />}
+                                  onConfirm={() =>
                                     handleToggleContactComplaint(
                                       comp.id,
                                       "contacted",
                                     )
                                   }
-                                  className="px-4 py-2.5 bg-gradient-to-r from-emerald-400 to-teal-500 hover:brightness-110 active:scale-95 text-xs text-black font-extrabold font-sans rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
-                                >
-                                  Mark as Contacted & Close
-                                </button>
+                                />
                               </div>
                             </div>
                           ))}
@@ -9492,23 +9495,21 @@ ${ttNotes}`
                                 </div>
                               </div>
 
-                              <div className="flex items-center gap-2.5 self-stretch sm:self-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-white/5">
-                                <button
-                                  onClick={() =>
-                                    handlePartnerDecision(req.id, true)
-                                  }
-                                  className="flex-1 sm:flex-initial px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-emerald-500/20"
-                                >
-                                  Agree Swap
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    handlePartnerDecision(req.id, false)
-                                  }
-                                  className="flex-1 sm:flex-initial px-4 py-2 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/20 text-rose-300 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                                >
-                                  Decline
-                                </button>
+                              <div className="flex flex-col sm:flex-row items-center gap-2.5 self-stretch sm:self-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-white/5 w-full sm:w-auto">
+                                <SlideToConfirm
+                                  label="Slide to Agree"
+                                  confirmedLabel="Agreed!"
+                                  colorClass="from-emerald-500 to-teal-500"
+                                  icon={<CheckCircle2 className="w-4 h-4 text-white" />}
+                                  onConfirm={() => handlePartnerDecision(req.id, true)}
+                                />
+                                <SlideToConfirm
+                                  label="Slide to Decline"
+                                  confirmedLabel="Declined"
+                                  colorClass="from-rose-500 to-red-500"
+                                  icon={<XCircle className="w-4 h-4 text-white" />}
+                                  onConfirm={() => handlePartnerDecision(req.id, false)}
+                                />
                               </div>
                             </div>
                           ))}
@@ -13872,22 +13873,22 @@ ${ttNotes}`
                                           >
                                             <Copy className="w-3.5 h-3.5" />
                                           </button>
-                                          <button
-                                            onClick={() =>
-                                              handleTLApproval(req.id, true)
-                                            }
-                                            className="px-3 py-1.5 bg-emerald-500/15 border border-emerald-500/20 hover:bg-emerald-500/25 text-emerald-300 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                                          >
-                                            Approve
-                                          </button>
-                                          <button
-                                            onClick={() =>
-                                              handleTLApproval(req.id, false)
-                                            }
-                                            className="px-3 py-1.5 bg-rose-500/15 border border-rose-500/20 hover:bg-rose-500/25 text-rose-300 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                                          >
-                                            Decline
-                                          </button>
+                                          <div className="flex flex-col gap-1 w-full sm:w-48">
+                                            <SlideToConfirm
+                                              label="Slide to Approve"
+                                              confirmedLabel="Approved!"
+                                              colorClass="from-emerald-500 to-teal-500"
+                                              icon={<CheckCircle2 className="w-4 h-4 text-white" />}
+                                              onConfirm={() => handleTLApproval(req.id, true)}
+                                            />
+                                            <SlideToConfirm
+                                              label="Slide to Decline"
+                                              confirmedLabel="Declined"
+                                              colorClass="from-rose-500 to-red-500"
+                                              icon={<XCircle className="w-4 h-4 text-white" />}
+                                              onConfirm={() => handleTLApproval(req.id, false)}
+                                            />
+                                          </div>
                                         </div>
                                       </td>
                                     </tr>
@@ -17650,22 +17651,15 @@ ${ttNotes}`
                                                   }
                                                 />
 
-                                                <button
-                                                  onClick={() =>
-                                                    handleSetInquiryAnswered(
-                                                      inq.id,
-                                                    )
-                                                  }
-                                                  disabled={isSubmittingAnswer}
-                                                  className={`px-4 py-2 text-white font-bold text-xs rounded-lg shadow transition-all flex items-center justify-center gap-2 ${isSubmittingAnswer ? "bg-emerald-800 opacity-50 cursor-not-allowed" : "bg-emerald-600 hover:bg-emerald-500 cursor-pointer active:scale-95"}`}
-                                                >
-                                                  {isSubmittingAnswer ? (
-                                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                  ) : null}
-                                                  {isSubmittingAnswer
-                                                    ? "Submitting..."
-                                                    : "Submit Final Answer"}
-                                                </button>
+                                                <div className="w-full sm:w-64">
+                                                  <SlideToConfirm
+                                                    label={isSubmittingAnswer ? "Submitting..." : "Slide to Answer"}
+                                                    confirmedLabel="Answered!"
+                                                    colorClass="from-emerald-500 to-teal-500"
+                                                    onConfirm={() => handleSetInquiryAnswered(inq.id)}
+                                                    disabled={isSubmittingAnswer}
+                                                  />
+                                                </div>
                                               </div>
                                             )}
                                           </div>
@@ -24196,20 +24190,19 @@ ${ttNotes}`
                                                       {(isNeedContact ||
                                                         (isTLOreSupport &&
                                                           !isClosed)) && (
-                                                        <button
-                                                          onClick={() =>
-                                                            handleToggleContactComplaint(
-                                                              comp.id,
-                                                              "contacted",
-                                                            )
-                                                          }
-                                                          className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 active:scale-95 text-black font-extrabold font-sans text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-1"
-                                                        >
-                                                          {" "}
-                                                          {isNeedContact
-                                                            ? "Mark Case Closed"
-                                                            : "Force Close"}
-                                                        </button>
+                                                        <div className="w-full sm:w-64">
+                                                          <SlideToConfirm
+                                                            label={isNeedContact ? "Slide to Close Case" : "Slide to Force Close"}
+                                                            confirmedLabel="Closed!"
+                                                            colorClass="from-emerald-500 to-teal-500"
+                                                            onConfirm={() =>
+                                                              handleToggleContactComplaint(
+                                                                comp.id,
+                                                                "contacted",
+                                                              )
+                                                            }
+                                                          />
+                                                        </div>
                                                       )}
 
                                                       {/* Reopen Closed Case if done in error */}

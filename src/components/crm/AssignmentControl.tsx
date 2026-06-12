@@ -5,6 +5,8 @@ import { CRMCase } from "./CRMTypes";
 import { assignCase } from "../../services/assignmentService";
 import { toast } from "sonner";
 
+import { SlideToConfirm } from '../SlideToConfirm';
+
 interface AssignmentControlProps {
   caseData: CRMCase;
   currentUser: any;
@@ -96,18 +98,14 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
       <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
         {/* Claim button if not assigned to self */}
         {!isAssignedToMe && currentUser && (
-          <button
-            onClick={handleClaim}
+          <SlideToConfirm
+            label="Slide to Claim This Case"
+            confirmedLabel="Claimed!"
+            colorClass="from-indigo-500 to-purple-500"
+            icon={<Check className="w-5 h-5 text-white" />}
+            onConfirm={handleClaim}
             disabled={loading}
-            className="flex-1 min-w-[80px] bg-indigo-600 hover:bg-indigo-500 text-white font-sans font-black text-[10px] uppercase tracking-wider py-1.5 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
-          >
-            {loading ? (
-              <RefreshCw className="w-3 h-3 animate-spin" />
-            ) : (
-              <Check className="w-3 h-3" />
-            )}
-            Claim Case
-          </button>
+          />
         )}
 
         {/* Reassign dropdown button for Team Leaders */}

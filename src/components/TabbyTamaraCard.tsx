@@ -10,6 +10,7 @@ import { db, wrappedUpdateDoc as updateDoc } from '../firebase';
 import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
 import { MultiAttachmentUpload } from './MultiAttachmentUpload';
+import { SlideToConfirm } from './SlideToConfirm';
 import { formatCaseRef, normalizePhone, formatPhoneForCopy, copyToClipboard, extractLinks, normalizeUrl, getSafeTTWorkflowStatus, getSafeTTSourceChannel, getAgentLOB, buildCaseClipboardPayload, normalizeAttachments, calculateTabbyTamaraPrice } from '../utils';
 import { AGENT_LOBS } from '../types';
 import { assignCase } from '../services/assignmentService';
@@ -593,17 +594,17 @@ export const TabbyTamaraCard = ({
           title="Copy Phone"
         >
           <div className="flex flex-col">
-            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1"><Phone className="w-3 h-3 text-blue-400" /> Phone</span>
-            <span className="text-sm font-semibold text-slate-100 mt-1 truncate">{req.phoneNumber || "N/A"}</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><Phone className="w-3 h-3 text-blue-400" /> Phone</span>
+            <span className="text-[15px] font-semibold text-slate-100 mt-1.5 break-words">{req.phoneNumber || "N/A"}</span>
           </div>
         </div>
-        <div className="px-4 py-3 flex flex-col overflow-hidden">
-          <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1"><Hospital className="w-3 h-3 text-emerald-500" /> Clinic</span>
-          <span className="text-sm font-semibold text-slate-100 mt-1 truncate">{req.clinicName || "N/A"}</span>
+        <div className="px-4 py-3 flex flex-col">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><Hospital className="w-3 h-3 text-emerald-500" /> Clinic</span>
+          <span className="text-[15px] font-semibold text-slate-100 mt-1.5 break-words">{req.clinicName || "N/A"}</span>
         </div>
         <div className="px-4 py-3 flex flex-col">
-          <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1"><Calendar className="w-3 h-3 text-slate-400" /> Date</span>
-          <span className="text-sm font-semibold text-slate-100 mt-1 truncate">{new Date(req.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><Calendar className="w-3 h-3 text-slate-400" /> Date</span>
+          <span className="text-[15px] font-semibold text-slate-100 mt-1.5 break-words">{new Date(req.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
         </div>
       </div>
       
@@ -614,9 +615,9 @@ export const TabbyTamaraCard = ({
           {req.paymentLength && <span className="ml-[10px] text-[10px] text-slate-400 font-bold uppercase tracking-widest bg-slate-700/60 border border-slate-600 px-2 py-0.5 rounded-full">{req.paymentLength} Mo. Plan</span>}
         </div>
         <div className='text-right'>
-           <p className='text-[9px] text-indigo-400 uppercase tracking-widest font-bold'>Final Amount</p>
+           <p className='text-[10px] text-indigo-400 uppercase tracking-wider font-bold'>Final Amount</p>
            <p className='text-2xl font-black text-white font-mono tracking-tight'>{pricing.finalPriceFormatted}</p>
-           <p className='text-[9px] text-slate-500 uppercase tracking-widest mt-0.5'>Inc. 5% Fee ({pricing.feeAmountFormatted})</p>
+           <p className='text-[10px] text-slate-400 uppercase tracking-wider mt-0.5'>Inc. 5% Fee ({pricing.feeAmountFormatted})</p>
         </div>
       </div>
 
@@ -761,7 +762,7 @@ export const TabbyTamaraCard = ({
                </span>
                <div className="flex items-center group/link relative w-full border border-amber-500/20 bg-amber-950/20 rounded-xl p-3 hover:border-amber-500/30 transition-colors">
                   <ExternalLink className="w-4 h-4 text-amber-500/50 mr-3 shrink-0" />
-                  <a href={normalizeUrl(req.paymentLink) || req.paymentLink} target="_blank" rel="noreferrer" onClick={() => copyToClipboard(req.paymentLink, "Payment Link Copied!")} className="flex-1 truncate text-sm text-amber-100 font-mono hover:text-white transition-colors cursor-pointer block pr-10">
+                  <a href={normalizeUrl(req.paymentLink) || req.paymentLink} target="_blank" rel="noreferrer" onClick={() => copyToClipboard(req.paymentLink, "Payment Link Copied!")} className="flex-1 break-all text-sm text-amber-100 font-mono hover:text-white transition-colors cursor-pointer block pr-10 leading-relaxed">
                     {normalizeUrl(req.paymentLink) || req.paymentLink || "No payment link generated"}
                   </a>
                   <div className="opacity-0 group-hover/link:opacity-100 transition-opacity flex items-center absolute right-3 pointer-events-none">
@@ -787,9 +788,9 @@ export const TabbyTamaraCard = ({
                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">TL Links</span>
                    <div className="flex flex-col gap-2">
                      {extractLinks(req.tlLinks).map((link: string, idx: number) => (
-                       <a key={idx} href={normalizeUrl(link)} target="_blank" rel="noreferrer" className="flex gap-3 text-sm bg-black/40 border border-emerald-500/10 p-3 rounded-xl items-center text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/30 transition-colors">
-                         <LinkIcon className="w-4 h-4 shrink-0 text-emerald-500/50" />
-                         <span className="truncate">{link}</span>
+                       <a key={idx} href={normalizeUrl(link)} target="_blank" rel="noreferrer" className="flex gap-3 text-sm bg-black/40 border border-emerald-500/10 p-4 rounded-xl items-start text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/30 transition-colors">
+                         <LinkIcon className="w-4 h-4 shrink-0 text-emerald-500/50 mt-0.5" />
+                         <span className="break-all leading-relaxed">{link}</span>
                        </a>
                      ))}
                    </div>
@@ -798,14 +799,14 @@ export const TabbyTamaraCard = ({
 
              {(req.tlPhotos && req.tlPhotos.length > 0) && (
                 <div className='mt-2'>
-                  <p className='text-[9px] text-amber-400/70 uppercase tracking-widest font-bold mb-1'>TL Attachments</p>
+                  <p className='text-[10px] text-amber-400/70 uppercase tracking-wider font-bold mb-1'>TL Attachments</p>
                   <AttachmentsDisplay photos={req.tlPhotos} links={[]} />
                 </div>
              )}
 
              {(req.tlSupportingLinks && req.tlSupportingLinks.length > 0) && (
                 <div className="mt-2 space-y-1">
-                   <span className="text-[9px] text-slate-400 uppercase tracking-widest font-bold block mb-1">TL Supporting Links</span>
+                   <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold block mb-1">TL Supporting Links</span>
                    <AttachmentsDisplay photos={[]} links={req.tlSupportingLinks} />
                  </div>
              )}
@@ -827,7 +828,7 @@ export const TabbyTamaraCard = ({
                      <span className={`font-bold text-[10px] ${fu.senderRole === 'tl' ? 'text-amber-400' : 'text-indigo-400'}`}>
                        {fu.senderRole === 'tl' ? '' : ''} {fu.senderName}
                      </span>
-                     <span className='text-[9px] text-slate-600 font-mono'>{new Date(fu.createdAt).toLocaleString()}</span>
+                     <span className='text-[10px] text-slate-500 font-mono'>{new Date(fu.createdAt).toLocaleString()}</span>
                    </div>
                    {fu.text && <p className='text-slate-300 leading-relaxed'>{fu.text}</p>}
                    {fu.photos && fu.photos.length > 0 && (
@@ -959,7 +960,7 @@ export const TabbyTamaraCard = ({
                <input type="text" value={tlFintechLinks} onChange={(e) => setTlFintechLinks(e.target.value)} placeholder="https://link1.com, https://link2.com" className="w-full bg-slate-900 border border-slate-600/60 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-all" />
              </div>
              <div className="border-t border-white/10 pt-3">
-               <p className="text-[9px] text-slate-400 uppercase tracking-widest font-bold mb-2">
+               <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-2">
                  📎 Attach Payment Confirmation / ID (optional)
                </p>
                <MultiAttachmentUpload
@@ -970,13 +971,21 @@ export const TabbyTamaraCard = ({
                  photosLabel="Payment screenshot, ID, or any supporting file"
                />
              </div>
-             <div className="flex gap-3 justify-end pt-3 border-t border-slate-700/40">
-               <button onClick={() => { handleConfirmTabbyTamara(req.id, tlFintechPaymentLink, tlFintechNotes, tlFintechLinks, "rejected", tlFormPhotos, tlFormLinks); setTlFormPhotos([]); setTlFormLinks([]); setActiveFintechHandlingId(null); }} className="px-5 py-2.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 font-bold text-[10px] uppercase tracking-widest rounded-xl transition-colors flex items-center gap-1.5 shrink-0">
-                 <Trash2 className="w-4 h-4" /> Reject
-               </button>
-               <button onClick={() => { handleConfirmTabbyTamara(req.id, tlFintechPaymentLink, tlFintechNotes, tlFintechLinks, "confirmed", tlFormPhotos, tlFormLinks); setTlFormPhotos([]); setTlFormLinks([]); setActiveFintechHandlingId(null); }} className="px-6 py-2.5 bg-indigo-600 text-white hover:bg-indigo-500 font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all shadow-lg hover:shadow-indigo-500/20 flex items-center gap-1.5 w-full sm:w-auto justify-center">
-                 <CheckCircle2 className="w-4 h-4" /> Issue Link
-               </button>
+             <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 pt-3 border-t border-slate-700/40">
+               <SlideToConfirm
+                 label="Slide to Reject"
+                 confirmedLabel="Rejected!"
+                 colorClass="from-red-600 to-rose-500"
+                 icon={<Trash2 className="w-5 h-5 text-white" />}
+                 onConfirm={() => { handleConfirmTabbyTamara(req.id, tlFintechPaymentLink, tlFintechNotes, tlFintechLinks, "rejected", tlFormPhotos, tlFormLinks); setTlFormPhotos([]); setTlFormLinks([]); setActiveFintechHandlingId(null); }}
+               />
+               <SlideToConfirm
+                 label="Slide to Issue Link"
+                 confirmedLabel="Issued!"
+                 colorClass="from-indigo-600 to-blue-500"
+                 icon={<CheckCircle2 className="w-5 h-5 text-white" />}
+                 onConfirm={() => { handleConfirmTabbyTamara(req.id, tlFintechPaymentLink, tlFintechNotes, tlFintechLinks, "confirmed", tlFormPhotos, tlFormLinks); setTlFormPhotos([]); setTlFormLinks([]); setActiveFintechHandlingId(null); }}
+               />
              </div>
            </div>
         </div>
@@ -1038,7 +1047,7 @@ export const TabbyTamaraCard = ({
             </button>
             {showAssignDropdown && (
               <div className="absolute bottom-10 right-0 z-50 bg-[#1e1e24] border border-slate-700 rounded-xl w-56 shadow-2xl p-2 space-y-1">
-                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest px-2 py-1">Select Social Media Agent</p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-2 py-1">Select Social Media Agent</p>
                 {socialMediaAgents.length === 0 ? (
                   <p className="text-xs text-slate-400 px-2 py-1">No agents found</p>
                 ) : (

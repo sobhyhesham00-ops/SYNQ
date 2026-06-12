@@ -13,6 +13,7 @@ import {
 import { CopyWrap } from "./CopyWrap";
 import { AttachmentsDisplay } from "./AttachmentsDisplay";
 import { RequestReplyThread } from "./RequestReplyThread";
+import { SlideToConfirm } from "./SlideToConfirm";
 import { TabbyTamaraComplaint, User as UserType, INITIAL_AGENTS } from "../types";
 import { 
   formatCaseRef, 
@@ -668,12 +669,14 @@ export const ComplaintsWorkspace: React.FC<ComplaintsWorkspaceProps> = ({
 
                 {/* Agent or TL Mark Contacted Closed Case button */}
                 {(isNeedContact || (isTLOreSupport && !isClosed)) && (
-                  <button
-                    onClick={() => handleToggleContactComplaint(comp.id, "contacted")}
-                    className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 active:scale-95 text-black font-extrabold font-sans text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-1"
-                  >
-                    {isNeedContact ? "Mark Case Closed" : "Force Close Case"}
-                  </button>
+                  <div className="w-full sm:w-64">
+                    <SlideToConfirm
+                      label={isNeedContact ? "Slide to Close Case" : "Slide to Force Close"}
+                      confirmedLabel="Closed!"
+                      colorClass="from-emerald-500 to-teal-500"
+                      onConfirm={() => handleToggleContactComplaint(comp.id, "contacted")}
+                    />
+                  </div>
                 )}
 
                 {/* Reopen Closed Case if done in error */}
