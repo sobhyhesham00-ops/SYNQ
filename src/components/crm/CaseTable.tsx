@@ -39,6 +39,11 @@ export const CaseTable: React.FC<CaseTableProps> = ({
   const getStatusBadge = (crmType: string, status: string) => {
     let style = "bg-slate-800 text-slate-300 border-white/5";
     let label = status?.replace(/_/g, ' ') || 'Submitted';
+    if (status === "awaiting_client_contact") {
+      label = "Awaiting Contact";
+    } else if (status === "not_confirmed") {
+      label = "Not Confirmed";
+    }
 
     if (status === "answered" || status === "resolved") {
       style = "bg-emerald-500/10 text-emerald-400 border-emerald-500/10";
@@ -51,7 +56,11 @@ export const CaseTable: React.FC<CaseTableProps> = ({
     }
 
     return (
-      <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${style}`}>
+      <span 
+        className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase border ${style} inline-block max-w-full truncate leading-tight`}
+        style={{ letterSpacing: '0.02em' }}
+        title={label}
+      >
         {label}
       </span>
     );
@@ -119,7 +128,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
               <th className="p-2 w-48">Patient / Subject</th>
               <th className="p-2 w-24">Clinic</th>
               <th className="p-2 w-24">Assignee</th>
-              <th className="p-2 w-24">Status</th>
+              <th className="p-2 w-28">Status</th>
               <th className="p-2 w-28">
                 <button 
                   onClick={() => onSortChange('sla_urgency')}
@@ -177,7 +186,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                     <td className="p-2 truncate text-slate-400 text-[11px]">
                       {item.crmType === "inquiry" ? item.agentName : item.assignedToName || "Unassigned Queue"}
                     </td>
-                    <td className="p-2">
+                    <td className="p-2 overflow-hidden">
                       {getStatusBadge(item.crmType, item.status)}
                     </td>
                     <td className="p-2">
