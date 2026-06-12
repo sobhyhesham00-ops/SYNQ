@@ -556,12 +556,12 @@ export const TabbyTamaraCard = ({
       {/* BODY */}
       <div className='px-5 pb-4 border-b border-slate-700/40'>
         <h3 
-          className='text-2xl font-black text-white tracking-tight cursor-pointer hover:text-amber-100 transition-colors w-fit flex items-center gap-2 group/name'  
+          className='text-2xl font-black text-white tracking-tight cursor-pointer hover:text-amber-100 active:scale-95 transition-all w-fit flex items-center gap-2 group/name'  
           onClick={() => copyToClipboard(req.patientName || "Unknown", "Patient name copied!")}
-          title="Copy Patient Name"
+          title="Tap to copy patient name"
         >
           {req.patientName || "Unknown"}
-          <Copy className="w-4 h-4 opacity-0 group-hover/name:opacity-100 transition-opacity text-amber-100/50" />
+          <Copy className="w-4 h-4 text-amber-100/60 group-hover/name:text-amber-100 transition-colors" />
         </h3>
         <div className='flex items-center flex-wrap gap-2 mt-1.5'>
           <span className='text-[10px] text-slate-400 font-mono bg-white/[0.04] px-2 py-0.5 rounded-md'>File: {req.fileNumber || req.idNumber || 'N/A'}</span>
@@ -597,13 +597,16 @@ export const TabbyTamaraCard = ({
 
       <div className='grid grid-cols-3 divide-x divide-slate-700/40 border-b border-slate-700/40'>
         <div
-          className="px-4 py-3 cursor-pointer hover:bg-slate-700/30 transition-colors group/phone"
+          className="px-4 py-3 cursor-pointer hover:bg-slate-700/30 active:bg-slate-700/50 transition-colors group/phone"
           onClick={() => copyToClipboard(formatPhoneLocalForCopy(req.phoneNumber), `Copied: ${formatPhoneLocalForCopy(req.phoneNumber)}`)}
-          title="Copy Phone"
+          title="Tap to copy phone number (without country code)"
         >
           <div className="flex flex-col">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><Phone className="w-3 h-3 text-blue-400" /> Phone</span>
-            <span className="text-[15px] font-semibold text-slate-100 mt-1.5 break-words">{req.phoneNumber || "N/A"}</span>
+            <span className="text-[15px] font-semibold text-slate-100 mt-1.5 break-words flex items-center gap-1.5">
+              {req.phoneNumber || "N/A"}
+              <Copy className="w-3.5 h-3.5 text-slate-500 group-hover/phone:text-blue-400 transition-colors shrink-0" />
+            </span>
           </div>
         </div>
         <div className="px-4 py-3 flex flex-col">

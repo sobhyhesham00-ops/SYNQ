@@ -43,7 +43,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
 
   const STATUS_LABELS: Record<string, string> = {
     pending: '⏳ Pending', pending_partner: '🤝 Awaiting Partner',
-    pending_tl: '👨💼 Pending TL', not_confirmed: '❔ Awaiting Confirm',
+    pending_tl: '🧑💼 Pending TL', not_confirmed: '❔ Awaiting Confirm',
     approved: '✅ Approved', answered: '💬 Answered',
     confirmed: '✅ Confirmed', closed: '🔒 Closed', contacted: '📞 Contacted',
     rejected: '❌ Rejected', cancelled: '🚫 Cancelled', declined: '🚫 Declined',
