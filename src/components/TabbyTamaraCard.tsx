@@ -11,14 +11,20 @@ import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
 import { MultiAttachmentUpload } from './MultiAttachmentUpload';
 import { SlideToConfirm } from './SlideToConfirm';
-import { formatCaseRef, normalizePhone, formatPhoneForCopy, copyToClipboard, extractLinks, normalizeUrl, getSafeTTWorkflowStatus, getSafeTTSourceChannel, getAgentLOB, buildCaseClipboardPayload, normalizeAttachments, calculateTabbyTamaraPrice } from '../utils';
+import { formatCaseRef, normalizePhone, formatPhoneForCopy, formatPhoneLocalForCopy, copyToClipboard, extractLinks, normalizeUrl, getSafeTTWorkflowStatus, getSafeTTSourceChannel, getAgentLOB, buildCaseClipboardPayload, normalizeAttachments, calculateTabbyTamaraPrice } from '../utils';
 import { AGENT_LOBS } from '../types';
 import { assignCase } from '../services/assignmentService';
 
 // REUSABLE COMPONENTS
 
-const StatusBadge = ({ status, customerContacted, className = "" }: any) => {
-  if (status === "not_confirmed") {
+const StatusBadge = ({ status, customerContacted, workflowStatus, className = "" }: any) => {
+  if (workflowStatus === "completed") {
+    return (
+      <span className={`px-2 py-0.5 rounded-lg text-[11px] font-bold tracking-widest uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5 ${className}`}>
+        ✅ Closed
+      </span>
+    );
+  } else if (status === "not_confirmed") {
     return (
       <span className={`px-2 py-0.5 rounded-lg text-[11px] font-bold tracking-widest uppercase bg-amber-500/10 text-amber-500 border border-amber-500/20 flex items-center gap-1.5 ${className}`}>
         <AlertCircle className="w-3.5 h-3.5" /> Pending TL
@@ -145,7 +151,9 @@ export const TabbyTamaraCard = ({
   const isSocialMedia = userLOB === 'Social Media';
   const isUnassigned = !req.assignedToId;
   const isCallCenterRequest = sourceChannel === 'call_center';
-  const canClaim = isSocialMedia && isUnassigned && isCallCenterRequest;
+  const isSubmitter = (req.submittedByName || req.agentName)?.toLowerCase() === currentUser?.name?.toLowerCase();
+  const canClaim = (isSocialMedia && isUnassigned && isCallCenterRequest) ||
+                    (isSubmitter && isUnassigned && workflowStatus === "awaiting_client_contact");
   
   // Reassign / Assign State
   const [showAssignDropdown, setShowAssignDropdown] = useState(false);
@@ -541,7 +549,7 @@ export const TabbyTamaraCard = ({
            <div className="font-mono text-[10px] text-slate-500 uppercase tracking-wider hidden sm:block mr-2">
              Ref: {formatCaseRef(req.id, 'tt_request', req.createdAt, req.caseRef)}
            </div>
-           <StatusBadge status={req.status} customerContacted={req.customerContacted} />
+           <StatusBadge status={req.status} customerContacted={req.customerContacted} workflowStatus={workflowStatus} />
          </div>
       </div>
 
@@ -590,7 +598,7 @@ export const TabbyTamaraCard = ({
       <div className='grid grid-cols-3 divide-x divide-slate-700/40 border-b border-slate-700/40'>
         <div
           className="px-4 py-3 cursor-pointer hover:bg-slate-700/30 transition-colors group/phone"
-          onClick={() => copyToClipboard(req.phoneNumber, "Phone number copied!")}
+          onClick={() => copyToClipboard(formatPhoneLocalForCopy(req.phoneNumber), `Copied: ${formatPhoneLocalForCopy(req.phoneNumber)}`)}
           title="Copy Phone"
         >
           <div className="flex flex-col">
@@ -630,7 +638,8 @@ export const TabbyTamaraCard = ({
               { label: req.status === 'rejected' ? 'Rejected' : 'Link Ready', done: req.status === 'rejected' || ['tl_link_ready', 'awaiting_client_contact', 'ready_for_partner', 'sent_to_partner', 'completed'].includes(workflowStatus) },
               { label: 'Client Contact', done: ['ready_for_partner', 'sent_to_partner', 'completed'].includes(workflowStatus) },
               { label: 'Ready for Partner', done: ['ready_for_partner', 'sent_to_partner', 'completed'].includes(workflowStatus) },
-              { label: 'Sent', done: ['sent_to_partner', 'completed'].includes(workflowStatus) }
+              { label: 'Sent', done: ['sent_to_partner', 'completed'].includes(workflowStatus) },
+              { label: 'Closed', done: workflowStatus === 'completed' }
             ];
             return steps.map((step, i, arr) => (
               <React.Fragment key={step.label}>
@@ -1121,6 +1130,52 @@ export const TabbyTamaraCard = ({
           >
              <ExternalLink className="w-3.5 h-3.5" /> <span className="hidden sm:inline">{showPartnerPanel ? 'Cancel Partner' : 'Send to Partner'}</span>
           </button>
+        )}
+
+        {/* Agent: Client Contacted -> Close Case */}
+        {!isTLOreSupport &&
+         req.assignedToName?.toLowerCase() === currentUser?.name?.toLowerCase() &&
+         workflowStatus === "awaiting_client_contact" && (
+          <div className="w-full sm:w-64">
+            <SlideToConfirm
+              label="Slide to Close Case"
+              confirmedLabel="Closed!"
+              colorClass="from-emerald-500 to-teal-500"
+              icon={<CheckCircle2 className="w-4 h-4 text-white" />}
+              onConfirm={async () => {
+                try {
+                  const closeActivity = {
+                    id: "act_" + Math.random().toString(36).substring(2, 11),
+                    senderName: "System",
+                    authorId: "system",
+                    authorRole: "system",
+                    text: `${currentUser.name} confirmed client contact. Case closed.`,
+                    createdAt: new Date().toISOString(),
+                  };
+                  await updateDoc(doc(db, "tt_requests", req.id), {
+                    customerContacted: "contacted",
+                    contactedAt: new Date().toISOString(),
+                    workflowStatus: "completed",
+                    replies: arrayUnion(closeActivity),
+                  });
+                  if (addSystemNotification) {
+                    addSystemNotification(
+                      "Tabby/Tamara Case Closed",
+                      `${currentUser.name} marked client as contacted. Request for ${req.patientName} is now closed.`,
+                      "general",
+                      "tl",
+                      undefined,
+                      "tt_request",
+                      req.id
+                    );
+                  }
+                  toast.success("Client contacted — case closed!");
+                } catch (err: any) {
+                  toast.error("Failed to close case: " + err.message);
+                }
+              }}
+            />
+          </div>
         )}
       </div>
 

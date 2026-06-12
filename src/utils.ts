@@ -1693,6 +1693,32 @@ export const formatPhoneForCopy = (phone: string): string => {
   return raw.replace(/\s+/g, '');
 };
 
+/**
+ * Returns the phone number formatted for local UAE copying:
+ * strips +971 / 971 / 00971 / leading 0, leaves digits only,
+ * resulting number should start with 5 (UAE mobile prefix).
+ * e.g. "+971501234567" -> "501234567"
+ *      "00971501234567" -> "501234567"
+ *      "0501234567" -> "501234567"
+ *      "501234567" -> "501234567"
+ */
+export const formatPhoneLocalForCopy = (phone: string): string => {
+  if (!phone) return '';
+  let digits = (phone || '').replace(/\D/g, ''); // strip all non-digits (+, spaces, dashes)
+  
+  // Strip 00971 / 971 country code prefixes
+  if (digits.startsWith('00971')) {
+    digits = digits.slice(5);
+  } else if (digits.startsWith('971')) {
+    digits = digits.slice(3);
+  }
+  
+  // Strip a leading 0 (e.g. "0501234567" -> "501234567")
+  digits = digits.replace(/^0+/, '');
+  
+  return digits;
+};
+
 export const getSLAStatus = (createdAt: string, status: string, resolvedStatuses: string[]) => {
   const ageMs = Date.now() - new Date(createdAt).getTime();
   const ageH = ageMs / 3600000;

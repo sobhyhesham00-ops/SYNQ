@@ -35,6 +35,9 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
   const [warnings, setWarnings] = useState<string[]>([]);
   const [tempSchedules, setTempSchedules] = useState<ScheduledShift[]>([]);
   const [fileName, setFileName] = useState<string>('');
+  const [availableSheets, setAvailableSheets] = useState<string[]>([]);
+  const [selectedSheet, setSelectedSheet] = useState<string>('');
+  const [rawWorkbook, setRawWorkbook] = useState<any>(null);
   
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -82,14 +85,17 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
     setTempSchedules([]);
     setFileName(file.name);
     setCurrentPage(1);
+    setRawWorkbook(null);
+    setAvailableSheets([]);
+    setSelectedSheet('');
     
     const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
-    const validExts = ['.xlsx', '.xls', '.csv', '.tsv', '.txt'];
+    const spreadsheetExts = ['.xlsx', '.xls', '.xlsm', '.csv', '.tsv', '.txt', '.ods'];
     
-    if (!validExts.includes(ext)) {
-      setUploadError(`Invalid file format: ${ext}. Supported formats are .xlsx, .xls, .csv, .tsv, .txt.`);
-      setIsProcessing(false);
-      return;
+    if (!spreadsheetExts.includes(ext)) {
+      // Attempt anyway - XLSX library can sometimes read unexpected formats,
+      // but warn the user it may not work for non-spreadsheet files (e.g. images/PDFs)
+      setWarnings([`File extension "${ext}" is not a typical spreadsheet format. Attempting to parse anyway — if this fails, please export your schedule as .xlsx or .csv and try again.`]);
     }
 
     const reader = new FileReader();
@@ -98,19 +104,30 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
         const data = e.target?.result;
         let csvText = '';
         
-        if (ext === '.xlsx' || ext === '.xls') {
-          const workbook = XLSX.read(data, { type: 'binary' });
+        const binaryExts = ['.xlsx', '.xls', '.xlsm', '.ods', '.numbers'];
+        if (binaryExts.includes(ext)) {
+          const workbook = XLSX.read(data, { type: 'binary', cellDates: true });
+          if (workbook.SheetNames.length > 1) {
+            setRawWorkbook(workbook);
+            setAvailableSheets(workbook.SheetNames);
+            setSelectedSheet(workbook.SheetNames[0]);
+          }
           const firstSheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[firstSheetName];
-          csvText = XLSX.utils.sheet_to_csv(worksheet);
+          csvText = XLSX.utils.sheet_to_csv(worksheet, { dateNF: 'yyyy-mm-dd' });
         } else {
           // csv, tsv, txt can be read as text
           const textContent = data as string;
           try {
-            const workbook = XLSX.read(textContent, { type: 'string' });
+            const workbook = XLSX.read(textContent, { type: 'string', cellDates: true });
+            if (workbook.SheetNames.length > 1) {
+              setRawWorkbook(workbook);
+              setAvailableSheets(workbook.SheetNames);
+              setSelectedSheet(workbook.SheetNames[0]);
+            }
             const firstSheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[firstSheetName];
-            csvText = XLSX.utils.sheet_to_csv(worksheet);
+            csvText = XLSX.utils.sheet_to_csv(worksheet, { dateNF: 'yyyy-mm-dd' });
           } catch (xlsxErr) {
             console.warn("XLSX parsing failed for text format, falling back to raw text reading", xlsxErr);
             csvText = textContent;
@@ -130,7 +147,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
         const result = parseScheduleCSV(csvText, agentsList);
         
         if (result.errors && result.errors.length > 0) {
-          setWarnings(result.errors);
+          setWarnings(prev => [...prev, ...result.errors]);
         }
 
         if (!result.schedules || result.schedules.length === 0) {
@@ -151,7 +168,8 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
       setIsProcessing(false);
     };
     
-    if (ext === '.xlsx' || ext === '.xls') {
+    const binaryExts = ['.xlsx', '.xls', '.xlsm', '.ods', '.numbers'];
+    if (binaryExts.includes(ext)) {
       reader.readAsBinaryString(file);
     } else {
       reader.readAsText(file);
@@ -174,6 +192,9 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
     setUploadError(null);
     setFileName('');
     setCurrentPage(1);
+    setRawWorkbook(null);
+    setAvailableSheets([]);
+    setSelectedSheet('');
     onSchedulesImported([]); // clear parent temp changes as well
   };
 
@@ -225,7 +246,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
             Import Schedule Roster
           </h2>
           <p className="text-slate-400 text-xs mt-0.5">
-            Supported formats: Excel (.xlsx, .xls) and Plain/Delimited (.csv, .tsv, .txt)
+            Supported formats: Excel (.xlsx, .xls, .xlsm), OpenDocument (.ods), Numbers, and Plain (.csv, .tsv, .txt)
           </p>
         </div>
       </div>
@@ -244,7 +265,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
       >
         <input
           type="file"
-          accept=".xlsx,.xls,.csv,.tsv,.txt"
+          accept=".xlsx,.xls,.csv,.tsv,.txt,.xlsm,.ods,.numbers"
           onChange={handleChange}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
         />
@@ -262,7 +283,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
             <h4 className="text-slate-200 font-bold text-sm mb-0.5">Drag & drop your roster file here</h4>
             <p className="text-slate-500 text-xs mb-3">or click to browse from your device</p>
             <div className="flex flex-wrap justify-center gap-1.5">
-              {['.XLSX', '.XLS', '.CSV', '.TSV', '.TXT'].map(fType => (
+              {['.XLSX', '.XLS', '.XLSM', '.ODS', '.NUMBERS', '.CSV', '.TSV', '.TXT'].map(fType => (
                 <span key={fType} className="px-2 py-0.5 bg-slate-900 rounded text-[9px] font-mono text-slate-400 border border-slate-800">
                   {fType}
                 </span>
@@ -271,6 +292,42 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
           </>
         )}
       </div>
+
+      {/* Sheet Picker if multiple sheets found */}
+      {availableSheets.length > 1 && (
+        <div className="bg-slate-950/40 border border-slate-800 rounded-2xl p-4 space-y-2 text-left">
+          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
+            This file has multiple sheets — select which one to import:
+          </label>
+          <select
+            value={selectedSheet}
+            onChange={(e) => {
+              setSelectedSheet(e.target.value);
+              setUploadError(null);
+              setUploadSuccess(null);
+              setWarnings([]);
+              if (rawWorkbook) {
+                const worksheet = rawWorkbook.Sheets[e.target.value];
+                const csvText = XLSX.utils.sheet_to_csv(worksheet, { dateNF: 'yyyy-mm-dd' });
+                const result = parseScheduleCSV(csvText, agentsList);
+                if (result.schedules && result.schedules.length > 0) {
+                  setTempSchedules(result.schedules);
+                  setWarnings(result.errors || []);
+                  setUploadSuccess(`Successfully parsed ${result.schedules.length} shift rows from sheet "${e.target.value}".`);
+                } else {
+                  setTempSchedules([]);
+                  setUploadError('No valid shifts found in this sheet.');
+                }
+              }
+            }}
+            className="w-full bg-slate-900 border border-slate-700/60 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all cursor-pointer"
+          >
+            {availableSheets.map(name => (
+              <option key={name} value={name}>{name}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Status Messages & Warnings */}
       {(uploadSuccess || uploadError || warnings.length > 0) && (

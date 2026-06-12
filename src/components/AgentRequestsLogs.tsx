@@ -2,11 +2,11 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Search, Filter, ClipboardList, Clock, CheckCircle2, XCircle, Pencil, Copy, Phone, 
   Link as LinkIcon, ExternalLink, Paperclip, MessageSquare, ChevronDown, ChevronUp, Trash2,
-  AlertCircle
+  AlertCircle, User
 } from 'lucide-react';
 import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
-import { formatCaseRef, normalizePhone, formatPhoneForCopy, getSLAStatus, copyToClipboard, extractLinks, calculateTabbyTamaraPrice } from '../utils';
+import { formatCaseRef, normalizePhone, formatPhoneForCopy, formatPhoneLocalForCopy, getSLAStatus, copyToClipboard, extractLinks, calculateTabbyTamaraPrice } from '../utils';
 
 const CopyButton = ({ text, tooltip, icon: Icon = Copy }: { text: string, tooltip: string, icon?: any }) => {
   const [copied, setCopied] = useState(false);
@@ -42,13 +42,14 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
   }
 
   const STATUS_LABELS: Record<string, string> = {
-    pending: 'Pending', pending_partner: 'Awaiting Partner',
-    pending_tl: 'Pending TL', not_confirmed: 'Awaiting Confirm',
-    approved: 'Approved', answered: 'Answered',
-    confirmed: 'Confirmed', closed: 'Closed', contacted: 'Contacted',
-    rejected: 'Rejected', cancelled: 'Cancelled', declined: 'Declined',
-    need_contact: 'Act: Contact Patient', in_progress: 'In Progress',
-    submitted: 'Submitted', sent: 'Sent to Partner'
+    pending: '⏳ Pending', pending_partner: '🤝 Awaiting Partner',
+    pending_tl: '👨💼 Pending TL', not_confirmed: '❔ Awaiting Confirm',
+    approved: '✅ Approved', answered: '💬 Answered',
+    confirmed: '✅ Confirmed', closed: '🔒 Closed', contacted: '📞 Contacted',
+    rejected: '❌ Rejected', cancelled: '🚫 Cancelled', declined: '🚫 Declined',
+    need_contact: '📲 Act: Contact Patient', in_progress: '🔄 In Progress',
+    submitted: '📨 Submitted', sent: '📤 Sent to Partner',
+    completed: '✅ Closed'
   };
 
   let title = "Request";
@@ -84,7 +85,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
       </div>
     );
     if (req.notes) {
-      secondaryContent = <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">Notes</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words italic pl-2 border-l-2 border-white/10">{req.notes}</p></div>;
+      secondaryContent = <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📝 Notes</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words italic pl-2 border-l-2 border-white/10">{req.notes}</p></div>;
     }
   } else if (req._cType === 'inq') {
     title = 'Clinic Inquiry';
@@ -97,15 +98,25 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
     ].filter(Boolean).join('\n');
 
     primaryContent = (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{req.clinicName || 'N/A'}</p></div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">Phone</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
-        <div className="sm:col-span-2"><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">Inquiry</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.text}</p></div>
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-widest bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center gap-1.5">
+            ❓ Clinic Inquiry
+          </span>
+          {req.answer && (
+            <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+              💬 Answered
+            </span>
+          )}
+        </div>
+        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{req.clinicName || 'N/A'}</p></div>
+        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📞 Phone</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
+        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">💬 Inquiry</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.text}</p></div>
+        {req.answer && (
+          <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">✅ Answer</p><p className="text-[13px] text-emerald-200 mt-0.5 whitespace-pre-wrap break-words">{req.answer}</p></div>
+        )}
       </div>
     );
-    if (req.answer) {
-      tlResponseContent = <div><p className="text-[11px] uppercase text-emerald-500 font-semibold tracking-wider">Answered</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.answer}</p></div>;
-    }
   } else if (req._cType === 'tt_request') {
     title = 'Tabby/Tamara Request';
     const pricing = calculateTabbyTamaraPrice(req.priceWithoutTax || 0);
@@ -119,14 +130,14 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
 
     primaryContent = (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">Patient</p><p className="text-[13px] text-slate-200 mt-0.5">{req.patientName || 'N/A'} <span className="text-slate-400 text-[11px]">({req.platform})</span></p></div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">Phone</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{req.clinicName || 'N/A'}</p></div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">Amount</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{pricing.finalPriceFormatted} <span className="text-[10px] text-slate-500">({pricing.priceBeforeFeeFormatted} + 5%)</span></p></div>
+        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">👤 Patient</p><p className="text-[13px] text-slate-200 mt-0.5">{req.patientName || 'N/A'} <span className="text-slate-400 text-[11px]">({req.platform})</span></p></div>
+        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📞 Phone</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
+        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{req.clinicName || 'N/A'}</p></div>
+        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">💰 Amount</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{pricing.finalPriceFormatted} <span className="text-[10px] text-slate-500">({pricing.priceBeforeFeeFormatted} + 5%)</span></p></div>
       </div>
     );
     if (req.notes) {
-      secondaryContent = <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">Notes</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words italic pl-2 border-l-2 border-white/10">{req.notes}</p></div>;
+      secondaryContent = <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📝 Notes</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words italic pl-2 border-l-2 border-white/10">{req.notes}</p></div>;
     }
   } else if (req._cType === 'tt_complaint') {
     title = 'Complaint';
@@ -140,10 +151,10 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
 
     primaryContent = (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">Patient</p><p className="text-[13px] text-slate-200 mt-0.5">{req.patientName || 'N/A'}</p></div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">Phone</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{req.clinicName || 'N/A'}</p></div>
-        <div className="sm:col-span-2"><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">Complaint</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.complaintDetails}</p></div>
+        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">👤 Patient</p><p className="text-[13px] text-slate-200 mt-0.5">{req.patientName || 'N/A'}</p></div>
+        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📞 Phone</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
+        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{req.clinicName || 'N/A'}</p></div>
+        <div className="sm:col-span-2"><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">⚠️ Complaint</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.complaintDetails}</p></div>
       </div>
     );
     if (req.tlComment) {
@@ -162,10 +173,10 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
 
     primaryContent = (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">Patient</p><p className="text-[13px] text-slate-200 mt-0.5">{req.patientName || 'N/A'}</p></div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">Phone</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
-        <div className="sm:col-span-2"><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{req.clinicName || 'N/A'}</p></div>
-        <div className="sm:col-span-2"><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">Notes</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.notes || 'No notes yet'}</p></div>
+        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">👤 Patient</p><p className="text-[13px] text-slate-200 mt-0.5">{req.patientName || 'N/A'}</p></div>
+        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📞 Phone</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
+        <div className="sm:col-span-2"><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{req.clinicName || 'N/A'}</p></div>
+        <div className="sm:col-span-2"><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📝 Notes</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.notes || 'No notes yet'}</p></div>
       </div>
     );
     if (req.handlingNotes) {
@@ -281,7 +292,16 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
       <div className="flex items-center justify-between px-3 py-2 bg-black/20 border-t border-white/10 gap-2 flex-wrap">
         <div className="flex items-center gap-1">
           <CopyButton text={copyData} tooltip="Copy Full Request" icon={ClipboardList} />
-          {req.phoneNumber && <CopyButton text={req.phoneNumber} tooltip="Copy Phone" icon={Phone} />}
+          {req.phoneNumber && (
+            <CopyButton 
+              text={formatPhoneLocalForCopy(req.phoneNumber)} 
+              tooltip={`Copy Phone (${formatPhoneLocalForCopy(req.phoneNumber)})`} 
+              icon={Phone} 
+            />
+          )}
+          {(req._cType === 'tt_request' || req._cType === 'tt_complaint' || req._cType === 'comm') && req.patientName && (
+            <CopyButton text={req.patientName} tooltip="Copy Patient Name" icon={User} />
+          )}
         </div>
         
         <div className="flex items-center gap-1">
