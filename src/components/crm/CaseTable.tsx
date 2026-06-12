@@ -102,12 +102,12 @@ export const CaseTable: React.FC<CaseTableProps> = ({
   return (
     <div id="crm-table-container" className="w-full h-full flex flex-col min-h-0 bg-[#0d0d11] rounded-2xl border border-white/5 overflow-hidden">
       {/* Table grid for larger screens */}
-      <div className="hidden lg:block overflow-x-auto min-h-0">
-        <table className="w-full text-left text-xs text-slate-300 whitespace-nowrap table-fixed">
+      <div className="hidden lg:block overflow-x-auto min-h-0 custom-scrollbar">
+        <table className="w-full min-w-[900px] text-left text-xs text-slate-300 whitespace-nowrap table-fixed">
           <thead className="bg-[#121216] text-[10px] font-black uppercase tracking-wider text-slate-500 border-b border-white/5 sticky top-0 z-15">
             <tr>
-              <th className="p-3 w-4"></th>
-              <th className="p-3 w-48">
+              <th className="p-2 w-6"></th>
+              <th className="p-2 w-32">
                 <button 
                   onClick={() => onSortChange(sortBy === 'newest' ? 'oldest' : 'newest')}
                   className="flex items-center gap-1 hover:text-white"
@@ -115,12 +115,12 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                   Reference {sortBy === 'newest' ? <ChevronDown className="w-3 h-3" /> : sortBy === 'oldest' ? <ChevronUp className="w-3 h-3" /> : null}
                 </button>
               </th>
-              <th className="p-3 w-28">Type</th>
-              <th className="p-3 w-56">Patient / Subject</th>
-              <th className="p-3 w-32">Clinic</th>
-              <th className="p-3 w-32">Assignee</th>
-              <th className="p-3 w-28">Status</th>
-              <th className="p-3 w-36">
+              <th className="p-2 w-20">Type</th>
+              <th className="p-2 w-48">Patient / Subject</th>
+              <th className="p-2 w-24">Clinic</th>
+              <th className="p-2 w-24">Assignee</th>
+              <th className="p-2 w-24">Status</th>
+              <th className="p-2 w-28">
                 <button 
                   onClick={() => onSortChange('sla_urgency')}
                   className="flex items-center gap-1 hover:text-white"
@@ -128,21 +128,13 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                   SLA / Age {sortBy === 'sla_urgency' ? <ChevronDown className="w-3 h-3 text-emerald-400" /> : null}
                 </button>
               </th>
-              <th className="p-3 w-40">
-                <button 
-                  onClick={() => onSortChange('last_updated')}
-                  className="flex items-center gap-1 hover:text-white"
-                >
-                  Updated {sortBy === 'last_updated' ? <ChevronDown className="w-3 h-3 text-emerald-400" /> : null}
-                </button>
-              </th>
-              <th className="p-3 w-24 text-center">Indicators</th>
+              <th className="p-2 w-8 text-center">📎</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/[0.03]">
             {cases.length === 0 ? (
               <tr>
-                <td colSpan={10} className="p-12 text-center text-slate-500 italic">
+                <td colSpan={9} className="p-12 text-center text-slate-500 italic">
                   No cases found matching the filter criteria.
                 </td>
               </tr>
@@ -160,18 +152,18 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                         : "hover:bg-white/[0.02]"
                     }`}
                   >
-                    <td className="p-3 text-center">
+                    <td className="p-2 text-center">
                       {item.unread && (
                         <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse mx-auto" title="Unread activity" />
                       )}
                     </td>
-                    <td className="p-3 font-mono text-[11px] text-slate-100 font-bold truncate">
+                    <td className="p-2 font-mono text-[10px] text-slate-100 font-bold truncate">
                       {item.referenceId}
                     </td>
-                    <td className="p-3">
+                    <td className="p-2">
                       {getTypeBadge(item)}
                     </td>
-                    <td className="p-3 max-w-[224px] truncate" title={item.patientName || item.subject}>
+                    <td className="p-2 max-w-[180px] truncate" title={item.patientName || item.subject}>
                       <span className="font-semibold text-slate-200 block truncate">
                         {item.patientName || "—"}
                       </span>
@@ -179,37 +171,38 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                         {item.subject}
                       </span>
                     </td>
-                    <td className="p-3 truncate text-slate-400 font-medium">
+                    <td className="p-2 truncate text-slate-400 font-medium text-[11px]">
                       {CLINIC_LABELS[item.clinicName] || item.clinicName}
                     </td>
-                    <td className="p-3 truncate text-slate-400">
+                    <td className="p-2 truncate text-slate-400 text-[11px]">
                       {item.crmType === "inquiry" ? item.agentName : item.assignedToName || "Unassigned Queue"}
                     </td>
-                    <td className="p-3">
+                    <td className="p-2">
                       {getStatusBadge(item.crmType, item.status)}
                     </td>
-                    <td className="p-3">
-                      <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] border ${sla.color}`}>
+                    <td className="p-2">
+                      <span 
+                        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] border ${sla.color}`}
+                        title={`Last updated: ${new Date(item.updatedAt || item.createdAt).toLocaleString()}`}
+                      >
                         <Clock className="w-2.5 h-2.5 shrink-0" />
                         {sla.label}
                       </span>
                     </td>
-                    <td className="p-3 text-[10px] text-slate-500 font-mono">
-                      {new Date(item.updatedAt || item.createdAt).toLocaleDateString()} {new Date(item.updatedAt || item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </td>
-                    <td className="p-3">
-                      <div className="flex items-center justify-center gap-2.5 text-slate-500">
+                    <td className="p-2">
+                      <div className="flex items-center justify-center gap-1.5 text-slate-500">
                         {item.attachmentCount > 0 && (
-                          <span className="flex items-center gap-0.5 text-[10px]" title={`${item.attachmentCount} Attachment(s)`}>
+                          <span className="flex items-center gap-0.5 text-[9px]" title={`${item.attachmentCount} Attachment(s)`}>
                             <Paperclip className="w-3 h-3" />
-                            {item.attachmentCount}
                           </span>
                         )}
                         {item.replyCount > 0 && (
-                          <span className="flex items-center gap-0.5 text-[10px]" title={`${item.replyCount} Reply(s)`}>
+                          <span className="flex items-center gap-0.5 text-[9px]" title={`${item.replyCount} Reply(s)`}>
                             <MessageSquare className="w-3 h-3" />
-                            {item.replyCount}
                           </span>
+                        )}
+                        {item.attachmentCount === 0 && item.replyCount === 0 && (
+                          <span className="text-slate-700">—</span>
                         )}
                       </div>
                     </td>
