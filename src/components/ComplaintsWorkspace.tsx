@@ -94,55 +94,30 @@ export const ComplaintsWorkspace: React.FC<ComplaintsWorkspaceProps> = ({
   getElapsedTimerString
 }) => {
   const filteredComps = tabbyTamaraComplaints.filter((c) => {
-    const isMyComplaint =
-      c.agentName?.toLowerCase() ===
-      currentUser?.name?.toLowerCase();
-    if (!isTLOreSupport && !isMyComplaint)
+    const isMyComplaint = c.agentName?.toLowerCase() === currentUser?.name?.toLowerCase();
+    if (currentUser?.role === "agent" && !isMyComplaint) {
       return false;
+    }
 
     const sq = complaintSearch.toLowerCase();
     const matchesSearch =
       !sq ||
-      (c.patientName || "")
-        .toLowerCase()
-        .includes(sq) ||
-      (c.phoneNumber || "")
-        .toLowerCase()
-        .includes(sq.replace(/\D/g, "")) ||
-      (c.clinicName || "")
-        .toLowerCase()
-        .includes(sq) ||
-      (c.agentName || "")
-        .toLowerCase()
-        .includes(sq) ||
-      (c.complaintDetails || "")
-        .toLowerCase()
-        .includes(sq);
+      (c.patientName || "").toLowerCase().includes(sq) ||
+      (c.phoneNumber || "").toLowerCase().includes(sq.replace(/\D/g, "")) ||
+      (c.clinicName || "").toLowerCase().includes(sq) ||
+      (c.agentName || "").toLowerCase().includes(sq) ||
+      (c.complaintDetails || "").toLowerCase().includes(sq);
 
-    const matchesStatus =
-      complaintListFilter === "all" ||
-      c.status === complaintListFilter;
+    const matchesStatus = complaintListFilter === "all" || c.status === complaintListFilter;
 
-    const matchesProvider =
-      tcFilterClinic === "all" ||
-      (c.clinicName &&
-        c.clinicName?.toLowerCase() ===
-          tcFilterClinic.toLowerCase());
+    const matchesProvider = tcFilterClinic === "all" || (c.clinicName && c.clinicName?.toLowerCase() === tcFilterClinic.toLowerCase());
 
-    const matchesDate =
-      !compDateFilter ||
-      (c.createdAt &&
-        c.createdAt.startsWith(
-          compDateFilter,
-        ));
+    const matchesDate = !compDateFilter || (c.createdAt && c.createdAt.startsWith(compDateFilter));
 
-    return (
-      matchesSearch &&
-      matchesStatus &&
-      matchesProvider &&
-      matchesDate
-    );
+    return matchesSearch && matchesStatus && matchesProvider && matchesDate;
   });
+
+  console.log("[ComplaintsWorkspace] Input complaints:", tabbyTamaraComplaints?.length, "-> Output filteredComps:", filteredComps?.length, "| Active filters:", { role: currentUser?.role, isTLOreSupport, complaintListFilter, compDateFilter, tcFilterClinic, complaintSearch });
 
   if (filteredComps.length === 0) {
     return (
@@ -161,7 +136,7 @@ export const ComplaintsWorkspace: React.FC<ComplaintsWorkspaceProps> = ({
   }
 
   return (
-    <div className="flex flex-col gap-4 animate-fade-in font-sans">
+    <div className="space-y-4 max-h-[700px] overflow-y-auto pr-1 animate-fade-in font-sans">
       <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold pl-1 text-left">
         📁 {filteredComps.length} Complaints Found
       </p>
@@ -270,7 +245,7 @@ export const ComplaintsWorkspace: React.FC<ComplaintsWorkspaceProps> = ({
 
             {/* EXPANDED CONTENT UNDERNEATH */}
             {isExpanded && (
-              <div className="flex flex-col gap-4 border-t border-white/5 pt-4" onClick={(e) => e.stopPropagation()}>
+              <div className="flex flex-col gap-4 border-t border-white/5 pt-4 w-full overflow-hidden transition-all duration-300" onClick={(e) => e.stopPropagation()}>
                 {/* Patient Info Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-white/[0.02] border border-white/5 p-4 rounded-xl text-xs text-left">
                   <div>

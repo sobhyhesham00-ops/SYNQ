@@ -36,8 +36,7 @@ export const DataVault: React.FC<DataVaultProps> = ({ userName }) => {
         const querySnapshot = await getDocs(collection(db, collName));
         if (querySnapshot) {
           backupData[collName] = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...(doc.data() as any)
+            ...(doc.data() as any),id: doc.id
           }));
         } else {
           backupData[collName] = [];

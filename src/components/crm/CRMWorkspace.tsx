@@ -642,8 +642,8 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
 
       {/* Main split work bench */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start min-h-0 flex-1">
-        {/* Cases Table - left block (Col Span 7 / Expandable if nothing selected) */}
-        <div className={`col-span-1 h-full flex flex-col min-h-0 ${selectedCaseId && selectedCase && selectedCase.crmType !== "inquiry" ? "lg:col-span-7" : "lg:col-span-12"}`}>
+        {/* Cases Table - Expandable full width block */}
+        <div className="col-span-1 lg:col-span-12 h-full flex flex-col min-h-0">
           <CaseTable
             cases={filteredCases}
             selectedCaseId={selectedCaseId}
@@ -665,29 +665,6 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
             onReopenComplaint={handleReopenComplaint}
           />
         </div>
-
-        {/* Selected Case Detail Drawer - right block (Col Span 5 on layout) */}
-        {selectedCaseId && selectedCase && selectedCase.crmType !== "inquiry" && (
-          <div className="col-span-1 lg:col-span-5 h-full min-h-[550px] lg:max-h-[85vh]">
-            <CaseDetailDrawer
-              caseData={selectedCase}
-              onClose={() => setSelectedCaseId(null)}
-              currentUser={currentUser}
-              isTLOreSupport={isTLOreSupport}
-              addSystemNotification={addSystemNotification}
-              onAssignCase={handleAssignCase}
-              onClaimCase={handleClaimCase}
-              onDeleteCase={handleDeleteCase}
-              onEditItem={onEditItem}
-              onSendToPartner={handleSendToPartner}
-              onMarkInquirySent={handleMarkInquirySent}
-              onMarkPatientContactedTT={handleMarkPatientContactedTT}
-              onTLCommentComplaint={handleTLCommentComplaint}
-              onCloseComplaint={handleCloseComplaint}
-              onReopenComplaint={handleReopenComplaint}
-            />
-          </div>
-        )}
       </div>
     </div>
   );

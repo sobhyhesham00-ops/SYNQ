@@ -245,7 +245,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                         </div>
                       </td>
                     </tr>
-                    {isSelected && item.crmType === "inquiry" && (
+                    {isSelected && (
                       <tr key={`${item.id}-details`} className="bg-[#050508]/65">
                         <td colSpan={9} className="p-5 border-t border-b border-indigo-500/25">
                           <div className="max-w-4xl mx-auto rounded-2xl overflow-hidden shadow-2xl border border-white/5 bg-[#09090c] text-left">
@@ -344,7 +344,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                     </div>
                   </div>
                 </div>
-                {isSelected && item.crmType === "inquiry" && (
+                {isSelected && (
                   <div className="p-4 bg-[#050508]/80 border-t border-b border-indigo-500/20 text-left">
                     <CaseDetailDrawer
                       caseData={item}

@@ -1066,29 +1066,18 @@ export default function App() {
       } catch (e) {}
 
       // 2. Real-time Firestore Sync via Collections!
-      const getCutoffTime = () => {
-        const now = new Date();
-        const currentYear = now.getFullYear();
-        const currentMonth = now.getMonth();
-        const cutoff = new Date(currentYear, currentMonth - 1, 17, 0, 0, 0, 0);
-        return cutoff.getTime();
-      };
 
       const unsubInquiries = onSnapshot(
         collection(db, "inquiries"),
         (snap) => {
-          const arr = snap.docs.map((d) => d.data() as Inquiry);
-          const cutoff = getCutoffTime();
-          const filtered = arr.filter(
-            (item) => new Date(item.createdAt || 0).getTime() >= cutoff,
-          );
-          filtered.sort(
-            (a, b) =>
+          const arr = snap.docs.map(d => ({...d.data(), id: d.id}) as any);
+          arr.sort(
+            (a: any, b: any) =>
               new Date(b.createdAt || 0).getTime() -
               new Date(a.createdAt || 0).getTime(),
           );
-          setInquiries(filtered);
-          setStorageItem("sched_inquiries", filtered, false);
+          setInquiries(arr);
+          setStorageItem("sched_inquiries", arr, false);
         },
         (error) => {
           console.error("inquiries snapshot error:", error.code, error.message);
@@ -1098,7 +1087,7 @@ export default function App() {
       const unsubQa = onSnapshot(
         collection(db, "qa_scores"),
         (snap) => {
-          const arr = snap.docs.map((d) => d.data() as QAScore);
+          const arr = snap.docs.map(d => ({...d.data(), id: d.id}) as any);
           arr.sort(
             (a, b) =>
               new Date(b.createdAt || 0).getTime() -
@@ -1132,18 +1121,14 @@ export default function App() {
       const unsubTT = onSnapshot(
         collection(db, "tabby_tamara"),
         (snap) => {
-          const arr = snap.docs.map((d) => d.data() as TabbyTamaraRequest);
-          const cutoff = getCutoffTime();
-          const filtered = arr.filter(
-            (item) => new Date(item.createdAt || 0).getTime() >= cutoff,
-          );
-          filtered.sort(
-            (a, b) =>
+          const arr = snap.docs.map(d => ({...d.data(), id: d.id}) as any);
+          arr.sort(
+            (a: any, b: any) =>
               new Date(b.createdAt || 0).getTime() -
               new Date(a.createdAt || 0).getTime(),
           );
-          setTabbyTamaraRequests(filtered);
-          setStorageItem("sched_tabby_tamara", filtered, false);
+          setTabbyTamaraRequests(arr);
+          setStorageItem("sched_tabby_tamara", arr, false);
         },
         (error) => {
           console.error(
@@ -1156,18 +1141,28 @@ export default function App() {
       const unsubComp = onSnapshot(
         collection(db, "tabby_tamara_complaints"),
         (snap) => {
-          const arr = snap.docs.map((d) => d.data() as TabbyTamaraComplaint);
-          const cutoff = getCutoffTime();
-          const filtered = arr.filter(
-            (item) => new Date(item.createdAt || 0).getTime() >= cutoff,
-          );
-          filtered.sort(
-            (a, b) =>
+          const arr = snap.docs.map(d => {
+            const data = d.data() as any;
+            const missing = [];
+            if (!data.patientName) missing.push("patientName");
+            if (!data.phoneNumber) missing.push("phoneNumber");
+            if (!data.complaintDetails) missing.push("complaintDetails");
+            if (!data.clinicName) missing.push("clinicName");
+            if (!data.createdAt) missing.push("createdAt");
+            if (!data.status) missing.push("status");
+            if (missing.length > 0) {
+              console.warn(`[TabbyTamaraComplaint] Doc ${d.id} is missing fields: ${missing.join(", ")}`);
+            }
+            return { ...data, id: d.id };
+          });
+          
+          arr.sort(
+            (a: any, b: any) =>
               new Date(b.createdAt || 0).getTime() -
               new Date(a.createdAt || 0).getTime(),
           );
-          setTabbyTamaraComplaints(filtered);
-          setStorageItem("sched_tt_complaints", filtered, false);
+          setTabbyTamaraComplaints(arr);
+          setStorageItem("sched_tt_complaints", arr, false);
         },
         (error) => {
           console.error(
@@ -1180,20 +1175,14 @@ export default function App() {
       const unsubComms = onSnapshot(
         collection(db, "client_comms"),
         (snap) => {
-          const arr = snap.docs.map(
-            (d) => d.data() as ClientCommunicationRequest,
-          );
-          const cutoff = getCutoffTime();
-          const filtered = arr.filter(
-            (item) => new Date(item.createdAt || 0).getTime() >= cutoff,
-          );
-          filtered.sort(
-            (a, b) =>
+          const arr = snap.docs.map(d => ({...d.data(), id: d.id}) as any);
+          arr.sort(
+            (a: any, b: any) =>
               new Date(b.createdAt || 0).getTime() -
               new Date(a.createdAt || 0).getTime(),
           );
-          setClientComms(filtered);
-          setStorageItem("sched_client_comms", filtered, false);
+          setClientComms(arr);
+          setStorageItem("sched_client_comms", arr, false);
         },
         (error) => {
           console.error(
@@ -1206,7 +1195,7 @@ export default function App() {
       const unsubReq = onSnapshot(
         collection(db, "scheduling_requests"),
         (snap) => {
-          const arr = snap.docs.map((d) => d.data() as SchedulingRequest);
+          const arr = snap.docs.map(d => ({...d.data(), id: d.id}) as any);
           arr.sort(
             (a, b) =>
               new Date(b.createdAt || 0).getTime() -
@@ -1227,7 +1216,7 @@ export default function App() {
         collection(db, "timelogs"),
         (snap) => {
           console.log("Got timelogs snapshot, docs =", snap.size);
-          const arr = snap.docs.map((d) => d.data() as TimeLog);
+          const arr = snap.docs.map(d => ({...d.data(), id: d.id}) as any);
           arr.sort((a, b) => {
             const d1 = a.date
               ? new Date(a.date).getTime()
@@ -1262,7 +1251,7 @@ export default function App() {
         collection(db, "announcements"),
         (snap) => {
           console.log("Got announcement snapshot, document size:", snap.size);
-          const arr = snap.docs.map((d) => d.data() as Announcement);
+          const arr = snap.docs.map(d => ({...d.data(), id: d.id}) as any);
           arr.sort(
             (a, b) =>
               new Date(b.createdAt || 0).getTime() -
@@ -1380,7 +1369,7 @@ export default function App() {
       const unsubCases = onSnapshot(
         collection(db, "cases"),
         (snap) => {
-          const arr = snap.docs.map((d) => d.data() as CaseRecord);
+          const arr = snap.docs.map(d => ({...d.data(), id: d.id}) as any);
           arr.sort(
             (a, b) =>
               new Date(b.createdAt || 0).getTime() -
@@ -1536,7 +1525,7 @@ export default function App() {
       const unsubFeedbacks = onSnapshot(
         collection(db, "tl_feedbacks"),
         (snap) => {
-          const arr = snap.docs.map((d) => d.data() as TlFeedback);
+          const arr = snap.docs.map(d => ({...d.data(), id: d.id}) as any);
           arr.sort(
             (a, b) =>
               new Date(b.createdAt || 0).getTime() -
@@ -1611,7 +1600,7 @@ export default function App() {
         collection(db, "users"),
         (snap) => {
           const dbUsers = snap.docs.map(
-            (d) => ({ id: d.id, ...d.data() }) as any,
+            (d) => ({ ...d.data(), id: d.id }) as any,
           );
           setRegisteredUsers(dbUsers);
 
@@ -1897,7 +1886,7 @@ export default function App() {
     const unsubTodos = onSnapshot(
       collection(db, "todos"),
       (snapshot) => {
-        const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+        const data = snapshot.docs.map((d) => ({ ...d.data(), id: d.id }));
         setTodos(data);
       },
       (error) => {
@@ -3216,6 +3205,10 @@ ${pageText}
   const [inquiryLanguageDir, setInquiryLanguageDir] = useState<
     "auto" | "ltr" | "rtl"
   >("auto");
+  const [inquiryFileId, setInquiryFileId] = useState("");
+  
+  const [showClinicTemplateModal, setShowClinicTemplateModal] = useState(false);
+  const [templateInquiryId, setTemplateInquiryId] = useState<string | null>(null);
 
   // Selected Inquiry for answering
   const [answeringInquiryId, setAnsweringInquiryId] = useState<string | null>(
@@ -6056,16 +6049,7 @@ ${result.errors.slice(0, 5).join("\n")}${
     }
 
     if (!inquiryPlatform) {
-      toast.error(
-        "Please select an Inquiry Platform (Source)! This is a mandatory field.",
-      );
-      return;
-    }
-
-    if (!String(inquiryPatientName || "").trim()) {
-      toast.error(
-        "Please enter the Patient Name! This is now a mandatory field.",
-      );
+      toast.error("Please select a Platform! This is a mandatory field.");
       return;
     }
 
@@ -6123,6 +6107,7 @@ ${result.errors.slice(0, 5).join("\n")}${
         agentName: currentUser.name,
         clinicName: inquiryClinicName,
         patientName: String(inquiryPatientName || "").trim(),
+        fileId: String(inquiryFileId || "").trim(),
         fileNumber:
           inquiryCustomerType === "old"
             ? String(inquiryFileNumber || "").trim()
@@ -6154,6 +6139,7 @@ ${result.errors.slice(0, 5).join("\n")}${
       setInquiryClinicName("");
       setInquiryPhoneNumber("");
       setInquiryPatientName("");
+      setInquiryFileId("");
       setInquiryFileNumber("");
       setInquiryPlatform("");
       setInquiryCustomerType("new");
@@ -6193,6 +6179,58 @@ ${result.errors.slice(0, 5).join("\n")}${
     }
   };
 
+  const handleTLViewInquiry = (inquiryId: string) => {
+    if (!currentUser || currentUser.role !== "tl") return;
+
+    let updatedInquiry: any = null;
+
+    const inqToUpdate = inquiries.find((i) => i.id === inquiryId);
+    if (!inqToUpdate || inqToUpdate.viewingStatus === "tl_viewing") return;
+
+    const updated = inquiries.map((inq) => {
+      if (inq.id === inquiryId) {
+        updatedInquiry = {
+          ...inq,
+          viewingStatus: "tl_viewing",
+          viewingBy: currentUser.name,
+          viewingAt: new Date().toISOString(),
+        };
+        return updatedInquiry;
+      }
+      return inq;
+    });
+
+    if (updatedInquiry) {
+      setInquiries(updated);
+      setDoc(doc(db, "inquiries", inquiryId), updatedInquiry).catch((e) =>
+        console.error("Error setting tl view:", e),
+      );
+      setStorageItem("sched_inquiries", updated);
+
+      addSystemNotification(
+        "Team Leader Reviewing Your Inquiry",
+        `${currentUser.name} is now reviewing your inquiry for clinic ${updatedInquiry.clinicName}.`,
+        "inquiry",
+        updatedInquiry.agentName,
+        inquiryId
+      );
+    }
+  };
+
+  const generateClinicTemplate = (inq: Inquiry): string => {
+    return [
+      `📌 INQUIRY DETAILS`,
+      `Ref: ${inq.caseRef || formatCaseRef(inq.id, 'inquiry', inq.createdAt, inq.caseRef)}`,
+      `Clinic: ${inq.clinicName}`,
+      `Patient Name: ${inq.patientName || "N/A"}`,
+      `File ID: ${inq.fileId || inq.fileNumber || "N/A"}`,
+      `Agent: ${inq.agentName}`,
+      ``,
+      `DETAILS:`,
+      inq.text
+    ].join('\n');
+  };
+
   const handleSetInquirySent = (inquiryId: string) => {
     if (!currentUser || currentUser.role !== "tl") return;
 
@@ -6221,6 +6259,13 @@ ${result.errors.slice(0, 5).join("\n")}${
     setStorageItem("sched_inquiries", updated);
 
     if (sentInquiry) {
+      const template = generateClinicTemplate(sentInquiry);
+      navigator.clipboard.writeText(template).then(() => {
+        toast.success("Standardized template copied to clipboard!");
+      }).catch((e) => {
+        console.error("Clipboard write failed", e);
+      });
+
       addSystemNotification(
         "Inquiry Forwarded to Partner",
         `Your inquiry for clinic ${sentInquiry.clinicName} has been forwarded to the partner by ${currentUser.name}.`,
@@ -6380,12 +6425,12 @@ ${result.errors.slice(0, 5).join("\n")}${
     if (isSubmittingAnswer) return;
 
     const answerText = String(currentAnswerText || "").trim();
-    if (
-      !answerText &&
-      currentAnswerAttachments.length === 0 &&
-      currentAnswerLinks.length === 0
-    ) {
-      toast.error("Please supply an answer text or attach a file.");
+    if (!answerText) {
+      toast.error("Reply text cannot be empty.");
+      return;
+    }
+    if (answerText.length > 500) {
+      toast.error("Reply details cannot exceed 500 characters.");
       return;
     }
 
@@ -7861,10 +7906,11 @@ ${ttNotes}`
       return;
     }
     const now = new Date().toISOString();
+    let partialUpdate: any = null;
+
     const updated = tabbyTamaraComplaints.map((c) => {
       if (c.id === complaintId) {
-        const updatedComp = {
-          ...c,
+        partialUpdate = {
           tlComment: comment,
           tlResolutionType: resolutionType || c.tlResolutionType,
           tlName: currentUser.name,
@@ -7873,7 +7919,8 @@ ${ttNotes}`
           commentedAt: now,
           status: "need_contact" as const,
         };
-        setDoc(doc(db, "tabby_tamara_complaints", c.id), updatedComp).catch((e) =>
+        const updatedComp = { ...c, ...partialUpdate };
+        updateDoc(doc(db, "tabby_tamara_complaints", c.id), partialUpdate).catch((e) =>
           console.error("TT Complaint Comment Error:", e),
         );
         return updatedComp;
@@ -7910,11 +7957,11 @@ ${ttNotes}`
     status: "not_contacted" | "contacted",
   ) => {
     let comp: any = null;
+    let partialUpdate: any = null;
 
     const updated = tabbyTamaraComplaints.map((c) => {
       if (c.id === complaintId) {
-        comp = {
-          ...c,
+        partialUpdate = {
           customerContacted: status,
           status:
             status === "contacted"
@@ -7923,8 +7970,9 @@ ${ttNotes}`
           contactedAt:
             status === "contacted" ? new Date().toISOString() : undefined,
         };
+        comp = { ...c, ...partialUpdate };
         // Sync to Firestore
-        setDoc(doc(db, "tabby_tamara_complaints", c.id), comp).catch((e) =>
+        updateDoc(doc(db, "tabby_tamara_complaints", c.id), partialUpdate).catch((e) =>
           console.error("TT Complaint Contact Update Error:", e),
         );
         return comp;
@@ -8290,7 +8338,7 @@ ${ttNotes}`
             <div className="absolute inset-0 rounded-full border-4 border-indigo-500/10 border-t-indigo-500 animate-spin"></div>
             <div className="absolute inset-2 rounded-full border-4 border-pink-500/5 border-t-pink-500/60 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-[10px] font-black tracking-widest text-indigo-400 uppercase">Sync</span>
+              <span className="text-[10px] font-black tracking-widest text-indigo-400 uppercase">Connecting...</span>
             </div>
           </div>
           <div className="space-y-2">
@@ -10156,8 +10204,7 @@ ${ttNotes}`
                             </h3>
                             <textarea
                               className="w-full h-32 bg-white/5 backdrop-blur-xl border border-white/20 text-slate-100 p-3 rounded-xl focus:border-indigo-500 outline-none resize-none text-sm font-medium"
-                              placeholder="Write anything... scratchpad... thoughts... "
-                            ></textarea>
+                              placeholder="Write anything... scratchpad... thoughts... "></textarea>
                           </div>
 
                           <div className="bg-white/5 border border-white/10 rounded-2xl p-5 relative overflow-hidden shadow-inner flex flex-col h-full">
@@ -10167,8 +10214,7 @@ ${ttNotes}`
                               </h3>
                               <select
                                 value={todoFilter}
-                                onChange={(e) =>
-                                  setTodoFilter(e.target.value as any)
+                                onChange={(e) => setTodoFilter(e.target.value as any)
                                 }
                                 className="bg-white/5 backdrop-blur-xl border border-white/10 text-xs font-bold text-slate-300 rounded px-2 py-1 outline-none"
                               >
@@ -10220,11 +10266,11 @@ ${ttNotes}`
                                   placeholder="I need to..."
                                   required
                                   className="flex-1 bg-white/5 backdrop-blur-xl border border-white/20 text-slate-100 px-3 py-2 text-sm rounded-xl outline-none focus:border-indigo-500"
-                                />
+                                 id="input_auto_1781360034178_10"/>
                                 <select
                                   name="category"
                                   className="bg-white/5 backdrop-blur-xl border border-white/20 text-slate-100 px-2 text-xs rounded-xl outline-none focus:border-indigo-500"
-                                >
+                                 id="select_auto_1781360034178_11">
                                   <option value="Work">Work</option>
                                   <option value="Personal">Personal</option>
                                   <option value="Urgent">Urgent</option>
@@ -10236,7 +10282,7 @@ ${ttNotes}`
                                   title="Remind in X mins"
                                   min="1"
                                   className="w-20 bg-white/5 backdrop-blur-xl border border-white/20 text-slate-100 px-2 py-2 text-sm rounded-xl outline-none focus:border-indigo-500 text-center"
-                                />
+                                 id="input_auto_1781360034178_12"/>
                                 <button
                                   type="submit"
                                   className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl transition-colors font-bold shadow-lg shadow-indigo-500/20"
@@ -12114,8 +12160,7 @@ ${ttNotes}`
                                         type="text"
                                         placeholder="Filter by agent..."
                                         value={dashboardSearchTeam}
-                                        onChange={(e) =>
-                                          setDashboardSearchTeam(e.target.value)
+                                        onChange={(e) => setDashboardSearchTeam(e.target.value)
                                         }
                                         className="w-full bg-white/5 border border-white/10 text-slate-100 text-xs rounded-2xl pl-9 pr-3 py-2 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-sans"
                                         spellCheck="false"
@@ -15483,8 +15528,7 @@ ${ttNotes}`
                                   id="swap-target-shift"
                                   className="text-slate-100 w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl   focus:outline-none focus:border-indigo-500"
                                   value={swapTargetShift}
-                                  onChange={(e) =>
-                                    setSwapTargetShift(e.target.value)
+                                  onChange={(e) => setSwapTargetShift(e.target.value)
                                   }
                                 >
                                   {SHIFTS.map((s) => (
@@ -15511,8 +15555,7 @@ ${ttNotes}`
                                 id="swap-partner"
                                 className="text-slate-100 w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl   focus:outline-none focus:border-indigo-500 font-medium"
                                 value={swapTargetAgent}
-                                onChange={(e) =>
-                                  setSwapTargetAgent(e.target.value)
+                                onChange={(e) => setSwapTargetAgent(e.target.value)
                                 }
                                 required
                               >
@@ -15635,8 +15678,7 @@ ${ttNotes}`
                                   type="date"
                                   className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500 text-sm"
                                   value={annualStart}
-                                  onChange={(e) =>
-                                    setAnnualStart(e.target.value)
+                                  onChange={(e) => setAnnualStart(e.target.value)
                                   }
                                   required
                                 />
@@ -15833,8 +15875,7 @@ ${ttNotes}`
                                 </label>
                                 <select
                                   value={inquiryClinicName}
-                                  onChange={(e) =>
-                                    setInquiryClinicName(e.target.value)
+                                  onChange={(e) => setInquiryClinicName(e.target.value)
                                   }
                                   className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                   required
@@ -15882,60 +15923,100 @@ ${ttNotes}`
                               <div className="space-y-1.5">
                                 <label className="text-xs font-semibold text-slate-300 block flex items-center justify-between">
                                   <span className="flex items-center gap-1">
-                                    Inquiry Platform (Source){" "}
+                                    Platform{" "}
                                     <span className="text-rose-400 font-extrabold">
                                       *
                                     </span>
                                   </span>
+                                  {inquiryPlatform && (
+                                    <span className="text-[10px] text-emerald-400 font-mono font-bold uppercase">
+                                      Passed
+                                    </span>
+                                  )}
                                 </label>
                                 <select
                                   value={inquiryPlatform}
-                                  onChange={(e) =>
-                                    setInquiryPlatform(e.target.value)
+                                  onChange={(e) => setInquiryPlatform(e.target.value)
                                   }
                                   className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                   required
                                 >
-                                  <option value="">
+                                  <option
+                                    value=""
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                  >
                                     -- Select Platform * --
                                   </option>
-                                  <option value="Snapchat">👻 Snapchat</option>
-                                  <option value="TikTok">🎵 TikTok</option>
-                                  <option value="WhatsApp">💬 WhatsApp</option>
-                                  <option value="Facebook">👥 Facebook</option>
-                                  <option value="Instagram">
-                                    📸 Instagram
+                                  <option
+                                    value="snapchat"
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                  >
+                                    Snapchat
                                   </option>
-                                  <option value="Google">
-                                    🔍 Google Search
+                                  <option
+                                    value="whatsapp"
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                  >
+                                    WhatsApp
                                   </option>
-                                  <option value="Twitter_X">
-                                    𝕏 Twitter / X
+                                  <option
+                                    value="tiktok"
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                  >
+                                    TikTok
                                   </option>
-                                  <option value="Phone_Call">
-                                    📞 Phone Call
+                                  <option
+                                    value="instagram"
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                  >
+                                    Instagram
                                   </option>
-                                  <option value="Other_Web">
-                                    🌐 Other / Website
+                                  <option
+                                    value="facebook"
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                  >
+                                    Facebook
+                                  </option>
+                                  <option
+                                    value="phone_call"
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                  >
+                                    Phone Call
+                                  </option>
+                                  <option
+                                    value="other"
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                  >
+                                    Other
                                   </option>
                                 </select>
                               </div>
 
-                              {/* Patient Name input (Type, don't select) */}
+                              {/* Patient Name input (Optional) */}
                               <div className="space-y-1.5">
                                 <label className="text-xs font-semibold text-slate-300 block">
-                                  Patient Name{" "}
-                                  <span className="text-rose-400 font-extrabold">
-                                    *
-                                  </span>
+                                  Patient Name <span className="text-slate-500 font-normal">(Optional)</span>
                                 </label>
                                 <input
                                   type="text"
-                                  required
-                                  placeholder="Type Patient Name *"
+                                  placeholder="Type Patient Name"
                                   value={inquiryPatientName}
-                                  onChange={(e) =>
-                                    setInquiryPatientName(e.target.value)
+                                  onChange={(e) => setInquiryPatientName(e.target.value)
+                                  }
+                                  className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+                                />
+                              </div>
+
+                              {/* File ID input (Optional) */}
+                              <div className="space-y-1.5">
+                                <label className="text-xs font-semibold text-slate-300 block">
+                                  File ID <span className="text-slate-500 font-normal">(Optional)</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="Type File ID"
+                                  value={inquiryFileId}
+                                  onChange={(e) => setInquiryFileId(e.target.value)
                                   }
                                   className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                 />
@@ -15985,8 +16066,7 @@ ${ttNotes}`
                                     required
                                     placeholder="Type Patient File / ID Number *"
                                     value={inquiryFileNumber}
-                                    onChange={(e) =>
-                                      setInquiryFileNumber(e.target.value)
+                                    onChange={(e) => setInquiryFileNumber(e.target.value)
                                     }
                                     className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                   />
@@ -16257,6 +16337,7 @@ ${ttNotes}`
                                             <div
                                               key={inq.id}
                                               id={`inquiry-${inq.id}`}
+                                              onClick={() => handleTLViewInquiry(inq.id)}
                                               className="p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl space-y-3 hover:border-white/10 transition-all relative"
                                             >
                                               {/* Top Info row */}
@@ -16498,8 +16579,7 @@ ${ttNotes}`
                                                     inq.customerContacted ||
                                                     "not_contacted"
                                                   }
-                                                  onChange={(e) =>
-                                                    handleUpdateContactedStatus(
+                                                  onChange={(e) => handleUpdateContactedStatus(
                                                       inq.id,
                                                       e.target.value as any,
                                                     )
@@ -16554,8 +16634,7 @@ ${ttNotes}`
                                       type="text"
                                       placeholder="Search by phone, clinic, agent name, or text... (e.g. +9665)"
                                       value={globalInquirySearch}
-                                      onChange={(e) =>
-                                        setGlobalInquirySearch(e.target.value)
+                                      onChange={(e) => setGlobalInquirySearch(e.target.value)
                                       }
                                       className="w-full bg-transparent text-sm text-slate-100 focus:outline-none placeholder-slate-600 font-mono py-2"
                                     />
@@ -17709,8 +17788,7 @@ ${ttNotes}`
                                 type="text"
                                 placeholder="Search by agent name, LOB, text or answer values..."
                                 value={inquirySearchQuery}
-                                onChange={(e) =>
-                                  setInquirySearchQuery(e.target.value)
+                                onChange={(e) => setInquirySearchQuery(e.target.value)
                                 }
                                 className="w-full pl-10 pr-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                               />
@@ -17718,8 +17796,7 @@ ${ttNotes}`
                             <div className="flex gap-1.5 w-full md:w-auto shrink-0 border-r border-white/10 pr-4 mr-1">
                               <select
                                 value={inquiryClinicFilter}
-                                onChange={(e) =>
-                                  setInquiryClinicFilter(e.target.value)
+                                onChange={(e) => setInquiryClinicFilter(e.target.value)
                                 }
                                 className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-2.5 py-2 text-[11px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                               >
@@ -18211,6 +18288,11 @@ ${ttNotes}`
                                                   ⏱ {ageLabel}
                                                 </span>
                                               )}
+                                              {inq.viewingStatus === 'tl_viewing' && (
+                                                <span className="px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 bg-amber-500/10 border-amber-500/25 text-amber-400">
+                                                  👁 Team Leader Viewing
+                                                </span>
+                                              )}
                                               {inq.status ===
                                                 "sent_to_clinic" &&
                                                 inq.sentAt && (
@@ -18337,11 +18419,10 @@ ${ttNotes}`
                                                     inq.status ===
                                                       "submitted") && (
                                                     <button
-                                                      onClick={() =>
-                                                        handleMarkSentToClinic(
-                                                          inq.id,
-                                                        )
-                                                      }
+                                                      onClick={() => {
+                                                        setTemplateInquiryId(inq.id);
+                                                        setShowClinicTemplateModal(true);
+                                                      }}
                                                       className="px-3.5 py-1.5 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/25 text-orange-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 font-sans"
                                                     >
                                                       <Send className="w-3.5 h-3.5" />{" "}
@@ -18373,11 +18454,10 @@ ${ttNotes}`
                                                         </span>
                                                       </div>
                                                       <button
-                                                        onClick={() =>
-                                                          handleMarkSentToClinic(
-                                                            inq.id,
-                                                          )
-                                                        }
+                                                        onClick={() => {
+                                                          setTemplateInquiryId(inq.id);
+                                                          setShowClinicTemplateModal(true);
+                                                        }}
                                                         className="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 font-sans"
                                                         title="Re-copy the template (e.g. if you need to re-send)"
                                                       >
@@ -18462,8 +18542,7 @@ ${ttNotes}`
                                                   </span>
                                                   <select
                                                     value={inq.agentName}
-                                                    onChange={(e) =>
-                                                      handleReassignInquiry(
+                                                    onChange={(e) => handleReassignInquiry(
                                                         inq.id,
                                                         e.target.value,
                                                       )
@@ -18514,14 +18593,17 @@ ${ttNotes}`
                                                     <textarea
                                                       placeholder="Type the response/answer details clearly..."
                                                       value={currentAnswerText}
-                                                      onChange={(e) =>
-                                                        setCurrentAnswerText(
+                                                      maxLength={500}
+                                                      onChange={(e) => setCurrentAnswerText(
                                                           e.target.value,
                                                         )
                                                       }
                                                       rows={3}
                                                       className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-emerald-500 transition-all font-sans resize-none"
                                                     />
+                                                    <div className="text-right text-[10px] text-slate-400 font-mono pr-1 -mt-1">
+                                                      {currentAnswerText.length} / 500 characters
+                                                    </div>
 
                                                     <ProfessionalAttachmentUploader
                                                       attachments={
@@ -19346,8 +19428,7 @@ ${ttNotes}`
                                         <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                                         <input
                                           value={rtmSearch}
-                                          onChange={(e) =>
-                                            setRtmSearch(e.target.value)
+                                          onChange={(e) => setRtmSearch(e.target.value)
                                           }
                                           placeholder="Search agents by name..."
                                           className="w-full pl-9 pr-4 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-sm focus:border-indigo-500 text-slate-200 outline-none transition-all placeholder:text-slate-600 focus:bg-black/70"
@@ -19842,8 +19923,7 @@ ${ttNotes}`
                                   <input
                                     type="text"
                                     value={tlSearchQuery}
-                                    onChange={(e) =>
-                                      setTlSearchQuery(e.target.value)
+                                    onChange={(e) => setTlSearchQuery(e.target.value)
                                     }
                                     placeholder="Filter status table by agent name..."
                                     className="w-full pl-9 pr-4 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
@@ -19856,8 +19936,7 @@ ${ttNotes}`
                                   </span>
                                   <select
                                     value={tlStatusFilter}
-                                    onChange={(e) =>
-                                      setTlStatusFilter(e.target.value as any)
+                                    onChange={(e) => setTlStatusFilter(e.target.value as any)
                                     }
                                     className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-300 focus:outline-none focus:border-indigo-500 cursor-pointer"
                                   >
@@ -20075,8 +20154,7 @@ ${ttNotes}`
                                                     ></span>
                                                     <select
                                                       value={activeStatus}
-                                                      onChange={(e) =>
-                                                        handleTLOverrideAgentStatus(
+                                                      onChange={(e) => handleTLOverrideAgentStatus(
                                                           name,
                                                           e.target.value as any,
                                                         )
@@ -20423,8 +20501,7 @@ ${ttNotes}`
                               </label>
                               <select
                                 value={manualRosterAgent}
-                                onChange={(e) =>
-                                  setManualRosterAgent(e.target.value)
+                                onChange={(e) => setManualRosterAgent(e.target.value)
                                 }
                                 className="w-full px-3 py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer focus:border-indigo-500 font-sans"
                               >
@@ -20448,8 +20525,7 @@ ${ttNotes}`
                               <input
                                 type="date"
                                 value={manualRosterDate}
-                                onChange={(e) =>
-                                  setManualRosterDate(e.target.value)
+                                onChange={(e) => setManualRosterDate(e.target.value)
                                 }
                                 className="w-full px-3 py-1.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none focus:border-indigo-500 h-[42px]"
                               />
@@ -20461,8 +20537,7 @@ ${ttNotes}`
                               </label>
                               <select
                                 value={manualRosterShift}
-                                onChange={(e) =>
-                                  setManualRosterShift(e.target.value)
+                                onChange={(e) => setManualRosterShift(e.target.value)
                                 }
                                 className="w-full px-3 py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer focus:border-indigo-500 font-sans"
                               >
@@ -20503,8 +20578,7 @@ ${ttNotes}`
                                 type="text"
                                 placeholder="e.g. Approved temporary schedule override / Direct management assignment / Shift Notes..."
                                 value={manualRosterNotes}
-                                onChange={(e) =>
-                                  setManualRosterNotes(e.target.value)
+                                onChange={(e) => setManualRosterNotes(e.target.value)
                                 }
                                 className="w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500"
                               />
@@ -20703,8 +20777,7 @@ ${ttNotes}`
                                 type="text"
                                 placeholder="Filter by Agent Name..."
                                 value={scheduleFilterAgent}
-                                onChange={(e) =>
-                                  setScheduleFilterAgent(e.target.value)
+                                onChange={(e) => setScheduleFilterAgent(e.target.value)
                                 }
                                 className="px-4 py-2 bg-black/45 hover:bg-white/20 backdrop-blur-md backdrop-blur-xl border border-white/10 focus:border-indigo-500/85 focus:ring-1 focus:ring-indigo-500 rounded-xl text-xs text-slate-100 placeholder-slate-400 outline-none transition-all w-full sm:w-64"
                               />
@@ -21901,8 +21974,7 @@ ${ttNotes}`
                                                     <input
                                                       type="time"
                                                       value={blBreakTime}
-                                                      onChange={(e) =>
-                                                        setBlBreakTime(
+                                                      onChange={(e) => setBlBreakTime(
                                                           e.target.value,
                                                         )
                                                       }
@@ -21916,8 +21988,7 @@ ${ttNotes}`
                                                     <input
                                                       type="time"
                                                       value={blLunchTime}
-                                                      onChange={(e) =>
-                                                        setBlLunchTime(
+                                                      onChange={(e) => setBlLunchTime(
                                                           e.target.value,
                                                         )
                                                       }
@@ -22064,8 +22135,7 @@ ${ttNotes}`
                                       return (
                                         <select
                                           value={p2pSelectedDate}
-                                          onChange={(e) =>
-                                            setP2pSelectedDate(e.target.value)
+                                          onChange={(e) => setP2pSelectedDate(e.target.value)
                                           }
                                           className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
                                         >
@@ -22097,8 +22167,7 @@ ${ttNotes}`
                                     </label>
                                     <select
                                       value={p2pTargetAgent}
-                                      onChange={(e) =>
-                                        setP2pTargetAgent(e.target.value)
+                                      onChange={(e) => setP2pTargetAgent(e.target.value)
                                       }
                                       className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
                                     >
@@ -22140,8 +22209,7 @@ ${ttNotes}`
                                     </label>
                                     <select
                                       value={p2pTargetShift}
-                                      onChange={(e) =>
-                                        setP2pTargetShift(e.target.value)
+                                      onChange={(e) => setP2pTargetShift(e.target.value)
                                       }
                                       className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
                                     >
@@ -22172,8 +22240,7 @@ ${ttNotes}`
                                       type="text"
                                       placeholder="I have a doctor appt / Need early shift..."
                                       value={p2pNotes}
-                                      onChange={(e) =>
-                                        setP2pNotes(e.target.value)
+                                      onChange={(e) => setP2pNotes(e.target.value)
                                       }
                                       className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 outline-none"
                                     />
@@ -22813,8 +22880,7 @@ ${ttNotes}`
                                           type="text"
                                           placeholder="Enter full patient name"
                                           value={ttPatientName}
-                                          onChange={(e) =>
-                                            setTtPatientName(e.target.value)
+                                          onChange={(e) => setTtPatientName(e.target.value)
                                           }
                                           className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium"
                                           required
@@ -22830,8 +22896,7 @@ ${ttNotes}`
                                           type="text"
                                           placeholder="Patient file / folder number"
                                           value={ttFileNumber}
-                                          onChange={(e) =>
-                                            setTtFileNumber(e.target.value)
+                                          onChange={(e) => setTtFileNumber(e.target.value)
                                           }
                                           className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
                                         />
@@ -22847,8 +22912,7 @@ ${ttNotes}`
                                             <input
                                               type="checkbox"
                                               checked={ttIsOldCustomer}
-                                              onChange={(e) =>
-                                                setTtIsOldCustomer(
+                                              onChange={(e) => setTtIsOldCustomer(
                                                   e.target.checked,
                                                 )
                                               }
@@ -22867,8 +22931,7 @@ ${ttNotes}`
                                               type="text"
                                               placeholder="National ID / Iqama Number"
                                               value={ttIdNumber}
-                                              onChange={(e) =>
-                                                setTtIdNumber(e.target.value)
+                                              onChange={(e) => setTtIdNumber(e.target.value)
                                               }
                                               className="w-full bg-black/45 border border-amber-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 font-mono"
                                               required={!ttIsOldCustomer}
@@ -22890,8 +22953,7 @@ ${ttNotes}`
                                             type="text"
                                             placeholder="0.00"
                                             value={ttPriceWithoutTax}
-                                            onChange={(e) =>
-                                              setTtPriceWithoutTax(
+                                            onChange={(e) => setTtPriceWithoutTax(
                                                 e.target.value,
                                               )
                                             }
@@ -23037,8 +23099,7 @@ ${ttNotes}`
                                         <select
                                           id="tt-clinic"
                                           value={ttClinicName}
-                                          onChange={(e) =>
-                                            setTtClinicName(e.target.value)
+                                          onChange={(e) => setTtClinicName(e.target.value)
                                           }
                                           className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                           required
@@ -23090,8 +23151,7 @@ ${ttNotes}`
                                         <textarea
                                           placeholder="Any special treatment, payment plan terms, etc."
                                           value={ttNotes}
-                                          onChange={(e) =>
-                                            setTtNotes(e.target.value)
+                                          onChange={(e) => setTtNotes(e.target.value)
                                           }
                                           className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[70px] resize-y"
                                         />
@@ -23157,8 +23217,7 @@ ${ttNotes}`
                                           type="text"
                                           placeholder="Enter patient name"
                                           value={tcPatientName}
-                                          onChange={(e) =>
-                                            setTcPatientName(e.target.value)
+                                          onChange={(e) => setTcPatientName(e.target.value)
                                           }
                                           className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans font-medium"
                                           required
@@ -23174,8 +23233,7 @@ ${ttNotes}`
                                           type="text"
                                           placeholder="File / folder reference"
                                           value={tcFileNumber}
-                                          onChange={(e) =>
-                                            setTcFileNumber(e.target.value)
+                                          onChange={(e) => setTcFileNumber(e.target.value)
                                           }
                                           className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-mono"
                                         />
@@ -23191,8 +23249,7 @@ ${ttNotes}`
                                             <input
                                               type="checkbox"
                                               checked={tcIsOldCustomer}
-                                              onChange={(e) =>
-                                                setTcIsOldCustomer(
+                                              onChange={(e) => setTcIsOldCustomer(
                                                   e.target.checked,
                                                 )
                                               }
@@ -23211,8 +23268,7 @@ ${ttNotes}`
                                               type="text"
                                               placeholder="National ID / Iqama Number"
                                               value={tcIdNumber}
-                                              onChange={(e) =>
-                                                setTcIdNumber(e.target.value)
+                                              onChange={(e) => setTcIdNumber(e.target.value)
                                               }
                                               className="w-full bg-black/45 border border-amber-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 font-mono"
                                               required={!tcIsOldCustomer}
@@ -23270,8 +23326,7 @@ ${ttNotes}`
                                         <select
                                           id="tc-clinic"
                                           value={tcClinicName}
-                                          onChange={(e) =>
-                                            setTcClinicName(e.target.value)
+                                          onChange={(e) => setTcClinicName(e.target.value)
                                           }
                                           className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                           required
@@ -23323,8 +23378,7 @@ ${ttNotes}`
                                         <textarea
                                           placeholder="Patient notes or description of the issue or service failure..."
                                           value={tcComplaintDetails}
-                                          onChange={(e) =>
-                                            setTcComplaintDetails(
+                                          onChange={(e) => setTcComplaintDetails(
                                               e.target.value,
                                             )
                                           }
@@ -23383,8 +23437,7 @@ ${ttNotes}`
                                           type="text"
                                           placeholder="Enter Patient Name"
                                           value={ccPatientName}
-                                          onChange={(e) =>
-                                            setCcPatientName(e.target.value)
+                                          onChange={(e) => setCcPatientName(e.target.value)
                                           }
                                           className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-3 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans focus:ring-1 focus:ring-indigo-500/30"
                                           required
@@ -23398,8 +23451,7 @@ ${ttNotes}`
                                         </label>
                                         <select
                                           value={ccClinicName}
-                                          onChange={(e) =>
-                                            setCcClinicName(e.target.value)
+                                          onChange={(e) => setCcClinicName(e.target.value)
                                           }
                                           className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                           required
@@ -23565,8 +23617,7 @@ ${ttNotes}`
                                         <textarea
                                           placeholder="Explain the required follow up..."
                                           value={ccNotes}
-                                          onChange={(e) =>
-                                            setCcNotes(e.target.value)
+                                          onChange={(e) => setCcNotes(e.target.value)
                                           }
                                           className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[80px] resize-y font-medium"
                                           required
@@ -23864,8 +23915,7 @@ ${ttNotes}`
                                         </span>
                                         <select
                                           value={ttFilterProvider}
-                                          onChange={(e) =>
-                                            setTtFilterProvider(
+                                          onChange={(e) => setTtFilterProvider(
                                               e.target.value as any,
                                             )
                                           }
@@ -23910,8 +23960,7 @@ ${ttNotes}`
                                     </span>
                                     <select
                                       value={tcFilterClinic}
-                                      onChange={(e) =>
-                                        setTcFilterClinic(e.target.value)
+                                      onChange={(e) => setTcFilterClinic(e.target.value)
                                       }
                                       className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-2.5 py-1 text-[11px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                                     >
@@ -24067,8 +24116,7 @@ ${ttNotes}`
                                                   type="text"
                                                   placeholder="Search patient, phone, clinic, agent..."
                                                   value={ttSearch}
-                                                  onChange={(e) =>
-                                                    setTtSearch(e.target.value)
+                                                  onChange={(e) => setTtSearch(e.target.value)
                                                   }
                                                   className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium"
                                                 />
@@ -24077,8 +24125,7 @@ ${ttNotes}`
                                                 <input
                                                   type="date"
                                                   value={ttDateFilter}
-                                                  onChange={(e) =>
-                                                    setTtDateFilter(
+                                                  onChange={(e) => setTtDateFilter(
                                                       e.target.value,
                                                     )
                                                   }
@@ -24103,7 +24150,7 @@ ${ttNotes}`
                                                 </p>
                                               </div>
                                             ) : (
-                                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                              <div className="space-y-4 max-h-[700px] overflow-y-auto pr-1">
                                                 {filteredTTRequests.map(
                                                   (req) => (
                                                     <TabbyTamaraCard
@@ -24320,7 +24367,7 @@ ${ttNotes}`
                                             </p>
                                           </div>
                                         ) : (
-                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in font-sans font-sans">
+                                          <div className="space-y-4 max-h-[700px] overflow-y-auto pr-1 animate-fade-in font-sans">
                                             {tabbyTamaraComplaints
                                               .filter((c) => {
                                                 const isMyComplaint =
@@ -24537,7 +24584,7 @@ ${ttNotes}`
                                                               ) {
                                                                 handleAssignRecord(
                                                                   comp.id,
-                                                                  "tt_complaints",
+                                                                  "tabby_tamara_complaints",
                                                                   e.target
                                                                     .value,
                                                                   "Complaint",
@@ -24868,8 +24915,7 @@ ${ttNotes}`
                                                               value={
                                                                 tlComplaintComment
                                                               }
-                                                              onChange={(e) =>
-                                                                setTlComplaintComment(
+                                                              onChange={(e) => setTlComplaintComment(
                                                                   e.target
                                                                     .value,
                                                                 )
@@ -25150,7 +25196,7 @@ ${ttNotes}`
                                                         currentUser={
                                                           currentUser
                                                         }
-                                                        collectionName="tt_complaints"
+                                                        collectionName="tabby_tamara_complaints"
                                                         addSystemNotification={
                                                           addSystemNotification
                                                         }
@@ -25254,7 +25300,7 @@ ${ttNotes}`
                                             </p>
                                           </div>
                                         ) : (
-                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in font-sans">
+                                          <div className="space-y-4 max-h-[700px] overflow-y-auto pr-1 animate-fade-in font-sans">
                                             {clientComms
                                               .filter((c) => {
                                                 const isRelevantToMe =
@@ -25643,8 +25689,7 @@ ${ttNotes}`
                                                           value={
                                                             ccHandlingNotes
                                                           }
-                                                          onChange={(e) =>
-                                                            setCcHandlingNotes(
+                                                          onChange={(e) => setCcHandlingNotes(
                                                               e.target.value,
                                                             )
                                                           }
@@ -25979,8 +26024,7 @@ ${ttNotes}`
                                 </label>
                                 <select
                                   value={feedbackFilterTl}
-                                  onChange={(e) =>
-                                    setFeedbackFilterTl(e.target.value)
+                                  onChange={(e) => setFeedbackFilterTl(e.target.value)
                                   }
                                   className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-sans w-full sm:w-48"
                                 >
@@ -26026,8 +26070,7 @@ ${ttNotes}`
                                   </label>
                                   <select
                                     value={selectedTlForFeedback}
-                                    onChange={(e) =>
-                                      setSelectedTlForFeedback(e.target.value)
+                                    onChange={(e) => setSelectedTlForFeedback(e.target.value)
                                     }
                                     className="bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-400 font-sans w-full cursor-pointer"
                                   >
@@ -26063,8 +26106,7 @@ ${ttNotes}`
                                       <input
                                         type="file"
                                         className="hidden"
-                                        onChange={handleFeedbackFileChange}
-                                      />
+                                        onChange={handleFeedbackFileChange}/>
                                     </label>
                                     {feedbackAttachment && (
                                       <button
@@ -26089,8 +26131,7 @@ ${ttNotes}`
                                 </label>
                                 <textarea
                                   value={feedbackNotes}
-                                  onChange={(e) =>
-                                    setFeedbackNotes(e.target.value)
+                                  onChange={(e) => setFeedbackNotes(e.target.value)
                                   }
                                   rows={4}
                                   placeholder="Type details... Bold text is supported by using **double asterisks**. Tag anyone using @Name, they will get an instant ping notification!"
@@ -26342,8 +26383,7 @@ ${ttNotes}`
                                               value={
                                                 feedbackReplies[f.id] || ""
                                               }
-                                              onChange={(e) =>
-                                                setFeedbackReplies((prev) => ({
+                                              onChange={(e) => setFeedbackReplies((prev) => ({
                                                   ...prev,
                                                   [f.id]: e.target.value,
                                                 }))
@@ -26483,8 +26523,7 @@ ${ttNotes}`
                                   type="text"
                                   placeholder="Search names, phones, emails..."
                                   value={directorySearchQuery}
-                                  onChange={(e) =>
-                                    setDirectorySearchQuery(e.target.value)
+                                  onChange={(e) => setDirectorySearchQuery(e.target.value)
                                   }
                                   className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-500 font-sans font-medium"
                                 />
@@ -27478,6 +27517,80 @@ ${ttNotes}`
                 Yes, Cancel It
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showClinicTemplateModal && templateInquiryId && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-800/40 rounded-2xl p-6 max-w-lg w-full shadow-2xl space-y-4 mx-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                <Send className="w-5 h-5 text-indigo-400" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-100 text-sm">
+                  Review Clinic Template
+                </h3>
+                <p className="text-xs text-slate-400">
+                  This standardized template will be copied to your clipboard.
+                </p>
+              </div>
+            </div>
+            {(() => {
+              const inq = inquiries.find((i) => i.id === templateInquiryId);
+              if (!inq) return null;
+              const template = generateClinicTemplate(inq);
+
+              return (
+                <div className="space-y-4">
+                  <textarea
+                    readOnly
+                    className="w-full h-48 bg-slate-900/80 border border-slate-800/40 rounded-xl text-xs font-mono text-slate-300 p-3 focus:outline-none resize-none"
+                    value={template}/>
+                  <div className="flex justify-between items-center pt-2">
+                    <button
+                      onClick={() => {
+                        copyToClipboard(
+                          template,
+                          "Standardized template copied to clipboard!"
+                        );
+                      }}
+                      className="px-3 py-1.5 bg-sky-600/10 hover:bg-sky-600/20 text-sky-400 text-[11px] font-bold rounded-lg border border-sky-500/20 transition-colors flex items-center gap-2"
+                    >
+                      <Copy className="w-3.5 h-3.5" /> Copy to Clipboard
+                    </button>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => {
+                          setShowClinicTemplateModal(false);
+                          setTemplateInquiryId(null);
+                        }}
+                        className="px-4 py-2 text-xs border border-white/10 rounded-xl text-slate-300 hover:bg-white/5 transition-colors cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => {
+                          // Copy first, then set status
+                          copyToClipboard(
+                            template,
+                            "Template copied! Inquiry marked as sent."
+                          ).then(() => {
+                            handleSetInquirySent(inq.id);
+                            setShowClinicTemplateModal(false);
+                            setTemplateInquiryId(null);
+                          });
+                        }}
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black transition-colors cursor-pointer"
+                      >
+                        Confirm & Send
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}

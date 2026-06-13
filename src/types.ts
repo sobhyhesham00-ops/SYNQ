@@ -124,9 +124,10 @@ export interface Inquiry {
   clinicName: string; // Mandatory dropdown value
   patientName?: string;
   fileNumber?: string;
+  fileId?: string;
   phoneNumber?: string;
   customerType?: 'new' | 'old';
-  platform?: string;
+  platform: string;
   text: string;
   photos: string[]; // Base64 data-urls or image urls
   screenshot?: string | null; // keep for backward compat
@@ -136,6 +137,9 @@ export interface Inquiry {
   status: 'submitted' | 'tl_reviewing' | 'sent_to_clinic' | 'answered' | 'closed' | 'sent';
   readBy?: string;
   readAt?: string;
+  viewingStatus?: 'none' | 'tl_viewing';
+  viewingBy?: string;
+  viewingAt?: string;
   sentBy?: string;
   sentAt?: string;            // timestamp of MOST RECENT "sent to clinic" click
   sentToClinicCount?: number;  // increments on every "sent to clinic" click (follow-ups)
