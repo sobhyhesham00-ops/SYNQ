@@ -132,7 +132,6 @@ export const TabbyTamaraCard = ({
 }: any) => {
   const hasAttachments = Boolean((req.photos && req.photos.length > 0) || (req.links && req.links.length > 0) || req.paymentScreenshot);
   const [expandedNotes, setExpandedNotes] = useState(Boolean(req.notes || hasAttachments));
-  const [isExpanded, setIsExpanded] = useState(false);
   
   const [isContactingMode, setIsContactingMode] = useState(false);
   const [contactNotes, setContactNotes] = useState("");
@@ -192,7 +191,7 @@ export const TabbyTamaraCard = ({
         createdAt: new Date().toISOString()
       };
       
-      await updateDoc(doc(db, "tabby_tamara", req.id), {
+      await updateDoc(doc(db, "tt_requests", req.id), {
         assignedToId: currentUser.id || currentUser.uid || "usr_" + currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
         assignedToName: currentUser.name,
         assignedAt: new Date().toISOString(),
@@ -255,7 +254,7 @@ export const TabbyTamaraCard = ({
       await assignCase('tt_request', req.id, { id: assigneeId, name: agentName }, currentUser);
 
       // Remaining doc updates specific to tabby tamara card
-      await updateDoc(doc(db, "tabby_tamara", req.id), {
+      await updateDoc(doc(db, "tt_requests", req.id), {
         workflowStatus: "awaiting_client_contact",
         replies: arrayUnion(assignActivity)
       });
@@ -303,7 +302,7 @@ export const TabbyTamaraCard = ({
         createdAt: new Date().toISOString()
       };
       
-      await updateDoc(doc(db, "tabby_tamara", req.id), {
+      await updateDoc(doc(db, "tt_requests", req.id), {
         workflowStatus: "sent_to_partner",
         partnerSentAt: new Date().toISOString(),
         partnerSentById: currentUser.id || currentUser.uid || "usr_" + currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
@@ -523,15 +522,7 @@ export const TabbyTamaraCard = ({
   const pricing = calculateTabbyTamaraPrice(req.priceWithoutTax || 0);
 
   return (
-    <div 
-      id={`request-${req.id}`} 
-      onClick={() => {
-        if (!isExpanded) {
-          setIsExpanded(true);
-        }
-      }}
-      className={`bg-[#18181c] border border-slate-700/60 rounded-2xl shadow-xl shadow-black/40 hover:shadow-black/60 transition-all duration-200 flex flex-col relative overflow-hidden max-w-full group/card ${!isExpanded ? "cursor-pointer hover:bg-white/[0.02]" : "hover:border-slate-600/80"}`}
-    >
+    <div id={`request-${req.id}`} className="bg-[#18181c] border border-slate-700/60 rounded-2xl shadow-xl shadow-black/40 hover:shadow-black/60 hover:border-slate-600/80 transition-all duration-200 flex flex-col relative overflow-hidden max-w-full group/card">
       {/* Platform color strip */}
       <div className={`h-1.5 w-full rounded-t-2xl ${
         req.platform === 'tabby' ? 'bg-gradient-to-r from-amber-400 to-amber-600' :
@@ -545,15 +536,7 @@ export const TabbyTamaraCard = ({
       )}
 
       {/* HEADER STRIP */}
-      <div 
-        onClick={(e) => {
-          if (isExpanded) {
-            e.stopPropagation();
-            setIsExpanded(false);
-          }
-        }}
-        className={`flex items-center justify-between px-5 pt-4 pb-2.5 ${isExpanded ? "cursor-pointer hover:opacity-85" : ""}`}
-      >
+      <div className='flex items-center justify-between px-5 pt-4 pb-2.5'>
          <div className="flex items-center gap-3">
            <ProviderGlowBadge platform={req.platform} />
          </div>
@@ -567,32 +550,14 @@ export const TabbyTamaraCard = ({
              Ref: {formatCaseRef(req.id, 'tt_request', req.createdAt, req.caseRef)}
            </div>
            <StatusBadge status={req.status} customerContacted={req.customerContacted} workflowStatus={workflowStatus} />
-           <div 
-             className="text-slate-400 hover:text-indigo-400 p-1 rounded-md transition-all shrink-0 ml-1 flex items-center justify-center cursor-pointer"
-             onClick={(e) => {
-               e.stopPropagation();
-               setIsExpanded(!isExpanded);
-             }}
-           >
-             {isExpanded ? <ChevronUp className="w-4.5 h-4.5 text-indigo-400" /> : <ChevronDown className="w-4.5 h-4.5 text-slate-400" />}
-           </div>
          </div>
       </div>
 
       {/* BODY */}
-      <div className='px-5 pb-4 border-b border-slate-700/40 text-left' onClick={(e) => {
-        if (!isExpanded) {
-          // Allow parent onClick to run
-        } else {
-          e.stopPropagation();
-        }
-      }}>
+      <div className='px-5 pb-4 border-b border-slate-700/40'>
         <h3 
           className='text-2xl font-black text-white tracking-tight cursor-pointer hover:text-amber-100 active:scale-95 transition-all w-fit flex items-center gap-2 group/name'  
-          onClick={(e) => {
-            e.stopPropagation();
-            copyToClipboard(req.patientName || "Unknown", "Patient name copied!");
-          }}
+          onClick={() => copyToClipboard(req.patientName || "Unknown", "Patient name copied!")}
           title="Tap to copy patient name"
         >
           {req.patientName || "Unknown"}
@@ -630,17 +595,12 @@ export const TabbyTamaraCard = ({
         </div>
       </div>
 
-      {isExpanded && (
-        <div className="w-full overflow-hidden transition-all duration-300">
-          <div className='grid grid-cols-3 divide-x divide-slate-700/40 border-b border-slate-700/40' onClick={(e) => e.stopPropagation()}>
-            <div
-              className="px-4 py-3 cursor-pointer hover:bg-slate-700/30 active:bg-slate-700/50 transition-colors group/phone"
-              onClick={(e) => {
-                e.stopPropagation();
-                copyToClipboard(formatPhoneLocalForCopy(req.phoneNumber), `Copied: ${formatPhoneLocalForCopy(req.phoneNumber)}`);
-              }}
-              title="Tap to copy phone number (without country code)"
-            >
+      <div className='grid grid-cols-3 divide-x divide-slate-700/40 border-b border-slate-700/40'>
+        <div
+          className="px-4 py-3 cursor-pointer hover:bg-slate-700/30 active:bg-slate-700/50 transition-colors group/phone"
+          onClick={() => copyToClipboard(formatPhoneLocalForCopy(req.phoneNumber), `Copied: ${formatPhoneLocalForCopy(req.phoneNumber)}`)}
+          title="Tap to copy phone number (without country code)"
+        >
           <div className="flex flex-col">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><Phone className="w-3 h-3 text-blue-400" /> Phone</span>
             <span className="text-[15px] font-semibold text-slate-100 mt-1.5 break-words flex items-center gap-1.5">
@@ -931,7 +891,7 @@ export const TabbyTamaraCard = ({
                        photos: followUpPhotos,
                        createdAt: new Date().toISOString(),
                      };
-                     await updateDoc(doc(db, 'tabby_tamara', req.id), {
+                     await updateDoc(doc(db, 'tt_requests', req.id), {
                        agentFollowUps: arrayUnion(newFollowUp)
                      });
                      if (addSystemNotification) {
@@ -1195,7 +1155,7 @@ export const TabbyTamaraCard = ({
                     text: `${currentUser.name} confirmed client contact. Case closed.`,
                     createdAt: new Date().toISOString(),
                   };
-                  await updateDoc(doc(db, "tabby_tamara", req.id), {
+                  await updateDoc(doc(db, "tt_requests", req.id), {
                     customerContacted: "contacted",
                     contactedAt: new Date().toISOString(),
                     workflowStatus: "completed",
@@ -1356,19 +1316,17 @@ export const TabbyTamaraCard = ({
         </div>
       )}
 
-      {/* ALWAYS VISIBLE REPLY THREAD WHEN EXPANDED */}
-      <div className="bg-slate-800/20 pt-4 pb-5 px-5 border-t border-slate-700/40" onClick={(e) => e.stopPropagation()}>
+      {/* ALWAYS VISIBLE REPLY THREAD */}
+      <div className="bg-slate-800/20 pt-4 pb-5 px-5 border-t border-slate-700/40">
         <RequestReplyThread
           request={req}
           currentUser={currentUser}
-          collectionName="tabby_tamara"
+          collectionName="tt_requests"
           addSystemNotification={addSystemNotification}
           requestType="FinTech"
           requestAgentName={req.agentName}
         />
       </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -148,9 +148,9 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
         }
         const file = filesArray[i];
         
-        // Size validation (Max 10MB)
-        if (file.size > 10 * 1024 * 1024) {
-             toast.error(`File '${file.name}' exceeds the 10MB size limit.`);
+        // Size validation (Max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+             toast.error(`File ${file.name} is too large. Max size is 5MB.`);
              continue;
         }
 
@@ -257,8 +257,7 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
                 ) : (
                   <>
                     <Camera className="w-6 h-6 text-slate-500 group-hover:text-indigo-400 transition-colors" />
-                    <span className="text-[9px] text-slate-500 font-bold uppercase mt-1 group-hover:text-indigo-300 transform -translate-y-1">Add File</span>
-                    <span className="text-[7px] text-slate-500 text-center px-1">Max 10MB<br/>Local Only</span>
+                    <span className="text-[9px] text-slate-500 font-bold uppercase mt-1 group-hover:text-indigo-300">Add File</span>
                   </>
                 )}
             </label>

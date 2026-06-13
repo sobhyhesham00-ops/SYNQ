@@ -4,7 +4,6 @@ import { Book, Tag, Plus, File, Paperclip, Trash2, Download } from 'lucide-react
 import { collection, doc, disableNetwork } from 'firebase/firestore';
 import { 
   db,
-  auth,
   wrappedOnSnapshot as onSnapshot,
   wrappedAddDoc as addDoc,
   wrappedDeleteDoc as deleteDoc,
@@ -48,31 +47,19 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
   const isTL = (currentUser.role as string) === 'tl' || (currentUser.role as string) === 'admin' || (currentUser.role as string) === 'director' || currentUser.role === 'qa';
 
   useEffect(() => {
-    let unsubSnapshot: any = null;
-    const unsubAuth = auth.onAuthStateChanged((user) => {
-      if (!user) return;
-      if (unsubSnapshot) unsubSnapshot();
-
-      console.log(`[Firebase Firestore] ArticleManager [${category}] - Attaching "articles" onSnapshot listener...`);
-      unsubSnapshot = onSnapshot(collection(db, "articles"), (snap: any) => {
-        const docs = snap.docs.map((d: any) => ({ ...d.data(), id: d.id } as Article));
-        const filtered = docs.filter((a: any) => a.category === category).sort((a: any, b: any) => b.createdAt - a.createdAt);
-        setArticles(filtered);
-        if (filtered.length > 0 && !selectedArticleId) {
-          setSelectedArticleId(filtered[0].id);
-        } else if (filtered.length === 0) {
-          setSelectedArticleId(null);
-        }
-      }, (error: any) => {
-        console.error("Articles Real-time Sync Error:", error.code, error.message);
-      });
+    const unsub = onSnapshot(collection(db, "articles"), (snap: any) => {
+      const docs = snap.docs.map((d: any) => ({ id: d.id, ...d.data() } as Article));
+      const filtered = docs.filter((a: any) => a.category === category).sort((a: any, b: any) => b.createdAt - a.createdAt);
+      setArticles(filtered);
+      if (filtered.length > 0 && !selectedArticleId) {
+        setSelectedArticleId(filtered[0].id);
+      } else if (filtered.length === 0) {
+        setSelectedArticleId(null);
+      }
+    }, (error: any) => {
+      console.error("Articles Real-time Sync Error:", error.code, error.message);
     });
-
-    return () => {
-      console.log(`[Firebase Firestore] ArticleManager [${category}] - Detaching "articles" listener.`);
-      if (unsubSnapshot) unsubSnapshot();
-      unsubAuth();
-    };
+    return () => unsub();
   }, [category]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

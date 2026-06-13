@@ -202,8 +202,8 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
   }
 
   const collectionMap: Record<string, string> = {
-    sched: 'scheduling_requests', inq: 'inquiries', tt_request: 'tabby_tamara',
-    tt_complaint: 'tabby_tamara_complaints', comm: 'client_comms'
+    sched: 'scheduling_requests', inq: 'inquiries', tt_request: 'tt_requests',
+    tt_complaint: 'tt_complaints', comm: 'client_comms'
   };
 
   const allLinks = [];

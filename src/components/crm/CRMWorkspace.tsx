@@ -397,7 +397,7 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
       }
       toast.success(`Communication assigned to ${agentName}!`);
     } else if (type === "complaint") {
-      const targetDoc = doc(db, "tabby_tamara_complaints", caseId);
+      const targetDoc = doc(db, "tt_complaints", caseId);
       
       const payload: any = {
         ...basePayload,
@@ -424,7 +424,7 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
 
       toast.success(`Case assigned to ${agentName}!`);
     } else if (type === "tabby_tamara") {
-      const targetDoc = doc(db, "tabby_tamara", caseId);
+      const targetDoc = doc(db, "tt_requests", caseId);
       
       const payload: any = {
         ...basePayload,
@@ -461,11 +461,11 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
   };
 
   const handleDeleteCase = async (caseId: string, type: 'inquiry' | 'complaint' | 'tabby_tamara' | 'client_comm') => {
-    let collName = 'tabby_tamara';
+    let collName = 'tt_requests';
     if (type === 'inquiry') collName = 'inquiries';
-    else if (type === 'complaint') collName = 'tabby_tamara_complaints';
+    else if (type === 'complaint') collName = 'tt_complaints';
     else if (type === 'client_comm') collName = 'client_comms';
-    else if (type === 'tabby_tamara') collName = 'tabby_tamara';
+    else if (type === 'tabby_tamara') collName = 'tt_requests';
     else throw new Error("Unknown entity type for deletion.");
 
     await deleteDoc(doc(db, collName, caseId));
@@ -484,7 +484,7 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
   };
 
   const handleSendToPartner = async (caseId: string, notes: string, photos: string[]) => {
-    const targetDoc = doc(db, "tabby_tamara", caseId);
+    const targetDoc = doc(db, "tt_requests", caseId);
     const sendActivity = {
       id: "act_" + Math.random().toString(36).substring(2, 11),
       senderName: "System",
@@ -532,9 +532,9 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
   };
 
   const handleMarkPatientContactedTT = async (caseId: string, type: 'complaint' | 'tabby_tamara', contactedStatus: 'contacted' | 'attempted' | 'not_contacted') => {
-    let coll = 'tabby_tamara';
-    if (type === 'complaint') coll = 'tabby_tamara_complaints';
-    else if (type === 'tabby_tamara') coll = 'tabby_tamara';
+    let coll = 'tt_requests';
+    if (type === 'complaint') coll = 'tt_complaints';
+    else if (type === 'tabby_tamara') coll = 'tt_requests';
     else throw new Error("Unknown entity type for marking patient contacted");
 
     const targetDoc = doc(db, coll, caseId);
@@ -559,7 +559,7 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
   };
 
   const handleTLCommentComplaint = async (complaintId: string, comment: string, resolutionType: string) => {
-    const targetDoc = doc(db, "tabby_tamara_complaints", complaintId);
+    const targetDoc = doc(db, "tt_complaints", complaintId);
     const now = new Date().toISOString();
     
     const payload = {
@@ -582,7 +582,7 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
   };
 
   const handleCloseComplaint = async (complaintId: string) => {
-    const targetDoc = doc(db, "tabby_tamara_complaints", complaintId);
+    const targetDoc = doc(db, "tt_complaints", complaintId);
     const activity = {
       id: "act_" + Math.random().toString(36).substring(2, 11),
       senderName: "System",
@@ -604,7 +604,7 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
   };
 
   const handleReopenComplaint = async (complaintId: string) => {
-    const targetDoc = doc(db, "tabby_tamara_complaints", complaintId);
+    const targetDoc = doc(db, "tt_complaints", complaintId);
     const activity = {
       id: "act_" + Math.random().toString(36).substring(2, 11),
       senderName: "System",
@@ -642,8 +642,8 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
 
       {/* Main split work bench */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start min-h-0 flex-1">
-        {/* Cases Table - Expandable full width block */}
-        <div className="col-span-1 lg:col-span-12 h-full flex flex-col min-h-0">
+        {/* Cases Table - left block (Col Span 7 / Expandable if nothing selected) */}
+        <div className={`col-span-1 h-full flex flex-col min-h-0 ${selectedCaseId && selectedCase && selectedCase.crmType !== "inquiry" ? "lg:col-span-7" : "lg:col-span-12"}`}>
           <CaseTable
             cases={filteredCases}
             selectedCaseId={selectedCaseId}
@@ -665,6 +665,29 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
             onReopenComplaint={handleReopenComplaint}
           />
         </div>
+
+        {/* Selected Case Detail Drawer - right block (Col Span 5 on layout) */}
+        {selectedCaseId && selectedCase && selectedCase.crmType !== "inquiry" && (
+          <div className="col-span-1 lg:col-span-5 h-full min-h-[550px] lg:max-h-[85vh]">
+            <CaseDetailDrawer
+              caseData={selectedCase}
+              onClose={() => setSelectedCaseId(null)}
+              currentUser={currentUser}
+              isTLOreSupport={isTLOreSupport}
+              addSystemNotification={addSystemNotification}
+              onAssignCase={handleAssignCase}
+              onClaimCase={handleClaimCase}
+              onDeleteCase={handleDeleteCase}
+              onEditItem={onEditItem}
+              onSendToPartner={handleSendToPartner}
+              onMarkInquirySent={handleMarkInquirySent}
+              onMarkPatientContactedTT={handleMarkPatientContactedTT}
+              onTLCommentComplaint={handleTLCommentComplaint}
+              onCloseComplaint={handleCloseComplaint}
+              onReopenComplaint={handleReopenComplaint}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

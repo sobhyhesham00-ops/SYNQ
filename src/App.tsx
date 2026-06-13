@@ -646,7 +646,7 @@ export default function App() {
 
   const [, forceTick] = useState(0);
   useEffect(() => {
-    const interval = setInterval(() => forceTick((t) => t + 1), 30000);
+    const interval = setInterval(() => forceTick(t => t + 1), 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -791,7 +791,7 @@ export default function App() {
           id,
         );
       } else if (type === "tt_request") {
-        const docRef = doc(db, "tabby_tamara", id);
+        const docRef = doc(db, "tt_requests", id);
         await setDoc(docRef, updatedData, { merge: true });
         setTabbyTamaraRequests((prev) =>
           prev.map((item) =>
@@ -809,7 +809,7 @@ export default function App() {
           id,
         );
       } else if (type === "tt_complaint") {
-        const docRef = doc(db, "tabby_tamara_complaints", id);
+        const docRef = doc(db, "tt_complaints", id);
         await setDoc(docRef, updatedData, { merge: true });
         setTabbyTamaraComplaints((prev) =>
           prev.map((item) =>
@@ -1012,31 +1012,14 @@ export default function App() {
     window.addEventListener("storage", handleStorageListener);
 
     // Trigger anonymous authentication if not already logged in
-    console.log("[Firebase Auth] Main sync effect mounted. Subscribing to auth state changes...");
+    ensureAuth();
 
-    const unsubAuth = auth.onAuthStateChanged(async (firebaseUser) => {
-      console.log("[Firebase Auth] Auth state transition detected:", firebaseUser ? `UID=${firebaseUser.uid} (Anonymous=${firebaseUser.isAnonymous})` : "null");
-      
-      if (!firebaseUser) {
-        console.log("[Firebase Auth] No authenticated session found. Resolving anonymous login...");
-        try {
-          const user = await ensureAuth();
-          console.log("[Firebase Auth] Anonymous sign-in achieved. User:", user?.uid);
-        } catch (authErr) {
-          console.error("[Firebase Auth] Critical error inside state listener anonymous login trigger:", authErr);
-        }
-        return;
-      }
-
+    const unsubAuth = auth.onAuthStateChanged((firebaseUser) => {
+      if (!firebaseUser) return;
       if (!active) return;
-
-      console.log(`[Firebase Auth] Auth completed successfully! Gating state ready. User ID: ${firebaseUser.uid}`);
-      setIsAuthReady(true);
 
       // Define local onSnapshot helper to register unsubscribes
       const onSnapshot = (ref: any, ...args: any[]) => {
-        const path = ref.path || (ref.query && ref.query.path) || "unknown";
-        console.log(`[Firebase Firestore] Attaching onSnapshot listener to path: "${path}"`);
         const unsub = wrappedOnSnapshot(ref, ...args);
         unsubscribes.push(unsub);
         return unsub;
@@ -1066,13 +1049,12 @@ export default function App() {
       } catch (e) {}
 
       // 2. Real-time Firestore Sync via Collections!
-
       const unsubInquiries = onSnapshot(
         collection(db, "inquiries"),
         (snap) => {
-          const arr = snap.docs.map(d => ({...d.data(), id: d.id}) as any);
+          const arr = snap.docs.map((d) => d.data() as Inquiry);
           arr.sort(
-            (a: any, b: any) =>
+            (a, b) =>
               new Date(b.createdAt || 0).getTime() -
               new Date(a.createdAt || 0).getTime(),
           );
@@ -1087,7 +1069,7 @@ export default function App() {
       const unsubQa = onSnapshot(
         collection(db, "qa_scores"),
         (snap) => {
-          const arr = snap.docs.map(d => ({...d.data(), id: d.id}) as any);
+          const arr = snap.docs.map((d) => d.data() as QAScore);
           arr.sort(
             (a, b) =>
               new Date(b.createdAt || 0).getTime() -
@@ -1119,11 +1101,11 @@ export default function App() {
         },
       );
       const unsubTT = onSnapshot(
-        collection(db, "tabby_tamara"),
+        collection(db, "tt_requests"),
         (snap) => {
-          const arr = snap.docs.map(d => ({...d.data(), id: d.id}) as any);
+          const arr = snap.docs.map((d) => d.data() as TabbyTamaraRequest);
           arr.sort(
-            (a: any, b: any) =>
+            (a, b) =>
               new Date(b.createdAt || 0).getTime() -
               new Date(a.createdAt || 0).getTime(),
           );
@@ -1132,32 +1114,18 @@ export default function App() {
         },
         (error) => {
           console.error(
-            "tabby_tamara snapshot error:",
+            "tt_requests snapshot error:",
             error.code,
             error.message,
           );
         },
       );
       const unsubComp = onSnapshot(
-        collection(db, "tabby_tamara_complaints"),
+        collection(db, "tt_complaints"),
         (snap) => {
-          const arr = snap.docs.map(d => {
-            const data = d.data() as any;
-            const missing = [];
-            if (!data.patientName) missing.push("patientName");
-            if (!data.phoneNumber) missing.push("phoneNumber");
-            if (!data.complaintDetails) missing.push("complaintDetails");
-            if (!data.clinicName) missing.push("clinicName");
-            if (!data.createdAt) missing.push("createdAt");
-            if (!data.status) missing.push("status");
-            if (missing.length > 0) {
-              console.warn(`[TabbyTamaraComplaint] Doc ${d.id} is missing fields: ${missing.join(", ")}`);
-            }
-            return { ...data, id: d.id };
-          });
-          
+          const arr = snap.docs.map((d) => d.data() as TabbyTamaraComplaint);
           arr.sort(
-            (a: any, b: any) =>
+            (a, b) =>
               new Date(b.createdAt || 0).getTime() -
               new Date(a.createdAt || 0).getTime(),
           );
@@ -1166,7 +1134,7 @@ export default function App() {
         },
         (error) => {
           console.error(
-            "tabby_tamara_complaints snapshot error:",
+            "tt_complaints snapshot error:",
             error.code,
             error.message,
           );
@@ -1175,9 +1143,11 @@ export default function App() {
       const unsubComms = onSnapshot(
         collection(db, "client_comms"),
         (snap) => {
-          const arr = snap.docs.map(d => ({...d.data(), id: d.id}) as any);
+          const arr = snap.docs.map(
+            (d) => d.data() as ClientCommunicationRequest,
+          );
           arr.sort(
-            (a: any, b: any) =>
+            (a, b) =>
               new Date(b.createdAt || 0).getTime() -
               new Date(a.createdAt || 0).getTime(),
           );
@@ -1195,7 +1165,7 @@ export default function App() {
       const unsubReq = onSnapshot(
         collection(db, "scheduling_requests"),
         (snap) => {
-          const arr = snap.docs.map(d => ({...d.data(), id: d.id}) as any);
+          const arr = snap.docs.map((d) => d.data() as SchedulingRequest);
           arr.sort(
             (a, b) =>
               new Date(b.createdAt || 0).getTime() -
@@ -1216,7 +1186,7 @@ export default function App() {
         collection(db, "timelogs"),
         (snap) => {
           console.log("Got timelogs snapshot, docs =", snap.size);
-          const arr = snap.docs.map(d => ({...d.data(), id: d.id}) as any);
+          const arr = snap.docs.map((d) => d.data() as TimeLog);
           arr.sort((a, b) => {
             const d1 = a.date
               ? new Date(a.date).getTime()
@@ -1251,7 +1221,7 @@ export default function App() {
         collection(db, "announcements"),
         (snap) => {
           console.log("Got announcement snapshot, document size:", snap.size);
-          const arr = snap.docs.map(d => ({...d.data(), id: d.id}) as any);
+          const arr = snap.docs.map((d) => d.data() as Announcement);
           arr.sort(
             (a, b) =>
               new Date(b.createdAt || 0).getTime() -
@@ -1369,7 +1339,7 @@ export default function App() {
       const unsubCases = onSnapshot(
         collection(db, "cases"),
         (snap) => {
-          const arr = snap.docs.map(d => ({...d.data(), id: d.id}) as any);
+          const arr = snap.docs.map((d) => d.data() as CaseRecord);
           arr.sort(
             (a, b) =>
               new Date(b.createdAt || 0).getTime() -
@@ -1525,7 +1495,7 @@ export default function App() {
       const unsubFeedbacks = onSnapshot(
         collection(db, "tl_feedbacks"),
         (snap) => {
-          const arr = snap.docs.map(d => ({...d.data(), id: d.id}) as any);
+          const arr = snap.docs.map((d) => d.data() as TlFeedback);
           arr.sort(
             (a, b) =>
               new Date(b.createdAt || 0).getTime() -
@@ -1600,7 +1570,7 @@ export default function App() {
         collection(db, "users"),
         (snap) => {
           const dbUsers = snap.docs.map(
-            (d) => ({ ...d.data(), id: d.id }) as any,
+            (d) => ({ id: d.id, ...d.data() }) as any,
           );
           setRegisteredUsers(dbUsers);
 
@@ -1707,9 +1677,6 @@ export default function App() {
     getStorageItem<string>("sched_google_sheet_gid", "0"),
   );
 
-  // Firebase Auth Readiness
-  const [isAuthReady, setIsAuthReady] = useState<boolean>(false);
-
   // Theme support
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     const saved = localStorage.getItem("theme_mode");
@@ -1751,9 +1718,7 @@ export default function App() {
 
   // Real-time Firestore Sync with [currentUser] dependency for Schedules, Notifications, Orders, and Todos as requested
   useEffect(() => {
-    if (!isAuthReady || !currentUser || !currentUser.id) return;
-
-    console.log("[Firebase Firestore] Attaching schedules/notifications/orders/todos onSnapshot listeners...");
+    if (!currentUser || !currentUser.id) return;
 
     // 1. Schedules Real-time Sync
     const unsubSched = onSnapshot(
@@ -1886,7 +1851,7 @@ export default function App() {
     const unsubTodos = onSnapshot(
       collection(db, "todos"),
       (snapshot) => {
-        const data = snapshot.docs.map((d) => ({ ...d.data(), id: d.id }));
+        const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
         setTodos(data);
       },
       (error) => {
@@ -1895,13 +1860,12 @@ export default function App() {
     );
 
     return () => {
-      console.log("[Firebase Firestore] Detaching schedules, notifications, orders, and todos listeners.");
       unsubSched();
       unsubNotifs();
       unsubOrders();
       unsubTodos();
     };
-  }, [currentUser, isAuthReady]);
+  }, [currentUser]);
 
   const isMasterAdmin = currentUser
     ? currentUser?.name?.toLowerCase() === "hesham sobhy" ||
@@ -2937,7 +2901,7 @@ ${pageText}
     const checkHourlyReminders = async () => {
       // Find all inquiries that are in "answered" status.
       const answeredInquiries = inquiries.filter(
-        (inq) => inq.status === "answered",
+        (inq) => inq.status === "answered"
       );
 
       const now = new Date();
@@ -2953,30 +2917,23 @@ ${pageText}
         // Check if a reminder has been sent already.
         // We can check lastHourlyReminderAt. If never sent, the answeredTime acts as the baseline.
         const lastReminderStr = inq.lastHourlyReminderAt;
-        const lastReminderTime = lastReminderStr
-          ? new Date(lastReminderStr)
-          : answeredTime;
+        const lastReminderTime = lastReminderStr ? new Date(lastReminderStr) : answeredTime;
 
         const msSinceLastReminder = now.getTime() - lastReminderTime.getTime();
         const oneHourInMs = 60 * 60 * 1000;
 
         // Trigger reminder if:
         // - At least one hour has elapsed since the last reminder (or since answeredAt, if no reminder was sent yet)
-        if (
-          msSinceLastReminder >= oneHourInMs ||
-          (!lastReminderStr && msSinceAnswered >= oneHourInMs)
-        ) {
+        if (msSinceLastReminder >= oneHourInMs || (!lastReminderStr && msSinceAnswered >= oneHourInMs)) {
           const hoursTotal = Math.floor(msSinceAnswered / (60 * 60 * 1000));
-          const minsTotal = Math.floor(
-            (msSinceAnswered % (60 * 60 * 1000)) / 60000,
-          );
-          const timeIndicator =
-            hoursTotal > 0 ? `${hoursTotal}h ${minsTotal}m` : `${minsTotal}m`;
+          const minsTotal = Math.floor((msSinceAnswered % (60 * 60 * 1000)) / 60000);
+          const timeIndicator = hoursTotal > 0 
+            ? `${hoursTotal}h ${minsTotal}m` 
+            : `${minsTotal}m`;
 
-          const refCode =
-            inq.caseRef || `INQ-${inq.id.replace("inq_", "").toUpperCase()}`;
+          const refCode = inq.caseRef || `INQ-${inq.id.replace('inq_', '').toUpperCase()}`;
           const title = "⏳ Case Answered Reminder";
-          const message = `Inquiry ${refCode} for ${inq.clinicName || "N/A"} has been in "Answered" status for ${timeIndicator}. Please review the answer and click on "Close Inquiry" manually to move it to Closed.`;
+          const message = `Inquiry ${refCode} for ${inq.clinicName || 'N/A'} has been in "Answered" status for ${timeIndicator}. Please review the answer and click on "Close Inquiry" manually to move it to Closed.`;
 
           // Generate stableId so multiple browser windows/tabs collapse to a single notification
           const hourBucket = Math.floor(now.getTime() / oneHourInMs);
@@ -2989,28 +2946,23 @@ ${pageText}
             inq.agentName,
             stableId,
             "inquiry",
-            inq.id,
+            inq.id
           );
 
           const updatedReminderTime = now.toISOString();
 
           // Update the database
           await updateDoc(doc(db, "inquiries", inq.id), {
-            lastHourlyReminderAt: updatedReminderTime,
-          }).catch((e) =>
-            console.error("Update lastHourlyReminderAt error:", e),
-          );
+            lastHourlyReminderAt: updatedReminderTime
+          }).catch((e) => console.error("Update lastHourlyReminderAt error:", e));
 
           // Also update local inquiries state
           setInquiries((prev) =>
             prev.map((i) =>
               i.id === inq.id
-                ? ({
-                    ...i,
-                    lastHourlyReminderAt: updatedReminderTime,
-                  } as Inquiry)
-                : i,
-            ),
+                ? ({ ...i, lastHourlyReminderAt: updatedReminderTime } as Inquiry)
+                : i
+            )
           );
         }
       }
@@ -3199,16 +3151,10 @@ ${pageText}
   const [inquiryPatientName, setInquiryPatientName] = useState("");
   const [inquiryFileNumber, setInquiryFileNumber] = useState("");
   const [inquiryPlatform, setInquiryPlatform] = useState("");
-  const [inquiryCustomerType, setInquiryCustomerType] = useState<"new" | "old">(
-    "new",
-  );
+  const [inquiryCustomerType, setInquiryCustomerType] = useState<"new" | "old">("new");
   const [inquiryLanguageDir, setInquiryLanguageDir] = useState<
     "auto" | "ltr" | "rtl"
   >("auto");
-  const [inquiryFileId, setInquiryFileId] = useState("");
-  
-  const [showClinicTemplateModal, setShowClinicTemplateModal] = useState(false);
-  const [templateInquiryId, setTemplateInquiryId] = useState<string | null>(null);
 
   // Selected Inquiry for answering
   const [answeringInquiryId, setAnsweringInquiryId] = useState<string | null>(
@@ -3274,9 +3220,7 @@ ${pageText}
   );
   const [inquiryStatusFilter, setInquiryStatusFilter] = useState("");
   const [inquiryClinicFilter, setInquiryClinicFilter] = useState("all");
-  const [expandedInquiryId, setExpandedInquiryId] = useState<string | null>(
-    null,
-  );
+  const [expandedInquiryId, setExpandedInquiryId] = useState<string | null>(null);
   const [expandedCcId, setExpandedCcId] = useState<string | null>(null);
   const [casesSearch, setCasesSearch] = useState("");
   const [logAgentFilter, setLogAgentFilter] = useState("all");
@@ -3398,9 +3342,9 @@ ${pageText}
 
       const collectionsToMigrate = [
         { name: "inquiries", prefix: "inq", typeField: "inquiry" },
-        { name: "tabby_tamara", prefix: "tt_request", typeField: "tt_request" },
+        { name: "tt_requests", prefix: "tt_request", typeField: "tt_request" },
         {
-          name: "tabby_tamara_complaints",
+          name: "tt_complaints",
           prefix: "tt_complaint",
           typeField: "tt_complaint",
         },
@@ -5257,33 +5201,13 @@ ${result.errors.slice(0, 5).join("\n")}${
           // Extract email
           const emailVal = (() => {
             for (const k of Object.keys(a.data)) {
-              const lk = k
-                .toLowerCase()
-                .trim()
-                .replace(/[\s_-]+/g, "");
+              const lk = k.toLowerCase().trim().replace(/[\s_-]+/g, "");
               if (
-                [
-                  "email",
-                  "mail",
-                  "corpemail",
-                  "corporateemail",
-                  "emailaddress",
-                  "useremail",
-                  "workemail",
-                ].includes(lk) ||
+                ["email", "mail", "corpemail", "corporateemail", "emailaddress", "useremail", "workemail"].includes(lk) ||
                 ([" email", "mail"].some((term) => lk.includes(term)) &&
-                  ![
-                    "teamleader",
-                    "tl",
-                    "lead",
-                    "leader",
-                    "manager",
-                    "supervisor",
-                  ].some((term) => lk.includes(term)))
+                  !["teamleader", "tl", "lead", "leader", "manager", "supervisor"].some((term) => lk.includes(term)))
               ) {
-                return a.data[k] !== undefined && a.data[k] !== null
-                  ? String(a.data[k]).trim()
-                  : "";
+                return a.data[k] !== undefined && a.data[k] !== null ? String(a.data[k]).trim() : "";
               }
             }
             return "";
@@ -5292,19 +5216,9 @@ ${result.errors.slice(0, 5).join("\n")}${
           // Extract phone
           const phoneVal = (() => {
             for (const k of Object.keys(a.data)) {
-              const lk = k
-                .toLowerCase()
-                .trim()
-                .replace(/[\s_-]+/g, "");
+              const lk = k.toLowerCase().trim().replace(/[\s_-]+/g, "");
               if (
-                [
-                  "phone",
-                  "mobile",
-                  "tel",
-                  "tele",
-                  "contact",
-                  "phonenumber",
-                ].some(
+                ["phone", "mobile", "tel", "tele", "contact", "phonenumber"].some(
                   (key) =>
                     lk === key ||
                     lk.startsWith("phone") ||
@@ -5313,21 +5227,10 @@ ${result.errors.slice(0, 5).join("\n")}${
                     lk.endsWith("mobile") ||
                     lk === "contactnumber" ||
                     (lk.includes("number") &&
-                      ![
-                        "badge",
-                        "serial",
-                        "id",
-                        "count",
-                        "index",
-                        "employee",
-                        "user",
-                        "emp",
-                      ].some((t) => lk.includes(t))),
+                      !["badge", "serial", "id", "count", "index", "employee", "user", "emp"].some((t) => lk.includes(t)))
                 )
               ) {
-                return a.data[k] !== undefined && a.data[k] !== null
-                  ? String(a.data[k]).trim()
-                  : "";
+                return a.data[k] !== undefined && a.data[k] !== null ? String(a.data[k]).trim() : "";
               }
             }
             return "";
@@ -5337,14 +5240,8 @@ ${result.errors.slice(0, 5).join("\n")}${
           const lobVal = (() => {
             for (const k of Object.keys(a.data)) {
               const lk = k.toLowerCase().trim();
-              if (
-                lk === "lob" ||
-                lk === "line of business" ||
-                lk.includes("lob")
-              ) {
-                return a.data[k] !== undefined && a.data[k] !== null
-                  ? String(a.data[k]).trim()
-                  : "";
+              if (lk === "lob" || lk === "line of business" || lk.includes("lob")) {
+                return a.data[k] !== undefined && a.data[k] !== null ? String(a.data[k]).trim() : "";
               }
             }
             return "";
@@ -5355,15 +5252,11 @@ ${result.errors.slice(0, 5).join("\n")}${
             for (const k of Object.keys(a.data)) {
               const lk = k.toLowerCase().trim();
               if (
-                lk === "lob team" ||
-                lk === "team" ||
-                lk === "lob_team" ||
+                lk === "lob team" || lk === "team" || lk === "lob_team" ||
                 (lk.includes("team") && lk.includes("lob")) ||
                 lk.includes("squad")
               ) {
-                return a.data[k] !== undefined && a.data[k] !== null
-                  ? String(a.data[k]).trim()
-                  : "";
+                return a.data[k] !== undefined && a.data[k] !== null ? String(a.data[k]).trim() : "";
               }
             }
             return "";
@@ -5382,9 +5275,7 @@ ${result.errors.slice(0, 5).join("\n")}${
                 (lk.includes("team") && lk.includes("leader")) ||
                 lk.includes("lead")
               ) {
-                return a.data[k] !== undefined && a.data[k] !== null
-                  ? String(a.data[k]).trim()
-                  : "";
+                return a.data[k] !== undefined && a.data[k] !== null ? String(a.data[k]).trim() : "";
               }
             }
             return "";
@@ -5395,11 +5286,11 @@ ${result.errors.slice(0, 5).join("\n")}${
             name: a.agentName,
             role: isTLName(a.agentName) ? "tl" : "agent",
             email: emailVal,
-            phone: phoneVal, // ← NEW
-            lob: lobVal, // ← NEW
-            lobTeam: lobTeamVal, // ← NEW
-            teamLeader: tlVal, // ← NEW
-            directoryData: a.data, // ← NEW: store full CSV row for reference
+            phone: phoneVal,        // ← NEW
+            lob: lobVal,            // ← NEW
+            lobTeam: lobTeamVal,    // ← NEW
+            teamLeader: tlVal,      // ← NEW
+            directoryData: a.data,  // ← NEW: store full CSV row for reference
           };
 
           setDoc(doc(db, "users", userDocId), userProfile).catch((e) =>
@@ -6049,24 +5940,22 @@ ${result.errors.slice(0, 5).join("\n")}${
     }
 
     if (!inquiryPlatform) {
-      toast.error("Please select a Platform! This is a mandatory field.");
+      toast.error("Please select an Inquiry Platform (Source)! This is a mandatory field.");
+      return;
+    }
+
+    if (!String(inquiryPatientName || "").trim()) {
+      toast.error("Please enter the Patient Name! This is now a mandatory field.");
       return;
     }
 
     if (!String(inquiryPhoneNumber || "").trim()) {
-      toast.error(
-        "Please enter the Patient Phone Number! This is now a mandatory field.",
-      );
+      toast.error("Please enter the Patient Phone Number! This is now a mandatory field.");
       return;
     }
 
-    if (
-      inquiryCustomerType === "old" &&
-      !String(inquiryFileNumber || "").trim()
-    ) {
-      toast.error(
-        "For Old Customers, typing the Patient File / ID Number is required!",
-      );
+    if (inquiryCustomerType === "old" && !String(inquiryFileNumber || "").trim()) {
+      toast.error("For Old Customers, typing the Patient File / ID Number is required!");
       return;
     }
 
@@ -6080,8 +5969,8 @@ ${result.errors.slice(0, 5).join("\n")}${
       const createdAt = new Date().toISOString();
       let safeId = "inq_";
       if (
-        typeof crypto !== "undefined" &&
-        typeof crypto.randomUUID === "function"
+         typeof crypto !== "undefined" &&
+         typeof crypto.randomUUID === "function"
       ) {
         safeId += `${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
       } else {
@@ -6107,11 +5996,7 @@ ${result.errors.slice(0, 5).join("\n")}${
         agentName: currentUser.name,
         clinicName: inquiryClinicName,
         patientName: String(inquiryPatientName || "").trim(),
-        fileId: String(inquiryFileId || "").trim(),
-        fileNumber:
-          inquiryCustomerType === "old"
-            ? String(inquiryFileNumber || "").trim()
-            : undefined,
+        fileNumber: inquiryCustomerType === "old" ? String(inquiryFileNumber || "").trim() : undefined,
         phoneNumber: String(inquiryPhoneNumber || "").trim(),
         customerType: inquiryCustomerType,
         platform: inquiryPlatform,
@@ -6139,7 +6024,6 @@ ${result.errors.slice(0, 5).join("\n")}${
       setInquiryClinicName("");
       setInquiryPhoneNumber("");
       setInquiryPatientName("");
-      setInquiryFileId("");
       setInquiryFileNumber("");
       setInquiryPlatform("");
       setInquiryCustomerType("new");
@@ -6179,58 +6063,6 @@ ${result.errors.slice(0, 5).join("\n")}${
     }
   };
 
-  const handleTLViewInquiry = (inquiryId: string) => {
-    if (!currentUser || currentUser.role !== "tl") return;
-
-    let updatedInquiry: any = null;
-
-    const inqToUpdate = inquiries.find((i) => i.id === inquiryId);
-    if (!inqToUpdate || inqToUpdate.viewingStatus === "tl_viewing") return;
-
-    const updated = inquiries.map((inq) => {
-      if (inq.id === inquiryId) {
-        updatedInquiry = {
-          ...inq,
-          viewingStatus: "tl_viewing",
-          viewingBy: currentUser.name,
-          viewingAt: new Date().toISOString(),
-        };
-        return updatedInquiry;
-      }
-      return inq;
-    });
-
-    if (updatedInquiry) {
-      setInquiries(updated);
-      setDoc(doc(db, "inquiries", inquiryId), updatedInquiry).catch((e) =>
-        console.error("Error setting tl view:", e),
-      );
-      setStorageItem("sched_inquiries", updated);
-
-      addSystemNotification(
-        "Team Leader Reviewing Your Inquiry",
-        `${currentUser.name} is now reviewing your inquiry for clinic ${updatedInquiry.clinicName}.`,
-        "inquiry",
-        updatedInquiry.agentName,
-        inquiryId
-      );
-    }
-  };
-
-  const generateClinicTemplate = (inq: Inquiry): string => {
-    return [
-      `📌 INQUIRY DETAILS`,
-      `Ref: ${inq.caseRef || formatCaseRef(inq.id, 'inquiry', inq.createdAt, inq.caseRef)}`,
-      `Clinic: ${inq.clinicName}`,
-      `Patient Name: ${inq.patientName || "N/A"}`,
-      `File ID: ${inq.fileId || inq.fileNumber || "N/A"}`,
-      `Agent: ${inq.agentName}`,
-      ``,
-      `DETAILS:`,
-      inq.text
-    ].join('\n');
-  };
-
   const handleSetInquirySent = (inquiryId: string) => {
     if (!currentUser || currentUser.role !== "tl") return;
 
@@ -6259,13 +6091,6 @@ ${result.errors.slice(0, 5).join("\n")}${
     setStorageItem("sched_inquiries", updated);
 
     if (sentInquiry) {
-      const template = generateClinicTemplate(sentInquiry);
-      navigator.clipboard.writeText(template).then(() => {
-        toast.success("Standardized template copied to clipboard!");
-      }).catch((e) => {
-        console.error("Clipboard write failed", e);
-      });
-
       addSystemNotification(
         "Inquiry Forwarded to Partner",
         `Your inquiry for clinic ${sentInquiry.clinicName} has been forwarded to the partner by ${currentUser.name}.`,
@@ -6280,112 +6105,77 @@ ${result.errors.slice(0, 5).join("\n")}${
 
   const handleMarkInquiryRead = async (inquiryId: string) => {
     if (!currentUser) return;
-    const inq = inquiries.find((i) => i.id === inquiryId);
+    const inq = inquiries.find(i => i.id === inquiryId);
     if (!inq) return;
     const now = new Date().toISOString();
-    const newStatus = inq.status === "submitted" ? "tl_reviewing" : inq.status;
-
+    const newStatus = inq.status === 'submitted' ? 'tl_reviewing' : inq.status;
+    
     const updated = inquiries.map((i) =>
-      i.id === inquiryId
-        ? {
-            ...i,
-            status: newStatus as any,
-            readBy: currentUser.name,
-            readAt: now,
-          }
-        : i,
+      i.id === inquiryId ? { ...i, status: newStatus as any, readBy: currentUser.name, readAt: now } : i
     );
     setInquiries(updated);
     setStorageItem("sched_inquiries", updated);
-    await updateDoc(doc(db, "inquiries", inquiryId), {
-      status: newStatus,
-      readBy: currentUser.name,
-      readAt: now,
+    await updateDoc(doc(db, "inquiries", inquiryId), { 
+      status: newStatus, readBy: currentUser.name, readAt: now 
     }).catch((e) => console.error("Mark read error:", e));
   };
 
   const handleMarkSentToClinic = async (inquiryId: string) => {
     if (!currentUser) return;
-    const inq = inquiries.find((i) => i.id === inquiryId);
+    const inq = inquiries.find(i => i.id === inquiryId);
     if (!inq) return;
-
+    
     const now = new Date().toISOString();
     const newCount = (inq.sentToClinicCount || 0) + 1;
-    const inqForTemplate = {
-      ...inq,
-      sentToClinicCount: inq.sentToClinicCount || 0,
-    };
+    const inqForTemplate = { ...inq, sentToClinicCount: inq.sentToClinicCount || 0 };
 
     // Build rich (HTML + plain text) clipboard content
     const plainText = buildClinicInquiryTextTemplate(inqForTemplate);
     const htmlContent = buildClinicInquiryHtmlTemplate(inqForTemplate);
-
+    
     const copied = await copyToClipboard(
       plainText,
       `Inquiry copied with ${(inq.attachments?.length || 0) + (inq.photos?.length || 0)} attachment(s)! Paste into the clinic's WhatsApp group.`,
-      htmlContent,
+      htmlContent
     );
     if (!copied) return;
-
+    
     const updated = inquiries.map((i) =>
       i.id === inquiryId
-        ? {
-            ...i,
-            status: "sent_to_clinic" as const,
-            sentBy: currentUser.name,
-            sentAt: now,
-            sentToClinicCount: newCount,
-          }
-        : i,
+        ? { ...i, status: 'sent_to_clinic' as const, sentBy: currentUser.name, sentAt: now, sentToClinicCount: newCount }
+        : i
     );
     setInquiries(updated);
     setStorageItem("sched_inquiries", updated);
-    await updateDoc(doc(db, "inquiries", inquiryId), {
-      status: "sent_to_clinic",
-      sentBy: currentUser.name,
-      sentAt: now,
-      sentToClinicCount: newCount,
+    await updateDoc(doc(db, "inquiries", inquiryId), { 
+      status: 'sent_to_clinic', sentBy: currentUser.name, sentAt: now, sentToClinicCount: newCount,
     }).catch((e) => console.error("Mark sent error:", e));
 
     addSystemNotification(
       "Inquiry Sent to Clinic",
       `${currentUser.name} sent your inquiry to ${inq.clinicName} — awaiting their response.`,
-      "general",
-      inq.agentName,
-      undefined,
-      "inquiry",
-      inquiryId,
+      "general", inq.agentName, undefined, "inquiry", inquiryId
     );
   };
 
   const handleCloseInquiry = async (inquiryId: string) => {
     if (!currentUser) return;
     const now = new Date().toISOString();
-    const inq = inquiries.find((i) => i.id === inquiryId);
+    const inq = inquiries.find(i => i.id === inquiryId);
     if (!inq) return;
 
     const updated = inquiries.map((i) =>
-      i.id === inquiryId
-        ? {
-            ...i,
-            status: "closed" as const,
-            closedBy: currentUser.name,
-            closedAt: now,
-          }
-        : i,
+      i.id === inquiryId ? { ...i, status: 'closed' as const, closedBy: currentUser.name, closedAt: now } : i
     );
     setInquiries(updated);
     setStorageItem("sched_inquiries", updated);
-    await updateDoc(doc(db, "inquiries", inquiryId), {
-      status: "closed",
-      closedBy: currentUser.name,
-      closedAt: now,
+    await updateDoc(doc(db, "inquiries", inquiryId), { 
+      status: 'closed', closedBy: currentUser.name, closedAt: now 
     }).catch((e) => console.error("Close inquiry error:", e));
-
+    
     let timerMessage = "";
     if (inq.answeredAt) {
-      const msDiff =
-        new Date(now).getTime() - new Date(inq.answeredAt).getTime();
+      const msDiff = new Date(now).getTime() - new Date(inq.answeredAt).getTime();
       const minsTotal = Math.floor(msDiff / 60000);
       const hours = Math.floor(minsTotal / 60);
       const mins = minsTotal % 60;
@@ -6395,8 +6185,7 @@ ${result.errors.slice(0, 5).join("\n")}${
         timerMessage = ` (Time in answered status before manually closing: ${mins}m)`;
       }
     } else {
-      const msDiff =
-        new Date(now).getTime() - new Date(inq.createdAt).getTime();
+      const msDiff = new Date(now).getTime() - new Date(inq.createdAt).getTime();
       const minsTotal = Math.floor(msDiff / 60000);
       const hours = Math.floor(minsTotal / 60);
       const mins = minsTotal % 60;
@@ -6407,16 +6196,11 @@ ${result.errors.slice(0, 5).join("\n")}${
       }
     }
 
-    const refCode =
-      inq.caseRef || `INQ-${inq.id.replace("inq_", "").toUpperCase()}`;
+    const refCode = inq.caseRef || `INQ-${inq.id.replace('inq_', '').toUpperCase()}`;
     addSystemNotification(
       "Inquiry Closed Manually",
       `Inquiry ${refCode} for ${inq.clinicName || "N/A"} has been closed manually by ${currentUser.name}${timerMessage}.`,
-      "general",
-      "all",
-      undefined,
-      "inquiry",
-      inquiryId,
+      "general", "all", undefined, "inquiry", inquiryId
     );
   };
 
@@ -6425,12 +6209,12 @@ ${result.errors.slice(0, 5).join("\n")}${
     if (isSubmittingAnswer) return;
 
     const answerText = String(currentAnswerText || "").trim();
-    if (!answerText) {
-      toast.error("Reply text cannot be empty.");
-      return;
-    }
-    if (answerText.length > 500) {
-      toast.error("Reply details cannot exceed 500 characters.");
+    if (
+      !answerText &&
+      currentAnswerAttachments.length === 0 &&
+      currentAnswerLinks.length === 0
+    ) {
+      toast.error("Please supply an answer text or attach a file.");
       return;
     }
 
@@ -6705,7 +6489,7 @@ ${ttNotes}`
       });
 
       // Sync to Firestore
-      await setDoc(doc(db, "tabby_tamara", newRequest.id), newRequest);
+      await setDoc(doc(db, "tt_requests", newRequest.id), newRequest);
 
       // Clear form
       setTtPatientName("");
@@ -6816,7 +6600,7 @@ ${ttNotes}`
           updatedAt: new Date().toISOString(),
         };
         // Sync to Firestore
-        setDoc(doc(db, "tabby_tamara", r.id), updatedReq).catch((e) =>
+        setDoc(doc(db, "tt_requests", r.id), updatedReq).catch((e) =>
           console.error("TT Confirm Error:", e),
         );
 
@@ -6888,21 +6672,15 @@ ${ttNotes}`
   ) => {
     if (!currentUser) return;
     try {
-      const assigneeId =
-        "usr_" + toAgent.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+      const assigneeId = "usr_" + toAgent.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
       let entityType = collectionName;
-      if (collectionName === "tabby_tamara_complaints") entityType = "tt_complaint";
-      else if (collectionName === "tabby_tamara") entityType = "tt_request";
+      if (collectionName === "tt_complaints") entityType = "tt_complaint";
+      else if (collectionName === "tt_requests") entityType = "tt_request";
       else if (collectionName === "client_comms") entityType = "client_comm";
       else if (collectionName === "inquiries") entityType = "inquiry";
 
       // Central assignment service call
-      await assignCase(
-        entityType,
-        recordId,
-        { id: assigneeId, name: toAgent },
-        currentUser,
-      );
+      await assignCase(entityType, recordId, { id: assigneeId, name: toAgent }, currentUser);
 
       const { updateDoc, doc } = await import("firebase/firestore");
       await updateDoc(doc(db, collectionName, recordId), {
@@ -6916,13 +6694,13 @@ ${ttNotes}`
             i.id === recordId ? { ...i, assignedTo: toAgent } : i,
           ),
         );
-      } else if (collectionName === "tabby_tamara") {
+      } else if (collectionName === "tt_requests") {
         setTabbyTamaraRequests((prev) =>
           prev.map((r) =>
             r.id === recordId ? { ...r, assignedTo: toAgent } : r,
           ),
         );
-      } else if (collectionName === "tabby_tamara_complaints") {
+      } else if (collectionName === "tt_complaints") {
         setTabbyTamaraComplaints((prev) =>
           prev.map((c) =>
             c.id === recordId ? { ...c, assignedTo: toAgent } : c,
@@ -7047,7 +6825,7 @@ ${ttNotes}`
         }
 
         // Sync to Firestore
-        setDoc(doc(db, "tabby_tamara", r.id), updatedReq).catch((e) =>
+        setDoc(doc(db, "tt_requests", r.id), updatedReq).catch((e) =>
           console.error("TT Update Contact Error:", e),
         );
         return updatedReq;
@@ -7076,7 +6854,7 @@ ${ttNotes}`
         setStorageItem("sched_tabby_tamara", updated);
 
         // Sync to Firestore
-        deleteDoc(doc(db, "tabby_tamara", requestId)).catch((e) =>
+        deleteDoc(doc(db, "tt_requests", requestId)).catch((e) =>
           console.error("TT Delete Error:", e),
         );
       },
@@ -7150,7 +6928,7 @@ ${ttNotes}`
       });
 
       // Sync to Firestore
-      await setDoc(doc(db, "tabby_tamara_complaints", newComplaint.id), newComplaint);
+      await setDoc(doc(db, "tt_complaints", newComplaint.id), newComplaint);
 
       // Clear form
       setTcPatientName("");
@@ -7906,11 +7684,10 @@ ${ttNotes}`
       return;
     }
     const now = new Date().toISOString();
-    let partialUpdate: any = null;
-
     const updated = tabbyTamaraComplaints.map((c) => {
       if (c.id === complaintId) {
-        partialUpdate = {
+        const updatedComp = {
+          ...c,
           tlComment: comment,
           tlResolutionType: resolutionType || c.tlResolutionType,
           tlName: currentUser.name,
@@ -7919,8 +7696,7 @@ ${ttNotes}`
           commentedAt: now,
           status: "need_contact" as const,
         };
-        const updatedComp = { ...c, ...partialUpdate };
-        updateDoc(doc(db, "tabby_tamara_complaints", c.id), partialUpdate).catch((e) =>
+        setDoc(doc(db, "tt_complaints", c.id), updatedComp).catch((e) =>
           console.error("TT Complaint Comment Error:", e),
         );
         return updatedComp;
@@ -7957,11 +7733,11 @@ ${ttNotes}`
     status: "not_contacted" | "contacted",
   ) => {
     let comp: any = null;
-    let partialUpdate: any = null;
 
     const updated = tabbyTamaraComplaints.map((c) => {
       if (c.id === complaintId) {
-        partialUpdate = {
+        comp = {
+          ...c,
           customerContacted: status,
           status:
             status === "contacted"
@@ -7970,9 +7746,8 @@ ${ttNotes}`
           contactedAt:
             status === "contacted" ? new Date().toISOString() : undefined,
         };
-        comp = { ...c, ...partialUpdate };
         // Sync to Firestore
-        updateDoc(doc(db, "tabby_tamara_complaints", c.id), partialUpdate).catch((e) =>
+        setDoc(doc(db, "tt_complaints", c.id), comp).catch((e) =>
           console.error("TT Complaint Contact Update Error:", e),
         );
         return comp;
@@ -8020,7 +7795,7 @@ ${ttNotes}`
         setTabbyTamaraComplaints(updated);
         setStorageItem("sched_tt_complaints", updated);
         // Sync to Firestore
-        deleteDoc(doc(db, "tabby_tamara_complaints", complaintId)).catch((e) =>
+        deleteDoc(doc(db, "tt_complaints", complaintId)).catch((e) =>
           console.error("TT Complaint Delete Error:", e),
         );
       },
@@ -8323,40 +8098,6 @@ ${ttNotes}`
       agentName?.toLowerCase().includes(scheduleFilterAgent.toLowerCase())
     );
   });
-
-  if (!isAuthReady) {
-    return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">
-        {/* Decorative background blobs */}
-        <div className="absolute top-[-10%] -left-32 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none"></div>
-        <div className="absolute bottom-[-10%] -right-32 w-[600px] h-[600px] bg-pink-500/10 rounded-full blur-[120px] pointer-events-none"></div>
-        
-        <Toaster theme="dark" position="bottom-right" />
-        <div className="max-w-md w-full text-center space-y-6 z-10">
-          <div className="relative w-20 h-20 mx-auto">
-            {/* Elegant spinning rings matching the design */}
-            <div className="absolute inset-0 rounded-full border-4 border-indigo-500/10 border-t-indigo-500 animate-spin"></div>
-            <div className="absolute inset-2 rounded-full border-4 border-pink-500/5 border-t-pink-500/60 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-[10px] font-black tracking-widest text-indigo-400 uppercase">Connecting...</span>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <h2 className="text-xl font-bold text-slate-100 tracking-wider uppercase">Connecting...</h2>
-            <p className="text-xs text-slate-400 font-medium">Initializing secure real-time connections</p>
-          </div>
-          <div className="pt-4 border-t border-white/5 flex flex-col gap-1 items-center justify-center">
-            <p className="text-[10px] font-mono text-slate-500 tracking-wide">
-              Auth State: Initializing Anonymous Handshake
-            </p>
-            <p className="text-[9px] font-mono text-slate-600">
-              Gated by Security Rules Compliance
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (isAppKilled) {
     return (
@@ -9826,9 +9567,7 @@ ${ttNotes}`
                                   label="Slide to Mark Contacted"
                                   confirmedLabel="Contacted!"
                                   colorClass="from-emerald-400 to-teal-500"
-                                  icon={
-                                    <CheckCircle2 className="w-5 h-5 text-black" />
-                                  }
+                                  icon={<CheckCircle2 className="w-5 h-5 text-black" />}
                                   onConfirm={() =>
                                     handleContactTabbyTamara(
                                       req.id,
@@ -9906,9 +9645,7 @@ ${ttNotes}`
                                   label="Slide to Contact & Close"
                                   confirmedLabel="Closed!"
                                   colorClass="from-emerald-400 to-teal-500"
-                                  icon={
-                                    <CheckCircle2 className="w-5 h-5 text-black" />
-                                  }
+                                  icon={<CheckCircle2 className="w-5 h-5 text-black" />}
                                   onConfirm={() =>
                                     handleToggleContactComplaint(
                                       comp.id,
@@ -9991,23 +9728,15 @@ ${ttNotes}`
                                   label="Slide to Agree"
                                   confirmedLabel="Agreed!"
                                   colorClass="from-emerald-500 to-teal-500"
-                                  icon={
-                                    <CheckCircle2 className="w-4 h-4 text-white" />
-                                  }
-                                  onConfirm={() =>
-                                    handlePartnerDecision(req.id, true)
-                                  }
+                                  icon={<CheckCircle2 className="w-4 h-4 text-white" />}
+                                  onConfirm={() => handlePartnerDecision(req.id, true)}
                                 />
                                 <SlideToConfirm
                                   label="Slide to Decline"
                                   confirmedLabel="Declined"
                                   colorClass="from-rose-500 to-red-500"
-                                  icon={
-                                    <XCircle className="w-4 h-4 text-white" />
-                                  }
-                                  onConfirm={() =>
-                                    handlePartnerDecision(req.id, false)
-                                  }
+                                  icon={<XCircle className="w-4 h-4 text-white" />}
+                                  onConfirm={() => handlePartnerDecision(req.id, false)}
                                 />
                               </div>
                             </div>
@@ -10204,7 +9933,8 @@ ${ttNotes}`
                             </h3>
                             <textarea
                               className="w-full h-32 bg-white/5 backdrop-blur-xl border border-white/20 text-slate-100 p-3 rounded-xl focus:border-indigo-500 outline-none resize-none text-sm font-medium"
-                              placeholder="Write anything... scratchpad... thoughts... "></textarea>
+                              placeholder="Write anything... scratchpad... thoughts... "
+                            ></textarea>
                           </div>
 
                           <div className="bg-white/5 border border-white/10 rounded-2xl p-5 relative overflow-hidden shadow-inner flex flex-col h-full">
@@ -10214,7 +9944,8 @@ ${ttNotes}`
                               </h3>
                               <select
                                 value={todoFilter}
-                                onChange={(e) => setTodoFilter(e.target.value as any)
+                                onChange={(e) =>
+                                  setTodoFilter(e.target.value as any)
                                 }
                                 className="bg-white/5 backdrop-blur-xl border border-white/10 text-xs font-bold text-slate-300 rounded px-2 py-1 outline-none"
                               >
@@ -10266,11 +9997,11 @@ ${ttNotes}`
                                   placeholder="I need to..."
                                   required
                                   className="flex-1 bg-white/5 backdrop-blur-xl border border-white/20 text-slate-100 px-3 py-2 text-sm rounded-xl outline-none focus:border-indigo-500"
-                                 id="input_auto_1781360034178_10"/>
+                                />
                                 <select
                                   name="category"
                                   className="bg-white/5 backdrop-blur-xl border border-white/20 text-slate-100 px-2 text-xs rounded-xl outline-none focus:border-indigo-500"
-                                 id="select_auto_1781360034178_11">
+                                >
                                   <option value="Work">Work</option>
                                   <option value="Personal">Personal</option>
                                   <option value="Urgent">Urgent</option>
@@ -10282,7 +10013,7 @@ ${ttNotes}`
                                   title="Remind in X mins"
                                   min="1"
                                   className="w-20 bg-white/5 backdrop-blur-xl border border-white/20 text-slate-100 px-2 py-2 text-sm rounded-xl outline-none focus:border-indigo-500 text-center"
-                                 id="input_auto_1781360034178_12"/>
+                                />
                                 <button
                                   type="submit"
                                   className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl transition-colors font-bold shadow-lg shadow-indigo-500/20"
@@ -12160,7 +11891,8 @@ ${ttNotes}`
                                         type="text"
                                         placeholder="Filter by agent..."
                                         value={dashboardSearchTeam}
-                                        onChange={(e) => setDashboardSearchTeam(e.target.value)
+                                        onChange={(e) =>
+                                          setDashboardSearchTeam(e.target.value)
                                         }
                                         className="w-full bg-white/5 border border-white/10 text-slate-100 text-xs rounded-2xl pl-9 pr-3 py-2 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-sans"
                                         spellCheck="false"
@@ -14374,23 +14106,15 @@ ${ttNotes}`
                                               label="Slide to Approve"
                                               confirmedLabel="Approved!"
                                               colorClass="from-emerald-500 to-teal-500"
-                                              icon={
-                                                <CheckCircle2 className="w-4 h-4 text-white" />
-                                              }
-                                              onConfirm={() =>
-                                                handleTLApproval(req.id, true)
-                                              }
+                                              icon={<CheckCircle2 className="w-4 h-4 text-white" />}
+                                              onConfirm={() => handleTLApproval(req.id, true)}
                                             />
                                             <SlideToConfirm
                                               label="Slide to Decline"
                                               confirmedLabel="Declined"
                                               colorClass="from-rose-500 to-red-500"
-                                              icon={
-                                                <XCircle className="w-4 h-4 text-white" />
-                                              }
-                                              onConfirm={() =>
-                                                handleTLApproval(req.id, false)
-                                              }
+                                              icon={<XCircle className="w-4 h-4 text-white" />}
+                                              onConfirm={() => handleTLApproval(req.id, false)}
                                             />
                                           </div>
                                         </div>
@@ -15528,7 +15252,8 @@ ${ttNotes}`
                                   id="swap-target-shift"
                                   className="text-slate-100 w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl   focus:outline-none focus:border-indigo-500"
                                   value={swapTargetShift}
-                                  onChange={(e) => setSwapTargetShift(e.target.value)
+                                  onChange={(e) =>
+                                    setSwapTargetShift(e.target.value)
                                   }
                                 >
                                   {SHIFTS.map((s) => (
@@ -15555,7 +15280,8 @@ ${ttNotes}`
                                 id="swap-partner"
                                 className="text-slate-100 w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl   focus:outline-none focus:border-indigo-500 font-medium"
                                 value={swapTargetAgent}
-                                onChange={(e) => setSwapTargetAgent(e.target.value)
+                                onChange={(e) =>
+                                  setSwapTargetAgent(e.target.value)
                                 }
                                 required
                               >
@@ -15678,7 +15404,8 @@ ${ttNotes}`
                                   type="date"
                                   className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500 text-sm"
                                   value={annualStart}
-                                  onChange={(e) => setAnnualStart(e.target.value)
+                                  onChange={(e) =>
+                                    setAnnualStart(e.target.value)
                                   }
                                   required
                                 />
@@ -15764,23 +15491,22 @@ ${ttNotes}`
                   )}
 
                   {/* Agent Portal: Request History Logs (Only Agent) */}
-                  {currentUser.role === "agent" &&
-                    activeTab === "my-requests" && (
-                      <AgentRequestsLogs
-                        currentUser={currentUser}
-                        requests={requests}
-                        inquiries={inquiries}
-                        tabbyTamaraRequests={tabbyTamaraRequests}
-                        complaints={tabbyTamaraComplaints}
-                        clientComms={clientComms}
-                        canEditItem={canEditItem}
-                        getRemainingEditTime={getRemainingEditTime}
-                        editLimitMs={getEditLimitMs()}
-                        setEditingItem={setEditingItem}
-                        handleCancelRequest={handleCancelRequest}
-                        addSystemNotification={addSystemNotification}
-                      />
-                    )}
+                  {currentUser.role === "agent" && activeTab === "my-requests" && (
+                    <AgentRequestsLogs
+                      currentUser={currentUser}
+                      requests={requests}
+                      inquiries={inquiries}
+                      tabbyTamaraRequests={tabbyTamaraRequests}
+                      complaints={tabbyTamaraComplaints}
+                      clientComms={clientComms}
+                      canEditItem={canEditItem}
+                      getRemainingEditTime={getRemainingEditTime}
+                      editLimitMs={getEditLimitMs()}
+                      setEditingItem={setEditingItem}
+                      handleCancelRequest={handleCancelRequest}
+                      addSystemNotification={addSystemNotification}
+                    />
+                  )}
 
                   {/* All Agent Submissions Log (TL / Support / QA - Management Mode) */}
                   {isTLOreSupport && activeTab === "submissions-log" && (
@@ -15875,7 +15601,8 @@ ${ttNotes}`
                                 </label>
                                 <select
                                   value={inquiryClinicName}
-                                  onChange={(e) => setInquiryClinicName(e.target.value)
+                                  onChange={(e) =>
+                                    setInquiryClinicName(e.target.value)
                                   }
                                   className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                   required
@@ -15923,101 +15650,40 @@ ${ttNotes}`
                               <div className="space-y-1.5">
                                 <label className="text-xs font-semibold text-slate-300 block flex items-center justify-between">
                                   <span className="flex items-center gap-1">
-                                    Platform{" "}
-                                    <span className="text-rose-400 font-extrabold">
-                                      *
-                                    </span>
+                                    Inquiry Platform (Source){" "}
+                                    <span className="text-rose-400 font-extrabold">*</span>
                                   </span>
-                                  {inquiryPlatform && (
-                                    <span className="text-[10px] text-emerald-400 font-mono font-bold uppercase">
-                                      Passed
-                                    </span>
-                                  )}
                                 </label>
                                 <select
                                   value={inquiryPlatform}
-                                  onChange={(e) => setInquiryPlatform(e.target.value)
-                                  }
+                                  onChange={(e) => setInquiryPlatform(e.target.value)}
                                   className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                   required
                                 >
-                                  <option
-                                    value=""
-                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                  >
-                                    -- Select Platform * --
-                                  </option>
-                                  <option
-                                    value="snapchat"
-                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                  >
-                                    Snapchat
-                                  </option>
-                                  <option
-                                    value="whatsapp"
-                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                  >
-                                    WhatsApp
-                                  </option>
-                                  <option
-                                    value="tiktok"
-                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                  >
-                                    TikTok
-                                  </option>
-                                  <option
-                                    value="instagram"
-                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                  >
-                                    Instagram
-                                  </option>
-                                  <option
-                                    value="facebook"
-                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                  >
-                                    Facebook
-                                  </option>
-                                  <option
-                                    value="phone_call"
-                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                  >
-                                    Phone Call
-                                  </option>
-                                  <option
-                                    value="other"
-                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                  >
-                                    Other
-                                  </option>
+                                  <option value="">-- Select Platform * --</option>
+                                  <option value="Snapchat">👻 Snapchat</option>
+                                  <option value="TikTok">🎵 TikTok</option>
+                                  <option value="WhatsApp">💬 WhatsApp</option>
+                                  <option value="Facebook">👥 Facebook</option>
+                                  <option value="Instagram">📸 Instagram</option>
+                                  <option value="Google">🔍 Google Search</option>
+                                  <option value="Twitter_X">𝕏 Twitter / X</option>
+                                  <option value="Phone_Call">📞 Phone Call</option>
+                                  <option value="Other_Web">🌐 Other / Website</option>
                                 </select>
                               </div>
 
-                              {/* Patient Name input (Optional) */}
+                              {/* Patient Name input (Type, don't select) */}
                               <div className="space-y-1.5">
                                 <label className="text-xs font-semibold text-slate-300 block">
-                                  Patient Name <span className="text-slate-500 font-normal">(Optional)</span>
+                                  Patient Name <span className="text-rose-400 font-extrabold">*</span>
                                 </label>
                                 <input
                                   type="text"
-                                  placeholder="Type Patient Name"
+                                  required
+                                  placeholder="Type Patient Name *"
                                   value={inquiryPatientName}
-                                  onChange={(e) => setInquiryPatientName(e.target.value)
-                                  }
-                                  className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
-                                />
-                              </div>
-
-                              {/* File ID input (Optional) */}
-                              <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-slate-300 block">
-                                  File ID <span className="text-slate-500 font-normal">(Optional)</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  placeholder="Type File ID"
-                                  value={inquiryFileId}
-                                  onChange={(e) => setInquiryFileId(e.target.value)
-                                  }
+                                  onChange={(e) => setInquiryPatientName(e.target.value)}
                                   className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                 />
                               </div>
@@ -16025,26 +15691,19 @@ ${ttNotes}`
                               {/* Customer Type Segmented Control */}
                               <div className="space-y-1.5">
                                 <label className="text-xs font-semibold text-slate-300 block">
-                                  Customer Status{" "}
-                                  <span className="text-rose-400 font-extrabold">
-                                    *
-                                  </span>
+                                  Customer Status <span className="text-rose-400 font-extrabold">*</span>
                                 </label>
                                 <div className="grid grid-cols-2 gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
                                   <button
                                     type="button"
-                                    onClick={() =>
-                                      setInquiryCustomerType("new")
-                                    }
+                                    onClick={() => setInquiryCustomerType("new")}
                                     className={`py-2 text-xs font-medium rounded-lg transition-all text-center cursor-pointer ${inquiryCustomerType === "new" ? "bg-indigo-600 text-white shadow-md font-bold" : "text-slate-400 hover:text-slate-200"}`}
                                   >
                                     🆕 New Customer
                                   </button>
                                   <button
                                     type="button"
-                                    onClick={() =>
-                                      setInquiryCustomerType("old")
-                                    }
+                                    onClick={() => setInquiryCustomerType("old")}
                                     className={`py-2 text-xs font-medium rounded-lg transition-all text-center cursor-pointer ${inquiryCustomerType === "old" ? "bg-indigo-600 text-white shadow-md font-bold" : "text-slate-400 hover:text-slate-200"}`}
                                   >
                                     📂 Old Customer
@@ -16056,18 +15715,14 @@ ${ttNotes}`
                               {inquiryCustomerType === "old" && (
                                 <div className="space-y-1.5 animate-fade-in">
                                   <label className="text-xs font-semibold text-slate-300 block">
-                                    Patient File Number{" "}
-                                    <span className="text-rose-400 font-extrabold">
-                                      *
-                                    </span>
+                                    Patient File Number <span className="text-rose-400 font-extrabold">*</span>
                                   </label>
                                   <input
                                     type="text"
                                     required
                                     placeholder="Type Patient File / ID Number *"
                                     value={inquiryFileNumber}
-                                    onChange={(e) => setInquiryFileNumber(e.target.value)
-                                    }
+                                    onChange={(e) => setInquiryFileNumber(e.target.value)}
                                     className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                   />
                                 </div>
@@ -16076,10 +15731,7 @@ ${ttNotes}`
                               {/* Phone Number (Required) */}
                               <div className="space-y-1.5">
                                 <label className="text-xs font-semibold text-slate-300 block">
-                                  Phone Number{" "}
-                                  <span className="text-rose-400 font-extrabold">
-                                    *
-                                  </span>
+                                  Phone Number <span className="text-rose-400 font-extrabold">*</span>
                                 </label>
                                 <input
                                   type="tel"
@@ -16151,10 +15803,7 @@ ${ttNotes}`
                                   value={inquiryText}
                                   onChange={(e) => {
                                     const val = e.target.value;
-                                    if (
-                                      currentUser?.role === "agent" &&
-                                      val.length > 500
-                                    ) {
+                                    if (currentUser?.role === "agent" && val.length > 500) {
                                       return;
                                     }
                                     setInquiryText(val);
@@ -16337,7 +15986,6 @@ ${ttNotes}`
                                             <div
                                               key={inq.id}
                                               id={`inquiry-${inq.id}`}
-                                              onClick={() => handleTLViewInquiry(inq.id)}
                                               className="p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl space-y-3 hover:border-white/10 transition-all relative"
                                             >
                                               {/* Top Info row */}
@@ -16579,7 +16227,8 @@ ${ttNotes}`
                                                     inq.customerContacted ||
                                                     "not_contacted"
                                                   }
-                                                  onChange={(e) => handleUpdateContactedStatus(
+                                                  onChange={(e) =>
+                                                    handleUpdateContactedStatus(
                                                       inq.id,
                                                       e.target.value as any,
                                                     )
@@ -16634,7 +16283,8 @@ ${ttNotes}`
                                       type="text"
                                       placeholder="Search by phone, clinic, agent name, or text... (e.g. +9665)"
                                       value={globalInquirySearch}
-                                      onChange={(e) => setGlobalInquirySearch(e.target.value)
+                                      onChange={(e) =>
+                                        setGlobalInquirySearch(e.target.value)
                                       }
                                       className="w-full bg-transparent text-sm text-slate-100 focus:outline-none placeholder-slate-600 font-mono py-2"
                                     />
@@ -17788,7 +17438,8 @@ ${ttNotes}`
                                 type="text"
                                 placeholder="Search by agent name, LOB, text or answer values..."
                                 value={inquirySearchQuery}
-                                onChange={(e) => setInquirySearchQuery(e.target.value)
+                                onChange={(e) =>
+                                  setInquirySearchQuery(e.target.value)
                                 }
                                 className="w-full pl-10 pr-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                               />
@@ -17796,7 +17447,8 @@ ${ttNotes}`
                             <div className="flex gap-1.5 w-full md:w-auto shrink-0 border-r border-white/10 pr-4 mr-1">
                               <select
                                 value={inquiryClinicFilter}
-                                onChange={(e) => setInquiryClinicFilter(e.target.value)
+                                onChange={(e) =>
+                                  setInquiryClinicFilter(e.target.value)
                                 }
                                 className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-2.5 py-2 text-[11px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                               >
@@ -17890,54 +17542,15 @@ ${ttNotes}`
                                     </div>
                                   ) : (
                                     filteredInquiries.map((inq) => {
-                                      const STATUS_CONFIG: Record<
-                                        string,
-                                        {
-                                          color: string;
-                                          label: string;
-                                          emoji: string;
-                                        }
-                                      > = {
-                                        submitted: {
-                                          color:
-                                            "bg-yellow-500/10 border-yellow-500/20 text-yellow-400 animate-pulse",
-                                          label: "New",
-                                          emoji: "🆕",
-                                        },
-                                        tl_reviewing: {
-                                          color:
-                                            "bg-blue-500/10 border-blue-500/20 text-blue-400",
-                                          label: "TL Reviewing",
-                                          emoji: "👀",
-                                        },
-                                        sent_to_clinic: {
-                                          color:
-                                            "bg-orange-500/10 border-orange-500/20 text-orange-400 animate-pulse",
-                                          label: "Sent to Clinic",
-                                          emoji: "📤",
-                                        },
-                                        answered: {
-                                          color:
-                                            "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
-                                          label: "Answered",
-                                          emoji: "✅",
-                                        },
-                                        closed: {
-                                          color:
-                                            "bg-slate-700/40 border-slate-600/40 text-slate-400",
-                                          label: "Closed",
-                                          emoji: "🔒",
-                                        },
-                                        sent: {
-                                          color:
-                                            "bg-orange-500/10 border-orange-500/20 text-orange-400",
-                                          label: "Sent to Client",
-                                          emoji: "📤",
-                                        }, // legacy fallback
+                                      const STATUS_CONFIG: Record<string, { color: string; label: string; emoji: string }> = {
+                                        submitted:     { color: "bg-yellow-500/10 border-yellow-500/20 text-yellow-400 animate-pulse", label: "New", emoji: "🆕" },
+                                        tl_reviewing:  { color: "bg-blue-500/10 border-blue-500/20 text-blue-400", label: "TL Reviewing", emoji: "👀" },
+                                        sent_to_clinic:{ color: "bg-orange-500/10 border-orange-500/20 text-orange-400 animate-pulse", label: "Sent to Clinic", emoji: "📤" },
+                                        answered:      { color: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400", label: "Answered", emoji: "✅" },
+                                        closed:        { color: "bg-slate-700/40 border-slate-600/40 text-slate-400", label: "Closed", emoji: "🔒" },
+                                        sent:          { color: "bg-orange-500/10 border-orange-500/20 text-orange-400", label: "Sent to Client", emoji: "📤" }, // legacy fallback
                                       };
-                                      const statusConfig =
-                                        STATUS_CONFIG[inq.status] ||
-                                        STATUS_CONFIG.submitted;
+                                      const statusConfig = STATUS_CONFIG[inq.status] || STATUS_CONFIG.submitted;
                                       const statusColor = statusConfig.color;
                                       const statusText = `${statusConfig.emoji} ${statusConfig.label}`;
 
@@ -17958,8 +17571,7 @@ ${ttNotes}`
                                               : "bg-slate-700 text-slate-400 border-white/10"
                                           : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
 
-                                      const isExpanded =
-                                        expandedInquiryId === inq.id;
+                                      const isExpanded = expandedInquiryId === inq.id;
 
                                       return (
                                         <div
@@ -17973,7 +17585,7 @@ ${ttNotes}`
                                           }}
                                         >
                                           {/* Agent info, LOB and date */}
-                                          <div
+                                          <div 
                                             className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full ${isExpanded ? "border-b border-slate-700/60 pb-2.5 cursor-pointer hover:opacity-80" : ""}`}
                                             onClick={(e) => {
                                               if (isExpanded) {
@@ -18049,17 +17661,13 @@ ${ttNotes}`
                                                   {inq.customerType && (
                                                     <span
                                                       className={`text-[10px] px-2 py-0.5 border rounded font-sans font-bold flex items-center gap-1 ${
-                                                        inq.customerType ===
-                                                        "new"
+                                                        inq.customerType === "new"
                                                           ? "bg-teal-500/10 text-teal-300 border-teal-500/20"
                                                           : "bg-purple-500/10 text-purple-300 border-purple-500/20"
                                                       }`}
                                                       title="Customer Status"
                                                     >
-                                                      {inq.customerType ===
-                                                      "new"
-                                                        ? "🆕 New"
-                                                        : "📂 Old"}
+                                                      {inq.customerType === "new" ? "🆕 New" : "📂 Old"}
                                                     </span>
                                                   )}
                                                   {inq.fileNumber && (
@@ -18125,145 +17733,64 @@ ${ttNotes}`
                                               <button
                                                 onClick={(e) => {
                                                   e.stopPropagation();
-                                                  const patientName =
-                                                    inq.patientName || "—";
-                                                  const fileNumber =
-                                                    inq.fileNumber || "—";
-                                                  const phoneNumber =
-                                                    inq.phoneNumber || "—";
-                                                  const clinicName =
-                                                    inq.clinicName || "—";
-                                                  const agentName =
-                                                    inq.agentName || "Agent";
-
-                                                  const INQUIRY_STATUS_LABELS: Record<
-                                                    string,
-                                                    string
-                                                  > = {
-                                                    submitted: "📨 Submitted",
-                                                    tl_reviewing:
-                                                      "👀 TL Reviewing",
-                                                    sent_to_clinic:
-                                                      "📤 Sent to Clinic",
-                                                    answered: "✅ Answered",
-                                                    closed: "🔒 Closed",
-                                                    sent: "📤 Sent to Partner",
+                                                  const patientName = inq.patientName || "—";
+                                                  const fileNumber = inq.fileNumber || "—";
+                                                  const phoneNumber = inq.phoneNumber || "—";
+                                                  const clinicName = inq.clinicName || "—";
+                                                  const agentName = inq.agentName || "Agent";
+                                                   
+                                                  const INQUIRY_STATUS_LABELS: Record<string, string> = {
+                                                    submitted: '📨 Submitted',
+                                                    tl_reviewing: '👀 TL Reviewing',
+                                                    sent_to_clinic: '📤 Sent to Clinic',
+                                                    answered: '✅ Answered',
+                                                    closed: '🔒 Closed',
+                                                    sent: '📤 Sent to Partner'
                                                   };
-                                                  const statusLabel =
-                                                    INQUIRY_STATUS_LABELS[
-                                                      inq.status
-                                                    ] ||
-                                                    inq.status?.toUpperCase() ||
-                                                    "SUBMITTED";
+                                                  const statusLabel = INQUIRY_STATUS_LABELS[inq.status] || inq.status?.toUpperCase() || "SUBMITTED";
 
-                                                  const rawAttachments: any[] =
-                                                    [
-                                                      ...(inq.photos || []),
-                                                      ...(inq.attachments ||
-                                                        []),
-                                                      ...(inq.screenshot
-                                                        ? [inq.screenshot]
-                                                        : []),
-                                                    ];
+                                                  const rawAttachments: any[] = [
+                                                    ...(inq.photos || []),
+                                                    ...(inq.attachments || []),
+                                                    ...(inq.screenshot ? [inq.screenshot] : [])
+                                                  ];
 
-                                                  const repliesList: string[] =
-                                                    [];
-                                                  if (
-                                                    inq.replies &&
-                                                    Array.isArray(inq.replies)
-                                                  ) {
-                                                    inq.replies.forEach(
-                                                      (rep: any) => {
-                                                        repliesList.push(
-                                                          `${rep.senderName} (${rep.authorRole || "User"}): ${rep.text}`,
-                                                        );
-                                                        if (rep.photos)
-                                                          rawAttachments.push(
-                                                            ...rep.photos,
-                                                          );
-                                                        if (rep.attachments)
-                                                          rawAttachments.push(
-                                                            ...rep.attachments,
-                                                          );
-                                                        if (rep.screenshot)
-                                                          rawAttachments.push(
-                                                            rep.screenshot,
-                                                          );
-                                                      },
-                                                    );
+                                                  const repliesList: string[] = [];
+                                                  if (inq.replies && Array.isArray(inq.replies)) {
+                                                    inq.replies.forEach((rep: any) => {
+                                                      repliesList.push(`${rep.senderName} (${rep.authorRole || 'User'}): ${rep.text}`);
+                                                      if (rep.photos) rawAttachments.push(...rep.photos);
+                                                      if (rep.attachments) rawAttachments.push(...rep.attachments);
+                                                      if (rep.screenshot) rawAttachments.push(rep.screenshot);
+                                                    });
                                                   }
 
-                                                  const normAttachments =
-                                                    normalizeAttachments(
-                                                      rawAttachments,
-                                                    );
-                                                  const attachmentsText =
-                                                    normAttachments.length > 0
-                                                      ? `Attachments:\n${normAttachments.map((att) => `  - ${att.name || "File"}`).join("\n")}`
-                                                      : "";
+                                                  const normAttachments = normalizeAttachments(rawAttachments);
+                                                  const attachmentsText = normAttachments.length > 0 
+                                                    ? `Attachments:\n${normAttachments.map(att => `  - ${att.name || 'File'}`).join('\n')}` 
+                                                    : "";
 
-                                                  const formattedClinicNameUpdate = clinicName && clinicName !== "—"
-                                                    ? (clinicName.charAt(0).toUpperCase() + clinicName.slice(1))
-                                                    : "—";
-
-                                                  const text = currentUser?.role === "tl"
-                                                    ? [
-                                                        `✨ *INQUIRY REQUEST STATUS* ✨`,
-                                                        `--------------------------------------`,
-                                                        `🆔 *Ref:* ${formatCaseRef(inq.id, "inq", inq.createdAt, inq.caseRef)}`,
-                                                        `👤 *Patient Name:* ${patientName}`,
-                                                        `📞 *Phone:* ${formatPhoneForCopy(phoneNumber)}`,
-                                                        inq.platform
-                                                          ? `🌐 *Platform:* ${inq.platform}`
-                                                          : "",
-                                                        fileNumber && fileNumber !== "—"
-                                                          ? `📁 *File/ID:* ${fileNumber}`
-                                                          : "",
-                                                        `🏥 *Clinic:* ${formattedClinicNameUpdate}`,
-                                                        `💬 *Inquiry Details:*`,
-                                                        `${inq.text || "—"}`,
-                                                        `--------------------------------------`,
-                                                      ]
-                                                        .filter(Boolean)
-                                                        .join("\n")
-                                                    : [
-                                                        `✨ *INQUIRY REQUEST STATUS* ✨`,
-                                                        `--------------------------------------`,
-                                                        `🆔 *Ref:* ${formatCaseRef(inq.id, "inq", inq.createdAt, inq.caseRef)}`,
-                                                        `👤 *Patient Name:* ${patientName}`,
-                                                        `📞 *Phone:* ${formatPhoneForCopy(phoneNumber)}`,
-                                                        inq.platform
-                                                          ? `🌐 *Platform:* ${inq.platform}`
-                                                          : "",
-                                                        inq.customerType
-                                                          ? `🏷️ *Customer Status:* ${inq.customerType === "new" ? "New Customer" : "Old Customer"}`
-                                                          : "",
-                                                        `📁 *File/ID:* ${fileNumber}`,
-                                                        `🏥 *Clinic:* ${clinicName}`,
-                                                        `📋 *Status:* ${statusLabel}`,
-                                                        `👤 *Agent Name:* ${agentName}`,
-                                                        `💬 *Inquiry Details:*`,
-                                                        `${inq.text || "—"}`,
-                                                        inq.answer
-                                                          ? `💡 *TL Answer:* ${inq.answer}`
-                                                          : "",
-                                                        inq.answeredBy
-                                                          ? `👮 *Answered By:* ${inq.answeredBy}`
-                                                          : "",
-                                                        repliesList.length > 0
-                                                          ? `\n💬 *Replies & Conversation History:*\n${repliesList.join("\n")}`
-                                                          : "",
-                                                        attachmentsText
-                                                          ? `\n📎 ${attachmentsText}`
-                                                          : "",
-                                                        inq.links &&
-                                                        inq.links.length > 0
-                                                          ? `\n🔗 *Links:* \n${inq.links.join("\n")}`
-                                                          : "",
-                                                        `--------------------------------------`,
-                                                      ]
-                                                        .filter(Boolean)
-                                                        .join("\n");
+                                                  const text = [
+                                                    `✨ *INQUIRY REQUEST STATUS* ✨`,
+                                                    `--------------------------------------`,
+                                                    `🆔 *Ref:* ${formatCaseRef(inq.id, "inq", inq.createdAt, inq.caseRef)}`,
+                                                    `👤 *Patient Name:* ${patientName}`,
+                                                    `📞 *Phone:* ${formatPhoneForCopy(phoneNumber)}`,
+                                                    inq.platform ? `🌐 *Platform:* ${inq.platform}` : "",
+                                                    inq.customerType ? `🏷️ *Customer Status:* ${inq.customerType === "new" ? "New Customer" : "Old Customer"}` : "",
+                                                    `📁 *File/ID:* ${fileNumber}`,
+                                                    `🏥 *Clinic:* ${clinicName}`,
+                                                    `📋 *Status:* ${statusLabel}`,
+                                                    `👤 *Agent Name:* ${agentName}`,
+                                                    `💬 *Inquiry Details:*`,
+                                                    `${inq.text || "—"}`,
+                                                    inq.answer ? `💡 *TL Answer:* ${inq.answer}` : "",
+                                                    inq.answeredBy ? `👮 *Answered By:* ${inq.answeredBy}` : "",
+                                                    repliesList.length > 0 ? `\n💬 *Replies & Conversation History:*\n${repliesList.join('\n')}` : "",
+                                                    attachmentsText ? `\n📎 ${attachmentsText}` : "",
+                                                    (inq.links && inq.links.length > 0) ? `\n🔗 *Links:* \n${inq.links.join('\n')}` : "",
+                                                    `--------------------------------------`
+                                                  ].filter(Boolean).join('\n');
 
                                                   copyToClipboard(
                                                     text,
@@ -18288,26 +17815,11 @@ ${ttNotes}`
                                                   ⏱ {ageLabel}
                                                 </span>
                                               )}
-                                              {inq.viewingStatus === 'tl_viewing' && (
-                                                <span className="px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 bg-amber-500/10 border-amber-500/25 text-amber-400">
-                                                  👁 Team Leader Viewing
+                                              {inq.status === 'sent_to_clinic' && inq.sentAt && (
+                                                <span className="px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 bg-orange-500/20 text-orange-400 border-orange-500/30 animate-pulse font-sans">
+                                                  ⏱️ Sent {Math.floor((Date.now() - new Date(inq.sentAt).getTime()) / 60000)}m ago
                                                 </span>
                                               )}
-                                              {inq.status ===
-                                                "sent_to_clinic" &&
-                                                inq.sentAt && (
-                                                  <span className="px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 bg-orange-500/20 text-orange-400 border-orange-500/30 animate-pulse font-sans">
-                                                    ⏱️ Sent{" "}
-                                                    {Math.floor(
-                                                      (Date.now() -
-                                                        new Date(
-                                                          inq.sentAt,
-                                                        ).getTime()) /
-                                                        60000,
-                                                    )}
-                                                    m ago
-                                                  </span>
-                                                )}
                                               {isSuperAdmin && (
                                                 <button
                                                   onClick={(e) => {
@@ -18321,328 +17833,256 @@ ${ttNotes}`
                                                 </button>
                                               )}
                                               <div className="text-slate-400 hover:text-indigo-400 p-1 rounded-md transition-all shrink-0 ml-1 flex items-center justify-center">
-                                                {isExpanded ? (
-                                                  <ChevronUp className="w-4.5 h-4.5 text-indigo-400" />
-                                                ) : (
-                                                  <ChevronDown className="w-4.5 h-4.5 text-slate-400" />
-                                                )}
+                                                {isExpanded ? <ChevronUp className="w-4.5 h-4.5 text-indigo-400" /> : <ChevronDown className="w-4.5 h-4.5 text-slate-400" />}
                                               </div>
                                             </div>
                                           </div>
 
                                           {isExpanded && (
                                             <>
-                                              {/* Question body */}
-                                              <div className="space-y-3 font-sans">
-                                                <p className="text-xs text-slate-200 leading-relaxed whitespace-pre-wrap">
-                                                  {inq.text}
-                                                </p>
 
-                                                {/* Render attachments */}
-                                                <AttachmentsDisplay
-                                                  photos={[
-                                                    ...(inq.photos || []),
-                                                    ...(inq.screenshot
-                                                      ? [inq.screenshot]
-                                                      : []),
-                                                    ...((inq as any).imageUrl
-                                                      ? [(inq as any).imageUrl]
-                                                      : []),
-                                                  ].filter(Boolean)}
-                                                  attachments={inq.attachments}
-                                                  links={inq.links || []}
-                                                  tlPhotos={inq.tlPhotos}
-                                                  tlLinks={inq.tlLinks}
-                                                  showSideBadges={true}
+                                          {/* Question body */}
+                                          <div className="space-y-3 font-sans">
+                                            <p className="text-xs text-slate-200 leading-relaxed whitespace-pre-wrap">
+                                              {inq.text}
+                                            </p>
+
+                                            {/* Render attachments */}
+                                            <AttachmentsDisplay
+                                              photos={[
+                                                ...(inq.photos || []),
+                                                ...(inq.screenshot
+                                                  ? [inq.screenshot]
+                                                  : []),
+                                                ...((inq as any).imageUrl
+                                                  ? [(inq as any).imageUrl]
+                                                  : []),
+                                              ].filter(Boolean)}
+                                              attachments={inq.attachments}
+                                              links={inq.links || []}
+                                              tlPhotos={inq.tlPhotos}
+                                              tlLinks={inq.tlLinks}
+                                              showSideBadges={true}
+                                            />
+
+                                            {/* TL customerContacted quick update buttons */}
+                                            <div className="flex flex-wrap bg-slate-900/50 p-1 rounded-lg gap-1 border border-white/5 mt-3 w-max">
+                                              <button
+                                                onClick={() =>
+                                                  handleUpdateContactedStatus(
+                                                    inq.id,
+                                                    "not_contacted",
+                                                  )
+                                                }
+                                                className={`text-[10px] px-2 py-1 rounded transition-colors ${!inq.customerContacted || inq.customerContacted === "not_contacted" ? "bg-rose-500/20 text-rose-300 font-bold" : "text-slate-400 hover:bg-white/5"}`}
+                                              >
+                                                Not Contacted
+                                              </button>
+                                              <button
+                                                onClick={() =>
+                                                  handleUpdateContactedStatus(
+                                                    inq.id,
+                                                    "attempted",
+                                                  )
+                                                }
+                                                className={`text-[10px] px-2 py-1 rounded transition-colors ${inq.customerContacted === "attempted" ? "bg-amber-500/20 text-amber-300 font-bold" : "text-slate-400 hover:bg-white/5"}`}
+                                              >
+                                                ⏳ Attempted
+                                              </button>
+                                              <button
+                                                onClick={() =>
+                                                  handleUpdateContactedStatus(
+                                                    inq.id,
+                                                    "contacted",
+                                                  )
+                                                }
+                                                className={`text-[10px] px-2 py-1 rounded transition-colors ${inq.customerContacted === "contacted" ? "bg-emerald-500/20 text-emerald-300 font-bold" : "text-slate-400 hover:bg-white/5"}`}
+                                              >
+                                                Contacted
+                                              </button>
+                                            </div>
+
+                                            {/* End attachments */}
+                                          </div>
+
+                                          {/* Update and input tools */}
+                                          <div className="pt-2 border-t border-white/5 space-y-3">
+                                            {/* Default action stage button rows */}
+                                            <div className="flex flex-wrap gap-2 items-center">
+                                              {inq.status === 'submitted' && (
+                                                <button
+                                                  onClick={() => handleMarkInquiryRead(inq.id)}
+                                                  className="px-3.5 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/25 text-blue-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 font-sans"
+                                                >
+                                                  👀 Mark as Read
+                                                </button>
+                                              )}
+
+                                              {(inq.status === 'tl_reviewing' || inq.status === 'submitted') && (
+                                                <button
+                                                  onClick={() => handleMarkSentToClinic(inq.id)}
+                                                  className="px-3.5 py-1.5 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/25 text-orange-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 font-sans"
+                                                >
+                                                  <Send className="w-3.5 h-3.5" /> 📤 Sent to Clinic (Copy)
+                                                </button>
+                                              )}
+
+                                              {(inq.status === 'sent_to_clinic' || inq.status === 'sent') && (
+                                                <>
+                                                  <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-orange-400 uppercase">
+                                                    <Send className="w-3.5 h-3.5 animate-pulse" />
+                                                    <span>
+                                                      Sent by {inq.sentBy || "Unknown"} on {inq.sentAt ? new Date(inq.sentAt).toLocaleString() : "Unknown"}
+                                                      {inq.sentToClinicCount && inq.sentToClinicCount > 1 ? ` (Follow-up #${inq.sentToClinicCount})` : ''}
+                                                    </span>
+                                                  </div>
+                                                  <button
+                                                    onClick={() => handleMarkSentToClinic(inq.id)}
+                                                    className="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 font-sans"
+                                                    title="Re-copy the template (e.g. if you need to re-send)"
+                                                  >
+                                                    <Copy className="w-3.5 h-3.5" /> Re-copy
+                                                  </button>
+                                                </>
+                                              )}
+
+                                              {(inq.status === 'sent_to_clinic' || inq.status === 'sent' || inq.status === 'tl_reviewing') && (
+                                                <button
+                                                  onClick={() => { setAnsweringInquiryId(inq.id); setCurrentAnswerText(inq.answer || ''); }}
+                                                  className="px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 text-emerald-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 font-sans"
+                                                >
+                                                  <CheckCircle2 className="w-3.5 h-3.5" /> Paste Clinic's Answer
+                                                </button>
+                                              )}
+
+                                              {inq.status === 'answered' && (
+                                                <button
+                                                  onClick={() => handleCloseInquiry(inq.id)}
+                                                  className="px-3.5 py-1.5 bg-slate-700/40 hover:bg-slate-700/60 border border-slate-600/40 text-slate-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 font-sans"
+                                                >
+                                                  🔒 Close Inquiry
+                                                </button>
+                                              )}
+
+                                              {inq.status === 'closed' && (
+                                                <span className="text-[10px] text-slate-500 font-mono">
+                                                  🔒 Closed by {inq.closedBy} on {new Date(inq.closedAt || '').toLocaleString()}
+                                                </span>
+                                              )}
+                                            </div>
+
+                                            <div className="relative">
+                                              <InquiryRepliesViewer
+                                                inquiry={inq}
+                                              />
+                                              {inq.status === "answered" && (
+                                                <button
+                                                  onClick={() => {
+                                                    setAnsweringInquiryId(
+                                                      inq.id,
+                                                    );
+                                                    setCurrentAnswerText(
+                                                      inq.answer || "",
+                                                    );
+                                                  }}
+                                                  className="mt-2 text-[10px] text-indigo-400 hover:text-indigo-300 font-bold block"
+                                                >
+                                                  Reply Again / Edit
+                                                </button>
+                                              )}
+                                            </div>
+
+                                            {/* Reassign Agent Option */}
+                                            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/5">
+                                              <span className="text-[11px] text-slate-400 font-semibold flex items-center gap-1">
+                                                Reassign Agent:
+                                              </span>
+                                              <select
+                                                value={inq.agentName}
+                                                onChange={(e) =>
+                                                  handleReassignInquiry(
+                                                    inq.id,
+                                                    e.target.value,
+                                                  )
+                                                }
+                                                className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-2.5 py-1 text-[11px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
+                                              >
+                                                {agentsList.map((aName) => (
+                                                  <option
+                                                    key={aName}
+                                                    value={aName}
+                                                    className="bg-white/10 backdrop-blur-md text-slate-100 backdrop-blur-lg  font-sans"
+                                                  >
+                                                    {aName}
+                                                  </option>
+                                                ))}
+                                              </select>
+                                            </div>
+
+                                            {/* Dialog for answering inside pipeline cards */}
+                                            {answeringInquiryId === inq.id && (
+                                              <div className="p-4 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl space-y-3 animate-fade-in text-left">
+                                                <div className="flex justify-between items-center pb-1">
+                                                  <h4 className="text-xs font-bold text-slate-100 font-display">
+                                                    Feed Back / System Answer
+                                                    Details
+                                                  </h4>
+                                                  <button
+                                                    onClick={() => {
+                                                      setAnsweringInquiryId(
+                                                        null,
+                                                      );
+                                                      setCurrentAnswerText("");
+                                                      setCurrentAnswerAttachments(
+                                                        [],
+                                                      );
+                                                      setCurrentAnswerLinks([]);
+                                                    }}
+                                                    className="text-slate-400 text-xs hover:text-slate-100"
+                                                  >
+                                                    Cancel
+                                                  </button>
+                                                </div>
+                                                <textarea
+                                                  placeholder="Type the response/answer details clearly..."
+                                                  value={currentAnswerText}
+                                                  onChange={(e) =>
+                                                    setCurrentAnswerText(
+                                                      e.target.value,
+                                                    )
+                                                  }
+                                                  rows={3}
+                                                  className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-emerald-500 transition-all font-sans resize-none"
                                                 />
 
-                                                {/* TL customerContacted quick update buttons */}
-                                                <div className="flex flex-wrap bg-slate-900/50 p-1 rounded-lg gap-1 border border-white/5 mt-3 w-max">
-                                                  <button
-                                                    onClick={() =>
-                                                      handleUpdateContactedStatus(
-                                                        inq.id,
-                                                        "not_contacted",
-                                                      )
-                                                    }
-                                                    className={`text-[10px] px-2 py-1 rounded transition-colors ${!inq.customerContacted || inq.customerContacted === "not_contacted" ? "bg-rose-500/20 text-rose-300 font-bold" : "text-slate-400 hover:bg-white/5"}`}
-                                                  >
-                                                    Not Contacted
-                                                  </button>
-                                                  <button
-                                                    onClick={() =>
-                                                      handleUpdateContactedStatus(
-                                                        inq.id,
-                                                        "attempted",
-                                                      )
-                                                    }
-                                                    className={`text-[10px] px-2 py-1 rounded transition-colors ${inq.customerContacted === "attempted" ? "bg-amber-500/20 text-amber-300 font-bold" : "text-slate-400 hover:bg-white/5"}`}
-                                                  >
-                                                    ⏳ Attempted
-                                                  </button>
-                                                  <button
-                                                    onClick={() =>
-                                                      handleUpdateContactedStatus(
-                                                        inq.id,
-                                                        "contacted",
-                                                      )
-                                                    }
-                                                    className={`text-[10px] px-2 py-1 rounded transition-colors ${inq.customerContacted === "contacted" ? "bg-emerald-500/20 text-emerald-300 font-bold" : "text-slate-400 hover:bg-white/5"}`}
-                                                  >
-                                                    Contacted
-                                                  </button>
-                                                </div>
+                                                <ProfessionalAttachmentUploader
+                                                  attachments={
+                                                    currentAnswerAttachments
+                                                  }
+                                                  links={currentAnswerLinks}
+                                                  onAttachmentsChange={
+                                                    setCurrentAnswerAttachments
+                                                  }
+                                                  onLinksChange={
+                                                    setCurrentAnswerLinks
+                                                  }
+                                                />
 
-                                                {/* End attachments */}
-                                              </div>
-
-                                              {/* Update and input tools */}
-                                              <div className="pt-2 border-t border-white/5 space-y-3">
-                                                {/* Default action stage button rows */}
-                                                <div className="flex flex-wrap gap-2 items-center">
-                                                  {inq.status ===
-                                                    "submitted" && (
-                                                    <button
-                                                      onClick={() =>
-                                                        handleMarkInquiryRead(
-                                                          inq.id,
-                                                        )
-                                                      }
-                                                      className="px-3.5 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/25 text-blue-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 font-sans"
-                                                    >
-                                                      👀 Mark as Read
-                                                    </button>
-                                                  )}
-
-                                                  {(inq.status ===
-                                                    "tl_reviewing" ||
-                                                    inq.status ===
-                                                      "submitted") && (
-                                                    <button
-                                                      onClick={() => {
-                                                        setTemplateInquiryId(inq.id);
-                                                        setShowClinicTemplateModal(true);
-                                                      }}
-                                                      className="px-3.5 py-1.5 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/25 text-orange-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 font-sans"
-                                                    >
-                                                      <Send className="w-3.5 h-3.5" />{" "}
-                                                      📤 Sent to Clinic (Copy)
-                                                    </button>
-                                                  )}
-
-                                                  {(inq.status ===
-                                                    "sent_to_clinic" ||
-                                                    inq.status === "sent") && (
-                                                    <>
-                                                      <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-orange-400 uppercase">
-                                                        <Send className="w-3.5 h-3.5 animate-pulse" />
-                                                        <span>
-                                                          Sent by{" "}
-                                                          {inq.sentBy ||
-                                                            "Unknown"}{" "}
-                                                          on{" "}
-                                                          {inq.sentAt
-                                                            ? new Date(
-                                                                inq.sentAt,
-                                                              ).toLocaleString()
-                                                            : "Unknown"}
-                                                          {inq.sentToClinicCount &&
-                                                          inq.sentToClinicCount >
-                                                            1
-                                                            ? ` (Follow-up #${inq.sentToClinicCount})`
-                                                            : ""}
-                                                        </span>
-                                                      </div>
-                                                      <button
-                                                        onClick={() => {
-                                                          setTemplateInquiryId(inq.id);
-                                                          setShowClinicTemplateModal(true);
-                                                        }}
-                                                        className="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 font-sans"
-                                                        title="Re-copy the template (e.g. if you need to re-send)"
-                                                      >
-                                                        <Copy className="w-3.5 h-3.5" />{" "}
-                                                        Re-copy
-                                                      </button>
-                                                    </>
-                                                  )}
-
-                                                  {(inq.status ===
-                                                    "sent_to_clinic" ||
-                                                    inq.status === "sent" ||
-                                                    inq.status ===
-                                                      "tl_reviewing") && (
-                                                    <button
-                                                      onClick={() => {
-                                                        setAnsweringInquiryId(
-                                                          inq.id,
-                                                        );
-                                                        setCurrentAnswerText(
-                                                          inq.answer || "",
-                                                        );
-                                                      }}
-                                                      className="px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 text-emerald-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 font-sans"
-                                                    >
-                                                      <CheckCircle2 className="w-3.5 h-3.5" />{" "}
-                                                      Paste Clinic's Answer
-                                                    </button>
-                                                  )}
-
-                                                  {inq.status ===
-                                                    "answered" && (
-                                                    <button
-                                                      onClick={() =>
-                                                        handleCloseInquiry(
-                                                          inq.id,
-                                                        )
-                                                      }
-                                                      className="px-3.5 py-1.5 bg-slate-700/40 hover:bg-slate-700/60 border border-slate-600/40 text-slate-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 font-sans"
-                                                    >
-                                                      🔒 Close Inquiry
-                                                    </button>
-                                                  )}
-
-                                                  {inq.status === "closed" && (
-                                                    <span className="text-[10px] text-slate-500 font-mono">
-                                                      🔒 Closed by{" "}
-                                                      {inq.closedBy} on{" "}
-                                                      {new Date(
-                                                        inq.closedAt || "",
-                                                      ).toLocaleString()}
-                                                    </span>
-                                                  )}
-                                                </div>
-
-                                                <div className="relative">
-                                                  <InquiryRepliesViewer
-                                                    inquiry={inq}
+                                                <div className="w-full sm:w-64">
+                                                  <SlideToConfirm
+                                                    label={isSubmittingAnswer ? "Submitting..." : "Slide to Answer"}
+                                                    confirmedLabel="Answered!"
+                                                    colorClass="from-emerald-500 to-teal-500"
+                                                    onConfirm={() => handleSetInquiryAnswered(inq.id)}
+                                                    disabled={isSubmittingAnswer}
                                                   />
-                                                  {inq.status ===
-                                                    "answered" && (
-                                                    <button
-                                                      onClick={() => {
-                                                        setAnsweringInquiryId(
-                                                          inq.id,
-                                                        );
-                                                        setCurrentAnswerText(
-                                                          inq.answer || "",
-                                                        );
-                                                      }}
-                                                      className="mt-2 text-[10px] text-indigo-400 hover:text-indigo-300 font-bold block"
-                                                    >
-                                                      Reply Again / Edit
-                                                    </button>
-                                                  )}
                                                 </div>
-
-                                                {/* Reassign Agent Option */}
-                                                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/5">
-                                                  <span className="text-[11px] text-slate-400 font-semibold flex items-center gap-1">
-                                                    Reassign Agent:
-                                                  </span>
-                                                  <select
-                                                    value={inq.agentName}
-                                                    onChange={(e) => handleReassignInquiry(
-                                                        inq.id,
-                                                        e.target.value,
-                                                      )
-                                                    }
-                                                    className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-2.5 py-1 text-[11px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
-                                                  >
-                                                    {agentsList.map((aName) => (
-                                                      <option
-                                                        key={aName}
-                                                        value={aName}
-                                                        className="bg-white/10 backdrop-blur-md text-slate-100 backdrop-blur-lg  font-sans"
-                                                      >
-                                                        {aName}
-                                                      </option>
-                                                    ))}
-                                                  </select>
-                                                </div>
-
-                                                {/* Dialog for answering inside pipeline cards */}
-                                                {answeringInquiryId ===
-                                                  inq.id && (
-                                                  <div className="p-4 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl space-y-3 animate-fade-in text-left">
-                                                    <div className="flex justify-between items-center pb-1">
-                                                      <h4 className="text-xs font-bold text-slate-100 font-display">
-                                                        Feed Back / System
-                                                        Answer Details
-                                                      </h4>
-                                                      <button
-                                                        onClick={() => {
-                                                          setAnsweringInquiryId(
-                                                            null,
-                                                          );
-                                                          setCurrentAnswerText(
-                                                            "",
-                                                          );
-                                                          setCurrentAnswerAttachments(
-                                                            [],
-                                                          );
-                                                          setCurrentAnswerLinks(
-                                                            [],
-                                                          );
-                                                        }}
-                                                        className="text-slate-400 text-xs hover:text-slate-100"
-                                                      >
-                                                        Cancel
-                                                      </button>
-                                                    </div>
-                                                    <textarea
-                                                      placeholder="Type the response/answer details clearly..."
-                                                      value={currentAnswerText}
-                                                      maxLength={500}
-                                                      onChange={(e) => setCurrentAnswerText(
-                                                          e.target.value,
-                                                        )
-                                                      }
-                                                      rows={3}
-                                                      className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-emerald-500 transition-all font-sans resize-none"
-                                                    />
-                                                    <div className="text-right text-[10px] text-slate-400 font-mono pr-1 -mt-1">
-                                                      {currentAnswerText.length} / 500 characters
-                                                    </div>
-
-                                                    <ProfessionalAttachmentUploader
-                                                      attachments={
-                                                        currentAnswerAttachments
-                                                      }
-                                                      links={currentAnswerLinks}
-                                                      onAttachmentsChange={
-                                                        setCurrentAnswerAttachments
-                                                      }
-                                                      onLinksChange={
-                                                        setCurrentAnswerLinks
-                                                      }
-                                                    />
-
-                                                    <div className="w-full sm:w-64">
-                                                      <SlideToConfirm
-                                                        label={
-                                                          isSubmittingAnswer
-                                                            ? "Submitting..."
-                                                            : "Slide to Answer"
-                                                        }
-                                                        confirmedLabel="Answered!"
-                                                        colorClass="from-emerald-500 to-teal-500"
-                                                        onConfirm={() =>
-                                                          handleSetInquiryAnswered(
-                                                            inq.id,
-                                                          )
-                                                        }
-                                                        disabled={
-                                                          isSubmittingAnswer
-                                                        }
-                                                      />
-                                                    </div>
-                                                  </div>
-                                                )}
                                               </div>
-                                            </>
-                                          )}
-                                        </div>
+                                            )}
+                                          </div>
+                                        </>
+                                      )}
+                                      </div>
                                       );
                                     })
                                   )}
@@ -19428,7 +18868,8 @@ ${ttNotes}`
                                         <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                                         <input
                                           value={rtmSearch}
-                                          onChange={(e) => setRtmSearch(e.target.value)
+                                          onChange={(e) =>
+                                            setRtmSearch(e.target.value)
                                           }
                                           placeholder="Search agents by name..."
                                           className="w-full pl-9 pr-4 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-sm focus:border-indigo-500 text-slate-200 outline-none transition-all placeholder:text-slate-600 focus:bg-black/70"
@@ -19923,7 +19364,8 @@ ${ttNotes}`
                                   <input
                                     type="text"
                                     value={tlSearchQuery}
-                                    onChange={(e) => setTlSearchQuery(e.target.value)
+                                    onChange={(e) =>
+                                      setTlSearchQuery(e.target.value)
                                     }
                                     placeholder="Filter status table by agent name..."
                                     className="w-full pl-9 pr-4 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
@@ -19936,7 +19378,8 @@ ${ttNotes}`
                                   </span>
                                   <select
                                     value={tlStatusFilter}
-                                    onChange={(e) => setTlStatusFilter(e.target.value as any)
+                                    onChange={(e) =>
+                                      setTlStatusFilter(e.target.value as any)
                                     }
                                     className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-300 focus:outline-none focus:border-indigo-500 cursor-pointer"
                                   >
@@ -20154,7 +19597,8 @@ ${ttNotes}`
                                                     ></span>
                                                     <select
                                                       value={activeStatus}
-                                                      onChange={(e) => handleTLOverrideAgentStatus(
+                                                      onChange={(e) =>
+                                                        handleTLOverrideAgentStatus(
                                                           name,
                                                           e.target.value as any,
                                                         )
@@ -20501,7 +19945,8 @@ ${ttNotes}`
                               </label>
                               <select
                                 value={manualRosterAgent}
-                                onChange={(e) => setManualRosterAgent(e.target.value)
+                                onChange={(e) =>
+                                  setManualRosterAgent(e.target.value)
                                 }
                                 className="w-full px-3 py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer focus:border-indigo-500 font-sans"
                               >
@@ -20525,7 +19970,8 @@ ${ttNotes}`
                               <input
                                 type="date"
                                 value={manualRosterDate}
-                                onChange={(e) => setManualRosterDate(e.target.value)
+                                onChange={(e) =>
+                                  setManualRosterDate(e.target.value)
                                 }
                                 className="w-full px-3 py-1.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none focus:border-indigo-500 h-[42px]"
                               />
@@ -20537,7 +19983,8 @@ ${ttNotes}`
                               </label>
                               <select
                                 value={manualRosterShift}
-                                onChange={(e) => setManualRosterShift(e.target.value)
+                                onChange={(e) =>
+                                  setManualRosterShift(e.target.value)
                                 }
                                 className="w-full px-3 py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer focus:border-indigo-500 font-sans"
                               >
@@ -20578,7 +20025,8 @@ ${ttNotes}`
                                 type="text"
                                 placeholder="e.g. Approved temporary schedule override / Direct management assignment / Shift Notes..."
                                 value={manualRosterNotes}
-                                onChange={(e) => setManualRosterNotes(e.target.value)
+                                onChange={(e) =>
+                                  setManualRosterNotes(e.target.value)
                                 }
                                 className="w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500"
                               />
@@ -20777,7 +20225,8 @@ ${ttNotes}`
                                 type="text"
                                 placeholder="Filter by Agent Name..."
                                 value={scheduleFilterAgent}
-                                onChange={(e) => setScheduleFilterAgent(e.target.value)
+                                onChange={(e) =>
+                                  setScheduleFilterAgent(e.target.value)
                                 }
                                 className="px-4 py-2 bg-black/45 hover:bg-white/20 backdrop-blur-md backdrop-blur-xl border border-white/10 focus:border-indigo-500/85 focus:ring-1 focus:ring-indigo-500 rounded-xl text-xs text-slate-100 placeholder-slate-400 outline-none transition-all w-full sm:w-64"
                               />
@@ -21974,7 +21423,8 @@ ${ttNotes}`
                                                     <input
                                                       type="time"
                                                       value={blBreakTime}
-                                                      onChange={(e) => setBlBreakTime(
+                                                      onChange={(e) =>
+                                                        setBlBreakTime(
                                                           e.target.value,
                                                         )
                                                       }
@@ -21988,7 +21438,8 @@ ${ttNotes}`
                                                     <input
                                                       type="time"
                                                       value={blLunchTime}
-                                                      onChange={(e) => setBlLunchTime(
+                                                      onChange={(e) =>
+                                                        setBlLunchTime(
                                                           e.target.value,
                                                         )
                                                       }
@@ -22135,7 +21586,8 @@ ${ttNotes}`
                                       return (
                                         <select
                                           value={p2pSelectedDate}
-                                          onChange={(e) => setP2pSelectedDate(e.target.value)
+                                          onChange={(e) =>
+                                            setP2pSelectedDate(e.target.value)
                                           }
                                           className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
                                         >
@@ -22167,7 +21619,8 @@ ${ttNotes}`
                                     </label>
                                     <select
                                       value={p2pTargetAgent}
-                                      onChange={(e) => setP2pTargetAgent(e.target.value)
+                                      onChange={(e) =>
+                                        setP2pTargetAgent(e.target.value)
                                       }
                                       className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
                                     >
@@ -22209,7 +21662,8 @@ ${ttNotes}`
                                     </label>
                                     <select
                                       value={p2pTargetShift}
-                                      onChange={(e) => setP2pTargetShift(e.target.value)
+                                      onChange={(e) =>
+                                        setP2pTargetShift(e.target.value)
                                       }
                                       className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
                                     >
@@ -22240,7 +21694,8 @@ ${ttNotes}`
                                       type="text"
                                       placeholder="I have a doctor appt / Need early shift..."
                                       value={p2pNotes}
-                                      onChange={(e) => setP2pNotes(e.target.value)
+                                      onChange={(e) =>
+                                        setP2pNotes(e.target.value)
                                       }
                                       className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 outline-none"
                                     />
@@ -22880,7 +22335,8 @@ ${ttNotes}`
                                           type="text"
                                           placeholder="Enter full patient name"
                                           value={ttPatientName}
-                                          onChange={(e) => setTtPatientName(e.target.value)
+                                          onChange={(e) =>
+                                            setTtPatientName(e.target.value)
                                           }
                                           className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium"
                                           required
@@ -22896,7 +22352,8 @@ ${ttNotes}`
                                           type="text"
                                           placeholder="Patient file / folder number"
                                           value={ttFileNumber}
-                                          onChange={(e) => setTtFileNumber(e.target.value)
+                                          onChange={(e) =>
+                                            setTtFileNumber(e.target.value)
                                           }
                                           className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
                                         />
@@ -22912,7 +22369,8 @@ ${ttNotes}`
                                             <input
                                               type="checkbox"
                                               checked={ttIsOldCustomer}
-                                              onChange={(e) => setTtIsOldCustomer(
+                                              onChange={(e) =>
+                                                setTtIsOldCustomer(
                                                   e.target.checked,
                                                 )
                                               }
@@ -22931,7 +22389,8 @@ ${ttNotes}`
                                               type="text"
                                               placeholder="National ID / Iqama Number"
                                               value={ttIdNumber}
-                                              onChange={(e) => setTtIdNumber(e.target.value)
+                                              onChange={(e) =>
+                                                setTtIdNumber(e.target.value)
                                               }
                                               className="w-full bg-black/45 border border-amber-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 font-mono"
                                               required={!ttIsOldCustomer}
@@ -22953,7 +22412,8 @@ ${ttNotes}`
                                             type="text"
                                             placeholder="0.00"
                                             value={ttPriceWithoutTax}
-                                            onChange={(e) => setTtPriceWithoutTax(
+                                            onChange={(e) =>
+                                              setTtPriceWithoutTax(
                                                 e.target.value,
                                               )
                                             }
@@ -23099,7 +22559,8 @@ ${ttNotes}`
                                         <select
                                           id="tt-clinic"
                                           value={ttClinicName}
-                                          onChange={(e) => setTtClinicName(e.target.value)
+                                          onChange={(e) =>
+                                            setTtClinicName(e.target.value)
                                           }
                                           className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                           required
@@ -23151,7 +22612,8 @@ ${ttNotes}`
                                         <textarea
                                           placeholder="Any special treatment, payment plan terms, etc."
                                           value={ttNotes}
-                                          onChange={(e) => setTtNotes(e.target.value)
+                                          onChange={(e) =>
+                                            setTtNotes(e.target.value)
                                           }
                                           className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[70px] resize-y"
                                         />
@@ -23217,7 +22679,8 @@ ${ttNotes}`
                                           type="text"
                                           placeholder="Enter patient name"
                                           value={tcPatientName}
-                                          onChange={(e) => setTcPatientName(e.target.value)
+                                          onChange={(e) =>
+                                            setTcPatientName(e.target.value)
                                           }
                                           className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans font-medium"
                                           required
@@ -23233,7 +22696,8 @@ ${ttNotes}`
                                           type="text"
                                           placeholder="File / folder reference"
                                           value={tcFileNumber}
-                                          onChange={(e) => setTcFileNumber(e.target.value)
+                                          onChange={(e) =>
+                                            setTcFileNumber(e.target.value)
                                           }
                                           className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-mono"
                                         />
@@ -23249,7 +22713,8 @@ ${ttNotes}`
                                             <input
                                               type="checkbox"
                                               checked={tcIsOldCustomer}
-                                              onChange={(e) => setTcIsOldCustomer(
+                                              onChange={(e) =>
+                                                setTcIsOldCustomer(
                                                   e.target.checked,
                                                 )
                                               }
@@ -23268,7 +22733,8 @@ ${ttNotes}`
                                               type="text"
                                               placeholder="National ID / Iqama Number"
                                               value={tcIdNumber}
-                                              onChange={(e) => setTcIdNumber(e.target.value)
+                                              onChange={(e) =>
+                                                setTcIdNumber(e.target.value)
                                               }
                                               className="w-full bg-black/45 border border-amber-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 font-mono"
                                               required={!tcIsOldCustomer}
@@ -23326,7 +22792,8 @@ ${ttNotes}`
                                         <select
                                           id="tc-clinic"
                                           value={tcClinicName}
-                                          onChange={(e) => setTcClinicName(e.target.value)
+                                          onChange={(e) =>
+                                            setTcClinicName(e.target.value)
                                           }
                                           className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                           required
@@ -23378,7 +22845,8 @@ ${ttNotes}`
                                         <textarea
                                           placeholder="Patient notes or description of the issue or service failure..."
                                           value={tcComplaintDetails}
-                                          onChange={(e) => setTcComplaintDetails(
+                                          onChange={(e) =>
+                                            setTcComplaintDetails(
                                               e.target.value,
                                             )
                                           }
@@ -23437,7 +22905,8 @@ ${ttNotes}`
                                           type="text"
                                           placeholder="Enter Patient Name"
                                           value={ccPatientName}
-                                          onChange={(e) => setCcPatientName(e.target.value)
+                                          onChange={(e) =>
+                                            setCcPatientName(e.target.value)
                                           }
                                           className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-3 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans focus:ring-1 focus:ring-indigo-500/30"
                                           required
@@ -23451,7 +22920,8 @@ ${ttNotes}`
                                         </label>
                                         <select
                                           value={ccClinicName}
-                                          onChange={(e) => setCcClinicName(e.target.value)
+                                          onChange={(e) =>
+                                            setCcClinicName(e.target.value)
                                           }
                                           className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                           required
@@ -23617,7 +23087,8 @@ ${ttNotes}`
                                         <textarea
                                           placeholder="Explain the required follow up..."
                                           value={ccNotes}
-                                          onChange={(e) => setCcNotes(e.target.value)
+                                          onChange={(e) =>
+                                            setCcNotes(e.target.value)
                                           }
                                           className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[80px] resize-y font-medium"
                                           required
@@ -23915,7 +23386,8 @@ ${ttNotes}`
                                         </span>
                                         <select
                                           value={ttFilterProvider}
-                                          onChange={(e) => setTtFilterProvider(
+                                          onChange={(e) =>
+                                            setTtFilterProvider(
                                               e.target.value as any,
                                             )
                                           }
@@ -23960,7 +23432,8 @@ ${ttNotes}`
                                     </span>
                                     <select
                                       value={tcFilterClinic}
-                                      onChange={(e) => setTcFilterClinic(e.target.value)
+                                      onChange={(e) =>
+                                        setTcFilterClinic(e.target.value)
                                       }
                                       className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-2.5 py-1 text-[11px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                                     >
@@ -24116,7 +23589,8 @@ ${ttNotes}`
                                                   type="text"
                                                   placeholder="Search patient, phone, clinic, agent..."
                                                   value={ttSearch}
-                                                  onChange={(e) => setTtSearch(e.target.value)
+                                                  onChange={(e) =>
+                                                    setTtSearch(e.target.value)
                                                   }
                                                   className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium"
                                                 />
@@ -24125,7 +23599,8 @@ ${ttNotes}`
                                                 <input
                                                   type="date"
                                                   value={ttDateFilter}
-                                                  onChange={(e) => setTtDateFilter(
+                                                  onChange={(e) =>
+                                                    setTtDateFilter(
                                                       e.target.value,
                                                     )
                                                   }
@@ -24150,7 +23625,7 @@ ${ttNotes}`
                                                 </p>
                                               </div>
                                             ) : (
-                                              <div className="space-y-4 max-h-[700px] overflow-y-auto pr-1">
+                                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 {filteredTTRequests.map(
                                                   (req) => (
                                                     <TabbyTamaraCard
@@ -24367,7 +23842,7 @@ ${ttNotes}`
                                             </p>
                                           </div>
                                         ) : (
-                                          <div className="space-y-4 max-h-[700px] overflow-y-auto pr-1 animate-fade-in font-sans">
+                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in font-sans font-sans">
                                             {tabbyTamaraComplaints
                                               .filter((c) => {
                                                 const isMyComplaint =
@@ -24584,7 +24059,7 @@ ${ttNotes}`
                                                               ) {
                                                                 handleAssignRecord(
                                                                   comp.id,
-                                                                  "tabby_tamara_complaints",
+                                                                  "tt_complaints",
                                                                   e.target
                                                                     .value,
                                                                   "Complaint",
@@ -24915,7 +24390,8 @@ ${ttNotes}`
                                                               value={
                                                                 tlComplaintComment
                                                               }
-                                                              onChange={(e) => setTlComplaintComment(
+                                                              onChange={(e) =>
+                                                                setTlComplaintComment(
                                                                   e.target
                                                                     .value,
                                                                 )
@@ -24983,11 +24459,7 @@ ${ttNotes}`
                                                                 ? `Links:\n${(comp.links || []).join("\n")}`
                                                                 : "";
 
-                                                            const statusEmoji =
-                                                              comp.status ===
-                                                              "closed"
-                                                                ? "✅"
-                                                                : "⏳";
+                                                            const statusEmoji = comp.status === "closed" ? "✅" : "⏳";
                                                             const text = [
                                                               `🚨 *CUSTOMER COMPLAINT* 🚨`,
                                                               `--------------------------------------`,
@@ -25001,15 +24473,9 @@ ${ttNotes}`
                                                               comp.tlComment
                                                                 ? `💬 *TL Comment:* ${comp.tlComment}`
                                                                 : "",
-                                                              photoLines
-                                                                ? `📎 ${photoLines}`
-                                                                : "",
-                                                              screenshotLine
-                                                                ? `📸 ${screenshotLine}`
-                                                                : "",
-                                                              linkLines
-                                                                ? `🔗 ${linkLines}`
-                                                                : "",
+                                                              photoLines ? `📎 ${photoLines}` : "",
+                                                              screenshotLine ? `📸 ${screenshotLine}` : "",
+                                                              linkLines ? `🔗 ${linkLines}` : "",
                                                               `--------------------------------------`,
                                                             ]
                                                               .filter(Boolean)
@@ -25085,11 +24551,7 @@ ${ttNotes}`
                                                               ? `Links:\n${(comp.links || []).join("\n")}`
                                                               : "";
 
-                                                          const statusEmoji =
-                                                            comp.status ===
-                                                            "closed"
-                                                              ? "✅"
-                                                              : "⏳";
+                                                          const statusEmoji = comp.status === "closed" ? "✅" : "⏳";
                                                           const text = [
                                                             `🚨 *CUSTOMER COMPLAINT* 🚨`,
                                                             `--------------------------------------`,
@@ -25103,15 +24565,9 @@ ${ttNotes}`
                                                             comp.tlComment
                                                               ? `💬 *TL Comment:* ${comp.tlComment}`
                                                               : "",
-                                                            photoLines
-                                                              ? `📎 ${photoLines}`
-                                                              : "",
-                                                            screenshotLine
-                                                              ? `📸 ${screenshotLine}`
-                                                              : "",
-                                                            linkLines
-                                                              ? `🔗 ${linkLines}`
-                                                              : "",
+                                                            photoLines ? `📎 ${photoLines}` : "",
+                                                            screenshotLine ? `📸 ${screenshotLine}` : "",
+                                                            linkLines ? `🔗 ${linkLines}` : "",
                                                             `--------------------------------------`,
                                                           ]
                                                             .filter(Boolean)
@@ -25155,11 +24611,7 @@ ${ttNotes}`
                                                           !isClosed)) && (
                                                         <div className="w-full sm:w-64">
                                                           <SlideToConfirm
-                                                            label={
-                                                              isNeedContact
-                                                                ? "Slide to Close Case"
-                                                                : "Slide to Force Close"
-                                                            }
+                                                            label={isNeedContact ? "Slide to Close Case" : "Slide to Force Close"}
                                                             confirmedLabel="Closed!"
                                                             colorClass="from-emerald-500 to-teal-500"
                                                             onConfirm={() =>
@@ -25196,7 +24648,7 @@ ${ttNotes}`
                                                         currentUser={
                                                           currentUser
                                                         }
-                                                        collectionName="tabby_tamara_complaints"
+                                                        collectionName="tt_complaints"
                                                         addSystemNotification={
                                                           addSystemNotification
                                                         }
@@ -25300,7 +24752,7 @@ ${ttNotes}`
                                             </p>
                                           </div>
                                         ) : (
-                                          <div className="space-y-4 max-h-[700px] overflow-y-auto pr-1 animate-fade-in font-sans">
+                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in font-sans">
                                             {clientComms
                                               .filter((c) => {
                                                 const isRelevantToMe =
@@ -25689,7 +25141,8 @@ ${ttNotes}`
                                                           value={
                                                             ccHandlingNotes
                                                           }
-                                                          onChange={(e) => setCcHandlingNotes(
+                                                          onChange={(e) =>
+                                                            setCcHandlingNotes(
                                                               e.target.value,
                                                             )
                                                           }
@@ -25794,11 +25247,7 @@ ${ttNotes}`
                                                       {/* Copy Option */}
                                                       <button
                                                         onClick={() => {
-                                                          const statusEmoji =
-                                                            req.status ===
-                                                            "contacted"
-                                                              ? "✅"
-                                                              : "⏳";
+                                                          const statusEmoji = req.status === "contacted" ? "✅" : "⏳";
                                                           const details = [
                                                             `📣 *CLIENT COMMUNICATION* 📣`,
                                                             `--------------------------------------`,
@@ -25808,17 +25257,12 @@ ${ttNotes}`
                                                             `🌐 *Language:* ${req.language || "N/A"}`,
                                                             `📞 *Phone:* ${formatPhoneForCopy(req.phoneNumber)}`,
                                                             `${statusEmoji} *Status:* ${req.status ? req.status.toUpperCase() : "PENDING"}`,
-                                                            req.notes
-                                                              ? `📝 *Notes:* ${req.notes}`
-                                                              : "",
+                                                            req.notes ? `📝 *Notes:* ${req.notes}` : "",
                                                             req.handlingNotes
                                                               ? `✅ *Resolution:* ${req.handlingNotes}`
                                                               : "⏳ *Resolution:* Pending TL review",
-                                                            req.handledBy
-                                                              ? `👮 *Handled By:* ${req.handledBy}`
-                                                              : "",
-                                                            (req.photos || [])
-                                                              .length > 0
+                                                            req.handledBy ? `👮 *Handled By:* ${req.handledBy}` : "",
+                                                            (req.photos || []).length > 0
                                                               ? `📎 *Attachments:* ${req.photos.length} item(s)`
                                                               : "",
                                                             `--------------------------------------`,
@@ -26024,7 +25468,8 @@ ${ttNotes}`
                                 </label>
                                 <select
                                   value={feedbackFilterTl}
-                                  onChange={(e) => setFeedbackFilterTl(e.target.value)
+                                  onChange={(e) =>
+                                    setFeedbackFilterTl(e.target.value)
                                   }
                                   className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-sans w-full sm:w-48"
                                 >
@@ -26070,7 +25515,8 @@ ${ttNotes}`
                                   </label>
                                   <select
                                     value={selectedTlForFeedback}
-                                    onChange={(e) => setSelectedTlForFeedback(e.target.value)
+                                    onChange={(e) =>
+                                      setSelectedTlForFeedback(e.target.value)
                                     }
                                     className="bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-400 font-sans w-full cursor-pointer"
                                   >
@@ -26106,7 +25552,8 @@ ${ttNotes}`
                                       <input
                                         type="file"
                                         className="hidden"
-                                        onChange={handleFeedbackFileChange}/>
+                                        onChange={handleFeedbackFileChange}
+                                      />
                                     </label>
                                     {feedbackAttachment && (
                                       <button
@@ -26131,7 +25578,8 @@ ${ttNotes}`
                                 </label>
                                 <textarea
                                   value={feedbackNotes}
-                                  onChange={(e) => setFeedbackNotes(e.target.value)
+                                  onChange={(e) =>
+                                    setFeedbackNotes(e.target.value)
                                   }
                                   rows={4}
                                   placeholder="Type details... Bold text is supported by using **double asterisks**. Tag anyone using @Name, they will get an instant ping notification!"
@@ -26383,7 +25831,8 @@ ${ttNotes}`
                                               value={
                                                 feedbackReplies[f.id] || ""
                                               }
-                                              onChange={(e) => setFeedbackReplies((prev) => ({
+                                              onChange={(e) =>
+                                                setFeedbackReplies((prev) => ({
                                                   ...prev,
                                                   [f.id]: e.target.value,
                                                 }))
@@ -26523,7 +25972,8 @@ ${ttNotes}`
                                   type="text"
                                   placeholder="Search names, phones, emails..."
                                   value={directorySearchQuery}
-                                  onChange={(e) => setDirectorySearchQuery(e.target.value)
+                                  onChange={(e) =>
+                                    setDirectorySearchQuery(e.target.value)
                                   }
                                   className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-500 font-sans font-medium"
                                 />
@@ -26641,21 +26091,17 @@ ${ttNotes}`
                                   <th className="p-4">Agent Name</th>
                                   <th className="p-4">App Username</th>
                                   {(directoryHeaders || []).length > 0 ? (
-                                    (directoryHeaders || []).map(
-                                      (header, hIdx) => {
-                                        const isLast =
-                                          hIdx ===
-                                          (directoryHeaders || []).length - 1;
-                                        return (
-                                          <th
-                                            key={hIdx}
-                                            className={`p-4 ${isLast ? "rounded-r-xl" : ""}`}
-                                          >
-                                            {header}
-                                          </th>
-                                        );
-                                      },
-                                    )
+                                    (directoryHeaders || []).map((header, hIdx) => {
+                                      const isLast = hIdx === (directoryHeaders || []).length - 1;
+                                      return (
+                                        <th
+                                          key={hIdx}
+                                          className={`p-4 ${isLast ? "rounded-r-xl" : ""}`}
+                                        >
+                                          {header}
+                                        </th>
+                                      );
+                                    })
                                   ) : (
                                     <>
                                       <th className="p-4">Email</th>
@@ -26671,362 +26117,201 @@ ${ttNotes}`
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-white/5 font-medium">
-                                {agentDirectory && agentDirectory.length > 0
-                                  ? agentDirectory
-                                      .filter((row) => {
-                                        if (!directorySearchQuery) return true;
-                                        const q =
-                                          directorySearchQuery.toLowerCase();
-                                        return (
-                                          row.agentName
-                                            .toLowerCase()
-                                            .includes(q) ||
-                                          Object.values(row.data).some((v) =>
-                                            String(v || "")
-                                              .toLowerCase()
-                                              .includes(q),
-                                          ) ||
-                                          getUsernameFromFullName(row.agentName)
-                                            .toLowerCase()
-                                            .includes(q)
-                                        );
-                                      })
-                                      .map((row, idx) => {
-                                        const directoryHeadersArray =
-                                          directoryHeaders || [];
-                                        const tlHeader =
-                                          directoryHeadersArray.find((h) => {
-                                            const lh = String(h || "")
-                                              .toLowerCase()
-                                              .trim();
-                                            return (
-                                              lh === "tl" ||
-                                              lh === "team leader" ||
-                                              lh.includes("manager") ||
-                                              lh.includes("supervisor") ||
-                                              lh.includes("lead")
-                                            );
-                                          });
-                                        const roleHeader =
-                                          directoryHeadersArray.find((h) => {
-                                            const lh = String(h || "")
-                                              .toLowerCase()
-                                              .trim();
-                                            return (
-                                              lh === "role" ||
-                                              lh === "lob" ||
-                                              lh.includes("job title") ||
-                                              lh.includes("designation")
-                                            );
-                                          });
-                                        const lobHeader =
-                                          directoryHeadersArray.find((h) => {
-                                            const lh = String(h || "")
-                                              .toLowerCase()
-                                              .trim();
-                                            return (
-                                              lh === "lob" ||
-                                              lh.includes("line") ||
-                                              lh.includes("account") ||
-                                              lh.includes("function")
-                                            );
-                                          });
-                                        const lobTeamHeader =
-                                          directoryHeadersArray.find((h) => {
-                                            const lh = String(h || "")
-                                              .toLowerCase()
-                                              .trim();
-                                            return (
-                                              lh === "lob team" ||
-                                              lh === "team" ||
-                                              lh.includes("sub") ||
-                                              lh.includes("squad")
-                                            );
-                                          });
-                                        const emailHeader =
-                                          directoryHeadersArray.find((h) => {
-                                            const lh = String(h || "")
-                                              .toLowerCase()
-                                              .trim();
-                                            return (
-                                              lh === "email" ||
-                                              lh === "mail" ||
-                                              lh === "corporate email" ||
-                                              lh === "work email"
-                                            );
-                                          });
-                                        const phoneHeader =
-                                          directoryHeadersArray.find((h) => {
-                                            const lh = String(h || "")
-                                              .toLowerCase()
-                                              .trim();
-                                            return (
-                                              lh === "phone" ||
-                                              lh === "mobile" ||
-                                              lh === "contact" ||
-                                              lh === "tel"
-                                            );
-                                          });
+                                {agentDirectory && agentDirectory.length > 0 ? (
+                                  agentDirectory
+                                    .filter((row) => {
+                                      if (!directorySearchQuery) return true;
+                                      const q = directorySearchQuery.toLowerCase();
+                                      return (
+                                        row.agentName.toLowerCase().includes(q) ||
+                                        Object.values(row.data).some((v) =>
+                                          String(v || "").toLowerCase().includes(q)
+                                        ) ||
+                                        getUsernameFromFullName(row.agentName)
+                                          .toLowerCase()
+                                          .includes(q)
+                                      );
+                                    })
+                                    .map((row, idx) => {
+                                      const directoryHeadersArray = directoryHeaders || [];
+                                      const tlHeader = directoryHeadersArray.find((h) => {
+                                        const lh = String(h || "").toLowerCase().trim();
+                                        return lh === "tl" || lh === "team leader" || lh.includes("manager") || lh.includes("supervisor") || lh.includes("lead");
+                                      });
+                                      const roleHeader = directoryHeadersArray.find((h) => {
+                                        const lh = String(h || "").toLowerCase().trim();
+                                        return lh === "role" || lh === "lob" || lh.includes("job title") || lh.includes("designation");
+                                      });
+                                      const lobHeader = directoryHeadersArray.find((h) => {
+                                        const lh = String(h || "").toLowerCase().trim();
+                                        return lh === "lob" || lh.includes("line") || lh.includes("account") || lh.includes("function");
+                                      });
+                                      const lobTeamHeader = directoryHeadersArray.find((h) => {
+                                        const lh = String(h || "").toLowerCase().trim();
+                                        return lh === "lob team" || lh === "team" || lh.includes("sub") || lh.includes("squad");
+                                      });
+                                      const emailHeader = directoryHeadersArray.find((h) => {
+                                        const lh = String(h || "").toLowerCase().trim();
+                                        return lh === "email" || lh === "mail" || lh === "corporate email" || lh === "work email";
+                                      });
+                                      const phoneHeader = directoryHeadersArray.find((h) => {
+                                        const lh = String(h || "").toLowerCase().trim();
+                                        return lh === "phone" || lh === "mobile" || lh === "contact" || lh === "tel";
+                                      });
 
-                                        const emailVal =
-                                          emailHeader && row.data[emailHeader]
-                                            ? row.data[emailHeader]
-                                            : "-";
-                                        const phoneVal =
-                                          phoneHeader && row.data[phoneHeader]
-                                            ? row.data[phoneHeader]
-                                            : "-";
-                                        const lobVal =
-                                          lobHeader && row.data[lobHeader]
-                                            ? row.data[lobHeader]
-                                            : "";
-                                        const lobTeamVal =
-                                          lobTeamHeader &&
-                                          row.data[lobTeamHeader]
-                                            ? row.data[lobTeamHeader]
-                                            : "-";
-                                        const roleVal =
-                                          roleHeader && row.data[roleHeader]
-                                            ? row.data[roleHeader]
-                                            : "-";
-                                        const tlVal =
-                                          tlHeader && row.data[tlHeader]
-                                            ? row.data[tlHeader]
-                                            : "-";
+                                      const emailVal = emailHeader && row.data[emailHeader] ? row.data[emailHeader] : "-";
+                                      const phoneVal = phoneHeader && row.data[phoneHeader] ? row.data[phoneHeader] : "-";
+                                      const lobVal = lobHeader && row.data[lobHeader] ? row.data[lobHeader] : "";
+                                      const lobTeamVal = lobTeamHeader && row.data[lobTeamHeader] ? row.data[lobTeamHeader] : "-";
+                                      const roleVal = roleHeader && row.data[roleHeader] ? row.data[roleHeader] : "-";
+                                      const tlVal = tlHeader && row.data[tlHeader] ? row.data[tlHeader] : "-";
 
-                                        return (
-                                          <tr
-                                            key={row.id}
-                                            className="hover:bg-white/5 transition-all"
-                                          >
-                                            <td className="p-4 text-slate-500 font-mono text-[11px]">
-                                              {idx + 1}
-                                            </td>
-                                            <td className="p-4 text-slate-100 font-bold">
-                                              {row.agentName}
-                                            </td>
-                                            <td className="p-4 text-cyan-400 font-black font-mono">
-                                              {getUsernameFromFullName(
-                                                row.agentName,
-                                              )}
-                                            </td>
-                                            {(directoryHeadersArray || [])
-                                              .length > 0 ? (
-                                              (directoryHeadersArray || []).map(
-                                                (header, hIdx) => (
-                                                  <td
-                                                    key={hIdx}
-                                                    className="p-4"
-                                                  >
-                                                    {row.data[header] || "-"}
-                                                  </td>
-                                                ),
-                                              )
-                                            ) : (
-                                              <>
-                                                <td className="p-4">
-                                                  {emailVal}
-                                                </td>
-                                                <td className="p-4 font-mono text-[12px]">
-                                                  {phoneVal !== "-" ? (
-                                                    <span className="text-emerald-400">
-                                                      {phoneVal
-                                                        .replace(/\s+/g, "")
-                                                        .startsWith("+")
-                                                        ? phoneVal.replace(
-                                                            /\s+/g,
-                                                            "",
-                                                          )
-                                                        : phoneVal}
-                                                    </span>
-                                                  ) : (
-                                                    <span className="text-slate-600">
-                                                      -
-                                                    </span>
-                                                  )}
-                                                </td>
-                                                <td className="p-4">
-                                                  {lobVal ? (
-                                                    <span
-                                                      className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
-                                                        lobVal
-                                                          .toLowerCase()
-                                                          .includes("call")
-                                                          ? "bg-blue-500/15 text-blue-300 border border-blue-500/20"
-                                                          : lobVal
-                                                                .toLowerCase()
-                                                                .includes(
-                                                                  "chat",
-                                                                )
-                                                            ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"
-                                                            : lobVal
-                                                                  .toLowerCase()
-                                                                  .includes(
-                                                                    "social",
-                                                                  )
-                                                              ? "bg-pink-500/15 text-pink-300 border border-pink-500/20"
-                                                              : "bg-white/10 text-slate-300 border border-white/10"
-                                                      }`}
-                                                    >
-                                                      {lobVal}
-                                                    </span>
-                                                  ) : (
-                                                    <span className="text-slate-600">
-                                                      -
-                                                    </span>
-                                                  )}
-                                                </td>
-                                                <td className="p-4">
-                                                  {lobTeamVal}
-                                                </td>
-                                                <td className="p-4">
+                                      return (
+                                        <tr key={row.id} className="hover:bg-white/5 transition-all">
+                                          <td className="p-4 text-slate-500 font-mono text-[11px]">{idx + 1}</td>
+                                          <td className="p-4 text-slate-100 font-bold">{row.agentName}</td>
+                                          <td className="p-4 text-cyan-400 font-black font-mono">
+                                            {getUsernameFromFullName(row.agentName)}
+                                          </td>
+                                          {(directoryHeadersArray || []).length > 0 ? (
+                                            (directoryHeadersArray || []).map((header, hIdx) => (
+                                              <td key={hIdx} className="p-4">
+                                                {row.data[header] || "-"}
+                                              </td>
+                                            ))
+                                          ) : (
+                                            <>
+                                              <td className="p-4">{emailVal}</td>
+                                              <td className="p-4 font-mono text-[12px]">
+                                                {phoneVal !== "-" ? (
+                                                  <span className="text-emerald-400">
+                                                    {phoneVal.replace(/\s+/g, "").startsWith("+")
+                                                      ? phoneVal.replace(/\s+/g, "")
+                                                      : phoneVal}
+                                                  </span>
+                                                ) : (
+                                                  <span className="text-slate-600">-</span>
+                                                )}
+                                              </td>
+                                              <td className="p-4">
+                                                {lobVal ? (
                                                   <span
-                                                    className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${
-                                                      roleVal.toLowerCase() ===
-                                                        "tl" ||
-                                                      roleVal.toLowerCase() ===
-                                                        "team leader"
-                                                        ? "bg-amber-950/30 text-amber-400 border-amber-500/20"
-                                                        : roleVal.toLowerCase() ===
-                                                            "qa"
-                                                          ? "bg-purple-950/30 text-purple-400 border-purple-500/20"
-                                                          : "bg-slate-800 text-slate-400 border-slate-700"
+                                                    className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
+                                                      lobVal.toLowerCase().includes("call")
+                                                        ? "bg-blue-500/15 text-blue-300 border border-blue-500/20"
+                                                        : lobVal.toLowerCase().includes("chat")
+                                                          ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"
+                                                          : lobVal.toLowerCase().includes("social")
+                                                            ? "bg-pink-500/15 text-pink-300 border border-pink-500/20"
+                                                            : "bg-white/10 text-slate-300 border border-white/10"
                                                     }`}
                                                   >
-                                                    {roleVal}
+                                                    {lobVal}
                                                   </span>
-                                                </td>
-                                                <td className="p-4 text-cyan-300 font-bold">
-                                                  {tlVal}
-                                                </td>
-                                              </>
-                                            )}
-                                          </tr>
-                                        );
-                                      })
-                                  : registeredUsers.length > 0
-                                    ? registeredUsers
-                                        .filter((m) => {
-                                          if (!directorySearchQuery)
-                                            return true;
-                                          const q =
-                                            directorySearchQuery.toLowerCase();
-                                          return (
-                                            m.name.toLowerCase().includes(q) ||
-                                            (m.email &&
-                                              m.email
-                                                .toLowerCase()
-                                                .includes(q)) ||
-                                            (m.phone &&
-                                              String(m.phone)
-                                                .toLowerCase()
-                                                .includes(q)) ||
-                                            getUsernameFromFullName(m.name)
-                                              .toLowerCase()
-                                              .includes(q)
-                                          );
-                                        })
-                                        .map((meta, idx) => (
-                                          <tr
-                                            key={idx}
-                                            className="hover:bg-white/5 transition-all"
-                                          >
-                                            <td className="p-4 text-slate-500 font-mono text-[11px]">
-                                              {idx + 1}
-                                            </td>
-                                            <td className="p-4 text-slate-100 font-bold">
-                                              {meta.name}
-                                            </td>
-                                            <td className="p-4 text-cyan-400 font-black font-mono">
-                                              {getUsernameFromFullName(
-                                                meta.name,
-                                              )}
-                                            </td>
-                                            <td className="p-4">
-                                              {meta.email || "-"}
-                                            </td>
-                                            <td className="p-4 font-mono text-[12px]">
-                                              {meta.phone ? (
-                                                <span className="text-emerald-400">
-                                                  {meta.phone
-                                                    .replace(/\s+/g, "")
-                                                    .startsWith("+")
-                                                    ? meta.phone.replace(
-                                                        /\s+/g,
-                                                        "",
-                                                      )
-                                                    : meta.phone}
-                                                </span>
-                                              ) : (
-                                                <span className="text-slate-600">
-                                                  -
-                                                </span>
-                                              )}
-                                            </td>
-                                            <td className="p-4">
-                                              {meta.lob ? (
+                                                ) : (
+                                                  <span className="text-slate-600">-</span>
+                                                )}
+                                              </td>
+                                              <td className="p-4">{lobTeamVal}</td>
+                                              <td className="p-4">
                                                 <span
-                                                  className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
-                                                    meta.lob
-                                                      .toLowerCase()
-                                                      .includes("call")
-                                                      ? "bg-blue-500/15 text-blue-300 border border-blue-500/20"
-                                                      : meta.lob
-                                                            .toLowerCase()
-                                                            .includes("chat")
-                                                        ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"
-                                                        : meta.lob
-                                                              .toLowerCase()
-                                                              .includes(
-                                                                "social",
-                                                              )
-                                                          ? "bg-pink-500/15 text-pink-300 border border-pink-500/20"
-                                                          : "bg-white/10 text-slate-300 border border-white/10"
+                                                  className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${
+                                                    roleVal.toLowerCase() === "tl" || roleVal.toLowerCase() === "team leader"
+                                                      ? "bg-amber-950/30 text-amber-400 border-amber-500/20"
+                                                      : roleVal.toLowerCase() === "qa"
+                                                        ? "bg-purple-950/30 text-purple-400 border-purple-500/20"
+                                                        : "bg-slate-800 text-slate-400 border-slate-700"
                                                   }`}
                                                 >
-                                                  {meta.lob}
+                                                  {roleVal}
                                                 </span>
-                                              ) : (
-                                                <span className="text-slate-600">
-                                                  -
-                                                </span>
-                                              )}
-                                            </td>
-                                            <td className="p-4">
-                                              {meta.lobTeam || "-"}
-                                            </td>
-                                            <td className="p-4">
-                                              <span
-                                                className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${
-                                                  meta.role === "tl"
-                                                    ? "bg-amber-950/30 text-amber-400 border-amber-500/20"
-                                                    : meta.role === "qa"
-                                                      ? "bg-purple-950/30 text-purple-400 border-purple-500/20"
-                                                      : "bg-slate-800 text-slate-400 border-slate-700"
-                                                }`}
-                                              >
-                                                {meta.role === "tl"
-                                                  ? "Team Leader"
-                                                  : meta.role === "qa"
-                                                    ? "QA"
-                                                    : "Agent"}
-                                              </span>
-                                            </td>
-                                            <td className="p-4 text-cyan-300 font-bold">
-                                              {meta.teamLeader || "-"}
-                                            </td>
-                                          </tr>
-                                        ))
-                                    : null}
+                                              </td>
+                                              <td className="p-4 text-cyan-300 font-bold">{tlVal}</td>
+                                            </>
+                                          )}
+                                        </tr>
+                                      );
+                                    })
+                                ) : registeredUsers.length > 0 ? (
+                                  registeredUsers
+                                    .filter((m) => {
+                                      if (!directorySearchQuery) return true;
+                                      const q = directorySearchQuery.toLowerCase();
+                                      return (
+                                        m.name.toLowerCase().includes(q) ||
+                                        (m.email && m.email.toLowerCase().includes(q)) ||
+                                        (m.phone && String(m.phone).toLowerCase().includes(q)) ||
+                                        getUsernameFromFullName(m.name).toLowerCase().includes(q)
+                                      );
+                                    })
+                                    .map((meta, idx) => (
+                                      <tr key={idx} className="hover:bg-white/5 transition-all">
+                                        <td className="p-4 text-slate-500 font-mono text-[11px]">{idx + 1}</td>
+                                        <td className="p-4 text-slate-100 font-bold">{meta.name}</td>
+                                        <td className="p-4 text-cyan-400 font-black font-mono">
+                                          {getUsernameFromFullName(meta.name)}
+                                        </td>
+                                        <td className="p-4">{meta.email || "-"}</td>
+                                        <td className="p-4 font-mono text-[12px]">
+                                          {meta.phone ? (
+                                            <span className="text-emerald-400">
+                                              {meta.phone.replace(/\s+/g, "").startsWith("+")
+                                                ? meta.phone.replace(/\s+/g, "")
+                                                : meta.phone}
+                                            </span>
+                                          ) : (
+                                            <span className="text-slate-600">-</span>
+                                          )}
+                                        </td>
+                                        <td className="p-4">
+                                          {meta.lob ? (
+                                            <span
+                                              className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
+                                                meta.lob.toLowerCase().includes("call")
+                                                  ? "bg-blue-500/15 text-blue-300 border border-blue-500/20"
+                                                  : meta.lob.toLowerCase().includes("chat")
+                                                    ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"
+                                                    : meta.lob.toLowerCase().includes("social")
+                                                      ? "bg-pink-500/15 text-pink-300 border border-pink-500/20"
+                                                      : "bg-white/10 text-slate-300 border border-white/10"
+                                              }`}
+                                            >
+                                              {meta.lob}
+                                            </span>
+                                          ) : (
+                                            <span className="text-slate-600">-</span>
+                                          )}
+                                        </td>
+                                        <td className="p-4">{meta.lobTeam || "-"}</td>
+                                        <td className="p-4">
+                                          <span
+                                            className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${
+                                              meta.role === "tl"
+                                                ? "bg-amber-950/30 text-amber-400 border-amber-500/20"
+                                                : meta.role === "qa"
+                                                  ? "bg-purple-950/30 text-purple-400 border-purple-500/20"
+                                                  : "bg-slate-800 text-slate-400 border-slate-700"
+                                            }`}
+                                          >
+                                            {meta.role === "tl"
+                                              ? "Team Leader"
+                                              : meta.role === "qa"
+                                                ? "QA"
+                                                : "Agent"}
+                                          </span>
+                                        </td>
+                                        <td className="p-4 text-cyan-300 font-bold">{meta.teamLeader || "-"}</td>
+                                      </tr>
+                                    ))
+                                ) : null}
                               </tbody>
                             </table>
-                            {(!agentDirectory || agentDirectory.length === 0) &&
-                              registeredUsers.length === 0 && (
-                                <div className="text-center p-8 text-slate-500 font-medium font-sans">
-                                  No directory data active. Please upload a
-                                  headcount file.
-                                </div>
-                              )}
+                            {(!agentDirectory || agentDirectory.length === 0) && registeredUsers.length === 0 && (
+                              <div className="text-center p-8 text-slate-500 font-medium font-sans">
+                                No directory data active. Please upload a
+                                headcount file.
+                              </div>
+                            )}
                           </div>
                         </div>
                       );
@@ -27392,19 +26677,7 @@ ${ttNotes}`
                         .join("\n");
                   }
 
-                  const statusEmoji =
-                    d.status === "answered" ||
-                    d.status === "completed" ||
-                    d.status === "resolved" ||
-                    d.status === "approved"
-                      ? "✅"
-                      : d.status === "rejected" ||
-                          d.status === "declined" ||
-                          d.status === "failed"
-                        ? "❌"
-                        : d.status === "cancelled"
-                          ? "⚠️"
-                          : "⏳";
+                  const statusEmoji = d.status === "answered" || d.status === "completed" || d.status === "resolved" || d.status === "approved" ? "✅" : d.status === "rejected" || d.status === "declined" || d.status === "failed" ? "❌" : d.status === "cancelled" ? "⚠️" : "⏳";
                   const text = [
                     `📋 *AUDIT RECORD DETAILS* 📋`,
                     `--------------------------------------`,
@@ -27517,80 +26790,6 @@ ${ttNotes}`
                 Yes, Cancel It
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {showClinicTemplateModal && templateInquiryId && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-800/40 rounded-2xl p-6 max-w-lg w-full shadow-2xl space-y-4 mx-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
-                <Send className="w-5 h-5 text-indigo-400" />
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-100 text-sm">
-                  Review Clinic Template
-                </h3>
-                <p className="text-xs text-slate-400">
-                  This standardized template will be copied to your clipboard.
-                </p>
-              </div>
-            </div>
-            {(() => {
-              const inq = inquiries.find((i) => i.id === templateInquiryId);
-              if (!inq) return null;
-              const template = generateClinicTemplate(inq);
-
-              return (
-                <div className="space-y-4">
-                  <textarea
-                    readOnly
-                    className="w-full h-48 bg-slate-900/80 border border-slate-800/40 rounded-xl text-xs font-mono text-slate-300 p-3 focus:outline-none resize-none"
-                    value={template}/>
-                  <div className="flex justify-between items-center pt-2">
-                    <button
-                      onClick={() => {
-                        copyToClipboard(
-                          template,
-                          "Standardized template copied to clipboard!"
-                        );
-                      }}
-                      className="px-3 py-1.5 bg-sky-600/10 hover:bg-sky-600/20 text-sky-400 text-[11px] font-bold rounded-lg border border-sky-500/20 transition-colors flex items-center gap-2"
-                    >
-                      <Copy className="w-3.5 h-3.5" /> Copy to Clipboard
-                    </button>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => {
-                          setShowClinicTemplateModal(false);
-                          setTemplateInquiryId(null);
-                        }}
-                        className="px-4 py-2 text-xs border border-white/10 rounded-xl text-slate-300 hover:bg-white/5 transition-colors cursor-pointer"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={() => {
-                          // Copy first, then set status
-                          copyToClipboard(
-                            template,
-                            "Template copied! Inquiry marked as sent."
-                          ).then(() => {
-                            handleSetInquirySent(inq.id);
-                            setShowClinicTemplateModal(false);
-                            setTemplateInquiryId(null);
-                          });
-                        }}
-                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black transition-colors cursor-pointer"
-                      >
-                        Confirm & Send
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
           </div>
         </div>
       )}

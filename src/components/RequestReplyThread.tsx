@@ -154,20 +154,12 @@ export function RequestReplyThread({
 
   const handleReply = async (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmedText = String(text || '').trim();
-    if (!trimmedText) {
-      toast.error("Reply text cannot be empty.");
-      return;
-    }
-    if (trimmedText.length > 500) {
-      toast.error("Reply details cannot exceed 500 characters.");
-      return;
-    }
+    if (!String(text || '').trim() && attachments.length === 0 && links.length === 0 && replyPhotos.length === 0) return;
 
     try {
       const eType = collectionName === 'inquiries' ? 'inquiry' :
                     collectionName === 'scheduling_requests' ? 'scheduling' :
-                    collectionName === 'tabby_tamara_complaints' ? 'tt_complaint' :
+                    collectionName === 'tt_complaints' ? 'tt_complaint' :
                     collectionName === 'client_comms' ? 'client_comm' : 'tt_request';
 
       const processedAttachments = await processAttachments(
@@ -182,7 +174,7 @@ export function RequestReplyThread({
         authorId: currentUser.id,
         senderName: currentUser.name,
         authorRole: currentUser.role,
-        text: trimmedText,
+        text,
         createdAt: new Date().toISOString(),
         attachments: processedAttachments,
         links,
@@ -193,8 +185,8 @@ export function RequestReplyThread({
       // Fallbacks for notifications if props were not provided
       const computedRequestType = requestType || (
         collectionName === 'scheduling_requests' ? 'Scheduling' :
-        collectionName === 'tabby_tamara' ? 'Tabby/Tamara' :
-        collectionName === 'tabby_tamara_complaints' ? 'Complaint' :
+        collectionName === 'tt_requests' ? 'Tabby/Tamara' :
+        collectionName === 'tt_complaints' ? 'Complaint' :
         collectionName === 'client_comms' ? 'Client Comm' :
         'Request'
       );
@@ -217,8 +209,8 @@ export function RequestReplyThread({
           
         const eType = collectionName === 'inquiries' ? 'inquiry' :
                      collectionName === 'scheduling_requests' ? 'scheduling_request' :
-                     collectionName === 'tabby_tamara' ? 'tt_request' :
-                     collectionName === 'tabby_tamara_complaints' ? 'tt_complaint' :
+                     collectionName === 'tt_requests' ? 'tt_request' :
+                     collectionName === 'tt_complaints' ? 'tt_complaint' :
                      collectionName === 'client_comms' ? 'client_comm' :
                      collectionName === 'cases' ? 'case' : undefined;
                      
@@ -497,10 +489,10 @@ export function RequestReplyThread({
             <textarea 
               id={`reply-input-${request.id}`}
               value={text}
-              maxLength={500}
               onChange={e => {
                 const val = e.target.value;
-                if (val.length > 500) {
+                const isAgentInquiry = collectionName === "inquiries" && currentUser?.role === "agent";
+                if (isAgentInquiry && val.length > 500) {
                   return;
                 }
                 setText(val);
@@ -510,9 +502,11 @@ export function RequestReplyThread({
               placeholder="Record calling status, client correspondence, or submit Team Leader/Agent notes..."
             />
             
-            <div className="text-right text-[10px] text-slate-400 font-mono pr-1 -mt-1">
-              {text.length} / 500 characters
-            </div>
+            {collectionName === "inquiries" && currentUser?.role === "agent" && (
+              <div className="text-right text-[10px] text-slate-500 font-mono pr-1 -mt-1">
+                {text.length}/500 characters
+              </div>
+            )}
             
             <div className="flex items-center justify-between border-t border-white/5 pt-2 flex-wrap gap-2">
               <div className="flex gap-2">

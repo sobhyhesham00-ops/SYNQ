@@ -202,8 +202,8 @@ export const getStorageItem = <T>(key: string, defaultValue: T): T => {
 const getCollectionName = (key: string) => {
     switch(key) {
         case 'sched_inquiries': return 'inquiries';
-        case 'sched_tabby_tamara': return 'tabby_tamara';
-        case 'sched_tt_complaints': return 'tabby_tamara_complaints';
+        case 'sched_tabby_tamara': return 'tt_requests';
+        case 'sched_tt_complaints': return 'tt_complaints';
         case 'sched_client_comms': return 'client_comms';
         case 'sched_requests': return 'scheduling_requests';
         case 'sched_time_logs': return 'timelogs';
@@ -1577,12 +1577,12 @@ export const CASE_CONFIG = {
     prefix: "INQ",
   },
   tt_request: {
-    collection: "tabby_tamara",
+    collection: "tt_requests",
     activeTab: "tabby-tamara",
     prefix: "TTR",
   },
   tt_complaint: {
-    collection: "tabby_tamara_complaints",
+    collection: "tt_complaints",
     activeTab: "complaints",
     prefix: "TTC",
   },

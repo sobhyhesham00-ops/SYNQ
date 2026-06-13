@@ -28,9 +28,9 @@ export const CaseConversation: React.FC<CaseConversationProps> = ({
       case 'inquiry':
         return 'inquiries';
       case 'complaint':
-        return 'tabby_tamara_complaints';
+        return 'tt_complaints';
       case 'tabby_tamara':
-        return 'tabby_tamara';
+        return 'tt_requests';
       case 'client_comm':
         return 'client_comms';
       default:

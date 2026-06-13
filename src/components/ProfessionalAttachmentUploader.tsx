@@ -82,13 +82,7 @@ export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUplo
         }
         const file = fileArray[i];
         
-        // 1. Validate file size (Max 10MB)
-        if (file.size > 10 * 1024 * 1024) {
-             toast.error(`File '${file.name}' exceeds the 10MB size limit.`);
-             continue;
-        }
-
-        // 2. Validate file
+        // 1. Validate file
         const validation = validateFile(file);
         if (!validation.valid) {
             toast.error(validation.error);
@@ -183,7 +177,7 @@ export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUplo
                    <div className="flex flex-col items-center gap-1.5 text-center px-4">
                        <UploadCloud className="w-8 h-8 text-slate-400 mb-1" />
                        <span className="text-xs font-semibold text-slate-200">Click to upload or drag & drop</span>
-                       <span className="text-[10px] font-medium text-slate-500">Max {maxAttachments} files, 10MB each. Files are stored locally on this device, not uploaded to the cloud.</span>
+                       <span className="text-[10px] font-medium text-slate-500">Supports images, PDFs, Word, Excel (Max 15MB). Paste images from clipboard.</span>
                    </div>
                 )}
             </label>
