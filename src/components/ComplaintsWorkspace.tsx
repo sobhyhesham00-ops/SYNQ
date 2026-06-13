@@ -161,7 +161,7 @@ export const ComplaintsWorkspace: React.FC<ComplaintsWorkspaceProps> = ({
   }
 
   return (
-    <div className="space-y-4 max-h-[700px] overflow-y-auto pr-1 animate-fade-in font-sans">
+    <div className="flex flex-col gap-4 animate-fade-in font-sans">
       <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold pl-1 text-left">
         📁 {filteredComps.length} Complaints Found
       </p>
@@ -270,7 +270,7 @@ export const ComplaintsWorkspace: React.FC<ComplaintsWorkspaceProps> = ({
 
             {/* EXPANDED CONTENT UNDERNEATH */}
             {isExpanded && (
-              <div className="flex flex-col gap-4 border-t border-white/5 pt-4 w-full overflow-hidden transition-all duration-300" onClick={(e) => e.stopPropagation()}>
+              <div className="flex flex-col gap-4 border-t border-white/5 pt-4" onClick={(e) => e.stopPropagation()}>
                 {/* Patient Info Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-white/[0.02] border border-white/5 p-4 rounded-xl text-xs text-left">
                   <div>

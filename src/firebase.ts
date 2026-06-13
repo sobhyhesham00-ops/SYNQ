@@ -49,7 +49,6 @@ const isTestEnv = typeof process !== 'undefined' && process.env.NODE_ENV === 'te
 export const db = initializeFirestore(app, {
   localCache: isTestEnv ? undefined : persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
   ignoreUndefinedProperties: true,
-  experimentalForceLongPolling: true
 }, firebaseConfig.firestoreDatabaseId);
 
 export const auth = getAuth(app);

@@ -631,7 +631,7 @@ export const TabbyTamaraCard = ({
       </div>
 
       {isExpanded && (
-        <div className="w-full overflow-hidden transition-all duration-300">
+        <>
           <div className='grid grid-cols-3 divide-x divide-slate-700/40 border-b border-slate-700/40' onClick={(e) => e.stopPropagation()}>
             <div
               className="px-4 py-3 cursor-pointer hover:bg-slate-700/30 active:bg-slate-700/50 transition-colors group/phone"
@@ -1367,7 +1367,7 @@ export const TabbyTamaraCard = ({
           requestAgentName={req.agentName}
         />
       </div>
-        </div>
+        </>
       )}
     </div>
   );
