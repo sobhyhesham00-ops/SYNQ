@@ -34,6 +34,7 @@ import {
 } from 'firebase/firestore';
 import { 
   db,
+  auth,
   wrappedOnSnapshot as onSnapshot,
   wrappedAddDoc as addDoc,
   wrappedUpdateDoc as updateDoc,
@@ -116,19 +117,23 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
 
   // Firestore listener
   useEffect(() => {
-    const messagesRef = collection(db, 'messages');
-    let q = query(
-      messagesRef,
-      where('participants', 'array-contains', currentUser.id),
-      orderBy('createdAt', 'desc'),
-      limit(500)
-    );
+    let unsubscribe: any = null;
+    const unsubAuth = auth.onAuthStateChanged((user) => {
+      if (!user) return;
+      if (unsubscribe) unsubscribe();
 
-    console.log(`[Firebase Firestore] MessagingSystem - Attaching "messages" onSnapshot listener for user: ${currentUser.name}`);
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const messagesRef = collection(db, 'messages');
+      let q = query(
+        messagesRef,
+        where('participants', 'array-contains', currentUser.id),
+        orderBy('createdAt', 'desc'),
+        limit(500)
+      );
+
+      console.log(`[Firebase Firestore] MessagingSystem - Attaching "messages" onSnapshot listener for user: ${currentUser.name}`);
+      unsubscribe = onSnapshot(q, (snapshot) => {
       const msgs = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
+        ...doc.data(),id: doc.id
       })) as any[];
       
       const filtered = msgs.filter(m => {
@@ -173,10 +178,12 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
     }, (error) => {
       console.error("Messages Real-time Sync Error:", error.code, error.message);
     });
+    });
 
     return () => {
       console.log(`[Firebase Firestore] MessagingSystem - Detaching "messages" listener.`);
-      unsubscribe();
+      if (unsubscribe) unsubscribe();
+      unsubAuth();
     };
   }, [selectedRecipient, currentUser, userTL]);
 
@@ -905,8 +912,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
                   className="hidden" 
                   ref={fileInputRef}
                   onChange={handleFileUpload}
-                  accept="image/*,application/pdf,.doc,.docx"
-                />
+                  accept="image/*,application/pdf,.doc,.docx"/>
               </button>
               
               <div className="flex-1 relative">
