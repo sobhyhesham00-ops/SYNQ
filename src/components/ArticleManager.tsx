@@ -47,6 +47,7 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
   const isTL = (currentUser.role as string) === 'tl' || (currentUser.role as string) === 'admin' || (currentUser.role as string) === 'director' || currentUser.role === 'qa';
 
   useEffect(() => {
+    console.log(`[Firebase Firestore] ArticleManager [${category}] - Attaching "articles" onSnapshot listener...`);
     const unsub = onSnapshot(collection(db, "articles"), (snap: any) => {
       const docs = snap.docs.map((d: any) => ({ id: d.id, ...d.data() } as Article));
       const filtered = docs.filter((a: any) => a.category === category).sort((a: any, b: any) => b.createdAt - a.createdAt);
@@ -59,7 +60,10 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
     }, (error: any) => {
       console.error("Articles Real-time Sync Error:", error.code, error.message);
     });
-    return () => unsub();
+    return () => {
+      console.log(`[Firebase Firestore] ArticleManager [${category}] - Detaching "articles" listener.`);
+      unsub();
+    };
   }, [category]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

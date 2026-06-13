@@ -10,6 +10,7 @@ interface MultiAttachmentUploadProps {
   onLinksChange: (links: string[]) => void;
   photosLabel?: string;
   onUploadStateChange?: (isUploading: boolean) => void;
+  maxFiles?: number;
 }
 
 export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
@@ -18,7 +19,8 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
   onPhotosChange,
   onLinksChange,
   photosLabel = "Additional Photos / Screenshots",
-  onUploadStateChange
+  onUploadStateChange,
+  maxFiles = 4
 }) => {
   const [tempLinkInput, setTempLinkInput] = useState('');
 
@@ -45,7 +47,17 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
     }
 
     if (filesArray.length > 0) {
-        Promise.all(filesArray.map(file => {
+        if (photos.length >= maxFiles) {
+          toast.error(`You can only upload up to ${maxFiles} attachments.`);
+          return;
+        }
+        const availableSlots = maxFiles - photos.length;
+        const sliceArray = filesArray.slice(0, availableSlots);
+        if (sliceArray.length < filesArray.length) {
+          toast.warning(`Only ${sliceArray.length} pasted file(s) were processed due to the file limit.`);
+        }
+
+        Promise.all(sliceArray.map(file => {
           return new Promise<string>((resolve) => {
             const reader = new FileReader();
             reader.onload = async (event) => {
@@ -118,6 +130,11 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
   const handleMultipleFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     
+    if (photos.length >= maxFiles) {
+      toast.error(`You can only upload up to ${maxFiles} attachments.`);
+      return;
+    }
+
     setIsUploading(true);
     setUploadProgress({ current: 0, total: files.length });
 
@@ -125,12 +142,16 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
     const newPhotos: string[] = [];
 
     for (let i = 0; i < filesArray.length; i++) {
+        if (photos.length + newPhotos.length >= maxFiles) {
+             toast.error(`Attachment limit of ${maxFiles} reached. Remaining files were skipped.`);
+             break;
+        }
         const file = filesArray[i];
         
-        // Size validation (Max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            toast.error(`File ${file.name} is too large. Max size is 5MB.`);
-            continue;
+        // Size validation (Max 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+             toast.error(`File '${file.name}' exceeds the 10MB size limit.`);
+             continue;
         }
 
         // Type validation
@@ -236,7 +257,8 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
                 ) : (
                   <>
                     <Camera className="w-6 h-6 text-slate-500 group-hover:text-indigo-400 transition-colors" />
-                    <span className="text-[9px] text-slate-500 font-bold uppercase mt-1 group-hover:text-indigo-300">Add File</span>
+                    <span className="text-[9px] text-slate-500 font-bold uppercase mt-1 group-hover:text-indigo-300 transform -translate-y-1">Add File</span>
+                    <span className="text-[7px] text-slate-500 text-center px-1">Max 10MB<br/>Local Only</span>
                   </>
                 )}
             </label>

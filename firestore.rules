@@ -39,19 +39,32 @@ service cloud.firestore {
              (notifData.targetGroups != null && notifData.targetGroups.hasAny([uid, "usr_" + uid, "all", role, name, name.toLowerCase()]));
     }
 
-    // Users
+    // Users Collection
+    // Read: Simple authentication check with no nested helper calls. This completely eliminates the 
+    // circular evaluation risk since role-lookup functions (like getUserRole) fetch from this collection.
+    // Write: Allow authenticated users to create/update their own profile, but prevent self-escalation of 'role'.
+    // Administrators/TLs can also modify profiles.
     match /users/{userId} {
-      allow read, write: if isSignedIn();
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && (
+        (request.auth.uid == userId && (
+          !request.resource.data.keys().hasAny(['role']) || 
+          request.resource.data.role == resource.data.role
+        )) || 
+        isSuperAdmin()
+      );
+      allow delete: if request.auth != null && isSuperAdmin();
     }
 
     // Cases, Requests, Inquiries
     match /inquiries/{docId} {
       allow read, write: if isSignedIn();
     }
-    match /tt_requests/{docId} {
+    match /tabby_tamara/{docId} {
       allow read, write: if isSignedIn();
     }
-    match /tt_complaints/{docId} {
+    match /tabby_tamara_complaints/{docId} {
       allow read, write: if isSignedIn();
     }
     match /client_comms/{docId} {

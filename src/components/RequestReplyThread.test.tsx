@@ -29,7 +29,7 @@ describe('RequestReplyThread', () => {
       <RequestReplyThread 
         request={mockRequest} 
         currentUser={currentUser} 
-        collectionName="tt_complaints" 
+        collectionName="tabby_tamara_complaints" 
         addSystemNotification={vi.fn()}
       />
     );

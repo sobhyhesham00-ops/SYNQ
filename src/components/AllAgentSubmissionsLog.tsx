@@ -40,7 +40,8 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
     confirmed: '✅ Confirmed', closed: '🔒 Closed', contacted: '📞 Contacted',
     rejected: '❌ Rejected', cancelled: '🚫 Cancelled', declined: '🚫 Declined',
     need_contact: '📲 Act: Contact Patient', in_progress: '🔄 In Progress',
-    submitted: '📨 Submitted', sent: '📤 Sent to Partner'
+    submitted: '📨 Submitted', sent: '📤 Sent to Partner',
+    tl_reviewing: '👀 TL Reviewing', sent_to_clinic: '📤 Sent to Clinic'
   };
 
   let title = "Request";
@@ -201,8 +202,8 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
   }
 
   const collectionMap: Record<string, string> = {
-    sched: 'scheduling_requests', inq: 'inquiries', tt_request: 'tt_requests',
-    tt_complaint: 'tt_complaints', comm: 'client_comms'
+    sched: 'scheduling_requests', inq: 'inquiries', tt_request: 'tabby_tamara',
+    tt_complaint: 'tabby_tamara_complaints', comm: 'client_comms'
   };
 
   const allLinks = [];

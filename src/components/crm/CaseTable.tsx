@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { CRMCase } from "./CRMTypes";
 import { formatCaseRef, getSLAStatus } from "../../utils";
+import { CaseDetailDrawer } from "./CaseDetailDrawer";
 
 interface CaseTableProps {
   cases: CRMCase[];
@@ -19,6 +20,20 @@ interface CaseTableProps {
   onSelectCase: (c: CRMCase) => void;
   sortBy: string;
   onSortChange: (field: 'newest' | 'oldest' | 'sla_urgency' | 'last_updated') => void;
+  // inline drawer props (optional)
+  currentUser?: any;
+  isTLOreSupport?: boolean;
+  addSystemNotification?: any;
+  onAssignCase?: any;
+  onClaimCase?: any;
+  onDeleteCase?: any;
+  onEditItem?: any;
+  onSendToPartner?: any;
+  onMarkInquirySent?: any;
+  onMarkPatientContactedTT?: any;
+  onTLCommentComplaint?: any;
+  onCloseComplaint?: any;
+  onReopenComplaint?: any;
 }
 
 const CLINIC_LABELS: Record<string, string> = {
@@ -35,6 +50,20 @@ export const CaseTable: React.FC<CaseTableProps> = ({
   onSelectCase,
   sortBy,
   onSortChange,
+  // inline drawer props
+  currentUser,
+  isTLOreSupport = false,
+  addSystemNotification,
+  onAssignCase,
+  onClaimCase,
+  onDeleteCase,
+  onEditItem,
+  onSendToPartner,
+  onMarkInquirySent,
+  onMarkPatientContactedTT,
+  onTLCommentComplaint,
+  onCloseComplaint,
+  onReopenComplaint,
 }) => {
   const getStatusBadge = (crmType: string, status: string) => {
     let style = "bg-slate-800 text-slate-300 border-white/5";
@@ -152,70 +181,96 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                 const isSelected = selectedCaseId === item.id;
                 const sla = getSLAStatus(item.createdAt, item.status, ["answered", "resolved", "closed"]);
                 return (
-                  <tr
-                    key={item.id}
-                    onClick={() => onSelectCase(item)}
-                    className={`cursor-pointer transition-all ${
-                      isSelected
-                        ? "bg-indigo-600/10 text-white font-medium border-l-2 border-indigo-500"
-                        : "hover:bg-white/[0.02]"
-                    }`}
-                  >
-                    <td className="p-2 text-center">
-                      {item.unread && (
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse mx-auto" title="Unread activity" />
-                      )}
-                    </td>
-                    <td className="p-2 font-mono text-[10px] text-slate-100 font-bold truncate">
-                      {item.referenceId}
-                    </td>
-                    <td className="p-2">
-                      {getTypeBadge(item)}
-                    </td>
-                    <td className="p-2 max-w-[180px] truncate" title={item.patientName || item.subject}>
-                      <span className="font-semibold text-slate-200 block truncate">
-                        {item.patientName || "—"}
-                      </span>
-                      <span className="text-[10px] text-slate-500 truncate block mt-0.5">
-                        {item.subject}
-                      </span>
-                    </td>
-                    <td className="p-2 truncate text-slate-400 font-medium text-[11px]">
-                      {CLINIC_LABELS[item.clinicName] || item.clinicName}
-                    </td>
-                    <td className="p-2 truncate text-slate-400 text-[11px]">
-                      {item.crmType === "inquiry" ? item.agentName : item.assignedToName || "Unassigned Queue"}
-                    </td>
-                    <td className="p-2 overflow-hidden">
-                      {getStatusBadge(item.crmType, item.status)}
-                    </td>
-                    <td className="p-2">
-                      <span 
-                        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] border ${sla.color}`}
-                        title={`Last updated: ${new Date(item.updatedAt || item.createdAt).toLocaleString()}`}
-                      >
-                        <Clock className="w-2.5 h-2.5 shrink-0" />
-                        {sla.label}
-                      </span>
-                    </td>
-                    <td className="p-2">
-                      <div className="flex items-center justify-center gap-1.5 text-slate-500">
-                        {item.attachmentCount > 0 && (
-                          <span className="flex items-center gap-0.5 text-[9px]" title={`${item.attachmentCount} Attachment(s)`}>
-                            <Paperclip className="w-3 h-3" />
-                          </span>
+                  <React.Fragment key={item.id}>
+                    <tr
+                      onClick={() => onSelectCase(item)}
+                      className={`cursor-pointer transition-all ${
+                        isSelected
+                          ? "bg-indigo-600/10 text-white font-medium border-l-2 border-indigo-500"
+                          : "hover:bg-white/[0.02]"
+                      }`}
+                    >
+                      <td className="p-2 text-center">
+                        {item.unread && (
+                          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse mx-auto" title="Unread activity" />
                         )}
-                        {item.replyCount > 0 && (
-                          <span className="flex items-center gap-0.5 text-[9px]" title={`${item.replyCount} Reply(s)`}>
-                            <MessageSquare className="w-3 h-3" />
-                          </span>
-                        )}
-                        {item.attachmentCount === 0 && item.replyCount === 0 && (
-                          <span className="text-slate-700">—</span>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="p-2 font-mono text-[10px] text-slate-100 font-bold truncate">
+                        {item.referenceId}
+                      </td>
+                      <td className="p-2">
+                        {getTypeBadge(item)}
+                      </td>
+                      <td className="p-2 max-w-[180px] truncate" title={item.patientName || item.subject}>
+                        <span className="font-semibold text-slate-200 block truncate">
+                          {item.patientName || "—"}
+                        </span>
+                        <span className="text-[10px] text-slate-500 truncate block mt-0.5 font-sans whitespace-pre-wrap line-clamp-2">
+                          {item.subject}
+                        </span>
+                      </td>
+                      <td className="p-2 truncate text-slate-400 font-medium text-[11px]">
+                        {CLINIC_LABELS[item.clinicName] || item.clinicName}
+                      </td>
+                      <td className="p-2 truncate text-slate-400 text-[11px]">
+                        {item.crmType === "inquiry" ? item.agentName : item.assignedToName || "Unassigned Queue"}
+                      </td>
+                      <td className="p-2 overflow-hidden">
+                        {getStatusBadge(item.crmType, item.status)}
+                      </td>
+                      <td className="p-2">
+                        <span 
+                          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] border ${sla.color}`}
+                          title={`Last updated: ${new Date(item.updatedAt || item.createdAt).toLocaleString()}`}
+                        >
+                          <Clock className="w-2.5 h-2.5 shrink-0" />
+                          {sla.label}
+                        </span>
+                      </td>
+                      <td className="p-2">
+                        <div className="flex items-center justify-center gap-1.5 text-slate-500">
+                          {item.attachmentCount > 0 && (
+                            <span className="flex items-center gap-0.5 text-[9px]" title={`${item.attachmentCount} Attachment(s)`}>
+                              <Paperclip className="w-3 h-3" />
+                            </span>
+                          )}
+                          {item.replyCount > 0 && (
+                            <span className="flex items-center gap-0.5 text-[9px]" title={`${item.replyCount} Reply(s)`}>
+                              <MessageSquare className="w-3 h-3" />
+                            </span>
+                          )}
+                          {item.attachmentCount === 0 && item.replyCount === 0 && (
+                            <span className="text-slate-700">—</span>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                    {isSelected && (
+                      <tr key={`${item.id}-details`} className="bg-[#050508]/65">
+                        <td colSpan={9} className="p-5 border-t border-b border-indigo-500/25">
+                          <div className="max-w-4xl mx-auto rounded-2xl overflow-hidden shadow-2xl border border-white/5 bg-[#09090c] text-left">
+                            <CaseDetailDrawer
+                              caseData={item}
+                              onClose={() => onSelectCase(item)}
+                              currentUser={currentUser}
+                              isTLOreSupport={isTLOreSupport}
+                              addSystemNotification={addSystemNotification}
+                              onAssignCase={onAssignCase}
+                              onClaimCase={onClaimCase}
+                              onDeleteCase={onDeleteCase}
+                              onEditItem={onEditItem}
+                              onSendToPartner={onSendToPartner}
+                              onMarkInquirySent={onMarkInquirySent}
+                              onMarkPatientContactedTT={onMarkPatientContactedTT}
+                              onTLCommentComplaint={onTLCommentComplaint}
+                              onCloseComplaint={onCloseComplaint}
+                              onReopenComplaint={onReopenComplaint}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 );
               })
             )}
@@ -234,61 +289,83 @@ export const CaseTable: React.FC<CaseTableProps> = ({
             const isSelected = selectedCaseId === item.id;
             const sla = getSLAStatus(item.createdAt, item.status, ["answered", "resolved", "closed"]);
             return (
-              <div
-                key={item.id}
-                onClick={() => onSelectCase(item)}
-                className={`p-4 cursor-pointer transition-all space-y-3 ${
-                  isSelected ? "bg-indigo-600/15 border-l-4 border-indigo-500 text-white" : "hover:bg-white/[0.01]"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[11px] text-slate-100 font-black">
-                    {item.referenceId}
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    {item.unread && <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />}
-                    {getTypeBadge(item)}
+              <React.Fragment key={item.id}>
+                <div
+                  onClick={() => onSelectCase(item)}
+                  className={`p-4 cursor-pointer transition-all space-y-3 ${
+                    isSelected ? "bg-indigo-600/15 border-l-4 border-indigo-500 text-white" : "hover:bg-white/[0.01]"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[11px] text-slate-100 font-black">
+                      {item.referenceId}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {item.unread && <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />}
+                      {getTypeBadge(item)}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-bold text-slate-200">
+                      {item.patientName || "Subject Log"}
+                    </h4>
+                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                      {item.subject}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    {getStatusBadge(item.crmType, item.status)}
+                    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] border ${sla.color}`}>
+                      <Clock className="w-2.5 h-2.5" />
+                      {sla.label}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-mono ml-auto">
+                      {CLINIC_LABELS[item.clinicName] || item.clinicName}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-white/[0.02]">
+                    <span className="truncate">
+                      👤 {item.crmType === "inquiry" ? item.agentName : item.assignedToName || "Unassigned"}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      {item.attachmentCount > 0 && (
+                        <span className="flex items-center gap-0.5">
+                          <Paperclip className="w-3 h-3" /> {item.attachmentCount}
+                        </span>
+                      )}
+                      {item.replyCount > 0 && (
+                        <span className="flex items-center gap-0.5">
+                          <MessageSquare className="w-3 h-3" /> {item.replyCount}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-
-                <div className="space-y-1">
-                  <h4 className="text-sm font-bold text-slate-200">
-                    {item.patientName || "Subject Log"}
-                  </h4>
-                  <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                    {item.subject}
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2 pt-1">
-                  {getStatusBadge(item.crmType, item.status)}
-                  <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] border ${sla.color}`}>
-                    <Clock className="w-2.5 h-2.5" />
-                    {sla.label}
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-mono ml-auto">
-                    {CLINIC_LABELS[item.clinicName] || item.clinicName}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-white/[0.02]">
-                  <span className="truncate">
-                    👤 {item.crmType === "inquiry" ? item.agentName : item.assignedToName || "Unassigned"}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    {item.attachmentCount > 0 && (
-                      <span className="flex items-center gap-0.5">
-                        <Paperclip className="w-3 h-3" /> {item.attachmentCount}
-                      </span>
-                    )}
-                    {item.replyCount > 0 && (
-                      <span className="flex items-center gap-0.5">
-                        <MessageSquare className="w-3 h-3" /> {item.replyCount}
-                      </span>
-                    )}
+                {isSelected && (
+                  <div className="p-4 bg-[#050508]/80 border-t border-b border-indigo-500/20 text-left">
+                    <CaseDetailDrawer
+                      caseData={item}
+                      onClose={() => onSelectCase(item)}
+                      currentUser={currentUser}
+                      isTLOreSupport={isTLOreSupport}
+                      addSystemNotification={addSystemNotification}
+                      onAssignCase={onAssignCase}
+                      onClaimCase={onClaimCase}
+                      onDeleteCase={onDeleteCase}
+                      onEditItem={onEditItem}
+                      onSendToPartner={onSendToPartner}
+                      onMarkInquirySent={onMarkInquirySent}
+                      onMarkPatientContactedTT={onMarkPatientContactedTT}
+                      onTLCommentComplaint={onTLCommentComplaint}
+                      onCloseComplaint={onCloseComplaint}
+                      onReopenComplaint={onReopenComplaint}
+                    />
                   </div>
-                </div>
-              </div>
+                )}
+              </React.Fragment>
             );
           })
         )}

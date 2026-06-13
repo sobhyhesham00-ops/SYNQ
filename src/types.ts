@@ -122,19 +122,33 @@ export interface Inquiry {
   caseRef?: string;
   agentName: string;
   clinicName: string; // Mandatory dropdown value
+  patientName?: string;
+  fileNumber?: string;
+  fileId?: string;
   phoneNumber?: string;
+  customerType?: 'new' | 'old';
+  platform: string;
   text: string;
   photos: string[]; // Base64 data-urls or image urls
   screenshot?: string | null; // keep for backward compat
   attachments?: any[]; // Array of FileAttachment objects
   links: string[]; // URLs
   createdAt: string; // ISO timestamp
-  status: 'submitted' | 'sent' | 'answered';
+  status: 'submitted' | 'tl_reviewing' | 'sent_to_clinic' | 'answered' | 'closed' | 'sent';
+  readBy?: string;
+  readAt?: string;
+  viewingStatus?: 'none' | 'tl_viewing';
+  viewingBy?: string;
+  viewingAt?: string;
   sentBy?: string;
-  sentAt?: string;
-  answer?: string;
+  sentAt?: string;            // timestamp of MOST RECENT "sent to clinic" click
+  sentToClinicCount?: number;  // increments on every "sent to clinic" click (follow-ups)
+  answer?: string;             // kept for backward compatibility with old inquiries
   answeredBy?: string;
   answeredAt?: string;
+  closedBy?: string;
+  closedAt?: string;
+  lastHourlyReminderAt?: string;
   seenByAgent?: boolean; // Tracking if agent acknowledged the notification
   customerContacted?: 'not_contacted' | 'contacted' | 'attempted'; // Dropdown menu status for customer contact status
   assignedTo?: string;

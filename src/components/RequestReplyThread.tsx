@@ -81,11 +81,21 @@ export function RequestReplyThread({
   const handleMultipleFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     
+    const limit = 4;
+    if (attachments.length >= limit) {
+      toast.error(`You can only upload up to ${limit} attachments.`);
+      return;
+    }
+    
     setIsUploading(true);
     const filesArray = Array.from(files);
     const newAttachments: FileAttachment[] = [];
 
     for (let i = 0; i < filesArray.length; i++) {
+      if (attachments.length + newAttachments.length >= limit) {
+        toast.error(`Attachment limit of ${limit} reached. Skipped remaining files.`);
+        break;
+      }
       const file = filesArray[i];
       
       // Size limit (Max 10MB per file)
@@ -144,12 +154,20 @@ export function RequestReplyThread({
 
   const handleReply = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!String(text || '').trim() && attachments.length === 0 && links.length === 0 && replyPhotos.length === 0) return;
+    const trimmedText = String(text || '').trim();
+    if (!trimmedText) {
+      toast.error("Reply text cannot be empty.");
+      return;
+    }
+    if (trimmedText.length > 500) {
+      toast.error("Reply details cannot exceed 500 characters.");
+      return;
+    }
 
     try {
       const eType = collectionName === 'inquiries' ? 'inquiry' :
                     collectionName === 'scheduling_requests' ? 'scheduling' :
-                    collectionName === 'tt_complaints' ? 'tt_complaint' :
+                    collectionName === 'tabby_tamara_complaints' ? 'tt_complaint' :
                     collectionName === 'client_comms' ? 'client_comm' : 'tt_request';
 
       const processedAttachments = await processAttachments(
@@ -164,7 +182,7 @@ export function RequestReplyThread({
         authorId: currentUser.id,
         senderName: currentUser.name,
         authorRole: currentUser.role,
-        text,
+        text: trimmedText,
         createdAt: new Date().toISOString(),
         attachments: processedAttachments,
         links,
@@ -175,8 +193,8 @@ export function RequestReplyThread({
       // Fallbacks for notifications if props were not provided
       const computedRequestType = requestType || (
         collectionName === 'scheduling_requests' ? 'Scheduling' :
-        collectionName === 'tt_requests' ? 'Tabby/Tamara' :
-        collectionName === 'tt_complaints' ? 'Complaint' :
+        collectionName === 'tabby_tamara' ? 'Tabby/Tamara' :
+        collectionName === 'tabby_tamara_complaints' ? 'Complaint' :
         collectionName === 'client_comms' ? 'Client Comm' :
         'Request'
       );
@@ -199,8 +217,8 @@ export function RequestReplyThread({
           
         const eType = collectionName === 'inquiries' ? 'inquiry' :
                      collectionName === 'scheduling_requests' ? 'scheduling_request' :
-                     collectionName === 'tt_requests' ? 'tt_request' :
-                     collectionName === 'tt_complaints' ? 'tt_complaint' :
+                     collectionName === 'tabby_tamara' ? 'tt_request' :
+                     collectionName === 'tabby_tamara_complaints' ? 'tt_complaint' :
                      collectionName === 'client_comms' ? 'client_comm' :
                      collectionName === 'cases' ? 'case' : undefined;
                      
@@ -479,11 +497,22 @@ export function RequestReplyThread({
             <textarea 
               id={`reply-input-${request.id}`}
               value={text}
-              onChange={e => setText(e.target.value)}
+              maxLength={500}
+              onChange={e => {
+                const val = e.target.value;
+                if (val.length > 500) {
+                  return;
+                }
+                setText(val);
+              }}
               rows={2}
               className="w-full bg-transparent border-none rounded-xl p-1 text-xs text-slate-100 placeholder-slate-500 focus:ring-0 focus:outline-none font-sans resize-none custom-scrollbar leading-relaxed text-left"
               placeholder="Record calling status, client correspondence, or submit Team Leader/Agent notes..."
             />
+            
+            <div className="text-right text-[10px] text-slate-400 font-mono pr-1 -mt-1">
+              {text.length} / 500 characters
+            </div>
             
             <div className="flex items-center justify-between border-t border-white/5 pt-2 flex-wrap gap-2">
               <div className="flex gap-2">

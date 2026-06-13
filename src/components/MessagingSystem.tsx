@@ -124,6 +124,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
       limit(500)
     );
 
+    console.log(`[Firebase Firestore] MessagingSystem - Attaching "messages" onSnapshot listener for user: ${currentUser.name}`);
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const msgs = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -173,7 +174,10 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
       console.error("Messages Real-time Sync Error:", error.code, error.message);
     });
 
-    return () => unsubscribe();
+    return () => {
+      console.log(`[Firebase Firestore] MessagingSystem - Detaching "messages" listener.`);
+      unsubscribe();
+    };
   }, [selectedRecipient, currentUser, userTL]);
 
   useEffect(() => {

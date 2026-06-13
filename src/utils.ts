@@ -202,8 +202,8 @@ export const getStorageItem = <T>(key: string, defaultValue: T): T => {
 const getCollectionName = (key: string) => {
     switch(key) {
         case 'sched_inquiries': return 'inquiries';
-        case 'sched_tabby_tamara': return 'tt_requests';
-        case 'sched_tt_complaints': return 'tt_complaints';
+        case 'sched_tabby_tamara': return 'tabby_tamara';
+        case 'sched_tt_complaints': return 'tabby_tamara_complaints';
         case 'sched_client_comms': return 'client_comms';
         case 'sched_requests': return 'scheduling_requests';
         case 'sched_time_logs': return 'timelogs';
@@ -1577,12 +1577,12 @@ export const CASE_CONFIG = {
     prefix: "INQ",
   },
   tt_request: {
-    collection: "tt_requests",
+    collection: "tabby_tamara",
     activeTab: "tabby-tamara",
     prefix: "TTR",
   },
   tt_complaint: {
-    collection: "tt_complaints",
+    collection: "tabby_tamara_complaints",
     activeTab: "complaints",
     prefix: "TTC",
   },
@@ -1717,6 +1717,93 @@ export const formatPhoneLocalForCopy = (phone: string): string => {
   digits = digits.replace(/^0+/, '');
   
   return digits;
+};
+
+/**
+ * Builds the PLAIN TEXT template (for the text/plain clipboard fallback and 
+ * for platforms that don't support rich paste).
+ */
+export const buildClinicInquiryTextTemplate = (inq: {
+  id: string;
+  caseRef?: string;
+  createdAt: string;
+  agentName: string;
+  clinicName: string;
+  phoneNumber?: string;
+  text: string;
+  attachments?: any[];
+  photos?: string[];
+  links?: string[];
+  sentToClinicCount?: number;
+}): string => {
+  const ref = formatCaseRef(inq.id, "inq", inq.createdAt, inq.caseRef);
+  const localPhone = inq.phoneNumber ? formatPhoneLocalForCopy(inq.phoneNumber) : '';
+  const isFollowUp = (inq.sentToClinicCount || 0) > 0;
+  
+  const allFiles = [
+    ...(inq.attachments || []).map(a => ({ name: a.name, url: a.url, type: a.type })),
+    ...(inq.photos || []).map((p, i) => ({ name: `Screenshot_${i + 1}.png`, url: p, type: 'image/png' })),
+  ];
+
+  const lines = [
+    isFollowUp ? `📋 *FOLLOW-UP INQUIRY* — Ref: ${ref}` : `📋 *NEW INQUIRY* — Ref: ${ref}`,
+    ``,
+    `🏥 *Clinic:* ${inq.clinicName}`,
+    `👤 *Agent:* ${inq.agentName}`,
+    `📞 *Pt Number:* ${localPhone || 'N/A'}`,
+    `🌐 *Platform:* WhatsApp`,
+    ``,
+    `💬 *Question:*`,
+    inq.text,
+    allFiles.length > 0 ? `` : '',
+    allFiles.length > 0 ? `📎 *${allFiles.length} file(s) attached below* ⬇️` : '',
+    (inq.links || []).length > 0 ? `🔗 *Links:* ${(inq.links || []).join(', ')}` : '',
+  ].filter(line => line !== '');
+
+  return lines.join('\n');
+};
+
+/**
+ * Builds an HTML clipboard payload (text + embedded <img> tags for images, and 
+ * clickable download links for non-image files like PDFs). When pasted into 
+ * apps that support rich paste (WhatsApp Web, Slack, email clients), images 
+ * embed directly and file links are clickable.
+ */
+export const buildClinicInquiryHtmlTemplate = (inq: {
+  id: string;
+  caseRef?: string;
+  createdAt: string;
+  agentName: string;
+  clinicName: string;
+  phoneNumber?: string;
+  text: string;
+  attachments?: any[];
+  photos?: string[];
+  links?: string[];
+  sentToClinicCount?: number;
+}): string => {
+  const plainText = buildClinicInquiryTextTemplate(inq);
+  const htmlEscapedText = plainText
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\n/g, '<br/>')
+    // Re-apply basic bold formatting for *text* -> <b>text</b>
+    .replace(/\*(.+?)\*/g, '<b>$1</b>');
+
+  const allFiles = [
+    ...(inq.attachments || []).map(a => ({ name: a.name, url: a.url, type: a.type })),
+    ...(inq.photos || []).map((p, i) => ({ name: `Screenshot_${i + 1}.png`, url: p, type: 'image/png' })),
+  ];
+
+  const fileHtml = allFiles.map(f => {
+    if ((f.type || '').startsWith('image/')) {
+      return `<div style="margin-top:8px;"><img src="${f.url}" alt="${f.name}" style="max-width:400px; border-radius:8px;" /></div>`;
+    }
+    return `<div style="margin-top:8px;">📄 <a href="${f.url}">${f.name}</a></div>`;
+  }).join('');
+
+  return `<div style="font-family:sans-serif; font-size:14px; line-height:1.5;">${htmlEscapedText}${fileHtml}</div>`;
 };
 
 export const getSLAStatus = (createdAt: string, status: string, resolvedStatuses: string[]) => {

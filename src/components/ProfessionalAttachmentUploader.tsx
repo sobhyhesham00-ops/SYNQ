@@ -17,6 +17,7 @@ interface ProfessionalAttachmentUploaderProps {
   onAttachmentsChange: (attachments: FileAttachment[]) => void;
   onLinksChange: (links: string[]) => void;
   onUploadStateChange?: (isUploading: boolean) => void;
+  maxAttachments?: number;
 }
 
 import { validateFile } from "../services/attachmentService";
@@ -26,7 +27,8 @@ export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUplo
   links = [],
   onAttachmentsChange,
   onLinksChange,
-  onUploadStateChange
+  onUploadStateChange,
+  maxAttachments = 4
 }) => {
   const [tempLinkInput, setTempLinkInput] = useState('');
   const [isDragging, setIsDragging] = useState(false);
@@ -61,6 +63,12 @@ export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUplo
 
   const handleFiles = async (files: FileList | globalThis.File[]) => {
     if (!files || files.length === 0) return;
+
+    if (attachments.length >= maxAttachments) {
+      toast.error(`You can only upload up to ${maxAttachments} attachments per inquiry.`);
+      return;
+    }
+
     setIsUploading(true);
     setUploadProgress({ current: 0, total: files.length });
 
@@ -68,9 +76,19 @@ export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUplo
     const fileArray = Array.from(files);
 
     for (let i = 0; i < fileArray.length; i++) {
+        if (attachments.length + newAttachments.length >= maxAttachments) {
+            toast.error(`Attachment limit of ${maxAttachments} reached. Remaining files were skipped.`);
+            break;
+        }
         const file = fileArray[i];
         
-        // 1. Validate file
+        // 1. Validate file size (Max 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+             toast.error(`File '${file.name}' exceeds the 10MB size limit.`);
+             continue;
+        }
+
+        // 2. Validate file
         const validation = validateFile(file);
         if (!validation.valid) {
             toast.error(validation.error);
@@ -165,7 +183,7 @@ export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUplo
                    <div className="flex flex-col items-center gap-1.5 text-center px-4">
                        <UploadCloud className="w-8 h-8 text-slate-400 mb-1" />
                        <span className="text-xs font-semibold text-slate-200">Click to upload or drag & drop</span>
-                       <span className="text-[10px] font-medium text-slate-500">Supports images, PDFs, Word, Excel (Max 15MB). Paste images from clipboard.</span>
+                       <span className="text-[10px] font-medium text-slate-500">Max {maxAttachments} files, 10MB each. Files are stored locally on this device, not uploaded to the cloud.</span>
                    </div>
                 )}
             </label>

@@ -30,7 +30,7 @@ import { AssignmentControl } from "./AssignmentControl";
 import { CaseConversation } from "./CaseConversation";
 import { CaseAttachments } from "./CaseAttachments";
 import { CaseActivityTimeline } from "./CaseActivityTimeline";
-import { buildCaseClipboardPayload, copyToClipboard, calculateTabbyTamaraPrice, formatCaseRef, formatPhoneForCopy } from "../../utils";
+import { buildCaseClipboardPayload, copyToClipboard, calculateTabbyTamaraPrice, formatCaseRef, formatPhoneForCopy, normalizeAttachments } from "../../utils";
 import { toast } from "sonner";
 
 interface CaseDetailDrawerProps {
@@ -108,30 +108,117 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
 
       if (caseData.crmType === "inquiry") {
         const inq = caseData.raw as any;
-        const refCode = `INQ-${inq.id.replace('inq_', '').toUpperCase()}`;
+        const refCode = inq.caseRef || `INQ-${inq.id.replace('inq_', '').toUpperCase()}`;
+        const patientName = inq.patientName || "—";
+        const fileNumber = inq.fileNumber || "—";
+        const phoneNumber = inq.phoneNumber || "—";
+        const clinicName = inq.clinicName || "—";
+        const agentName = inq.agentName || "Agent";
         
-        payloadText = `[${refCode}] INQUIRY DETAILS\n` +
-          `-----------------------------------\n` +
-          `Clinic Name: ${inq.clinicName || "N/A"}\n` +
-          `Phone Number: ${inq.phoneNumber || "N/A"}\n` +
-          `Agent Name: ${inq.agentName || "N/A"}\n` +
-          `Inquiry Text: ${inq.text || "N/A"}\n` +
-          `Status: ${inq.status?.toUpperCase() || "N/A"}\n` +
-          `Answer: ${inq.answer || "N/A"}`;
+        const INQUIRY_STATUS_LABELS: Record<string, string> = {
+          submitted: '📨 Submitted',
+          tl_reviewing: '👀 TL Reviewing',
+          sent_to_clinic: '📤 Sent to Clinic',
+          answered: '✅ Answered',
+          closed: '🔒 Closed',
+          sent: '📤 Sent to Partner'
+        };
+        const statusText = INQUIRY_STATUS_LABELS[inq.status] || inq.status?.toUpperCase() || "SUBMITTED";
 
-        payloadHtml = `<div style="font-family: sans-serif; font-size: 13px; color: #1e293b; line-height: 1.5;">` +
-          `<h3 style="margin: 0 0 10px 0; color: #4f46e5; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">[${refCode}] INQUIRY</h3>` +
-          `<table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">` +
-          `<tr><td style="font-weight: bold; width: 120px; padding: 4px 0;">Clinic Name:</td><td>${inq.clinicName || "N/A"}</td></tr>` +
-          `<tr><td style="font-weight: bold; padding: 4px 0;">Phone:</td><td style="font-family: monospace;">${inq.phoneNumber || "N/A"}</td></tr>` +
-          `<tr><td style="font-weight: bold; padding: 4px 0;">Agent:</td><td>${inq.agentName || "N/A"}</td></tr>` +
-          `<tr><td style="font-weight: bold; padding: 4px 0;">Status:</td><td><span style="background: #fef3c7; color: #d97706; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold;">${inq.status || "N/A"}</span></td></tr>` +
-          `</table>` +
-          `<p style="font-weight: bold; margin: 10px 0 5px 0;">Inquiry Body:</p>` +
-          `<blockquote style="border-left: 3px solid #6366f1; padding-left: 10px; margin: 0; color: #475569; font-style: italic;">${inq.text || "N/A"}</blockquote>` +
-          (inq.answer ? `<p style="font-weight: bold; margin: 10px 0 5px 0; color: #10b981;">Answer / Response:</p>` +
-          `<blockquote style="border-left: 3px solid #10b981; padding-left: 10px; margin: 0; color: #475569;">${inq.answer}</blockquote>` : "") +
-          `</div>`;
+        // Collect all attachments from inquiry and its replies
+        const rawAttachments: any[] = [
+          ...(inq.photos || []),
+          ...(inq.attachments || []),
+          ...(inq.screenshot ? [inq.screenshot] : [])
+        ];
+
+        const repliesList: string[] = [];
+        const repliesHtmlList: string[] = [];
+        if (inq.replies && Array.isArray(inq.replies)) {
+          inq.replies.forEach((rep: any) => {
+            repliesList.push(`${rep.senderName} (${rep.authorRole || 'User'}): ${rep.text}`);
+            repliesHtmlList.push(`<li><strong>${rep.senderName}</strong> <span style="font-size: 11px; color: #888;">(${rep.authorRole || 'User'})</span>: ${rep.text}</li>`);
+            if (rep.photos) rawAttachments.push(...rep.photos);
+            if (rep.attachments) rawAttachments.push(...rep.attachments);
+            if (rep.screenshot) rawAttachments.push(rep.screenshot);
+          });
+        }
+
+        const normAttachments = normalizeAttachments(rawAttachments);
+        const attachmentsText = normAttachments.length > 0 
+          ? `Attachments:\n${normAttachments.map(att => `  - ${att.name || 'File'}`).join('\n')}` 
+          : "";
+
+        const textLines = [
+          `✨ *INQUIRY REQUEST STATUS* ✨`,
+          `--------------------------------------`,
+          `🆔 *Ref:* ${refCode}`,
+          `👤 *Patient Name:* ${patientName}`,
+          `📞 *Phone:* ${formatPhoneForCopy(phoneNumber)}`,
+          `📁 *File/ID:* ${fileNumber}`,
+          `🏥 *Clinic:* ${clinicName}`,
+          `📋 *Status:* ${statusText}`,
+          `👤 *Agent Name:* ${agentName}`,
+          `💬 *Inquiry Details:*`,
+          `${inq.text || "—"}`,
+          inq.answer ? `💡 *TL Answer:* ${inq.answer}` : "",
+          inq.answeredBy ? `👮 *Answered By:* ${inq.answeredBy}` : "",
+          repliesList.length > 0 ? `\n💬 *Replies & Conversation History:*\n${repliesList.join('\n')}` : "",
+          attachmentsText ? `\n📎 ${attachmentsText}` : "",
+          (inq.links && inq.links.length > 0) ? `\n🔗 *Links:* \n${inq.links.join('\n')}` : "",
+          `--------------------------------------`
+        ].filter(Boolean).join('\n');
+
+        let statusBadgeColor = "#f59e0b"; // amber
+        if (inq.status === "answered" || inq.status === "closed") {
+          statusBadgeColor = "#10b981"; // green
+        } else if (inq.status === "tl_reviewing") {
+          statusBadgeColor = "#3b82f6"; // blue
+        } else if (inq.status === "sent_to_clinic") {
+          statusBadgeColor = "#8b5cf6"; // purple
+        }
+
+        let html = `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 600px; color: #1e293b; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">`;
+        html += `<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px;">`;
+        html += `<span style="font-size: 14px; font-weight: 700; background-color: #6366f120; color: #6366f1; padding: 6px 12px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.05em;">❓ INQUIRY</span>`;
+        html += `<span style="font-size: 11px; font-weight: 700; background-color: #f1f5f9; color: #475569; padding: 4px 8px; border-radius: 6px; font-family: monospace;">${refCode}</span>`;
+        html += `</div>`;
+        
+        html += `<table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 15px;">`;
+        html += `<tr><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; color: #64748b; width: 150px;">👤 Patient Name</td><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; font-weight: 600; color: #0f172a;">${patientName}</td></tr>`;
+        html += `<tr><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; color: #64748b;">📞 Phone Number</td><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; font-weight: 600; color: #0f172a; font-family: monospace;">${formatPhoneForCopy(phoneNumber)}</td></tr>`;
+        html += `<tr><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; color: #64748b;">📁 File / ID</td><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; font-weight: 600; color: #0f172a; font-family: monospace;">${fileNumber}</td></tr>`;
+        html += `<tr><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; color: #64748b;">🏥 Clinic</td><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; font-weight: 600; color: #0f172a;">${clinicName}</td></tr>`;
+        html += `<tr><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; color: #64748b;">👤 Submitter Agent</td><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; font-weight: 600; color: #0f172a;">${agentName}</td></tr>`;
+        html += `<tr><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; color: #64748b;">📋 Status</td><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc;"><span style="font-size: 11px; font-weight: 800; background-color: ${statusBadgeColor}15; color: ${statusBadgeColor}; padding: 4px 10px; border-radius: 6px; text-transform: uppercase;">${statusText}</span></td></tr>`;
+        html += `</table>`;
+
+        html += `<p style="font-weight: bold; margin: 15px 0 5px 0; font-size: 14px; color: #0f172a;">💬 Inquiry Details:</p>`;
+        html += `<blockquote style="border-left: 3px solid #6366f1; padding-left: 12px; margin: 0 0 15px 0; color: #334155; font-style: italic; background-color: #f8fafc; padding-top: 8px; padding-bottom: 8px; border-radius: 0 8px 8px 0; white-space: pre-wrap;">${inq.text}</blockquote>`;
+
+        if (inq.answer) {
+          html += `<p style="font-weight: bold; margin: 15px 0 5px 0; font-size: 14px; color: #0f172a;">💡 TL Answer / Response:</p>`;
+          html += `<blockquote style="border-left: 3px solid #10b981; padding-left: 12px; margin: 0 0 15px 0; color: #065f46; background-color: #f0fdf4; padding-top: 8px; padding-bottom: 8px; border-radius: 0 8px 8px 0;">${inq.answer} ${inq.answeredBy ? `<br/><span style="font-size: 11px; color: #15803d; font-weight: bold;">— Answered by: ${inq.answeredBy}</span>` : ""}</blockquote>`;
+        }
+
+        if (repliesHtmlList.length > 0) {
+          html += `<p style="font-weight: bold; margin: 15px 0 5px 0; font-size: 14px; color: #0f172a;">💬 Conversation History:</p>`;
+          html += `<ul style="margin: 0; padding-left: 20px; color: #475569; background-color: #f8fafc; padding-top: 8px; padding-bottom: 8px; border-radius: 8px; list-style-type: square;">${repliesHtmlList.join('')}</ul>`;
+        }
+
+        if (normAttachments.length > 0) {
+          html += `<p style="font-weight: bold; margin: 15px 0 5px 0; font-size: 12px; color: #475569;">📎 Attached files (${normAttachments.length}):</p>`;
+          html += `<ul style="margin: 0; padding-left: 20px; font-size: 12px;">`;
+          normAttachments.forEach((att: any) => {
+            html += `<li><a href="${att.url}" target="_blank" style="color: #2563eb; text-decoration: none;">${att.name || 'File Attachment'}</a></li>`;
+          });
+          html += `</ul>`;
+        }
+        
+        html += `</div>`;
+
+        payloadText = textLines;
+        payloadHtml = html;
       } else if (caseData.crmType === "complaint") {
         const comp = caseData.raw as any;
         const refCode = formatCaseRef(comp.id, 'tt_complaint', comp.createdAt, comp.caseRef);

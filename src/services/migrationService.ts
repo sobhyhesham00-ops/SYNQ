@@ -60,7 +60,7 @@ export const migrateData = async () => {
     }
 
     // 2. Migrate TT Requests
-    const ttSnap = await getDocs(collection(db, "tt_requests"));
+    const ttSnap = await getDocs(collection(db, "tabby_tamara"));
     for (const snapDoc of ttSnap.docs) {
       const data = snapDoc.data();
       let needsUpdate = false;
@@ -95,7 +95,7 @@ export const migrateData = async () => {
       }
 
       if (needsUpdate) {
-        batch.update(doc(db, "tt_requests", snapDoc.id), updates);
+        batch.update(doc(db, "tabby_tamara", snapDoc.id), updates);
         opsInBatch++;
         migratedCount++;
         await commitIfNeeded();

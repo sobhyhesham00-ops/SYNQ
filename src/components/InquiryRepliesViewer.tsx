@@ -7,7 +7,7 @@ interface InquiryRepliesViewerProps {
 }
 
 export const InquiryRepliesViewer: React.FC<InquiryRepliesViewerProps> = ({ inquiry }) => {
-  const hasLegacyAnswer = inquiry.status === "answered" && inquiry.answer;
+  const hasLegacyAnswer = !!inquiry.answer;
   const hasReplies = inquiry.replies && inquiry.replies.length > 0;
 
   if (!hasLegacyAnswer && !hasReplies) return null;

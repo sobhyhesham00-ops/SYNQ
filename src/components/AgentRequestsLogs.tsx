@@ -49,6 +49,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
     rejected: '❌ Rejected', cancelled: '🚫 Cancelled', declined: '🚫 Declined',
     need_contact: '📲 Act: Contact Patient', in_progress: '🔄 In Progress',
     submitted: '📨 Submitted', sent: '📤 Sent to Partner',
+    tl_reviewing: '👀 TL Reviewing', sent_to_clinic: '📤 Sent to Clinic',
     completed: '✅ Closed'
   };
 
@@ -91,29 +92,59 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
     title = 'Clinic Inquiry';
     copyData = [
       '❓ Clinic Inquiry',
-      `🏥 Clinic: ${req.clinicName}`,
+      `👤 Patient Name: ${req.patientName || 'N/A'}`,
       `📞 Phone: ${formatPhoneForCopy(req.phoneNumber || '')}`,
+      req.platform ? `🌐 Platform: ${req.platform}` : '',
+      req.customerType ? `🏷️ Customer Status: ${req.customerType === 'new' ? 'New Customer' : 'Old Customer'}` : '',
+      req.fileNumber ? `📁 File/ID: ${req.fileNumber}` : '',
+      `🏥 Clinic: ${req.clinicName}`,
       `💬 Inquiry: ${req.text}`,
       req.answer ? `✅ Answer: ${req.answer}` : '',
     ].filter(Boolean).join('\n');
 
     primaryContent = (
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-widest bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center gap-1.5">
             ❓ Clinic Inquiry
           </span>
+          {req.platform && (
+            <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-widest bg-slate-500/10 text-slate-300 border border-slate-500/20 flex items-center gap-1.5">
+              🌐 {req.platform}
+            </span>
+          )}
+          {req.customerType && (
+            <span className={`px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-widest border flex items-center gap-1.5 ${
+              req.customerType === 'new' ? 'bg-teal-500/10 text-teal-400 border-teal-500/20' : 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+            }`}>
+              {req.customerType === 'new' ? '🆕 New Customer' : '📂 Old Customer'}
+            </span>
+          )}
           {req.answer && (
             <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
               💬 Answered
             </span>
           )}
         </div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{req.clinicName || 'N/A'}</p></div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📞 Phone</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">💬 Inquiry</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.text}</p></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white/5 p-3 rounded-xl border border-white/5">
+          <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">👤 Patient Name</p><p className="text-[13px] text-slate-200 mt-0.5 font-bold">{req.patientName || 'N/A'}</p></div>
+          <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📞 Phone</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
+          <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{req.clinicName || 'N/A'}</p></div>
+          {req.fileNumber ? (
+            <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📁 File Number</p><p className="text-[13px] text-amber-300 mt-0.5 font-mono font-bold">{req.fileNumber}</p></div>
+          ) : (
+            <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📂 Customer Type</p><p className="text-[13px] text-slate-300 mt-0.5">New Customer (No File)</p></div>
+          )}
+        </div>
+        <div>
+          <p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">💬 Inquiry Description</p>
+          <p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words bg-black/10 p-2.5 rounded-lg border border-white/5">{req.text}</p>
+        </div>
         {req.answer && (
-          <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">✅ Answer</p><p className="text-[13px] text-emerald-200 mt-0.5 whitespace-pre-wrap break-words">{req.answer}</p></div>
+          <div className="bg-emerald-500/5 p-3 rounded-lg border border-emerald-500/10">
+            <p className="text-[11px] uppercase text-emerald-500 font-semibold tracking-wider">✅ Answer / Resolution</p>
+            <p className="text-[13px] text-emerald-200 mt-0.5 whitespace-pre-wrap break-words">{req.answer}</p>
+          </div>
         )}
       </div>
     );
@@ -206,8 +237,8 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
   }
 
   const collectionMap: Record<string, string> = {
-    sched: 'scheduling_requests', inq: 'inquiries', tt_request: 'tt_requests',
-    tt_complaint: 'tt_complaints', comm: 'client_comms'
+    sched: 'scheduling_requests', inq: 'inquiries', tt_request: 'tabby_tamara',
+    tt_complaint: 'tabby_tamara_complaints', comm: 'client_comms'
   };
 
   const allLinks = [];

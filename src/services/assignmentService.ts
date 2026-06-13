@@ -16,12 +16,12 @@ export const assignCase = async (
 ) => {
   if (!entityType || !entityId || !assignee || !actor) return;
 
-  const validEntityTypes = ['inquiries', 'tt_requests', 'tt_complaints', 'client_comms', 'requests'];
+  const validEntityTypes = ['inquiries', 'tabby_tamara', 'tabby_tamara_complaints', 'client_comms', 'requests'];
   let collectionName = entityType;
   
   if (entityType === "inquiry") collectionName = "inquiries";
-  else if (entityType === "tt_request") collectionName = "tt_requests";
-  else if (entityType === "tt_complaint") collectionName = "tt_complaints";
+  else if (entityType === "tt_request") collectionName = "tabby_tamara";
+  else if (entityType === "tt_complaint") collectionName = "tabby_tamara_complaints";
   else if (entityType === "client_comm") collectionName = "client_comms";
   else if (entityType === "scheduling") collectionName = "requests";
 

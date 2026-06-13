@@ -22,18 +22,63 @@ export const processAttachments = async (
 ): Promise<FileAttachment[]> => {
   if (!attachments || attachments.length === 0) return [];
 
+  console.log(`[processAttachments] Starting to process ${attachments.length} attachments.`);
+
   const processed = await Promise.all(
     attachments.map(async (att) => {
       // If there's no file object, it means it's either an old base64 attachment,
       // or an already uploaded file. Keep it exactly as is (metadata only).
-      if (!att.file) return att;
+      if (!att.file) {
+        console.log(`[processAttachments] Keeping existing attachment/meta: ${att.name || att.id}`);
+        return att;
+      }
+
+      console.log(`[processAttachments] Preparing upload for file: ${att.file.name}, size: ${att.file.size} bytes`);
 
       // Ensure a clean clone without the File object for Firestore
       const { file, ...attMeta } = att;
       
+      if (entityType === "inquiry") {
+        console.log(`[processAttachments] Local storage for inquiry attachment: ${file.name}`);
+        const localUrl = URL.createObjectURL(file);
+        return {
+          ...attMeta,
+          url: localUrl,
+          file: file,
+        };
+      }
+      
       const { uploadTask } = createUploadTask(file, entityType, entityId, replyOrRoot);
-      await uploadTask;
-      const downloadUrl = await getAttachmentDownloadURL(uploadTask);
+      
+      console.log(`[processAttachments] Initiated uploadBytesResumable for ${file.name}`);
+
+      // Properly wrap the UploadTask in a Promise to prevent hanging / unresolved chains.
+      const downloadUrl = await new Promise<string>((resolve, reject) => {
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log(
+              `[processAttachments] Progress for ${file.name}: ${progress.toFixed(2)}% (${snapshot.bytesTransferred}/${snapshot.totalBytes} bytes)`
+            );
+          },
+          (error) => {
+            console.error(`[processAttachments] Upload failed for ${file.name}:`, error);
+            reject(new Error(`Failed to upload ${file.name}: ${error.message}`));
+          },
+          async () => {
+            console.log(`[processAttachments] Upload completed for ${file.name}. Retrieving download URL...`);
+            try {
+              const url = await getDownloadURL(uploadTask.snapshot.ref);
+              console.log(`[processAttachments] Download URL retrieved for ${file.name}: ${url}`);
+              resolve(url);
+            } catch (err: any) {
+              console.error(`[processAttachments] getDownloadURL failed for ${file.name}:`, err);
+              reject(new Error(`Failed to retrieve download URL for ${file.name}: ${err.message}`));
+            }
+          }
+        );
+      });
       
       return {
         ...attMeta,
@@ -42,6 +87,7 @@ export const processAttachments = async (
     })
   );
 
+  console.log(`[processAttachments] All attachments processed successfully.`);
   return processed;
 };
 
