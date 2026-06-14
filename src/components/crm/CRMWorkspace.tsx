@@ -198,7 +198,7 @@ export const CRMWorkspace: React.FC<CRMWorkspaceProps> = ({
 
   // 4. Process Case filter logic
   const filteredCases = useMemo(() => {
-    const isAgentRole = currentUser?.role === 'agent';
+    const isAgentRole = ['agent', 'sme'].includes(currentUser?.role as string);
 
     return cases
       .filter((c) => {

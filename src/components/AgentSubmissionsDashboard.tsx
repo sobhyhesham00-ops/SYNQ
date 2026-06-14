@@ -28,7 +28,7 @@ import { RequestReplyThread } from "./RequestReplyThread";
 import { SlideToConfirm } from "./SlideToConfirm";
 import { CopyWrap } from "./CopyWrap";
 import { Inquiry, TabbyTamaraRequest, TabbyTamaraComplaint, User as UserType } from "../types";
-import { formatCaseRef, normalizePhone, copyToClipboard } from "../utils";
+import { formatCaseRef, normalizePhone, copyToClipboard , getClinicLabel, generateInquiryCopyText, generateComplaintCopyText, generateTabbyTamaraCopyText} from "../utils";
 import { toast } from "sonner";
 
 interface AgentSubmissionsDashboardProps {
@@ -80,17 +80,6 @@ type SubmissionItem =
   | { type: "inquiry"; id: string; createdAt: string; clinicName: string; phoneNumber: string; status: string; agentName: string; data: Inquiry }
   | { type: "tabbyTamara"; id: string; createdAt: string; clinicName: string; phoneNumber: string; status: string; agentName: string; data: TabbyTamaraRequest }
   | { type: "complaint"; id: string; createdAt: string; clinicName: string; phoneNumber: string; status: string; agentName: string; data: TabbyTamaraComplaint };
-
-const getClinicLabel = (val: string) => {
-  const mapping: Record<string, string> = {
-    dermadent: "Dermadent",
-    onetouch_mo3tred: "One Touch AlMutarid",
-    onetouch_merkhnya: "One Touch Markhaniya",
-    welltouch: "Well Touch",
-    newage: "New Age"
-  };
-  return mapping[val] || val;
-};
 
 export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps> = ({
   inquiries,
@@ -226,44 +215,17 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
   });
 
   // Handle utilities
-  const handleCopyInquiry = (inq: Inquiry) => {
-    const photoLines = (inq.photos || []).length > 0 ? `Attachments: ${inq.photos.length} photo(s) attached` : "";
-    const linkLines = (inq.links || []).length > 0 ? `Links:\n${(inq.links || []).join("\n")}` : "";
-    const text = [
-      ` Inquiry`,
-      `Ref: ${formatCaseRef(inq.id, "inq", inq.createdAt, inq.caseRef)}`,
-      `Clinic: ${getClinicLabel(inq.clinicName)}`,
-      `Phone: ${inq.phoneNumber || ""}`,
-      `Submitted By: ${inq.agentName || "Unknown"}`,
-      `Inquiry: ${inq.text}`,
-      `Status: ${inq.status}`,
-      inq.answer ? `TL Answer: ${inq.answer}` : "",
-      inq.answeredBy ? `Answered by: ${inq.answeredBy}` : "",
-      photoLines,
-      linkLines
-    ].filter(Boolean).join("\n");
-    
-    copyToClipboard(text);
-    toast.success("Case details copied to clipboard!");
-  };
+  const handleCopyInquiry = (e: React.MouseEvent, inq: any) => {
+        e.stopPropagation();
+        const text = generateInquiryCopyText(inq);
+        copyToClipboard(text);
+      };
 
-  const handleCopyComplaint = (comp: TabbyTamaraComplaint) => {
-    const text = [
-      `🚨 Complaint`,
-      `Ref: ${formatCaseRef(comp.id, "tt_complaint", comp.createdAt, comp.caseRef)}`,
-      `Clinic: ${getClinicLabel(comp.clinicName)}`,
-      `Phone: ${normalizePhone(comp.phoneNumber || "")}`,
-      `Submitted By: ${comp.agentName || "Unknown"}`,
-      `Customer Type: ${comp.isOldCustomer ? "Old Customer" : "New Customer"}`,
-      `File Number: ${comp.fileNumber || "N/A"}`,
-      !comp.isOldCustomer ? `ID Number: ${comp.idNumber || "N/A"}` : "",
-      `Details: ${comp.complaintDetails}`,
-      `Status: ${comp.status}`
-    ].filter(Boolean).join("\n");
-
-    copyToClipboard(text);
-    toast.success("Complaint details copied to clipboard!");
-  };
+  const handleCopyComplaint = (e: React.MouseEvent, comp: any) => {
+        e.stopPropagation();
+        const text = generateComplaintCopyText(comp);
+        copyToClipboard(text);
+      };
 
   return (
     <div className="space-y-6 animate-fade-in p-1">
@@ -898,7 +860,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                             </div>
                           )}
 
-                          {currentUser.role === "agent" && item.status === "closed" && (
+                          {["agent", "sme"].includes(currentUser.role as string) && item.status === "closed" && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();

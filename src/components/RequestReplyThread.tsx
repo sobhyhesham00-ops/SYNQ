@@ -209,7 +209,7 @@ export function RequestReplyThread({
       });
 
       if (addSystemNotification) {
-        const isAgentReplying = currentUser.role === 'agent';
+        const isAgentReplying = ['agent', 'sme'].includes(currentUser.role as string);
         const target = isAgentReplying ? 'tl' : (computedRequestAgentName || 'tl');
         const title = isAgentReplying
           ? `Agent Reply on ${computedRequestType || 'Request'}`

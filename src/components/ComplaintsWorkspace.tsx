@@ -21,7 +21,7 @@ import {
   formatCaseRef, 
   normalizePhone, 
   copyToClipboard
-} from "../utils";
+, getClinicLabel, generateInquiryCopyText, generateComplaintCopyText, generateTabbyTamaraCopyText} from "../utils";
 
 const compStatusLabels: Record<string, string> = {
   pending_tl: "⏳ Pending TL review",
@@ -660,7 +660,7 @@ export const ComplaintsWorkspace: React.FC<ComplaintsWorkspaceProps> = ({
                     )}
 
                     {/* Reopen Closed Case if done in error */}
-                    {currentUser?.role === "agent" && isClosed && (
+                    {["agent", "sme"].includes(currentUser?.role as string) && isClosed && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

@@ -39,7 +39,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
   onCardClick,
   announcements = []
 }) => {
-  const isAgent = currentUser.role === 'agent';
+  const isAgent = ['agent', 'sme'].includes(currentUser.role as string);
   const isTL = currentUser.role === 'tl';
 
   // For agents, show their own avg score, for TLs show team avg

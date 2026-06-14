@@ -29,7 +29,7 @@ import { RequestReplyThread } from "./RequestReplyThread";
 import { SlideToConfirm } from "./SlideToConfirm";
 import { CopyWrap } from "./CopyWrap";
 import { Inquiry, TabbyTamaraRequest, TabbyTamaraComplaint, User as UserType } from "../types";
-import { formatCaseRef, normalizePhone, copyToClipboard } from "../utils";
+import { formatCaseRef, normalizePhone, copyToClipboard, getClinicLabel, generateInquiryCopyText, generateComplaintCopyText, generateTabbyTamaraCopyText } from "../utils";
 import { toast } from "sonner";
 
 interface GlobalDashboardProps {
@@ -82,17 +82,6 @@ type SubmissionItem =
   | { type: "inquiry"; id: string; createdAt: string; clinicName: string; phoneNumber: string; status: string; agentName: string; data: Inquiry }
   | { type: "tabbyTamara"; id: string; createdAt: string; clinicName: string; phoneNumber: string; status: string; agentName: string; data: TabbyTamaraRequest }
   | { type: "complaint"; id: string; createdAt: string; clinicName: string; phoneNumber: string; status: string; agentName: string; data: TabbyTamaraComplaint };
-
-const getClinicLabel = (val: string) => {
-  const mapping: Record<string, string> = {
-    dermadent: "Dermadent",
-    onetouch_mo3tred: "One Touch AlMutarid",
-    onetouch_merkhnya: "One Touch Markhaniya",
-    welltouch: "Well Touch",
-    newage: "New Age"
-  };
-  return mapping[val] || val;
-};
 
 export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
   inquiries,
@@ -304,43 +293,16 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
     toast.info("Filters reset to Today's pending cases!");
   };
 
-  const handleCopyInquiry = (inq: Inquiry) => {
-    const photoLines = (inq.photos || []).length > 0 ? `Attachments: ${inq.photos.length} photo(s) attached` : "";
-    const linkLines = (inq.links || []).length > 0 ? `Links:\n${(inq.links || []).join("\n")}` : "";
-    const text = [
-      ` Inquiry`,
-      `Ref: ${formatCaseRef(inq.id, "inq", inq.createdAt, inq.caseRef)}`,
-      `Clinic: ${getClinicLabel(inq.clinicName)}`,
-      `Phone: ${inq.phoneNumber || ""}`,
-      `Submitted By: ${inq.agentName || "Unknown"}`,
-      `Inquiry: ${inq.text}`,
-      `Status: ${inq.status}`,
-      inq.answer ? `TL Answer: ${inq.answer}` : "",
-      inq.answeredBy ? `Answered by: ${inq.answeredBy}` : "",
-      photoLines,
-      linkLines
-    ].filter(Boolean).join("\n");
-    
+  const handleCopyInquiry = (e: React.MouseEvent, inq: Inquiry) => {
+    e.stopPropagation();
+    const text = generateInquiryCopyText(inq);
     copyToClipboard(text);
-    toast.success("Case details copied to clipboard!");
   };
 
-  const handleCopyComplaint = (comp: TabbyTamaraComplaint) => {
-    const text = [
-      `🚨 Complaint`,
-      `Ref: ${formatCaseRef(comp.id, "tt_complaint", comp.createdAt, comp.caseRef)}`,
-      `Clinic: ${getClinicLabel(comp.clinicName)}`,
-      `Phone: ${normalizePhone(comp.phoneNumber || "")}`,
-      `Submitted By: ${comp.agentName || "Unknown"}`,
-      `Customer Type: ${comp.isOldCustomer ? "Old Customer" : "New Customer"}`,
-      `File Number: ${comp.fileNumber || "N/A"}`,
-      !comp.isOldCustomer ? `ID Number: ${comp.idNumber || "N/A"}` : "",
-      `Details: ${comp.complaintDetails}`,
-      `Status: ${comp.status}`
-    ].filter(Boolean).join("\n");
-
+  const handleCopyComplaint = (e: React.MouseEvent, comp: TabbyTamaraComplaint) => {
+    e.stopPropagation();
+    const text = generateComplaintCopyText(comp);
     copyToClipboard(text);
-    toast.success("Complaint details copied to clipboard!");
   };
 
   return (
@@ -799,7 +761,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleCopyInquiry(item.data);
+                              handleCopyInquiry(e, item.data as any);
                             }}
                             className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                           >
@@ -823,7 +785,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
 
                     {/* TYPE === TABBY TAMARA WORK DETAILS */}
                     {item.type === "tabbyTamara" && (
-                      <div className="space-y-1">
+                      <div className="space-y-4">
                         <TabbyTamaraCard
                           req={item.data}
                           currentUser={currentUser}
@@ -849,6 +811,18 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
                           isExpanded={true}
                           onToggle={() => {}}
                         />
+                        <div className="flex gap-2 justify-end mt-2 pt-3 border-t border-white/5">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const text = generateTabbyTamaraCopyText(item.data);
+                              copyToClipboard(text);
+                            }}
+                            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-auto"
+                          >
+                            <Copy className="w-3.5 h-3.5" /> Copy Details
+                          </button>
+                        </div>
                       </div>
                     )}
 
@@ -1035,7 +1009,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleCopyComplaint(item.data);
+                              handleCopyComplaint(e, item.data as any);
                             }}
                             className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-slate-100 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-auto"
                           >
@@ -1090,7 +1064,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
                             </div>
                           )}
 
-                          {currentUser.role === "agent" && item.status === "closed" && (
+                          {["agent", "sme"].includes(currentUser.role as string) && item.status === "closed" && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();

@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
-import { formatCaseRef, normalizePhone, formatPhoneForCopy, formatPhoneLocalForCopy, getSLAStatus, copyToClipboard, extractLinks, calculateTabbyTamaraPrice } from '../utils';
+import { formatCaseRef, normalizePhone, formatPhoneForCopy, formatPhoneLocalForCopy, getSLAStatus, copyToClipboard, extractLinks, calculateTabbyTamaraPrice , getClinicLabel, generateInquiryCopyText, generateComplaintCopyText, generateTabbyTamaraCopyText} from "../utils";
 
 const CopyButton = ({ text, tooltip, icon: Icon = Copy }: { text: string, tooltip: string, icon?: any }) => {
   const [copied, setCopied] = useState(false);
@@ -537,7 +537,7 @@ export const AgentRequestsLogs = ({
     <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold text-slate-100 font-display text-left">
-          {currentUser?.role === "agent" ? "My Submissions Log" : "All Submissions Log"}
+          {["agent", "sme"].includes(currentUser?.role as string) ? "My Submissions Log" : "All Submissions Log"}
         </h2>
         <p className="text-slate-400 text-[14px] text-left mt-1">Review status, details and track tickets effectively in your workspace.</p>
       </div>

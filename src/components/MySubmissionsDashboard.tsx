@@ -26,7 +26,7 @@ import { RequestReplyThread } from "./RequestReplyThread";
 import { SlideToConfirm } from "./SlideToConfirm";
 import { CopyWrap } from "./CopyWrap";
 import { Inquiry, TabbyTamaraRequest, TabbyTamaraComplaint, User as UserType, INITIAL_AGENTS } from "../types";
-import { formatCaseRef, normalizePhone, copyToClipboard } from "../utils";
+import { formatCaseRef, normalizePhone, copyToClipboard , getClinicLabel, generateInquiryCopyText, generateComplaintCopyText, generateTabbyTamaraCopyText} from "../utils";
 
 interface MySubmissionsDashboardProps {
   inquiries: Inquiry[];
@@ -77,17 +77,6 @@ type SubmissionItem =
   | { type: "inquiry"; id: string; createdAt: string; clinicName: string; phoneNumber: string; status: string; data: Inquiry }
   | { type: "tabbyTamara"; id: string; createdAt: string; clinicName: string; phoneNumber: string; status: string; data: TabbyTamaraRequest }
   | { type: "complaint"; id: string; createdAt: string; clinicName: string; phoneNumber: string; status: string; data: TabbyTamaraComplaint };
-
-const getClinicLabel = (val: string) => {
-  const mapping: Record<string, string> = {
-    dermadent: "Dermadent",
-    onetouch_mo3tred: "One Touch AlMutarid",
-    onetouch_merkhnya: "One Touch Markhaniya",
-    welltouch: "Well Touch",
-    newage: "New Age"
-  };
-  return mapping[val] || val;
-};
 
 export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
   inquiries,
@@ -235,45 +224,17 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
   // Sort by createdAt descending
   filteredList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-  const handleCopyInquiry = (inq: Inquiry) => {
-    const photoLines = (inq.photos || []).length > 0 ? `Attachments: ${inq.photos.length} photo(s) attached` : "";
-    const linkLines = (inq.links || []).length > 0 ? `Links:\n${(inq.links || []).join("\n")}` : "";
-    const text = [
-      ` Inquiry`,
-      `Ref: ${formatCaseRef(inq.id, "inq", inq.createdAt, inq.caseRef)}`,
-      `Clinic: ${getClinicLabel(inq.clinicName)}`,
-      `Phone: ${inq.phoneNumber || ""}`,
-      `Inquiry: ${inq.text}`,
-      `Status: ${inq.status}`,
-      inq.answer ? `TL Answer: ${inq.answer}` : "",
-      inq.answeredBy ? `Answered by: ${inq.answeredBy}` : "",
-      photoLines,
-      linkLines
-    ]
-      .filter(Boolean)
-      .join("\n");
-    copyToClipboard(text, "Inquiry details copied!");
-  };
+  const handleCopyInquiry = (e: React.MouseEvent, inq: any) => {
+        e.stopPropagation();
+        const text = generateInquiryCopyText(inq);
+        copyToClipboard(text);
+      };
 
-  const handleCopyComplaint = (comp: TabbyTamaraComplaint) => {
-    const photoLines = (comp.photos || []).length > 0 ? `Attachments: ${comp.photos.length} photo(s) attached` : "";
-    const linkLines = (comp.links || []).length > 0 ? `Links:\n${(comp.links || []).join("\n")}` : "";
-    const text = [
-      ` Complaint`,
-      `Ref: ${formatCaseRef(comp.id, "tt_complaint", comp.createdAt, comp.caseRef)}`,
-      `Patient: ${comp.patientName} | File: ${comp.fileNumber || "N/A"}`,
-      `Phone: ${normalizePhone(comp.phoneNumber || "")}`,
-      `Clinic: ${getClinicLabel(comp.clinicName)}`,
-      `Status: ${comp.status}`,
-      `Details: ${comp.complaintDetails}`,
-      comp.tlComment ? `TL Reply: ${comp.tlComment}` : "",
-      photoLines,
-      linkLines
-    ]
-      .filter(Boolean)
-      .join("\n");
-    copyToClipboard(text, "Complaint details copied!");
-  };
+  const handleCopyComplaint = (e: React.MouseEvent, comp: any) => {
+        e.stopPropagation();
+        const text = generateComplaintCopyText(comp);
+        copyToClipboard(text);
+      };
 
   return (
     <div className="space-y-6 animate-fade-in font-sans">
@@ -853,7 +814,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                           )}
 
                           {/* Reopen Closed Case if done in error */}
-                          {currentUser.role === "agent" && item.status === "closed" && (
+                          {["agent", "sme"].includes(currentUser.role as string) && item.status === "closed" && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();

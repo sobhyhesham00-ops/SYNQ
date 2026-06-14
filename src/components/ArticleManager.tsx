@@ -48,7 +48,7 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "articles"), (snap: any) => {
-      const docs = snap.docs.map((d: any) => ({ id: d.id, ...d.data() } as Article));
+      const docs = snap.docs.map((d: any) => ({ ...d.data(), id: d.id } as Article));
       const filtered = docs.filter((a: any) => a.category === category).sort((a: any, b: any) => b.createdAt - a.createdAt);
       setArticles(filtered);
       if (filtered.length > 0 && !selectedArticleId) {

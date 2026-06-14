@@ -11,7 +11,7 @@ import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
 import { MultiAttachmentUpload } from './MultiAttachmentUpload';
 import { SlideToConfirm } from './SlideToConfirm';
-import { formatCaseRef, normalizePhone, formatPhoneForCopy, formatPhoneLocalForCopy, copyToClipboard, extractLinks, normalizeUrl, getSafeTTWorkflowStatus, getSafeTTSourceChannel, getAgentLOB, buildCaseClipboardPayload, normalizeAttachments, calculateTabbyTamaraPrice } from '../utils';
+import { formatCaseRef, normalizePhone, formatPhoneForCopy, formatPhoneLocalForCopy, copyToClipboard, extractLinks, normalizeUrl, getSafeTTWorkflowStatus, getSafeTTSourceChannel, getAgentLOB, buildCaseClipboardPayload, normalizeAttachments, calculateTabbyTamaraPrice , getClinicLabel, generateInquiryCopyText, generateComplaintCopyText, generateTabbyTamaraCopyText} from "../utils";
 import { AGENT_LOBS } from '../types';
 import { assignCase } from '../services/assignmentService';
 
@@ -449,13 +449,15 @@ export const TabbyTamaraCard = ({
   };
 
   const handleCopyTextOnly = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const payload = buildCaseClipboardPayload(req);
-    const success = await copyToClipboard(payload.text, "Report details copied successfully!", payload.html);
-    if (!success) {
-      toast.error("Failed to copy request details.");
-    }
-  };
+        e.stopPropagation();
+        const text = req.requestType === 'tabby' || req.requestType === 'tamara' 
+            ? generateTabbyTamaraCopyText(req)
+            : generateComplaintCopyText(req);
+        const success = await copyToClipboard(text, "Report details copied successfully!");
+        if (!success) {
+          toast.error("Failed to copy request details.");
+        }
+      };
 
   const handleShareAction = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -920,7 +922,7 @@ export const TabbyTamaraCard = ({
                        agentFollowUps: arrayUnion(newFollowUp)
                      });
                      if (addSystemNotification) {
-                       const target = currentUser.role === 'agent' ? 'tl' : req.agentName;
+                       const target = ['agent', 'sme'].includes(currentUser.role as string) ? 'tl' : req.agentName;
                        addSystemNotification(
                          'Follow-up on TT Request',
                          `${currentUser.name} added a follow-up note on ${formatCaseRef(req.id, 'tt_request', req.createdAt, req.caseRef)}: "${followUpText.substring(0, 80)}"`,

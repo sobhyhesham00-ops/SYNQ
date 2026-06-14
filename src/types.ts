@@ -1,4 +1,4 @@
-export type Role = 'tl' | 'agent' | 'qa';
+export type Role = 'tl' | 'agent' | 'qa' | 'sme' | 'director';
 
 export interface FileAttachment {
   id: string;
@@ -551,7 +551,14 @@ export interface Order {
   members: OrderMember[];
   deliveryFee: number;
   tax: number;
-  discount: number;
 }
 
-
+export interface AttendanceRecord {
+  id: string; // format: `${agentName}_${date}` e.g. "john_doe_2026-06-14"
+  agentName: string;
+  date: string; // YYYY-MM-DD
+  status: 'present' | 'absent' | 'late' | 'on_leave' | 'not_marked';
+  markedBy?: string; // TL name
+  markedAt?: string; // ISO timestamp
+  notes?: string;
+}

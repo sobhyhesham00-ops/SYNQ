@@ -56,10 +56,9 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
 
-  const isGlobalAdminUser = currentUser?.email?.toLowerCase() === 'sobhyhesham00@gmail.com' ||
-    currentUser?.name?.toLowerCase() === 'h.sobhy' ||
-    currentUser?.name?.toLowerCase() === 'hesham sobhy' ||
-    currentUser?.name?.toLowerCase() === 'hesso';
+  const isGlobalAdminUser = currentUser?.name?.toLowerCase() === "h.sobhy" ||
+                            currentUser?.name?.toLowerCase() === "hesham sobhy" ||
+                            currentUser?.name?.toLowerCase() === "hesso";
   
   // States for new user
   const [showAddForm, setShowAddForm] = useState(false);

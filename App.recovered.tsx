@@ -1653,7 +1653,7 @@ export default function App() {
         collection(db, "users"),
         (snap) => {
           const dbUsers = snap.docs.map(
-            (d) => ({ ...d.data(), id: d.id }) as any,
+            (d) => ({ id: d.id, ...d.data() }) as any,
           );
           setRegisteredUsers(dbUsers);
 
@@ -1936,7 +1936,7 @@ export default function App() {
     const unsubTodos = onSnapshot(
       collection(db, "todos"),
       (snapshot) => {
-        const data = snapshot.docs.map((d) => ({ ...d.data(), id: d.id }));
+        const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
         setTodos(data);
       },
       (error) => {
@@ -18510,10 +18510,71 @@ ${ttNotes}`
                                             <div className="flex items-center gap-2">
                                               <button
                                                 onClick={(e) => {
-  e.stopPropagation();
-  const text = generateInquiryCopyText(inq);
-  copyToClipboard(text, 'Inquiry details copied!');
-}}
+                                                  e.stopPropagation();
+                                                  const patientName = inq.patientName || "—";
+                                                  const fileNumber = inq.fileNumber || "—";
+                                                  const phoneNumber = inq.phoneNumber || "—";
+                                                  const clinicName = inq.clinicName || "—";
+                                                  const agentName = inq.agentName || "Agent";
+                                                   
+                                                  const INQUIRY_STATUS_LABELS: Record<string, string> = {
+                                                    submitted: '📨 Submitted',
+                                                    tl_reviewing: '👀 TL Reviewing',
+                                                    sent_to_clinic: '📤 Sent to Clinic',
+                                                    answered: '✅ Answered',
+                                                    closed: '🔒 Closed',
+                                                    sent: '📤 Sent to Partner'
+                                                  };
+                                                  const statusLabel = INQUIRY_STATUS_LABELS[inq.status] || inq.status?.toUpperCase() || "SUBMITTED";
+
+                                                  const rawAttachments: any[] = [
+                                                    ...(inq.photos || []),
+                                                    ...(inq.attachments || []),
+                                                    ...(inq.screenshot ? [inq.screenshot] : [])
+                                                  ];
+
+                                                  const repliesList: string[] = [];
+                                                  if (inq.replies && Array.isArray(inq.replies)) {
+                                                    inq.replies.forEach((rep: any) => {
+                                                      repliesList.push(`${rep.senderName} (${rep.authorRole || 'User'}): ${rep.text}`);
+                                                      if (rep.photos) rawAttachments.push(...rep.photos);
+                                                      if (rep.attachments) rawAttachments.push(...rep.attachments);
+                                                      if (rep.screenshot) rawAttachments.push(rep.screenshot);
+                                                    });
+                                                  }
+
+                                                  const normAttachments = normalizeAttachments(rawAttachments);
+                                                  const attachmentsText = normAttachments.length > 0 
+                                                    ? `Attachments:\n${normAttachments.map(att => `  - ${att.name || 'File'}`).join('\n')}` 
+                                                    : "";
+
+                                                  const text = [
+                                                    `✨ *INQUIRY REQUEST STATUS* ✨`,
+                                                    `--------------------------------------`,
+                                                    `🆔 *Ref:* ${formatCaseRef(inq.id, "inq", inq.createdAt, inq.caseRef)}`,
+                                                    `👤 *Patient Name:* ${patientName}`,
+                                                    `📞 *Phone:* ${formatPhoneForCopy(phoneNumber)}`,
+                                                    inq.platform ? `🌐 *Platform:* ${inq.platform}` : "",
+                                                    inq.customerType ? `🏷️ *Customer Status:* ${inq.customerType === "new" ? "New Customer" : "Old Customer"}` : "",
+                                                    `📁 *File/ID:* ${fileNumber}`,
+                                                    `🏥 *Clinic:* ${clinicName}`,
+                                                    `📋 *Status:* ${statusLabel}`,
+                                                    `👤 *Agent Name:* ${agentName}`,
+                                                    `💬 *Inquiry Details:*`,
+                                                    `${inq.text || "—"}`,
+                                                    inq.answer ? `💡 *TL Answer:* ${inq.answer}` : "",
+                                                    inq.answeredBy ? `👮 *Answered By:* ${inq.answeredBy}` : "",
+                                                    repliesList.length > 0 ? `\n💬 *Replies & Conversation History:*\n${repliesList.join('\n')}` : "",
+                                                    attachmentsText ? `\n📎 ${attachmentsText}` : "",
+                                                    (inq.links && inq.links.length > 0) ? `\n🔗 *Links:* \n${inq.links.join('\n')}` : "",
+                                                    `--------------------------------------`
+                                                  ].filter(Boolean).join('\n');
+
+                                                  copyToClipboard(
+                                                    text,
+                                                    "Inquiry details copied with beautiful emojis!",
+                                                  );
+                                                }}
                                                 className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                                                 title="Copy Details"
                                               >
@@ -25397,9 +25458,51 @@ ${ttNotes}`
                                                       {isTLOreSupport && (
                                                         <button
                                                           onClick={() => {
-  const text = generateComplaintCopyText(comp);
-  copyToClipboard(text, 'Complaint details copied!');
-}}
+                                                            const photoLines =
+                                                              (
+                                                                comp.photos ||
+                                                                []
+                                                              ).length > 0
+                                                                ? `Attachments: ${comp.photos.length} photo(s) attached`
+                                                                : "";
+                                                            const screenshotLine =
+                                                              comp.screenshot ||
+                                                              comp.imageUrl
+                                                                ? `Screenshot: 1 image attached`
+                                                                : "";
+                                                            const linkLines =
+                                                              (comp.links || [])
+                                                                .length > 0
+                                                                ? `Links:\n${(comp.links || []).join("\n")}`
+                                                                : "";
+
+                                                            const statusEmoji = comp.status === "closed" ? "✅" : "⏳";
+                                                            const text = [
+                                                              `🚨 *CUSTOMER COMPLAINT* 🚨`,
+                                                              `--------------------------------------`,
+                                                              `🆔 *Ref:* ${formatCaseRef(comp.id, "tt_complaint", comp.createdAt, comp.caseRef)}`,
+                                                              `👤 *Patient:* ${comp.patientName} | 📁 *File:* ${comp.fileNumber || "N/A"}`,
+                                                              `📞 *Phone:* ${formatPhoneForCopy(comp.phoneNumber || "")}`,
+                                                              `🪪 *ID Type:* ${comp.idNumber || (comp.isOldCustomer ? "Old Customer" : "New Customer")}`,
+                                                              `🏥 *Clinic:* ${comp.clinicName}`,
+                                                              `${statusEmoji} *Status:* ${comp.status ? comp.status.toUpperCase() : "PENDING"}`,
+                                                              `⚠️ *Complaint:* ${comp.complaintDetails}`,
+                                                              comp.tlComment
+                                                                ? `💬 *TL Comment:* ${comp.tlComment}`
+                                                                : "",
+                                                              photoLines ? `📎 ${photoLines}` : "",
+                                                              screenshotLine ? `📸 ${screenshotLine}` : "",
+                                                              linkLines ? `🔗 ${linkLines}` : "",
+                                                              `--------------------------------------`,
+                                                            ]
+                                                              .filter(Boolean)
+                                                              .join("\n");
+
+                                                            copyToClipboard(
+                                                              text,
+                                                              "Complaint details copied with beautiful emojis!",
+                                                            );
+                                                          }}
                                                           className="mr-auto px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-slate-100 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                                                           title="Copy Complaint details"
                                                         >
@@ -25449,9 +25552,49 @@ ${ttNotes}`
                                                       {/* Copy Option */}
                                                       <button
                                                         onClick={() => {
-  const text = generateComplaintCopyText(comp);
-  copyToClipboard(text, 'Complaint details copied!');
-}}
+                                                          const photoLines =
+                                                            (comp.photos || [])
+                                                              .length > 0
+                                                              ? `Attachments: ${comp.photos.length} photo(s) attached`
+                                                              : "";
+                                                          const screenshotLine =
+                                                            comp.screenshot ||
+                                                            comp.imageUrl
+                                                              ? `Screenshot: 1 image attached`
+                                                              : "";
+                                                          const linkLines =
+                                                            (comp.links || [])
+                                                              .length > 0
+                                                              ? `Links:\n${(comp.links || []).join("\n")}`
+                                                              : "";
+
+                                                          const statusEmoji = comp.status === "closed" ? "✅" : "⏳";
+                                                          const text = [
+                                                            `🚨 *CUSTOMER COMPLAINT* 🚨`,
+                                                            `--------------------------------------`,
+                                                            `🆔 *Ref:* ${formatCaseRef(comp.id, "tt_complaint", comp.createdAt, comp.caseRef)}`,
+                                                            `👤 *Patient:* ${comp.patientName} | 📁 *File:* ${comp.fileNumber || "N/A"}`,
+                                                            `📞 *Phone:* ${formatPhoneForCopy(comp.phoneNumber || "")}`,
+                                                            `🪪 *ID Type:* ${comp.idNumber || (comp.isOldCustomer ? "Old Customer" : "New Customer")}`,
+                                                            `🏥 *Clinic:* ${comp.clinicName}`,
+                                                            `${statusEmoji} *Status:* ${comp.status ? comp.status.toUpperCase() : "PENDING"}`,
+                                                            `⚠️ *Complaint:* ${comp.complaintDetails}`,
+                                                            comp.tlComment
+                                                              ? `💬 *TL Comment:* ${comp.tlComment}`
+                                                              : "",
+                                                            photoLines ? `📎 ${photoLines}` : "",
+                                                            screenshotLine ? `📸 ${screenshotLine}` : "",
+                                                            linkLines ? `🔗 ${linkLines}` : "",
+                                                            `--------------------------------------`,
+                                                          ]
+                                                            .filter(Boolean)
+                                                            .join("\n");
+
+                                                          copyToClipboard(
+                                                            text,
+                                                            "Complaint details copied with beautiful emojis!",
+                                                          );
+                                                        }}
                                                         className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-slate-100 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                                                         title="Copy Complaint details"
                                                       >

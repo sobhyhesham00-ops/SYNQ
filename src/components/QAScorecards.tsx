@@ -117,7 +117,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
     setView('list');
   };
 
-  const myScores = currentUser.role === 'agent' 
+  const myScores = ['agent', 'sme'].includes(currentUser.role as string) 
     ? qaScores.filter(s => s.agentName.toLowerCase() === currentUser.name.toLowerCase())
     : qaScores;
 
