@@ -3279,6 +3279,159 @@ ${pageText}
     },
   ]);
   const [inquirySearchQuery, setInquirySearchQuery] = useState("");
+  const [globalSearchInput, setGlobalSearchInput] = useState("");
+  const [debouncedGlobalSearchInput, setDebouncedGlobalSearchInput] = useState("");
+  const [isGlobalSearchPanelOpen, setIsGlobalSearchPanelOpen] = useState(false);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedGlobalSearchInput(globalSearchInput);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [globalSearchInput]);
+
+  // Dynamic global search matching over all datasets with phone numbers
+  const globalSearchResults = useMemo(() => {
+    const searchVal = debouncedGlobalSearchInput.trim();
+    if (!searchVal) return [];
+    
+    const normSearchVal = normalizePhone(searchVal);
+    if (!normSearchVal) return [];
+
+    const results: Array<{
+      id: string;
+      type: 'inquiry' | 'tabby_tamara' | 'complaint' | 'client_comm' | 'case' | 'request';
+      patientName: string;
+      phoneNumber: string;
+      clinicName: string;
+      status: string;
+      createdAt: string;
+      agentName: string;
+      caseRef: string;
+      originalItem: any;
+    }> = [];
+
+    const isMatched = (phone: string) => {
+      const normPhone = normalizePhone(phone);
+      if (!normPhone) return false;
+      if (normSearchVal.length >= 7) {
+        return normPhone.includes(normSearchVal) || normSearchVal.includes(normPhone);
+      } else {
+        return normPhone.includes(normSearchVal);
+      }
+    };
+
+    // 1. Inquiries
+    (inquiries || []).forEach(item => {
+      if (item.phoneNumber && isMatched(item.phoneNumber)) {
+        results.push({
+          id: item.id,
+          type: 'inquiry',
+          patientName: item.patientName || "Unknown Patient",
+          phoneNumber: item.phoneNumber || "",
+          clinicName: item.clinicName || "",
+          status: item.status,
+          createdAt: item.createdAt,
+          agentName: item.agentName,
+          caseRef: item.caseRef || item.id.substring(0, 8),
+          originalItem: item
+        });
+      }
+    });
+
+    // 2. Tabby & Tamara Requests
+    (tabbyTamaraRequests || []).forEach(item => {
+      if (item.phoneNumber && isMatched(item.phoneNumber)) {
+        results.push({
+          id: item.id,
+          type: 'tabby_tamara',
+          patientName: item.patientName || "Unknown Patient",
+          phoneNumber: item.phoneNumber || "",
+          clinicName: item.clinicName || "",
+          status: item.status,
+          createdAt: item.createdAt,
+          agentName: item.agentName,
+          caseRef: item.caseRef || item.id.substring(0, 8),
+          originalItem: item
+        });
+      }
+    });
+
+    // 3. Tabby & Tamara Complaints
+    (tabbyTamaraComplaints || []).forEach(item => {
+      if (item.phoneNumber && isMatched(item.phoneNumber)) {
+        results.push({
+          id: item.id,
+          type: 'complaint',
+          patientName: item.patientName || "Unknown Patient",
+          phoneNumber: item.phoneNumber || "",
+          clinicName: item.clinicName || "",
+          status: item.status,
+          createdAt: item.createdAt,
+          agentName: item.agentName,
+          caseRef: item.caseRef || item.id.substring(0, 8),
+          originalItem: item
+        });
+      }
+    });
+
+    // 4. Client Communication Requests
+    (clientComms || []).forEach(item => {
+      if (item.phoneNumber && isMatched(item.phoneNumber)) {
+        results.push({
+          id: item.id,
+          type: 'client_comm',
+          patientName: item.patientName || item.notes?.substring(0, 20) || "Client Comm",
+          phoneNumber: item.phoneNumber || "",
+          clinicName: item.clinicName || "",
+          status: item.status,
+          createdAt: item.createdAt,
+          agentName: item.callCenterAgentName || "System",
+          caseRef: item.caseRef || item.id.substring(0, 8),
+          originalItem: item
+        });
+      }
+    });
+
+    // 5. Cases
+    (cases || []).forEach(item => {
+      if (item.phoneNumber && isMatched(item.phoneNumber)) {
+        results.push({
+          id: item.id,
+          type: 'case',
+          patientName: item.patientName || "Unknown Patient",
+          phoneNumber: item.phoneNumber || "",
+          clinicName: item.branch || "",
+          status: "submitted",
+          createdAt: item.createdAt,
+          agentName: item.agentName,
+          caseRef: item.caseRef || item.id.substring(0, 8),
+          originalItem: item
+        });
+      }
+    });
+
+    // 6. Scheduling Requests
+    (requests || []).forEach((item: any) => {
+      if (item.phoneNumber && isMatched(item.phoneNumber)) {
+        results.push({
+          id: item.id,
+          type: 'request',
+          patientName: item.agentName || "Agent Work Request",
+          phoneNumber: item.phoneNumber,
+          clinicName: "",
+          status: item.status || "pending",
+          createdAt: item.createdAt,
+          agentName: item.agentName,
+          caseRef: item.id.substring(0, 8),
+          originalItem: item
+        });
+      }
+    });
+
+    return results.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [debouncedGlobalSearchInput, inquiries, tabbyTamaraRequests, tabbyTamaraComplaints, clientComms, cases, requests]);
+
   const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
   const [globalInquirySearch, setGlobalInquirySearch] = useState("");
   const [agentInquiryView, setAgentInquiryView] = useState<"my" | "global">(
@@ -3335,96 +3488,50 @@ ${pageText}
   const lastOpenCasesNotificationTimeRef = useRef<number>(0);
 
   const checkAndNotifyOpenCases = () => {
-    if (!currentUser) return;
-    if (currentUser.role !== "agent" && currentUser.role !== "tl") return;
-
-    const now = Date.now();
-    const oneHourMs = 3600000;
-    if (now - lastOpenCasesNotificationTimeRef.current < oneHourMs) {
-      return;
-    }
-
-    // 1. Inquiries - open/pending: not answered and not closed
-    const openInquiries = inquiries.filter((inq) => {
-      const isOpen = inq.status !== "answered" && inq.status !== "closed";
-      if (!isOpen) return false;
-      if (currentUser.role === "tl") return true;
-      return (
-        inq.agentName === currentUser.name ||
-        inq.agentName?.toLowerCase() === currentUser.name.toLowerCase()
-      );
-    });
-
-    // 2. Complaints - open/pending: status is not closed
-    const openComplaints = tabbyTamaraComplaints.filter((comp) => {
-      const isOpen = comp.status !== "closed";
-      if (!isOpen) return false;
-      if (currentUser.role === "tl") return true;
-      return (
-        comp.agentName === currentUser.name ||
-        comp.agentName?.toLowerCase() === currentUser.name.toLowerCase()
-      );
-    });
-
-    // 3. Tabby & Tamara Requests - open/pending
-    const openTabbyTamara = tabbyTamaraRequests.filter((req) => {
-      const isOpen =
-        req.status !== "confirmed" &&
-        req.status !== "rejected" &&
-        req.workflowStatus !== "completed" &&
-        req.workflowStatus !== "rejected";
-      if (!isOpen) return false;
-      if (currentUser.role === "tl") return true;
-      return (
-        req.agentName === currentUser.name ||
-        req.agentName?.toLowerCase() === currentUser.name.toLowerCase() ||
-        req.submittedByName?.toLowerCase() === currentUser.name.toLowerCase()
-      );
-    });
-
-    const count = openInquiries.length + openComplaints.length + openTabbyTamara.length;
-
-    if (count > 0) {
-      const hourBucket = Math.floor(now / 3600000);
-      const stableId = `open_cases_reminder_${currentUser.name}_${hourBucket}`;
+    let count = 0;
+    
+    if (currentUser?.role === "agent") {
+      const myName = currentUser.name?.toLowerCase() || '';
+      if (!myName) return;
       
+      const myInquiries = inquiries.filter(r => r.agentName?.toLowerCase() === myName && r.status !== 'answered');
+      const myTTRequests = tabbyTamaraRequests.filter(r => r.agentName?.toLowerCase() === myName && !['closed','confirmed','rejected','cancelled','declined'].includes(r.status));
+      const myTTComplaints = tabbyTamaraComplaints.filter(r => r.agentName?.toLowerCase() === myName && r.status !== 'closed');
+      
+      count = myInquiries.length + myTTRequests.length + myTTComplaints.length;
+      
+    } else if (currentUser?.role === "tl") {
+      const allInquiries = inquiries.filter(r => r.status !== 'answered');
+      const allTTRequests = tabbyTamaraRequests.filter(r => !['closed','confirmed','rejected','cancelled','declined'].includes(r.status));
+      const allTTComplaints = tabbyTamaraComplaints.filter(r => r.status !== 'closed');
+      
+      count = allInquiries.length + allTTRequests.length + allTTComplaints.length;
+    }
+    
+    if (count > 0) {
       addSystemNotification(
         "Open Cases Reminder",
-        `You have ${count} open case(s) that need to be closed.`,
+        `You have ${count} open case(s) that need attention.`,
         "reminder",
-        currentUser.name,
-        stableId
+        currentUser.name || "Agent"
       );
-      
-      lastOpenCasesNotificationTimeRef.current = now;
     }
   };
 
-  // Keep a ref to the latest check function to avoid stale closures in the interval
-  const checkAndNotifyOpenCasesRef = useRef(checkAndNotifyOpenCases);
   useEffect(() => {
-    checkAndNotifyOpenCasesRef.current = checkAndNotifyOpenCases;
-  }, [checkAndNotifyOpenCases]);
-
-  // Hook 1: Runs on mount and whenever data loads or changes (throttled by lastOpenCasesNotificationTimeRef)
-  useEffect(() => {
-    if (!currentUser) return;
-    if (currentUser.role !== "agent" && currentUser.role !== "tl") return;
-
-    checkAndNotifyOpenCases();
+    if (!currentUser || (currentUser.role !== "agent" && currentUser.role !== "tl")) return;
+    const lastNotifKey = `lastOpenCaseNotif_${currentUser.name}`;
+    const checkAndRun = () => {
+      const last = localStorage.getItem(lastNotifKey);
+      const now = Date.now();
+      if (last && now - parseInt(last, 10) < 3600000) return; // skip if notified within last hour
+      checkAndNotifyOpenCases();
+      localStorage.setItem(lastNotifKey, String(now));
+    };
+    checkAndRun();
+    const interval = setInterval(checkAndRun, 3600000);
+    return () => clearInterval(interval);
   }, [currentUser, inquiries, tabbyTamaraRequests, tabbyTamaraComplaints]);
-
-  // Hook 2: Independent hourly clock interval that runs checkAndNotifyOpenCasesRef.current()
-  useEffect(() => {
-    if (!currentUser) return;
-    if (currentUser.role !== "agent" && currentUser.role !== "tl") return;
-
-    const intervalId = setInterval(() => {
-      checkAndNotifyOpenCasesRef.current();
-    }, 3600000);
-
-    return () => clearInterval(intervalId);
-  }, [currentUser]);
 
   // Personal Reminders Background Check Engine
   const checkAndNotifyTodosReminders = () => {
@@ -8881,9 +8988,189 @@ ${ttNotes}`
           </div>
         ) : (
           /* User Logged In Portal */
-          <div className="flex-1 flex flex-col md:flex-row gap-6 md:gap-8 my-4 lg:my-6">
-            {/* Navigation / Sidebar Menu */}
-            <aside className="w-full md:w-64 border border-white/10 bg-white/5 backdrop-blur-xl flex flex-col p-5 rounded-2xl sm:rounded-3xl shadow-xl space-y-6">
+          <div className="flex-1 flex flex-col gap-6 my-4 lg:my-6">
+            {/* Global Workspace Header / Navbar with Global Search */}
+            <header className="w-full bg-[#14141a]/60 backdrop-blur-xl border border-white/10 p-4 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl relative z-40">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-black/40 rounded-xl flex items-center justify-center border border-white/10">
+                  <Database className="w-5 h-5 text-indigo-400" />
+                </div>
+                <div className="text-left">
+                  <h1 className="text-sm font-black tracking-tight text-slate-100 font-display flex items-center gap-1.5">
+                    Synq Workspace <span className="text-[9px] uppercase tracking-wider font-extrabold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full font-sans">CONSOLE</span>
+                  </h1>
+                  <p className="text-[10px] text-slate-500 font-mono font-bold tracking-tight">Active Portal Access</p>
+                </div>
+              </div>
+
+              {/* SEARCH BAR COMPONENT */}
+              <div className="flex-1 max-w-md relative" id="global-search-container">
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
+                    <Search className="w-4 h-4" />
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="Search by phone number..."
+                    value={globalSearchInput ?? ""}
+                    onChange={(e) => {
+                      setGlobalSearchInput(e.target.value);
+                      setIsGlobalSearchPanelOpen(true);
+                    }}
+                    onFocus={() => setIsGlobalSearchPanelOpen(true)}
+                    className="w-full pl-9 pr-8 py-2 bg-white/5 border border-white/10 rounded-2xl text-xs text-slate-100 focus:outline-none focus:border-indigo-500 focus:bg-white/10 placeholder:text-slate-500 transition-all font-sans"
+                  />
+                  {globalSearchInput && (
+                    <button
+                      onClick={() => {
+                        setGlobalSearchInput("");
+                        setIsGlobalSearchPanelOpen(false);
+                      }}
+                      className="absolute inset-y-0 right-2 flex items-center px-1 text-slate-400 hover:text-slate-200"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Dropdown Overlay Results Panel */}
+                {isGlobalSearchPanelOpen && globalSearchInput && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-30" 
+                      onClick={() => setIsGlobalSearchPanelOpen(false)} 
+                    />
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#121216] border border-white/10 rounded-2xl shadow-2xl z-45 p-1.5 max-h-96 overflow-y-auto flex flex-col divide-y divide-white/5">
+                      <div className="p-3 text-[10px] text-slate-400 font-extrabold uppercase tracking-wider bg-black/20 flex items-center justify-between border-b border-white/5 rounded-t-xl font-mono">
+                        <span>Results for "{globalSearchInput}": {globalSearchResults.length} records</span>
+                        <button 
+                          onClick={() => {
+                            setGlobalSearchInput("");
+                            setIsGlobalSearchPanelOpen(false);
+                          }}
+                          className="p-1 hover:bg-white/5 rounded text-slate-400 hover:text-white"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      {globalSearchResults.length === 0 ? (
+                        <div className="p-6 text-center text-xs text-slate-500 font-medium">
+                          No records found for this phone number.
+                        </div>
+                      ) : (
+                        globalSearchResults.map((item) => {
+                          const dateStr = item.createdAt ? formatDateNice(item.createdAt) : "";
+                          const badgeClasses = {
+                            inquiry: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
+                            tabby_tamara: 'bg-rose-500/10 text-rose-400 border border-rose-500/20',
+                            complaint: 'bg-red-500/10 text-red-500 border border-red-500/20',
+                            client_comm: 'bg-sky-500/10 text-sky-400 border border-sky-500/20',
+                            case: 'bg-orange-500/10 text-orange-400 border border-orange-500/20',
+                            request: 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
+                          }[item.type];
+
+                          const typeLabel = {
+                            inquiry: 'Inquiry',
+                            tabby_tamara: 'T&T Request',
+                            complaint: 'Complaint',
+                            client_comm: 'Client Comm',
+                            case: 'Manual Book Case',
+                            request: 'Schedule Request'
+                          }[item.type];
+
+                          return (
+                            <button
+                              key={item.id + '-' + item.type}
+                              onClick={() => {
+                                // Navigate dynamically
+                                if (item.type === 'inquiry') {
+                                  setActiveTab('inquiries');
+                                  setExpandedInquiryId(item.id);
+                                  setGlobalInquirySearch('');
+                                  setInquirySearchQuery('');
+                                  setInquiryClinicFilter('all');
+                                  setInquiryStatusFilter('');
+                                } else if (item.type === 'tabby_tamara') {
+                                  setActiveTab('tabby-tamara');
+                                  setExpandedTabbyTamaraId(item.id);
+                                  setTtSearchQuery('');
+                                  setTtSearch('');
+                                  setTtDateFilter('');
+                                  setTtFilterStatus('all');
+                                  setTcFilterClinic('all');
+                                } else if (item.type === 'complaint') {
+                                  setActiveTab('complaints');
+                                  setSelectedComplaintId(item.id);
+                                  setComplaintSearch('');
+                                  setCompDateFilter('');
+                                  setComplaintListFilter('all');
+                                } else if (item.type === 'client_comm') {
+                                  setActiveTab('client-comms');
+                                  setExpandedCcId(item.id);
+                                  setCommSearch('');
+                                  setCommLangFilter('all');
+                                } else if (item.type === 'case') {
+                                  setActiveTab('cases');
+                                  setCasesSearch(item.phoneNumber);
+                                } else if (item.type === 'request') {
+                                  setActiveTab('schedules');
+                                }
+                                setIsGlobalSearchPanelOpen(false);
+                              }}
+                              className="w-full text-left p-2.5 hover:bg-white/5 transition-colors duration-150 flex flex-col gap-1.5 focus:outline-none"
+                            >
+                              <div className="flex items-center justify-between gap-1.5">
+                                <span className={`text-[8px] font-extrabold uppercase tracking-widest px-1.5 py-0.5 rounded font-mono ${badgeClasses}`}>
+                                  {typeLabel}
+                                </span>
+                                <span className="text-[10px] text-slate-500 font-mono">
+                                  Ref: {item.caseRef}
+                                </span>
+                              </div>
+                              <div className="flex justify-between items-baseline gap-2">
+                                <p className="text-xs font-bold text-slate-200 truncate">
+                                  {item.patientName}
+                                </p>
+                                {item.clinicName && (
+                                  <span className="text-[10px] text-zinc-400 font-semibold max-w-[120px] truncate">
+                                    {item.clinicName}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center justify-between gap-2 text-[10px] text-slate-400 mt-0.5 font-mono">
+                                <span className="text-slate-500 truncate">Submitted by: {item.agentName}</span>
+                                <span className="text-indigo-400/85 whitespace-nowrap">{item.phoneNumber}</span>
+                              </div>
+                              <div className="flex justify-between items-center text-[9px] text-slate-500 border-t border-white/[0.03] pt-1">
+                                <span>Status: <span className="font-semibold text-slate-400 capitalize">{item.status}</span></span>
+                                <span>{dateStr}</span>
+                              </div>
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Connected User Badge */}
+              <div className="flex items-center justify-end gap-3 text-right">
+                <div className="hidden sm:block">
+                  <p className="text-xs font-bold text-slate-200">{currentUser.name}</p>
+                  <p className="text-[9px] text-slate-500 font-mono font-black uppercase tracking-widest">{currentUser.role || 'Agent'}</p>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center font-bold text-xs text-indigo-400 font-display">
+                  {currentUser.name ? currentUser.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() : 'U'}
+                </div>
+              </div>
+            </header>
+
+            {/* Split Content structure */}
+            <div className="flex-1 flex flex-col md:flex-row gap-6 md:gap-8">
+              {/* Navigation / Sidebar Menu */}
+              <aside className="w-full md:w-64 border border-white/10 bg-white/5 backdrop-blur-xl flex flex-col p-5 rounded-2xl sm:rounded-3xl shadow-xl space-y-6">
               {/* Egypt Local Time & 10th of Ramadan Weather */}
               <div className="p-3.5 rounded-xl bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-cyan-500/10 border border-white/10 space-y-2">
                 <div className="flex justify-between items-center">
@@ -27035,6 +27322,7 @@ ${ttNotes}`
               </AnimatePresence>
             </main>
           </div>
+        </div>
         )}
       </div>
       <EditModal

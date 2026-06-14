@@ -369,6 +369,8 @@ export const AllAgentSubmissionsLog = ({
   const [filterType, setFilterType] = useState('all');
   const [filterDate, setFilterDate] = useState('');
   const [filterAgent, setFilterAgent] = useState('all');
+  const [filterClinic, setFilterClinic] = useState('all');
+  const [filterPhone, setFilterPhone] = useState('');
   const [sortBy, setSortBy] = useState<'date_desc'|'date_asc'|'status'>('date_desc');
 
   const [, forceUpdate] = useState(0);
@@ -380,11 +382,11 @@ export const AllAgentSubmissionsLog = ({
   const allRequests = useMemo(() => {
     const res: any[] = [];
     
-    requests.forEach(r => res.push({...r, _cType: 'sched'}));
-    inquiries.forEach(r => res.push({...r, _cType: 'inq'}));
-    tabbyTamaraRequests.forEach(r => res.push({...r, _cType: 'tt_request'}));
-    complaints.forEach(r => res.push({...r, _cType: 'tt_complaint'}));
-    clientComms.forEach(r => res.push({...r, _cType: 'comm'}));
+    requests.forEach((r: any) => res.push({...r, _cType: 'sched'}));
+    inquiries.forEach((r: any) => res.push({...r, _cType: 'inq'}));
+    tabbyTamaraRequests.forEach((r: any) => res.push({...r, _cType: 'tt_request'}));
+    complaints.forEach((r: any) => res.push({...r, _cType: 'tt_complaint'}));
+    clientComms.forEach((r: any) => res.push({...r, _cType: 'comm'}));
     
     return res.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [requests, inquiries, tabbyTamaraRequests, complaints, clientComms]);
@@ -408,6 +410,8 @@ export const AllAgentSubmissionsLog = ({
     return allRequests.filter(r => ['approved','answered','confirmed','closed','contacted'].includes(r.status)).length;
   }, [allRequests]);
 
+  const isNoFiltersActive = !filterDate && filterClinic === 'all' && !filterPhone && search === '' && filterType === 'all' && filterAgent === 'all';
+
   const filtered = allRequests.filter(r => {
     const s = search.toLowerCase();
     const agentName = r.agentName || r.callCenterAgentName || "Unknown Agent";
@@ -415,12 +419,10 @@ export const AllAgentSubmissionsLog = ({
     const matchesSearch = !s || 
       (r.id && r.id.toLowerCase().includes(s)) ||
       (agentName && agentName.toLowerCase().includes(s)) ||
-      (r.phoneNumber && r.phoneNumber.toLowerCase().includes(s)) ||
       (r.patientName && r.patientName.toLowerCase().includes(s)) ||
       (r.text && r.text.toLowerCase().includes(s)) ||
       (r.complaintDetails && r.complaintDetails.toLowerCase().includes(s)) ||
-      (r.notes && r.notes.toLowerCase().includes(s)) ||
-      (r.clinicName && r.clinicName.toLowerCase().includes(s));
+      (r.notes && r.notes.toLowerCase().includes(s));
       
     if (!matchesSearch) return false;
     if (filterType !== 'all' && r._cType !== filterType) return false;
@@ -429,13 +431,15 @@ export const AllAgentSubmissionsLog = ({
       return false;
     }
 
-    if (filterDate) {
-      const qDate = new Date(filterDate).toDateString();
-      const itemDate = new Date(r.createdAt).toDateString();
-      if (qDate !== itemDate) return false;
+    if (isNoFiltersActive) {
+      return ['pending', 'pending_partner', 'pending_tl', 'not_confirmed', 'need_contact', 'in_progress', 'submitted', 'sent', 'tl_reviewing', 'sent_to_clinic'].includes(r.status);
     }
 
-    return true;
+    const matchesDate = !filterDate || (r.createdAt && r.createdAt.startsWith(filterDate));
+    const matchesClinic = filterClinic === 'all' || (r.clinicName && r.clinicName.toLowerCase() === filterClinic.toLowerCase());
+    const matchesPhone = !filterPhone || (r.phoneNumber || '').replace(/\D/g, '').includes(filterPhone.replace(/\D/g, ''));
+
+    return matchesDate && matchesClinic && matchesPhone;
   });
 
   const sorted = [...filtered].sort((a, b) => {
@@ -480,56 +484,101 @@ export const AllAgentSubmissionsLog = ({
       </div>
 
       <div className="bg-slate-950 border border-white/5 rounded-2xl shadow-xl p-5 space-y-4">
-        <div className='flex gap-2 flex-wrap mb-4 pb-4 border-b border-white/5'>
-          <div className='flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-md text-[11px] uppercase tracking-wider font-bold text-slate-300'>
-            <ClipboardList className="w-3.5 h-3.5" />
-            <span>{allRequests.length} Total</span>
+        <div className='flex justify-between items-center flex-wrap gap-2 mb-4 pb-4 border-b border-white/5'>
+          <div className="flex gap-2 flex-wrap">
+            <div className='flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-md text-[11px] uppercase tracking-wider font-bold text-slate-300'>
+              <ClipboardList className="w-3.5 h-3.5" />
+              <span>{allRequests.length} Total</span>
+            </div>
+            <div className='flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-md text-[11px] uppercase tracking-wider font-bold text-amber-400'>
+              <Clock className="w-3.5 h-3.5" />
+              <span>{pendingCount} Pending</span>
+            </div>
+            <div className='flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-md text-[11px] uppercase tracking-wider font-bold text-emerald-400'>
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>{resolvedCount} Resolved</span>
+            </div>
           </div>
-          <div className='flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-md text-[11px] uppercase tracking-wider font-bold text-amber-400'>
-            <Clock className="w-3.5 h-3.5" />
-            <span>{pendingCount} Pending</span>
-          </div>
-          <div className='flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-md text-[11px] uppercase tracking-wider font-bold text-emerald-400'>
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>{resolvedCount} Resolved</span>
+          <div className="text-[12px] font-medium text-slate-400">
+            Showing {sorted.length} of {allRequests.length} total
           </div>
         </div>
-        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 pb-4 border-b border-white/5">
-          <div className="relative flex-grow max-w-sm w-full">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input type="text" placeholder="Search ID, Agent, Phone, Patient..." value={search} onChange={e => setSearch(e.target.value)} className="w-full pl-9 pr-4 py-2.5 bg-white/5 border border-white/5 rounded-lg text-[13px] text-white focus:outline-none focus:border-indigo-500 font-sans" />
+
+        {isNoFiltersActive && (
+          <div className="bg-amber-500/10 border border-amber-500/20 text-amber-500 px-4 py-2 rounded-lg text-[13px] font-medium mb-4 flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            Showing all pending requests. Use filters to view history.
           </div>
-          <div className="flex gap-2 w-full xl:w-auto items-center flex-wrap">
-            <input type="date" title="Filter by submission date" value={filterDate} onChange={e => setFilterDate(e.target.value)} className="w-full xl:w-36 px-3 py-2.5 bg-white/5 border border-white/5 rounded-lg text-[13px] text-white focus:outline-none focus:border-indigo-500 font-sans cursor-pointer [color-scheme:dark]" />
-            <Filter className="w-4 h-4 text-slate-400 flex-shrink-0" />
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="w-full xl:w-36 xl:min-w-[140px] px-3 py-2.5 bg-white/5 border border-white/5 rounded-lg text-[13px] text-white focus:outline-none focus:border-indigo-500 font-sans cursor-pointer">
-              <option value="date_desc" className="bg-slate-900">Newest First</option>
-              <option value="date_asc" className="bg-slate-900">Oldest First</option>
-              <option value="status" className="bg-slate-900">By Status</option>
-            </select>
-            <select value={filterType} onChange={e => setFilterType(e.target.value)} className="w-full xl:w-40 xl:min-w-[150px] px-3 py-2.5 bg-white/5 border border-white/5 rounded-lg text-[13px] text-white focus:outline-none focus:border-indigo-500 font-sans cursor-pointer">
-              <option value="all" className="bg-slate-900">All Types</option>
-              <option value="sched" className="bg-slate-900">Leaves/Swaps</option>
-              <option value="inq" className="bg-slate-900">Inquiries</option>
-              <option value="tt_request" className="bg-slate-900">Tabby/Tamara</option>
-              <option value="tt_complaint" className="bg-slate-900">Complaints</option>
-              <option value="comm" className="bg-slate-900">Client Comms</option>
-            </select>
-            <select value={filterAgent} onChange={e => setFilterAgent(e.target.value)} className="w-full xl:w-48 xl:min-w-[180px] px-3 py-2.5 bg-white/5 border border-white/5 rounded-lg text-[13px] text-white focus:outline-none focus:border-indigo-500 font-sans cursor-pointer">
-              <option value="all" className="bg-slate-900">Filter By Agent</option>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3 pb-4 border-b border-white/5">
+          <div className="relative w-full xl:col-span-2">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input type="text" placeholder="Search ID, Agent, Patient..." value={search} onChange={e => setSearch(e.target.value)} className="w-full pl-9 pr-4 py-1.5 bg-slate-900/60 border border-slate-700/40 rounded-lg text-[12px] text-white focus:outline-none focus:border-indigo-500 font-sans" />
+          </div>
+          
+          {/* New Filters Start */}
+          <input 
+            type="date" 
+            value={filterDate} 
+            onChange={(e) => setFilterDate(e.target.value)} 
+            className="w-full bg-slate-900/60 border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 [color-scheme:dark]" 
+          />
+          <select 
+            value={filterClinic} 
+            onChange={(e) => setFilterClinic(e.target.value)} 
+            className="w-full bg-slate-900/60 border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500"
+          >
+            <option value="all">All Clinics</option>
+            <option value="dermadent">Dermadent</option>
+            <option value="onetouch_mo3tred">One Touch (Mo3tred)</option>
+            <option value="onetouch_merkhnya">One Touch (Merkhnya)</option>
+            <option value="welltouch">Well Touch</option>
+            <option value="newage">New Age</option>
+          </select>
+          <input 
+            type="text" 
+            placeholder="Search by phone..." 
+            value={filterPhone} 
+            onChange={(e) => setFilterPhone(e.target.value)} 
+            className="w-full bg-slate-900/60 border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 placeholder-slate-500" 
+          />
+          {/* New Filters End */}
+
+          <div className="flex gap-2 w-full xl:col-span-2 items-center flex-wrap lg:justify-end">
+            <select value={filterAgent} onChange={e => setFilterAgent(e.target.value)} className="bg-slate-900/60 border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer">
+              <option value="all">All Agents</option>
               {agentsList.map(name => (
-                <option key={name} value={name} className="bg-slate-900">{name}</option>
+                <option key={name} value={name}>{name}</option>
               ))}
             </select>
-            {(filterDate || filterAgent !== 'all') && (
+            <select value={filterType} onChange={e => setFilterType(e.target.value)} className="bg-slate-900/60 border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer">
+              <option value="all">All Types</option>
+              <option value="sched">Leaves/Swaps</option>
+              <option value="inq">Inquiries</option>
+              <option value="tt_request">Tabby/Tamara</option>
+              <option value="tt_complaint">Complaints</option>
+              <option value="comm">Client Comms</option>
+            </select>
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="bg-slate-900/60 border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer">
+              <option value="date_desc">Newest First</option>
+              <option value="date_asc">Oldest First</option>
+              <option value="status">By Status</option>
+            </select>
+            {(!isNoFiltersActive) && (
               <button 
                 onClick={() => {
                   setFilterDate('');
+                  setFilterClinic('all');
+                  setFilterPhone('');
+                  setSearch('');
+                  setFilterType('all');
                   setFilterAgent('all');
                 }}
-                className="px-3 py-2.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-lg text-[12px] font-bold hover:bg-rose-500/20 whitespace-nowrap cursor-pointer"
+                className="px-3 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 rounded-lg text-[12px] font-bold hover:bg-slate-700 whitespace-nowrap cursor-pointer transition-colors"
+                title="Clear Filters"
               >
-                Clear Filters
+                Clear
               </button>
             )}
           </div>
