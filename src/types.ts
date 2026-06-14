@@ -115,6 +115,7 @@ export interface TodoItem {
   createdAt: string;
   notified?: boolean;
   category?: 'Work' | 'Personal' | 'Urgent';
+  isPersonalReminder?: boolean;
 }
 
 export interface Inquiry {
@@ -124,9 +125,11 @@ export interface Inquiry {
   clinicName: string; // Mandatory dropdown value
   patientName?: string;
   fileNumber?: string;
+  fileId?: string;
+  patientId?: string;
   phoneNumber?: string;
   customerType?: 'new' | 'old';
-  platform?: string;
+  platform: string;
   text: string;
   photos: string[]; // Base64 data-urls or image urls
   screenshot?: string | null; // keep for backward compat
@@ -148,6 +151,9 @@ export interface Inquiry {
   seenByAgent?: boolean; // Tracking if agent acknowledged the notification
   customerContacted?: 'not_contacted' | 'contacted' | 'attempted'; // Dropdown menu status for customer contact status
   assignedTo?: string;
+  viewingStatus?: 'none' | 'tl_viewing';
+  viewingBy?: string;
+  viewingAt?: string;
   replies?: {
     id: string;
     authorId?: string;
@@ -467,7 +473,7 @@ export interface SystemNotification {
   id: string;
   title: string;
   message: string;
-  type: 'schedule' | 'compliance' | 'inquiry' | 'general' | 'incident' | 'absence' | 'feedback';
+  type: 'schedule' | 'compliance' | 'inquiry' | 'general' | 'incident' | 'absence' | 'feedback' | 'reminder';
   targetAgent: string; // specific agent name, or "all", or "tl"
   createdAt: string; // ISO string
   seenByUsers?: string[]; // list of ids who have seen it

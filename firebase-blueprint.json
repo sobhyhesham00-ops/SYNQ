@@ -166,12 +166,28 @@
         "createdAt": { "type": "string" },
         "createdBy": { "type": "string" }
       }
+    },
+    "tl_shift_log": {
+      "title": "TLShiftLog",
+      "description": "Shift logs recorded once daily when a Team Leader logs into the app",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tlName": { "type": "string" },
+        "shift": { "type": "string" },
+        "loggedInAt": { "type": "string" },
+        "date": { "type": "string" }
+      }
     }
   },
   "firestore": {
     "users/{userId}": {
       "schema": { "$ref": "#/entities/user" },
       "description": "User profiles"
+    },
+    "tl_shift_logs/{logId}": {
+      "schema": { "$ref": "#/entities/tl_shift_log" },
+      "description": "Daily logged shifts for Team Leaders"
     },
     "todos/{todoId}": {
       "schema": { "$ref": "#/entities/todo" },

@@ -3,6 +3,9 @@ import { purgeAllTimeLogs } from "./services/timelogService";
 import { EditModal } from "./components/EditModal";
 import { ResetPasswordModal } from "./components/ResetPasswordModal";
 import { AgentRequestsLogs } from "./components/AgentRequestsLogs";
+import { AgentFollowUpsTab } from "./components/AgentFollowUpsTab";
+import { AgentSubmissionsDashboard } from "./components/AgentSubmissionsDashboard";
+import { GlobalDashboard } from "./components/GlobalDashboard";
 import { AllAgentSubmissionsLog } from "./components/AllAgentSubmissionsLog";
 import { NotificationDrawer } from "./components/NotificationDrawer";
 import { TabbyTamaraCard } from "./components/TabbyTamaraCard";
@@ -33,6 +36,7 @@ import {
   wrappedUpdateDoc as updateDoc,
   wrappedDeleteDoc as deleteDoc,
   wrappedGetDocs as getDocs,
+  wrappedAddDoc as addDoc,
 } from "./firebase";
 import {
   Calendar,
@@ -72,6 +76,7 @@ import {
   Activity,
   PieChart,
   BarChart2,
+  Layers,
   GitPullRequest,
   LayoutDashboard,
   Wallet,
@@ -136,6 +141,7 @@ import { ArticleManager } from "./components/ArticleManager";
 import { RequestReplyThread } from "./components/RequestReplyThread";
 import { EnvironmentBadge } from "./components/EnvironmentBadge";
 import { ComplaintsWorkspace } from "./components/ComplaintsWorkspace";
+import { MySubmissionsDashboard } from "./components/MySubmissionsDashboard";
 import { processAttachments } from "./services/attachmentService";
 import * as XLSX from "xlsx";
 import {
@@ -633,6 +639,9 @@ const compStatusLabels: Record<string, string> = {
 };
 
 export default function App() {
+  // Firebase Auth Readiness state to coordinate listener initialization and prevent race conditions
+  const [authReady, setAuthReady] = useState<boolean>(false);
+
   // Current local time context of the user's PC (synced and showing in the main page)
   const [systemTime, setSystemTime] = useState<Date>(new Date());
   const [isAppKilled, setIsAppKilled] = useState<boolean>(false);
@@ -1011,15 +1020,44 @@ export default function App() {
     };
     window.addEventListener("storage", handleStorageListener);
 
+    // Helper to cleanup all active subscriptions
+    const cleanupListeners = () => {
+      console.log("[Firebase Auth] Cleaning up previous onSnapshot listeners...");
+      unsubscribes.forEach((unsub) => {
+        if (typeof unsub === "function") {
+          try {
+            unsub();
+          } catch (e) {
+            console.error("[Firebase Auth] Listener cleanup error:", e);
+          }
+        }
+      });
+      unsubscribes = [];
+    };
+
     // Trigger anonymous authentication if not already logged in
     ensureAuth();
 
     const unsubAuth = auth.onAuthStateChanged((firebaseUser) => {
-      if (!firebaseUser) return;
+      console.log(`[Firebase Auth] State transition detected. Current User:`, firebaseUser ? `${firebaseUser.uid} (Anonymous: ${firebaseUser.isAnonymous})` : "null");
+      
+      if (!firebaseUser) {
+        console.log("[Firebase Auth] No authenticated user present. Suspending attachment of Firestore listeners.");
+        setAuthReady(false);
+        cleanupListeners();
+        ensureAuth();
+        return;
+      }
       if (!active) return;
+
+      cleanupListeners();
+      console.log("[Firebase Auth] User successfully verified! Initializing 20+ real-time Firestore listeners...");
+      setAuthReady(true);
 
       // Define local onSnapshot helper to register unsubscribes
       const onSnapshot = (ref: any, ...args: any[]) => {
+        const path = ref.path || (ref.query && ref.query.path) || "unknown";
+        console.log(`[Firebase Auth] Registering listener on path: ${path}`);
         const unsub = wrappedOnSnapshot(ref, ...args);
         unsubscribes.push(unsub);
         return unsub;
@@ -1139,6 +1177,26 @@ export default function App() {
             error.message,
           );
         },
+      );
+      const unsubTLShiftLogs = onSnapshot(
+        collection(db, "tl_shift_logs"),
+        (snap) => {
+          const arr = snap.docs.map((d) => d.data() as any);
+          arr.sort(
+            (a, b) =>
+              new Date(b.loggedInAt || 0).getTime() -
+              new Date(a.loggedInAt || 0).getTime()
+          );
+          setTlShiftLogs(arr);
+          setStorageItem("sched_tl_shift_logs", arr, false);
+        },
+        (error) => {
+          console.error(
+            "tl_shift_logs snapshot error:",
+            error.code,
+            error.message
+          );
+        }
       );
       const unsubComms = onSnapshot(
         collection(db, "client_comms"),
@@ -1718,7 +1776,9 @@ export default function App() {
 
   // Real-time Firestore Sync with [currentUser] dependency for Schedules, Notifications, Orders, and Todos as requested
   useEffect(() => {
-    if (!currentUser || !currentUser.id) return;
+    if (!authReady || !currentUser || !currentUser.id) return;
+
+    console.log("[Firebase Auth] Attaching Schedules, Notifications, Orders, and Todos onSnapshot listeners...");
 
     // 1. Schedules Real-time Sync
     const unsubSched = onSnapshot(
@@ -1865,7 +1925,7 @@ export default function App() {
       unsubOrders();
       unsubTodos();
     };
-  }, [currentUser]);
+  }, [currentUser, authReady]);
 
   const isMasterAdmin = currentUser
     ? currentUser?.name?.toLowerCase() === "hesham sobhy" ||
@@ -2889,6 +2949,11 @@ ${pageText}
     }
   };
 
+  // TL shift logs state (for displaying on-shift online team leaders)
+  const [tlShiftLogs, setTlShiftLogs] = useState<any[]>(() => {
+    return getStorageItem<any[]>("sched_tl_shift_logs", []);
+  });
+
   // Inquiries database (persists in localStorage)
   const [inquiries, setInquiries] = useState<Inquiry[]>(() => {
     return getStorageItem<Inquiry[]>("sched_inquiries", []);
@@ -3150,6 +3215,7 @@ ${pageText}
   const [inquiryPhoneNumber, setInquiryPhoneNumber] = useState("");
   const [inquiryPatientName, setInquiryPatientName] = useState("");
   const [inquiryFileNumber, setInquiryFileNumber] = useState("");
+  const [inquiryFileId, setInquiryFileId] = useState("");
   const [inquiryPlatform, setInquiryPlatform] = useState("");
   const [inquiryCustomerType, setInquiryCustomerType] = useState<"new" | "old">("new");
   const [inquiryLanguageDir, setInquiryLanguageDir] = useState<
@@ -3221,7 +3287,10 @@ ${pageText}
   const [inquiryStatusFilter, setInquiryStatusFilter] = useState("");
   const [inquiryClinicFilter, setInquiryClinicFilter] = useState("all");
   const [expandedInquiryId, setExpandedInquiryId] = useState<string | null>(null);
+  const [showClinicTemplateModal, setShowClinicTemplateModal] = useState(false);
+  const [templateInquiryId, setTemplateInquiryId] = useState<string | null>(null);
   const [expandedCcId, setExpandedCcId] = useState<string | null>(null);
+  const [expandedTabbyTamaraId, setExpandedTabbyTamaraId] = useState<string | null>(null);
   const [casesSearch, setCasesSearch] = useState("");
   const [logAgentFilter, setLogAgentFilter] = useState("all");
   const [logTypeFilter, setLogTypeFilter] = useState("all");
@@ -3261,6 +3330,170 @@ ${pageText}
   const closeConfirm = () => {
     setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
   };
+
+  // Track last notification time to avoid spamming
+  const lastOpenCasesNotificationTimeRef = useRef<number>(0);
+
+  const checkAndNotifyOpenCases = () => {
+    if (!currentUser) return;
+    if (currentUser.role !== "agent" && currentUser.role !== "tl") return;
+
+    const now = Date.now();
+    const oneHourMs = 3600000;
+    if (now - lastOpenCasesNotificationTimeRef.current < oneHourMs) {
+      return;
+    }
+
+    // 1. Inquiries - open/pending: not answered and not closed
+    const openInquiries = inquiries.filter((inq) => {
+      const isOpen = inq.status !== "answered" && inq.status !== "closed";
+      if (!isOpen) return false;
+      if (currentUser.role === "tl") return true;
+      return (
+        inq.agentName === currentUser.name ||
+        inq.agentName?.toLowerCase() === currentUser.name.toLowerCase()
+      );
+    });
+
+    // 2. Complaints - open/pending: status is not closed
+    const openComplaints = tabbyTamaraComplaints.filter((comp) => {
+      const isOpen = comp.status !== "closed";
+      if (!isOpen) return false;
+      if (currentUser.role === "tl") return true;
+      return (
+        comp.agentName === currentUser.name ||
+        comp.agentName?.toLowerCase() === currentUser.name.toLowerCase()
+      );
+    });
+
+    // 3. Tabby & Tamara Requests - open/pending
+    const openTabbyTamara = tabbyTamaraRequests.filter((req) => {
+      const isOpen =
+        req.status !== "confirmed" &&
+        req.status !== "rejected" &&
+        req.workflowStatus !== "completed" &&
+        req.workflowStatus !== "rejected";
+      if (!isOpen) return false;
+      if (currentUser.role === "tl") return true;
+      return (
+        req.agentName === currentUser.name ||
+        req.agentName?.toLowerCase() === currentUser.name.toLowerCase() ||
+        req.submittedByName?.toLowerCase() === currentUser.name.toLowerCase()
+      );
+    });
+
+    const count = openInquiries.length + openComplaints.length + openTabbyTamara.length;
+
+    if (count > 0) {
+      const hourBucket = Math.floor(now / 3600000);
+      const stableId = `open_cases_reminder_${currentUser.name}_${hourBucket}`;
+      
+      addSystemNotification(
+        "Open Cases Reminder",
+        `You have ${count} open case(s) that need to be closed.`,
+        "reminder",
+        currentUser.name,
+        stableId
+      );
+      
+      lastOpenCasesNotificationTimeRef.current = now;
+    }
+  };
+
+  // Keep a ref to the latest check function to avoid stale closures in the interval
+  const checkAndNotifyOpenCasesRef = useRef(checkAndNotifyOpenCases);
+  useEffect(() => {
+    checkAndNotifyOpenCasesRef.current = checkAndNotifyOpenCases;
+  }, [checkAndNotifyOpenCases]);
+
+  // Hook 1: Runs on mount and whenever data loads or changes (throttled by lastOpenCasesNotificationTimeRef)
+  useEffect(() => {
+    if (!currentUser) return;
+    if (currentUser.role !== "agent" && currentUser.role !== "tl") return;
+
+    checkAndNotifyOpenCases();
+  }, [currentUser, inquiries, tabbyTamaraRequests, tabbyTamaraComplaints]);
+
+  // Hook 2: Independent hourly clock interval that runs checkAndNotifyOpenCasesRef.current()
+  useEffect(() => {
+    if (!currentUser) return;
+    if (currentUser.role !== "agent" && currentUser.role !== "tl") return;
+
+    const intervalId = setInterval(() => {
+      checkAndNotifyOpenCasesRef.current();
+    }, 3600000);
+
+    return () => clearInterval(intervalId);
+  }, [currentUser]);
+
+  // Personal Reminders Background Check Engine
+  const checkAndNotifyTodosReminders = () => {
+    if (!currentUser) return;
+    const now = Date.now();
+
+    const pendingAlerts = todos.filter((t) => {
+      return (
+        !t.isCompleted &&
+        !t.notified &&
+        t.agentName === currentUser.name &&
+        t.reminderTimeMs &&
+        t.reminderTimeMs <= now
+      );
+    });
+
+    pendingAlerts.forEach((t) => {
+      const stableId = `notif_todo_rem_${t.id}`;
+      
+      // Write system notification targeting ONLY the agent themselves
+      addSystemNotification(
+        "⏰ Personal Reminder",
+        `Personal follow-up task: "${t.text}"`,
+        "reminder",
+        currentUser.name,
+        stableId
+      );
+
+      // Present visual toast feedback immediately
+      toast.info(
+        <div className="flex flex-col gap-1 text-left">
+          <span className="font-bold text-sm text-emerald-400">
+            ⏰ Personal Reminder
+          </span>
+          <span className="text-xs text-slate-200">
+            {t.text}
+          </span>
+        </div>,
+        { duration: 10000 }
+      );
+
+      // Save notified state to prevent repeated triggers
+      updateDoc(doc(db, "todos", t.id), { notified: true }).catch((err) => {
+        console.error("Error setting notified state on personal reminder:", err);
+      });
+    });
+  };
+
+  const checkAndNotifyTodosRemindersRef = useRef(checkAndNotifyTodosReminders);
+  useEffect(() => {
+    checkAndNotifyTodosRemindersRef.current = checkAndNotifyTodosReminders;
+  }, [checkAndNotifyTodosReminders]);
+
+  // Check on any todos changes or currentUser updates
+  useEffect(() => {
+    if (!currentUser) return;
+    checkAndNotifyTodosReminders();
+  }, [currentUser, todos]);
+
+  // Background clock check ticking every 30 seconds
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const intervalId = setInterval(() => {
+      checkAndNotifyTodosRemindersRef.current();
+    }, 30000);
+
+    return () => clearInterval(intervalId);
+  }, [currentUser]);
 
   const [logSearchQuery, setLogSearchQuery] = useState("");
 
@@ -3501,10 +3734,74 @@ ${pageText}
     "all" | "inquiries" | "fintech" | "presence"
   >("all");
 
+  // Log TL shift start time on app load
+  useEffect(() => {
+    const logTLShiftOnOpen = async () => {
+      if (!currentUser || !authReady) return;
+      
+      const isTL = currentUser.role === "tl" ||
+                   (currentUser.name && typeof isTLName === "function" && isTLName(currentUser.name));
+      if (!isTL) return;
+
+      try {
+        const todayStr = getLocalISOString();
+        const tlName = currentUser.name;
+
+        // Query to see if this TL has already logged a shift for today
+        const q = query(
+          collection(db, "tl_shift_logs"),
+          where("tlName", "==", tlName),
+          where("date", "==", todayStr)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot && !querySnapshot.empty) {
+          console.log(`[TL Shift Log] Shift already logged for TL: ${tlName} on ${todayStr}. Skipping.`);
+          return;
+        }
+
+        // Determine shift:
+        // - if currentHour is between 7 and 13 (hour >= 7 && hour < 13): shift is "7 AM - 4 PM"
+        // - default/otherwise: "1 PM - 10 PM" (including the 1-4 PM overlap)
+        const now = new Date();
+        const currentHour = now.getHours();
+        let shift = "1 PM - 10 PM";
+        if (currentHour >= 7 && currentHour < 13) {
+          shift = "7 AM - 4 PM";
+        }
+
+        await addDoc(collection(db, "tl_shift_logs"), {
+          tlName,
+          shift,
+          loggedInAt: now.toISOString(),
+          date: todayStr
+        });
+
+        console.log(`[TL Shift Log] Successfully logged shift (${shift}) for TL: ${tlName} at ${now.toISOString()}`);
+      } catch (error) {
+        console.error("[TL Shift Log] Error logging TL shift on open:", error);
+      }
+    };
+
+    logTLShiftOnOpen();
+  }, [currentUser, authReady]);
+
   // Initialize correct active tab based on role
   useEffect(() => {
     if (currentUser) {
-      setActiveTab("dashboard");
+      const isElevated = currentUser.role === "tl" ||
+        currentUser.role === "qa" ||
+        (currentUser.role as string) === "admin" ||
+        (currentUser.role as string) === "superadmin" ||
+        (currentUser.role as string) === "director" ||
+        !!supportAssignments[currentUser.name] ||
+        (currentUser.name && typeof isTLName === "function" && isTLName(currentUser.name));
+
+      if (isElevated) {
+        setActiveTab("global-dashboard");
+      } else {
+        setActiveTab("dashboard");
+      }
     }
   }, [currentUser]);
 
@@ -5940,7 +6237,7 @@ ${result.errors.slice(0, 5).join("\n")}${
     }
 
     if (!inquiryPlatform) {
-      toast.error("Please select an Inquiry Platform (Source)! This is a mandatory field.");
+      toast.error("Please select a Platform! This is a mandatory field.");
       return;
     }
 
@@ -5997,6 +6294,7 @@ ${result.errors.slice(0, 5).join("\n")}${
         clinicName: inquiryClinicName,
         patientName: String(inquiryPatientName || "").trim(),
         fileNumber: inquiryCustomerType === "old" ? String(inquiryFileNumber || "").trim() : undefined,
+        fileId: String(inquiryFileId || "").trim(),
         phoneNumber: String(inquiryPhoneNumber || "").trim(),
         customerType: inquiryCustomerType,
         platform: inquiryPlatform,
@@ -6025,6 +6323,7 @@ ${result.errors.slice(0, 5).join("\n")}${
       setInquiryPhoneNumber("");
       setInquiryPatientName("");
       setInquiryFileNumber("");
+      setInquiryFileId("");
       setInquiryPlatform("");
       setInquiryCustomerType("new");
       setInquiryPhotos([]);
@@ -6063,10 +6362,93 @@ ${result.errors.slice(0, 5).join("\n")}${
     }
   };
 
-  const handleSetInquirySent = (inquiryId: string) => {
+  const handleTLViewInquiry = (inquiryId: string) => {
     if (!currentUser || currentUser.role !== "tl") return;
 
+    let targetInq: any = null;
+
+    const inqObj = inquiries.find((i) => i.id === inquiryId);
+    if (!inqObj || inqObj.viewingStatus === "tl_viewing") return;
+
+    const updated = inquiries.map((inq) => {
+      if (inq.id === inquiryId) {
+        targetInq = inq;
+        const updatedInq = {
+          ...inq,
+          viewingStatus: "tl_viewing" as const,
+          viewingBy: currentUser.name,
+          viewingAt: new Date().toISOString(),
+        };
+        // Sync to Firestore
+        setDoc(doc(db, "inquiries", inq.id), updatedInq).catch((e) =>
+          console.error("Inquiry View Update Error:", e),
+        );
+        return updatedInq;
+      }
+      return inq;
+    });
+
+    setInquiries(updated);
+    setStorageItem("sched_inquiries", updated);
+
+    if (targetInq) {
+      addSystemNotification(
+        "Team Leader Reviewing Your Inquiry",
+        `"${currentUser.name} is now reviewing your inquiry for clinic ${targetInq.clinicName}."`,
+        "inquiry",
+        targetInq.agentName,
+        undefined,
+        "inquiry",
+        targetInq.id,
+      );
+    }
+  };
+
+  const generateClinicTemplate = (inq: Inquiry): string => {
+    const ref = inq.caseRef || `INQ-${inq.id.substring(0, 8).toUpperCase()}`;
+    const pName = inq.patientName || "N/A";
+    const fId = inq.fileId || inq.fileNumber || "N/A";
+    const pId = inq.patientId || "N/A";
+    const pPhone = inq.phoneNumber ? formatPhoneForCopy(inq.phoneNumber) : "N/A";
+    
+    return [
+      `📋 *CLINICAL INQUIRY TEMPLATE*`,
+      `-----------------------------------`,
+      `🆔 *Reference:* ${ref}`,
+      `🏥 *Clinic:* ${inq.clinicName}`,
+      `👤 *Patient:* ${pName}`,
+      `📁 *File ID:* ${fId}`,
+      `🔑 *Patient ID:* ${pId}`,
+      `📞 *Phone:* ${pPhone}`,
+      `💬 *Inquiry Details:*`,
+      `${inq.text || "—"}`,
+      `-----------------------------------`,
+      `🧑‍💼 *Agent:* ${inq.agentName}`,
+      `📅 *Date:* ${inq.createdAt ? new Date(inq.createdAt).toLocaleString() : "N/A"}`,
+    ].join('\n');
+  };
+
+  const handleSetInquirySent = async (inquiryId: string, skipModal = false) => {
+    if (!currentUser || currentUser.role !== "tl") return;
+
+    const inqObj = inquiries.find((i) => i.id === inquiryId);
+    if (!inqObj) return;
+
+    if (!skipModal) {
+      setTemplateInquiryId(inquiryId);
+      setShowClinicTemplateModal(true);
+      return;
+    }
+
     let sentInquiry: any = null;
+
+    // Generate template and copy to clipboard
+    const templateText = generateClinicTemplate(inqObj);
+    try {
+      await copyToClipboard(templateText, "Standard clinic template copied to clipboard!");
+    } catch (e) {
+      console.error("Fails to copy standard template:", e);
+    }
 
     const updated = inquiries.map((inq) => {
       if (inq.id === inquiryId) {
@@ -6089,6 +6471,8 @@ ${result.errors.slice(0, 5).join("\n")}${
 
     setInquiries(updated);
     setStorageItem("sched_inquiries", updated);
+    setShowClinicTemplateModal(false);
+    setTemplateInquiryId(null);
 
     if (sentInquiry) {
       addSystemNotification(
@@ -6209,12 +6593,13 @@ ${result.errors.slice(0, 5).join("\n")}${
     if (isSubmittingAnswer) return;
 
     const answerText = String(currentAnswerText || "").trim();
-    if (
-      !answerText &&
-      currentAnswerAttachments.length === 0 &&
-      currentAnswerLinks.length === 0
-    ) {
-      toast.error("Please supply an answer text or attach a file.");
+    if (!answerText) {
+      toast.error("Reply text cannot be empty.");
+      return;
+    }
+
+    if (answerText.length > 500) {
+      toast.error("Reply details cannot exceed 500 characters.");
       return;
     }
 
@@ -8245,6 +8630,28 @@ ${ttNotes}`
     );
   }
 
+  if (!authReady) {
+    return (
+      <div id="auth-loading" className="min-h-screen bg-[#080d1a] text-slate-100 flex flex-col items-center justify-center font-sans antialiased relative overflow-hidden">
+        {/* Background aesthetic blobs */}
+        <div className="fixed top-[-10%] -left-32 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="fixed bottom-[-10%] -right-32 w-[600px] h-[600px] bg-pink-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="flex flex-col items-center gap-6 z-10">
+          <div className="relative flex items-center justify-center">
+            <div className="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-xs font-black tracking-widest text-indigo-400 font-display">S</span>
+            </div>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-300 to-indigo-200 bg-clip-text text-transparent font-display">Establishing Connection</h1>
+            <p className="text-xs text-slate-400 font-mono tracking-wider">Syncing secure Auth state...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       id="scheduling-root"
@@ -8870,6 +9277,12 @@ ${ttNotes}`
                       <>
                         {groupTitle("Operations & Triage", "", "text-teal-600")}
                         {buildBtn(
+                          "global-dashboard",
+                          <LayoutDashboard className="w-4 h-4 text-emerald-400" />,
+                          "Global Dashboard",
+                          "bg-emerald-500/20 border-emerald-500/30 text-emerald-100",
+                        )}
+                        {buildBtn(
                           "tl-announcements",
                           <Bell className="w-4 h-4 text-yellow-400" />,
                           "TL Announcements",
@@ -8911,11 +9324,11 @@ ${ttNotes}`
                           "My Cases",
                           "bg-orange-500/20 border-orange-500/30 text-orange-100",
                         )}
-                        {buildBtn(
-                          "submissions-log",
-                          <ClipboardList className="w-4 h-4 text-purple-400" />,
-                          "Agent Submissions Log",
-                          "bg-purple-500/20 border-purple-500/30 text-purple-100",
+                        {currentUser.role === "tl" && buildBtn(
+                          "agent-submissions",
+                          <Layers className="w-4 h-4 text-emerald-400" />,
+                          "Agent Submissions",
+                          "bg-emerald-500/20 border-emerald-500/30 text-emerald-100",
                         )}
 
                         {groupTitle(
@@ -9051,6 +9464,18 @@ ${ttNotes}`
                           <History className="w-4 h-4 text-orange-500" />,
                           "My Cases",
                           "bg-orange-500/20 border-orange-500/30 text-orange-100",
+                        )}
+                        {buildBtn(
+                          "follow-up",
+                          <Clock className="w-4 h-4 text-emerald-400" />,
+                          "Follow-up Reminders",
+                          "bg-[#10b981]/25 border-emerald-500/30 text-emerald-100",
+                        )}
+                        {buildBtn(
+                          "my-submissions",
+                          <ClipboardList className="w-4 h-4 text-emerald-400" />,
+                          "My Submissions",
+                          "bg-emerald-500/20 border-emerald-500/30 text-emerald-100",
                         )}
                         {buildBtn(
                           "qa-scorecard",
@@ -15508,15 +15933,11 @@ ${ttNotes}`
                     />
                   )}
 
-                  {/* All Agent Submissions Log (TL / Support / QA - Management Mode) */}
-                  {isTLOreSupport && activeTab === "submissions-log" && (
-                    <AllAgentSubmissionsLog
+                  {currentUser.role === "agent" && activeTab === "follow-up" && (
+                    <AgentFollowUpsTab
+                      todos={todos}
                       currentUser={currentUser}
-                      requests={requests}
-                      inquiries={inquiries}
-                      tabbyTamaraRequests={tabbyTamaraRequests}
-                      complaints={tabbyTamaraComplaints}
-                      clientComms={clientComms}
+                      db={db}
                       addSystemNotification={addSystemNotification}
                     />
                   )}
@@ -15646,30 +16067,77 @@ ${ttNotes}`
                                 </select>
                               </div>
 
-                              {/* Inquiry Source Platform Dropdown */}
+                              {/* Mandatory Platform Dropdown */}
                               <div className="space-y-1.5">
                                 <label className="text-xs font-semibold text-slate-300 block flex items-center justify-between">
                                   <span className="flex items-center gap-1">
-                                    Inquiry Platform (Source){" "}
-                                    <span className="text-rose-400 font-extrabold">*</span>
+                                    Platform{" "}
+                                    <span className="text-rose-400 font-extrabold">
+                                      *
+                                    </span>
                                   </span>
+                                  {inquiryPlatform && (
+                                    <span className="text-[10px] text-emerald-400 font-mono font-bold uppercase">
+                                      Passed
+                                    </span>
+                                  )}
                                 </label>
                                 <select
                                   value={inquiryPlatform}
-                                  onChange={(e) => setInquiryPlatform(e.target.value)}
+                                  onChange={(e) =>
+                                    setInquiryPlatform(e.target.value)
+                                  }
                                   className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                   required
                                 >
-                                  <option value="">-- Select Platform * --</option>
-                                  <option value="Snapchat">👻 Snapchat</option>
-                                  <option value="TikTok">🎵 TikTok</option>
-                                  <option value="WhatsApp">💬 WhatsApp</option>
-                                  <option value="Facebook">👥 Facebook</option>
-                                  <option value="Instagram">📸 Instagram</option>
-                                  <option value="Google">🔍 Google Search</option>
-                                  <option value="Twitter_X">𝕏 Twitter / X</option>
-                                  <option value="Phone_Call">📞 Phone Call</option>
-                                  <option value="Other_Web">🌐 Other / Website</option>
+                                  <option
+                                    value=""
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                  >
+                                    -- Select Platform * --
+                                  </option>
+                                  <option
+                                    value="snapchat"
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                  >
+                                    Snapchat
+                                  </option>
+                                  <option
+                                    value="whatsapp"
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                  >
+                                    WhatsApp
+                                  </option>
+                                  <option
+                                    value="tiktok"
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                  >
+                                    TikTok
+                                  </option>
+                                  <option
+                                    value="instagram"
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                  >
+                                    Instagram
+                                  </option>
+                                  <option
+                                    value="facebook"
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                  >
+                                    Facebook
+                                  </option>
+                                  <option
+                                    value="phone_call"
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                  >
+                                    Phone Call
+                                  </option>
+                                  <option
+                                    value="other"
+                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                  >
+                                    Other
+                                  </option>
                                 </select>
                               </div>
 
@@ -15752,6 +16220,20 @@ ${ttNotes}`
                                   * Please enter the number starting from 5
                                   (e.g., 501234567)
                                 </p>
+                              </div>
+
+                              {/* Optional File ID */}
+                              <div className="space-y-1.5 animate-fade-in text-left">
+                                <label className="text-xs font-semibold text-slate-300 block">
+                                  File ID (Optional)
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="Type File ID"
+                                  value={inquiryFileId}
+                                  onChange={(e) => setInquiryFileId(e.target.value)}
+                                  className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+                                />
                               </div>
 
                               {/* Inquiry text details with English or Arabic typing toggles */}
@@ -15986,7 +16468,7 @@ ${ttNotes}`
                                             <div
                                               key={inq.id}
                                               id={`inquiry-${inq.id}`}
-                                              className="p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl space-y-3 hover:border-white/10 transition-all relative"
+                                              className="p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl space-y-3 hover:border-white/10 transition-all duration-300 overflow-hidden relative flex flex-col w-full"
                                             >
                                               {/* Top Info row */}
                                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-2">
@@ -15996,6 +16478,11 @@ ${ttNotes}`
                                                   >
                                                     {statusText}
                                                   </span>
+                                                  {inq.viewingStatus === "tl_viewing" && (
+                                                    <span className="px-2 py-0.5 border text-[9px] font-bold rounded-lg bg-amber-500/10 border-amber-500/25 text-amber-400 shrink-0 flex items-center gap-1">
+                                                      👁 Team Leader Viewing
+                                                    </span>
+                                                  )}
                                                   {inq.status !==
                                                     "answered" && (
                                                     <span
@@ -17577,10 +18064,11 @@ ${ttNotes}`
                                         <div
                                           key={inq.id}
                                           id={`inquiry-${inq.id}`}
-                                          className={`p-5 bg-[#18181c] border border-slate-700/60 rounded-2xl hover:border-indigo-500/20 transition-all relative ${!isExpanded ? "hover:bg-white/[0.04] cursor-pointer space-y-0 shadow-md" : "space-y-4 shadow-xl ring-1 ring-indigo-500/15"}`}
+                                          className={`p-5 bg-[#18181c] border border-slate-700/60 rounded-2xl hover:border-indigo-500/20 transition-all duration-300 overflow-hidden relative flex flex-col w-full ${!isExpanded ? "hover:bg-white/[0.04] cursor-pointer space-y-0 shadow-md" : "space-y-4 shadow-xl ring-1 ring-indigo-500/15"}`}
                                           onClick={() => {
                                             if (!isExpanded) {
                                               setExpandedInquiryId(inq.id);
+                                              handleTLViewInquiry(inq.id);
                                             }
                                           }}
                                         >
@@ -17835,11 +18323,11 @@ ${ttNotes}`
                                               <div className="text-slate-400 hover:text-indigo-400 p-1 rounded-md transition-all shrink-0 ml-1 flex items-center justify-center">
                                                 {isExpanded ? <ChevronUp className="w-4.5 h-4.5 text-indigo-400" /> : <ChevronDown className="w-4.5 h-4.5 text-slate-400" />}
                                               </div>
-                                            </div>
                                           </div>
 
+                                           </div>
                                           {isExpanded && (
-                                            <>
+                                            <div className="w-full flex flex-col space-y-4 text-left">
 
                                           {/* Question body */}
                                           <div className="space-y-3 font-sans">
@@ -17864,6 +18352,89 @@ ${ttNotes}`
                                               tlLinks={inq.tlLinks}
                                               showSideBadges={true}
                                             />
+
+                                            {/* Standardized Clinic Template Area */}
+                                            {currentUser && currentUser.role === "tl" && (
+                                              <div className="mt-4 p-4 bg-[#141416]/90 rounded-xl border border-indigo-500/15 space-y-3 text-left">
+                                                <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                                                  <h4 className="text-xs font-bold text-indigo-400 font-display uppercase tracking-wider flex items-center gap-1.5 font-sans">
+                                                    📋 Partner Standard Template Review
+                                                  </h4>
+                                                  <button
+                                                    onClick={() => {
+                                                      const tpl = generateClinicTemplate(inq);
+                                                      copyToClipboard(tpl, "Standardized partner template copied successfully!");
+                                                    }}
+                                                    className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 border border-indigo-500/25 text-white text-[10px] font-bold rounded-md transition-all flex items-center gap-1 active:scale-95 cursor-pointer font-sans"
+                                                  >
+                                                    <Copy className="w-3 h-3" /> Copy Standard Template
+                                                  </button>
+                                                </div>
+
+                                                {/* Custom Review Input Fields */}
+                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-sans">
+                                                  <div>
+                                                    <label className="block text-[10px] text-slate-400 font-semibold mb-1 font-sans">
+                                                      Patient Name
+                                                    </label>
+                                                    <input
+                                                      type="text"
+                                                      value={inq.patientName || ""}
+                                                      onChange={async (e) => {
+                                                        const val = e.target.value;
+                                                        const updated = inquiries.map(i => i.id === inq.id ? { ...i, patientName: val } : i);
+                                                        setInquiries(updated);
+                                                        setStorageItem("sched_inquiries", updated);
+                                                        await updateDoc(doc(db, "inquiries", inq.id), { patientName: val }).catch(err => console.error(err));
+                                                      }}
+                                                      className="w-full px-2.5 py-1.5 bg-black/30 border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-indigo-500 font-sans font-bold"
+                                                      placeholder="Review/Edit Patient Name"
+                                                    />
+                                                  </div>
+                                                  <div>
+                                                    <label className="block text-[10px] text-slate-400 font-semibold mb-1 font-sans">
+                                                      File ID / Number
+                                                    </label>
+                                                    <input
+                                                      type="text"
+                                                      value={inq.fileId || inq.fileNumber || ""}
+                                                      onChange={async (e) => {
+                                                        const val = e.target.value;
+                                                        const updated = inquiries.map(i => i.id === inq.id ? { ...i, fileId: val, fileNumber: val } : i);
+                                                        setInquiries(updated);
+                                                        setStorageItem("sched_inquiries", updated);
+                                                        await updateDoc(doc(db, "inquiries", inq.id), { fileId: val, fileNumber: val }).catch(err => console.error(err));
+                                                      }}
+                                                      className="w-full px-2.5 py-1.5 bg-black/30 border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-indigo-500 font-sans font-bold"
+                                                      placeholder="Review/Edit File ID"
+                                                    />
+                                                  </div>
+                                                  <div>
+                                                    <label className="block text-[10px] text-slate-400 font-semibold mb-1 font-sans">
+                                                      Patient ID
+                                                    </label>
+                                                    <input
+                                                      type="text"
+                                                      value={inq.patientId || ""}
+                                                      onChange={async (e) => {
+                                                        const val = e.target.value;
+                                                        const updated = inquiries.map(i => i.id === inq.id ? { ...i, patientId: val } : i);
+                                                        setInquiries(updated);
+                                                        setStorageItem("sched_inquiries", updated);
+                                                        await updateDoc(doc(db, "inquiries", inq.id), { patientId: val }).catch(err => console.error(err));
+                                                      }}
+                                                      className="w-full px-2.5 py-1.5 bg-black/30 border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-indigo-500 font-sans font-bold"
+                                                      placeholder="Review/Edit Patient ID"
+                                                    />
+                                                  </div>
+                                                </div>
+
+                                                {/* Preview Area */}
+                                                <div className="bg-black/40 p-3 rounded-lg border border-white/5 font-mono text-[11px] leading-relaxed text-slate-300 select-all whitespace-pre-wrap">
+                                                  {generateClinicTemplate(inq)}
+                                                </div>
+                                              </div>
+                                            )}
 
                                             {/* TL customerContacted quick update buttons */}
                                             <div className="flex flex-wrap bg-slate-900/50 p-1 rounded-lg gap-1 border border-white/5 mt-3 w-max">
@@ -18043,17 +18614,23 @@ ${ttNotes}`
                                                     Cancel
                                                   </button>
                                                 </div>
-                                                <textarea
-                                                  placeholder="Type the response/answer details clearly..."
-                                                  value={currentAnswerText}
-                                                  onChange={(e) =>
-                                                    setCurrentAnswerText(
-                                                      e.target.value,
-                                                    )
-                                                  }
-                                                  rows={3}
-                                                  className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-emerald-500 transition-all font-sans resize-none"
-                                                />
+                                                <div className="space-y-1">
+                                                  <textarea
+                                                    placeholder="Type the response/answer details clearly..."
+                                                    value={currentAnswerText}
+                                                    onChange={(e) =>
+                                                      setCurrentAnswerText(
+                                                        e.target.value,
+                                                      )
+                                                    }
+                                                    maxLength={500}
+                                                    rows={3}
+                                                    className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-emerald-500 transition-all font-sans resize-none"
+                                                  />
+                                                  <div className="flex justify-end pr-1 text-[10px] text-slate-400 font-mono">
+                                                    {currentAnswerText.length} / 500 characters
+                                                  </div>
+                                                </div>
 
                                                 <ProfessionalAttachmentUploader
                                                   attachments={
@@ -18075,19 +18652,19 @@ ${ttNotes}`
                                                     colorClass="from-emerald-500 to-teal-500"
                                                     onConfirm={() => handleSetInquiryAnswered(inq.id)}
                                                     disabled={isSubmittingAnswer}
-                                                  />
-                                                </div>
-                                              </div>
-                                            )}
-                                          </div>
-                                        </>
-                                      )}
-                                      </div>
-                                      );
-                                    })
-                                  )}
-                                </div>
+                                                   />
+                                                 </div>
+                                               </div>
+                                             )}
+                                           </div>
+                                         </div>
+                                       )}
+                                       </div>
+                                       );
+                                     })
+                                   )}
                               </div>
+                            </div>
                             );
                           })()}
                         </>
@@ -18289,6 +18866,136 @@ ${ttNotes}`
                         );
                       })()}
                     </div>
+                  )}
+
+                  {activeTab === "my-submissions" && (
+                    <MySubmissionsDashboard
+                      inquiries={inquiries}
+                      tabbyTamaraRequests={tabbyTamaraRequests}
+                      tabbyTamaraComplaints={tabbyTamaraComplaints}
+                      currentUser={currentUser}
+                      onEditItem={(type, item) => {
+                        setEditingItem({
+                          type: type as any,
+                          id: item.id,
+                          data: { ...item }
+                        });
+                      }}
+                      canEditItem={canEditItem}
+                      getRemainingEditTime={getRemainingEditTime}
+                      getElapsedTimerString={getElapsedTimerString}
+                      addSystemNotification={addSystemNotification}
+                      isTLOreSupport={isTLOreSupport}
+                      isSuperAdmin={isSuperAdmin}
+                      activeFintechHandlingId={activeFintechHandlingId}
+                      setActiveFintechHandlingId={setActiveFintechHandlingId}
+                      tlFintechPaymentLink={tlFintechPaymentLink}
+                      setTlFintechPaymentLink={setTlFintechPaymentLink}
+                      tlFintechNotes={tlFintechNotes}
+                      setTlFintechNotes={setTlFintechNotes}
+                      tlFintechLinks={tlFintechLinks}
+                      setTlFintechLinks={setTlFintechLinks}
+                      handleConfirmTabbyTamara={handleConfirmTabbyTamara}
+                      handleMarkPatientContactedTT={handleContactTabbyTamara}
+                      handleDeleteTabbyTamara={handleDeleteTabbyTamara}
+                      handleToggleContactComplaint={handleToggleContactComplaint}
+                      handleDeleteComplaint={handleDeleteComplaint}
+                      handleAssignRecord={handleAssignRecord}
+                      activeComplaintHandlingId={activeComplaintHandlingId}
+                      setActiveComplaintHandlingId={setActiveComplaintHandlingId}
+                      tlComplaintResolutionType={tlComplaintResolutionType}
+                      setTlComplaintResolutionType={setTlComplaintResolutionType}
+                      tlComplaintComment={tlComplaintComment}
+                      setTlComplaintComment={setTlComplaintComment}
+                      handleTLCommentComplaint={handleTLCommentComplaint}
+                    />
+                  )}
+
+                  {activeTab === "global-dashboard" && (isTLOreSupport || (currentUser && ["admin", "superadmin", "director"].includes(currentUser.role))) && (
+                    <GlobalDashboard
+                      inquiries={inquiries}
+                      tabbyTamaraRequests={tabbyTamaraRequests}
+                      tabbyTamaraComplaints={tabbyTamaraComplaints}
+                      currentUser={currentUser}
+                      tlShiftLogs={tlShiftLogs}
+                      onEditItem={(type, item) => {
+                        setEditingItem({
+                          type: type as any,
+                          id: item.id,
+                          data: { ...item }
+                        });
+                      }}
+                      canEditItem={canEditItem}
+                      getRemainingEditTime={getRemainingEditTime}
+                      getElapsedTimerString={getElapsedTimerString}
+                      addSystemNotification={addSystemNotification}
+                      isTLOreSupport={isTLOreSupport}
+                      isSuperAdmin={isSuperAdmin}
+                      activeFintechHandlingId={activeFintechHandlingId}
+                      setActiveFintechHandlingId={setActiveFintechHandlingId}
+                      tlFintechPaymentLink={tlFintechPaymentLink}
+                      setTlFintechPaymentLink={setTlFintechPaymentLink}
+                      tlFintechNotes={tlFintechNotes}
+                      setTlFintechNotes={setTlFintechNotes}
+                      tlFintechLinks={tlFintechLinks}
+                      setTlFintechLinks={setTlFintechLinks}
+                      handleConfirmTabbyTamara={handleConfirmTabbyTamara}
+                      handleMarkPatientContactedTT={handleContactTabbyTamara}
+                      handleDeleteTabbyTamara={handleDeleteTabbyTamara}
+                      handleToggleContactComplaint={handleToggleContactComplaint}
+                      handleDeleteComplaint={handleDeleteComplaint}
+                      handleAssignRecord={handleAssignRecord}
+                      activeComplaintHandlingId={activeComplaintHandlingId}
+                      setActiveComplaintHandlingId={setActiveComplaintHandlingId}
+                      tlComplaintResolutionType={tlComplaintResolutionType}
+                      setTlComplaintResolutionType={setTlComplaintResolutionType}
+                      tlComplaintComment={tlComplaintComment}
+                      setTlComplaintComment={setTlComplaintComment}
+                      handleTLCommentComplaint={handleTLCommentComplaint}
+                    />
+                  )}
+
+                  {activeTab === "agent-submissions" && currentUser.role === "tl" && (
+                    <AgentSubmissionsDashboard
+                      inquiries={inquiries}
+                      tabbyTamaraRequests={tabbyTamaraRequests}
+                      tabbyTamaraComplaints={tabbyTamaraComplaints}
+                      currentUser={currentUser}
+                      onEditItem={(type, item) => {
+                        setEditingItem({
+                          type: type as any,
+                          id: item.id,
+                          data: { ...item }
+                        });
+                      }}
+                      canEditItem={canEditItem}
+                      getRemainingEditTime={getRemainingEditTime}
+                      getElapsedTimerString={getElapsedTimerString}
+                      addSystemNotification={addSystemNotification}
+                      isTLOreSupport={isTLOreSupport}
+                      isSuperAdmin={isSuperAdmin}
+                      activeFintechHandlingId={activeFintechHandlingId}
+                      setActiveFintechHandlingId={setActiveFintechHandlingId}
+                      tlFintechPaymentLink={tlFintechPaymentLink}
+                      setTlFintechPaymentLink={setTlFintechPaymentLink}
+                      tlFintechNotes={tlFintechNotes}
+                      setTlFintechNotes={setTlFintechNotes}
+                      tlFintechLinks={tlFintechLinks}
+                      setTlFintechLinks={setTlFintechLinks}
+                      handleConfirmTabbyTamara={handleConfirmTabbyTamara}
+                      handleMarkPatientContactedTT={handleContactTabbyTamara}
+                      handleDeleteTabbyTamara={handleDeleteTabbyTamara}
+                      handleToggleContactComplaint={handleToggleContactComplaint}
+                      handleDeleteComplaint={handleDeleteComplaint}
+                      handleAssignRecord={handleAssignRecord}
+                      activeComplaintHandlingId={activeComplaintHandlingId}
+                      setActiveComplaintHandlingId={setActiveComplaintHandlingId}
+                      tlComplaintResolutionType={tlComplaintResolutionType}
+                      setTlComplaintResolutionType={setTlComplaintResolutionType}
+                      tlComplaintComment={tlComplaintComment}
+                      setTlComplaintComment={setTlComplaintComment}
+                      handleTLCommentComplaint={handleTLCommentComplaint}
+                    />
                   )}
 
                   {/* Team Leader Time Logs Review panel */}
@@ -23625,7 +24332,7 @@ ${ttNotes}`
                                                 </p>
                                               </div>
                                             ) : (
-                                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                              <div className="space-y-3 w-full animate-fade-in">
                                                 {filteredTTRequests.map(
                                                   (req) => (
                                                     <TabbyTamaraCard
@@ -23702,6 +24409,14 @@ ${ttNotes}`
                                                       }
                                                       addSystemNotification={
                                                         addSystemNotification
+                                                      }
+                                                      isExpanded={
+                                                        expandedTabbyTamaraId === req.id
+                                                      }
+                                                      onToggle={() =>
+                                                        setExpandedTabbyTamaraId(
+                                                          expandedTabbyTamaraId === req.id ? null : req.id
+                                                        )
                                                       }
                                                     />
                                                   ),
@@ -26334,6 +27049,82 @@ ${ttNotes}`
         setNewPasswordInput={setNewPasswordInput}
         handleResetUserPassword={handleResetUserPassword}
       />
+      {/* Clinic Template Confirmation Modal */}
+      {showClinicTemplateModal && templateInquiryId && (() => {
+        const templateInq = inquiries.find(i => i.id === templateInquiryId);
+        if (!templateInq) return null;
+        const textTemplate = generateClinicTemplate(templateInq);
+        
+        return (
+          <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in font-sans">
+            <div className="w-full max-w-xl bg-[#141416]/95 border border-white/10 rounded-2xl shadow-2xl p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
+                  <span>📋 Review Standardized Clinic Template</span>
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowClinicTemplateModal(false);
+                    setTemplateInquiryId(null);
+                  }}
+                  className="p-1 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-all cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <p className="text-xs text-slate-400">
+                Please review the generated clinic template below. Click "Confirm & Send" to proceed with forwarding it, or "Copy to Clipboard" to manually copy.
+              </p>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider font-sans">
+                  Generated Clipboard Output Preview
+                </label>
+                <div className="relative">
+                  <pre className="w-full p-4 bg-slate-900/80 border border-slate-800/40 rounded-xl text-xs font-mono text-slate-300 overflow-y-auto max-h-[300px] whitespace-pre-wrap select-all leading-relaxed text-left">
+                    {textTemplate}
+                  </pre>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await copyToClipboard(textTemplate, "Standard clinic template copied to clipboard!");
+                  }}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 hover:text-white text-slate-300 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 border border-white/5"
+                >
+                  <Copy className="w-3.5 h-3.5" /> Copy to Clipboard
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowClinicTemplateModal(false);
+                      setTemplateInquiryId(null);
+                    }}
+                    className="px-4 py-2 bg-transparent hover:bg-white/5 text-slate-400 hover:text-white text-xs font-bold rounded-lg transition-all cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await handleSetInquirySent(templateInquiryId, true);
+                    }}
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-all shadow-md active:scale-95 cursor-pointer flex items-center gap-1.5"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Confirm & Send
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
       <NotificationDrawer
         isOpen={isNotifDrawerOpen}
         onClose={() => setIsNotifDrawerOpen(false)}

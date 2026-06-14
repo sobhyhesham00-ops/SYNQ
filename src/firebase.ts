@@ -58,6 +58,7 @@ export const ensureAuth = async () => {
     if (!auth.currentUser) {
       console.log("[Firebase Auth] Attempting anonymous sign-in...");
       const credential = await signInAnonymously(auth);
+      console.log("[Firebase Auth] Anonymous sign-in matched/success:", credential.user.uid);
       return credential.user;
     }
     return auth.currentUser;
@@ -72,8 +73,11 @@ export const storage = getStorage(app);
 export const useEmulator = (import.meta as any).env.VITE_USE_EMULATOR === "true" || ((import.meta as any).env.DEV && window.location.hostname === "localhost");
 
 // Auto sign-in anonymously for Firestore access if not using Google Auth
-if (auth.currentUser === null && !useEmulator) {
-  signInAnonymously(auth).catch((e: any) => console.warn("Anonymous auth failed (OK for offline):", e));
+if (auth.currentUser === null) {
+  console.log("[Firebase Auth] Proactive anonymous authentication triggered...");
+  signInAnonymously(auth)
+    .then((cred) => console.log("[Firebase Auth] Proactive anonymous sign-in successful. User ID:", cred.user.uid))
+    .catch((e: any) => console.warn("[Firebase Auth] Proactive anonymous sign-in failed (OK for offline):", e));
 }
 
 if (useEmulator) {
@@ -270,6 +274,9 @@ function getReferencePath(ref: any): string | null {
 
 export function wrappedOnSnapshot(ref: any, ...args: any[]) {
   const path = getReferencePath(ref);
+  const currentUid = auth.currentUser?.uid;
+  console.log(`[Firestore onSnapshot] Attaching real-time listener for path [${path}]. Current Auth UID: ${currentUid || "unauthenticated"}`);
+  
   let nextCb: any = null;
   let errorCb: any = null;
   let options: any = null;

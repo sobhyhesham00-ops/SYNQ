@@ -23,22 +23,81 @@ export const processAttachments = async (
   if (!attachments || attachments.length === 0) return [];
 
   const processed = await Promise.all(
-    attachments.map(async (att) => {
-      // If there's no file object, it means it's either an old base64 attachment,
-      // or an already uploaded file. Keep it exactly as is (metadata only).
-      if (!att.file) return att;
+    attachments.map((att) => {
+      return new Promise<FileAttachment>((resolve, reject) => {
+        // Support local-only processing for inquiry attachments
+        if (entityType === "inquiry") {
+          if (att.file) {
+            try {
+              const localUrl = URL.createObjectURL(att.file);
+              console.log(`[processAttachments] Local blob URL generated for inquiry attachment ${att.name}: ${localUrl}`);
+              const result: FileAttachment = {
+                id: att.id,
+                name: att.name,
+                type: att.type,
+                size: att.size,
+                url: localUrl,
+                uploadedAt: att.uploadedAt || new Date().toISOString(),
+                uploadedBy: att.uploadedBy
+              };
+              // Define file as non-enumerable so we can access it locally,
+              // but Firestore setDoc/addDoc will not trigger serialization failures.
+              Object.defineProperty(result, 'file', {
+                value: att.file,
+                enumerable: false,
+                configurable: true,
+                writable: true
+              });
+              resolve(result);
+            } catch (err: any) {
+              console.error(`[processAttachments] Failed to generate local blob URL for ${att.name}:`, err);
+              reject(new Error(`Failed to process ${att.name} locally: ${err.message}`));
+            }
+          } else {
+            resolve(att);
+          }
+          return;
+        }
 
-      // Ensure a clean clone without the File object for Firestore
-      const { file, ...attMeta } = att;
-      
-      const { uploadTask } = createUploadTask(file, entityType, entityId, replyOrRoot);
-      await uploadTask;
-      const downloadUrl = await getAttachmentDownloadURL(uploadTask);
-      
-      return {
-        ...attMeta,
-        url: downloadUrl
-      };
+        // If there's no file object, it means it's either an old base64 attachment,
+        // or an already uploaded file. Keep it exactly as is (metadata only).
+        if (!att.file) {
+          resolve(att);
+          return;
+        }
+
+        // Ensure a clean clone without the File object for Firestore
+        const { file, ...attMeta } = att;
+        
+        console.log(`Starting upload for ${file.name}...`);
+        const { uploadTask } = createUploadTask(file, entityType, entityId, replyOrRoot);
+        
+        uploadTask.on(
+          'state_changed',
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log(`Upload progress for ${file.name}: ${progress.toFixed(2)}%`);
+          },
+          (error) => {
+            console.error(`Upload error for ${file.name}:`, error);
+            reject(new Error(`Failed to upload ${file.name}: ${error.message}`));
+          },
+          async () => {
+            try {
+              console.log(`Upload completed for ${file.name}. Fetching download URL...`);
+              const downloadUrl = await getAttachmentDownloadURL(uploadTask);
+              console.log(`Successfully acquired download URL for ${file.name}.`);
+              resolve({
+                ...attMeta,
+                url: downloadUrl
+              });
+            } catch (err: any) {
+              console.error(`Error getting download URL for ${file.name}:`, err);
+              reject(new Error(`Failed to get download URL for ${file.name}: ${err.message}`));
+            }
+          }
+        );
+      });
     })
   );
 

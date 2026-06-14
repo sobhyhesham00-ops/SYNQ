@@ -128,7 +128,9 @@ export const TabbyTamaraCard = ({
   getRemainingEditTime,
   editLimitMs,
   setEditingItem,
-  addSystemNotification
+  addSystemNotification,
+  isExpanded,
+  onToggle
 }: any) => {
   const hasAttachments = Boolean((req.photos && req.photos.length > 0) || (req.links && req.links.length > 0) || req.paymentScreenshot);
   const [expandedNotes, setExpandedNotes] = useState(Boolean(req.notes || hasAttachments));
@@ -522,7 +524,17 @@ export const TabbyTamaraCard = ({
   const pricing = calculateTabbyTamaraPrice(req.priceWithoutTax || 0);
 
   return (
-    <div id={`request-${req.id}`} className="bg-[#18181c] border border-slate-700/60 rounded-2xl shadow-xl shadow-black/40 hover:shadow-black/60 hover:border-slate-600/80 transition-all duration-200 flex flex-col relative overflow-hidden max-w-full group/card">
+    <div 
+      id={`request-${req.id}`} 
+      className={`bg-[#18181c] border border-slate-700/60 rounded-2xl shadow-xl shadow-black/40 hover:shadow-black/60 hover:border-slate-600/80 transition-all duration-300 flex flex-col relative overflow-hidden max-w-full group/card ${
+        !isExpanded ? "hover:bg-white/[0.04] cursor-pointer" : "ring-1 ring-indigo-500/15"
+      }`}
+      onClick={() => {
+        if (!isExpanded && onToggle) {
+          onToggle();
+        }
+      }}
+    >
       {/* Platform color strip */}
       <div className={`h-1.5 w-full rounded-t-2xl ${
         req.platform === 'tabby' ? 'bg-gradient-to-r from-amber-400 to-amber-600' :
@@ -536,7 +548,15 @@ export const TabbyTamaraCard = ({
       )}
 
       {/* HEADER STRIP */}
-      <div className='flex items-center justify-between px-5 pt-4 pb-2.5'>
+      <div 
+        className={`flex items-center justify-between px-5 pt-4 pb-2.5 ${isExpanded ? 'cursor-pointer hover:opacity-85' : ''}`}
+        onClick={(e) => {
+          if (isExpanded && onToggle) {
+            e.stopPropagation();
+            onToggle();
+          }
+        }}
+      >
          <div className="flex items-center gap-3">
            <ProviderGlowBadge platform={req.platform} />
          </div>
@@ -550,6 +570,9 @@ export const TabbyTamaraCard = ({
              Ref: {formatCaseRef(req.id, 'tt_request', req.createdAt, req.caseRef)}
            </div>
            <StatusBadge status={req.status} customerContacted={req.customerContacted} workflowStatus={workflowStatus} />
+           <div className="text-slate-400 hover:text-indigo-400 p-1 rounded-md transition-all shrink-0 ml-1 flex items-center justify-center">
+             {isExpanded ? <ChevronUp className="w-4 h-4 text-indigo-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+           </div>
          </div>
       </div>
 
@@ -632,7 +655,9 @@ export const TabbyTamaraCard = ({
         </div>
       </div>
 
-      {/* PROGRESS TIMELINE */}
+      {isExpanded && (
+        <div className="w-full overflow-hidden transition-all duration-300">
+          {/* PROGRESS TIMELINE */}
       <div className='px-5 py-4 border-b border-slate-700/40 bg-slate-950/20 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-800'>
         <div className='flex items-center gap-0 pb-1 min-w-[500px] sm:min-w-0 justify-between'>
           {(() => {
@@ -1327,6 +1352,8 @@ export const TabbyTamaraCard = ({
           requestAgentName={req.agentName}
         />
       </div>
+        </div>
+      )}
     </div>
   );
 };

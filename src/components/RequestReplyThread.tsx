@@ -154,6 +154,18 @@ export function RequestReplyThread({
 
   const handleReply = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (collectionName === "inquiries") {
+      if (!String(text || "").trim()) {
+        toast.error("Reply text cannot be empty.");
+        return;
+      }
+      if (text.length > 500) {
+        toast.error("Reply details cannot exceed 500 characters.");
+        return;
+      }
+    }
+
     if (!String(text || '').trim() && attachments.length === 0 && links.length === 0 && replyPhotos.length === 0) return;
 
     try {
@@ -491,20 +503,21 @@ export function RequestReplyThread({
               value={text}
               onChange={e => {
                 const val = e.target.value;
-                const isAgentInquiry = collectionName === "inquiries" && currentUser?.role === "agent";
-                if (isAgentInquiry && val.length > 500) {
+                const isInquiry = collectionName === "inquiries";
+                if (isInquiry && val.length > 500) {
                   return;
                 }
                 setText(val);
               }}
+              maxLength={collectionName === "inquiries" ? 500 : undefined}
               rows={2}
               className="w-full bg-transparent border-none rounded-xl p-1 text-xs text-slate-100 placeholder-slate-500 focus:ring-0 focus:outline-none font-sans resize-none custom-scrollbar leading-relaxed text-left"
               placeholder="Record calling status, client correspondence, or submit Team Leader/Agent notes..."
             />
             
-            {collectionName === "inquiries" && currentUser?.role === "agent" && (
-              <div className="text-right text-[10px] text-slate-500 font-mono pr-1 -mt-1">
-                {text.length}/500 characters
+            {collectionName === "inquiries" && (
+              <div className="text-right text-[10px] text-slate-400 font-mono pr-1 -mt-1">
+                {text.length} / 500 characters
               </div>
             )}
             

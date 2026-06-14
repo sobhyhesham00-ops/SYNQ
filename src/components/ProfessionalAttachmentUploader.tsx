@@ -64,32 +64,35 @@ export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUplo
   const handleFiles = async (files: FileList | globalThis.File[]) => {
     if (!files || files.length === 0) return;
 
-    if (attachments.length >= maxAttachments) {
-      toast.error(`You can only upload up to ${maxAttachments} attachments per inquiry.`);
+    const fileArray = Array.from(files);
+
+    if (attachments.length >= 4 || attachments.length + fileArray.length > 4) {
+      toast.error("You can attach a maximum of 4 files per inquiry.");
       return;
     }
 
     setIsUploading(true);
-    setUploadProgress({ current: 0, total: files.length });
+    setUploadProgress({ current: 0, total: fileArray.length });
 
     const newAttachments: FileAttachment[] = [];
-    const fileArray = Array.from(files);
 
     for (let i = 0; i < fileArray.length; i++) {
-        if (attachments.length + newAttachments.length >= maxAttachments) {
-            toast.error(`Attachment limit of ${maxAttachments} reached. Remaining files were skipped.`);
-            break;
-        }
         const file = fileArray[i];
         
-        // 1. Validate file
+        // 1. Enforce 10MB limit per file
+        if (file.size > 10 * 1024 * 1024) {
+            toast.error(`File '${file.name}' exceeds the 10MB size limit.`);
+            continue;
+        }
+
+        // 2. Validate file type & general safety
         const validation = validateFile(file);
         if (!validation.valid) {
             toast.error(validation.error);
             continue;
         }
 
-        // 2. Prevent exact duplicates
+        // 3. Prevent exact duplicates
         if (attachments.some(a => a.name === file.name && a.size === file.size) || newAttachments.some(a => a.name === file.name && a.size === file.size)) {
             toast.error(`${file.name} is already attached.`);
             continue;
@@ -177,7 +180,9 @@ export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUplo
                    <div className="flex flex-col items-center gap-1.5 text-center px-4">
                        <UploadCloud className="w-8 h-8 text-slate-400 mb-1" />
                        <span className="text-xs font-semibold text-slate-200">Click to upload or drag & drop</span>
-                       <span className="text-[10px] font-medium text-slate-500">Supports images, PDFs, Word, Excel (Max 15MB). Paste images from clipboard.</span>
+                       <span className="text-[10px] font-medium text-slate-400 leading-relaxed">
+                         Max 4 files, 10MB each. Files are stored locally on this device, not uploaded to the cloud.
+                       </span>
                    </div>
                 )}
             </label>
