@@ -131,7 +131,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
 }) => {
   // Filters state
   const [filterClinic, setFilterClinic] = useState<string>("all");
-  const [filterDate, setFilterDate] = useState<string>("");
+  const [filterDate, setFilterDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [filterPhone, setFilterPhone] = useState<string>("");
   const [selectedTypeFilter, setSelectedTypeFilter] = useState<"all" | "inquiry" | "tabbyTamara" | "complaint">("all");
   const [sortOldestFirst, setSortOldestFirst] = useState<boolean>(false);
@@ -142,9 +142,10 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
   if (!currentUser) return null;
 
   // Helper to identify if a filter is active
+  const todayStr = new Date().toISOString().slice(0, 10);
   const isAnyFilterActive =
     filterClinic !== "all" ||
-    filterDate !== "" ||
+    filterDate !== todayStr ||
     filterPhone.trim() !== "" ||
     selectedTypeFilter !== "all";
 
@@ -296,7 +297,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
 
   const handleResetFilters = () => {
     setFilterClinic("all");
-    setFilterDate("");
+    setFilterDate(new Date().toISOString().slice(0, 10));
     setFilterPhone("");
     setSelectedTypeFilter("all");
     setSortOldestFirst(false);

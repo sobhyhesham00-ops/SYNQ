@@ -133,7 +133,6 @@ import { CopyWrap } from "./components/CopyWrap";
 import { SlideToConfirm } from "./components/SlideToConfirm";
 import { QAScorecards } from "./components/QAScorecards";
 import { KPICalculatorPanel } from "./components/KPICalculatorPanel";
-import { PatientSearchHub } from "./components/PatientSearchHub";
 import { InquiryRepliesViewer } from "./components/InquiryRepliesViewer";
 import { AnnouncementsTab } from "./components/AnnouncementsTab";
 import { OrdersTab } from "./components/OrdersTab";
@@ -9576,12 +9575,6 @@ ${ttNotes}`
                           "bg-yellow-500/20 border-yellow-500/30 text-yellow-100",
                         )}
                         {buildBtn(
-                          "client-search",
-                          <Search className="w-4 h-4 text-cyan-400" />,
-                          "Universal Search",
-                          "bg-cyan-500/20 border-cyan-500/30 text-cyan-100",
-                        )}
-                        {buildBtn(
                           "inquiries",
                           <HelpCircle className="w-4 h-4 text-amber-500" />,
                           "General Inquiries",
@@ -9715,12 +9708,6 @@ ${ttNotes}`
                           <Bell className="w-4 h-4 text-yellow-400" />,
                           "Updates & Announcements",
                           "bg-yellow-500/20 border-yellow-500/30 text-yellow-100",
-                        )}
-                        {buildBtn(
-                          "client-search",
-                          <Search className="w-4 h-4 text-cyan-400" />,
-                          "Universal Search",
-                          "bg-cyan-500/20 border-cyan-500/30 text-cyan-100",
                         )}
                         {buildBtn(
                           "inquiries",
@@ -15153,23 +15140,6 @@ ${ttNotes}`
                       </div>
                     )}
 
-                  {/* TL PatientSearchHub */}
-                  {currentUser.role === "tl" &&
-                    activeTab === "client-search" && (
-                      <div className="w-full">
-                        <PatientSearchHub
-                          inquiries={inquiries}
-                          ttRequests={tabbyTamaraRequests}
-                          ttComplaints={tabbyTamaraComplaints}
-                          clientComms={clientComms}
-                          cases={cases}
-                          currentUser={currentUser}
-                          requests={requests}
-                          onViewRecord={setViewingRecord}
-                        />
-                      </div>
-                    )}
-
                   {/* TL Report Section (Only TL) */}
                   {currentUser.role === "tl" && activeTab === "report" && (
                     <div className="space-y-6 animate-fade-in">
@@ -16227,22 +16197,6 @@ ${ttNotes}`
                       db={db}
                       addSystemNotification={addSystemNotification}
                     />
-                  )}
-
-                  {/* Agent Inquiries Desk */}
-                  {activeTab === "client-search" && (
-                    <div className="w-full">
-                      <PatientSearchHub
-                        inquiries={inquiries}
-                        ttRequests={tabbyTamaraRequests}
-                        ttComplaints={tabbyTamaraComplaints}
-                        clientComms={clientComms}
-                        cases={cases}
-                        requests={requests}
-                        currentUser={currentUser}
-                        onViewRecord={setViewingRecord}
-                      />
-                    </div>
                   )}
 
                   {/* TL Announcements */}
