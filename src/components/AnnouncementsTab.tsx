@@ -1,3 +1,4 @@
+import { getClinicLabel,  CLINIC_OPTIONS } from "../utils";
 import React, { useState } from 'react';
 import { Announcement, User } from '../types';
 import { Bell, Image as ImageIcon, Link, CheckCircle2, Download, Paperclip, X } from 'lucide-react';
@@ -196,11 +197,9 @@ export function AnnouncementsTab({
               <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Target Clinic</label>
               <select value={clinicFilter} onChange={e => setClinicFilter(e.target.value)} className="w-full bg-slate-900/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-yellow-500 cursor-pointer">
                 <option value="all" className="bg-slate-800 text-white font-sans">All Clinics (Global)</option>
-                <option value="dermadent" className="bg-slate-800 text-white font-sans">Dermadent</option>
-                <option value="onetouch_mo3tred" className="bg-slate-800 text-white font-sans">One Touch AlMutarid</option>
-                <option value="onetouch_merkhnya" className="bg-slate-800 text-white font-sans">One Touch Markhaniya</option>
-                <option value="welltouch" className="bg-slate-800 text-white font-sans">Well Touch</option>
-                <option value="newage" className="bg-slate-800 text-white font-sans">New Age</option>
+                {CLINIC_OPTIONS.map(c => (
+<option key={c.value} value={c.value} className="bg-slate-800 text-white font-sans">{c.label}</option>
+))}
               </select>
             </div>
           </div>
@@ -228,11 +227,9 @@ export function AnnouncementsTab({
           <h3 className="text-xl font-bold text-slate-200">Updates History</h3>
           <select value={filterClinic} onChange={e => setFilterClinic(e.target.value)} className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 outline-none cursor-pointer">
              <option value="all" className="font-sans">Filter by Clinic...</option>
-             <option value="dermadent" className="font-sans">Dermadent</option>
-             <option value="onetouch_mo3tred" className="font-sans">One Touch AlMutarid</option>
-             <option value="onetouch_merkhnya" className="font-sans">One Touch Markhaniya</option>
-             <option value="welltouch" className="font-sans">Well Touch</option>
-             <option value="newage" className="font-sans">New Age</option>
+             {CLINIC_OPTIONS.map(c => (
+<option key={c.value} value={c.value} className="font-sans">{c.label}</option>
+))}
           </select>
         </div>
 

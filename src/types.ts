@@ -550,6 +550,7 @@ export interface Order {
   timerMinutes?: number; 
   members: OrderMember[];
   deliveryFee: number;
+  discount?: number;
   tax: number;
 }
 

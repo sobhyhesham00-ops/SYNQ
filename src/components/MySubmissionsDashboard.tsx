@@ -26,7 +26,7 @@ import { RequestReplyThread } from "./RequestReplyThread";
 import { SlideToConfirm } from "./SlideToConfirm";
 import { CopyWrap } from "./CopyWrap";
 import { Inquiry, TabbyTamaraRequest, TabbyTamaraComplaint, User as UserType, INITIAL_AGENTS } from "../types";
-import { formatCaseRef, normalizePhone, copyToClipboard , getClinicLabel, generateInquiryCopyText, generateComplaintCopyText, generateTabbyTamaraCopyText} from "../utils";
+import { CLINIC_OPTIONS,  formatCaseRef, normalizePhone, copyToClipboard , getClinicLabel, generateInquiryCopyText, generateComplaintCopyText, generateTabbyTamaraCopyText} from "../utils";
 
 interface MySubmissionsDashboardProps {
   inquiries: Inquiry[];
@@ -224,14 +224,12 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
   // Sort by createdAt descending
   filteredList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-  const handleCopyInquiry = (e: React.MouseEvent, inq: any) => {
-        e.stopPropagation();
+  const handleCopyInquiry = (inq: any) => {
         const text = generateInquiryCopyText(inq);
         copyToClipboard(text);
       };
 
-  const handleCopyComplaint = (e: React.MouseEvent, comp: any) => {
-        e.stopPropagation();
+  const handleCopyComplaint = (comp: any) => {
         const text = generateComplaintCopyText(comp);
         copyToClipboard(text);
       };
@@ -280,11 +278,9 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
               className="w-full bg-[#18181c] border border-slate-700/60 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-[#10b981] font-sans h-10 cursor-pointer"
             >
               <option value="all">All Clinics</option>
-              <option value="dermadent">Dermadent</option>
-              <option value="onetouch_mo3tred">One Touch AlMutarid</option>
-              <option value="onetouch_merkhnya">One Touch Markhaniya</option>
-              <option value="welltouch">Well Touch</option>
-              <option value="newage">New Age</option>
+              {CLINIC_OPTIONS.map(c => (
+<option key={c.value} value={c.value}>{c.label}</option>
+))}
             </select>
           </div>
 
@@ -315,7 +311,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
               className="w-full bg-[#18181c] border border-slate-700/60 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-[#10b981] font-sans h-10 cursor-pointer"
             >
               <option value="pending">⏳ Pending Cases Only</option>
-              <option value="all">📁 All submissions</option>
+              <option value="all">📁 All Submissions</option>
             </select>
           </div>
         </div>

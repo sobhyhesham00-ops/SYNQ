@@ -430,9 +430,9 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                       onChange={(e) => setNewUserRole(e.target.value)}
                       className="w-full bg-black/20 border border-white/10 rounded-xl px-2.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-rose-500"
                     >
-                      <option value="agent">CSR (Agent)</option>
+                      <option value="agent">Agent</option>
                       <option value="tl">Team Leader</option>
-                      <option value="qa">QA Analyst</option>
+                      <option value="qa">QA</option>
                       <option value="director">Director</option>
                     </select>
                   </div>
@@ -571,9 +571,9 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                               onChange={(e) => setEditRole(e.target.value)}
                               className="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-200"
                             >
-                              <option value="agent">CSR (Agent)</option>
+                              <option value="agent">Agent</option>
                               <option value="tl">Team Leader</option>
-                              <option value="qa">QA Analyst</option>
+                              <option value="qa">QA</option>
                               <option value="director">Director</option>
                             </select>
                           </div>

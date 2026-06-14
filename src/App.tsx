@@ -117,7 +117,6 @@ import {
   Loader2,
   ChevronUp,
   ChevronDown,
-  Shield,
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { AIChatWidget } from "./AIChatWidget";
@@ -146,52 +145,7 @@ import { ComplaintsWorkspace } from "./components/ComplaintsWorkspace";
 import { MySubmissionsDashboard } from "./components/MySubmissionsDashboard";
 import { processAttachments } from "./services/attachmentService";
 import * as XLSX from "xlsx";
-import {
-  isTLName,
-  isQAName,
-  capitalizeName,
-  getStorageItem,
-  setStorageItem,
-  validateSwapRequest,
-  validateAnnualRequest,
-  getInitialRequests,
-  generateCSV,
-  generateTextReport,
-  formatDateNice,
-  getInitialSchedules,
-  parseScheduleCSV,
-  evaluateKpiFormula,
-  parseAgentDirectoryCSV,
-  generateScheduleTemplateFile,
-  getAgentLOB,
-  getAgentTL,
-  getAgentMeta,
-  generateInquiriesCSV,
-  generateTimeLogsCSV,
-  formatAgentName,
-  generateFintechRequestsCSV,
-  generateFintechComplaintsCSV,
-  generateClientCommsCSV,
-  generateCasesCSV,
-  generateSchedulesCSV,
-  getLocalISOString,
-  getLocalTimeZone,
-  normalizeName,
-  getUsernameFromFullName,
-  findAgentByUsername,
-  compressImage,
-  handleGlobalImagePaste,
-  formatCaseRef,
-  calculateTabbyTamaraPrice,
-  normalizePhone,
-  formatPhoneForCopy,
-  formatPhoneLocalForCopy,
-  normalizeAttachments,
-  copyToClipboard,
-  extractLinks,
-  buildClinicInquiryTextTemplate,
-  buildClinicInquiryHtmlTemplate,
-} from "./utils";
+import { getClinicLabel, CLINIC_OPTIONS, isTLName, isSMEName, isQAName, capitalizeName, getStorageItem, setStorageItem, validateSwapRequest, validateAnnualRequest, getInitialRequests, generateCSV, generateTextReport, formatDateNice, getInitialSchedules, parseScheduleCSV, evaluateKpiFormula, parseAgentDirectoryCSV, generateScheduleTemplateFile, getAgentLOB, getAgentTL, getAgentMeta, generateInquiriesCSV, generateTimeLogsCSV, formatAgentName, generateFintechRequestsCSV, generateFintechComplaintsCSV, generateClientCommsCSV, generateCasesCSV, generateSchedulesCSV, getLocalISOString, getLocalTimeZone, normalizeName, getUsernameFromFullName, findAgentByUsername, compressImage, handleGlobalImagePaste, formatCaseRef, calculateTabbyTamaraPrice, normalizePhone, formatPhoneForCopy, formatPhoneLocalForCopy, normalizeAttachments, copyToClipboard, extractLinks, buildClinicInquiryTextTemplate, buildClinicInquiryHtmlTemplate, generateInquiryCopyText, generateComplaintCopyText } from "./utils";
 import {
   SchedulingRequest,
   SwapRequest,
@@ -3023,7 +2977,7 @@ ${pageText}
 
           const refCode = inq.caseRef || `INQ-${inq.id.replace('inq_', '').toUpperCase()}`;
           const title = "⏳ Case Answered Reminder";
-          const message = `Inquiry ${refCode} for ${inq.clinicName || 'N/A'} has been in "Answered" status for ${timeIndicator}. Please review the answer and click on "Close Inquiry" manually to move it to Closed.`;
+          const message = `Inquiry ${refCode} for ${getClinicLabel(inq.clinicName)} has been in "Answered" status for ${timeIndicator}. Please review the answer and click on "Close Inquiry" manually to move it to Closed.`;
 
           // Generate stableId so multiple browser windows/tabs collapse to a single notification
           const hourBucket = Math.floor(now.getTime() / oneHourInMs);
@@ -4257,7 +4211,11 @@ ${pageText}
     }
 
     const persistedRole = userRoles[formattedUsername] || userRoles[correspondingFullName.toLowerCase().replace(/\s+/g, '.')];
-    const userRole = persistedRole || (isQAName(correspondingFullName) ? "qa" : isTLName(correspondingFullName) ? "tl" : "agent");
+    const userRole = persistedRole || (
+      isQAName(correspondingFullName) ? "qa" : 
+      isSMEName(correspondingFullName) ? "sme" :
+      isTLName(correspondingFullName) ? "tl" : "agent"
+    );
     console.log("[AUTH] Logged in as:", correspondingFullName, "| Persisted role:", persistedRole, "| Final role:", userRole, "| isSuperAdmin:", userRole === "director");
     const authenticatedUser: User = {
       id: `usr_${correspondingFullName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}`,
@@ -4366,8 +4324,12 @@ ${pageText}
       }).catch(console.error);
     }
 
-    const persistedRole = userRoles[formattedUsername] || userRoles[correspondingFullName.toLowerCase().replace(/\s+/g, '.')];
-    const userRole = persistedRole || (isQAName(correspondingFullName) ? "qa" : isTLName(correspondingFullName) ? "tl" : "agent");
+    const persistedRole = userRoles[finalName] || userRoles[correspondingFullName.toLowerCase().replace(/\s+/g, '.')];
+    const userRole = persistedRole || (
+      isQAName(correspondingFullName) ? "qa" : 
+      isSMEName(correspondingFullName) ? "sme" :
+      isTLName(correspondingFullName) ? "tl" : "agent"
+    );
     console.log("[AUTH] Logged in as:", correspondingFullName, "| Persisted role:", persistedRole, "| Final role:", userRole, "| isSuperAdmin:", userRole === "director");
     const authenticatedUser: User = {
       id: `usr_${correspondingFullName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}`,
@@ -6558,7 +6520,7 @@ ${result.errors.slice(0, 5).join("\n")}${
       `📋 *CLINICAL INQUIRY TEMPLATE*`,
       `-----------------------------------`,
       `🆔 *Reference:* ${ref}`,
-      `🏥 *Clinic:* ${inq.clinicName}`,
+      `🏥 *Clinic:* ${getClinicLabel(inq.clinicName)}`,
       `👤 *Patient:* ${pName}`,
       `📁 *File ID:* ${fId}`,
       `🔑 *Patient ID:* ${pId}`,
@@ -6680,7 +6642,7 @@ ${result.errors.slice(0, 5).join("\n")}${
 
     addSystemNotification(
       "Inquiry Sent to Clinic",
-      `${currentUser.name} sent your inquiry to ${inq.clinicName} — awaiting their response.`,
+      `${currentUser.name} sent your inquiry to ${getClinicLabel(inq.clinicName)} — awaiting their response.`,
       "general", inq.agentName, undefined, "inquiry", inquiryId
     );
   };
@@ -6726,7 +6688,7 @@ ${result.errors.slice(0, 5).join("\n")}${
     const refCode = inq.caseRef || `INQ-${inq.id.replace('inq_', '').toUpperCase()}`;
     addSystemNotification(
       "Inquiry Closed Manually",
-      `Inquiry ${refCode} for ${inq.clinicName || "N/A"} has been closed manually by ${currentUser.name}${timerMessage}.`,
+      `Inquiry ${refCode} for ${getClinicLabel(inq.clinicName)} has been closed manually by ${currentUser.name}${timerMessage}.`,
       "general", "all", undefined, "inquiry", inquiryId
     );
   };
@@ -9170,7 +9132,7 @@ ${ttNotes}`
                                 </p>
                                 {item.clinicName && (
                                   <span className="text-[10px] text-zinc-400 font-semibold max-w-[120px] truncate">
-                                    {item.clinicName}
+                                    {getClinicLabel(item.clinicName)}
                                   </span>
                                 )}
                               </div>
@@ -16324,36 +16286,9 @@ ${ttNotes}`
                                   >
                                     -- Select Clinic * --
                                   </option>
-                                  <option
-                                    value="dermadent"
-                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                  >
-                                    Dermadent
-                                  </option>
-                                  <option
-                                    value="onetouch_mo3tred"
-                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                  >
-                                    One Touch AlMutarid
-                                  </option>
-                                  <option
-                                    value="onetouch_merkhnya"
-                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                  >
-                                    One Touch Markhaniya
-                                  </option>
-                                  <option
-                                    value="welltouch"
-                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                  >
-                                    Well Touch
-                                  </option>
-                                  <option
-                                    value="newage"
-                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                  >
-                                    New Age
-                                  </option>
+                                  {CLINIC_OPTIONS.map(c => (
+<option key={c.value} value={c.value} className="bg-white/10 backdrop-blur-md text-slate-100 ">{c.label}</option>
+))}
                                 </select>
                               </div>
 
@@ -16792,7 +16727,7 @@ ${ttNotes}`
                                                       className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 border border-indigo-500/30 rounded-lg font-bold flex items-center gap-1 cursor-pointer hover:bg-indigo-500/30 transition-colors"
                                                       title="Copy Clinic"
                                                     >
-                                                      {inq.clinicName}
+                                                      {getClinicLabel(inq.clinicName)}
                                                     </span>
                                                   )}
                                                   {inq.phoneNumber && (
@@ -16904,7 +16839,7 @@ ${ttNotes}`
                                                       const text = [
                                                         ` Inquiry`,
                                                         `Ref: ${formatCaseRef(inq.id, "inq", inq.createdAt, inq.caseRef)}`,
-                                                        `Clinic: ${inq.clinicName}`,
+                                                        `Clinic: ${getClinicLabel(inq.clinicName)}`,
                                                         `Phone: ${formatPhoneForCopy(inq.phoneNumber || "")}`,
                                                         `Inquiry: ${inq.text}`,
                                                         `Status: ${inq.status}`,
@@ -17173,7 +17108,7 @@ ${ttNotes}`
                                                   className="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2.5 py-0.5 rounded-lg cursor-pointer hover:bg-indigo-500/20 transition-colors"
                                                   title="Copy Clinic"
                                                 >
-                                                  {inq.clinicName}
+                                                  {getClinicLabel(inq.clinicName)}
                                                 </span>
                                               )}
                                               {inq.phoneNumber && (
@@ -18235,36 +18170,9 @@ ${ttNotes}`
                                 >
                                   All Clinics
                                 </option>
-                                <option
-                                  value="dermadent"
-                                  className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                >
-                                  Dermadent
-                                </option>
-                                <option
-                                  value="onetouch_mo3tred"
-                                  className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                >
-                                  One Touch AlMutarid
-                                </option>
-                                <option
-                                  value="onetouch_merkhnya"
-                                  className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                >
-                                  One Touch Markhaniya
-                                </option>
-                                <option
-                                  value="welltouch"
-                                  className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                >
-                                  Well Touch
-                                </option>
-                                <option
-                                  value="newage"
-                                  className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                >
-                                  New Age
-                                </option>
+                                {CLINIC_OPTIONS.map(c => (
+<option key={c.value} value={c.value} className="bg-white/10 backdrop-blur-md text-slate-100 ">{c.label}</option>
+))}
                               </select>
                             </div>
                             <div className="flex gap-1.5 w-full md:w-auto overflow-x-auto select-none py-1 md:py-0">
@@ -18408,7 +18316,7 @@ ${ttNotes}`
                                                       className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 border border-indigo-500/30 rounded font-sans font-bold flex items-center gap-1 cursor-pointer hover:bg-indigo-500/30 transition-colors"
                                                       title="Copy Clinic"
                                                     >
-                                                      {inq.clinicName}
+                                                      {getClinicLabel(inq.clinicName)}
                                                     </span>
                                                   )}
                                                   {inq.phoneNumber && (
@@ -23519,36 +23427,9 @@ ${ttNotes}`
                                           >
                                             Select a Clinic
                                           </option>
-                                          <option
-                                            value="dermadent"
-                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                          >
-                                            Dermadent
-                                          </option>
-                                          <option
-                                            value="onetouch_mo3tred"
-                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                          >
-                                            One Touch AlMutarid
-                                          </option>
-                                          <option
-                                            value="onetouch_merkhnya"
-                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                          >
-                                            One Touch Markhaniya
-                                          </option>
-                                          <option
-                                            value="welltouch"
-                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                          >
-                                            Well Touch
-                                          </option>
-                                          <option
-                                            value="newage"
-                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                          >
-                                            New Age
-                                          </option>
+                                          {CLINIC_OPTIONS.map(c => (
+<option key={c.value} value={c.value} className="bg-white/10 backdrop-blur-md text-slate-100 ">{c.label}</option>
+))}
                                         </select>
                                       </div>
 
@@ -23752,36 +23633,9 @@ ${ttNotes}`
                                           >
                                             Select a Clinic
                                           </option>
-                                          <option
-                                            value="dermadent"
-                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                          >
-                                            Dermadent
-                                          </option>
-                                          <option
-                                            value="onetouch_mo3tred"
-                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                          >
-                                            One Touch AlMutarid
-                                          </option>
-                                          <option
-                                            value="onetouch_merkhnya"
-                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                          >
-                                            One Touch Markhaniya
-                                          </option>
-                                          <option
-                                            value="welltouch"
-                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                          >
-                                            Well Touch
-                                          </option>
-                                          <option
-                                            value="newage"
-                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                          >
-                                            New Age
-                                          </option>
+                                          {CLINIC_OPTIONS.map(c => (
+<option key={c.value} value={c.value} className="bg-white/10 backdrop-blur-md text-slate-100 ">{c.label}</option>
+))}
                                         </select>
                                       </div>
 
@@ -23880,36 +23734,9 @@ ${ttNotes}`
                                           >
                                             Select a Clinic
                                           </option>
-                                          <option
-                                            value="dermadent"
-                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                          >
-                                            Dermadent
-                                          </option>
-                                          <option
-                                            value="onetouch_mo3tred"
-                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                          >
-                                            One Touch AlMutarid
-                                          </option>
-                                          <option
-                                            value="onetouch_merkhnya"
-                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                          >
-                                            One Touch Markhaniya
-                                          </option>
-                                          <option
-                                            value="welltouch"
-                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                          >
-                                            Well Touch
-                                          </option>
-                                          <option
-                                            value="newage"
-                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                          >
-                                            New Age
-                                          </option>
+                                          {CLINIC_OPTIONS.map(c => (
+<option key={c.value} value={c.value} className="bg-white/10 backdrop-blur-md text-slate-100 ">{c.label}</option>
+))}
                                         </select>
                                       </div>
 
@@ -24391,36 +24218,9 @@ ${ttNotes}`
                                       >
                                         All Clinics
                                       </option>
-                                      <option
-                                        value="dermadent"
-                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                      >
-                                        Dermadent
-                                      </option>
-                                      <option
-                                        value="onetouch_mo3tred"
-                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                      >
-                                        One Touch AlMutarid
-                                      </option>
-                                      <option
-                                        value="onetouch_merkhnya"
-                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                      >
-                                        One Touch Markhaniya
-                                      </option>
-                                      <option
-                                        value="welltouch"
-                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                      >
-                                        Well Touch
-                                      </option>
-                                      <option
-                                        value="newage"
-                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                      >
-                                        New Age
-                                      </option>
+                                      {CLINIC_OPTIONS.map(c => (
+<option key={c.value} value={c.value} className="bg-white/10 backdrop-blur-md text-slate-100 ">{c.label}</option>
+))}
                                     </select>
                                   </div>
 
@@ -24932,7 +24732,7 @@ ${ttNotes}`
                                                           </span>
                                                           {comp.clinicName && (
                                                             <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-slate-300">
-                                                              {comp.clinicName}
+                                                              {getClinicLabel(comp.clinicName)}
                                                             </span>
                                                           )}
                                                         </div>
@@ -25750,7 +25550,7 @@ ${ttNotes}`
                                                           <span
                                                             className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border ${getClinicBadgeColor(req.clinicName)}`}
                                                           >
-                                                            {req.clinicName}
+                                                            {getClinicLabel(req.clinicName)}
                                                           </span>
                                                           <span
                                                             className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border border-white/10 ${req.language === "Arabic" ? "bg-emerald-500/10 text-emerald-300" : "bg-blue-500/10 text-blue-300"}`}
@@ -26127,7 +25927,7 @@ ${ttNotes}`
                                                             `--------------------------------------`,
                                                             `🆔 *Ref:* ${req.caseRef || formatCaseRef(req.id, "client_comm", req.createdAt, req.caseRef)}`,
                                                             `👤 *Patient:* ${req.patientName || "N/A"}`,
-                                                            `🏥 *Clinic:* ${req.clinicName || "N/A"}`,
+                                                            `🏥 *Clinic:* ${getClinicLabel(req.clinicName)}`,
                                                             `🌐 *Language:* ${req.language || "N/A"}`,
                                                             `📞 *Phone:* ${formatPhoneForCopy(req.phoneNumber)}`,
                                                             `${statusEmoji} *Status:* ${req.status ? req.status.toUpperCase() : "PENDING"}`,
@@ -27089,7 +26889,7 @@ ${ttNotes}`
                                               <td className="p-4">{lobTeamVal}</td>
                                               <td className="p-4">
                                                 <span
-                                                  className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${
+                                                  className={`font-bold py-1 px-3 rounded-lg text-[11px] border capitalize ${
                                                     roleVal.toLowerCase() === "tl" || roleVal.toLowerCase() === "team leader"
                                                       ? "bg-amber-950/30 text-amber-400 border-amber-500/20"
                                                       : roleVal.toLowerCase() === "qa"

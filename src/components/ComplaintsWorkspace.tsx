@@ -17,11 +17,7 @@ import { AttachmentsDisplay } from "./AttachmentsDisplay";
 import { RequestReplyThread } from "./RequestReplyThread";
 import { SlideToConfirm } from "./SlideToConfirm";
 import { TabbyTamaraComplaint, User as UserType, INITIAL_AGENTS } from "../types";
-import { 
-  formatCaseRef, 
-  normalizePhone, 
-  copyToClipboard
-, getClinicLabel, generateInquiryCopyText, generateComplaintCopyText, generateTabbyTamaraCopyText} from "../utils";
+import { getClinicLabel, formatCaseRef, normalizePhone, copyToClipboard } from "../utils";
 
 const compStatusLabels: Record<string, string> = {
   pending_tl: "⏳ Pending TL review",
@@ -225,7 +221,7 @@ export const ComplaintsWorkspace: React.FC<ComplaintsWorkspaceProps> = ({
                       </span>
                       {comp.clinicName && (
                         <span className="text-[10px] bg-rose-500/10 text-rose-300 px-2 py-0.5 border border-rose-500/20 rounded font-sans font-bold flex items-center gap-1">
-                          🏰 {comp.clinicName}
+                          🏰 {getClinicLabel(comp.clinicName)}
                         </span>
                       )}
                       {comp.phoneNumber && (
@@ -585,7 +581,7 @@ export const ComplaintsWorkspace: React.FC<ComplaintsWorkspaceProps> = ({
                           `Patient: ${comp.patientName} | File: ${comp.fileNumber || 'N/A'}`,
                           `Phone: ${normalizePhone(comp.phoneNumber || '')}`,
                           `ID Type: ${comp.idNumber || (comp.isOldCustomer ? 'Old Customer' : 'New Customer')}`,
-                          `Clinic: ${comp.clinicName}`,
+                          `Clinic: ${getClinicLabel(comp.clinicName)}`,
                           `Status: ${comp.status}`,
                           `Complaint: ${comp.complaintDetails}`,
                           comp.tlComment ? `TL Comment: ${comp.tlComment}` : '',

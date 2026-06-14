@@ -400,6 +400,27 @@ export const isTLName = (name: string): boolean => {
   return false;
 };
 
+// Check if user is extremely cool SME
+export const isSMEName = (name: string): boolean => {
+  if (!name) return false;
+  const fullName = findAgentByUsername(name) || name;
+  const normalized = capitalizeName(fullName);
+  
+  // TODO: Add SME agent names here (e.g., ['John Doe', 'Jane Smith'])
+  const SME_AGENTS: string[] = [];
+  if (SME_AGENTS.some(sme => sme?.toLowerCase() === normalized?.toLowerCase())) return true;
+  
+  const meta = getAgentMeta();
+  const overrideKey = Object.keys(meta).find(k => String(k || '').trim().toLowerCase().replace(/\s+/g, ' ') === normalized?.toLowerCase());
+  if (overrideKey && meta[overrideKey].roleType) {
+    const role = meta[overrideKey]?.roleType?.toLowerCase();
+    if (role === 'sme' || role === 'subject matter expert') {
+      return true;
+    }
+  }
+  return false;
+};
+
 export const formatAgentName = (name: string): string => {
   if (!name) return '';
   const fullName = findAgentByUsername(name) || name;
@@ -1748,7 +1769,7 @@ export const buildClinicInquiryTextTemplate = (inq: {
   const lines = [
     isFollowUp ? `📋 *FOLLOW-UP INQUIRY* — Ref: ${ref}` : `📋 *NEW INQUIRY* — Ref: ${ref}`,
     ``,
-    `🏥 *Clinic:* ${inq.clinicName}`,
+    `🏥 *Clinic:* ${getClinicLabel(inq.clinicName)}`,
     `👤 *Agent:* ${inq.agentName}`,
     `📞 *Pt Number:* ${localPhone || 'N/A'}`,
     `🌐 *Platform:* WhatsApp`,
@@ -1974,19 +1995,17 @@ export const buildCaseClipboardPayload = (request: TabbyTamaraRequest): Clipboar
 
   return { text: textLines, html, attachmentsList };
 };
-export const getClinicLabel = (val: string) => {
-  const mapping: Record<string, string> = {
-    dermadent: "Dermadent",
-    onetouch_mo3tred: "One Touch AlMutarid",
-    onetouch_merkhnya: "One Touch Markhaniya",
-    welltouch: "Well Touch",
-    beautyvision: "Beauty Vision",
-    rose: "Rose",
-    sultan: "Sultan",
-    nova: "Nova",
-    bnayat: "Bnayat",
-  };
-  return mapping[val] || val;
+export const CLINIC_OPTIONS: { value: string; label: string }[] = [
+  { value: "dermadent", label: "Dermadent" },
+  { value: "onetouch_mo3tred", label: "One Touch (Al Mutarid)" },
+  { value: "onetouch_merkhnya", label: "One Touch (Markhaniya)" },
+  { value: "welltouch", label: "Well Touch" },
+  { value: "newage", label: "New Age" },
+];
+
+export const getClinicLabel = (value: string): string => {
+  const found = CLINIC_OPTIONS.find(c => c.value === value?.toLowerCase());
+  return found ? found.label : (value ? value.charAt(0).toUpperCase() + value.slice(1) : "N/A");
 };
 
 export const generateInquiryCopyText = (inq: any): string => {

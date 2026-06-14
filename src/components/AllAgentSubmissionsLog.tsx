@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
-import { formatCaseRef, formatPhoneForCopy, formatPhoneLocalForCopy, getSLAStatus, copyToClipboard, extractLinks, calculateTabbyTamaraPrice , getClinicLabel, generateInquiryCopyText, generateComplaintCopyText, generateTabbyTamaraCopyText} from "../utils";
+import { getClinicLabel, CLINIC_OPTIONS, formatCaseRef, normalizePhone, formatPhoneForCopy, formatPhoneLocalForCopy, getSLAStatus, copyToClipboard, extractLinks, calculateTabbyTamaraPrice, generateInquiryCopyText, generateComplaintCopyText, generateTabbyTamaraCopyText } from "../utils";
 
 const CopyButton = ({ text, tooltip, icon: Icon = Copy }: { text: string, tooltip: string, icon?: any }) => {
   const [copied, setCopied] = useState(false);
@@ -86,7 +86,7 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
     copyData = [
       '❓ Clinic Inquiry',
       `👤 Agent: ${agentName}`,
-      `🏥 Clinic: ${req.clinicName}`,
+      `🏥 Clinic: ${getClinicLabel(req.clinicName)}`,
       `📞 Phone: ${formatPhoneForCopy(req.phoneNumber || '')}`,
       `💬 Inquiry: ${req.text}`,
       req.answer ? `✅ Answer: ${req.answer}` : '',
@@ -104,7 +104,7 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
             </span>
           )}
         </div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{req.clinicName || 'N/A'}</p></div>
+        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{getClinicLabel(req.clinicName)}</p></div>
         <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📞 Phone</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
         <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">💬 Inquiry</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.text}</p></div>
         {req.answer && (
@@ -120,7 +120,7 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
       `👤 Agent: ${agentName}`,
       `👤 Patient: ${req.patientName} | 📁 File: ${req.fileNumber || 'N/A'}`,
       `📞 Phone: ${formatPhoneForCopy(req.phoneNumber || '')}`,
-      `🏥 Clinic: ${req.clinicName}`,
+      `🏥 Clinic: ${getClinicLabel(req.clinicName)}`,
       `💰 Amount: ${pricing.finalPriceFormatted}`,
     ].filter(Boolean).join('\n');
 
@@ -128,7 +128,7 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">👤 Patient</p><p className="text-[13px] text-slate-200 mt-0.5">{req.patientName || 'N/A'} <span className="text-slate-400 text-[11px]">({req.platform})</span></p></div>
         <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📞 Phone</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{req.clinicName || 'N/A'}</p></div>
+        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{getClinicLabel(req.clinicName)}</p></div>
         <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">💰 Amount</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{pricing.finalPriceFormatted} <span className="text-[10px] text-slate-500">({pricing.priceBeforeFeeFormatted} + 5%)</span></p></div>
       </div>
     );
@@ -142,7 +142,7 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
       `👤 Agent: ${agentName}`,
       `👤 Patient: ${req.patientName} | 📁 File: ${req.fileNumber || 'N/A'}`,
       `📞 Phone: ${formatPhoneForCopy(req.phoneNumber || '')}`,
-      `🏥 Clinic: ${req.clinicName}`,
+      `🏥 Clinic: ${getClinicLabel(req.clinicName)}`,
       `📝 Complaint: ${req.complaintDetails}`,
     ].filter(Boolean).join('\n');
 
@@ -150,7 +150,7 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">👤 Patient</p><p className="text-[13px] text-slate-200 mt-0.5">{req.patientName || 'N/A'}</p></div>
         <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📞 Phone</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{req.clinicName || 'N/A'}</p></div>
+        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{getClinicLabel(req.clinicName)}</p></div>
         <div className="sm:col-span-2"><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">⚠️ Complaint</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.complaintDetails}</p></div>
       </div>
     );
@@ -164,7 +164,7 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
       `👤 Agent: ${agentName}`,
       `👤 Patient: ${req.patientName || 'N/A'}`,
       `📞 Phone: ${formatPhoneForCopy(req.phoneNumber || '')}`,
-      `🏥 Clinic: ${req.clinicName}`,
+      `🏥 Clinic: ${getClinicLabel(req.clinicName)}`,
       `🌐 Language: ${req.language || 'N/A'}`,
       `📝 Notes: ${req.notes || 'N/A'}`,
     ].filter(Boolean).join('\n');
@@ -173,7 +173,7 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">👤 Patient</p><p className="text-[13px] text-slate-200 mt-0.5">{req.patientName || 'N/A'}</p></div>
         <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📞 Phone</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
-        <div className="sm:col-span-2"><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{req.clinicName || 'N/A'}</p></div>
+        <div className="sm:col-span-2"><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{getClinicLabel(req.clinicName)}</p></div>
         <div className="sm:col-span-2"><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📝 Notes</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.notes || 'No notes yet'}</p></div>
       </div>
     );
@@ -530,11 +530,9 @@ export const AllAgentSubmissionsLog = ({
             className="w-full bg-slate-900/60 border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500"
           >
             <option value="all">All Clinics</option>
-            <option value="dermadent">Dermadent</option>
-            <option value="onetouch_mo3tred">One Touch (Mo3tred)</option>
-            <option value="onetouch_merkhnya">One Touch (Merkhnya)</option>
-            <option value="welltouch">Well Touch</option>
-            <option value="newage">New Age</option>
+            {CLINIC_OPTIONS.map(c => (
+<option key={c.value} value={c.value}>{c.label}</option>
+))}
           </select>
           <input 
             type="text" 

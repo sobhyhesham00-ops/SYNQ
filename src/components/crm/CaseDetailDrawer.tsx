@@ -1,3 +1,4 @@
+import { getClinicLabel } from "../../utils";
 import React, { useState } from "react";
 import { 
   X, 
@@ -226,7 +227,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
           `🚨 COMPLAINT — ${refCode}`,
           `Patient: ${comp.patientName || 'N/A'} | File: ${comp.fileNumber || 'N/A'}`,
           `Phone: ${comp.phoneNumber ? comp.phoneNumber.replace(/\s+/g, '') : 'N/A'}`,
-          `Clinic: ${comp.clinicName || 'N/A'}`,
+          `Clinic: ${getClinicLabel(comp.clinicName)}`,
           comp.idNumber ? `ID: ${comp.idNumber}` : (comp.isOldCustomer ? 'Customer Type: Existing' : 'Customer Type: New'),
           `Status: ${comp.status?.replace(/_/g, ' ').toUpperCase() || 'N/A'}`,
           `Complaint Details:\n${comp.complaintDetails || 'N/A'}`,
@@ -242,7 +243,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
           `<tr><td style="font-weight: bold; width: 120px; padding: 4px 0;">Patient Name:</td><td>${comp.patientName || "N/A"}</td></tr>` +
           `<tr><td style="font-weight: bold; padding: 4px 0;">File Number:</td><td>${comp.fileNumber || "N/A"}</td></tr>` +
           `<tr><td style="font-weight: bold; padding: 4px 0;">Phone:</td><td style="font-family: monospace;">${comp.phoneNumber ? comp.phoneNumber.replace(/\s+/g, '') : "N/A"}</td></tr>` +
-          `<tr><td style="font-weight: bold; padding: 4px 0;">Clinic Name:</td><td>${comp.clinicName || "N/A"}</td></tr>` +
+          `<tr><td style="font-weight: bold; padding: 4px 0;">Clinic Name:</td><td>${getClinicLabel(comp.clinicName)}</td></tr>` +
           `<tr><td style="font-weight: bold; padding: 4px 0;">ID/Customer:</td><td>${comp.idNumber ? comp.idNumber : (comp.isOldCustomer ? 'Customer Type: Existing' : 'Customer Type: New')}</td></tr>` +
           `<tr><td style="font-weight: bold; padding: 4px 0;">Status:</td><td><span style="background: #ffe4e6; color: #b91c1c; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold;">${comp.status?.replace(/_/g, ' ').toUpperCase() || "N/A"}</span></td></tr>` +
           `</table>` +
@@ -258,7 +259,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
           `*Client Communication Request*`,
           `*Ref:* ${refCode}`,
           `*Patient:* ${req.patientName || "N/A"}`,
-          `*Clinic:* ${req.clinicName || "N/A"}`,
+          `*Clinic:* ${getClinicLabel(req.clinicName)}`,
           `*Language:* ${req.language || "N/A"}`,
           `*Phone:* ${formatPhoneForCopy(req.phoneNumber || "")}`,
           `*Status:* ${req.status}`,
@@ -272,7 +273,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
           `<h3 style="margin: 0 0 10px 0; color: #10b981; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">Client Communication Request — ${refCode}</h3>` +
           `<table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">` +
           `<tr><td style="font-weight: bold; width: 120px; padding: 4px 0;">Patient:</td><td>${req.patientName || "N/A"}</td></tr>` +
-          `<tr><td style="font-weight: bold; padding: 4px 0;">Clinic:</td><td>${req.clinicName || "N/A"}</td></tr>` +
+          `<tr><td style="font-weight: bold; padding: 4px 0;">Clinic:</td><td>${getClinicLabel(req.clinicName)}</td></tr>` +
           `<tr><td style="font-weight: bold; padding: 4px 0;">Language:</td><td>${req.language || "N/A"}</td></tr>` +
           `<tr><td style="font-weight: bold; padding: 4px 0;">Phone:</td><td style="font-family: monospace;">${formatPhoneForCopy(req.phoneNumber || "")}</td></tr>` +
           `<tr><td style="font-weight: bold; padding: 4px 0;">Status:</td><td><span style="background: #d1fae5; color: #065f46; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold;">${req.status || "N/A"}</span></td></tr>` +
@@ -639,8 +640,8 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
 
                 <div>
                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider leading-none mb-1">Clinic Center</p>
-                  <span className="text-xs font-bold text-slate-250 truncate block" title={caseData.clinicName}>
-                    {caseData.clinicName}
+                  <span className="text-xs font-bold text-slate-250 truncate block" title={getClinicLabel(caseData.clinicName)}>
+                    {getClinicLabel(caseData.clinicName)}
                   </span>
                 </div>
 

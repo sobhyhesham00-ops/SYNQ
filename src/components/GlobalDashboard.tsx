@@ -29,7 +29,7 @@ import { RequestReplyThread } from "./RequestReplyThread";
 import { SlideToConfirm } from "./SlideToConfirm";
 import { CopyWrap } from "./CopyWrap";
 import { Inquiry, TabbyTamaraRequest, TabbyTamaraComplaint, User as UserType } from "../types";
-import { formatCaseRef, normalizePhone, copyToClipboard, getClinicLabel, generateInquiryCopyText, generateComplaintCopyText, generateTabbyTamaraCopyText } from "../utils";
+import { CLINIC_OPTIONS,  formatCaseRef, normalizePhone, copyToClipboard, getClinicLabel, generateInquiryCopyText, generateComplaintCopyText, generateTabbyTamaraCopyText } from "../utils";
 import { toast } from "sonner";
 
 interface GlobalDashboardProps {
@@ -496,11 +496,9 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
             className="w-full bg-[#18181c] border border-slate-700/60 rounded-xl px-3 py-2 text-xs text-slate-100 focus:ring-1 focus:ring-emerald-500/30 focus:border-emerald-500 outline-none h-10 cursor-pointer"
           >
             <option value="all">🏢 All Clinics</option>
-            <option value="dermadent">Dermadent</option>
-            <option value="onetouch_mo3tred">One Touch AlMutarid</option>
-            <option value="onetouch_merkhnya">One Touch Markhaniya</option>
-            <option value="welltouch">Well Touch</option>
-            <option value="newage">New Age</option>
+            {CLINIC_OPTIONS.map(c => (
+<option key={c.value} value={c.value}>{c.label}</option>
+))}
           </select>
         </div>
 

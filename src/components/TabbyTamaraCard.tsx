@@ -11,7 +11,7 @@ import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
 import { MultiAttachmentUpload } from './MultiAttachmentUpload';
 import { SlideToConfirm } from './SlideToConfirm';
-import { formatCaseRef, normalizePhone, formatPhoneForCopy, formatPhoneLocalForCopy, copyToClipboard, extractLinks, normalizeUrl, getSafeTTWorkflowStatus, getSafeTTSourceChannel, getAgentLOB, buildCaseClipboardPayload, normalizeAttachments, calculateTabbyTamaraPrice , getClinicLabel, generateInquiryCopyText, generateComplaintCopyText, generateTabbyTamaraCopyText} from "../utils";
+import { getClinicLabel, copyToClipboard, getSafeTTWorkflowStatus, getSafeTTSourceChannel, getAgentLOB, formatCaseRef, normalizeAttachments, normalizeUrl, extractLinks, calculateTabbyTamaraPrice, formatPhoneForCopy, buildCaseClipboardPayload, formatPhoneLocalForCopy, generateTabbyTamaraCopyText, generateComplaintCopyText } from "../utils";
 import { AGENT_LOBS } from '../types';
 import { assignCase } from '../services/assignmentService';
 
@@ -394,7 +394,7 @@ export const TabbyTamaraCard = ({
       `[${request.platform?.toUpperCase() || 'N/A'}] Request - ${request.patientName || 'Unknown'}`,
       `Ref: ${formatCaseRef(request.id, 'tt_request', request.createdAt, request.caseRef)}`,
       `File: ${request.fileNumber || 'N/A'} | Phone: ${formatPhoneForCopy(request.phoneNumber)}`,
-      `Clinic: ${request.clinicName || 'N/A'}`,
+      `Clinic: ${getClinicLabel(request.clinicName)}`,
       `Entered Amount: ${pricing.priceBeforeFeeFormatted}`,
       `5% Added: ${pricing.feeAmountFormatted}`,
       `Final Amount: ${pricing.finalPriceFormatted}`,
@@ -413,7 +413,7 @@ export const TabbyTamaraCard = ({
     let html = `<div><strong>[${request.platform?.toUpperCase() || 'N/A'}] Request - ${request.patientName || 'Unknown'}</strong><br/>`;
     html += `Ref: ${formatCaseRef(request.id, 'tt_request', request.createdAt, request.caseRef)}<br/>`;
     html += `File: ${request.fileNumber || 'N/A'} | Phone: ${formatPhoneForCopy(request.phoneNumber)}<br/>`;
-    html += `Clinic: ${request.clinicName || 'N/A'}<br/>`;
+    html += `Clinic: ${getClinicLabel(request.clinicName)}<br/>`;
     
     const pricing = calculateTabbyTamaraPrice(request.priceWithoutTax || 0);
     html += `Entered Amount: ${pricing.priceBeforeFeeFormatted}<br/>`;
@@ -636,7 +636,7 @@ export const TabbyTamaraCard = ({
         </div>
         <div className="px-4 py-3 flex flex-col">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><Hospital className="w-3 h-3 text-emerald-500" /> Clinic</span>
-          <span className="text-[15px] font-semibold text-slate-100 mt-1.5 break-words">{req.clinicName || "N/A"}</span>
+          <span className="text-[15px] font-semibold text-slate-100 mt-1.5 break-words">{getClinicLabel(req.clinicName)}</span>
         </div>
         <div className="px-4 py-3 flex flex-col">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><Calendar className="w-3 h-3 text-slate-400" /> Date</span>
