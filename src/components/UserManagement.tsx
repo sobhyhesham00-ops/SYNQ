@@ -137,9 +137,9 @@ export const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) =
               className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none focus:border-indigo-500"
             >
               <option value="agent">Agent</option>
-              <option value="sme">SME</option>
-              <option value="qa">QA</option>
-              <option value="tl">Team Leader</option>
+              <option value="sme">Subject Matter Expert (sme)</option>
+              <option value="qa">QA Analyst</option>
+              <option value="tl">Team Leader (tl)</option>
               <option value="director">Director</option>
             </select>
           </div>
@@ -202,9 +202,9 @@ export const UserManagement: React.FC<UserManagementProps> = ({ currentUser }) =
                     className="w-full md:w-48 bg-slate-950 border border-white/10 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-200 outline-none focus:border-indigo-500 cursor-pointer"
                   >
                     <option value="agent">Agent</option>
-                    <option value="sme">SME</option>
-                    <option value="qa">QA</option>
-                    <option value="tl">Team Leader</option>
+                    <option value="sme">Subject Matter Expert (sme)</option>
+                    <option value="qa">QA Analyst</option>
+                    <option value="tl">Team Leader (tl)</option>
                     <option value="director">Director</option>
                   </select>
                 </div>

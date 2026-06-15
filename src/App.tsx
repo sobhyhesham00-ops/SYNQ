@@ -145,7 +145,55 @@ import { ComplaintsWorkspace } from "./components/ComplaintsWorkspace";
 import { MySubmissionsDashboard } from "./components/MySubmissionsDashboard";
 import { processAttachments } from "./services/attachmentService";
 import * as XLSX from "xlsx";
-import { getClinicLabel, CLINIC_OPTIONS, isTLName, isSMEName, isQAName, capitalizeName, getStorageItem, setStorageItem, validateSwapRequest, validateAnnualRequest, getInitialRequests, generateCSV, generateTextReport, formatDateNice, getInitialSchedules, parseScheduleCSV, evaluateKpiFormula, parseAgentDirectoryCSV, generateScheduleTemplateFile, getAgentLOB, getAgentTL, getAgentMeta, generateInquiriesCSV, generateTimeLogsCSV, formatAgentName, generateFintechRequestsCSV, generateFintechComplaintsCSV, generateClientCommsCSV, generateCasesCSV, generateSchedulesCSV, getLocalISOString, getLocalTimeZone, normalizeName, getUsernameFromFullName, findAgentByUsername, compressImage, handleGlobalImagePaste, formatCaseRef, calculateTabbyTamaraPrice, normalizePhone, formatPhoneForCopy, formatPhoneLocalForCopy, normalizeAttachments, copyToClipboard, extractLinks, buildClinicInquiryTextTemplate, buildClinicInquiryHtmlTemplate, generateInquiryCopyText, generateComplaintCopyText } from "./utils";
+import { getClinicLabel, CLINIC_OPTIONS, 
+  isTLName,
+  isSMEName,
+  isQAName,
+  capitalizeName,
+  getStorageItem,
+  setStorageItem,
+  validateSwapRequest,
+  validateAnnualRequest,
+  getInitialRequests,
+  generateCSV,
+  generateTextReport,
+  formatDateNice,
+  getInitialSchedules,
+  parseScheduleCSV,
+  evaluateKpiFormula,
+  parseAgentDirectoryCSV,
+  generateScheduleTemplateFile,
+  getAgentLOB,
+  getAgentTL,
+  getAgentMeta,
+  generateInquiriesCSV,
+  generateTimeLogsCSV,
+  formatAgentName,
+  generateFintechRequestsCSV,
+  generateFintechComplaintsCSV,
+  generateClientCommsCSV,
+  generateCasesCSV,
+  generateSchedulesCSV,
+  getLocalISOString,
+  getLocalTimeZone,
+  normalizeName,
+  getUsernameFromFullName,
+  findAgentByUsername,
+  compressImage,
+  handleGlobalImagePaste,
+  formatCaseRef,
+  calculateTabbyTamaraPrice,
+  normalizePhone,
+  formatPhoneForCopy,
+  formatPhoneLocalForCopy,
+  normalizeAttachments,
+  copyToClipboard,
+  extractLinks,
+  buildClinicInquiryTextTemplate,
+  buildClinicInquiryHtmlTemplate,
+  generateInquiryCopyText,
+  generateComplaintCopyText,
+} from "./utils";
 import {
   SchedulingRequest,
   SwapRequest,
@@ -2013,7 +2061,8 @@ export default function App() {
                             currentUser?.name?.toLowerCase() === "hesham sobhy" ||
                             currentUser?.name?.toLowerCase() === "hesso" ||
                             currentUser?.name?.toLowerCase() === "sobhyhesham00@gmail.com";
-  const isSuperAdmin = currentUser?.role === "director";
+  // Super Admin Control is restricted to h.sobhy specifically, even though other users may hold the 'director' role for other permissions.
+  const isSuperAdmin = currentUser?.role === "director" && (currentUser?.name === "Hesham Sobhy" || getUsernameFromFullName(currentUser?.name || "") === "h.sobhy");
 
   const isTLOreSupport = currentUser
     ? currentUser.role === "tl" ||
@@ -4296,6 +4345,7 @@ ${pageText}
       .replace(/\s+/g, "");
     const matchedFullName = findAgentByUsername(trimmedInput, agentsList);
     const finalName = trimmedInput;
+    const formattedUsername = finalName;
     const correspondingFullName = matchedFullName || finalName;
 
     if (!finalName || !loginPassword) {
@@ -4324,7 +4374,7 @@ ${pageText}
       }).catch(console.error);
     }
 
-    const persistedRole = userRoles[finalName] || userRoles[correspondingFullName.toLowerCase().replace(/\s+/g, '.')];
+    const persistedRole = userRoles[formattedUsername] || userRoles[correspondingFullName.toLowerCase().replace(/\s+/g, '.')];
     const userRole = persistedRole || (
       isQAName(correspondingFullName) ? "qa" : 
       isSMEName(correspondingFullName) ? "sme" :
@@ -26889,7 +26939,7 @@ ${ttNotes}`
                                               <td className="p-4">{lobTeamVal}</td>
                                               <td className="p-4">
                                                 <span
-                                                  className={`font-bold py-1 px-3 rounded-lg text-[11px] border capitalize ${
+                                                  className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${
                                                     roleVal.toLowerCase() === "tl" || roleVal.toLowerCase() === "team leader"
                                                       ? "bg-amber-950/30 text-amber-400 border-amber-500/20"
                                                       : roleVal.toLowerCase() === "qa"

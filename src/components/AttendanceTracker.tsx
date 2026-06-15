@@ -4,6 +4,8 @@ import { db } from "../firebase";
 import { AttendanceRecord, ScheduledShift, User } from "../types";
 import { CheckCircle2, XCircle, Clock, CalendarDays } from "lucide-react";
 
+import { getAgentLOB } from "../utils";
+
 interface AttendanceTrackerProps {
   schedules: ScheduledShift[];
   attendanceRecords: AttendanceRecord[];
@@ -127,7 +129,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                     </h3>
                     <div className="flex items-center gap-2 mt-1 text-xs text-slate-400 font-medium">
                       <span className="bg-slate-800 px-2 py-0.5 rounded text-indigo-300">
-                        {shift.shiftLabel} {shift.shiftNotes ? `(${shift.shiftNotes})` : ""}
+                        {shift.shiftLabel} ({getAgentLOB(shift.agentName)})
                       </span>
                     </div>
                   </div>

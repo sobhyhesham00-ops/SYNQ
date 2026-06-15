@@ -17,7 +17,11 @@ import { AttachmentsDisplay } from "./AttachmentsDisplay";
 import { RequestReplyThread } from "./RequestReplyThread";
 import { SlideToConfirm } from "./SlideToConfirm";
 import { TabbyTamaraComplaint, User as UserType, INITIAL_AGENTS } from "../types";
-import { getClinicLabel, formatCaseRef, normalizePhone, copyToClipboard } from "../utils";
+import { getClinicLabel,  
+  formatCaseRef, 
+  normalizePhone, 
+  copyToClipboard
+, generateInquiryCopyText, generateComplaintCopyText, generateTabbyTamaraCopyText} from "../utils";
 
 const compStatusLabels: Record<string, string> = {
   pending_tl: "⏳ Pending TL review",

@@ -224,12 +224,14 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
   // Sort by createdAt descending
   filteredList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-  const handleCopyInquiry = (inq: any) => {
+  const handleCopyInquiry = (e: React.MouseEvent, inq: any) => {
+        e.stopPropagation();
         const text = generateInquiryCopyText(inq);
         copyToClipboard(text);
       };
 
-  const handleCopyComplaint = (comp: any) => {
+  const handleCopyComplaint = (e: React.MouseEvent, comp: any) => {
+        e.stopPropagation();
         const text = generateComplaintCopyText(comp);
         copyToClipboard(text);
       };
@@ -311,7 +313,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
               className="w-full bg-[#18181c] border border-slate-700/60 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-[#10b981] font-sans h-10 cursor-pointer"
             >
               <option value="pending">⏳ Pending Cases Only</option>
-              <option value="all">📁 All Submissions</option>
+              <option value="all">📁 All submissions</option>
             </select>
           </div>
         </div>
@@ -511,7 +513,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleCopyInquiry(item.data);
+                              handleCopyInquiry(e, item.data);
                             }}
                             className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                           >
@@ -753,7 +755,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleCopyComplaint(item.data);
+                              handleCopyComplaint(e, item.data);
                             }}
                             className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-slate-100 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-auto"
                           >

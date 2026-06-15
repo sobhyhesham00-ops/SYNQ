@@ -11,7 +11,7 @@ import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
 import { MultiAttachmentUpload } from './MultiAttachmentUpload';
 import { SlideToConfirm } from './SlideToConfirm';
-import { getClinicLabel, copyToClipboard, getSafeTTWorkflowStatus, getSafeTTSourceChannel, getAgentLOB, formatCaseRef, normalizeAttachments, normalizeUrl, extractLinks, calculateTabbyTamaraPrice, formatPhoneForCopy, buildCaseClipboardPayload, formatPhoneLocalForCopy, generateTabbyTamaraCopyText, generateComplaintCopyText } from "../utils";
+import { getClinicLabel,  formatCaseRef, normalizePhone, formatPhoneForCopy, formatPhoneLocalForCopy, copyToClipboard, extractLinks, normalizeUrl, getSafeTTWorkflowStatus, getSafeTTSourceChannel, getAgentLOB, buildCaseClipboardPayload, normalizeAttachments, calculateTabbyTamaraPrice , generateInquiryCopyText, generateComplaintCopyText, generateTabbyTamaraCopyText} from "../utils";
 import { AGENT_LOBS } from '../types';
 import { assignCase } from '../services/assignmentService';
 
