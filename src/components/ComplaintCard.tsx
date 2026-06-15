@@ -34,27 +34,27 @@ interface ComplaintCardProps {
   isSuperAdmin: boolean;
   isExpanded: boolean;
   onToggle: () => void;
-  activeComplaintHandlingId: string | null;
-  setActiveComplaintHandlingId: (id: string | null) => void;
-  tlComplaintResolutionType: string;
-  setTlComplaintResolutionType: (type: string) => void;
-  tlComplaintComment: string;
-  setTlComplaintComment: (comment: string) => void;
-  handleTLCommentComplaint: (id: string, comment: string, resolutionType: string) => void;
-  handleToggleContactComplaint: (id: string, status: "not_contacted" | "contacted") => void;
-  handleDeleteComplaint: (id: string) => void;
-  handleAssignRecord: (
+  activeComplaintHandlingId?: string | null;
+  setActiveComplaintHandlingId?: (id: string | null) => void;
+  tlComplaintResolutionType?: string;
+  setTlComplaintResolutionType?: (type: string) => void;
+  tlComplaintComment?: string;
+  setTlComplaintComment?: (comment: string) => void;
+  handleTLCommentComplaint?: (id: string, comment: string, resolutionType: string) => void;
+  handleToggleContactComplaint?: (id: string, status: "not_contacted" | "contacted") => void;
+  handleDeleteComplaint?: (id: string) => void;
+  handleAssignRecord?: (
     recordId: string,
     collectionName: string,
     toAgent: string,
     recordType: string,
     fromAgent: string
   ) => void;
-  addSystemNotification: any;
-  canEditItem: (createdAt: string | number | Date) => boolean;
-  getRemainingEditTime: (createdAt: string | number | Date) => string;
-  setEditingItem: (item: any) => void;
-  getElapsedTimerString: (confirmedAtISO: string, contactedAtISO?: string) => string;
+  addSystemNotification?: any;
+  canEditItem?: (createdAt: string | number | Date) => boolean;
+  getRemainingEditTime?: (createdAt: string | number | Date) => string;
+  setEditingItem?: (item: any) => void;
+  getElapsedTimerString?: (confirmedAtISO: string, contactedAtISO?: string) => string;
 }
 
 export const ComplaintCard: React.FC<ComplaintCardProps> = ({
@@ -65,20 +65,20 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
   isExpanded,
   onToggle,
   activeComplaintHandlingId,
-  setActiveComplaintHandlingId,
+  setActiveComplaintHandlingId = () => {},
   tlComplaintResolutionType,
-  setTlComplaintResolutionType,
+  setTlComplaintResolutionType = () => {},
   tlComplaintComment,
-  setTlComplaintComment,
-  handleTLCommentComplaint,
-  handleToggleContactComplaint,
-  handleDeleteComplaint,
-  handleAssignRecord,
+  setTlComplaintComment = () => {},
+  handleTLCommentComplaint = () => {},
+  handleToggleContactComplaint = () => {},
+  handleDeleteComplaint = () => {},
+  handleAssignRecord = () => {},
   addSystemNotification,
-  canEditItem,
-  getRemainingEditTime,
-  setEditingItem,
-  getElapsedTimerString
+  canEditItem = () => false,
+  getRemainingEditTime = () => "",
+  setEditingItem = () => {},
+  getElapsedTimerString = () => ""
 }) => {
   const isPendingTL = comp.status === "pending_tl";
   const isNeedContact = comp.status === "need_contact";

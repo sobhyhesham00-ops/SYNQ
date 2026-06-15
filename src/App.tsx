@@ -11,6 +11,8 @@ import { UserManagement } from "./components/UserManagement";
 import { AllAgentSubmissionsLog } from "./components/AllAgentSubmissionsLog";
 import { NotificationDrawer } from "./components/NotificationDrawer";
 import { TabbyTamaraCard } from "./components/TabbyTamaraCard";
+import { InquiryCard } from "./components/InquiryCard";
+import { ClientCommCard } from "./components/ClientCommCard";
 import { CRMWorkspace } from "./components/crm/CRMWorkspace";
 import * as mammoth from "mammoth";
 import React, { useState, useEffect, FormEvent, useRef, useMemo } from "react";
@@ -9614,13 +9616,13 @@ ${ttNotes}`
                         {buildBtn(
                           "global-dashboard",
                           <LayoutDashboard className="w-4 h-4 text-emerald-400" />,
-                          "Global Dashboard",
+                          "Daily Team Leader View",
                           "bg-emerald-500/20 border-emerald-500/30 text-emerald-100",
                         )}
                         {buildBtn(
                           "attendance",
                           <UserCheck className="w-4 h-4 text-indigo-400" />,
-                          "Agent Attendance",
+                          "Daily Attendance",
                           "bg-indigo-500/20 border-indigo-500/30 text-indigo-100",
                         )}
                         {currentUser.role === "director" && buildBtn(
@@ -18277,6 +18279,43 @@ ${ttNotes}`
                                     </div>
                                   ) : (
                                     filteredInquiries.map((inq) => {
+                                      if (inquiries) {
+                                        return (
+                                          <InquiryCard
+                                            key={inq.id}
+                                            inq={inq}
+                                            currentUser={currentUser}
+                                            isExpanded={expandedInquiryId === inq.id}
+                                            onToggle={() => setExpandedInquiryId(expandedInquiryId === inq.id ? null : inq.id)}
+                                            isTLOreSupport={isTLOreSupport}
+                                            isSuperAdmin={isSuperAdmin}
+                                            handleTLViewInquiry={handleTLViewInquiry}
+                                            canEditItem={canEditItem}
+                                            getRemainingEditTime={getRemainingEditTime}
+                                            setEditingItem={setEditingItem}
+                                            addSystemNotification={addSystemNotification}
+                                            answeringInquiryId={answeringInquiryId}
+                                            setAnsweringInquiryId={setAnsweringInquiryId}
+                                            currentAnswerText={currentAnswerText}
+                                            setCurrentAnswerText={setCurrentAnswerText}
+                                            currentAnswerAttachments={currentAnswerAttachments}
+                                            setCurrentAnswerAttachments={setCurrentAnswerAttachments}
+                                            currentAnswerLinks={currentAnswerLinks}
+                                            setCurrentAnswerLinks={setCurrentAnswerLinks}
+                                            isSubmittingAnswer={isSubmittingAnswer}
+                                            handleSetInquiryAnswered={handleSetInquiryAnswered}
+                                            handleDeleteInquiry={handleDeleteInquiry}
+                                            handleUpdateContactedStatus={handleUpdateContactedStatus}
+                                            handleMarkInquiryRead={handleMarkInquiryRead}
+                                            handleMarkSentToClinic={handleMarkSentToClinic}
+                                            handleCloseInquiry={handleCloseInquiry}
+                                            handleReassignInquiry={handleReassignInquiry}
+                                            agentsList={agentsList}
+                                            inquiries={inquiries}
+                                            setInquiries={setInquiries}
+                                          />
+                                        );
+                                      }
                                       const STATUS_CONFIG: Record<string, { color: string; label: string; emoji: string }> = {
                                         submitted:     { color: "bg-yellow-500/10 border-yellow-500/20 text-yellow-400 animate-pulse", label: "New", emoji: "🆕" },
                                         tl_reviewing:  { color: "bg-blue-500/10 border-blue-500/20 text-blue-400", label: "TL Reviewing", emoji: "👀" },
@@ -19139,14 +19178,45 @@ ${ttNotes}`
                       tlComplaintComment={tlComplaintComment}
                       setTlComplaintComment={setTlComplaintComment}
                       handleTLCommentComplaint={handleTLCommentComplaint}
+                      handleTLViewInquiry={handleTLViewInquiry}
+                      answeringInquiryId={answeringInquiryId}
+                      setAnsweringInquiryId={setAnsweringInquiryId}
+                      currentAnswerText={currentAnswerText}
+                      setCurrentAnswerText={setCurrentAnswerText}
+                      currentAnswerAttachments={currentAnswerAttachments}
+                      setCurrentAnswerAttachments={setCurrentAnswerAttachments}
+                      currentAnswerLinks={currentAnswerLinks}
+                      setCurrentAnswerLinks={setCurrentAnswerLinks}
+                      isSubmittingAnswer={isSubmittingAnswer}
+                      handleSetInquiryAnswered={handleSetInquiryAnswered}
+                      handleDeleteInquiry={handleDeleteInquiry}
+                      handleUpdateContactedStatus={handleUpdateContactedStatus}
+                      handleMarkInquiryRead={handleMarkInquiryRead}
+                      handleMarkSentToClinic={handleMarkSentToClinic}
+                      handleCloseInquiry={handleCloseInquiry}
+                      handleReassignInquiry={handleReassignInquiry}
+                      agentsList={agentsList}
+                      setInquiries={setInquiries}
+                      clientComms={clientComms}
+                      activeCcHandlingId={activeCcHandlingId}
+                      setActiveCcHandlingId={setActiveCcHandlingId}
+                      ccHandlingNotes={ccHandlingNotes}
+                      setCcHandlingNotes={setCcHandlingNotes}
+                      ccHandlingPhotos={ccHandlingPhotos}
+                      setCcHandlingPhotos={setCcHandlingPhotos}
+                      handleProcessClientComms={handleProcessClientComms}
+                      handleDeleteClientComms={handleDeleteClientComms}
+                      handleTakeClientComm={handleTakeClientComm}
+                      handleMarkClientCommDone={handleMarkClientCommDone}
                     />
                   )}
 
                   {activeTab === "attendance" && isTLOreSupport && (
                     <AttendanceTracker 
-                      schedules={schedules}
                       attendanceRecords={attendanceRecords}
                       currentUser={currentUser}
+                      agentDirectory={agentDirectory}
+                      registeredUsers={registeredUsers}
                     />
                   )}
 
@@ -25476,7 +25546,7 @@ ${ttNotes}`
                                             </p>
                                           </div>
                                         ) : (
-                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in font-sans">
+                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in font-sans" id="client-comms-grid-container">
                                             {clientComms
                                               .filter((c) => {
                                                 const isRelevantToMe =
@@ -25543,545 +25613,36 @@ ${ttNotes}`
                                                   matchesClinic
                                                 );
                                               })
-                                              .map((req) => {
-                                                const isPending =
-                                                  req.status === "pending";
-                                                const isInProgress =
-                                                  req.status === "in_progress";
-                                                const isClosed =
-                                                  req.status === "contacted";
-                                                const canTakeRequest =
-                                                  isPending &&
-                                                  req.callCenterAgentName !==
-                                                    currentUser?.name;
-                                                const canProcessRequest =
-                                                  isInProgress &&
-                                                  (!req.openedBy ||
-                                                    req.openedBy ===
-                                                      currentUser?.name);
-                                                const commAgeHours =
-                                                  (Date.now() -
-                                                    new Date(
-                                                      req.createdAt,
-                                                    ).getTime()) /
-                                                  3600000;
-                                                const commSLABadge =
-                                                  req.status === "contacted"
-                                                    ? "bg-emerald-500/10 text-emerald-400"
-                                                    : commAgeHours > 2
-                                                      ? "bg-red-500/20 text-red-400 animate-pulse"
-                                                      : commAgeHours > 0.5
-                                                        ? "bg-amber-500/20 text-amber-400"
-                                                        : "bg-slate-700 text-slate-400";
-                                                const commAgeLabel =
-                                                  commAgeHours < 1
-                                                    ? `${Math.floor(commAgeHours * 60)}m`
-                                                    : `${Math.floor(commAgeHours)}h ${Math.floor((commAgeHours % 1) * 60)}m`;
-
-                                                return (
-                                                  <div
-                                                    key={req.id}
-                                                    className={`relative p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4 shadow-md overflow-hidden bg-[#1e1e1e]/40 backdrop-blur-lg/60 ${
-                                                      isPending
-                                                        ? "border-indigo-500/30 bg-gradient-to-b from-indigo-950/10 to-transparent"
-                                                        : "border-white/5"
-                                                    }`}
-                                                  >
-                                                    {/* Top Accent line */}
-                                                    {isPending && (
-                                                      <div className="absolute top-0 right-0 left-0 h-1.5 flex animate-pulse">
-                                                        <div className="w-full bg-indigo-500" />
-                                                      </div>
-                                                    )}
-
-                                                    <div className="flex justify-between items-start gap-2 pt-1 text-left">
-                                                      <div className="space-y-0.5">
-                                                        <div className="flex flex-wrap items-center gap-1.5">
-                                                          <span
-                                                            className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border ${getClinicBadgeColor(req.clinicName)}`}
-                                                          >
-                                                            {getClinicLabel(req.clinicName)}
-                                                          </span>
-                                                          <span
-                                                            className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border border-white/10 ${req.language === "Arabic" ? "bg-emerald-500/10 text-emerald-300" : "bg-blue-500/10 text-blue-300"}`}
-                                                          >
-                                                            {req.language}
-                                                          </span>
-                                                          <span
-                                                            className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border ${
-                                                              req.status ===
-                                                              "contacted"
-                                                                ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/25"
-                                                                : req.status ===
-                                                                    "in_progress"
-                                                                  ? "bg-indigo-500/15 text-indigo-300 border-indigo-500/25"
-                                                                  : "bg-amber-500/15 text-amber-300 border-amber-500/25"
-                                                            }`}
-                                                          >
-                                                            {req.status ===
-                                                            "contacted"
-                                                              ? "✓ Contacted"
-                                                              : req.status ===
-                                                                  "in_progress"
-                                                                ? "⚡ In Progress"
-                                                                : "⏳ Pending"}
-                                                          </span>
-                                                        </div>
-                                                      </div>
-
-                                                      {/* Status Badges */}
-                                                      <div className="text-right flex flex-col items-end gap-1 shrink-0 font-sans">
-                                                        <span className="font-mono text-[10px] text-slate-500 font-bold tracking-wider mb-1 flex items-center justify-end gap-2">
-                                                          <span
-                                                            className={`px-1.5 py-0.5 rounded-sm border border-white/10 ${commSLABadge}`}
-                                                          >
-                                                            ⏱ {commAgeLabel}{" "}
-                                                            open
-                                                          </span>
-                                                          {formatComRef(req.id)}
-                                                        </span>
-                                                        {isPending && (
-                                                          <span className="text-[9px] uppercase tracking-wide font-extrabold bg-amber-500/10 border border-amber-500/30 text-amber-400 px-2 py-0.5 rounded-md animate-pulse">
-                                                            ⏳ PENDING ACTION
-                                                          </span>
-                                                        )}
-                                                        {isInProgress && (
-                                                          <span className="text-[9px] uppercase tracking-wide font-extrabold bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 px-2 py-0.5 rounded-md animate-pulse">
-                                                            IN PROGRESS (
-                                                            {req.openedBy})
-                                                          </span>
-                                                        )}
-                                                        {isClosed && (
-                                                          <span className="text-[9px] uppercase tracking-wide font-extrabold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-2 py-0.5 rounded-md">
-                                                            CONTACTED
-                                                          </span>
-                                                        )}
-                                                      </div>
-                                                    </div>
-
-                                                    {/* Core Detail Grid */}
-                                                    <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl space-y-2 text-xs text-left">
-                                                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-2 gap-y-1">
-                                                        <div>
-                                                          <p className="text-[9px] text-slate-400 uppercase tracking-wider">
-                                                            Requested By:
-                                                          </p>
-                                                          <p className="text-slate-200 font-bold truncate">
-                                                            <CopyWrap
-                                                              text={
-                                                                req.callCenterAgentName ||
-                                                                ""
-                                                              }
-                                                              label="Agent Name"
-                                                            >
-                                                              {
-                                                                req.callCenterAgentName
-                                                              }
-                                                            </CopyWrap>
-                                                          </p>
-                                                        </div>
-                                                        <div>
-                                                          <p className="text-[9px] text-slate-400 uppercase tracking-wider">
-                                                            Patient Name:
-                                                          </p>
-                                                          <p className="text-slate-200 font-bold truncate">
-                                                            <CopyWrap
-                                                              text={
-                                                                req.patientName ||
-                                                                "N/A"
-                                                              }
-                                                              label="Patient Name"
-                                                            >
-                                                              {req.patientName ||
-                                                                "N/A"}
-                                                            </CopyWrap>
-                                                          </p>
-                                                        </div>
-                                                        <div>
-                                                          <p className="text-[9px] text-slate-400 uppercase tracking-wider">
-                                                            Phone number:
-                                                          </p>
-                                                          <p className="text-indigo-300 font-mono font-bold truncate">
-                                                            <CopyWrap
-                                                              text={
-                                                                req.phoneNumber
-                                                                  ? req.phoneNumber.replace(
-                                                                      /\s+/g,
-                                                                      "",
-                                                                    )
-                                                                  : ""
-                                                              }
-                                                              label="Phone"
-                                                            >
-                                                              {req.phoneNumber
-                                                                ? req.phoneNumber.replace(
-                                                                    /\s+/g,
-                                                                    "",
-                                                                  )
-                                                                : ""}
-                                                            </CopyWrap>
-                                                          </p>
-                                                        </div>
-                                                      </div>
-
-                                                      <div className="border-t border-white/5 pt-1.5 text-xs text-slate-300">
-                                                        <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5 font-bold">
-                                                          Notes / Inquiry:
-                                                        </p>
-                                                        <div className="bg-black/25 p-2 rounded-lg border border-white/[0.03] text-slate-300 leading-normal font-sans italic">
-                                                          <CopyWrap
-                                                            text={
-                                                              req.notes || ""
-                                                            }
-                                                            label="Notes"
-                                                          >
-                                                            {req.notes || (
-                                                              <span className="text-slate-500 italic">
-                                                                No notes
-                                                              </span>
-                                                            )}
-                                                          </CopyWrap>
-                                                        </div>
-                                                      </div>
-
-                                                      <AttachmentsDisplay
-                                                        photos={[
-                                                          ...(req.photos || []),
-                                                          ...(req.screenshot
-                                                            ? [req.screenshot]
-                                                            : []),
-                                                        ]}
-                                                        links={req.links}
-                                                        tlPhotos={req.tlPhotos}
-                                                        tlLinks={req.tlLinks}
-                                                        showSideBadges={true}
-                                                      />
-
-                                                      {(req.handlingNotes ||
-                                                        (req.handlingPhotos &&
-                                                          req.handlingPhotos
-                                                            .length > 0)) && (
-                                                        <div className="border-t border-indigo-500/20 pt-1.5 text-xs text-indigo-300">
-                                                          {req.handlingNotes && (
-                                                            <>
-                                                              <p className="text-[9px] text-indigo-400 uppercase tracking-wider mb-0.5 font-bold">
-                                                                Resolution Notes
-                                                                ({req.handledBy}
-                                                                ):
-                                                              </p>
-                                                              <div className="bg-indigo-950/20 p-2 rounded-lg border border-indigo-500/10 text-slate-200 leading-normal font-sans mb-1">
-                                                                <CopyWrap
-                                                                  text={
-                                                                    req.handlingNotes ||
-                                                                    ""
-                                                                  }
-                                                                  label="Resolution Notes"
-                                                                >
-                                                                  {
-                                                                    req.handlingNotes
-                                                                  }
-                                                                </CopyWrap>
-                                                              </div>
-                                                            </>
-                                                          )}
-                                                          {req.handlingPhotos &&
-                                                            req.handlingPhotos
-                                                              .length > 0 && (
-                                                              <div className="mt-2">
-                                                                <AttachmentsDisplay
-                                                                  photos={
-                                                                    req.handlingPhotos
-                                                                  }
-                                                                  links={[]}
-                                                                  tlPhotos={
-                                                                    req.tlPhotos
-                                                                  }
-                                                                  tlLinks={
-                                                                    req.tlLinks
-                                                                  }
-                                                                  showSideBadges={
-                                                                    true
-                                                                  }
-                                                                />
-                                                              </div>
-                                                            )}
-                                                        </div>
-                                                      )}
-                                                    </div>
-
-                                                    {/* Timers */}
-                                                    <div className="p-3 bg-black/15 rounded-xl border border-white/[0.02] flex items-center justify-between text-xs font-sans">
-                                                      <div className="space-y-0.5 text-left">
-                                                        <p className="text-[9px] text-slate-400 uppercase">
-                                                          {isClosed
-                                                            ? "Closed By"
-                                                            : "Submitted"}
-                                                          :
-                                                        </p>
-                                                        <p className="text-[10px] text-slate-300">
-                                                          {isClosed
-                                                            ? req.handledBy
-                                                            : new Date(
-                                                                req.createdAt,
-                                                              ).toLocaleString()}
-                                                        </p>
-                                                      </div>
-
-                                                      <div className="text-right space-y-0.5">
-                                                        <p className="text-[9px] text-slate-400 uppercase font-bold">
-                                                          {isClosed
-                                                            ? "Turnaround Time"
-                                                            : isInProgress
-                                                              ? "Time Active"
-                                                              : "Time Waiting"}
-                                                          :
-                                                        </p>
-                                                        <p
-                                                          className={`font-mono text-xs font-black px-2 py-0.5 rounded ${isClosed ? "text-emerald-400 bg-emerald-500/10" : isInProgress ? "text-indigo-400 bg-indigo-500/10 animate-pulse" : "text-amber-400 bg-amber-500/10animate-pulse"}`}
-                                                        >
-                                                          {isClosed &&
-                                                          req.handledAt
-                                                            ? getElapsedTimerString(
-                                                                req.createdAt,
-                                                                req.handledAt,
-                                                              )
-                                                            : getElapsedTimerString(
-                                                                req.createdAt,
-                                                              )}
-                                                        </p>
-                                                      </div>
-                                                    </div>
-
-                                                    {/* Inline Handling form */}
-                                                    {activeCcHandlingId ===
-                                                      req.id && (
-                                                      <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl space-y-2 text-left animate-fade-in mt-1">
-                                                        <label className="text-[9px] font-bold text-slate-300 uppercase tracking-widest block mb-1">
-                                                          Handling Notes &
-                                                          Attachments *
-                                                        </label>
-                                                        <textarea
-                                                          placeholder="What was the outcome of contacting the client?"
-                                                          value={
-                                                            ccHandlingNotes
-                                                          }
-                                                          onChange={(e) =>
-                                                            setCcHandlingNotes(
-                                                              e.target.value,
-                                                            )
-                                                          }
-                                                          className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-2.5 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[60px]"
-                                                          required
-                                                        />
-                                                        <MultiAttachmentUpload
-                                                          photos={
-                                                            ccHandlingPhotos
-                                                          }
-                                                          links={[]} // links unsupported for inline
-                                                          onPhotosChange={
-                                                            setCcHandlingPhotos
-                                                          }
-                                                          onLinksChange={() => {}}
-                                                          photosLabel="Upload / Paste Handling Screenshots"
-                                                        />
-                                                        <div className="flex gap-2 justify-end pt-2">
-                                                          <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                              setActiveCcHandlingId(
-                                                                null,
-                                                              );
-                                                              setCcHandlingPhotos(
-                                                                [],
-                                                              );
-                                                            }}
-                                                            className="px-2.5 py-1.5 hover:bg-white/20 backdrop-blur-md rounded-lg text-[10px] font-bold text-slate-400 cursor-pointer"
-                                                          >
-                                                            Cancel
-                                                          </button>
-                                                          <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                              if (
-                                                                !ccHandlingNotes.trim() &&
-                                                                ccHandlingPhotos.length ===
-                                                                  0
-                                                              ) {
-                                                                toast.error(
-                                                                  "Please add notes or an attachment",
-                                                                );
-                                                                return;
-                                                              }
-                                                              handleProcessClientComms(
-                                                                req.id,
-                                                                ccHandlingNotes,
-                                                                ccHandlingPhotos,
-                                                              );
-                                                              setCcHandlingPhotos(
-                                                                [],
-                                                              );
-                                                            }}
-                                                            className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 active:scale-95 text-slate-950 text-[10px] font-black rounded-lg shadow cursor-pointer transition-all flex items-center gap-1"
-                                                          >
-                                                            Confirm Handled
-                                                          </button>
-                                                        </div>
-                                                      </div>
-                                                    )}
-
-                                                    {/* Actions */}
-                                                    <div className="flex gap-2 justify-end pt-1 border-t border-white/5">
-                                                      {isSuperAdmin && (
-                                                        <button
-                                                          onClick={() =>
-                                                            handleDeleteClientComms(
-                                                              req.id,
-                                                            )
-                                                          }
-                                                          className="mr-auto px-2 py-1.5 hover:bg-rose-500/15 border border-transparent hover:border-rose-500/10 rounded-lg text-rose-400 text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer"
-                                                          title="Delete Request"
-                                                        >
-                                                          <Trash2 className="w-3.5 h-3.5" />
-                                                        </button>
-                                                      )}
-
-                                                      {canEditItem(
-                                                        req.createdAt,
-                                                      ) && (
-                                                        <button
-                                                          onClick={() =>
-                                                            setEditingItem({
-                                                              type: "client_comm",
-                                                              id: req.id,
-                                                              data: { ...req },
-                                                            })
-                                                          }
-                                                          className="px-2.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-lg text-emerald-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-                                                          title={`Edit communication (${getRemainingEditTime(req.createdAt)})`}
-                                                        >
-                                                          <Pencil className="w-3.5 h-3.5" />
-                                                          Edit (
-                                                          {getRemainingEditTime(
-                                                            req.createdAt,
-                                                          )}
-                                                          )
-                                                        </button>
-                                                      )}
-
-                                                      {/* Copy Option */}
-                                                      <button
-                                                        onClick={() => {
-                                                          const statusEmoji = req.status === "contacted" ? "✅" : "⏳";
-                                                          const details = [
-                                                            `📣 *CLIENT COMMUNICATION* 📣`,
-                                                            `--------------------------------------`,
-                                                            `🆔 *Ref:* ${req.caseRef || formatCaseRef(req.id, "client_comm", req.createdAt, req.caseRef)}`,
-                                                            `👤 *Patient:* ${req.patientName || "N/A"}`,
-                                                            `🏥 *Clinic:* ${getClinicLabel(req.clinicName)}`,
-                                                            `🌐 *Language:* ${req.language || "N/A"}`,
-                                                            `📞 *Phone:* ${formatPhoneForCopy(req.phoneNumber)}`,
-                                                            `${statusEmoji} *Status:* ${req.status ? req.status.toUpperCase() : "PENDING"}`,
-                                                            req.notes ? `📝 *Notes:* ${req.notes}` : "",
-                                                            req.handlingNotes
-                                                              ? `✅ *Resolution:* ${req.handlingNotes}`
-                                                              : "⏳ *Resolution:* Pending TL review",
-                                                            req.handledBy ? `👮 *Handled By:* ${req.handledBy}` : "",
-                                                            (req.photos || []).length > 0
-                                                              ? `📎 *Attachments:* ${req.photos.length} item(s)`
-                                                              : "",
-                                                            `--------------------------------------`,
-                                                          ]
-                                                            .filter(Boolean)
-                                                            .join("\n");
-                                                          copyToClipboard(
-                                                            details,
-                                                            "Client communication details copied with beautiful emojis!",
-                                                          );
-                                                        }}
-                                                        className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-slate-100 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-                                                        title="Copy Request details"
-                                                      >
-                                                        <Copy className="w-3.5 h-3.5" />
-                                                        Copy
-                                                      </button>
-
-                                                      {canTakeRequest && (
-                                                        <button
-                                                          onClick={() =>
-                                                            handleTakeClientComm(
-                                                              req.id,
-                                                            )
-                                                          }
-                                                          className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-sans font-black text-xs rounded-xl shadow-lg cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
-                                                        >
-                                                          Open Request
-                                                        </button>
-                                                      )}
-
-                                                      {canProcessRequest &&
-                                                        activeCcHandlingId !==
-                                                          req.id && (
-                                                          <button
-                                                            onClick={() => {
-                                                              setActiveCcHandlingId(
-                                                                req.id,
-                                                              );
-                                                              setCcHandlingNotes(
-                                                                "",
-                                                              );
-                                                            }}
-                                                            className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 text-slate-100 font-sans font-black text-xs rounded-xl shadow-lg cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
-                                                          >
-                                                            Finalize Handled
-                                                          </button>
-                                                        )}
-
-                                                      {!isClosed &&
-                                                        (currentUser?.role ===
-                                                          "tl" ||
-                                                          currentUser?.name ===
-                                                            req.callCenterAgentName ||
-                                                          currentUser?.name ===
-                                                            req.openedBy) && (
-                                                          <button
-                                                            onClick={() =>
-                                                              handleMarkClientCommDone(
-                                                                req.id,
-                                                              )
-                                                            }
-                                                            className={`px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 text-slate-950 font-sans font-black text-xs rounded-xl shadow-lg cursor-pointer transition-all active:scale-95 flex items-center gap-1.5 ${canProcessRequest ? "ml-1" : ""}`}
-                                                          >
-                                                            <CheckCircle2 className="w-3.5 h-3.5" />
-                                                            {currentUser?.role ===
-                                                              "tl" &&
-                                                            req.status ===
-                                                              "pending"
-                                                              ? "Force Close"
-                                                              : "Done / Close"}
-                                                          </button>
-                                                        )}
-                                                    </div>
-
-                                                    <div className="w-full mt-3 pt-3 border-t border-white/5 mx-[2px]">
-                                                      <RequestReplyThread
-                                                        request={req}
-                                                        currentUser={
-                                                          currentUser
-                                                        }
-                                                        collectionName="client_comms"
-                                                        addSystemNotification={
-                                                          addSystemNotification
-                                                        }
-                                                        requestType="Client Comm"
-                                                        requestAgentName={
-                                                          req.callCenterAgentName ||
-                                                          req.openedBy
-                                                        }
-                                                      />
-                                                    </div>
-                                                  </div>
-                                                );
-                                              })}
+                                              .map((req) => (
+                                                <ClientCommCard
+                                                  key={req.id}
+                                                  comm={req}
+                                                  currentUser={currentUser}
+                                                  isExpanded={expandedCcId === req.id}
+                                                  onToggle={() =>
+                                                    setExpandedCcId(
+                                                      expandedCcId === req.id ? null : req.id
+                                                    )
+                                                  }
+                                                  isTLOreSupport={isTLOreSupport}
+                                                  isSuperAdmin={isSuperAdmin}
+                                                  activeCcHandlingId={activeCcHandlingId}
+                                                  setActiveCcHandlingId={setActiveCcHandlingId}
+                                                  ccHandlingNotes={ccHandlingNotes}
+                                                  setCcHandlingNotes={setCcHandlingNotes}
+                                                  ccHandlingPhotos={ccHandlingPhotos}
+                                                  setCcHandlingPhotos={setCcHandlingPhotos}
+                                                  handleProcessClientComms={handleProcessClientComms}
+                                                  handleDeleteClientComms={handleDeleteClientComms}
+                                                  canEditItem={canEditItem}
+                                                  getRemainingEditTime={getRemainingEditTime}
+                                                  setEditingItem={setEditingItem}
+                                                  handleTakeClientComm={handleTakeClientComm}
+                                                  handleMarkClientCommDone={handleMarkClientCommDone}
+                                                  addSystemNotification={addSystemNotification}
+                                                  getElapsedTimerString={getElapsedTimerString}
+                                                />
+                                              ))}
                                           </div>
                                         )}
                                       </>

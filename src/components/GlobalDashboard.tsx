@@ -21,15 +21,20 @@ import {
   Phone,
   Building,
   RotateCcw,
+  MessageCircle,
+  Download,
 } from "lucide-react";
+import * as XLSX from "xlsx";
 import { InquiryRepliesViewer } from "./InquiryRepliesViewer";
 import { TabbyTamaraCard } from "./TabbyTamaraCard";
 import { ComplaintCard } from "./ComplaintCard";
+import { InquiryCard } from "./InquiryCard";
+import { ClientCommCard } from "./ClientCommCard";
 import { AttachmentsDisplay } from "./AttachmentsDisplay";
 import { RequestReplyThread } from "./RequestReplyThread";
 import { SlideToConfirm } from "./SlideToConfirm";
 import { CopyWrap } from "./CopyWrap";
-import { Inquiry, TabbyTamaraRequest, TabbyTamaraComplaint, User as UserType } from "../types";
+import { Inquiry, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, User as UserType } from "../types";
 import { CLINIC_OPTIONS,  formatCaseRef, normalizePhone, copyToClipboard, getClinicLabel, generateInquiryCopyText, generateComplaintCopyText, generateTabbyTamaraCopyText } from "../utils";
 import { toast } from "sonner";
 
@@ -77,12 +82,47 @@ interface GlobalDashboardProps {
   setTlComplaintComment: (comment: string) => void;
   handleTLCommentComplaint: (id: string, comment: string, resolutionType: string) => void;
   tlShiftLogs?: any[];
+
+  // InquiryCard specific props passed down
+  handleTLViewInquiry?: any;
+  answeringInquiryId?: any;
+  setAnsweringInquiryId?: any;
+  currentAnswerText?: any;
+  setCurrentAnswerText?: any;
+  currentAnswerAttachments?: any;
+  setCurrentAnswerAttachments?: any;
+  currentAnswerLinks?: any;
+  setCurrentAnswerLinks?: any;
+  isSubmittingAnswer?: any;
+  handleSetInquiryAnswered?: any;
+  handleDeleteInquiry?: any;
+  handleUpdateContactedStatus?: any;
+  handleMarkInquiryRead?: any;
+  handleMarkSentToClinic?: any;
+  handleCloseInquiry?: any;
+  handleReassignInquiry?: any;
+  agentsList?: any;
+  setInquiries?: any;
+
+  // ClientCommCard specific props passed down
+  clientComms: ClientCommunicationRequest[];
+  activeCcHandlingId: string | null;
+  setActiveCcHandlingId: (id: string | null) => void;
+  ccHandlingNotes: string;
+  setCcHandlingNotes: (notes: string) => void;
+  ccHandlingPhotos: string[];
+  setCcHandlingPhotos: (photos: string[]) => void;
+  handleProcessClientComms: (id: string, notes: string, photos: string[]) => void;
+  handleDeleteClientComms: (id: string) => void;
+  handleTakeClientComm: (id: string) => void;
+  handleMarkClientCommDone: (id: string) => void;
 }
 
 type SubmissionItem =
   | { type: "inquiry"; id: string; createdAt: string; clinicName: string; phoneNumber: string; status: string; agentName: string; data: Inquiry }
   | { type: "tabbyTamara"; id: string; createdAt: string; clinicName: string; phoneNumber: string; status: string; agentName: string; data: TabbyTamaraRequest }
-  | { type: "complaint"; id: string; createdAt: string; clinicName: string; phoneNumber: string; status: string; agentName: string; data: TabbyTamaraComplaint };
+  | { type: "complaint"; id: string; createdAt: string; clinicName: string; phoneNumber: string; status: string; agentName: string; data: TabbyTamaraComplaint }
+  | { type: "clientComm"; id: string; createdAt: string; clinicName: string; phoneNumber: string; status: string; agentName: string; data: ClientCommunicationRequest };
 
 export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
   inquiries,
@@ -117,13 +157,43 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
   tlComplaintComment,
   setTlComplaintComment,
   handleTLCommentComplaint,
-  tlShiftLogs = []
+  tlShiftLogs = [],
+  handleTLViewInquiry,
+  answeringInquiryId,
+  setAnsweringInquiryId,
+  currentAnswerText,
+  setCurrentAnswerText,
+  currentAnswerAttachments,
+  setCurrentAnswerAttachments,
+  currentAnswerLinks,
+  setCurrentAnswerLinks,
+  isSubmittingAnswer,
+  handleSetInquiryAnswered,
+  handleDeleteInquiry,
+  handleUpdateContactedStatus,
+  handleMarkInquiryRead,
+  handleMarkSentToClinic,
+  handleCloseInquiry,
+  handleReassignInquiry,
+  agentsList,
+  setInquiries,
+  clientComms = [],
+  activeCcHandlingId,
+  setActiveCcHandlingId,
+  ccHandlingNotes,
+  setCcHandlingNotes,
+  ccHandlingPhotos,
+  setCcHandlingPhotos,
+  handleProcessClientComms,
+  handleDeleteClientComms,
+  handleTakeClientComm,
+  handleMarkClientCommDone,
 }) => {
   // Filters state
   const [filterClinic, setFilterClinic] = useState<string>("all");
   const [filterDate, setFilterDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [filterPhone, setFilterPhone] = useState<string>("");
-  const [selectedTypeFilter, setSelectedTypeFilter] = useState<"all" | "inquiry" | "tabbyTamara" | "complaint">("all");
+  const [selectedTypeFilter, setSelectedTypeFilter] = useState<"all" | "inquiry" | "tabbyTamara" | "complaint" | "clientComm">("all");
   const [sortOldestFirst, setSortOldestFirst] = useState<boolean>(false);
 
   // Expanded card state
@@ -160,6 +230,8 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
 
   const isComplaintPending = (comp: TabbyTamaraComplaint) => comp.status !== "closed";
 
+  const isCcPending = (req: ClientCommunicationRequest) => req.status !== "contacted";
+
   // Gather ALL items
   const allInquiries: SubmissionItem[] = inquiries.map((inq) => ({
     type: "inquiry",
@@ -194,16 +266,28 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
     data: comp
   }));
 
+  const allClientComms: SubmissionItem[] = (clientComms || []).map((comm) => ({
+    type: "clientComm",
+    id: comm.id,
+    createdAt: comm.createdAt,
+    clinicName: comm.clinicName || "",
+    phoneNumber: comm.phoneNumber || "",
+    status: comm.status || "",
+    agentName: comm.callCenterAgentName || comm.openedBy || "Unknown",
+    data: comm
+  }));
+
   // Combined master list of items
-  const combinedList = [...allInquiries, ...allTTRequests, ...allComplaints];
+  const combinedList = [...allInquiries, ...allTTRequests, ...allComplaints, ...allClientComms];
 
   // Under the "default today only" view: find count of items created today & strictly pending
   const todayPendingInquiriesCount = allInquiries.filter(i => isToday(i.createdAt) && isInquiryPending(i.data as any)).length;
   const todayPendingTTRequestsCount = allTTRequests.filter(i => isToday(i.createdAt) && isTTPending(i.data as any)).length;
   const todayPendingComplaintsCount = allComplaints.filter(i => isToday(i.createdAt) && isComplaintPending(i.data as any)).length;
+  const todayPendingClientCommsCount = allClientComms.filter(i => isToday(i.createdAt) && isCcPending(i.data as any)).length;
 
   // Under default today view, combined pending today
-  const combinedPendingTodayAll = todayPendingInquiriesCount + todayPendingTTRequestsCount + todayPendingComplaintsCount;
+  const combinedPendingTodayAll = todayPendingInquiriesCount + todayPendingTTRequestsCount + todayPendingComplaintsCount + todayPendingClientCommsCount;
 
   // Summary counts row values (reflects current filtering context for clarity, OR default today if unfiltered)
   // Let's make sure if we are filtering, the counters show the numbers corresponding to the active list
@@ -231,7 +315,15 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
       ).length
     : todayPendingComplaintsCount;
 
-  const displayTotalCount = displayInquiriesCount + displayTTRequestsCount + displayComplaintsCount;
+  const displayClientCommsCount = isAnyFilterActive
+    ? combinedList.filter(i => i.type === "clientComm" && isCcPending(i.data as any) &&
+        (filterClinic === "all" || i.clinicName?.toLowerCase() === filterClinic.toLowerCase()) &&
+        (!filterDate || i.createdAt.startsWith(filterDate)) &&
+        (!filterPhone || normalizePhone(i.phoneNumber).includes(normalizePhone(filterPhone)))
+      ).length
+    : todayPendingClientCommsCount;
+
+  const displayTotalCount = displayInquiriesCount + displayTTRequestsCount + displayComplaintsCount + displayClientCommsCount;
 
   // Filter the list based on state criteria
   const filteredList = combinedList.filter((item) => {
@@ -240,7 +332,8 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
     const isPending =
       item.type === "inquiry" ? isInquiryPending(item.data as Inquiry) :
       item.type === "tabbyTamara" ? isTTPending(item.data as TabbyTamaraRequest) :
-      isComplaintPending(item.data as TabbyTamaraComplaint);
+      item.type === "complaint" ? isComplaintPending(item.data as TabbyTamaraComplaint) :
+      isCcPending(item.data as ClientCommunicationRequest);
 
     if (!isPending) return false;
 
@@ -294,6 +387,39 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
     toast.info("Filters reset to Today's pending cases!");
   };
 
+  const handleExportData = () => {
+    if (filteredList.length === 0) {
+      toast.error("No data to export");
+      return;
+    }
+    const exportRows = filteredList.map((item) => ({
+      Type: item.type === "inquiry" ? "Inquiry" : item.type === "tabbyTamara" ? "Tabby/Tamara" : item.type === "complaint" ? "Complaint" : "Client Comm",
+      Reference: formatCaseRef(
+        item.id,
+        item.type === "inquiry"
+          ? "inq"
+          : item.type === "tabbyTamara"
+          ? "tt_request"
+          : item.type === "complaint"
+          ? "tt_complaint"
+          : "client_comm",
+        item.createdAt,
+        (item.data as any).caseRef
+      ),
+      Clinic: getClinicLabel(item.clinicName),
+      Phone: item.phoneNumber || "",
+      Agent: item.agentName || "",
+      Status: item.status || "",
+      "Created At": new Date(item.createdAt).toLocaleString(),
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(exportRows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Daily TL View");
+    const dateStr = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(workbook, `daily-tl-view-${dateStr}.xlsx`);
+    toast.success(`Exported ${exportRows.length} record(s) to Excel.`);
+  };
+
   const handleCopyInquiry = (e: React.MouseEvent, inq: Inquiry) => {
     e.stopPropagation();
     const text = generateInquiryCopyText(inq);
@@ -312,7 +438,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/40 border border-slate-800 p-6 rounded-3xl backdrop-blur-md">
         <div>
           <h2 className="text-2xl font-bold text-slate-100 flex items-center gap-2">
-            <ClipboardList className="w-7 h-7 text-emerald-400" /> Global Dispatch Dashboard
+            <ClipboardList className="w-7 h-7 text-emerald-400" /> Daily Team Leader View
           </h2>
           <p className="text-xs text-slate-400 mt-1 max-w-2xl">
             {isAnyFilterActive ? (
@@ -336,6 +462,15 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
               <RotateCcw className="w-3.5 h-3.5 text-rose-400" /> Reset to Today
             </button>
           )}
+
+          <button
+            onClick={handleExportData}
+            disabled={filteredList.length === 0}
+            className="px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+            title={filteredList.length === 0 ? "No data to export" : "Export filtered list to Excel"}
+          >
+            <Download className="w-3.5 h-3.5 text-indigo-400" /> Export Data
+          </button>
 
           <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-2 rounded-xl shrink-0">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -390,7 +525,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
       </div>
 
       {/* Summary Clickable Counter Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Click to filter Inquiries */}
         <button
           onClick={() => setSelectedTypeFilter(selectedTypeFilter === "inquiry" ? "all" : "inquiry")}
@@ -460,6 +595,29 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
           </span>
         </button>
 
+        {/* Click to filter Client Communications */}
+        <button
+          onClick={() => setSelectedTypeFilter(selectedTypeFilter === "clientComm" ? "all" : "clientComm")}
+          className={`p-4 rounded-2xl border transition-all text-left flex items-center justify-between gap-4 cursor-pointer relative overflow-hidden ${
+            selectedTypeFilter === "clientComm"
+              ? "bg-indigo-500/15 border-indigo-500/40 shadow-lg ring-1 ring-indigo-500/20"
+              : "bg-[#18181c]/65 border-slate-800 hover:border-slate-700"
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-xl ${selectedTypeFilter === "clientComm" ? "bg-indigo-500/20 text-indigo-300" : "bg-indigo-500/10 text-indigo-400"}`}>
+              <MessageCircle className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Client Comm</p>
+              <p className="text-lg font-bold text-slate-100 mt-0.5">{displayClientCommsCount} pending</p>
+            </div>
+          </div>
+          <span className="text-[9px] bg-slate-800 text-slate-400 font-mono px-2 py-0.5 rounded-full">
+            {selectedTypeFilter === "clientComm" ? "ACTIVE" : "CLICK"}
+          </span>
+        </button>
+
         {/* Combined total */}
         <button
           onClick={() => setSelectedTypeFilter("all")}
@@ -478,7 +636,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
               <p className="text-lg font-bold text-slate-100 mt-0.5">{displayTotalCount} cases</p>
             </div>
           </div>
-          <span className="text-[9px] bg-emerald-500/20 text-emerald-400 font-mono px-2 py-0.5 rounded-full font-black">
+          <span className="text-[9px] bg-emerald-500/20 text-emerald-400 font-mono px-2 py-0.5 rounded-full font-black font-semibold">
             {isAnyFilterActive ? "FILTERED" : "TODAY"}
           </span>
         </button>
@@ -655,189 +813,74 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
                 );
               }
 
-              const itemDateLabel = new Date(item.createdAt).toLocaleString();
+              if (item.type === "inquiry") {
+                return (
+                  <InquiryCard
+                    key={uniqueKey}
+                    inq={item.data as any}
+                    currentUser={currentUser}
+                    isExpanded={isExpanded}
+                    onToggle={() => setExpandedId(isExpanded ? null : uniqueKey)}
+                    isTLOreSupport={isTLOreSupport}
+                    isSuperAdmin={isSuperAdmin}
+                    handleTLViewInquiry={handleTLViewInquiry}
+                    canEditItem={canEditItem}
+                    getRemainingEditTime={getRemainingEditTime}
+                    setEditingItem={(editingItem: any) => onEditItem(editingItem.type, editingItem.data)}
+                    addSystemNotification={addSystemNotification}
+                    answeringInquiryId={answeringInquiryId}
+                    setAnsweringInquiryId={setAnsweringInquiryId}
+                    currentAnswerText={currentAnswerText}
+                    setCurrentAnswerText={setCurrentAnswerText}
+                    currentAnswerAttachments={currentAnswerAttachments}
+                    setCurrentAnswerAttachments={setCurrentAnswerAttachments}
+                    currentAnswerLinks={currentAnswerLinks}
+                    setCurrentAnswerLinks={setCurrentAnswerLinks}
+                    isSubmittingAnswer={isSubmittingAnswer}
+                    handleSetInquiryAnswered={handleSetInquiryAnswered}
+                    handleDeleteInquiry={handleDeleteInquiry}
+                    handleUpdateContactedStatus={handleUpdateContactedStatus}
+                    handleMarkInquiryRead={handleMarkInquiryRead}
+                    handleMarkSentToClinic={handleMarkSentToClinic}
+                    handleCloseInquiry={handleCloseInquiry}
+                    handleReassignInquiry={handleReassignInquiry}
+                    agentsList={agentsList}
+                    inquiries={inquiries}
+                    setInquiries={setInquiries}
+                  />
+                );
+              }
 
-            const ageMs = Date.now() - new Date(item.createdAt).getTime();
-            const ageHours = ageMs / 3600000;
-            const ageLabel = ageMs < 3600000
-              ? `${Math.floor(ageMs / 60000)}m open`
-              : `${Math.floor(ageHours)}h ${Math.floor((ageHours % 1) * 60)}m open`;
+              if (item.type === "clientComm") {
+                return (
+                  <ClientCommCard
+                    key={uniqueKey}
+                    comm={item.data}
+                    currentUser={currentUser}
+                    isExpanded={isExpanded}
+                    onToggle={() => setExpandedId(isExpanded ? null : uniqueKey)}
+                    isTLOreSupport={isTLOreSupport}
+                    isSuperAdmin={isSuperAdmin}
+                    activeCcHandlingId={activeCcHandlingId}
+                    setActiveCcHandlingId={setActiveCcHandlingId}
+                    ccHandlingNotes={ccHandlingNotes}
+                    setCcHandlingNotes={setCcHandlingNotes}
+                    ccHandlingPhotos={ccHandlingPhotos}
+                    setCcHandlingPhotos={setCcHandlingPhotos}
+                    handleProcessClientComms={handleProcessClientComms}
+                    handleDeleteClientComms={handleDeleteClientComms}
+                    canEditItem={canEditItem}
+                    getRemainingEditTime={getRemainingEditTime}
+                    setEditingItem={(editingItem: any) => onEditItem(editingItem.type, editingItem.data)}
+                    handleTakeClientComm={handleTakeClientComm}
+                    handleMarkClientCommDone={handleMarkClientCommDone}
+                    addSystemNotification={addSystemNotification}
+                    getElapsedTimerString={getElapsedTimerString}
+                  />
+                );
+              }
 
-            const ageBadgeColor = ageHours > 4
-              ? "bg-red-500/20 text-red-400 border-red-500/30 animate-pulse font-bold"
-              : ageHours > 1
-                ? "bg-amber-500/20 text-amber-400 border-amber-500/30 font-bold"
-                : "bg-slate-700/50 text-slate-300 border-white/10";
-
-            const typeBadgeClass = "bg-amber-500/10 text-amber-300 border-amber-500/20";
-            const typeIcon = <HelpCircle className="w-3.5 h-3.5 text-amber-400" />;
-            const typeName = "Inquiry";
-
-            const resolvedRef = formatCaseRef(
-              item.id,
-              "inq",
-              item.createdAt,
-              item.data.caseRef
-            );
-
-            const stripeColor = "bg-amber-500";
-
-            return (
-              <div
-                key={uniqueKey}
-                className={`group p-5 bg-[#18181c] border border-slate-700/60 rounded-2xl hover:border-emerald-500/25 transition-all duration-300 relative flex flex-col w-full overflow-hidden ${
-                  !isExpanded ? "hover:bg-white/[0.04] cursor-pointer shadow-md" : "shadow-xl ring-1 ring-emerald-500/10"
-                }`}
-                onClick={() => {
-                  if (!isExpanded) {
-                    setExpandedId(uniqueKey);
-                  }
-                }}
-              >
-                {/* Visual side stripe */}
-                <div className={`absolute top-0 bottom-0 left-0 w-[5px] ${stripeColor}`} />
-
-                {/* Main Row Info */}
-                <div
-                  className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full pl-2.5 ${
-                    isExpanded ? "border-b border-white/5 pb-3.5 cursor-pointer hover:opacity-85" : ""
-                  }`}
-                  onClick={(e) => {
-                    if (isExpanded) {
-                      e.stopPropagation();
-                      setExpandedId(null);
-                    }
-                  }}
-                >
-                  <div className="flex items-center gap-3 text-left">
-                    <div className="p-2.5 bg-black/35 rounded-full flex items-center justify-center shrink-0">
-                      {typeIcon}
-                    </div>
-
-                    <div>
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        {/* Type Label Badge */}
-                        <span className={`text-[9px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded border ${typeBadgeClass}`}>
-                          {typeName}
-                        </span>
-
-                        {/* Clinic Location Badge */}
-                        <span className="text-[10px] bg-white/5 text-slate-300 px-2 py-0.5 border border-white/10 rounded font-sans font-bold">
-                          🏰 {getClinicLabel(item.clinicName)}
-                        </span>
-
-                        {/* Submitter Agent Tag */}
-                        <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 border border-slate-700/60 rounded font-sans font-bold">
-                          👤 Agent: {item.agentName}
-                        </span>
-
-                        {/* Tel Number */}
-                        {item.phoneNumber && (
-                          <span className="text-[10px] bg-sky-500/10 text-sky-300 px-2 py-0.5 border border-sky-500/20 rounded font-mono font-bold">
-                            📞 {item.phoneNumber}
-                          </span>
-                        )}
-
-                        {/* SLA duration */}
-                        <span className={`text-[9px] uppercase tracking-wider px-2 py-0.5 rounded border ${ageBadgeColor}`}>
-                          ⏳ {ageLabel}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="font-mono text-[9px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded">
-                          {resolvedRef}
-                        </span>
-                        <span className="text-[9px] text-slate-500 font-mono">
-                          {itemDateLabel}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Status label */}
-                  <div className="flex items-center gap-2 sm:self-center self-end">
-                    <span className="text-[9px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-md font-sans leading-none bg-amber-500/10 border border-amber-500/30 text-amber-300">
-                      {item.status === "tl_link_ready" ? "🔗 Link Ready" :
-                       item.status === "awaiting_client_contact" ? "📞 Awaiting Contact" :
-                       item.status === "ready_for_partner" ? "🤝 Ready for Partner" :
-                       item.status === "sent_to_partner" ? "📤 Sent to Partner" :
-                       item.status === "pending_tl" ? "⌛ Pending TL review" :
-                       item.status === "need_contact" ? "📞 Pending contact" :
-                       item.status || "Open/Pending"}
-                    </span>
-
-                    <div className="text-slate-400 hover:text-emerald-400 p-1 rounded-md transition-all shrink-0 ml-1 flex items-center justify-center">
-                      {isExpanded ? <ChevronUp className="w-4 h-4 text-emerald-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Inline Expansion Area */}
-                {isExpanded && (
-                  <div className="w-full pl-2.5 mt-4 pt-4 border-t border-white/5 space-y-5 animate-fade-in text-left">
-                    {/* TYPE === INQUIRY WORK DETAILS */}
-                    {item.type === "inquiry" && (
-                      <div className="space-y-4">
-                        <div className="bg-black/35 border border-white/5 p-4 rounded-xl text-xs space-y-2 text-slate-200">
-                          <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                            📝 Submitted Inquiry Details
-                          </p>
-                          <p className="whitespace-pre-line leading-relaxed italic text-sm">
-                            "{item.data.text}"
-                          </p>
-                        </div>
-
-                        {((item.data.photos && item.data.photos.length > 0) || item.data.screenshot || item.data.links?.length > 0) && (
-                          <div className="space-y-3 bg-[#1e1e1e]/20 border border-white/5 p-4 rounded-xl">
-                            <span className="text-[10px] text-slate-400 uppercase tracking-widest font-black block">
-                              📎 Uploaded Attachments & Proofs
-                            </span>
-                            <AttachmentsDisplay
-                              photos={[
-                                ...(item.data.photos || []),
-                                ...(item.data.screenshot ? [item.data.screenshot] : []),
-                                ...((item.data as any).imageUrl ? [(item.data as any).imageUrl] : [])
-                              ].filter(Boolean)}
-                              attachments={item.data.attachments}
-                              links={item.data.links || []}
-                              tlPhotos={item.data.tlPhotos}
-                              tlLinks={item.data.tlLinks}
-                            />
-                          </div>
-                        )}
-
-                        <InquiryRepliesViewer inquiry={item.data} />
-
-                        <div className="flex gap-2 justify-end pt-3 border-t border-white/5">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCopyInquiry(e, item.data as any);
-                            }}
-                            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-                          >
-                            <Copy className="w-3.5 h-3.5" /> Copy Details
-                          </button>
-                          
-                          {canEditItem(item.createdAt) && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onEditItem("inquiry", item.data);
-                              }}
-                              className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-lg text-emerald-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-                            >
-                              <Pencil className="w-3.5 h-3.5" /> Edit ({getRemainingEditTime(item.createdAt)})
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
+              return null;
           });
         })()
         )}

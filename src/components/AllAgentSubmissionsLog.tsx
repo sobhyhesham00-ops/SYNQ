@@ -5,6 +5,10 @@ import {
 } from 'lucide-react';
 import { AttachmentsDisplay } from './AttachmentsDisplay';
 import { RequestReplyThread } from './RequestReplyThread';
+import { InquiryCard } from "./InquiryCard";
+import { TabbyTamaraCard } from "./TabbyTamaraCard";
+import { ComplaintCard } from "./ComplaintCard";
+import { ClientCommCard } from "./ClientCommCard";
 import { getClinicLabel,  CLINIC_OPTIONS,  formatCaseRef, formatPhoneForCopy, formatPhoneLocalForCopy, getSLAStatus, copyToClipboard, extractLinks, calculateTabbyTamaraPrice , generateInquiryCopyText, generateComplaintCopyText, generateTabbyTamaraCopyText} from "../utils";
 
 const CopyButton = ({ text, tooltip, icon: Icon = Copy }: { text: string, tooltip: string, icon?: any }) => {
@@ -372,6 +376,10 @@ export const AllAgentSubmissionsLog = ({
   const [filterClinic, setFilterClinic] = useState('all');
   const [filterPhone, setFilterPhone] = useState('');
   const [sortBy, setSortBy] = useState<'date_desc'|'date_asc'|'status'>('date_desc');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const isTLOreSupport = currentUser?.role === 'tl' || currentUser?.role === 'qa' || currentUser?.role === 'support' || currentUser?.role === 'admin' || currentUser?.role === 'super_admin' || currentUser?.role === 'superadmin';
+  const isSuperAdmin = currentUser?.role === 'superadmin' || currentUser?.role === 'super_admin';
 
   const [, forceUpdate] = useState(0);
   useEffect(() => {
@@ -589,14 +597,84 @@ export const AllAgentSubmissionsLog = ({
               <p className="text-[14px]">No agent submissions matched your criteria.</p>
             </div>
           ) : (
-            sorted.map((req) => (
-              <RequestCard 
-                key={req.id + req._cType} 
-                req={req} 
-                currentUser={currentUser} 
-                addSystemNotification={addSystemNotification}
-              />
-            ))
+            sorted.map((req) => {
+              const uniqueKey = req._cType + "-" + req.id;
+              const isExpanded = expandedId === uniqueKey;
+              const onToggle = () => setExpandedId(isExpanded ? null : uniqueKey);
+
+              if (req._cType === 'sched') {
+                return (
+                  <RequestCard 
+                    key={uniqueKey} 
+                    req={req} 
+                    currentUser={currentUser} 
+                    addSystemNotification={addSystemNotification}
+                  />
+                );
+              }
+
+              if (req._cType === 'inq') {
+                return (
+                  <InquiryCard
+                    key={uniqueKey}
+                    inq={req}
+                    currentUser={currentUser}
+                    isExpanded={isExpanded}
+                    onToggle={onToggle}
+                    isTLOreSupport={isTLOreSupport}
+                    isSuperAdmin={isSuperAdmin}
+                    addSystemNotification={addSystemNotification}
+                  />
+                );
+              }
+
+              if (req._cType === 'tt_request') {
+                return (
+                  <TabbyTamaraCard
+                    key={uniqueKey}
+                    req={req}
+                    currentUser={currentUser}
+                    isExpanded={isExpanded}
+                    onToggle={onToggle}
+                    isTLOreSupport={isTLOreSupport}
+                    isSuperAdmin={isSuperAdmin}
+                    addSystemNotification={addSystemNotification}
+                  />
+                );
+              }
+
+              if (req._cType === 'tt_complaint') {
+                return (
+                  <ComplaintCard
+                    key={uniqueKey}
+                    comp={req}
+                    currentUser={currentUser}
+                    isExpanded={isExpanded}
+                    onToggle={onToggle}
+                    isTLOreSupport={isTLOreSupport}
+                    isSuperAdmin={isSuperAdmin}
+                    addSystemNotification={addSystemNotification}
+                  />
+                );
+              }
+
+              if (req._cType === 'comm') {
+                return (
+                  <ClientCommCard
+                    key={uniqueKey}
+                    comm={req}
+                    currentUser={currentUser}
+                    isExpanded={isExpanded}
+                    onToggle={onToggle}
+                    isTLOreSupport={isTLOreSupport}
+                    isSuperAdmin={isSuperAdmin}
+                    addSystemNotification={addSystemNotification}
+                  />
+                );
+              }
+
+              return null;
+            })
           )}
         </div>
       </div>

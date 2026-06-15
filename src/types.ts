@@ -555,10 +555,11 @@ export interface Order {
 }
 
 export interface AttendanceRecord {
-  id: string; // format: `${agentName}_${date}` e.g. "john_doe_2026-06-14"
+  id: string; // format: `${agentUsername}_${date}` e.g. "john_doe_2026-06-14"
   agentName: string;
   date: string; // YYYY-MM-DD
-  status: 'present' | 'absent' | 'late' | 'on_leave' | 'not_marked';
+  status: 'present' | 'absent' | 'late' | 'casual' | 'annual' | 'sick' | 'no_show' | 'no_call' | 'not_marked';
+  lateTime?: string; // HH:MM, only relevant when status === 'late'
   markedBy?: string; // TL name
   markedAt?: string; // ISO timestamp
   notes?: string;
