@@ -1,8 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { 
   initializeFirestore, 
-  persistentLocalCache, 
-  persistentMultipleTabManager,
+  memoryLocalCache, 
   onSnapshot as firestoreOnSnapshot,
   setDoc as firestoreSetDoc,
   updateDoc as firestoreUpdateDoc,
@@ -47,7 +46,7 @@ const app = initializeApp(firebaseConfig);
 const isTestEnv = typeof process !== 'undefined' && process.env.NODE_ENV === 'test';
 
 export const db = initializeFirestore(app, {
-  localCache: isTestEnv ? undefined : persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+  localCache: isTestEnv ? undefined : memoryLocalCache(),
   ignoreUndefinedProperties: true,
 }, firebaseConfig.firestoreDatabaseId);
 
