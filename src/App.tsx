@@ -13,6 +13,7 @@ import { NotificationDrawer } from "./components/NotificationDrawer";
 import { TabbyTamaraCard } from "./components/TabbyTamaraCard";
 import { InquiryCard } from "./components/InquiryCard";
 import { ClientCommCard } from "./components/ClientCommCard";
+import { ComplaintCard } from "./components/ComplaintCard";
 import { CRMWorkspace } from "./components/crm/CRMWorkspace";
 import * as mammoth from "mammoth";
 import React, { useState, useEffect, FormEvent, useRef, useMemo } from "react";
@@ -96,6 +97,9 @@ import {
   BookOpen,
   FileArchive,
   Copy,
+  Trophy,
+  Award,
+  Archive,
   Lock,
   Sparkles,
   Sun,
@@ -3475,6 +3479,11 @@ ${pageText}
   const [expandedCcId, setExpandedCcId] = useState<string | null>(null);
   const [expandedTabbyTamaraId, setExpandedTabbyTamaraId] = useState<string | null>(null);
   const [casesSearch, setCasesSearch] = useState("");
+  const [myCasesTypeFilter, setMyCasesTypeFilter] = useState("all");
+  const [myCasesStatusFilter, setMyCasesStatusFilter] = useState("all");
+  const [myCasesSortOrder, setMyCasesSortOrder] = useState("desc");
+  const [myExpandedId, setMyExpandedId] = useState<string | null>(null);
+  const [showLegacyCases, setShowLegacyCases] = useState(false);
   const [logAgentFilter, setLogAgentFilter] = useState("all");
   const [logTypeFilter, setLogTypeFilter] = useState("all");
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -18326,194 +18335,713 @@ ${ttNotes}`
                   {/* Team Leader Time Logs Review panel */}
                   {activeTab === "cases" && (
                     <div className="space-y-6 animate-fade-in">
-                      {/* Header */}
-                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-4">
-                        <div>
-                          <h2 className="text-3xl font-bold text-slate-100 font-display">
-                            {currentUser.role === "tl"
-                              ? "All Cases"
-                              : "My Cases"}
-                          </h2>
-                          <p className="text-slate-400 text-sm">
-                            {currentUser.role === "tl"
-                              ? "All case records submitted by agents."
-                              : "Your submitted case records."}
-                          </p>
-                        </div>
-                        <div className="flex gap-2 items-center">
-                          <input
-                            type="text"
-                            placeholder="Search cases..."
-                            value={casesSearch ?? ""}
-                            onChange={(e) => setCasesSearch(e.target.value)}
-                            className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans w-48"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Stats */}
+                      {/* Performance Achievements & Case History Logic block */}
                       {(() => {
-                        const myCases = cases.filter(
-                          (c) =>
-                            currentUser.role === "tl" ||
-                            c.agentName?.toLowerCase() ===
-                              currentUser.name.toLowerCase(),
-                        );
-                        const search = (casesSearch ?? "").toLowerCase();
-                        const filtered = myCases
-                          .filter(
-                            (c) =>
-                              !search ||
-                              c.patientName?.toLowerCase().includes(search) ||
-                              c.phoneNumber?.includes(search) ||
-                              c.inquiry?.toLowerCase().includes(search) ||
-                              c.agentName?.toLowerCase().includes(search),
-                          )
-                          .sort(
-                            (a, b) =>
-                              new Date(b.createdAt).getTime() -
-                              new Date(a.createdAt).getTime(),
+                        const nameInput = currentUser.name.toLowerCase();
+                        const isAgent = currentUser.role === "agent";
+
+                        // Compute "handled by me" across all four main databases
+                        const myInquiries = inquiries.filter((inq) => {
+                          if (isAgent) {
+                            return inq.agentName?.toLowerCase() === nameInput;
+                          } else {
+                            return (
+                              inq.answeredBy === currentUser.name ||
+                              inq.viewingBy === currentUser.name ||
+                              inq.closedBy === currentUser.name ||
+                              inq.assignedTo === currentUser.id ||
+                              inq.assignedTo === currentUser.name
+                            );
+                          }
+                        }).map((inq) => ({
+                          type: "inquiry" as const,
+                          id: inq.id,
+                          createdAt: inq.createdAt,
+                          clinicName: inq.clinicName || "",
+                          phoneNumber: inq.phoneNumber || "",
+                          status: inq.status || "submitted",
+                          agentName: inq.agentName || "Unknown",
+                          data: inq,
+                        }));
+
+                        const myTTRequests = tabbyTamaraRequests.filter((req) => {
+                          if (isAgent) {
+                            return (
+                              req.agentName?.toLowerCase() === nameInput ||
+                              req.submittedByName?.toLowerCase() === nameInput
+                            );
+                          } else {
+                            return (
+                              req.assignedToName === currentUser.name ||
+                              req.assignedTo === currentUser.id ||
+                              req.assignedTo === currentUser.name ||
+                              req.confirmedBy === currentUser.name ||
+                              req.assignedByName === currentUser.name
+                            );
+                          }
+                        }).map((req) => ({
+                          type: "tabbyTamara" as const,
+                          id: req.id,
+                          createdAt: req.createdAt,
+                          clinicName: req.clinicName || "",
+                          phoneNumber: req.phoneNumber || "",
+                          status: req.workflowStatus || req.status || "submitted",
+                          agentName: req.agentName || req.submittedByName || "Unknown",
+                          data: req,
+                        }));
+
+                        const myComplaints = tabbyTamaraComplaints.filter((comp) => {
+                          if (isAgent) {
+                            return comp.agentName?.toLowerCase() === nameInput;
+                          } else {
+                            return (
+                              comp.tlHandledBy === currentUser.name ||
+                              comp.assignedTo === currentUser.id ||
+                              comp.assignedTo === currentUser.name ||
+                              comp.tlName === currentUser.name
+                            );
+                          }
+                        }).map((comp) => ({
+                          type: "complaint" as const,
+                          id: comp.id,
+                          createdAt: comp.createdAt,
+                          clinicName: comp.clinicName || "",
+                          phoneNumber: comp.phoneNumber || "",
+                          status: comp.status || "pending_tl",
+                          agentName: comp.agentName || "Unknown",
+                          data: comp,
+                        }));
+
+                        const myClientComms = (clientComms || []).filter((comm) => {
+                          if (isAgent) {
+                            return (
+                              comm.callCenterAgentName?.toLowerCase() === nameInput ||
+                              comm.openedBy?.toLowerCase() === nameInput
+                            );
+                          } else {
+                            return (
+                              comm.handledBy === currentUser.name ||
+                              comm.assignedTo === currentUser.id ||
+                              comm.assignedTo === currentUser.name ||
+                              comm.openedBy === currentUser.name
+                            );
+                          }
+                        }).map((comm) => ({
+                          type: "clientComm" as const,
+                          id: comm.id,
+                          createdAt: comm.createdAt,
+                          clinicName: comm.clinicName || "",
+                          phoneNumber: comm.phoneNumber || "",
+                          status: comm.status || "pending",
+                          agentName: comm.callCenterAgentName || comm.openedBy || "Unknown",
+                          data: comm,
+                         }));
+
+                        const countInquiries = myInquiries.length;
+                        const countTT = myTTRequests.length;
+                        const countComplaint = myComplaints.length;
+                        const countClientComm = myClientComms.length;
+                        const totalCasesHandled = countInquiries + countTT + countComplaint + countClientComm;
+
+                        // 7-day and 30-day case count stats
+                        const nowMs = Date.now();
+                        const last7DaysLimit = nowMs - 7 * 24 * 60 * 60 * 1000;
+                        const last30DaysLimit = nowMs - 30 * 24 * 60 * 60 * 1000;
+
+                        const combinedList = [
+                          ...myInquiries,
+                          ...myTTRequests,
+                          ...myComplaints,
+                          ...myClientComms,
+                        ];
+
+                        const statsThisWeek = combinedList.filter((c) => {
+                          if (!c.createdAt) return false;
+                          const t = new Date(c.createdAt).getTime();
+                          return t >= last7DaysLimit && t <= nowMs;
+                        }).length;
+
+                        const statsThisMonth = combinedList.filter((c) => {
+                          if (!c.createdAt) return false;
+                          const t = new Date(c.createdAt).getTime();
+                          return t >= last30DaysLimit && t <= nowMs;
+                        }).length;
+
+                        // Milestones config
+                        const milestones = [
+                          { name: "Bronze 🥉", threshold: 10, label: "Bronze" },
+                          { name: "Silver 🥈", threshold: 50, label: "Silver" },
+                          { name: "Gold 🥇", threshold: 100, label: "Gold" },
+                          { name: "Diamond 💎", threshold: 250, label: "Diamond" },
+                          { name: "Legend 👑", threshold: 500, label: "Legend" },
+                        ];
+                        const nextMilestone = milestones.find(m => totalCasesHandled < m.threshold) || null;
+
+                        // Filter combined list
+                        const s = (casesSearch ?? "").toLowerCase().trim();
+                        let filteredList = combinedList;
+
+                        if (s) {
+                          filteredList = filteredList.filter((item) => {
+                            const phone = item.phoneNumber || "";
+                            const clinic = item.clinicName || "";
+                            const agent = item.agentName || "";
+                            let pName = "";
+                            let detailText = "";
+
+                            if (item.type === "inquiry") {
+                              pName = item.data.patientName || "";
+                              detailText = item.data.text || "";
+                            } else if (item.type === "tabbyTamara") {
+                              pName = item.data.patientName || "";
+                              detailText = item.data.notes || "";
+                            } else if (item.type === "complaint") {
+                              pName = item.data.patientName || "";
+                              detailText = item.data.complaintDetails || "";
+                            } else if (item.type === "clientComm") {
+                              pName = item.data.patientName || "";
+                              detailText = item.data.notes || "";
+                            }
+
+                            return (
+                              pName.toLowerCase().includes(s) ||
+                              phone.includes(s) ||
+                              clinic.toLowerCase().includes(s) ||
+                              agent.toLowerCase().includes(s) ||
+                              detailText.toLowerCase().includes(s)
+                            );
+                          });
+                        }
+
+                        if (myCasesTypeFilter !== "all") {
+                          filteredList = filteredList.filter((item) => item.type === myCasesTypeFilter);
+                        }
+
+                        if (myCasesStatusFilter !== "all") {
+                          filteredList = filteredList.filter((item) => {
+                            const isClosed = ["closed", "completed", "confirmed", "rejected", "answered"].includes(item.status);
+                            return myCasesStatusFilter === "closed" ? isClosed : !isClosed;
+                          });
+                        }
+
+                        // Chronological sorting
+                        const sortedFilteredList = [...filteredList].sort((a, b) => {
+                          const tA = new Date(a.createdAt).getTime();
+                          const tB = new Date(b.createdAt).getTime();
+                          return myCasesSortOrder === "asc" ? tA - tB : tB - tA;
+                        });
+
+                        // progress ring component
+                        const RingItem = ({ label, count, target, strokeColor, trackColor, glowColor }: any) => {
+                          const pct = Math.min((count / target) * 100, 100);
+                          const circ = 2 * Math.PI * 32; // ~201.06
+                          const offset = circ - (pct / 100) * circ;
+
+                          return (
+                            <div className="flex flex-col items-center p-3 bg-white/[0.02] border border-white/5 rounded-2xl relative overflow-hidden group hover:border-white/10 transition-all">
+                              <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+                                {/* SVG Ring */}
+                                <svg className="w-full h-full transform -rotate-90">
+                                  <circle cx="50%" cy="50%" r="32" fill="transparent" stroke={trackColor} strokeWidth="5" />
+                                  <circle
+                                    cx="50%"
+                                    cy="50%"
+                                    r="32"
+                                    fill="transparent"
+                                    stroke={strokeColor}
+                                    strokeWidth="5"
+                                    strokeDasharray={circ}
+                                    strokeDashoffset={offset}
+                                    strokeLinecap="round"
+                                    className="transition-all duration-1000 ease-out"
+                                    style={{ filter: `drop-shadow(0 0 3px ${glowColor})` }}
+                                  />
+                                </svg>
+                                <div className="absolute flex flex-col items-center justify-center">
+                                  <span className="text-sm sm:text-lg font-black text-slate-100 font-mono leading-none">{count}</span>
+                                  <span className="text-[7px] text-slate-500 font-bold uppercase leading-none mt-0.5">{Math.round(pct)}%</span>
+                                </div>
+                              </div>
+                              <span className="mt-2 text-[10px] sm:text-xs font-black text-slate-300 tracking-wide">{label}</span>
+                              <span className="text-[8px] sm:text-[9px] text-slate-500 font-mono">Goal: {target}</span>
+                            </div>
                           );
+                        };
 
                         return (
-                          <>
-                            <div className="flex gap-2 flex-wrap">
-                              <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-slate-300">
-                                {myCases.length} Total
-                              </span>
-                              <span className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-xs font-bold text-indigo-400">
-                                {filtered.length} Shown
-                              </span>
-                            </div>
-
-                            {filtered.length === 0 ? (
-                              <div className="text-center py-20 text-slate-500">
-                                <p className="text-4xl mb-3"></p>
-                                <p className="font-bold">No cases found.</p>
-                                <p className="text-xs mt-1">
-                                  Cases you submit will appear here.
+                          <div className="space-y-6">
+                            {/* Header Banner */}
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-5">
+                              <div>
+                                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-100 font-display flex items-center gap-2">
+                                  <Trophy className="w-6 h-6 text-indigo-400" />
+                                  {isAgent ? "My Achievements & Case History" : "Team Leader Case History & Performance"}
+                                </h2>
+                                <p className="text-slate-400 text-xs sm:text-sm mt-1">
+                                  {isAgent ? "Monitor your performance targets, achieve system milestones, and view submitted logs." : "Review records you processed, assigned, and resolved across the platform."}
                                 </p>
                               </div>
-                            ) : (
-                              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                                {filtered.map((c) => (
-                                  <div
-                                    key={c.id}
-                                    className="bg-white/[0.02] border border-white/10 rounded-2xl p-4 space-y-3 hover:border-white/20 transition-all"
-                                  >
-                                    <div className="flex items-start justify-between gap-2">
-                                      <div>
-                                        <p className="font-black text-slate-100 text-sm">
-                                          {c.patientName || "Unknown Patient"}
-                                        </p>
-                                        <p className="text-[10px] text-slate-500 font-mono">
-                                          {formatCaseRef(
-                                            c.id,
-                                            "case",
-                                            c.createdAt,
-                                            c.caseRef,
-                                          )}{" "}
-                                          ·{" "}
-                                          {new Date(
-                                            c.createdAt,
-                                          ).toLocaleDateString()}
-                                        </p>
-                                      </div>
-                                      {c.status && (
-                                        <span
-                                          className={`px-2 py-0.5 rounded text-[9px] font-black border uppercase ${
-                                            c.status === "closed"
-                                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                                              : "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                                          }`}
-                                        >
-                                          {c.status}
-                                        </span>
-                                      )}
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                      <div
-                                        className="bg-white/[0.02] border border-white/5 rounded-lg p-2 cursor-pointer hover:bg-white/[0.04]"
-                                        onClick={() => {
-                                          navigator.clipboard.writeText(
-                                            normalizePhone(c.phoneNumber || ""),
-                                          );
-                                          toast.success("Phone copied!");
-                                        }}
-                                      >
-                                        <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-0.5">
-                                          Phone
-                                        </p>
-                                        <p className="text-xs text-slate-200 font-semibold font-mono">
-                                          {c.phoneNumber || "N/A"}
-                                        </p>
-                                      </div>
-                                      <div className="bg-white/[0.02] border border-white/5 rounded-lg p-2">
-                                        <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mb-0.5">
-                                          Agent
-                                        </p>
-                                        <p className="text-xs text-slate-200 font-semibold">
-                                          {c.agentName}
-                                        </p>
-                                      </div>
-                                      {c.service && (
-                                        <div className="bg-white/[0.02] border border-white/5 rounded-lg p-2">
-                                          <p className="text-[9px] text-slate-500 uppercase font-bold mb-0.5">
-                                            Service
-                                          </p>
-                                          <p className="text-xs text-slate-200">
-                                            {c.service}
-                                          </p>
-                                        </div>
-                                      )}
-                                      {c.branch && (
-                                        <div className="bg-white/[0.02] border border-white/5 rounded-lg p-2">
-                                          <p className="text-[9px] text-slate-500 uppercase font-bold mb-0.5">
-                                            Branch
-                                          </p>
-                                          <p className="text-xs text-slate-200">
-                                            {c.branch}
-                                          </p>
-                                        </div>
-                                      )}
-                                    </div>
-                                    {c.inquiry && (
-                                      <p className="text-xs text-slate-400 bg-white/[0.02] border border-white/5 rounded-lg p-2 leading-relaxed">
-                                        {c.inquiry}
-                                      </p>
-                                    )}
-                                    <button
-                                      onClick={() => {
-                                        const text = [
-                                          ` Case Record`,
-                                          `Ref: ${formatCaseRef(c.id, "case", c.createdAt, c.caseRef)}`,
-                                          `Patient: ${c.patientName}`,
-                                          `Phone: ${formatPhoneForCopy(c.phoneNumber || "")}`,
-                                          `Agent: ${c.agentName}`,
-                                          c.service
-                                            ? `Service: ${c.service}`
-                                            : "",
-                                          c.branch ? `Branch: ${c.branch}` : "",
-                                          c.inquiry
-                                            ? `Inquiry: ${c.inquiry}`
-                                            : "",
-                                          `Date: ${new Date(c.createdAt).toLocaleString()}`,
-                                        ]
-                                          .filter(Boolean)
-                                          .join("\n");
-                                        navigator.clipboard.writeText(text);
-                                        toast.success("Case copied!");
-                                      }}
-                                      className="w-full px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 text-[10px] font-bold transition-all flex items-center justify-center gap-1.5"
-                                    >
-                                      <Copy className="w-3 h-3" /> Copy Case
-                                      Details
-                                    </button>
+                            </div>
+
+                            {/* Achievements & Goals Section */}
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                              {/* Total Combines Stat Card */}
+                              <div className="lg:col-span-4 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden group">
+                                <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl group-hover:scale-125 transition-all duration-500" />
+                                <div>
+                                  <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 text-[9px] font-black uppercase tracking-widest rounded-full border border-indigo-400/20">
+                                    Overall Performance
+                                  </span>
+                                  <h3 className="text-4xl sm:text-5xl font-black text-slate-100 font-mono tracking-tight mt-4">
+                                    {totalCasesHandled}
+                                  </h3>
+                                  <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mt-1">
+                                    Total Cases Processed
+                                  </p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3 border-t border-white/5 pt-4 mt-4">
+                                  <div className="bg-white/[0.02] border border-white/5 rounded-xl p-2">
+                                    <p className="text-[8px] text-slate-500 font-black uppercase tracking-wider">This Week</p>
+                                    <p className="text-sm font-black text-emerald-400 font-mono mt-0.5">+{statsThisWeek}</p>
                                   </div>
-                                ))}
+                                  <div className="bg-white/[0.02] border border-white/5 rounded-xl p-2">
+                                    <p className="text-[8px] text-slate-500 font-black uppercase tracking-wider">This Month</p>
+                                    <p className="text-sm font-black text-indigo-400 font-mono mt-0.5">+{statsThisMonth}</p>
+                                  </div>
+                                </div>
                               </div>
-                            )}
-                          </>
+
+                              {/* Google Fit Style Circular Activity Rings */}
+                              <div className="lg:col-span-8 bg-white/[0.02] border border-white/5 rounded-2xl p-5 space-y-4">
+                                <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest flex items-center gap-1">
+                                  <Award className="w-3.5 h-3.5 text-indigo-400" /> Active Performance Rings
+                                </h3>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                  <RingItem
+                                    label="Inquiries"
+                                    count={countInquiries}
+                                    target={50}
+                                    strokeColor="#f59e0b"
+                                    trackColor="#78350f"
+                                    glowColor="#f59e0b"
+                                  />
+                                  <RingItem
+                                    label="Tabby/Tamara"
+                                    count={countTT}
+                                    target={20}
+                                    strokeColor="#06b6d4"
+                                    trackColor="#164e63"
+                                    glowColor="#06b6d4"
+                                  />
+                                  <RingItem
+                                    label="Complaints"
+                                    count={countComplaint}
+                                    target={10}
+                                    strokeColor="#f43f5e"
+                                    trackColor="#4c0519"
+                                    glowColor="#f43f5e"
+                                  />
+                                  <RingItem
+                                    label="Client Comms"
+                                    count={countClientComm}
+                                    target={20}
+                                    strokeColor="#0ea5e9"
+                                    trackColor="#0c4a6e"
+                                    glowColor="#0ea5e9"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Milestone Medals Card */}
+                            <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 space-y-4 relative overflow-hidden group">
+                              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                <div>
+                                  <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest flex items-center gap-1">
+                                    <Sparkles className="w-3.5 h-3.5 text-indigo-400" /> Unlockable Achievements
+                                  </h3>
+                                  <p className="text-[10px] text-slate-500 mt-0.5">Collect points to level up and earn custom certificates.</p>
+                                </div>
+                                {nextMilestone ? (
+                                  <span className="text-[10px] sm:text-xs font-mono font-black bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full">
+                                    {totalCasesHandled} / {nextMilestone.threshold} cases for {nextMilestone.name}
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] sm:text-xs font-mono font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full">
+                                    Maximum Rank Reached! 🏆👑
+                                  </span>
+                                )}
+                              </div>
+
+                              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3.5 pt-1">
+                                {milestones.map((m) => {
+                                  const isAchieved = totalCasesHandled >= m.threshold;
+                                  return (
+                                    <div
+                                      key={m.name}
+                                      className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300 ${
+                                        isAchieved
+                                          ? "bg-indigo-500/5 border-indigo-500/30 text-indigo-200 shadow-md shadow-indigo-500/5 scale-102"
+                                          : "bg-white/[0.01] border-white/5 text-slate-600 grayscale brightness-75 cursor-not-allowed"
+                                      }`}
+                                    >
+                                      <div className="relative text-3xl mb-1 flex items-center justify-center h-10 select-none">
+                                        {m.name.split(" ")[1] || m.name.split(" ")[0]}
+                                        {!isAchieved && (
+                                          <span className="absolute -bottom-1 -right-1 bg-slate-930 border border-white/10 text-[9px] px-1 rounded-md text-slate-500 font-mono select-none">
+                                            🔒
+                                          </span>
+                                        )}
+                                      </div>
+                                      <span className="text-[11px] font-extrabold tracking-wide text-center leading-tight">
+                                        {m.name.split(" ")[0]}
+                                      </span>
+                                      <span className="text-[9px] text-slate-500 font-mono mt-0.5">
+                                        {m.threshold} Cases
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+
+                            {/* Feed Filters Control Board */}
+                            <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 sm:p-5 space-y-4">
+                              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                <div>
+                                  <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Feed Logs & Cases</h3>
+                                  <p className="text-[11px] text-slate-500 mt-0.5">Full filterable repository of handled tasks</p>
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                  {/* Search */}
+                                  <div className="relative w-full sm:w-64">
+                                    <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-3" />
+                                    <input
+                                      type="text"
+                                      placeholder="Search records / patients / clients..."
+                                      value={casesSearch ?? ""}
+                                      onChange={(e) => setCasesSearch(e.target.value)}
+                                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                                    />
+                                  </div>
+
+                                  {/* Sort Order Action button */}
+                                  <button
+                                    onClick={() => setMyCasesSortOrder(myCasesSortOrder === "desc" ? "asc" : "desc")}
+                                    className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-semibold text-slate-300 transition-all flex items-center gap-1.5"
+                                  >
+                                    <Clock className="w-3.5 h-3.5" />
+                                    {myCasesSortOrder === "desc" ? "Newest First" : "Oldest First"}
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Clickable pill filters */}
+                              <div className="flex flex-col gap-3 py-2 border-t border-b border-white/5">
+                                {/* Type selector line */}
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider mr-2">Type:</span>
+                                  {[
+                                    { id: "all", label: "All Items", count: combinedList.length },
+                                    { id: "inquiry", label: "Inquiries", count: countInquiries },
+                                    { id: "tabbyTamara", label: "Tabby/Tamara", count: countTT },
+                                    { id: "complaint", label: "Complaints", count: countComplaint },
+                                    { id: "clientComm", label: "Client Comms", count: countClientComm },
+                                  ].map((pill) => (
+                                    <button
+                                      key={pill.id}
+                                      onClick={() => setMyCasesTypeFilter(pill.id)}
+                                      className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition-all flex items-center gap-1.5 ${
+                                        myCasesTypeFilter === pill.id
+                                          ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/25 scale-102"
+                                          : "bg-white/5 hover:bg-white/10 text-slate-300 hover:text-slate-100 border border-white/5"
+                                      }`}
+                                    >
+                                      {pill.label}
+                                      <span className={`px-1.5 py-0.2 rounded-full font-mono text-[9px] font-black ${
+                                        myCasesTypeFilter === pill.id
+                                          ? "bg-white/20 text-white"
+                                          : "bg-white/5 text-slate-400"
+                                      }`}>
+                                        {pill.count}
+                                      </span>
+                                    </button>
+                                  ))}
+                                </div>
+
+                                {/* Status filter row */}
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider mr-2">Status:</span>
+                                  {[
+                                    { id: "all", label: "Any Status" },
+                                    { id: "open", label: "Active & In-Progress" },
+                                    { id: "closed", label: "Closed / Handled" },
+                                  ].map((pill) => (
+                                    <button
+                                      key={pill.id}
+                                      onClick={() => setMyCasesStatusFilter(pill.id)}
+                                      className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all ${
+                                        myCasesStatusFilter === pill.id
+                                          ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+                                          : "bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 border border-transparent"
+                                      }`}
+                                    >
+                                      {pill.label}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Feed Stream list or empty message */}
+                              <div className="space-y-4 mt-2">
+                                {sortedFilteredList.length === 0 ? (
+                                  <div className="text-center py-24 bg-white/[0.01] border border-white/5 rounded-2xl">
+                                    <Award className="w-10 h-10 text-slate-600 mx-auto mb-2 animate-bounce" />
+                                    <p className="font-bold text-slate-400 text-sm">No match found inside your performance lists.</p>
+                                    <p className="text-xs text-slate-600 max-w-sm mx-auto mt-1 leading-relaxed">
+                                      We queried your processed items but found no elements matching your selected combination. Try clearing your search or filters.
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <div className="grid grid-cols-1 gap-4">
+                                    {sortedFilteredList.map((item) => {
+                                      const uniqueKey = `${item.type}-${item.id}`;
+                                      const isExpanded = myExpandedId === uniqueKey;
+                                      const onToggle = () => setMyExpandedId(isExpanded ? null : uniqueKey);
+
+                                      if (item.type === "tabbyTamara") {
+                                        return (
+                                          <TabbyTamaraCard
+                                            key={uniqueKey}
+                                            req={item.data as any}
+                                            currentUser={currentUser}
+                                            isTLOreSupport={isTLOreSupport}
+                                            isSuperAdmin={isSuperAdmin}
+                                            activeFintechHandlingId={activeFintechHandlingId}
+                                            setActiveFintechHandlingId={setActiveFintechHandlingId}
+                                            tlFintechPaymentLink={tlFintechPaymentLink}
+                                            setTlFintechPaymentLink={setTlFintechPaymentLink}
+                                            tlFintechNotes={tlFintechNotes}
+                                            setTlFintechNotes={setTlFintechNotes}
+                                            tlFintechLinks={tlFintechLinks}
+                                            setTlFintechLinks={setTlFintechLinks}
+                                            handleConfirmTabbyTamara={handleConfirmTabbyTamara}
+                                            handleMarkPatientContactedTT={handleContactTabbyTamara}
+                                            getElapsedTimerString={getElapsedTimerString}
+                                            handleDeleteTabbyTamara={handleDeleteTabbyTamara}
+                                            canEditItem={canEditItem}
+                                            getRemainingEditTime={getRemainingEditTime}
+                                            editLimitMs={10 * 60 * 1000}
+                                            setEditingItem={(editingItem: any) => {
+                                              setEditingItem({
+                                                type: "tt_request",
+                                                id: editingItem.data.id,
+                                                data: editingItem.data,
+                                              });
+                                            }}
+                                            addSystemNotification={addSystemNotification}
+                                            isExpanded={isExpanded}
+                                            onToggle={onToggle}
+                                          />
+                                        );
+                                      }
+
+                                      if (item.type === "complaint") {
+                                        return (
+                                          <ComplaintCard
+                                            key={uniqueKey}
+                                            comp={item.data as any}
+                                            currentUser={currentUser}
+                                            isTLOreSupport={isTLOreSupport}
+                                            isSuperAdmin={isSuperAdmin}
+                                            isExpanded={isExpanded}
+                                            onToggle={onToggle}
+                                            activeComplaintHandlingId={activeComplaintHandlingId}
+                                            setActiveComplaintHandlingId={setActiveComplaintHandlingId}
+                                            tlComplaintResolutionType={tlComplaintResolutionType}
+                                            setTlComplaintResolutionType={setTlComplaintResolutionType}
+                                            tlComplaintComment={tlComplaintComment}
+                                            setTlComplaintComment={setTlComplaintComment}
+                                            handleTLCommentComplaint={handleTLCommentComplaint}
+                                            handleToggleContactComplaint={handleToggleContactComplaint}
+                                            handleDeleteComplaint={handleDeleteComplaint}
+                                            handleAssignRecord={handleAssignRecord}
+                                            addSystemNotification={addSystemNotification}
+                                            canEditItem={canEditItem}
+                                            getRemainingEditTime={getRemainingEditTime}
+                                            setEditingItem={(editingItem: any) => {
+                                              setEditingItem({
+                                                type: "tt_complaint",
+                                                id: editingItem.data.id,
+                                                data: editingItem.data,
+                                              });
+                                            }}
+                                            getElapsedTimerString={getElapsedTimerString}
+                                          />
+                                        );
+                                      }
+
+                                      if (item.type === "inquiry") {
+                                        return (
+                                          <InquiryCard
+                                            key={uniqueKey}
+                                            inq={item.data as any}
+                                            currentUser={currentUser}
+                                            isExpanded={isExpanded}
+                                            onToggle={onToggle}
+                                            isTLOreSupport={isTLOreSupport}
+                                            isSuperAdmin={isSuperAdmin}
+                                            handleTLViewInquiry={handleTLViewInquiry}
+                                            canEditItem={canEditItem}
+                                            getRemainingEditTime={getRemainingEditTime}
+                                            setEditingItem={(editingItem: any) => {
+                                              setEditingItem({
+                                                type: "inquiry",
+                                                id: editingItem.data.id,
+                                                data: editingItem.data,
+                                              });
+                                            }}
+                                            addSystemNotification={addSystemNotification}
+                                            answeringInquiryId={answeringInquiryId}
+                                            setAnsweringInquiryId={setAnsweringInquiryId}
+                                            currentAnswerText={currentAnswerText}
+                                            setCurrentAnswerText={setCurrentAnswerText}
+                                            currentAnswerAttachments={currentAnswerAttachments}
+                                            setCurrentAnswerAttachments={setCurrentAnswerAttachments}
+                                            currentAnswerLinks={currentAnswerLinks}
+                                            setCurrentAnswerLinks={setCurrentAnswerLinks}
+                                            isSubmittingAnswer={isSubmittingAnswer}
+                                            handleSetInquiryAnswered={handleSetInquiryAnswered}
+                                            handleDeleteInquiry={handleDeleteInquiry}
+                                            handleUpdateContactedStatus={handleUpdateContactedStatus}
+                                            handleMarkInquiryRead={handleMarkInquiryRead}
+                                            handleMarkSentToClinic={handleMarkSentToClinic}
+                                            handleCloseInquiry={handleCloseInquiry}
+                                            handleReassignInquiry={handleReassignInquiry}
+                                            agentsList={agentsList}
+                                            inquiries={inquiries}
+                                            setInquiries={setInquiries}
+                                          />
+                                        );
+                                      }
+
+                                      if (item.type === "clientComm") {
+                                        return (
+                                          <ClientCommCard
+                                            key={uniqueKey}
+                                            comm={item.data as any}
+                                            currentUser={currentUser}
+                                            isExpanded={isExpanded}
+                                            onToggle={onToggle}
+                                            isTLOreSupport={isTLOreSupport}
+                                            isSuperAdmin={isSuperAdmin}
+                                            activeCcHandlingId={activeCcHandlingId}
+                                            setActiveCcHandlingId={setActiveCcHandlingId}
+                                            ccHandlingNotes={ccHandlingNotes}
+                                            setCcHandlingNotes={setCcHandlingNotes}
+                                            ccHandlingPhotos={ccHandlingPhotos}
+                                            setCcHandlingPhotos={setCcHandlingPhotos}
+                                            handleProcessClientComms={handleProcessClientComms}
+                                            handleDeleteClientComms={handleDeleteClientComms}
+                                            canEditItem={canEditItem}
+                                            getRemainingEditTime={getRemainingEditTime}
+                                            setEditingItem={(editingItem: any) => {
+                                              setEditingItem({
+                                                type: "client_comm",
+                                                id: editingItem.data.id,
+                                                data: editingItem.data,
+                                              });
+                                            }}
+                                            handleTakeClientComm={handleTakeClientComm}
+                                            handleMarkClientCommDone={handleMarkClientCommDone}
+                                            addSystemNotification={addSystemNotification}
+                                            getElapsedTimerString={getElapsedTimerString}
+                                          />
+                                        );
+                                      }
+
+                                      return null;
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Legacy Cases Collapsible Drawer (preserves old Firestore sub-collection database records if any exist) */}
+                            <div className="border border-white/5 rounded-2xl bg-white/[0.01] overflow-hidden mt-8">
+                              <button
+                                onClick={() => setShowLegacyCases(!showLegacyCases)}
+                                className="w-full flex items-center justify-between p-4 bg-white/[0.02] hover:bg-white/[0.04] transition-all"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Archive className="w-4 h-4 text-slate-400" />
+                                  <span className="text-sm font-bold text-slate-300 font-sans">
+                                    Legacy Direct Case Leads Collection ({cases.length} records)
+                                  </span>
+                                </div>
+                                <span className="text-xs text-indigo-400 font-black hover:underline">
+                                  {showLegacyCases ? "Collapse Section" : "Expand Section"}
+                                </span>
+                              </button>
+
+                              {showLegacyCases && (
+                                <div className="p-5 border-t border-white/5 space-y-4">
+                                  <p className="text-[11px] text-slate-500 italic">
+                                    These are direct customer leads logs mapped from the legacy `cases` sub-collection for data preservation.
+                                  </p>
+
+                                  {cases.length === 0 ? (
+                                    <p className="text-xs text-slate-500 italic text-center py-6">No legacy records in this database collection.</p>
+                                  ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                                      {cases
+                                        .filter((c) =>
+                                          currentUser.role === "tl" ||
+                                          c.agentName?.toLowerCase() === currentUser.name.toLowerCase()
+                                        )
+                                        .map((c) => (
+                                          <div
+                                            key={c.id}
+                                            className="bg-white/[0.01] border border-white/5 rounded-xl p-4 space-y-3 hover:border-white/10 transition-all text-xs"
+                                          >
+                                            <div className="flex items-start justify-between gap-2">
+                                              <div>
+                                                <p className="font-extrabold text-slate-200">
+                                                  {c.patientName || "Unknown Patient"}
+                                                </p>
+                                                <p className="text-[10px] text-slate-500 font-mono">
+                                                  Ref: {formatCaseRef(c.id, "case", c.createdAt, c.caseRef)}
+                                                </p>
+                                              </div>
+                                              {c.status && (
+                                                <span className="px-1.5 py-0.2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded font-mono text-[9px] uppercase">
+                                                  {c.status}
+                                                </span>
+                                              )}
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-2 bg-white/[0.01] p-2 rounded-lg text-slate-400">
+                                              <div>
+                                                <p className="text-[8px] text-slate-600 font-bold uppercase">Phone</p>
+                                                <p className="font-mono text-[11px] text-slate-300">{c.phoneNumber || "N/A"}</p>
+                                              </div>
+                                              <div>
+                                                <p className="text-[8px] text-slate-600 font-bold uppercase">Agent</p>
+                                                <p className="text-slate-300 font-semibold">{c.agentName}</p>
+                                              </div>
+                                            </div>
+                                            {c.inquiry && (
+                                              <p className="text-slate-400 leading-relaxed bg-white/[0.01] border border-white/5 p-2 rounded-lg">
+                                                {c.inquiry}
+                                              </p>
+                                            )}
+                                          </div>
+                                        ))}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         );
                       })()}
                     </div>
