@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, query, collection, where, getDocs, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { AttendanceRecord, User, AgentDirectoryRow, INITIAL_AGENTS } from "../types";
 import {
@@ -55,6 +55,32 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
     });
     setLateTimes(times);
   }, [attendanceRecords, selectedDate]);
+
+  // One-time Firestore migration of stale 'no_show' or 'no_call' statuses to 'nsnc'
+  useEffect(() => {
+    const runMigration = async () => {
+      try {
+        const q = query(
+          collection(db, "attendance_records"),
+          where("status", "in", ["no_show", "no_call"])
+        );
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          console.log(`[Migration] Found ${querySnapshot.size} stale records to update.`);
+          const promises = querySnapshot.docs.map((docSnap) => {
+            return updateDoc(doc(db, "attendance_records", docSnap.id), {
+              status: "nsnc",
+            });
+          });
+          await Promise.all(promises);
+          toast.success(`Successfully migrated ${querySnapshot.size} old attendance records to NSNC.`);
+        }
+      } catch (error) {
+        console.error("Attendance status migration error:", error);
+      }
+    };
+    runMigration();
+  }, []);
 
   // Build full agent roster list, not schedule-dependent
   const rosterOfAgents = useMemo(() => {
@@ -138,7 +164,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
       else if (item.status === "late") late++;
       else if (item.status === "absent") absent++;
       else if (["annual", "sick", "casual"].includes(item.status)) onLeave++;
-      else if (["no_show", "no_call"].includes(item.status)) noShowNoCall++;
+      else if (item.status === "nsnc") noShowNoCall++;
       else notMarked++;
     });
 
@@ -410,7 +436,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
           <p className="text-2xl font-black text-blue-400 mt-1">{stats.onLeave}</p>
         </div>
         <div className="p-4 bg-red-500/5 border border-red-500/10 rounded-2xl text-center">
-          <p className="text-[9px] uppercase font-black text-red-500 tracking-wider">No Show / Call</p>
+          <p className="text-[9px] uppercase font-black text-red-500 tracking-wider">NSNC</p>
           <p className="text-2xl font-black text-red-400 mt-1">{stats.noShowNoCall}</p>
         </div>
         <div className="p-4 bg-slate-800/10 border border-slate-800 rounded-2xl text-center">
@@ -487,7 +513,9 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                           <span className={`px-2.5 py-1 text-[10px] uppercase font-black border rounded-full ${badgeColor}`}>
                             {item.status === "not_marked"
                               ? "NOT MARKED"
-                              : item.status.replace("_", " ")}
+                              : item.status === "nsnc"
+                                ? "NSNC 🚫"
+                                : item.status.replace("_", " ")}
                             {item.status === "late" && (item.record?.lateTime || lateTimes[item.name]) ? (
                               <span className="ml-1 text-slate-100 font-bold font-mono">
                                 ({item.record?.lateTime || lateTimes[item.name]})
@@ -556,18 +584,11 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                             onClick={() => handleMarkStatus(item.name, "absent")}
                           />
                           <StatusSelectorButton
-                            label="No Show"
+                            label="NSNC"
                             icon="🚫"
-                            isActive={item.status === "no_show"}
-                            activeStyle="bg-red-500/25 text-red-400 border-red-500/40"
-                            onClick={() => handleMarkStatus(item.name, "no_show")}
-                          />
-                          <StatusSelectorButton
-                            label="No Call"
-                            icon="📵"
-                            isActive={item.status === "no_call"}
-                            activeStyle="bg-red-950/40 text-red-400 border-red-900/60"
-                            onClick={() => handleMarkStatus(item.name, "no_call")}
+                            isActive={item.status === "nsnc"}
+                            activeStyle="bg-red-500/25 text-red-00 border-red-500/40"
+                            onClick={() => handleMarkStatus(item.name, "nsnc")}
                           />
                         </div>
                       </td>
@@ -592,7 +613,11 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
 
                       <div className="flex flex-col items-end gap-1.5">
                         <span className={`px-2 py-0.5 rounded-full text-[9px] uppercase font-bold border ${badgeColor}`}>
-                          {item.status === "not_marked" ? "NOT MARKED" : item.status.replace("_", " ")}
+                          {item.status === "not_marked"
+                            ? "NOT MARKED"
+                            : item.status === "nsnc"
+                              ? "NSNC 🚫"
+                              : item.status.replace("_", " ")}
                           {item.status === "late" && (item.record?.lateTime || lateTimes[item.name]) ? (
                             <span className="ml-1 font-mono">({item.record?.lateTime || lateTimes[item.name]})</span>
                           ) : null}
@@ -656,18 +681,11 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                         onClick={() => handleMarkStatus(item.name, "absent")}
                       />
                       <StatusSelectorButton
-                        label="No Show"
+                        label="NSNC"
                         icon="🚫"
-                        isActive={item.status === "no_show"}
-                        activeStyle="bg-red-500/25 text-red-00 border-red-500/40"
-                        onClick={() => handleMarkStatus(item.name, "no_show")}
-                      />
-                      <StatusSelectorButton
-                        label="No Call"
-                        icon="📵"
-                        isActive={item.status === "no_call"}
-                        activeStyle="bg-red-950/40 text-red-400 border-red-900/60"
-                        onClick={() => handleMarkStatus(item.name, "no_call")}
+                        isActive={item.status === "nsnc"}
+                        activeStyle="bg-red-500/25 text-red-100 border-red-500/40"
+                        onClick={() => handleMarkStatus(item.name, "nsnc")}
                       />
                     </div>
                   </div>
@@ -689,8 +707,7 @@ const getStatusBadgeColor = (status: AttendanceRecord["status"]) => {
     case "late":
       return "bg-amber-500/20 text-amber-400 border-amber-500/30";
     case "absent":
-    case "no_show":
-    case "no_call":
+    case "nsnc":
       return "bg-rose-500/20 text-rose-400 border-rose-500/30";
     case "annual":
     case "sick":
