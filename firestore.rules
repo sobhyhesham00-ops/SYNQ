@@ -57,12 +57,13 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isSignedIn();
       allow write: if isSignedIn() && (
+        isSuperAdmin() ||
+        isTLOrSupport() ||
+        request.auth.uid == userId || 
         (resource != null && request.auth.uid == resource.data.uid) || 
         (request.resource != null && request.auth.uid == request.resource.data.uid) || 
-        request.auth.uid == userId || 
         (resource != null && getUserName() != null && getUserName() == resource.data.name) || 
         (request.resource != null && getUserName() != null && getUserName() == request.resource.data.name) || 
-        getUserRole() == 'director' || 
         !exists(/databases/$(database)/documents/users/$(request.auth.uid))
       );
     }
@@ -70,11 +71,18 @@ service cloud.firestore {
     // Cases, Requests, Inquiries
     match /inquiries/{docId} {
       allow read: if request.auth != null;
-      allow write: if request.auth != null && (
+      allow create, delete: if request.auth != null && (
         isSuperAdmin() || 
         isTLOrSupport() || 
         (resource != null && resource.data.agentName == getUserName()) || 
         (request.resource != null && request.resource.data.agentName == getUserName())
+      );
+      allow update: if request.auth != null && (
+        isSuperAdmin() || 
+        isTLOrSupport() || 
+        (resource != null && resource.data.agentName == getUserName()) || 
+        (request.resource != null && request.resource.data.agentName == getUserName()) ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastHourlyReminderAt'])
       );
     }
     function canWriteFintech() {
@@ -151,6 +159,12 @@ service cloud.firestore {
     // Others (Basic fallback for existing functionality)
     match /todos/{todoId} { allow read, write: if isSignedIn(); }
     match /qa_scores/{scoreId} { allow read, write: if isSignedIn(); }
+    match /system/sched_credentials {
+      allow read, write: if request.auth != null;
+    }
+    match /system/sched_locked_accounts {
+      allow read, write: if request.auth != null;
+    }
     match /system/{docId} { allow read, write: if isSignedIn(); }
     match /system/sched_agent_directory {
       allow read: if request.auth != null || request.auth == null;  // allow all reads from cache
