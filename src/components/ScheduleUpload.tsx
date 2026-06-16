@@ -20,13 +20,15 @@ export interface ScheduledShift {
 }
 
 interface ScheduleUploadProps {
-  onSchedulesImported: (schedules: ScheduledShift[]) => void;
+  onSchedulesImported?: (schedules: ScheduledShift[]) => void;
   agentsList?: string[];
+  onUpload?: (file: File) => void;
 }
 
 export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({ 
   onSchedulesImported, 
-  agentsList = [] 
+  agentsList = [],
+  onUpload 
 }) => {
   const [dragActive, setDragActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -77,6 +79,11 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
 
   const processFile = (file: File) => {
     if (!file) return;
+
+    if (onUpload) {
+      onUpload(file);
+      return;
+    }
     
     setIsProcessing(true);
     setUploadError(null);

@@ -449,15 +449,19 @@ export const getAgentLOB = (name: string): string => {
   
   const meta = getAgentMeta();
   const overrideKey = Object.keys(meta).find(k => String(k || '').trim().toLowerCase().replace(/\s+/g, ' ') === cleanName);
-  if (overrideKey && meta[overrideKey].roleType) {
-    return meta[overrideKey].roleType;
-  }
-
-  const matchedKey = Object.keys(AGENT_LOBS).find(
-    key => String(key || '').trim().toLowerCase().replace(/\s+/g, ' ') === cleanName
-  );
   
-  return matchedKey ? AGENT_LOBS[matchedKey] : 'General';
+  let lob = 'General';
+  if (overrideKey && meta[overrideKey].roleType) {
+    lob = meta[overrideKey].roleType;
+  } else {
+    const matchedKey = Object.keys(AGENT_LOBS).find(
+      key => String(key || '').trim().toLowerCase().replace(/\s+/g, ' ') === cleanName
+    );
+    if (matchedKey) lob = AGENT_LOBS[matchedKey];
+  }
+  
+  if (lob.toLowerCase() === 'social media' || lob.toLowerCase() === 'social_media') return 'Chat';
+  return lob;
 };
 
 export const getAgentTL = (name: string): string => {
