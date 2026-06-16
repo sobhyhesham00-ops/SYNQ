@@ -1771,14 +1771,6 @@ export default function App() {
   // Auth States
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     const saved = getStorageItem<User | null>("sched_current_user", null);
-    if (saved) {
-      // Auto-logout the old full name sessions. New username must contain a dot and no spaces.
-      const isNewFormat = saved.name.includes(".") && !saved.name.includes(" ");
-      if (!isNewFormat) {
-        localStorage.removeItem("sched_current_user");
-        return null;
-      }
-    }
     return saved;
   });
 
@@ -4470,11 +4462,15 @@ ${pageText}
       return toast.error("Password cannot be empty");
     if (!currentUser) return;
 
+    const usernameKey = getUsernameFromFullName(currentUser.name).toLowerCase();
     const formattedUsername = currentUser.name.toLowerCase();
+    const oldNormalizeKey = currentUser.name.trim().toLowerCase().replace(/\s+/g, '');
 
     const updatedCreds = {
       ...credentials,
+      [usernameKey]: newPasswordInput.trim(),
       [formattedUsername]: newPasswordInput.trim(),
+      [oldNormalizeKey]: newPasswordInput.trim(),
       [currentUser.name]: newPasswordInput.trim(),
     };
 
@@ -4483,6 +4479,11 @@ ${pageText}
     setDoc(doc(db, "system", "sched_credentials"), {
       data: updatedCreds,
     }).catch(console.error);
+
+    const userDocId = currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+    setDoc(doc(db, "users", userDocId), { 
+      password: newPasswordInput.trim()
+    }, { merge: true }).catch(console.error);
 
     toast.success("Password updated successfully!");
     setIsResetPasswordModalOpen(false);
@@ -9081,10 +9082,14 @@ ${ttNotes}`
                 }
                 
                 try {
+                  const usernameKey = getUsernameFromFullName(currentUser.name).toLowerCase();
                   const formattedUsername = currentUser.name.toLowerCase();
+                  const oldNormalizeKey = currentUser.name.trim().toLowerCase().replace(/\s+/g, '');
                   const updatedCreds = {
                     ...credentials,
+                    [usernameKey]: String(pwd).trim(),
                     [formattedUsername]: String(pwd).trim(),
+                    [oldNormalizeKey]: String(pwd).trim(),
                     [currentUser.name]: String(pwd).trim(),
                   };
                   setCredentials(updatedCreds);
