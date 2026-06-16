@@ -49,7 +49,6 @@ import {
   CheckCircle2,
   XCircle,
   AlertTriangle,
-  AlertCircle,
   Download,
   LogOut,
   Clock,
@@ -224,7 +223,6 @@ import {
   CaseRecord,
   AgentDirectoryRow,
   SystemNotification,
-  LOB,
   TlFeedback,
   FeedbackReply,
   QAScore,
@@ -1085,12 +1083,6 @@ export default function App() {
       }
       if (!active) return;
 
-      if (currentUserRef.current) {
-        setDoc(doc(db, "users", firebaseUser.uid), currentUserRef.current, { merge: true }).catch(console.error);
-        const userDocId = currentUserRef.current.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
-        setDoc(doc(db, "users", userDocId), currentUserRef.current, { merge: true }).catch(console.error);
-      }
-
       cleanupListeners();
       console.log("[Firebase Auth] User successfully verified! Initializing 20+ real-time Firestore listeners...");
       setAuthReady(true);
@@ -1624,7 +1616,31 @@ export default function App() {
                 { merge: true },
               ).catch(console.error);
             } else if (remoteVersion > CURRENT_APP_VERSION) {
-              setNewVersionAvailable(true);
+              // Safeguard against infinite reload loops
+              const key = `reloaded_for_version_${remoteVersion}`;
+              if (!sessionStorage.getItem(key)) {
+                sessionStorage.setItem(key, "true");
+                toast.loading(
+                  "A new system update was published! Refreshing to apply...",
+                );
+                setTimeout(() => {
+                  if ("caches" in window) {
+                    caches
+                      .keys()
+                      .then((names) => {
+                        for (let name of names) caches.delete(name);
+                      })
+                      .catch((e) =>
+                        console.error("Cache flush on reload error:", e),
+                      );
+                  }
+                  window.location.reload();
+                }, 3000);
+              } else {
+                console.warn(
+                  `Already attempted reload for version ${remoteVersion}, but local bundle version is still ${CURRENT_APP_VERSION}. Suppressing loop to let user open the app.`,
+                );
+              }
             }
           } else {
             setDoc(doc(db, "system", "app_version"), {
@@ -1647,13 +1663,6 @@ export default function App() {
           const dbUsers = snap.docs.map(
             (d) => ({ ...d.data(), id: d.id }) as any,
           );
-          dbUsers.forEach((u) => {
-            if (u.lob === "social_media") {
-              console.warn(`Migrating LOB for ${u.id} from social_media to chat`);
-              updateDoc(doc(db, "users", u.id), { lob: "chat" }).catch(console.error);
-              u.lob = "chat";
-            }
-          });
           setRegisteredUsers(dbUsers);
 
           // Optionally update currentUser if their document was updated
@@ -1777,6 +1786,14 @@ export default function App() {
   // Auth States
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     const saved = getStorageItem<User | null>("sched_current_user", null);
+    if (saved) {
+      // Auto-logout the old full name sessions. New username must contain a dot and no spaces.
+      const isNewFormat = saved.name.includes(".") && !saved.name.includes(" ");
+      if (!isNewFormat) {
+        localStorage.removeItem("sched_current_user");
+        return null;
+      }
+    }
     return saved;
   });
 
@@ -2290,7 +2307,7 @@ export default function App() {
       entityId,
     };
     // Auto-sync real-time to firestore
-    setDoc(doc(db, "notifications", newNotif.id), newNotif, { merge: true }).catch((e) =>
+    setDoc(doc(db, "notifications", newNotif.id), newNotif).catch((e) =>
       console.error("Notif sync error:", e),
     );
   };
@@ -2981,10 +2998,9 @@ ${pageText}
     if (!currentUser || !db) return;
 
     const checkHourlyReminders = async () => {
-      // Only process hourly reminders for inquiries owned by the current user to prevent
-      // redundant execution and Firestore permission denied errors from other agents' clients.
+      // Find all inquiries that are in "answered" status.
       const answeredInquiries = inquiries.filter(
-        (inq) => inq.status === "answered" && inq.agentName === currentUser.name
+        (inq) => inq.status === "answered"
       );
 
       const now = new Date();
@@ -3161,7 +3177,9 @@ ${pageText}
   const [ccPhoneNumber, setCcPhoneNumber] = useState("");
   const [ccLanguage, setCcLanguage] = useState<"Arabic" | "English">("Arabic");
   const [ccNotes, setCcNotes] = useState("");
-  const [ccChannel, setCcChannel] = useState<LOB>("call_center");
+  const [ccChannel, setCcChannel] = useState<
+    "call_center" | "chat" | "social_media"
+  >("call_center");
   const [activeCcHandlingId, setActiveCcHandlingId] = useState<string | null>(
     null,
   );
@@ -3203,8 +3221,6 @@ ${pageText}
   const [tlFintechPaymentLink, setTlFintechPaymentLink] = useState("");
   const [tlFintechNotes, setTlFintechNotes] = useState("");
   const [tlFintechLinks, setTlFintechLinks] = useState("");
-
-  const [newVersionAvailable, setNewVersionAvailable] = useState(false);
 
   // Form submission and confirmation states
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
@@ -3916,11 +3932,9 @@ ${pageText}
     logTLShiftOnOpen();
   }, [currentUser, authReady]);
 
-  // Initialize correct active tab based on role (runs only once per user session)
-  const initializedUserTab = useRef<string | null>(null);
+  // Initialize correct active tab based on role
   useEffect(() => {
-    if (currentUser && initializedUserTab.current !== currentUser.id) {
-      initializedUserTab.current = currentUser.id;
+    if (currentUser) {
       const isElevated = currentUser.role === "tl" ||
         currentUser.role === "qa" ||
         (currentUser.role as string) === "admin" ||
@@ -3934,10 +3948,8 @@ ${pageText}
       } else {
         setActiveTab("dashboard");
       }
-    } else if (!currentUser) {
-      initializedUserTab.current = null;
     }
-  }, [currentUser, supportAssignments]);
+  }, [currentUser]);
 
   // Request Form States
   const [swapDate, setSwapDate] = useState("");
@@ -4265,29 +4277,19 @@ ${pageText}
       isTLName(correspondingFullName) ? "tl" : "agent"
     );
     console.log("[AUTH] Logged in as:", correspondingFullName, "| Persisted role:", persistedRole, "| Final role:", userRole, "| isSuperAdmin:", userRole === "director");
-    const userDocId = correspondingFullName
-      .replace(/[^a-zA-Z0-9]/g, "")
-      .toLowerCase();
-
-    const dbUser = registeredUsers.find(u => 
-      u.id === userDocId || 
-      u.id === `usr_${userDocId}` ||
-      u.name.toLowerCase() === correspondingFullName.toLowerCase()
-    ) as any;
-
     const authenticatedUser: User = {
-      id: `usr_${userDocId}`,
+      id: `usr_${correspondingFullName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}`,
       name: correspondingFullName,
       role: userRole,
     };
-    if (dbUser?.mustChangePassword) {
-      (authenticatedUser as any).mustChangePassword = true;
-    }
 
     setCurrentUser(authenticatedUser);
     setStorageItem("sched_current_user", authenticatedUser);
 
-    setDoc(doc(db, "users", userDocId), authenticatedUser, { merge: true }).catch(console.error);
+    const userDocId = correspondingFullName
+      .replace(/[^a-zA-Z0-9]/g, "")
+      .toLowerCase();
+    setDoc(doc(db, "users", userDocId), authenticatedUser).catch(console.error);
 
     if (auth.currentUser?.uid) {
       setDoc(doc(db, "users", auth.currentUser.uid), authenticatedUser).catch(
@@ -4407,14 +4409,7 @@ ${pageText}
         correspondingFullName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
       ),
       authenticatedUser,
-      { merge: true }
     ).catch((e) => console.error("User doc sync error:", e));
-
-    if (auth.currentUser?.uid) {
-      setDoc(doc(db, "users", auth.currentUser.uid), authenticatedUser, { merge: true }).catch(
-        console.error,
-      );
-    }
 
     if (
       userRole === "agent" &&
@@ -4476,15 +4471,11 @@ ${pageText}
       return toast.error("Password cannot be empty");
     if (!currentUser) return;
 
-    const usernameKey = getUsernameFromFullName(currentUser.name).toLowerCase();
     const formattedUsername = currentUser.name.toLowerCase();
-    const oldNormalizeKey = currentUser.name.trim().toLowerCase().replace(/\s+/g, '');
 
     const updatedCreds = {
       ...credentials,
-      [usernameKey]: newPasswordInput.trim(),
       [formattedUsername]: newPasswordInput.trim(),
-      [oldNormalizeKey]: newPasswordInput.trim(),
       [currentUser.name]: newPasswordInput.trim(),
     };
 
@@ -4493,11 +4484,6 @@ ${pageText}
     setDoc(doc(db, "system", "sched_credentials"), {
       data: updatedCreds,
     }).catch(console.error);
-
-    const userDocId = currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
-    setDoc(doc(db, "users", userDocId), { 
-      password: newPasswordInput.trim()
-    }, { merge: true }).catch(console.error);
 
     toast.success("Password updated successfully!");
     setIsResetPasswordModalOpen(false);
@@ -7071,14 +7057,14 @@ ${ttNotes}`
 
       // Notifications
       if (channelLabel === "call_center") {
-        const chatAgents = Object.entries(AGENT_LOBS)
+        const socialMediaAgents = Object.entries(AGENT_LOBS)
           .filter(
             ([name, lob]) =>
-              (lob === "chat" || lob === "Chat") && name !== currentUser?.name,
+              lob === "Social Media" && name !== currentUser?.name,
           )
           .map(([name]) => name);
 
-        chatAgents.forEach((agentName) => {
+        socialMediaAgents.forEach((agentName) => {
           addSystemNotification(
             "New Tabby/Tamara request. Please contact the client.",
             `${currentUser.name} (Call Center) submitted a request for ${ttPatientName} (${ttPhoneNumber}).`,
@@ -7185,15 +7171,15 @@ ${ttNotes}`
           r.id,
         );
 
-        // If submitter is Call Center, notify all Chat agents to contact patient
+        // If submitter is Call Center, notify all Social Media agents to contact patient
         if (status === "confirmed" && paymentLink) {
           const submitterLOB = AGENT_LOBS[r.agentName] || "Unknown";
-          if (submitterLOB === "Call Center" || submitterLOB === "call_center") {
-            const chatAgents = Object.entries(AGENT_LOBS)
-              .filter(([name, lob]) => lob === "chat" || lob === "Chat")
+          if (submitterLOB === "Call Center") {
+            const socialMediaAgents = Object.entries(AGENT_LOBS)
+              .filter(([name, lob]) => lob === "Social Media")
               .map(([name]) => name);
 
-            chatAgents.forEach((agentName) => {
+            socialMediaAgents.forEach((agentName) => {
               addSystemNotification(
                 "💳 Payment Link Ready — Please Contact Patient",
                 `TL ${currentUser.name} confirmed a ${r.platform?.toUpperCase()} request.\n` +
@@ -7604,15 +7590,23 @@ ${ttNotes}`
 
       // Route notification to correct LOB team based on channel
       const targetLob =
-        ccChannel === "chat" ? "chat" : "call_center";
+        ccChannel === "social_media"
+          ? "Social Media"
+          : ccChannel === "chat"
+            ? "Chat"
+            : "Social Media";
       const targetedAgents = Object.entries(AGENT_LOBS)
         .filter(
-          ([name, lob]) => (lob === targetLob || lob === (ccChannel === "chat" ? "Chat" : "Call Center")) && name !== currentUser?.name,
+          ([name, lob]) => lob === targetLob && name !== currentUser?.name,
         )
         .map(([name]) => name);
 
       const channelLabel =
-        ccChannel === "chat" ? "Chat" : "Call Center";
+        ccChannel === "social_media"
+          ? "Social Media"
+          : ccChannel === "chat"
+            ? "Chat"
+            : "Call Center";
       targetedAgents.forEach((targetAgentName) => {
         addSystemNotification(
           `New Client Comm — ${channelLabel} → ${targetLob}`,
@@ -8830,23 +8824,6 @@ ${ttNotes}`
       className="min-h-screen bg-transparent text-slate-100 flex flex-col font-sans relative overflow-x-hidden antialiased"
     >
       <Toaster theme="dark" position="bottom-right" />
-      {newVersionAvailable && (
-        <div className="fixed top-0 left-0 right-0 z-[100] bg-indigo-500/10 border-b border-indigo-500/20 text-indigo-300 px-4 py-2 flex items-center justify-center gap-4 backdrop-blur-sm">
-          <span className="text-sm font-medium">A new version is available.</span>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-3 py-1 bg-indigo-500/20 hover:bg-indigo-500/30 rounded-md text-xs font-bold transition-colors"
-          >
-            Refresh Now
-          </button>
-          <button
-            onClick={() => setNewVersionAvailable(false)}
-            className="p-1 hover:bg-indigo-500/20 rounded-md transition-colors ml-4"
-          >
-            ✕
-          </button>
-        </div>
-      )}
       <AIChatWidget />
       <EnvironmentBadge
         currentUser={currentUser}
@@ -9068,81 +9045,6 @@ ${ttNotes}`
               {/* Install prompt removed from login screen */}
             </div>
           </div>
-        ) : (currentUser as any)?.mustChangePassword ? (
-          <div className="flex-1 flex flex-col items-center justify-center my-12 animate-fade-in">
-            <div className="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-3xl shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-orange-500"></div>
-              
-              <div className="flex flex-col items-center mb-8">
-                <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center shadow-lg shadow-black/80 mb-4 border border-rose-500/20 relative group">
-                  <Key className="w-8 h-8 text-rose-400" />
-                </div>
-                <h1 className="text-2xl font-black bg-gradient-to-r from-rose-300 to-orange-300 bg-clip-text text-transparent font-display text-center">
-                  Password Reset Required
-                </h1>
-                <p className="text-rose-300/80 text-xs text-center font-medium mt-2">
-                  Your password was reset to the default. Please configure a new secure password before accessing the system.
-                </p>
-              </div>
-
-              <form onSubmit={async (e) => {
-                e.preventDefault();
-                const formData = new FormData(e.currentTarget);
-                const pwd = formData.get('newpwd');
-                const confirm = formData.get('confirm');
-                if (!pwd || pwd !== confirm) {
-                   toast.error('Passwords do not match');
-                   return; 
-                }
-                
-                try {
-                  const usernameKey = getUsernameFromFullName(currentUser.name).toLowerCase();
-                  const formattedUsername = currentUser.name.toLowerCase();
-                  const oldNormalizeKey = currentUser.name.trim().toLowerCase().replace(/\s+/g, '');
-                  const updatedCreds = {
-                    ...credentials,
-                    [usernameKey]: String(pwd).trim(),
-                    [formattedUsername]: String(pwd).trim(),
-                    [oldNormalizeKey]: String(pwd).trim(),
-                    [currentUser.name]: String(pwd).trim(),
-                  };
-                  setCredentials(updatedCreds);
-                  setStorageItem("sched_credentials", updatedCreds);
-                  await setDoc(doc(db, "system", "sched_credentials"), { data: updatedCreds });
-
-                  const userDocId = currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
-                  
-                  const updatedUser = { ...currentUser };
-                  delete (updatedUser as any).mustChangePassword;
-                  
-                  await setDoc(doc(db, "users", userDocId), { 
-                    password: String(pwd).trim(),
-                    mustChangePassword: false 
-                  }, { merge: true });
-
-                  setCurrentUser(updatedUser);
-                  setStorageItem("sched_current_user", updatedUser);
-                  toast.success('Password updated successfully. Access granted.');
-                } catch (err) {
-                  console.error(err);
-                  toast.error('Failed to update password.');
-                }
-              }} 
-              className="space-y-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">New Password</label>
-                  <input type="password" name="newpwd" required className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-rose-500" placeholder="Minimum 6 characters" minLength={6} />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Confirm Password</label>
-                  <input type="password" name="confirm" required className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-rose-500" placeholder="Confirm your new password" />
-                </div>
-                <button type="submit" className="w-full py-3.5 bg-gradient-to-r from-rose-600 to-orange-600 hover:from-rose-500 hover:to-orange-500 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 mt-4 cursor-pointer">
-                  Update Password & Continue
-                </button>
-              </form>
-            </div>
-          </div>
         ) : (
           /* User Logged In Portal */
           <div className="flex-1 flex flex-col gap-6 my-4 lg:my-6">
@@ -9316,10 +9218,7 @@ ${ttNotes}`
               <div className="flex items-center justify-end gap-3 text-right">
                 <div className="hidden sm:block">
                   <p className="text-xs font-bold text-slate-200">{currentUser.name}</p>
-                  {currentUser.role === 'agent' && currentUser.teamLeader && (
-                    <span className="text-[10px] text-slate-500 block">TL: {currentUser.teamLeader}</span>
-                  )}
-                  <p className="text-[9px] text-slate-500 font-mono font-black uppercase tracking-widest block">{currentUser.role || 'Agent'}</p>
+                  <p className="text-[9px] text-slate-500 font-mono font-black uppercase tracking-widest">{currentUser.role || 'Agent'}</p>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center font-bold text-xs text-indigo-400 font-display">
                   {currentUser.name ? currentUser.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() : 'U'}
@@ -10690,15 +10589,10 @@ ${ttNotes}`
                           </div>
                           <div className="text-center sm:text-left flex-1">
                             <div className="flex flex-col sm:flex-row sm:items-end gap-3 justify-center sm:justify-start">
-                              <div className="flex flex-col">
-                                <h2 className="text-3xl font-display font-black text-slate-100">
-                                  {formatAgentName(currentUser.name)}{" "}
-                                  {currentUser.role === "tl" ? "" : ""}
-                                </h2>
-                                {currentUser.role === "agent" && currentUser.teamLeader && (
-                                  <span className="text-[10px] text-slate-500 block">TL: {currentUser.teamLeader}</span>
-                                )}
-                              </div>
+                              <h2 className="text-3xl font-display font-black text-slate-100">
+                                {formatAgentName(currentUser.name)}{" "}
+                                {currentUser.role === "tl" ? "" : ""}
+                              </h2>
                               <p className="text-xs font-mono text-slate-500 uppercase tracking-widest bg-[#1e1e1e]/40 backdrop-blur-lg/50 px-2 py-1 rounded mb-1">
                                 LOB: {getAgentLOB(currentUser.name)}
                               </p>
@@ -13804,7 +13698,7 @@ ${ttNotes}`
                                               <div className="space-y-1">
                                                 <div className="flex justify-between text-xs">
                                                   <span className="font-bold text-slate-300">
-                                                    Chat Load
+                                                    Social Media Load
                                                   </span>
                                                   <span className="text-slate-100 font-black font-mono">
                                                     {socialInq} ({socialPercent}
@@ -14507,7 +14401,7 @@ ${ttNotes}`
                                     });
                                   const events = [
                                     `Patient assessment dispatch record active`,
-                                    `Inbound call routed to Chat Queue`,
+                                    `Inbound call routed to Social Media Queue`,
                                     `Fintech installment agreement callback processed`,
                                     `Case inquiry record established`,
                                   ];
@@ -20879,30 +20773,27 @@ ${ttNotes}`
                       </div>
 
                       {/* Schedule Upload Module */}
-                      {(isSuperAdmin || currentUser?.role === "tl" || currentUser?.role === "director") && (
-                        <div className="w-full bg-white/5 border border-white/10 rounded-3xl p-6 shadow-2xl space-y-4 text-left">
-                          <h3 className="font-extrabold text-slate-100 text-base font-display flex items-center gap-2">
-                            <Upload className="w-5 h-5 text-indigo-400" />
-                            Upload Schedule File
-                          </h3>
+                      {isSuperAdmin && (
+                        <div className="w-full">
                           <ScheduleUpload
                             agentsList={agentsList}
-                            onUpload={handleScheduleUpload}
+                            onSchedulesImported={(parsedSchedules) => {
+                              setTempSchedules(parsedSchedules as any);
+                              setUploadSuccess(
+                                `Successfully processed ${parsedSchedules.length} shifts.`,
+                              );
+                            }}
                           />
-                          {rosterUploadSuccess && (
-                            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 rounded-lg text-sm flex items-center gap-2">
-                              <CheckCircle2 className="w-4 h-4 shrink-0" />
-                              <p>{rosterUploadSuccess}</p>
-                            </div>
-                          )}
-                          {rosterUploadErrors.length > 0 && (
-                            <div className="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-300 rounded-lg text-sm flex items-start gap-2 max-h-32 overflow-y-auto">
-                              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                              <div className="space-y-1">
-                                {rosterUploadErrors.map((err, idx) => (
-                                  <p key={idx}>{err}</p>
-                                ))}
-                              </div>
+                          {tempSchedules.length > 0 && (
+                            <div className="mt-4 flex justify-end">
+                              <button
+                                onClick={commitSchedules}
+                                className="px-5 py-2 bg-emerald-600 text-white shadow-md shadow-emerald-500/20 hover:bg-emerald-700 rounded-xl text-sm font-bold flex items-center gap-2 transition-all"
+                              >
+                                <CheckCircle2 className="w-4 h-4" /> Save &
+                                Append Published Schedule (
+                                {tempSchedules.length} items)
+                              </button>
                             </div>
                           )}
                         </div>
@@ -23084,7 +22975,8 @@ ${ttNotes}`
                                     Client Communication
                                   </h2>
                                   <p className="text-slate-400 text-sm">
-                                    Submit and monitor requests for Chat agents.
+                                    Submit and monitor requests for Chat and
+                                    Social Media agents.
                                   </p>
                                 </>
                               ) : isComplaintsTab ? (
@@ -23991,7 +23883,7 @@ ${ttNotes}`
                                         <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
                                           Source Channel *
                                         </label>
-                                        <div className="grid grid-cols-2 gap-2">
+                                        <div className="grid grid-cols-3 gap-2">
                                           <button
                                             id="cc-channel-call-center"
                                             type="button"
@@ -24017,6 +23909,20 @@ ${ttNotes}`
                                             }`}
                                           >
                                             💬 Chat
+                                          </button>
+                                          <button
+                                            id="cc-channel-social-media"
+                                            type="button"
+                                            onClick={() =>
+                                              setCcChannel("social_media")
+                                            }
+                                            className={`py-2 px-1 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center border cursor-pointer ${
+                                              ccChannel === "social_media"
+                                                ? "bg-indigo-600 border-indigo-500 text-white shadow"
+                                                : "bg-black/25 border-white/5 text-slate-400"
+                                            }`}
+                                          >
+                                            📱 Social Media
                                           </button>
                                         </div>
                                       </div>

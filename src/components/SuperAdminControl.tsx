@@ -54,7 +54,6 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   TRIGGER_CURRENT_APP_VERSION
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterIssue, setFilterIssue] = useState<string | null>(null);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
 
   const isGlobalAdminUser = currentUser?.name?.toLowerCase() === "h.sobhy" ||
@@ -157,14 +156,15 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
     }
   };
 
-  const handleSetPassword = async (user: UserProfile) => {
+  const handleSetPassword = async (userName: string) => {
     if (!isGlobalAdminUser) {
       toast.error('Only the global super admin (h.sobhy) can reset credentials.');
       return;
     }
-
-    const defaultPassword = "Synq12345@";
-    const userName = user.name || user.id;
+    if (!String(newPasswordValue || '').trim()) {
+      toast.error('Password cannot be empty!');
+      return;
+    }
 
     const usernameKey = getUsernameFromFullName(userName).toLowerCase();
     const fullNameKey = String(userName || '').trim();
@@ -173,25 +173,21 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
     const updatedCreds = { 
       ...credentials, 
-      [usernameKey]: defaultPassword,
-      [fullNameKey]: defaultPassword,
-      [lowerFullNameKey]: defaultPassword,
-      [oldNormalizeKey]: defaultPassword
+      [usernameKey]: String(newPasswordValue || '').trim(),
+      [fullNameKey]: String(newPasswordValue || '').trim(),
+      [lowerFullNameKey]: String(newPasswordValue || '').trim(),
+      [oldNormalizeKey]: String(newPasswordValue || '').trim()
     };
 
     try {
       await setDoc(doc(db, "system", "sched_credentials"), { data: updatedCreds });
       
-      await setDoc(doc(db, "users", user.id), {
-        password: defaultPassword,
-        mustChangePassword: true
-      }, { merge: true });
-
       // Also automatically unlock if is locked
       await handleUnlock(userName);
 
-      toast.success(`Password for ${userName} reset to default: Synq12345@`);
+      toast.success(`Successfully set password for ${userName}!`);
       setTargetPasswordChange(null);
+      setNewPasswordValue('');
     } catch (err: any) {
       console.error(err);
       toast.error('Failed to set credentials.');
@@ -310,48 +306,6 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
     }
   };
 
-  const handleCleanDuplicates = async () => {
-    if (!isGlobalAdminUser) return;
-    if (!window.confirm("Are you sure you want to clean duplicates? This will keep the most complete profile and delete others.")) return;
-
-    try {
-      const usernameGroups: Record<string, UserProfile[]> = {};
-      registeredUsers.forEach(u => {
-         const key = getUsernameFromFullName(u.name || u.id).toLowerCase();
-         if (!usernameGroups[key]) usernameGroups[key] = [];
-         usernameGroups[key].push(u);
-      });
-
-      const { writeBatch } = await import('firebase/firestore');
-      const batch = writeBatch(db);
-      let deletedCount = 0;
-
-      for (const [key, group] of Object.entries(usernameGroups)) {
-        if (group.length > 1) {
-          const sorted = group.sort((a, b) => {
-             if (a.role && !b.role) return -1;
-             if (!a.role && b.role) return 1;
-             return String(b.name || '').length - String(a.name || '').length;
-          });
-          for (let i = 1; i < sorted.length; i++) {
-             batch.delete(doc(db, "users", sorted[i].id));
-             deletedCount++;
-          }
-        }
-      }
-
-      if (deletedCount > 0) {
-        await batch.commit();
-        toast.success(`Cleaned ${deletedCount} duplicate user profiles.`);
-      } else {
-        toast.info("No duplicates found.");
-      }
-    } catch(err) {
-      console.error(err);
-      toast.error('Failed to clean duplicates');
-    }
-  };
-
   const handleRemoteReloadForce = async () => {
     try {
       const nextVer = TRIGGER_CURRENT_APP_VERSION + 1;
@@ -363,52 +317,8 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
     }
   };
 
-  const uniqueUsersMap = new Map<string, UserProfile>();
-  registeredUsers.forEach(u => {
-    const rawUsername = getUsernameFromFullName(u.name || u.id).toLowerCase();
-    const existing = uniqueUsersMap.get(rawUsername);
-    if (!existing) {
-       uniqueUsersMap.set(rawUsername, u);
-    } else {
-       // Keep the one with a role or longer name
-       if ((u.role && !existing.role) || (String(u.name || '').length > String(existing.name || '').length)) {
-          uniqueUsersMap.set(rawUsername, u);
-       }
-    }
-  });
-
-  const displayUsers = Array.from(uniqueUsersMap.values()).map(u => {
-    if (u.role === "tl") {
-      const teamLobs = Array.from(new Set(registeredUsers.filter(a => a.teamLeader?.toLowerCase() === (u.name || "").toLowerCase() && a.role !== "tl" && a.lob).map(a => a.lob)));
-      if (teamLobs.length > 0) {
-        return { ...u, lob: teamLobs.join(", ") };
-      }
-    }
-    return u;
-  });
-
-  // Identify Issues
-  const usernameCounts = registeredUsers.reduce((acc, u) => {
-    const un = getUsernameFromFullName(u.name || '').toLowerCase();
-    acc[un] = (acc[un] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  const duplicateUsers = registeredUsers.filter(u => usernameCounts[getUsernameFromFullName(u.name || '').toLowerCase()] > 1);
-  const missingLOBUsers = registeredUsers.filter(u => u.role === "agent" && (!u.lob || u.lob === "social_media"));
-  const missingTLUsers = registeredUsers.filter(u => u.role === "agent" && !u.teamLeader);
-  const needsPasswordChangeUsers = registeredUsers.filter(u => (u as any).mustChangePassword === true);
-  const brokenNamesUsers = registeredUsers.filter(u => !u.name || u.name.trim() === '');
-
   // Filter registered users based on search
-  const filteredUsers = displayUsers.filter(u => {
-    if (filterIssue === 'duplicate') return usernameCounts[getUsernameFromFullName(u.name || '').toLowerCase()] > 1;
-    if (filterIssue === 'missing_lob') return u.role === "agent" && (!u.lob || u.lob === "social_media");
-    if (filterIssue === 'missing_tl') return u.role === "agent" && !u.teamLeader;
-    if (filterIssue === 'needs_password') return (u as any).mustChangePassword === true;
-    if (filterIssue === 'broken_name') return !u.name || u.name.trim() === '';
-    return true;
-  }).filter(u => {
+  const filteredUsers = registeredUsers.filter(u => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -443,16 +353,6 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
             <RefreshCw className="w-3.5 h-3.5" />
             Force Re-Sync App (v{TRIGGER_CURRENT_APP_VERSION})
           </button>
-          
-          {isGlobalAdminUser && (
-            <button
-              onClick={handleCleanDuplicates}
-              className="px-4 py-2 text-xs font-bold transition-all rounded-xl bg-orange-500/10 hover:bg-orange-500/15 text-orange-300 border border-orange-500/20 flex items-center gap-1.5 cursor-pointer"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              Clean Duplicates
-            </button>
-          )}
         </div>
       </div>
 
@@ -460,66 +360,30 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
         {/* Left column: Quick metrics or directory snapshot summary */}
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-white/5 border border-white/10 p-6 rounded-3xl space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-slate-100 text-base font-display">System State Summary</h3>
-              {filterIssue && (
-                <button 
-                  onClick={() => setFilterIssue(null)}
-                  className="px-2 py-1 text-[10px] font-bold text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 rounded-md transition-colors"
-                >
-                  Clear Filter
-                </button>
-              )}
-            </div>
+            <h3 className="font-bold text-slate-100 text-base font-display">System State Summary</h3>
             
-            <div className="grid grid-cols-2 gap-3 text-center">
-              <button onClick={() => setFilterIssue(null)} className={`p-4 border rounded-2xl flex flex-col items-center justify-center transition-all ${filterIssue === null ? 'bg-indigo-500/40 border-indigo-400/50 scale-[1.02]' : 'bg-black/20 border-white/5 hover:border-white/10'}`}>
-                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Total Users</p>
-                 <div className="flex items-center gap-1.5 text-2xl font-black text-slate-200">
-                    <Users className="w-5 h-5 text-indigo-400" />
-                    {registeredUsers.length}
-                 </div>
-              </button>
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div className="p-4 bg-black/20 border border-white/5 rounded-2xl">
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Agents</p>
+                <p className="text-2xl font-black text-slate-200 mt-1">{registeredUsers.filter(u => u.role !== 'tl').length}</p>
+              </div>
 
-              <button onClick={() => setFilterIssue('duplicate')} className={`p-4 border rounded-2xl flex flex-col items-center justify-center transition-all ${filterIssue === 'duplicate' ? 'bg-rose-500/40 border-rose-400/50 scale-[1.02]' : 'bg-black/20 border-white/5 hover:border-white/10'}`}>
-                <div className="flex items-center gap-1 mb-1">
-                   <div className={`w-2 h-2 rounded-full shrink-0 ${duplicateUsers.length === 0 ? 'bg-emerald-500' : duplicateUsers.length <= 5 ? 'bg-amber-500' : 'bg-rose-500'}`} />
-                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none">Duplicate Logins</p>
-                </div>
-                <div className="text-2xl font-black text-slate-200">{duplicateUsers.length}</div>
-              </button>
+              <div className="p-4 bg-black/20 border border-white/5 rounded-2xl">
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Leaders/TLs</p>
+                <p className="text-2xl font-black text-indigo-400 mt-1">{registeredUsers.filter(u => u.role === 'tl').length}</p>
+              </div>
 
-              <button onClick={() => setFilterIssue('missing_lob')} className={`p-4 border rounded-2xl flex flex-col items-center justify-center transition-all ${filterIssue === 'missing_lob' ? 'bg-amber-500/40 border-amber-400/50 scale-[1.02]' : 'bg-black/20 border-white/5 hover:border-white/10'}`}>
-                <div className="flex items-center gap-1 mb-1">
-                   <div className={`w-2 h-2 rounded-full shrink-0 ${missingLOBUsers.length === 0 ? 'bg-emerald-500' : missingLOBUsers.length <= 5 ? 'bg-amber-500' : 'bg-rose-500'}`} />
-                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none">Missing LOB</p>
-                </div>
-                <div className="text-2xl font-black text-slate-200">{missingLOBUsers.length}</div>
-              </button>
+              <div className="p-4 bg-black/20 border border-rose-500/20 rounded-2xl">
+                <p className="text-xs text-rose-300 font-bold uppercase tracking-wider">Locked Accounts</p>
+                <p className="text-2xl font-black text-rose-400 mt-1">{lockedAccounts.length}</p>
+              </div>
 
-              <button onClick={() => setFilterIssue('missing_tl')} className={`p-4 border rounded-2xl flex flex-col items-center justify-center transition-all ${filterIssue === 'missing_tl' ? 'bg-amber-500/40 border-amber-400/50 scale-[1.02]' : 'bg-black/20 border-white/5 hover:border-white/10'}`}>
-                <div className="flex items-center gap-1 mb-1">
-                   <div className={`w-2 h-2 rounded-full shrink-0 ${missingTLUsers.length === 0 ? 'bg-emerald-500' : missingTLUsers.length <= 5 ? 'bg-amber-500' : 'bg-rose-500'}`} />
-                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none">Missing TL</p>
-                </div>
-                <div className="text-2xl font-black text-slate-200">{missingTLUsers.length}</div>
-              </button>
-
-              <button onClick={() => setFilterIssue('broken_name')} className={`p-4 border rounded-2xl flex flex-col items-center justify-center transition-all ${filterIssue === 'broken_name' ? 'bg-rose-500/40 border-rose-400/50 scale-[1.02]' : 'bg-black/20 border-white/5 hover:border-white/10'}`}>
-                <div className="flex items-center gap-1 mb-1">
-                   <div className={`w-2 h-2 rounded-full shrink-0 ${brokenNamesUsers.length === 0 ? 'bg-emerald-500' : brokenNamesUsers.length <= 5 ? 'bg-amber-500' : 'bg-rose-500'}`} />
-                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none">Broken Names</p>
-                </div>
-                <div className="text-2xl font-black text-slate-200">{brokenNamesUsers.length}</div>
-              </button>
-              
-              <button onClick={() => setFilterIssue('needs_password')} className={`p-4 border rounded-2xl flex flex-col items-center justify-center transition-all ${filterIssue === 'needs_password' ? 'bg-indigo-500/40 border-indigo-400/50 scale-[1.02]' : 'bg-black/20 border-white/5 hover:border-white/10'}`}>
-                <div className="flex items-center gap-1 mb-1">
-                   <div className={`w-2 h-2 rounded-full shrink-0 ${needsPasswordChangeUsers.length === 0 ? 'bg-emerald-500' : needsPasswordChangeUsers.length <= 5 ? 'bg-amber-500' : 'bg-rose-500'}`} />
-                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none whitespace-nowrap">Pass Change</p>
-                </div>
-                <div className="text-2xl font-black text-slate-200">{needsPasswordChangeUsers.length}</div>
-              </button>
+              <div className="p-4 bg-black/20 border border-orange-500/20 rounded-2xl">
+                <p className="text-xs text-orange-300 font-bold uppercase tracking-wider">Locked Attempts</p>
+                <p className="text-2xl font-black text-orange-400 mt-1">
+                  {Object.values(failedAttempts).filter(v => v > 0).length}
+                </p>
+              </div>
             </div>
 
             <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 space-y-2">
@@ -575,16 +439,13 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">LOB / Channel</label>
-                    <select
+                    <input
+                      type="text"
+                      placeholder="e.g. Chat, Social Media"
                       value={newUserLob}
                       onChange={(e) => setNewUserLob(e.target.value)}
-                      disabled={newUserRole === "tl"}
-                      className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 disabled:opacity-50"
-                    >
-                      <option value="">-- Choose LOB --</option>
-                      <option value="chat">Chat</option>
-                      <option value="call_center">Call Center</option>
-                    </select>
+                      className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100"
+                    />
                   </div>
                 </div>
 
@@ -679,8 +540,6 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                     className={`p-4 rounded-2xl border transition-all ${
                       isUserLocked 
                         ? 'bg-rose-950/20 border-rose-500/20 shadow-lg shadow-rose-950/10' 
-                        : (!user.name || user.name.trim() === '')
-                        ? 'bg-rose-500/5 border-rose-500/30 hover:border-rose-500/50'
                         : 'bg-black/20 border-white/5 hover:border-white/10'
                     }`}
                   >
@@ -741,16 +600,12 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
                           <div className="space-y-1">
                             <label className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">LOB / Channel</label>
-                            <select
+                            <input
+                              type="text"
                               value={editLob}
                               onChange={(e) => setEditLob(e.target.value)}
-                              disabled={editRole === "tl"}
-                              className="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-100 disabled:opacity-50"
-                            >
-                              <option value="">-- None --</option>
-                              <option value="chat">Chat</option>
-                              <option value="call_center">Call Center</option>
-                            </select>
+                              className="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-100"
+                            />
                           </div>
 
                           <div className="space-y-1">
@@ -786,16 +641,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                             </div>
                             <div>
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="font-bold text-slate-100 text-sm whitespace-nowrap">
-                                  {!user.name || user.name.trim() === '' ? (
-                                    <span className="text-rose-400 flex items-center gap-1">
-                                      <AlertCircle className="w-3.5 h-3.5" />
-                                      {user.id}
-                                    </span>
-                                  ) : (
-                                    user.name
-                                  )}
-                                </span>
+                                <span className="font-bold text-slate-100 text-sm whitespace-nowrap">{user.name}</span>
                                 <span className="text-[10px] bg-cyan-950/40 text-cyan-400 px-2.5 py-0.5 rounded-lg border border-cyan-500/20 font-mono font-bold" title="App Username for Login">
                                   {getUsernameFromFullName(user.name)}
                                 </span>
@@ -812,13 +658,10 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                                   </span>
                                 )}
                               </div>
-                              {user.teamLeader && user.role === 'agent' && (
-                                <p className="text-[10px] text-slate-500 font-medium">TL: {user.teamLeader}</p>
-                              )}
                               <p className="text-[10px] text-slate-400 mt-0.5 space-x-2">
                                 <span>{user.email || 'No Email'}</span>
                                 {user.phone && <span className="text-emerald-400 font-mono">• {user.phone}</span>}
-                                {user.lob && <span>• <span className="text-indigo-300 font-semibold">{user.lob === 'chat' ? 'Chat' : user.lob === 'call_center' ? 'Call Center' : user.lob}</span></span>}
+                                {user.lob && <span>• <span className="text-indigo-300 font-semibold">{user.lob}</span></span>}
                                 {user.teamLeader && <span>• TL: <span className="text-cyan-400">{user.teamLeader}</span></span>}
                               </p>
                             </div>
@@ -858,12 +701,36 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                         <div className="flex items-center justify-between border-t border-white/5 pt-2.5 text-xs text-slate-400">
                           <div className="flex items-center gap-3">
                             {isGlobalAdminUser ? (
-                              <button
-                                onClick={() => handleSetPassword(user)}
-                                className="flex items-center gap-1 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 hover:border-rose-500/30 transition-all rounded-xl p-1 px-2.5 text-[10.5px] font-bold text-rose-300 cursor-pointer"
-                              >
-                                <Key className="w-3 h-3 text-rose-400" /> Reset Password
-                              </button>
+                              targetPasswordChange === user.id ? (
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="text"
+                                    placeholder="Enter New Password"
+                                    value={newPasswordValue}
+                                    onChange={(e) => setNewPasswordValue(e.target.value)}
+                                    className="bg-black/40 border border-white/10 rounded-xl p-1 px-2.5 text-slate-200 text-[11px] focus:outline-none focus:border-rose-500 w-36"
+                                  />
+                                  <button
+                                    onClick={() => handleSetPassword(user.name)}
+                                    className="p-1 px-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-[10px] font-extrabold transition-all cursor-pointer"
+                                  >
+                                    Reset Password
+                                  </button>
+                                  <button
+                                    onClick={() => { setTargetPasswordChange(null); setNewPasswordValue(''); }}
+                                    className="p-1 text-slate-400 hover:text-slate-200 text-[10px] font-medium cursor-pointer"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => setTargetPasswordChange(user.id)}
+                                  className="flex items-center gap-1 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 hover:border-rose-500/30 transition-all rounded-xl p-1 px-2.5 text-[10.5px] font-bold text-rose-300 cursor-pointer"
+                                >
+                                  <Key className="w-3 h-3 text-rose-400" /> Reset Password
+                                </button>
+                              )
                             ) : (
                               <div className="text-[10px] text-slate-500 flex items-center gap-1 font-medium font-sans">
                                 <Lock className="w-2.5 h-2.5 text-slate-600" /> Password reset restricted to Global Admin

@@ -157,7 +157,6 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
     let absent = 0;
     let onLeave = 0; // Annual + Sick + Casual
     let noShowNoCall = 0; // No Show + No Call
-    let off = 0;
     let notMarked = 0;
 
     processedRoster.forEach((item) => {
@@ -166,7 +165,6 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
       else if (item.status === "absent") absent++;
       else if (["annual", "sick", "casual"].includes(item.status)) onLeave++;
       else if (item.status === "nsnc") noShowNoCall++;
-      else if (item.status === "off") off++;
       else notMarked++;
     });
 
@@ -177,7 +175,6 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
       absent,
       onLeave,
       noShowNoCall,
-      off,
       notMarked,
     };
   }, [processedRoster]);
@@ -442,10 +439,6 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
           <p className="text-[9px] uppercase font-black text-red-500 tracking-wider">NSNC</p>
           <p className="text-2xl font-black text-red-400 mt-1">{stats.noShowNoCall}</p>
         </div>
-        <div className="p-4 bg-gray-500/5 border border-gray-500/10 rounded-2xl text-center">
-          <p className="text-[9px] uppercase font-black text-gray-400 tracking-wider">Off</p>
-          <p className="text-2xl font-black text-gray-400 mt-1">{stats.off}</p>
-        </div>
         <div className="p-4 bg-slate-800/10 border border-slate-800 rounded-2xl text-center">
           <p className="text-[9px] uppercase font-black text-slate-400 tracking-wider">Not Marked</p>
           <p className="text-2xl font-black text-slate-400 mt-1">{stats.notMarked}</p>
@@ -597,13 +590,6 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                             activeStyle="bg-red-500/25 text-red-00 border-red-500/40"
                             onClick={() => handleMarkStatus(item.name, "nsnc")}
                           />
-                          <StatusSelectorButton
-                            label="Off"
-                            icon="🛌"
-                            isActive={item.status === "off"}
-                            activeStyle="bg-gray-500/25 text-gray-100 border-gray-500/40"
-                            onClick={() => handleMarkStatus(item.name, "off")}
-                          />
                         </div>
                       </td>
                     </tr>
@@ -701,13 +687,6 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                         activeStyle="bg-red-500/25 text-red-100 border-red-500/40"
                         onClick={() => handleMarkStatus(item.name, "nsnc")}
                       />
-                      <StatusSelectorButton
-                        label="Off"
-                        icon="🛌"
-                        isActive={item.status === "off"}
-                        activeStyle="bg-gray-500/25 text-gray-100 border-gray-500/40"
-                        onClick={() => handleMarkStatus(item.name, "off")}
-                      />
                     </div>
                   </div>
                 );
@@ -730,8 +709,6 @@ const getStatusBadgeColor = (status: AttendanceRecord["status"]) => {
     case "absent":
     case "nsnc":
       return "bg-rose-500/20 text-rose-400 border-rose-500/30";
-    case "off":
-      return "bg-gray-500/20 text-gray-400 border-gray-500/30";
     case "annual":
     case "sick":
     case "casual":

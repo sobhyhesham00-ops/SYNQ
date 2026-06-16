@@ -1,5 +1,4 @@
 export type Role = 'tl' | 'agent' | 'qa' | 'sme' | 'director';
-export type LOB = 'chat' | 'call_center';
 
 export interface FileAttachment {
   id: string;
@@ -421,46 +420,46 @@ export const INITIAL_AGENTS = [
 ];
 
 export const AGENT_LOBS: Record<string, string> = {
-  'AbdelRahman Al Sayed': 'chat',
-  'AbduAllah Salah Fahmy': 'call_center',
-  'Ahmed Eid Abdelbaset Eid': 'chat',
-  'Alaa Ashraf Farouk Darwish': 'chat',
-  'Ammar Ismail Helmy': 'chat',
-  'Amr Mohamed Farouk Mohamed': 'chat',
+  'AbdelRahman Al Sayed': 'Social Media',
+  'AbduAllah Salah Fahmy': 'Call Center',
+  'Ahmed Eid Abdelbaset Eid': 'Social Media',
+  'Alaa Ashraf Farouk Darwish': 'Social Media',
+  'Ammar Ismail Helmy': 'Social Media',
+  'Amr Mohamed Farouk Mohamed': 'Social Media',
   'Shymaa Hassan': 'TL',
   'Shaymaa Hassan': 'TL',
-  'Anan Ashraf farouk Darwish': 'chat',
-  'Asmaa Ahmed Mohamed Morsy': 'call_center',
-  'Bassant Alaa Eldin': 'call_center',
+  'Anan Ashraf farouk Darwish': 'Social Media',
+  'Asmaa Ahmed Mohamed Morsy': 'Call Center',
+  'Bassant Alaa Eldin': 'Call Center',
   'AbdelAlem Essam AbdelAlem': 'TL',
-  'Eslam Samy Ashour Ali': 'chat',
-  'Fatma Essam Abdelalem': 'call_center',
-  'Hadeer Mohamed': 'call_center',
-  'Hager Nagy': 'chat',
-  'Hussam Mahmoud Yousef Ahmed': 'chat',
-  'Hussein Ashraf': 'chat',
-  'Jodie El Sayed Mohamed Mohamed': 'call_center',
-  'Kenzi Reda Ahmed Ali': 'chat',
-  'Kholoud Fakhry': 'call_center',
-  'Kotoz Sami Mohamed': 'call_center',
-  'Mahmoud Mohamed Gamal Eldin': 'chat',
-  'Mai Ashraf Elsayed': 'chat',
-  'Mariam Nagy Eraky': 'call_center',
-  'Mariam walaa Gamal Mostafa': 'call_center',
+  'Eslam Samy Ashour Ali': 'Social Media',
+  'Fatma Essam Abdelalem': 'Call Center',
+  'Hadeer Mohamed': 'Call Center',
+  'Hager Nagy': 'Social Media',
+  'Hussam Mahmoud Yousef Ahmed': 'Social Media',
+  'Hussein Ashraf': 'Social Media',
+  'Jodie El Sayed Mohamed Mohamed': 'Call Center',
+  'Kenzi Reda Ahmed Ali': 'Social Media',
+  'Kholoud Fakhry': 'Call Center',
+  'Kotoz Sami Mohamed': 'Call Center',
+  'Mahmoud Mohamed Gamal Eldin': 'Social Media',
+  'Mai Ashraf Elsayed': 'Social Media',
+  'Mariam Nagy Eraky': 'Call Center',
+  'Mariam walaa Gamal Mostafa': 'Call Center',
   'Basma Rabea': 'Quality',
-  'Mennatallah Ahmed el sayed Salem': 'chat',
-  'Moaz Salah Al-Nagar': 'chat',
-  'Mohamed Alaa': 'chat',
-  'Mohamed Amer Mohy El Din': 'call_center',
-  'Mostafa Mahmoud Hamed Abd El Ghany': 'chat',
-  'Nouran Mohamed Saad Eldin Tawfik': 'call_center',
-  'Nouran Sharqawi': 'chat',
-  'Salma Ahmed Mohamed Kamel': 'chat',
-  'Yomna Mohamed Ahmed': 'chat',
-  'Youssef Magdy Hamad Abo Al Ainen': 'chat',
-  'Zeina Yasser Nessim Selim': 'chat',
+  'Mennatallah Ahmed el sayed Salem': 'Social Media',
+  'Moaz Salah Al-Nagar': 'Social Media',
+  'Mohamed Alaa': 'Social Media',
+  'Mohamed Amer Mohy El Din': 'Call Center',
+  'Mostafa Mahmoud Hamed Abd El Ghany': 'Social Media',
+  'Nouran Mohamed Saad Eldin Tawfik': 'Call Center',
+  'Nouran Sharqawi': 'Social Media',
+  'Salma Ahmed Mohamed Kamel': 'Social Media',
+  'Yomna Mohamed Ahmed': 'Social Media',
+  'Youssef Magdy Hamad Abo Al Ainen': 'Social Media',
+  'Zeina Yasser Nessim Selim': 'Social Media',
   'Emad Sayed': 'TL',
-  'Hana Alaa': 'chat',
+  'Hana Alaa': 'Social Media',
   'Hesham Sobhy': 'TL'
 };
 
@@ -559,7 +558,7 @@ export interface AttendanceRecord {
   id: string; // format: `${agentUsername}_${date}` e.g. "john_doe_2026-06-14"
   agentName: string;
   date: string; // YYYY-MM-DD
-  status: 'present' | 'absent' | 'late' | 'casual' | 'annual' | 'sick' | 'nsnc' | 'not_marked' | 'off';
+  status: 'present' | 'absent' | 'late' | 'casual' | 'annual' | 'sick' | 'nsnc' | 'not_marked';
   lateTime?: string; // HH:MM, only relevant when status === 'late'
   markedBy?: string; // TL name
   markedAt?: string; // ISO timestamp
