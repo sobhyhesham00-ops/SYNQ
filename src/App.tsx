@@ -1085,6 +1085,12 @@ export default function App() {
       }
       if (!active) return;
 
+      if (currentUserRef.current) {
+        setDoc(doc(db, "users", firebaseUser.uid), currentUserRef.current, { merge: true }).catch(console.error);
+        const userDocId = currentUserRef.current.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+        setDoc(doc(db, "users", userDocId), currentUserRef.current, { merge: true }).catch(console.error);
+      }
+
       cleanupListeners();
       console.log("[Firebase Auth] User successfully verified! Initializing 20+ real-time Firestore listeners...");
       setAuthReady(true);
@@ -2284,7 +2290,7 @@ export default function App() {
       entityId,
     };
     // Auto-sync real-time to firestore
-    setDoc(doc(db, "notifications", newNotif.id), newNotif).catch((e) =>
+    setDoc(doc(db, "notifications", newNotif.id), newNotif, { merge: true }).catch((e) =>
       console.error("Notif sync error:", e),
     );
   };
@@ -2975,9 +2981,10 @@ ${pageText}
     if (!currentUser || !db) return;
 
     const checkHourlyReminders = async () => {
-      // Find all inquiries that are in "answered" status.
+      // Only process hourly reminders for inquiries owned by the current user to prevent
+      // redundant execution and Firestore permission denied errors from other agents' clients.
       const answeredInquiries = inquiries.filter(
-        (inq) => inq.status === "answered"
+        (inq) => inq.status === "answered" && inq.agentName === currentUser.name
       );
 
       const now = new Date();
@@ -4400,7 +4407,14 @@ ${pageText}
         correspondingFullName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
       ),
       authenticatedUser,
+      { merge: true }
     ).catch((e) => console.error("User doc sync error:", e));
+
+    if (auth.currentUser?.uid) {
+      setDoc(doc(db, "users", auth.currentUser.uid), authenticatedUser, { merge: true }).catch(
+        console.error,
+      );
+    }
 
     if (
       userRole === "agent" &&

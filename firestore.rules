@@ -28,7 +28,7 @@ service cloud.firestore {
     // Checking roles handles TL, Admin, and Superadmin roles securely
     function isSuperAdmin() {
       let role = getUserRole();
-      return role == 'tl' || role == 'admin' || role == 'superadmin';
+      return role == 'tl' || role == 'admin' || role == 'superadmin' || role == 'director';
     }
 
     function isTLOrSupport() {
@@ -56,7 +56,15 @@ service cloud.firestore {
     // evaluation loop that happens when a getUserRole() lookup triggers a read of its own users collection.
     match /users/{userId} {
       allow read: if isSignedIn();
-      allow write: if isSignedIn() && (request.auth.uid == resource.data.uid || getUserRole() == 'director' || !exists(/databases/$(database)/documents/users/$(request.auth.uid)));
+      allow write: if isSignedIn() && (
+        (resource != null && request.auth.uid == resource.data.uid) || 
+        (request.resource != null && request.auth.uid == request.resource.data.uid) || 
+        request.auth.uid == userId || 
+        (resource != null && getUserName() != null && getUserName() == resource.data.name) || 
+        (request.resource != null && getUserName() != null && getUserName() == request.resource.data.name) || 
+        getUserRole() == 'director' || 
+        !exists(/databases/$(database)/documents/users/$(request.auth.uid))
+      );
     }
 
     // Cases, Requests, Inquiries
