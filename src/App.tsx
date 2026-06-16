@@ -1618,19 +1618,7 @@ export default function App() {
                 { merge: true },
               ).catch(console.error);
             } else if (remoteVersion > CURRENT_APP_VERSION) {
-              const key = `ignored_update_banner_${remoteVersion}`;
-              if (!sessionStorage.getItem(key)) {
-                setShowUpdateBanner(true);
-                // Pre-flush caches so reload is clean when they click Refresh
-                if ("caches" in window) {
-                  caches
-                    .keys()
-                    .then((names) => {
-                      for (let name of names) caches.delete(name);
-                    })
-                    .catch((e) => console.error("Cache flush error:", e));
-                }
-              }
+              setNewVersionAvailable(true);
             }
           } else {
             setDoc(doc(db, "system", "app_version"), {
@@ -3217,7 +3205,7 @@ ${pageText}
   const [tlFintechNotes, setTlFintechNotes] = useState("");
   const [tlFintechLinks, setTlFintechLinks] = useState("");
 
-  const [showUpdateBanner, setShowUpdateBanner] = useState(false);
+  const [newVersionAvailable, setNewVersionAvailable] = useState(false);
 
   // Form submission and confirmation states
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
@@ -7068,14 +7056,14 @@ ${ttNotes}`
 
       // Notifications
       if (channelLabel === "call_center") {
-        const socialMediaAgents = Object.entries(AGENT_LOBS)
+        const chatAgents = Object.entries(AGENT_LOBS)
           .filter(
             ([name, lob]) =>
-              lob === "Social Media" && name !== currentUser?.name,
+              (lob === "chat" || lob === "Chat") && name !== currentUser?.name,
           )
           .map(([name]) => name);
 
-        socialMediaAgents.forEach((agentName) => {
+        chatAgents.forEach((agentName) => {
           addSystemNotification(
             "New Tabby/Tamara request. Please contact the client.",
             `${currentUser.name} (Call Center) submitted a request for ${ttPatientName} (${ttPhoneNumber}).`,
@@ -7182,15 +7170,15 @@ ${ttNotes}`
           r.id,
         );
 
-        // If submitter is Call Center, notify all Social Media agents to contact patient
+        // If submitter is Call Center, notify all Chat agents to contact patient
         if (status === "confirmed" && paymentLink) {
           const submitterLOB = AGENT_LOBS[r.agentName] || "Unknown";
-          if (submitterLOB === "Call Center") {
-            const socialMediaAgents = Object.entries(AGENT_LOBS)
-              .filter(([name, lob]) => lob === "Social Media")
+          if (submitterLOB === "Call Center" || submitterLOB === "call_center") {
+            const chatAgents = Object.entries(AGENT_LOBS)
+              .filter(([name, lob]) => lob === "chat" || lob === "Chat")
               .map(([name]) => name);
 
-            socialMediaAgents.forEach((agentName) => {
+            chatAgents.forEach((agentName) => {
               addSystemNotification(
                 "💳 Payment Link Ready — Please Contact Patient",
                 `TL ${currentUser.name} confirmed a ${r.platform?.toUpperCase()} request.\n` +
@@ -8827,7 +8815,7 @@ ${ttNotes}`
       className="min-h-screen bg-transparent text-slate-100 flex flex-col font-sans relative overflow-x-hidden antialiased"
     >
       <Toaster theme="dark" position="bottom-right" />
-      {showUpdateBanner && (
+      {newVersionAvailable && (
         <div className="fixed top-0 left-0 right-0 z-[100] bg-indigo-500/10 border-b border-indigo-500/20 text-indigo-300 px-4 py-2 flex items-center justify-center gap-4 backdrop-blur-sm">
           <span className="text-sm font-medium">A new version is available.</span>
           <button
@@ -8837,7 +8825,7 @@ ${ttNotes}`
             Refresh Now
           </button>
           <button
-            onClick={() => setShowUpdateBanner(false)}
+            onClick={() => setNewVersionAvailable(false)}
             className="p-1 hover:bg-indigo-500/20 rounded-md transition-colors ml-4"
           >
             ✕
@@ -9309,7 +9297,10 @@ ${ttNotes}`
               <div className="flex items-center justify-end gap-3 text-right">
                 <div className="hidden sm:block">
                   <p className="text-xs font-bold text-slate-200">{currentUser.name}</p>
-                  <p className="text-[9px] text-slate-500 font-mono font-black uppercase tracking-widest">{currentUser.role || 'Agent'}</p>
+                  {currentUser.role === 'agent' && currentUser.teamLeader && (
+                    <span className="text-[10px] text-slate-500 block">TL: {currentUser.teamLeader}</span>
+                  )}
+                  <p className="text-[9px] text-slate-500 font-mono font-black uppercase tracking-widest block">{currentUser.role || 'Agent'}</p>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center font-bold text-xs text-indigo-400 font-display">
                   {currentUser.name ? currentUser.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() : 'U'}
@@ -10680,10 +10671,15 @@ ${ttNotes}`
                           </div>
                           <div className="text-center sm:text-left flex-1">
                             <div className="flex flex-col sm:flex-row sm:items-end gap-3 justify-center sm:justify-start">
-                              <h2 className="text-3xl font-display font-black text-slate-100">
-                                {formatAgentName(currentUser.name)}{" "}
-                                {currentUser.role === "tl" ? "" : ""}
-                              </h2>
+                              <div className="flex flex-col">
+                                <h2 className="text-3xl font-display font-black text-slate-100">
+                                  {formatAgentName(currentUser.name)}{" "}
+                                  {currentUser.role === "tl" ? "" : ""}
+                                </h2>
+                                {currentUser.role === "agent" && currentUser.teamLeader && (
+                                  <span className="text-[10px] text-slate-500 block">TL: {currentUser.teamLeader}</span>
+                                )}
+                              </div>
                               <p className="text-xs font-mono text-slate-500 uppercase tracking-widest bg-[#1e1e1e]/40 backdrop-blur-lg/50 px-2 py-1 rounded mb-1">
                                 LOB: {getAgentLOB(currentUser.name)}
                               </p>
@@ -13789,7 +13785,7 @@ ${ttNotes}`
                                               <div className="space-y-1">
                                                 <div className="flex justify-between text-xs">
                                                   <span className="font-bold text-slate-300">
-                                                    Social Media Load
+                                                    Chat Load
                                                   </span>
                                                   <span className="text-slate-100 font-black font-mono">
                                                     {socialInq} ({socialPercent}
@@ -14492,7 +14488,7 @@ ${ttNotes}`
                                     });
                                   const events = [
                                     `Patient assessment dispatch record active`,
-                                    `Inbound call routed to Social Media Queue`,
+                                    `Inbound call routed to Chat Queue`,
                                     `Fintech installment agreement callback processed`,
                                     `Case inquiry record established`,
                                   ];
@@ -23069,8 +23065,7 @@ ${ttNotes}`
                                     Client Communication
                                   </h2>
                                   <p className="text-slate-400 text-sm">
-                                    Submit and monitor requests for Chat and
-                                    Social Media agents.
+                                    Submit and monitor requests for Chat agents.
                                   </p>
                                 </>
                               ) : isComplaintsTab ? (

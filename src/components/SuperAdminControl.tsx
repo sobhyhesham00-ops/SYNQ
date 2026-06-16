@@ -54,6 +54,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   TRIGGER_CURRENT_APP_VERSION
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterIssue, setFilterIssue] = useState<string | null>(null);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
 
   const isGlobalAdminUser = currentUser?.name?.toLowerCase() === "h.sobhy" ||
@@ -386,8 +387,28 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
     return u;
   });
 
+  // Identify Issues
+  const usernameCounts = registeredUsers.reduce((acc, u) => {
+    const un = getUsernameFromFullName(u.name || '').toLowerCase();
+    acc[un] = (acc[un] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const duplicateUsers = registeredUsers.filter(u => usernameCounts[getUsernameFromFullName(u.name || '').toLowerCase()] > 1);
+  const missingLOBUsers = registeredUsers.filter(u => u.role === "agent" && (!u.lob || u.lob === "social_media"));
+  const missingTLUsers = registeredUsers.filter(u => u.role === "agent" && !u.teamLeader);
+  const needsPasswordChangeUsers = registeredUsers.filter(u => (u as any).mustChangePassword === true);
+  const brokenNamesUsers = registeredUsers.filter(u => !u.name || u.name.trim() === '');
+
   // Filter registered users based on search
   const filteredUsers = displayUsers.filter(u => {
+    if (filterIssue === 'duplicate') return usernameCounts[getUsernameFromFullName(u.name || '').toLowerCase()] > 1;
+    if (filterIssue === 'missing_lob') return u.role === "agent" && (!u.lob || u.lob === "social_media");
+    if (filterIssue === 'missing_tl') return u.role === "agent" && !u.teamLeader;
+    if (filterIssue === 'needs_password') return (u as any).mustChangePassword === true;
+    if (filterIssue === 'broken_name') return !u.name || u.name.trim() === '';
+    return true;
+  }).filter(u => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -439,30 +460,66 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
         {/* Left column: Quick metrics or directory snapshot summary */}
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-white/5 border border-white/10 p-6 rounded-3xl space-y-4">
-            <h3 className="font-bold text-slate-100 text-base font-display">System State Summary</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-slate-100 text-base font-display">System State Summary</h3>
+              {filterIssue && (
+                <button 
+                  onClick={() => setFilterIssue(null)}
+                  className="px-2 py-1 text-[10px] font-bold text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 rounded-md transition-colors"
+                >
+                  Clear Filter
+                </button>
+              )}
+            </div>
             
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="p-4 bg-black/20 border border-white/5 rounded-2xl">
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Agents</p>
-                <p className="text-2xl font-black text-slate-200 mt-1">{registeredUsers.filter(u => u.role !== 'tl').length}</p>
-              </div>
+            <div className="grid grid-cols-2 gap-3 text-center">
+              <button onClick={() => setFilterIssue(null)} className={`p-4 border rounded-2xl flex flex-col items-center justify-center transition-all ${filterIssue === null ? 'bg-indigo-500/40 border-indigo-400/50 scale-[1.02]' : 'bg-black/20 border-white/5 hover:border-white/10'}`}>
+                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Total Users</p>
+                 <div className="flex items-center gap-1.5 text-2xl font-black text-slate-200">
+                    <Users className="w-5 h-5 text-indigo-400" />
+                    {registeredUsers.length}
+                 </div>
+              </button>
 
-              <div className="p-4 bg-black/20 border border-white/5 rounded-2xl">
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Leaders/TLs</p>
-                <p className="text-2xl font-black text-indigo-400 mt-1">{registeredUsers.filter(u => u.role === 'tl').length}</p>
-              </div>
+              <button onClick={() => setFilterIssue('duplicate')} className={`p-4 border rounded-2xl flex flex-col items-center justify-center transition-all ${filterIssue === 'duplicate' ? 'bg-rose-500/40 border-rose-400/50 scale-[1.02]' : 'bg-black/20 border-white/5 hover:border-white/10'}`}>
+                <div className="flex items-center gap-1 mb-1">
+                   <div className={`w-2 h-2 rounded-full shrink-0 ${duplicateUsers.length === 0 ? 'bg-emerald-500' : duplicateUsers.length <= 5 ? 'bg-amber-500' : 'bg-rose-500'}`} />
+                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none">Duplicate Logins</p>
+                </div>
+                <div className="text-2xl font-black text-slate-200">{duplicateUsers.length}</div>
+              </button>
 
-              <div className="p-4 bg-black/20 border border-rose-500/20 rounded-2xl">
-                <p className="text-xs text-rose-300 font-bold uppercase tracking-wider">Locked Accounts</p>
-                <p className="text-2xl font-black text-rose-400 mt-1">{lockedAccounts.length}</p>
-              </div>
+              <button onClick={() => setFilterIssue('missing_lob')} className={`p-4 border rounded-2xl flex flex-col items-center justify-center transition-all ${filterIssue === 'missing_lob' ? 'bg-amber-500/40 border-amber-400/50 scale-[1.02]' : 'bg-black/20 border-white/5 hover:border-white/10'}`}>
+                <div className="flex items-center gap-1 mb-1">
+                   <div className={`w-2 h-2 rounded-full shrink-0 ${missingLOBUsers.length === 0 ? 'bg-emerald-500' : missingLOBUsers.length <= 5 ? 'bg-amber-500' : 'bg-rose-500'}`} />
+                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none">Missing LOB</p>
+                </div>
+                <div className="text-2xl font-black text-slate-200">{missingLOBUsers.length}</div>
+              </button>
 
-              <div className="p-4 bg-black/20 border border-orange-500/20 rounded-2xl">
-                <p className="text-xs text-orange-300 font-bold uppercase tracking-wider">Locked Attempts</p>
-                <p className="text-2xl font-black text-orange-400 mt-1">
-                  {Object.values(failedAttempts).filter(v => v > 0).length}
-                </p>
-              </div>
+              <button onClick={() => setFilterIssue('missing_tl')} className={`p-4 border rounded-2xl flex flex-col items-center justify-center transition-all ${filterIssue === 'missing_tl' ? 'bg-amber-500/40 border-amber-400/50 scale-[1.02]' : 'bg-black/20 border-white/5 hover:border-white/10'}`}>
+                <div className="flex items-center gap-1 mb-1">
+                   <div className={`w-2 h-2 rounded-full shrink-0 ${missingTLUsers.length === 0 ? 'bg-emerald-500' : missingTLUsers.length <= 5 ? 'bg-amber-500' : 'bg-rose-500'}`} />
+                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none">Missing TL</p>
+                </div>
+                <div className="text-2xl font-black text-slate-200">{missingTLUsers.length}</div>
+              </button>
+
+              <button onClick={() => setFilterIssue('broken_name')} className={`p-4 border rounded-2xl flex flex-col items-center justify-center transition-all ${filterIssue === 'broken_name' ? 'bg-rose-500/40 border-rose-400/50 scale-[1.02]' : 'bg-black/20 border-white/5 hover:border-white/10'}`}>
+                <div className="flex items-center gap-1 mb-1">
+                   <div className={`w-2 h-2 rounded-full shrink-0 ${brokenNamesUsers.length === 0 ? 'bg-emerald-500' : brokenNamesUsers.length <= 5 ? 'bg-amber-500' : 'bg-rose-500'}`} />
+                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none">Broken Names</p>
+                </div>
+                <div className="text-2xl font-black text-slate-200">{brokenNamesUsers.length}</div>
+              </button>
+              
+              <button onClick={() => setFilterIssue('needs_password')} className={`p-4 border rounded-2xl flex flex-col items-center justify-center transition-all ${filterIssue === 'needs_password' ? 'bg-indigo-500/40 border-indigo-400/50 scale-[1.02]' : 'bg-black/20 border-white/5 hover:border-white/10'}`}>
+                <div className="flex items-center gap-1 mb-1">
+                   <div className={`w-2 h-2 rounded-full shrink-0 ${needsPasswordChangeUsers.length === 0 ? 'bg-emerald-500' : needsPasswordChangeUsers.length <= 5 ? 'bg-amber-500' : 'bg-rose-500'}`} />
+                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none whitespace-nowrap">Pass Change</p>
+                </div>
+                <div className="text-2xl font-black text-slate-200">{needsPasswordChangeUsers.length}</div>
+              </button>
             </div>
 
             <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 space-y-2">
@@ -755,6 +812,9 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                                   </span>
                                 )}
                               </div>
+                              {user.teamLeader && user.role === 'agent' && (
+                                <p className="text-[10px] text-slate-500 font-medium">TL: {user.teamLeader}</p>
+                              )}
                               <p className="text-[10px] text-slate-400 mt-0.5 space-x-2">
                                 <span>{user.email || 'No Email'}</span>
                                 {user.phone && <span className="text-emerald-400 font-mono">• {user.phone}</span>}

@@ -150,18 +150,18 @@ export const TabbyTamaraCard = ({
   const sourceChannel = getSafeTTSourceChannel(req);
   const userLOB = getAgentLOB(currentUser?.name || '');
   
-  const isSocialMedia = userLOB === 'Social Media';
+  const isChat = userLOB === 'chat' || userLOB === 'Chat';
   const isUnassigned = !req.assignedToId;
   const isCallCenterRequest = sourceChannel === 'call_center';
   const isSubmitter = (req.submittedByName || req.agentName)?.toLowerCase() === currentUser?.name?.toLowerCase();
-  const canClaim = (isSocialMedia && isUnassigned && isCallCenterRequest) ||
+  const canClaim = (isChat && isUnassigned && isCallCenterRequest) ||
                     (isSubmitter && isUnassigned && workflowStatus === "awaiting_client_contact");
   
   // Reassign / Assign State
   const [showAssignDropdown, setShowAssignDropdown] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
-  const socialMediaAgents = Object.entries(AGENT_LOBS)
-    .filter(([_, lob]) => lob === 'Social Media')
+  const chatAgents = Object.entries(AGENT_LOBS)
+    .filter(([_, lob]) => lob === 'chat' || lob === 'Chat')
     .map(([name]) => name);
 
   // Client Materials Mode
@@ -598,7 +598,7 @@ export const TabbyTamaraCard = ({
               ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' 
               : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
           }`}>
-            {sourceChannel === 'call_center' ? ' Call Center' : ' Social Media'}
+            {sourceChannel === 'call_center' ? ' Call Center' : ' Chat'}
           </span>
           <span className='w-1 h-1 rounded-full bg-slate-700' />
 
@@ -1086,11 +1086,11 @@ export const TabbyTamaraCard = ({
             </button>
             {showAssignDropdown && (
               <div className="absolute bottom-10 right-0 z-50 bg-[#1e1e24] border border-slate-700 rounded-xl w-56 shadow-2xl p-2 space-y-1">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-2 py-1">Select Social Media Agent</p>
-                {socialMediaAgents.length === 0 ? (
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-2 py-1">Select Chat Agent</p>
+                {chatAgents.length === 0 ? (
                   <p className="text-xs text-slate-400 px-2 py-1">No agents found</p>
                 ) : (
-                  socialMediaAgents.map((agentName) => (
+                  chatAgents.map((agentName) => (
                     <button
                       key={agentName}
                       onClick={() => handleAssignAgent(agentName)}

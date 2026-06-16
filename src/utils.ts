@@ -460,7 +460,8 @@ export const getAgentLOB = (name: string): string => {
     if (matchedKey) lob = AGENT_LOBS[matchedKey];
   }
   
-  if (lob.toLowerCase() === 'social media' || lob.toLowerCase() === 'social_media') return 'Chat';
+  if (lob.toLowerCase() === 'chat') return 'chat';
+  if (lob.toLowerCase() === 'call center') return 'call_center';
   return lob;
 };
 
