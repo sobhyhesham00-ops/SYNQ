@@ -559,7 +559,7 @@ export interface AttendanceRecord {
   id: string; // format: `${agentUsername}_${date}` e.g. "john_doe_2026-06-14"
   agentName: string;
   date: string; // YYYY-MM-DD
-  status: 'present' | 'absent' | 'late' | 'casual' | 'annual' | 'sick' | 'nsnc' | 'not_marked';
+  status: 'present' | 'absent' | 'late' | 'casual' | 'annual' | 'sick' | 'nsnc' | 'not_marked' | 'off';
   lateTime?: string; // HH:MM, only relevant when status === 'late'
   markedBy?: string; // TL name
   markedAt?: string; // ISO timestamp
