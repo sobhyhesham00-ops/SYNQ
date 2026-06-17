@@ -197,10 +197,20 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
     ].join('\n');
   };
 
+  const STATUS_BORDER_COLORS: Record<string, string> = {
+    submitted: "border-l-yellow-500",
+    tl_reviewing: "border-l-blue-500",
+    sent_to_clinic: "border-l-orange-500",
+    answered: "border-l-emerald-500",
+    closed: "border-l-slate-600",
+    sent: "border-l-orange-500"
+  };
+  const borderLeftColor = STATUS_BORDER_COLORS[inq.status] || "border-l-slate-700";
+
   return (
     <div
       id={`inquiry-${inq.id}`}
-      className={`p-5 bg-[#18181c] border border-slate-700/60 rounded-2xl hover:border-indigo-500/20 transition-all duration-300 overflow-hidden relative flex flex-col w-full ${!isExpanded ? "hover:bg-white/[0.04] cursor-pointer space-y-0 shadow-md" : "space-y-4 shadow-xl ring-1 ring-indigo-500/15"}`}
+      className={`p-4 bg-[#121216] border-y border-r border-slate-700/60 border-l-4 ${borderLeftColor} rounded-xl hover:bg-white/[0.04] transition-all duration-300 relative flex flex-col w-full ${isExpanded ? "shadow-xl ring-1 ring-white/5 space-y-4" : "cursor-pointer shadow-md"}`}
       onClick={() => {
         if (!isExpanded) {
           onToggle();
@@ -210,9 +220,9 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
         }
       }}
     >
-      {/* Agent info, LOB and date */}
+      {/* Unexpanded / Header State */}
       <div 
-        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full ${isExpanded ? "border-b border-slate-700/60 pb-2.5 cursor-pointer hover:opacity-80" : ""}`}
+        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full ${isExpanded ? "border-b border-white/5 pb-3 cursor-pointer hover:opacity-80" : ""}`}
         onClick={(e) => {
           if (isExpanded) {
             e.stopPropagation();
@@ -220,165 +230,83 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
           }
         }}
       >
-        <div className="flex items-center gap-3">
-          <div className="w-8.5 h-8.5 bg-indigo-500 rounded-full flex items-center justify-center font-bold text-white text-xs shadow">
-            {(inq.agentName || "")
-              .split(" ")
-              .map((n: string) => n[0])
-              .join("")}
+        <div className="flex flex-col space-y-1">
+          {/* Row 1: Agent & Badges */}
+          <div className="flex items-center gap-2 flex-wrap text-left">
+            <span
+              onClick={(e) => {
+                e.stopPropagation();
+                copyToClipboard(inq.agentName || "", "Agent name copied!");
+              }}
+              className="text-xs font-bold text-slate-100 uppercase tracking-wide cursor-pointer hover:text-indigo-300 transition-colors shrink-0"
+              title="Copy Agent Name"
+            >
+              {inq.agentName}
+            </span>
+            <span className="text-[10px] text-slate-400 lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded font-sans shrink-0">
+              {getAgentLOB(inq.agentName)}
+            </span>
+            <span className="font-mono text-[10px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded shrink-0">
+              {formatCaseRef(inq.id, "inquiry", inq.createdAt, inq.caseRef)}
+            </span>
+            <span className="text-[9px] text-slate-500 font-mono shrink-0">
+              {new Date(inq.createdAt).toLocaleString()}
+            </span>
           </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap text-left">
+
+          {/* Row 2: Patient Name, Clinic, Phone */}
+          <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-300 flex-wrap">
+            {inq.patientName && <span className="font-bold">{inq.patientName}</span>}
+            {inq.clinicName && <span>• {getClinicLabelText(inq.clinicName)}</span>}
+            {inq.phoneNumber && <span>• {inq.phoneNumber}</span>}
+            
+            {inq.platform && (
+              <span className="text-[10px] bg-white/5 text-slate-300 px-2 py-0.5 border border-white/10 rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-2">
+                🌐 {inq.platform}
+              </span>
+            )}
+            {inq.customerType && (
+              <span
+                className={`text-[10px] px-2 py-0.5 border rounded font-sans font-bold flex items-center gap-1 shrink-0 ${
+                  inq.customerType === "new" ? "bg-teal-500/10 text-teal-300 border-teal-500/20" : "bg-purple-500/10 text-purple-300 border-purple-500/20"
+                }`}
+              >
+                {inq.customerType === "new" ? "🆕 New" : "📂 Old"}
+              </span>
+            )}
+            {inq.fileNumber && (
               <span
                 onClick={(e) => {
                   e.stopPropagation();
-                  copyToClipboard(
-                    inq.agentName || "",
-                    "Agent name copied!",
-                  );
+                  copyToClipboard(inq.fileNumber || "", "File number copied!");
                 }}
-                className="text-xs font-bold text-slate-100 uppercase tracking-wide cursor-pointer hover:text-indigo-300 transition-colors"
-                title="Copy Agent Name"
+                className="text-[10px] bg-amber-500/10 text-amber-300 px-2 py-0.5 border border-amber-500/20 rounded font-mono font-bold flex items-center gap-1 cursor-pointer hover:bg-amber-500/20 transition-colors shrink-0"
               >
-                {inq.agentName}
+                📁 File: {inq.fileNumber}
               </span>
-              <span className="text-[10px] text-slate-400 lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded font-sans">
-                {getAgentLOB(inq.agentName)}
-              </span>
-              {inq.clinicName && (
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    copyToClipboard(
-                      inq.clinicName || "",
-                      "Clinic name copied!",
-                    );
-                  }}
-                  className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 border border-indigo-500/30 rounded font-sans font-bold flex items-center gap-1 cursor-pointer hover:bg-indigo-500/30 transition-colors"
-                  title="Copy Clinic"
-                >
-                  {getClinicLabelText(inq.clinicName)}
-                </span>
-              )}
-              {inq.phoneNumber && (
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    copyToClipboard(
-                      (inq.phoneNumber || "").replace(/^0+/, ""),
-                      "Phone copied (no leading zero)",
-                    );
-                  }}
-                  className="text-[10px] bg-sky-500/10 text-sky-300 px-2 py-0.5 border border-sky-500/20 rounded font-mono font-bold flex items-center gap-1 cursor-pointer hover:bg-sky-500/20 transition-colors"
-                  title="Copy Phone Number"
-                >
-                  📞 {inq.phoneNumber}
-                </span>
-              )}
-              {inq.platform && (
-                <span
-                  className="text-[10px] bg-white/5 text-slate-300 px-2 py-0.5 border border-white/10 rounded font-sans font-bold flex items-center gap-1"
-                  title="Inquiry Source Platform"
-                >
-                  🌐 {inq.platform}
-                </span>
-              )}
-              {inq.customerType && (
-                <span
-                  className={`text-[10px] px-2 py-0.5 border rounded font-sans font-bold flex items-center gap-1 ${
-                    inq.customerType === "new"
-                      ? "bg-teal-500/10 text-teal-300 border-teal-500/20"
-                      : "bg-purple-500/10 text-purple-300 border-purple-500/20"
-                  }`}
-                  title="Customer Status"
-                >
-                  {inq.customerType === "new" ? "🆕 New" : "📂 Old"}
-                </span>
-              )}
-              {inq.fileNumber && (
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    copyToClipboard(
-                      inq.fileNumber || "",
-                      "File number copied!",
-                    );
-                  }}
-                  className="text-[10px] bg-amber-500/10 text-amber-300 px-2 py-0.5 border border-amber-500/20 rounded font-mono font-bold flex items-center gap-1 cursor-pointer hover:bg-amber-500/20 transition-colors"
-                  title="Copy File Number"
-                >
-                  📁 File: {inq.fileNumber}
-                </span>
-              )}
-              {inq.customerContacted === "contacted" && (
-                <span
-                  className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 border border-emerald-500/30 rounded font-sans font-bold flex items-center gap-1"
-                  title="Customer is Contacted"
-                >
-                  Contacted
-                </span>
-              )}
-              {inq.customerContacted === "attempted" && (
-                <span
-                  className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 border border-amber-500/30 rounded font-sans font-bold flex items-center gap-1"
-                  title="Contact has been Attempted"
-                >
-                  ⏳ Contact Attempted
-                </span>
-              )}
-              {(inq.customerContacted === "not_contacted" || !inq.customerContacted) && (
-                <span
-                  className="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.5 border border-rose-500/30 rounded font-sans font-bold flex items-center gap-1"
-                  title="Customer not contacted yet"
-                >
-                  Not Contacted
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="font-mono text-[10px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded">
-                {formatCaseRef(
-                  inq.id,
-                  "inquiry",
-                  inq.createdAt,
-                  inq.caseRef,
-                )}
-              </span>
-              <span className="text-[9px] text-slate-500 font-mono">
-                {new Date(inq.createdAt).toLocaleString()}
-              </span>
-            </div>
+            )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2 self-end sm:self-auto">
+        {/* Right side: Status, Badges, Toggle */}
+        <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
           <button
             onClick={(e) => {
               e.stopPropagation();
               const text = generateInquiryCopyText(inq);
               copyToClipboard(text, 'Inquiry details copied!');
             }}
-            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer hidden sm:flex"
             title="Copy Details"
           >
-            <Copy className="w-3 h-3" />{" "}
-            Copy Details
+            <Copy className="w-3 h-3" /> Copy
           </button>
-          <span
-            className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg uppercase tracking-wider shrink-0 ${statusColor}`}
-          >
+          <span className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg uppercase tracking-wider shrink-0 ${statusColor}`}>
             {statusText}
           </span>
           {inq.status !== "answered" && (
-            <span
-              className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 ${ageBadgeColor}`}
-            >
+            <span className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 ${ageBadgeColor}`}>
               ⏱ {ageLabel}
-            </span>
-          )}
-          {inq.status === 'sent_to_clinic' && inq.sentAt && (
-            <span className="px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 bg-orange-500/20 text-orange-400 border-orange-500/30 animate-pulse font-sans">
-              ⏱️ Sent {Math.floor((Date.now() - new Date(inq.sentAt).getTime()) / 60000)}m ago
             </span>
           )}
           {isSuperAdmin && handleDeleteInquiry && (
@@ -420,107 +348,6 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
               tlLinks={inq.tlLinks}
               showSideBadges={true}
             />
-
-            {/* Standardized Clinic Template Area */}
-            {currentUser && currentUser.role === "tl" && (
-              <div className="mt-4 p-4 bg-[#141416]/90 rounded-xl border border-indigo-500/15 space-y-3 text-left">
-                <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                  <h4 className="text-xs font-bold text-indigo-400 font-display uppercase tracking-wider flex items-center gap-1.5 font-sans">
-                    📋 Partner Standard Template Review
-                  </h4>
-                  <button
-                    onClick={() => {
-                      const tpl = generateClinicTemplateLocal(inq);
-                      copyToClipboard(tpl, "Standardized partner template copied successfully!");
-                    }}
-                    className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 border border-indigo-500/25 text-white text-[10px] font-bold rounded-md transition-all flex items-center gap-1 active:scale-95 cursor-pointer font-sans"
-                  >
-                    <Copy className="w-3 h-3" /> Copy Standard Template
-                  </button>
-                </div>
-
-                {/* Custom Review Input Fields */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-sans">
-                  <div>
-                    <label className="block text-[10px] text-slate-400 font-semibold mb-1 font-sans">
-                      Patient Name
-                    </label>
-                    <input
-                      type="text"
-                      value={localPatientName}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setLocalPatientName(val);
-                        if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
-                        saveDebounceRef.current = setTimeout(() => {
-                          if (setInquiries && inquiries) {
-                            const updated = inquiries.map(i => i.id === inq.id ? { ...i, patientName: val } : i);
-                            setInquiries(updated);
-                            setStorageItem("sched_inquiries", updated);
-                          }
-                          updateDoc(doc(db, "inquiries", inq.id), { patientName: val }).catch(err => console.error(err));
-                        }, 600);
-                      }}
-                      className="w-full px-2.5 py-1.5 bg-black/30 border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-indigo-500 font-sans font-bold"
-                      placeholder="Review/Edit Patient Name"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-slate-400 font-semibold mb-1 font-sans">
-                      File ID / Number
-                    </label>
-                    <input
-                      type="text"
-                      value={localFileId}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setLocalFileId(val);
-                        if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
-                        saveDebounceRef.current = setTimeout(() => {
-                          if (setInquiries && inquiries) {
-                            const updated = inquiries.map(i => i.id === inq.id ? { ...i, fileId: val, fileNumber: val } : i);
-                            setInquiries(updated);
-                            setStorageItem("sched_inquiries", updated);
-                          }
-                          updateDoc(doc(db, "inquiries", inq.id), { fileId: val, fileNumber: val }).catch(err => console.error(err));
-                        }, 600);
-                      }}
-                      className="w-full px-2.5 py-1.5 bg-black/30 border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-indigo-500 font-sans font-bold"
-                      placeholder="Review/Edit File ID"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-slate-400 font-semibold mb-1 font-sans">
-                      Patient ID
-                    </label>
-                    <input
-                      type="text"
-                      value={localPatientId}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setLocalPatientId(val);
-                        if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
-                        saveDebounceRef.current = setTimeout(() => {
-                          if (setInquiries && inquiries) {
-                            const updated = inquiries.map(i => i.id === inq.id ? { ...i, patientId: val } : i);
-                            setInquiries(updated);
-                            setStorageItem("sched_inquiries", updated);
-                          }
-                          updateDoc(doc(db, "inquiries", inq.id), { patientId: val }).catch(err => console.error(err));
-                        }, 600);
-                      }}
-                      className="w-full px-2.5 py-1.5 bg-black/30 border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-indigo-500 font-sans font-bold"
-                      placeholder="Review/Edit Patient ID"
-                    />
-                  </div>
-                </div>
-
-                {/* Preview Area */}
-                <div className="bg-black/40 p-3 rounded-lg border border-white/5 font-mono text-[11px] leading-relaxed text-slate-300 select-all whitespace-pre-wrap">
-                  {generateClinicTemplateLocal(inq)}
-                </div>
-              </div>
-            )}
 
             {/* TL customerContacted quick update buttons */}
             {handleUpdateContactedStatus && (

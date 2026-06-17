@@ -18,7 +18,8 @@ import {
   getClinicLabel,  
   formatCaseRef, 
   normalizePhone, 
-  copyToClipboard 
+  copyToClipboard,
+  getAgentLOB
 } from "../utils";
 
 const compStatusLabels: Record<string, string> = {
@@ -90,6 +91,13 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
     ? `${Math.max(1, Math.floor(compAgeMs / 60000))}m`
     : `${Math.floor(compAgeHours)}h`;
 
+  const STATUS_BORDER_COLORS: Record<string, string> = {
+    pending_tl: "border-l-amber-500",
+    need_contact: "border-l-rose-500",
+    closed: "border-l-emerald-500"
+  };
+  const borderLeftColor = STATUS_BORDER_COLORS[comp.status] || "border-l-slate-700";
+
   return (
     <div
       onClick={() => {
@@ -97,20 +105,13 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
           onToggle();
         }
       }}
-      className={`p-5 bg-[#18181c] border border-slate-700/60 rounded-2xl hover:border-indigo-500/20 transition-all duration-300 relative flex flex-col w-full overflow-hidden ${
-        !isExpanded ? "hover:bg-white/[0.04] cursor-pointer shadow-md" : "shadow-xl ring-1 ring-indigo-500/15"
+      className={`p-4 bg-[#121216] border-y border-r border-slate-700/60 border-l-4 ${borderLeftColor} rounded-xl hover:bg-white/[0.04] transition-all duration-300 relative flex flex-col w-full overflow-hidden ${
+        isExpanded ? "shadow-xl ring-1 ring-white/5 space-y-4" : "cursor-pointer shadow-md"
       }`}
     >
-      {/* Priority Accent Stripe */}
-      <div className={`absolute top-0 bottom-0 left-0 w-[5px] ${
-        isNeedContact ? "bg-rose-500 animate-pulse" :
-        isPendingTL ? "bg-amber-500" :
-        isClosed ? "bg-emerald-500" : "bg-slate-500"
-      }`} />
-
-      {/* CARD SUMMARY HEADER ROW */}
+      {/* Unexpanded / Header State */}
       <div 
-        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full pl-2.5 ${isExpanded ? "border-b border-white/5 pb-3.5 cursor-pointer hover:opacity-85" : ""}`}
+        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full ${isExpanded ? "border-b border-white/5 pb-3 cursor-pointer hover:opacity-80" : ""}`}
         onClick={(e) => {
           if (isExpanded) {
             e.stopPropagation();
@@ -118,46 +119,54 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
           }
         }}
       >
-        <div className="flex items-center gap-3 text-left">
-          <div className="w-8.5 h-8.5 bg-rose-500 rounded-full flex items-center justify-center font-bold text-white text-xs shadow shrink-0">
-            {(comp.patientName || "C")
-              .split(" ")
-              .map((n) => n[0])
-              .join("")
-              .slice(0, 2)
-              .toUpperCase()}
+        <div className="flex flex-col space-y-1">
+          {/* Row 1: Agent & Badges */}
+          <div className="flex items-center gap-2 flex-wrap text-left">
+            <span
+              onClick={(e) => {
+                e.stopPropagation();
+                copyToClipboard(comp.agentName || "", "Agent name copied!");
+              }}
+              className="text-xs font-bold text-slate-100 uppercase tracking-wide cursor-pointer hover:text-indigo-300 transition-colors shrink-0"
+            >
+              {comp.agentName}
+            </span>
+            <span className="text-[10px] text-slate-400 lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded font-sans shrink-0">
+              {getAgentLOB(comp.agentName)}
+            </span>
+            <span className="font-mono text-[10px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded shrink-0">
+              {formatCaseRef(comp.id, "tt_complaint", comp.createdAt, comp.caseRef)}
+            </span>
+            <span className="text-[9px] text-slate-500 font-mono shrink-0">
+              {new Date(comp.createdAt).toLocaleString()}
+            </span>
           </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-bold text-slate-100 uppercase tracking-wide">
-                {comp.patientName}
-              </span>
-              {comp.clinicName && (
-                <span className="text-[10px] bg-rose-500/10 text-rose-300 px-2 py-0.5 border border-rose-500/20 rounded font-sans font-bold flex items-center gap-1">
-                  🏰 {getClinicLabel(comp.clinicName)}
-                </span>
-              )}
-              {comp.phoneNumber && (
-                <span className="text-[10px] bg-sky-500/10 text-sky-300 px-2 py-0.5 border border-sky-500/20 rounded font-mono font-bold flex items-center gap-1">
-                  📞 {comp.phoneNumber}
-                </span>
-              )}
-              <span className="text-[10px] bg-white/5 text-slate-300 px-2 py-0.5 border border-white/10 rounded font-sans font-bold flex items-center gap-1">
-                📁 Case: {comp.fileNumber || "N/A"}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="font-mono text-[9px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded mr-1">
-                {formatCaseRef(comp.id, "tt_complaint", comp.createdAt, comp.caseRef)}
-              </span>
-              <span className="text-[9px] text-slate-500 font-mono">
-                {new Date(comp.createdAt).toLocaleString()} ({compAgeLabel} ago)
-              </span>
-            </div>
+
+          {/* Row 2: Patient Name, Clinic, Phone */}
+          <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-300 flex-wrap">
+            {comp.patientName && <span className="font-bold">{comp.patientName}</span>}
+            {comp.clinicName && <span>• {getClinicLabel(comp.clinicName)}</span>}
+            {comp.phoneNumber && <span>• {comp.phoneNumber}</span>}
+            
+            <span className="text-[10px] bg-white/5 text-slate-300 px-2 py-0.5 border border-white/10 rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-2">
+               📁 File: {comp.fileNumber || "N/A"}
+            </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:self-center self-end">
+        {/* Right side: Status, Badges, Toggle */}
+        <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const text = `Complaint: ${comp.patientName} - ${getClinicLabel(comp.clinicName)} - ${comp.phoneNumber}`;
+              copyToClipboard(text, 'Complaint details copied!');
+            }}
+            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer hidden sm:flex"
+            title="Copy Details"
+          >
+            <Copy className="w-3 h-3" /> Copy
+          </button>
           {comp.assignedTo && (
             <span className="text-[9px] font-bold text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20 max-w-[100px] truncate leading-none">
               📌 {comp.assignedTo}
@@ -165,14 +174,17 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
           )}
           <span className={`text-[9px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-md font-sans leading-none ${
             isPendingTL
-              ? "bg-amber-500/10 border border-amber-500/30 text-amber-300"
+              ? "bg-amber-500/10 border border-amber-500/30 text-amber-300 animate-pulse"
               : isNeedContact
-                ? "bg-rose-500/10 border border-rose-500/30 text-rose-400"
+                ? "bg-rose-500/10 border border-rose-500/30 text-rose-400 animate-pulse"
                 : isClosed
                   ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
                   : "bg-slate-700 text-slate-300"
           }`}>
             {compStatusLabels[comp.status] || comp.status}
+          </span>
+          <span className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 ${isClosed ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-slate-700 text-slate-400 border-white/10"}`}>
+            ⏱ {compAgeLabel} open
           </span>
           <div className="text-slate-400 hover:text-indigo-400 p-1 rounded-md transition-all shrink-0 ml-1 flex items-center justify-center">
             {isExpanded ? <ChevronUp className="w-4 h-4 text-indigo-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
@@ -182,7 +194,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
 
       {/* EXPANDABLE DETAIL BLOCK */}
       {isExpanded && (
-        <div className="w-full pl-2.5 overflow-hidden transition-all duration-300 mt-4 pt-4 border-t border-white/5 space-y-5 flex flex-col text-left">
+        <div className="w-full overflow-hidden transition-all duration-300 flex flex-col text-left space-y-4">
           {/* Patient Info Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-white/[0.02] border border-white/5 p-4 rounded-xl text-xs">
             <div>

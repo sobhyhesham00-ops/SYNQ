@@ -398,10 +398,10 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
   return (
     <div className="space-y-6 animate-fade-in p-1 text-left">
       {/* Title block */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/40 border border-slate-800 p-6 rounded-3xl backdrop-blur-md">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#121216] border border-slate-700/60 p-6 rounded-3xl shadow-lg">
         <div>
           <h2 className="text-2xl font-bold text-slate-100 flex items-center gap-2">
-            <ClipboardList className="w-7 h-7 text-emerald-400" /> Daily Team Leader View
+            <ClipboardList className="w-7 h-7 text-indigo-400" /> TL Control Center
           </h2>
           <p className="text-xs text-slate-400 mt-1 max-w-2xl">
             {isAnyFilterActive ? (
@@ -435,9 +435,9 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
             <Download className="w-3.5 h-3.5 text-indigo-400" /> Export Data
           </button>
 
-          <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-2 rounded-xl shrink-0">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[10px] font-black text-emerald-300 uppercase tracking-widest">
+          <div className="flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 px-3.5 py-2 rounded-xl shrink-0">
+            <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+            <span className="text-[10px] font-black text-indigo-300 uppercase tracking-widest">
               {filteredList.length} Items Listed
             </span>
           </div>
@@ -445,7 +445,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
       </div>
 
       {/* Online Team Leaders Today */}
-      <div className="bg-[#18181c]/45 border border-slate-800/80 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-[#121216] border border-slate-700/60 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
         <div className="flex items-center gap-2.5">
           <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400">
             <User className="w-4 h-4" />
@@ -460,7 +460,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
           {TEAM_LEADERS.map(tlName => {
             const log = tlLoginLogs.find(l => l.tlName === tlName);
             return (
-              <div key={tlName} className="flex items-center gap-2 text-sm bg-slate-800/20 px-3 py-1.5 rounded-xl border border-slate-850">
+              <div key={tlName} className="flex items-center gap-2 text-sm bg-black/20 px-3 py-1.5 rounded-xl border border-white/5">
                 <div className={`w-2 h-2 rounded-full ${log?.onlineStatus === 'online' ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`} />
                 <span className="font-bold text-slate-200">{tlName}</span>
                 {log ? (
@@ -474,122 +474,125 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
         </div>
       </div>
 
-      {/* Summary Clickable Counter Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {/* Click to filter Inquiries */}
-        <button
-          onClick={() => setSelectedTypeFilter(selectedTypeFilter === "inquiry" ? "all" : "inquiry")}
-          className={`p-4 rounded-2xl border transition-all text-left flex items-center justify-between gap-4 cursor-pointer relative overflow-hidden ${
-            selectedTypeFilter === "inquiry"
-              ? "bg-amber-500/15 border-amber-500/40 shadow-lg ring-1 ring-amber-500/20"
-              : "bg-[#18181c]/65 border-slate-800 hover:border-slate-700"
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-xl ${selectedTypeFilter === "inquiry" ? "bg-amber-500/20 text-amber-300" : "bg-amber-500/10 text-amber-400"}`}>
-              <HelpCircle className="w-5 h-5" />
+      <div className="space-y-3">
+        <h3 className="text-sm font-bold text-slate-300 uppercase tracking-widest px-1">Today at a Glance</h3>
+        {/* Summary Clickable Counter Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          {/* Click to filter Inquiries */}
+          <button
+            onClick={() => setSelectedTypeFilter(selectedTypeFilter === "inquiry" ? "all" : "inquiry")}
+            className={`p-4 rounded-xl border transition-all text-left flex flex-col gap-2 cursor-pointer relative overflow-hidden ${
+              selectedTypeFilter === "inquiry"
+                ? "bg-amber-500/15 border-amber-500/40 shadow-lg ring-1 ring-amber-500/20"
+                : "bg-[#121216] border-slate-700/60 hover:border-slate-500/60 shadow-md"
+            }`}
+          >
+            <div className="flex items-center justify-between w-full">
+              <div className={`p-1.5 rounded-lg ${selectedTypeFilter === "inquiry" ? "bg-amber-500/20 text-amber-300" : "bg-amber-500/10 text-amber-400"}`}>
+                <HelpCircle className="w-5 h-5" />
+              </div>
+              <span className="text-[9px] bg-black/30 text-slate-400 font-mono px-2 py-0.5 rounded-md border border-white/5">
+                {selectedTypeFilter === "inquiry" ? "ACTIVE" : "CLICK"}
+              </span>
             </div>
             <div>
-              <p className="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Inquiries</p>
-              <p className="text-lg font-bold text-slate-100 mt-0.5">{displayInquiriesCount} pending</p>
+              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Inquiries</p>
+              <p className="text-2xl font-black text-slate-100 tracking-tight">{displayInquiriesCount}</p>
             </div>
-          </div>
-          <span className="text-[9px] bg-slate-800 text-slate-400 font-mono px-2 py-0.5 rounded-full">
-            {selectedTypeFilter === "inquiry" ? "ACTIVE" : "CLICK"}
-          </span>
-        </button>
+          </button>
 
-        {/* Click to filter Tabby/Tamara */}
-        <button
-          onClick={() => setSelectedTypeFilter(selectedTypeFilter === "tabbyTamara" ? "all" : "tabbyTamara")}
-          className={`p-4 rounded-2xl border transition-all text-left flex items-center justify-between gap-4 cursor-pointer relative overflow-hidden ${
-            selectedTypeFilter === "tabbyTamara"
-              ? "bg-[#2bc9d7]/15 border-[#2bc9d7]/40 shadow-lg ring-1 ring-[#2bc9d7]/20"
-              : "bg-[#18181c]/65 border-slate-800 hover:border-slate-700"
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-xl ${selectedTypeFilter === "tabbyTamara" ? "bg-[#2bc9d7]/20 text-[#2bc9d7]" : "bg-[#2bc9d7]/10 text-[#2bc9d7]"}`}>
-              <Wallet className="w-5 h-5" />
+          {/* Click to filter Tabby/Tamara */}
+          <button
+            onClick={() => setSelectedTypeFilter(selectedTypeFilter === "tabbyTamara" ? "all" : "tabbyTamara")}
+            className={`p-4 rounded-xl border transition-all text-left flex flex-col gap-2 cursor-pointer relative overflow-hidden ${
+              selectedTypeFilter === "tabbyTamara"
+                ? "bg-[#2bc9d7]/15 border-[#2bc9d7]/40 shadow-lg ring-1 ring-[#2bc9d7]/20"
+                : "bg-[#121216] border-slate-700/60 hover:border-slate-500/60 shadow-md"
+            }`}
+          >
+            <div className="flex items-center justify-between w-full">
+              <div className={`p-1.5 rounded-lg ${selectedTypeFilter === "tabbyTamara" ? "bg-[#2bc9d7]/20 text-[#2bc9d7]" : "bg-[#2bc9d7]/10 text-[#2bc9d7]"}`}>
+                <Wallet className="w-5 h-5" />
+              </div>
+              <span className="text-[9px] bg-black/30 text-slate-400 font-mono px-2 py-0.5 rounded-md border border-white/5">
+                {selectedTypeFilter === "tabbyTamara" ? "ACTIVE" : "CLICK"}
+              </span>
             </div>
             <div>
-              <p className="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Alternative Pay</p>
-              <p className="text-lg font-bold text-slate-100 mt-0.5">{displayTTRequestsCount} pending</p>
+              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Alternative Pay</p>
+              <p className="text-2xl font-black text-slate-100 tracking-tight">{displayTTRequestsCount}</p>
             </div>
-          </div>
-          <span className="text-[9px] bg-slate-800 text-slate-400 font-mono px-2 py-0.5 rounded-full">
-            {selectedTypeFilter === "tabbyTamara" ? "ACTIVE" : "CLICK"}
-          </span>
-        </button>
+          </button>
 
-        {/* Click to filter Complaints */}
-        <button
-          onClick={() => setSelectedTypeFilter(selectedTypeFilter === "complaint" ? "all" : "complaint")}
-          className={`p-4 rounded-2xl border transition-all text-left flex items-center justify-between gap-4 cursor-pointer relative overflow-hidden ${
-            selectedTypeFilter === "complaint"
-              ? "bg-rose-500/15 border-rose-500/40 shadow-lg ring-1 ring-rose-500/20"
-              : "bg-[#18181c]/65 border-slate-800 hover:border-slate-700"
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-xl ${selectedTypeFilter === "complaint" ? "bg-rose-500/20 text-rose-300" : "bg-rose-500/10 text-rose-400"}`}>
-              <AlertTriangle className="w-5 h-5" />
+          {/* Click to filter Complaints */}
+          <button
+            onClick={() => setSelectedTypeFilter(selectedTypeFilter === "complaint" ? "all" : "complaint")}
+            className={`p-4 rounded-xl border transition-all text-left flex flex-col gap-2 cursor-pointer relative overflow-hidden ${
+              selectedTypeFilter === "complaint"
+                ? "bg-rose-500/15 border-rose-500/40 shadow-lg ring-1 ring-rose-500/20"
+                : "bg-[#121216] border-slate-700/60 hover:border-slate-500/60 shadow-md"
+            }`}
+          >
+            <div className="flex items-center justify-between w-full">
+              <div className={`p-1.5 rounded-lg ${selectedTypeFilter === "complaint" ? "bg-rose-500/20 text-rose-300" : "bg-rose-500/10 text-rose-400"}`}>
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <span className="text-[9px] bg-black/30 text-slate-400 font-mono px-2 py-0.5 rounded-md border border-white/5">
+                {selectedTypeFilter === "complaint" ? "ACTIVE" : "CLICK"}
+              </span>
             </div>
             <div>
-              <p className="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Complaints</p>
-              <p className="text-lg font-bold text-slate-100 mt-0.5">{displayComplaintsCount} pending</p>
+              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Complaints</p>
+              <p className="text-2xl font-black text-slate-100 tracking-tight">{displayComplaintsCount}</p>
             </div>
-          </div>
-          <span className="text-[9px] bg-slate-800 text-slate-400 font-mono px-2 py-0.5 rounded-full">
-            {selectedTypeFilter === "complaint" ? "ACTIVE" : "CLICK"}
-          </span>
-        </button>
+          </button>
 
-        {/* Click to filter Client Communications */}
-        <button
-          onClick={() => setSelectedTypeFilter(selectedTypeFilter === "clientComm" ? "all" : "clientComm")}
-          className={`p-4 rounded-2xl border transition-all text-left flex items-center justify-between gap-4 cursor-pointer relative overflow-hidden ${
-            selectedTypeFilter === "clientComm"
-              ? "bg-indigo-500/15 border-indigo-500/40 shadow-lg ring-1 ring-indigo-500/20"
-              : "bg-[#18181c]/65 border-slate-800 hover:border-slate-700"
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-xl ${selectedTypeFilter === "clientComm" ? "bg-indigo-500/20 text-indigo-300" : "bg-indigo-500/10 text-indigo-400"}`}>
-              <MessageCircle className="w-5 h-5" />
+          {/* Click to filter Client Communications */}
+          <button
+            onClick={() => setSelectedTypeFilter(selectedTypeFilter === "clientComm" ? "all" : "clientComm")}
+            className={`p-4 rounded-xl border transition-all text-left flex flex-col gap-2 cursor-pointer relative overflow-hidden ${
+              selectedTypeFilter === "clientComm"
+                ? "bg-indigo-500/15 border-indigo-500/40 shadow-lg ring-1 ring-indigo-500/20"
+                : "bg-[#121216] border-slate-700/60 hover:border-slate-500/60 shadow-md"
+            }`}
+          >
+            <div className="flex items-center justify-between w-full">
+              <div className={`p-1.5 rounded-lg ${selectedTypeFilter === "clientComm" ? "bg-indigo-500/20 text-indigo-300" : "bg-indigo-500/10 text-indigo-400"}`}>
+                <MessageCircle className="w-5 h-5" />
+              </div>
+              <span className="text-[9px] bg-black/30 text-slate-400 font-mono px-2 py-0.5 rounded-md border border-white/5">
+                {selectedTypeFilter === "clientComm" ? "ACTIVE" : "CLICK"}
+              </span>
             </div>
             <div>
-              <p className="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Client Comm</p>
-              <p className="text-lg font-bold text-slate-100 mt-0.5">{displayClientCommsCount} pending</p>
+              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Client Comm</p>
+              <p className="text-2xl font-black text-slate-100 tracking-tight">{displayClientCommsCount}</p>
             </div>
-          </div>
-          <span className="text-[9px] bg-slate-800 text-slate-400 font-mono px-2 py-0.5 rounded-full">
-            {selectedTypeFilter === "clientComm" ? "ACTIVE" : "CLICK"}
-          </span>
-        </button>
+          </button>
 
-        {/* Combined total */}
-        <button
-          onClick={() => setSelectedTypeFilter("all")}
-          className={`p-4 rounded-2xl border transition-all text-left flex items-center justify-between gap-4 cursor-pointer relative overflow-hidden ${
-            selectedTypeFilter === "all"
-              ? "bg-slate-300/10 border-slate-300/20 shadow-lg"
-              : "bg-[#18181c]/65 border-slate-800 hover:border-slate-700"
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-slate-800 text-slate-300">
-              <ClipboardList className="w-5 h-5" />
+          {/* Combined total */}
+          <button
+            onClick={() => setSelectedTypeFilter("all")}
+            className={`p-4 rounded-xl border transition-all text-left flex flex-col gap-2 cursor-pointer relative overflow-hidden ${
+              selectedTypeFilter === "all"
+                ? "bg-white/10 border-white/20 shadow-lg"
+                : "bg-[#121216] border-slate-700/60 hover:border-slate-500/60 shadow-md"
+            }`}
+          >
+            <div className="flex items-center justify-between w-full">
+              <div className="p-1.5 rounded-lg bg-white/10 text-slate-300 border border-white/5">
+                <ClipboardList className="w-5 h-5" />
+              </div>
+              <span className="text-[9px] bg-emerald-500/20 text-emerald-400 font-mono px-2 py-0.5 rounded-md border border-emerald-500/20 font-black">
+                {isAnyFilterActive ? "FILTERED" : "TODAY"}
+              </span>
             </div>
             <div>
-              <p className="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Combined Queue</p>
-              <p className="text-lg font-bold text-slate-100 mt-0.5">{displayTotalCount} cases</p>
+              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Combined Queue</p>
+              <p className="text-2xl font-black text-slate-100 tracking-tight">{displayTotalCount}</p>
             </div>
-          </div>
-          <span className="text-[9px] bg-emerald-500/20 text-emerald-400 font-mono px-2 py-0.5 rounded-full font-black font-semibold">
-            {isAnyFilterActive ? "FILTERED" : "TODAY"}
-          </span>
-        </button>
+          </button>
+        </div>
       </div>
 
       {/* Filter bar exactly as specified */}
@@ -669,19 +672,19 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
       </div>
 
       {/* Dispatch queue combined list */}
-      <div className="bg-white/5 border border-white/10 p-5 sm:p-6 rounded-3xl backdrop-blur-xl space-y-4">
-        <div className="border-b border-white/5 pb-3">
-          <h3 className="text-base font-bold text-slate-100 font-display">
-            Dispatcher Combined Case Pipeline
+      <div className="bg-[#121216]/80 p-0 rounded-2xl shadow-xl overflow-hidden border border-slate-700/60">
+        <div className="border-b border-slate-700/60 p-5 bg-[#121216]">
+          <h3 className="text-base font-bold text-slate-100 font-display flex items-center gap-2">
+            <ClipboardList className="w-5 h-5 text-indigo-400" /> Unified Case Pipeline
           </h3>
-          <p className="text-xs text-slate-400">
-            Total matched dispatch cases waiting in queue: {filteredList.length}
+          <p className="text-xs text-slate-400 mt-1">
+            Total matched dispatch cases waiting in queue: <strong className="text-indigo-400">{filteredList.length}</strong>
           </p>
         </div>
 
-        <div className="space-y-4 max-h-[700px] overflow-y-auto pr-1">
+        <div className="max-h-[700px] overflow-y-auto w-full">
           {filteredList.length === 0 ? (
-          <div className="p-16 text-center rounded-3xl border border-dashed border-white/10 bg-[#121216]/25 backdrop-blur-sm space-y-2 animate-fade-in">
+          <div className="p-16 text-center space-y-2 animate-fade-in bg-[#0d0d11]">
             <div className="w-12 h-12 rounded-full bg-slate-800/50 flex items-center justify-center mx-auto text-slate-400 mb-2">
               <Filter className="w-6 h-6 text-slate-500" />
             </div>
@@ -697,7 +700,8 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
             </p>
           </div>
         ) : (
-          (() => {
+          <div className="divide-y divide-slate-700/60 flex flex-col w-full">
+          {(() => {
             return filteredList.map((item) => {
               const uniqueKey = `${item.type}-${item.id}`;
               const isExpanded = expandedId === uniqueKey;
@@ -830,8 +834,9 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
               }
 
               return null;
-          });
-        })()
+            });
+          })()}
+          </div>
         )}
         </div>
       </div>

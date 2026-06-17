@@ -60,6 +60,24 @@ interface CaseDetailDrawerProps {
   onReopenComplaint: (complaintId: string) => Promise<void>;
 }
 
+const InfoField = ({ label, value, copyable, mono }: { label: string; value: string; copyable?: boolean; mono?: boolean }) => (
+  <div className="flex flex-col gap-0.5">
+    <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">{label}</span>
+    <div className="flex items-center gap-1.5">
+      <span className={`text-sm text-slate-100 font-medium ${mono ? 'font-mono' : ''}`}>{value || '—'}</span>
+      {copyable && value && (
+        <button
+          onClick={() => copyToClipboard(value, `${label} copied!`)}
+          className="text-slate-600 hover:text-indigo-400 transition-colors cursor-pointer"
+          title={`Copy ${label}`}
+        >
+          <Copy className="w-3 h-3" />
+        </button>
+      )}
+    </div>
+  </div>
+);
+
 export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
   caseData,
   onClose,
@@ -367,24 +385,60 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
     <div id="case-crm-detail-drawer" className="h-full flex flex-col bg-[#09090c] border border-white/5 rounded-2xl overflow-hidden shadow-2xl relative">
       {/* Drawer Header Toolbar */}
       <div className="bg-[#121216] border-b border-white/5 p-4 flex items-center justify-between z-10 shrink-0">
-        <div>
-          <span className="text-[10px] uppercase font-black tracking-widest text-[#2effc3] bg-[#00e3a5]/5 px-2 py-0.5 rounded border border-[#00e3a5]/10 shrink-0">
-            {caseData.crmType === 'inquiry' ? 'Inquiry' : caseData.crmType === 'complaint' ? 'Complaint' : caseData.crmType === 'client_comm' ? 'Client Comm' : 'Tabby/Tamara'}
-          </span>
-          <h2 className="text-sm font-black text-slate-100 font-mono mt-1.5 flex items-center gap-1">
-            {caseData.referenceId}
-          </h2>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] uppercase font-bold tracking-widest text-[#2effc3] bg-[#00e3a5]/5 px-2 py-0.5 rounded-full border border-[#00e3a5]/10 shrink-0">
+              {caseData.crmType === 'inquiry' ? 'Inquiry' : caseData.crmType === 'complaint' ? 'Complaint' : caseData.crmType === 'client_comm' ? 'Client Comm' : 'Tabby/Tamara'}
+            </span>
+            <h2 className="text-sm font-bold text-slate-100 font-mono">
+              {caseData.referenceId}
+            </h2>
+          </div>
+          <div className="flex items-center gap-2 mt-1">
+            {caseData.status && (
+              <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide inline-block max-w-full truncate
+                ${['submitted', 'not_confirmed', 'awaiting_client_contact'].includes(caseData.status) ? 'bg-amber-500/10 text-amber-500' :
+                  caseData.status === 'tl_reviewing' ? 'bg-blue-500/10 text-blue-400' :
+                  ['sent_to_clinic', 'sent'].includes(caseData.status) ? 'bg-orange-500/10 text-orange-400' :
+                  ['in_progress', 'need_contact'].includes(caseData.status) ? 'bg-purple-500/10 text-purple-400' :
+                  ['answered', 'resolved', 'contacted'].includes(caseData.status) ? 'bg-emerald-500/10 text-emerald-400' :
+                  caseData.status === 'pending_tl' ? 'bg-yellow-500/10 text-yellow-400' :
+                  'bg-slate-500/10 text-slate-400'
+                }
+              `}>
+                {['submitted', 'not_confirmed', 'awaiting_client_contact'].includes(caseData.status) ? 'New / Pending' :
+                  caseData.status === 'tl_reviewing' ? 'TL Review' :
+                  ['sent_to_clinic', 'sent'].includes(caseData.status) ? 'Sent to Clinic' :
+                  ['in_progress', 'need_contact'].includes(caseData.status) ? 'In Progress' :
+                  ['answered', 'resolved', 'contacted'].includes(caseData.status) ? 'Resolved' :
+                  caseData.status === 'pending_tl' ? 'Pending TL' :
+                  caseData.status?.replace(/_/g, ' ') || 'Submitted'}
+              </span>
+            )}
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] border border-white/10 text-slate-400">
+              <Clock className="w-2.5 h-2.5" />
+              {new Date(caseData.createdAt).toLocaleString()}
+            </span>
+          </div>
         </div>
-        <button 
-          onClick={onClose}
-          className="p-1.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all cursor-pointer text-slate-400 hover:text-white"
-        >
-          <X className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={handleCopyClipboard}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-bold flex items-center gap-2 transition-all cursor-pointer"
+          >
+            <Copy className="w-4 h-4" /> COPY CASE
+          </button>
+          <button 
+            onClick={onClose}
+            className="p-1.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all cursor-pointer text-slate-400 hover:text-white"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Tabs navigation panel */}
-      <div className="bg-[#0b0b0f] border-b border-white/5 px-2 flex justify-start shrink-0 z-10">
+      <div className="flex border-b border-white/5 gap-6 px-4 shrink-0 z-10 bg-[#0b0b0f]">
         {[
           { id: 'overview', label: 'Overview', icon: <Briefcase className="w-3.5 h-3.5" /> },
           { id: 'conversation', label: 'Timeline & Replies', icon: <MessageSquare className="w-3.5 h-3.5" /> },
@@ -396,10 +450,10 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id as any)}
-              className={`px-3 py-3 border-b-2 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`py-3 flex items-center gap-1.5 transition-all cursor-pointer text-sm ${
                 isActive
-                  ? "border-[#2effc3] text-[#2effc3] bg-white/[0.01]"
-                  : "border-transparent text-slate-500 hover:text-slate-300"
+                  ? "border-b-2 border-indigo-500 text-white font-bold"
+                  : "text-slate-500 hover:text-slate-300"
               }`}
             >
               {t.icon}
@@ -415,32 +469,27 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
         {activeTab === 'overview' && (
           <div className="space-y-5 animate-fade-in" id="drawer-tab-overview">
             
-            {/* Action Bar */}
-            <div className="flex flex-wrap gap-2 bg-[#121216] border border-white/5 p-3 rounded-xl">
-              <button 
-                onClick={handleCopyClipboard}
-                className="px-3 py-1.5 text-slate-300 hover:text-white hover:bg-white/5 border border-white/10 rounded-lg font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer"
-              >
-                <Copy className="w-3.5 h-3.5" /> Copy Log
-              </button>
+            {/* Patient Info Grid */}
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3 p-4 bg-white/[0.02] rounded-xl border border-white/5">
+              <InfoField label="Patient Name" value={caseData.patientName} copyable />
+              <InfoField label="Phone" value={caseData.phoneNumber} copyable mono />
+              <InfoField label="Clinic" value={getClinicLabel(caseData.clinicName)} />
+              <InfoField label="File / ID" value={caseData.crmType === 'tabby_tamara' || caseData.crmType === 'complaint' ? (caseData.raw.fileNumber || caseData.raw.idNumber || '') : ''} copyable mono />
+              <InfoField label="Submitted By" value={caseData.agentName} />
+              <InfoField label="Date" value={new Date(caseData.createdAt).toLocaleDateString()} />
+              {caseData.assignedToName && <InfoField label="Assigned To" value={caseData.assignedToName} />}
+              {caseData.crmType === 'tabby_tamara' && <InfoField label="Platform" value={caseData.raw.platform || ''} />}
+            </div>
 
-              {canEdit && (
-                <button 
-                  onClick={handleEditTrigger}
-                  className="px-3 py-1.5 text-indigo-400 hover:text-indigo-300 border border-indigo-500/20 bg-indigo-500/5 rounded-lg font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer"
-                >
-                  <Edit3 className="w-3.5 h-3.5" /> Edit Case
-                </button>
-              )}
-
-              {isTLOreSupport && (
-                <button 
-                  onClick={handleRemoveCase}
-                  className="px-3 py-1.5 text-rose-400 hover:text-rose-300 border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 rounded-lg font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ml-auto"
-                >
-                  <Trash2 className="w-3.5 h-3.5" /> Delete
-                </button>
-              )}
+            {/* Subject / Details Box */}
+            <div className="p-4 bg-[#0a0a0e] rounded-xl border border-white/5">
+              <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-2">Case Details</p>
+              <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-wrap">
+                {caseData.crmType === 'inquiry' ? caseData.raw.text 
+                 : caseData.crmType === 'complaint' ? caseData.raw.complaintDetails 
+                 : caseData.crmType === 'client_comm' ? caseData.raw.notes 
+                 : caseData.subject}
+              </p>
             </div>
 
             {/* Quick Actions Panel depending on request parameters */}
@@ -605,96 +654,45 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
               </div>
             )}
 
-            {/* Close / Reopen Complaint (TL exclusive) */}
-            {caseData.crmType === "complaint" && isTLOreSupport && (
-              <div className="flex gap-2.5 w-full">
-                {caseData.status !== "closed" ? (
-                  <button
-                    onClick={() => onCloseComplaint(caseData.id)}
-                    className="flex-1 bg-rose-700 hover:bg-rose-600 text-white font-black text-[10px] uppercase tracking-wider py-2 border border-rose-600/30 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    <CheckCircle className="w-3.5 h-3.5" /> Close Complaint File
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => onReopenComplaint(caseData.id)}
-                    className="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-black text-[10px] uppercase tracking-wider py-2 border border-amber-500/30 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    <CornerUpLeft className="w-3.5 h-3.5" /> Reopen Complaint Ticket
-                  </button>
-                )}
-              </div>
-            )}
+            {/* ACTION BUTTONS ROW */}
+            <div className="flex flex-wrap gap-2 pt-4 border-t border-white/5">
+              {canEdit && (
+                <button 
+                  onClick={handleEditTrigger}
+                  className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 rounded-lg text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <Edit3 className="w-4 h-4" /> Edit Case
+                </button>
+              )}
 
-            {/* Case Parameters Structured Grid */}
-            <div className="bg-[#121216] border border-white/5 p-4 rounded-xl space-y-3.5">
-              <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider border-b border-white/5 pb-2">Fields & Parameters</h3>
-              
-              <div className="grid grid-cols-2 gap-y-3.5 gap-x-2.5">
-                <div>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider leading-none mb-1">State status</p>
-                  <span className="text-xs font-bold text-slate-200 uppercase truncate">
-                    {caseData.status?.replace(/_/g, ' ')}
-                  </span>
-                </div>
+              {caseData.crmType === "complaint" && isTLOreSupport && (
+                <>
+                  {caseData.status !== "closed" ? (
+                    <button
+                      onClick={() => onCloseComplaint(caseData.id)}
+                      className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 rounded-lg text-sm font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <CheckCircle className="w-4 h-4" /> Close Complaint
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => onReopenComplaint(caseData.id)}
+                      className="px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 text-amber-500 rounded-lg text-sm font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <CornerUpLeft className="w-4 h-4" /> Reopen Complaint
+                    </button>
+                  )}
+                </>
+              )}
 
-                <div>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider leading-none mb-1">Clinic Center</p>
-                  <span className="text-xs font-bold text-slate-250 truncate block" title={getClinicLabel(caseData.clinicName)}>
-                    {getClinicLabel(caseData.clinicName)}
-                  </span>
-                </div>
-
-                <div>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider leading-none mb-1">Phone Dial</p>
-                  <span className="text-xs font-bold text-slate-200 block truncate leading-relaxed">
-                    {caseData.phoneNumber || "No database dial"}
-                  </span>
-                </div>
-
-                <div>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider leading-none mb-1">Dialer Submitter</p>
-                  <span className="text-xs font-bold text-slate-250 block truncate">
-                    {caseData.agentName}
-                  </span>
-                </div>
-
-                <div>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider leading-none mb-1">Date Logged</p>
-                  <span className="text-xs font-bold text-slate-200 block truncate">
-                    {new Date(caseData.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-
-                {caseData.crmType !== "client_comm" && caseData.raw.priceWithoutTax && (
-                  <div>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider leading-none mb-1">Trx value (incl. 5% VAT)</p>
-                    <span className="text-xs font-black text-slate-200 block truncate">
-                      {calculateTabbyTamaraPrice(caseData.raw.priceWithoutTax).finalPriceFormatted}
-                    </span>
-                  </div>
-                )}
-                
-                {caseData.crmType !== "client_comm" && caseData.raw.platform && (
-                  <div>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider leading-none mb-1">Platform</p>
-                    <span className="text-xs font-black text-[#00e3a5] block truncate">
-                      {caseData.raw.platform === "tabby" ? "Tabby" : 
-                       caseData.raw.platform === "tamara" ? "Tamara" : 
-                       caseData.raw.platform === "one_time_payment" ? "One Time Paid" : 
-                       caseData.raw.platform?.toUpperCase()}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Original description details log */}
-            <div className="bg-[#121216]/50 border border-white/5 p-4 rounded-xl space-y-2">
-              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Description Payload</span>
-              <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-line font-medium break-words max-h-48 overflow-y-auto pr-1">
-                {caseData.subject || "No content summary entered."}
-              </p>
+              {isTLOreSupport && (
+                <button 
+                  onClick={handleRemoveCase}
+                  className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 rounded-lg text-sm font-bold transition-all flex items-center gap-1.5 cursor-pointer ml-auto"
+                >
+                  <Trash2 className="w-4 h-4" /> Delete Case
+                </button>
+              )}
             </div>
 
             {/* Dynamic Assignment Control Widget */}

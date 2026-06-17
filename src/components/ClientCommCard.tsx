@@ -17,7 +17,8 @@ import {
   getClinicLabel, 
   formatCaseRef, 
   copyToClipboard, 
-  formatPhoneForCopy 
+  formatPhoneForCopy,
+  getAgentLOB
 } from "../utils";
 import { toast } from "sonner";
 
@@ -122,85 +123,112 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
 
   const timerFunc = getElapsedTimerString || defaultGetElapsedTimerString;
 
+  const STATUS_BORDER_COLORS: Record<string, string> = {
+    submitted: "border-l-amber-500",
+    pending: "border-l-amber-500",
+    in_progress: "border-l-indigo-500",
+    contacted: "border-l-emerald-500",
+    closed: "border-l-slate-600",
+  };
+  const borderLeftColor = STATUS_BORDER_COLORS[comm.status] || "border-l-slate-700";
+
   return (
     <div
-      className={`relative p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4 shadow-md overflow-hidden bg-[#1e1e1e]/40 backdrop-blur-lg/60 ${
-        isExpanded ? "ring-1 ring-indigo-500/25 border-indigo-500/30" : "border-white/5 hover:bg-white/[0.04]"
-      } ${
-        isPending ? "border-indigo-500/30 bg-gradient-to-b from-indigo-950/10 to-transparent" : ""
-      }`}
+      className={`relative p-4 bg-[#121216] border-y border-r border-slate-700/60 border-l-4 ${borderLeftColor} rounded-xl shadow-md overflow-hidden transition-all duration-300 flex flex-col w-full ${isExpanded ? "ring-1 ring-white/5 space-y-4" : "hover:bg-white/[0.04] cursor-pointer"}`}
+      onClick={() => {
+        if (!isExpanded) {
+          onToggle();
+        }
+      }}
     >
-      {/* Top Accent line */}
+      {/* Top Accent line if pending */}
       {isPending && (
-        <div className="absolute top-0 right-0 left-0 h-1.5 flex animate-pulse">
-          <div className="w-full bg-indigo-500" />
+        <div className="absolute top-0 right-0 left-0 h-1 flex animate-pulse">
+          <div className="w-full bg-indigo-500/50" />
         </div>
       )}
 
       {/* Header section clickable to toggle expansion */}
       <div 
-        onClick={onToggle}
-        className="flex justify-between items-start gap-2 pt-1 text-left cursor-pointer"
+        onClick={(e) => {
+          if (isExpanded) {
+            e.stopPropagation();
+            onToggle();
+          }
+        }}
+        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full ${isExpanded ? "border-b border-white/5 pb-3 cursor-pointer hover:opacity-80" : ""}`}
       >
-        <div className="space-y-0.5">
-          <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-col space-y-1">
+          {/* Row 1: Agent & Badges */}
+          <div className="flex items-center gap-2 flex-wrap text-left">
             <span
-              className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border ${getClinicBadgeColor(comm.clinicName)}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                copyToClipboard(comm.callCenterAgentName || "", "Agent name copied!");
+              }}
+              className="text-xs font-bold text-slate-100 uppercase tracking-wide cursor-pointer hover:text-indigo-300 transition-colors shrink-0"
             >
-              {getClinicLabel(comm.clinicName)}
+              {comm.callCenterAgentName}
             </span>
-            <span
-              className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border border-white/10 ${comm.language === "Arabic" ? "bg-emerald-500/10 text-emerald-300" : "bg-blue-500/10 text-blue-300"}`}
-            >
-              {comm.language}
+            <span className="text-[10px] text-slate-400 lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded font-sans shrink-0">
+              {getAgentLOB(comm.callCenterAgentName)}
             </span>
-            <span
-              className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border ${
-                comm.status === "contacted"
-                  ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/25"
-                  : comm.status === "in_progress"
-                    ? "bg-indigo-500/15 text-indigo-300 border-indigo-500/25"
-                    : "bg-amber-500/15 text-amber-300 border-amber-500/25"
-              }`}
-            >
-              {comm.status === "contacted"
-                ? "✓ Contacted"
-                : comm.status === "in_progress"
-                  ? "⚡ In Progress"
-                  : "⏳ Pending"}
+            <span className="font-mono text-[10px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded shrink-0">
+              {formatCaseRef(comm.id, "client_comm", comm.createdAt, comm.caseRef)}
             </span>
+            <span className="text-[9px] text-slate-500 font-mono shrink-0">
+              {new Date(comm.createdAt).toLocaleString()}
+            </span>
+          </div>
+
+          {/* Row 2: Patient Name, Clinic, Phone */}
+          <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-300 flex-wrap">
+            {comm.patientName && <span className="font-bold">{comm.patientName}</span>}
+            {comm.clinicName && <span>• {getClinicLabel(comm.clinicName)}</span>}
+            {comm.phoneNumber && <span>• {comm.phoneNumber}</span>}
+            
+            {comm.language && (
+               <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border border-white/10 shrink-0 ml-2 ${comm.language === "Arabic" ? "bg-emerald-500/10 text-emerald-300" : "bg-blue-500/10 text-blue-300"}`}>
+                 {comm.language}
+               </span>
+            )}
           </div>
         </div>
 
         {/* Status Badges & Toggle */}
-        <div className="text-right flex flex-col items-end gap-1 shrink-0 font-sans">
-          <span className="font-mono text-[10px] text-slate-500 font-bold tracking-wider mb-1 flex items-center justify-end gap-2">
-            <span
-              className={`px-1.5 py-0.5 rounded-sm border border-white/10 ${commSLABadge}`}
-            >
-              ⏱ {commAgeLabel} open
-            </span>
-            {formatComRef(comm.id)}
+        <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+          <span
+            className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg uppercase tracking-wider shrink-0 ${
+              comm.status === "contacted"
+                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                : comm.status === "in_progress"
+                  ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20 animate-pulse"
+                  : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+            }`}
+          >
+            {comm.status === "contacted" ? "✓ Contacted" : comm.status === "in_progress" ? "⚡ In Progress" : "⏳ Pending"}
           </span>
-          {isPending && (
-            <span className="text-[9px] uppercase tracking-wide font-extrabold bg-amber-500/10 border border-amber-500/30 text-amber-400 px-2 py-0.5 rounded-md animate-pulse">
-              ⏳ PENDING ACTION
-            </span>
-          )}
-          {isInProgress && (
-            <span className="text-[9px] uppercase tracking-wide font-extrabold bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 px-2 py-0.5 rounded-md animate-pulse">
-              IN PROGRESS ({comm.openedBy})
-            </span>
-          )}
-          {isClosed && (
-            <span className="text-[9px] uppercase tracking-wide font-extrabold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-2 py-0.5 rounded-md">
-              CONTACTED
-            </span>
+          <span className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 ${commSLABadge}`}>
+             ⏱ {commAgeLabel} open
+          </span>
+          {isSuperAdmin && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteClientComms(comm.id);
+              }}
+              className="text-stone-400 hover:text-rose-400 p-1 rounded-md transition-all shrink-0 ml-1.5"
+              title="Delete Request"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
           )}
         </div>
       </div>
 
-      {/* Core Detail Grid */}
+      {isExpanded && (
+        <div className="w-full flex-col flex space-y-4 text-left">
+          {/* Core Detail Grid */}
       <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl space-y-2 text-xs text-left">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-2 gap-y-1">
           <div>
@@ -509,6 +537,8 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
           requestAgentName={comm.callCenterAgentName || comm.openedBy}
         />
       </div>
+        </div>
+      )}
     </div>
   );
 };

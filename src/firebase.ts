@@ -1,6 +1,7 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import {
   initializeFirestore,
+  getFirestore,
   onSnapshot as firestoreOnSnapshot,
   setDoc as firestoreSetDoc,
   updateDoc as firestoreUpdateDoc,
@@ -72,17 +73,15 @@ for (const key of requiredKeys) {
   }
 }
 
-const app = initializeApp(firebaseConfig);
+const isFirstInit = !getApps().length;
+const app = isFirstInit ? initializeApp(firebaseConfig) : getApp();
 const isTestEnv =
   typeof process !== "undefined" && process.env.NODE_ENV === "test";
 
-export const db = initializeFirestore(
-  app,
-  {
-    ignoreUndefinedProperties: true,
-  },
-  firebaseConfig.firestoreDatabaseId,
-);
+// Handle HMR safely
+export const db = isFirstInit 
+  ? initializeFirestore(app, { ignoreUndefinedProperties: true }, firebaseConfig.firestoreDatabaseId)
+  : getFirestore(app, firebaseConfig.firestoreDatabaseId);
 
 enableIndexedDbPersistence(db).catch((err) => {
   if (err.code === "failed-precondition") console.warn("Multiple tabs open");
