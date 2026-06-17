@@ -1649,6 +1649,24 @@ export default function App() {
         },
       );
 
+      const unsubLastRosterUpdate = onSnapshot(
+        doc(db, "system", "sched_last_roster_update"),
+        (snap) => {
+          if (snap.exists()) {
+            const data = snap.data() as { timestamp: number; updatedBy: string };
+            setLastRosterUpdate(data);
+            setStorageItem("sched_last_roster_update", data, false);
+          }
+        },
+        (error) => {
+          console.error(
+            "sched_last_roster_update snapshot error:",
+            error.code,
+            error.message,
+          );
+        },
+      );
+
       const unsubFeedbacks = onSnapshot(
         collection(db, "tl_feedbacks"),
         (snap) => {
@@ -3334,6 +3352,10 @@ ${pageText}
   const [uaeWeatherCode, setUaeWeatherCode] = useState<number>(0);
   const [selectedWeatherLoc, setSelectedWeatherLoc] = useState<"both" | "egypt" | "uae">(() => {
     return getStorageItem<"both" | "egypt" | "uae">("sched_weather_location_pref", "both");
+  });
+
+  const [lastRosterUpdate, setLastRosterUpdate] = useState<{timestamp: number; updatedBy: string} | null>(() => {
+    return getStorageItem<{timestamp: number; updatedBy: string} | null>("sched_last_roster_update", null);
   });
 
   // Tabby/Tamara form inputs
@@ -5834,6 +5856,11 @@ ${result.errors.slice(0, 5).join("\n")}${
             batch.delete(doc.ref);
           });
           await batch.commit();
+
+          setDoc(doc(db, "system", "sched_last_roster_update"), {
+            timestamp: Date.now(),
+            updatedBy: currentUser?.name || "Leadership",
+          }).catch(console.error);
 
           toast.success("Schedules cleared.");
         } catch (err: any) {
@@ -8431,6 +8458,11 @@ ${ttNotes}`
       (e) => console.error("Agent Meta Sync Error:", e),
     );
 
+    setDoc(doc(db, "system", "sched_last_roster_update"), {
+      timestamp: Date.now(),
+      updatedBy: currentUser?.name || "Leadership",
+    }).catch((e) => console.error("Last Roster Update Sync Error:", e));
+
     toast.success(
       `Schedule system updated with ${targetSchedules.length} live shifts!`,
     );
@@ -10536,6 +10568,40 @@ ${ttNotes}`
                       </div>
                       <span className="font-mono">Synq v2.4.1</span>
                     </button>
+
+                    {lastRosterUpdate ? (
+                      <div className="w-full p-2.5 bg-indigo-500/5 hover:bg-indigo-500/10 border border-indigo-500/20 hover:border-indigo-500/30 rounded-lg text-[10px] mb-2 text-left transition-all shrink-0">
+                        <div className="flex items-center gap-1.5 text-indigo-300 font-extrabold uppercase tracking-wider text-[8px] mb-0.5">
+                          <span className="w-1 to-1 rounded-full bg-indigo-400 shrink-0 w-1.5 h-1.5 animate-pulse" />
+                          <span>Last Roster Update</span>
+                        </div>
+                        <p className="text-slate-300 text-[10px] font-medium font-sans">
+                          By <span className="text-white font-bold">{lastRosterUpdate.updatedBy || "Leadership"}</span>
+                        </p>
+                        <p className="text-slate-400 font-mono text-[9px] mt-0.5 tracking-tight">
+                          {(() => {
+                            try {
+                              const d = new Date(lastRosterUpdate.timestamp);
+                              return d.toLocaleDateString(undefined, {
+                                weekday: "short",
+                                month: "short",
+                                day: "numeric",
+                              }) + " " + d.toLocaleTimeString(undefined, {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true,
+                              });
+                            } catch (e) {
+                              return "Pending parse...";
+                            }
+                          })()}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="w-full p-2 bg-slate-500/5 border border-slate-500/10 rounded-lg text-[9px] text-slate-500 mb-2 font-mono text-center shrink-0">
+                        No recorded updates yet
+                      </div>
+                    )}
 
                     <button
                       id="signout-button"
