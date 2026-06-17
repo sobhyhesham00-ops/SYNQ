@@ -50,7 +50,7 @@ export const NotificationDrawer = ({
   const unreadCount = sortedNotifs.filter(n => !n.seenByUsers?.includes(currentUser?.id)).length;
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence>
       {isOpen && (
         <React.Fragment key="drawer">
           <motion.div

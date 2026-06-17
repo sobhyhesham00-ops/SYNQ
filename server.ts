@@ -57,6 +57,11 @@ async function startServer() {
     res.json({ status: 'ok' });
   });
 
+  // ─── API: Safe Beacon/Ping Endpoint ──────────────────────────────────────
+  app.all('/api/noop', (req, res) => {
+    res.sendStatus(204);
+  });
+
   // ─── API: AI Schedule Roster Analyzer ────────────────────────────────────────
   app.post('/api/analyze-schedule', async (req, res) => {
     try {
@@ -91,7 +96,10 @@ async function startServer() {
     }
   });
 
-
+  // ─── API: Catch-all for unmatched api routes ────────────────────────────────
+  app.all('/api/*', (req, res) => {
+    res.status(404).json({ error: "API route not found" });
+  });
 
   // ─── Vite dev middleware / production static serving ─────────────────────────
   if (process.env.NODE_ENV !== "production") {
@@ -101,6 +109,7 @@ async function startServer() {
       server: { 
         middlewareMode: true,
         hmr: false,
+        proxy: {}, // Disable proxying to prevent infinite loops / resource exhaustion
       },
       appType: "spa",
     });

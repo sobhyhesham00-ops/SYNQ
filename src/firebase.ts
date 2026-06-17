@@ -10,7 +10,8 @@ import {
   getDocs as firestoreGetDocs,
   getDoc as firestoreGetDoc,
   connectFirestoreEmulator,
-  enableIndexedDbPersistence,
+  persistentLocalCache,
+  persistentMultipleTabManager,
 } from "firebase/firestore";
 import {
   getAuth,
@@ -80,14 +81,17 @@ const isTestEnv =
 
 // Handle HMR safely
 export const db = isFirstInit 
-  ? initializeFirestore(app, { ignoreUndefinedProperties: true }, firebaseConfig.firestoreDatabaseId)
+  ? initializeFirestore(
+      app,
+      {
+        ignoreUndefinedProperties: true,
+        localCache: persistentLocalCache({
+          tabManager: persistentMultipleTabManager(),
+        }),
+      },
+      firebaseConfig.firestoreDatabaseId
+    )
   : getFirestore(app, firebaseConfig.firestoreDatabaseId);
-
-enableIndexedDbPersistence(db).catch((err) => {
-  if (err.code === "failed-precondition") console.warn("Multiple tabs open");
-  else if (err.code === "unimplemented")
-    console.warn("Browser does not support persistence");
-});
 
 export const auth = getAuth(app);
 

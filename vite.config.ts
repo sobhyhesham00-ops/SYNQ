@@ -16,13 +16,6 @@ export default defineConfig(() => {
     },
     server: {
       port: 5173,
-      // FIX: Proxy /api/* to the Express backend running on port 3000.
-      proxy: {
-        "/api": {
-          target: "http://localhost:3000",
-          changeOrigin: true,
-        },
-      },
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       hmr: false,
       watch: process.env.DISABLE_HMR === "true" ? null : {},

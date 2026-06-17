@@ -307,9 +307,6 @@ body.theme-light .bg-emerald-500\/10 {
 body.theme-light .text-indigo-200 {
   color: #4f46e5 !important;
 }
-body.theme-light .text-[#a5b4fc] {
-  color: #4f46e5 !important;
-}
 
 /* Suppress Vite Error Overlay */
 vite-error-overlay {

@@ -34,6 +34,6 @@ describe('RequestReplyThread', () => {
       />
     );
     
-    expect(getByText(/Thread \(0\)/i)).toBeDefined();
+    expect(getByText(/Enterprise Timeline Feed/i)).toBeDefined();
   });
 });
