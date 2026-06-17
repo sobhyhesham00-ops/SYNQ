@@ -1972,7 +1972,7 @@ export const buildCaseClipboardPayload = (request: TabbyTamaraRequest): Clipboar
   const pricing = calculateTabbyTamaraPrice(request.priceWithoutTax || 0);
 
   // Text version
-  const textLines = [
+  let textLines = [
     `✨ *${provider} PAYMENT REQUEST* ✨`,
     `--------------------------------------`,
     `🆔 *Ref:* ${refCode}`,
@@ -2017,8 +2017,34 @@ export const buildCaseClipboardPayload = (request: TabbyTamaraRequest): Clipboar
   html += `<tr><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; color: #64748b;">💵 Amount (incl. VAT)</td><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; font-weight: 700; color: #10b981; font-size: 15px;">${pricing.finalPriceFormatted}</td></tr>`;
   html += `<tr><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; color: #64748b;">📋 Status</td><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc;"><span style="font-size: 11px; font-weight: 800; background-color: ${statusColor}15; color: ${statusColor}; padding: 4px 10px; border-radius: 6px; text-transform: uppercase;">● ${workflowStatusLabel}</span></td></tr>`;
   html += `<tr><td style="padding: 10px 0; color: #64748b;">🔗 Payment Link</td><td style="padding: 10px 0;"><a href="${normalizeUrl(paymentLink)}" target="_blank" style="color: #2563eb; text-decoration: none; font-weight: 600; word-break: break-all;">${paymentLink}</a></td></tr>`;
-  html += `</table></div>`;
+  if (attachmentsList.length > 0) {
+    html += `<div style="margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 15px;">`;
+    html += `<h4 style="margin: 0 0 10px 0; color: #475569; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">Attachments (${attachmentsList.length})</h4>`;
+    html += `<div style="display: flex; flex-wrap: wrap; gap: 10px;">`;
+    attachmentsList.forEach((att, idx) => {
+      if (att.url.startsWith("data:image")) {
+        html += `<img src="${att.url}" alt="Attachment ${idx+1}" style="max-width: 150px; border-radius: 8px; border: 1px solid #e2e8f0; object-fit: cover;" />`;
+      } else {
+         html += `<a href="${normalizeUrl(att.url)}" target="_blank" style="display: inline-block; padding: 6px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; text-decoration: none; color: #2563eb;">📎 Attachment ${idx+1}</a>`;
+      }
+      textLines += `\n📎 Attachment ${idx+1}: ${att.url.startsWith("data:") ? "[Image Inline]" : normalizeUrl(att.url)}`;
+    });
+    html += `</div></div>`;
+  }
+  
+  const customLinks = extractLinks(request.links || "");
+  if (customLinks.length > 0) {
+    html += `<div style="margin-top: 15px;">`;
+    html += `<h4 style="margin: 0 0 10px 0; color: #475569; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em;">Additional Links</h4>`;
+    customLinks.forEach((l, idx) => {
+       html += `<div><a href="${normalizeUrl(l)}" target="_blank" style="color: #2563eb; text-decoration: none; font-size: 13px;">🔗 Link ${idx+1}: ${l}</a></div>`;
+       textLines += `\n🔗 Link ${idx+1}: ${normalizeUrl(l)}`;
+    });
+    html += `</div>`;
+  }
 
+  html += `</div>`;
+  
   return { text: textLines, html, attachmentsList };
 };
 export const CLINIC_OPTIONS: { value: string; label: string }[] = [

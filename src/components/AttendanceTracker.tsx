@@ -21,6 +21,7 @@ import {
 import { getAgentLOB, getUsernameFromFullName, normalizeAgentLob } from "../utils";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 interface AttendanceTrackerProps {
   attendanceRecords: AttendanceRecord[];
@@ -413,35 +414,80 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
         </div>
       </div>
 
-      {/* Quick Stats Summary Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-7 gap-4">
-        <div className="p-4 bg-[#18181c]/50 border border-slate-800 rounded-2xl text-center">
-          <p className="text-[9px] uppercase font-black text-slate-500 tracking-wider">Total Active</p>
-          <p className="text-2xl font-black text-slate-200 mt-1">{stats.total}</p>
+      {/* Quick Stats Summary Grid & Interactive Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-3 grid grid-cols-2 xl:grid-cols-4 gap-4">
+          <div className="p-4 bg-[#18181c]/50 border border-slate-800 rounded-2xl text-center flex flex-col justify-center">
+            <p className="text-[10px] uppercase font-black text-slate-500 tracking-wider">Total Active</p>
+            <p className="text-3xl font-black text-slate-200 mt-1">{stats.total}</p>
+          </div>
+          <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl text-center flex flex-col justify-center">
+            <p className="text-[10px] uppercase font-black text-emerald-500 tracking-wider">Present</p>
+            <p className="text-3xl font-black text-emerald-400 mt-1">{stats.present}</p>
+          </div>
+          <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-2xl text-center flex flex-col justify-center">
+            <p className="text-[10px] uppercase font-black text-amber-500 tracking-wider">Late</p>
+            <p className="text-3xl font-black text-amber-400 mt-1">{stats.late}</p>
+          </div>
+          <div className="p-4 bg-rose-500/5 border border-rose-500/10 rounded-2xl text-center flex flex-col justify-center">
+            <p className="text-[10px] uppercase font-black text-rose-500 tracking-wider">Absent</p>
+            <p className="text-3xl font-black text-rose-400 mt-1">{stats.absent}</p>
+          </div>
+          <div className="p-4 bg-blue-500/5 border border-blue-500/10 rounded-2xl text-center flex flex-col justify-center">
+            <p className="text-[10px] uppercase font-black text-blue-500 tracking-wider">On Leave</p>
+            <p className="text-3xl font-black text-blue-400 mt-1">{stats.onLeave}</p>
+          </div>
+          <div className="p-4 bg-red-500/5 border border-red-500/10 rounded-2xl text-center flex flex-col justify-center">
+            <p className="text-[10px] uppercase font-black text-red-500 tracking-wider">NSNC</p>
+            <p className="text-3xl font-black text-red-400 mt-1">{stats.noShowNoCall}</p>
+          </div>
+          <div className="p-4 bg-slate-800/10 border border-slate-800 rounded-2xl text-center flex flex-col justify-center lg:col-span-2 xl:col-span-1">
+            <p className="text-[10px] uppercase font-black text-slate-400 tracking-wider">Not Marked</p>
+            <p className="text-3xl font-black text-slate-400 mt-1">{stats.notMarked}</p>
+          </div>
         </div>
-        <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl text-center">
-          <p className="text-[9px] uppercase font-black text-emerald-500 tracking-wider">Present</p>
-          <p className="text-2xl font-black text-emerald-400 mt-1">{stats.present}</p>
-        </div>
-        <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-2xl text-center">
-          <p className="text-[9px] uppercase font-black text-amber-500 tracking-wider">Late</p>
-          <p className="text-2xl font-black text-amber-400 mt-1">{stats.late}</p>
-        </div>
-        <div className="p-4 bg-rose-500/5 border border-rose-500/10 rounded-2xl text-center">
-          <p className="text-[9px] uppercase font-black text-rose-500 tracking-wider">Absent</p>
-          <p className="text-2xl font-black text-rose-400 mt-1">{stats.absent}</p>
-        </div>
-        <div className="p-4 bg-blue-500/5 border border-blue-500/10 rounded-2xl text-center">
-          <p className="text-[9px] uppercase font-black text-blue-500 tracking-wider">On Leave</p>
-          <p className="text-2xl font-black text-blue-400 mt-1">{stats.onLeave}</p>
-        </div>
-        <div className="p-4 bg-red-500/5 border border-red-500/10 rounded-2xl text-center">
-          <p className="text-[9px] uppercase font-black text-red-500 tracking-wider">NSNC</p>
-          <p className="text-2xl font-black text-red-400 mt-1">{stats.noShowNoCall}</p>
-        </div>
-        <div className="p-4 bg-slate-800/10 border border-slate-800 rounded-2xl text-center">
-          <p className="text-[9px] uppercase font-black text-slate-400 tracking-wider">Not Marked</p>
-          <p className="text-2xl font-black text-slate-400 mt-1">{stats.notMarked}</p>
+        
+        <div className="bg-slate-900/25 border border-slate-800/80 p-5 rounded-2xl h-64 flex flex-col">
+          <h3 className="text-[10px] font-black uppercase text-slate-300 tracking-wider mb-2">Daily Attendance Ratio</h3>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={[
+                  { name: "Present", value: stats.present, color: "#10b981" },
+                  { name: "Late", value: stats.late, color: "#f59e0b" },
+                  { name: "Absent", value: stats.absent, color: "#f43f5e" },
+                  { name: "On Leave", value: stats.onLeave, color: "#3b82f6" },
+                  { name: "NSNC", value: stats.noShowNoCall, color: "#ef4444" },
+                  { name: "Not Marked", value: stats.notMarked, color: "#64748b" }
+                ].filter(d => d.value > 0)}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                innerRadius={45}
+                outerRadius={65}
+                paddingAngle={5}
+              >
+                {
+                  [
+                    { name: "Present", value: stats.present, color: "#10b981" },
+                    { name: "Late", value: stats.late, color: "#f59e0b" },
+                    { name: "Absent", value: stats.absent, color: "#f43f5e" },
+                    { name: "On Leave", value: stats.onLeave, color: "#3b82f6" },
+                    { name: "NSNC", value: stats.noShowNoCall, color: "#ef4444" },
+                    { name: "Not Marked", value: stats.notMarked, color: "#64748b" }
+                  ].filter(d => d.value > 0).map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} stroke="rgba(255,255,255,0.05)" />
+                  ))
+                }
+              </Pie>
+              <Tooltip 
+                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '8px' }}
+                itemStyle={{ color: '#f8fafc', fontSize: '12px' }}
+              />
+              <Legend verticalAlign="bottom" height={20} iconType="circle" wrapperStyle={{ fontSize: '10px' }} />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
       </div>
 

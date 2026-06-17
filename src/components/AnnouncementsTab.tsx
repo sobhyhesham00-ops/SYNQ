@@ -22,7 +22,7 @@ export function AnnouncementsTab({
   const [linkUrl, setLinkUrl] = useState('');
   const [clinicFilter, setClinicFilter] = useState('all');
   
-  const [filterClinic, setFilterClinic] = useState('all');
+  const [filterClinics, setFilterClinics] = useState<string[]>([]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -138,7 +138,7 @@ export function AnnouncementsTab({
   };
 
   const filtered = announcements.filter(a => {
-    if (filterClinic !== 'all' && a.clinicFilter !== 'all' && a.clinicFilter !== filterClinic) return false;
+    if (filterClinics.length > 0 && a.clinicFilter !== 'all' && !filterClinics.includes(a.clinicFilter)) return false;
     return true;
   });
 
@@ -225,12 +225,40 @@ export function AnnouncementsTab({
       <div className="bg-white/[0.02] border border-white/10 rounded-3xl p-6 backdrop-blur-xl min-h-[400px]">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-bold text-slate-200">Updates History</h3>
-          <select value={filterClinic} onChange={e => setFilterClinic(e.target.value)} className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 outline-none cursor-pointer">
-             <option value="all" className="font-sans">Filter by Clinic...</option>
-             {CLINIC_OPTIONS.map(c => (
-<option key={c.value} value={c.value} className="font-sans">{c.label}</option>
-))}
-          </select>
+          <div className="relative">
+            <select 
+              value="" 
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val && !filterClinics.includes(val)) {
+                  setFilterClinics([...filterClinics, val]);
+                }
+              }} 
+              className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 outline-none cursor-pointer"
+            >
+               <option value="" className="font-sans">➕ Add Clinic to Filter...</option>
+               {CLINIC_OPTIONS.filter(c => !filterClinics.includes(c.value)).map(c => (
+                 <option key={c.value} value={c.value} className="font-sans">{c.label}</option>
+               ))}
+            </select>
+            {filterClinics.length > 0 && (
+              <div className="absolute top-full right-0 z-50 mt-1 flex flex-wrap gap-1 bg-slate-800 p-2 rounded-lg border border-slate-700 shadow-xl w-64">
+                <span className="w-full text-xs text-slate-400 font-bold mb-1 flex justify-between">
+                  Selected Clinics:
+                  <button onClick={() => setFilterClinics([])} className="text-rose-400 hover:text-rose-300">Clear</button>
+                </span>
+                {filterClinics.map(c => {
+                  const label = CLINIC_OPTIONS.find(opt => opt.value === c)?.label || c;
+                  return (
+                    <span key={c} className="bg-amber-500/20 text-amber-300 border-none px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
+                      {label}
+                      <button onClick={() => setFilterClinics(prev => prev.filter(x => x !== c))} className="hover:text-white cursor-pointer">&times;</button>
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="space-y-4 text-left">

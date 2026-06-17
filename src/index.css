@@ -258,6 +258,59 @@ body.theme-light .bg-amber-500\/15 {
   background-color: rgba(217, 119, 6, 0.08) !important;
 }
 
+/* Eye-safe rich tones for custom branding in light mode */
+body.theme-light .text-cyan-400 {
+  color: #0891b2 !important; /* Rich eye-safe turquoise */
+}
+body.theme-light .text-cyan-300 {
+  color: #097d9c !important;
+}
+body.theme-light .text-indigo-300 {
+  color: #4f46e5 !important; /* Elegant corporate indigo */
+}
+body.theme-light .text-purple-300 {
+  color: #7c3aed !important;
+}
+body.theme-light .bg-black\/40, 
+body.theme-light .bg-black\/50,
+body.theme-light .bg-black\/30 {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  color: #1c1c1e !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04) !important;
+}
+body.theme-light .border-cyan-500\/15,
+body.theme-light .border-cyan-500\/20,
+body.theme-light .border-cyan-500\/30 {
+  border-color: rgba(6, 182, 212, 0.22) !important;
+}
+body.theme-light .bg-gradient-to-br.from-cyan-500\/5 {
+  background-image: linear-gradient(to bottom right, rgba(6, 182, 212, 0.04), rgba(79, 70, 229, 0.04)) !important;
+}
+body.theme-light .shadow-\[0_4px_20px_rgba\(0\,0\,0\,0\.3\)\] {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03) !important;
+}
+body.theme-light .shadow-\[0_4px_25px_rgba\(0\,0\,0\,0\.35\)\] {
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04) !important;
+}
+body.theme-light .bg-cyan-500\/10 {
+  background-color: rgba(6, 182, 212, 0.08) !important;
+}
+body.theme-light .bg-rose-500\/10 {
+  background-color: rgba(244, 63, 94, 0.08) !important;
+}
+body.theme-light .bg-blue-500\/10 {
+  background-color: rgba(59, 130, 246, 0.08) !important;
+}
+body.theme-light .bg-emerald-500\/10 {
+  background-color: rgba(16, 185, 129, 0.08) !important;
+}
+body.theme-light .text-indigo-200 {
+  color: #4f46e5 !important;
+}
+body.theme-light .text-[#a5b4fc] {
+  color: #4f46e5 !important;
+}
+
 /* Suppress Vite Error Overlay */
 vite-error-overlay {
   display: none !important;

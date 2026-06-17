@@ -186,21 +186,21 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col justify-between group hover:border-indigo-500/30 transition-all cursor-pointer text-left"
+          className="p-6 rounded-[32px] bg-[#181a20] border-none flex flex-col justify-between group hover:bg-[#1f222a] transition-all cursor-pointer text-left"
           onClick={() => onNavigate('roster')}
         >
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 text-indigo-400">
+          <div className="flex items-center justify-between mb-6">
+            <div className="w-12 h-12 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400">
               <Clock className="w-5 h-5" />
             </div>
-            <div className="px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg text-[9px] font-black uppercase tracking-widest border border-emerald-500/20">
+            <div className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-full text-[10px] font-bold uppercase tracking-widest">
               Active
             </div>
           </div>
           <div>
-            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Upcoming Rotation</p>
-            <h3 className="text-xl font-bold text-slate-100">{myNextShift?.shiftLabel || 'Off Duty'}</h3>
-            <p className="text-slate-400 text-xs mt-1">{myNextShift?.date || 'No scheduled date'}</p>
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Upcoming Rotation</p>
+            <h3 className="text-2xl font-black text-white px-0.5">{myNextShift?.shiftLabel || 'Off Duty'}</h3>
+            <p className="text-slate-500 text-sm mt-1 font-medium">{myNextShift?.date || 'No scheduled date'}</p>
           </div>
         </motion.div>
 
@@ -209,11 +209,12 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col justify-between group hover:border-amber-500/30 hover:bg-amber-500/[0.02] transition-all cursor-pointer text-left"
+          className="p-6 rounded-[32px] bg-[#181a20] border-none flex flex-col justify-between group hover:bg-[#1f222a] transition-all cursor-pointer text-left relative overflow-hidden"
           onClick={() => handleCardTrigger('queue', isAgent ? 'cases' : 'client-comms')}
         >
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 text-amber-400">
+          <div className="absolute top-0 right-0 p-16 bg-amber-500/5 blur-[40px] rounded-full pointer-events-none group-hover:bg-amber-500/10 transition-colors" />
+          <div className="flex items-center justify-between mb-6 relative z-10">
+            <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400">
               <Activity className="w-5 h-5" />
             </div>
             {(pendingRequestsCount > 0 || activeCasesCount > 0) && (
@@ -223,14 +224,14 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
               </div>
             )}
           </div>
-          <div>
-            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Requests & Queue Status</p>
+          <div className="relative z-10">
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Queue Status</p>
             <div className="flex items-baseline gap-2">
-              <h3 className="text-3xl font-black text-slate-100">{(!isNaN(pendingRequestsCount) ? pendingRequestsCount : 0) + (!isNaN(activeCasesCount) ? activeCasesCount : 0)}</h3>
-              <span className="text-[10px] text-amber-400 font-bold uppercase tracking-widest">Inspect Live</span>
+              <h3 className="text-3xl font-black text-white">{(!isNaN(pendingRequestsCount) ? pendingRequestsCount : 0) + (!isNaN(activeCasesCount) ? activeCasesCount : 0)}</h3>
+              <span className="text-xs text-amber-400 font-bold uppercase tracking-widest group-hover:text-amber-300">Inspect</span>
             </div>
-            <p className="text-slate-400 text-xs mt-2 flex items-center gap-1.5 font-medium group-hover:text-amber-300">
-              <MessageSquare className="w-3 h-3" /> {pendingRequestsCount} Pending Requests
+            <p className="text-slate-500 text-sm mt-2 flex items-center gap-1.5 font-medium group-hover:text-amber-400 transition-colors">
+              <MessageSquare className="w-3.5 h-3.5" /> {pendingRequestsCount} Pending Requests
             </p>
           </div>
         </motion.div>
@@ -240,24 +241,25 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col justify-between group hover:border-green-500/30 hover:bg-green-500/[0.02] transition-all cursor-pointer text-left"
+          className="p-6 rounded-[32px] bg-[#181a20] border-none flex flex-col justify-between group hover:bg-[#1f222a] transition-all cursor-pointer text-left relative overflow-hidden"
           onClick={() => handleCardTrigger('qa', 'qa-scorecard')}
         >
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 rounded-2xl bg-green-500/10 flex items-center justify-center border border-green-500/20 text-green-400">
+          <div className="absolute top-0 right-0 p-16 bg-green-500/5 blur-[40px] rounded-full pointer-events-none group-hover:bg-green-500/10 transition-colors" />
+          <div className="flex items-center justify-between mb-6 relative z-10">
+            <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center text-green-400">
               <ShieldCheck className="w-5 h-5" />
             </div>
           </div>
-          <div>
-            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">QA Performance Log</p>
+          <div className="relative z-10">
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">QA Performance</p>
             <div className="flex items-baseline gap-2">
               <h3 className={`text-3xl font-black ${avgQaScore && avgQaScore < 70 ? 'text-red-400' : 'text-green-400'}`}>
                 {avgQaScore !== null && !isNaN(avgQaScore) ? `${avgQaScore}%` : 'N/A'}
               </h3>
-              <span className="text-[10px] text-green-400 font-bold uppercase tracking-widest">Inspect Live</span>
+              <span className="text-xs text-green-400 font-bold uppercase tracking-widest group-hover:text-green-300">Inspect</span>
             </div>
-            <p className="text-slate-400 text-xs mt-2 flex items-center gap-1.5 font-medium group-hover:text-green-300">
-              <CheckCircle2 className="w-3 h-3" /> {myQaScores.length} Evaluations Recorded
+            <p className="text-slate-500 text-sm mt-2 flex items-center gap-1.5 font-medium group-hover:text-green-400 transition-colors">
+              <CheckCircle2 className="w-3.5 h-3.5" /> {myQaScores.length} Evaluations
             </p>
           </div>
         </motion.div>
@@ -267,22 +269,23 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col justify-between group hover:border-pink-500/30 hover:bg-pink-500/[0.02] transition-all cursor-pointer text-left"
+          className="p-6 rounded-[32px] bg-[#181a20] border-none flex flex-col justify-between group hover:bg-[#1f222a] transition-all cursor-pointer text-left relative overflow-hidden"
           onClick={() => handleCardTrigger('inquiry', 'inquiries')}
         >
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 rounded-2xl bg-pink-500/10 flex items-center justify-center border border-pink-500/20 text-pink-400">
+          <div className="absolute top-0 right-0 p-16 bg-pink-500/5 blur-[40px] rounded-full pointer-events-none group-hover:bg-pink-500/10 transition-colors" />
+          <div className="flex items-center justify-between mb-6 relative z-10">
+            <div className="w-12 h-12 rounded-full bg-pink-500/10 flex items-center justify-center text-pink-400">
               <MessageSquare className="w-5 h-5" />
             </div>
           </div>
-          <div>
-            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Clinic Inquiries Support</p>
+          <div className="relative z-10">
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Clinic Inquiries</p>
             <div className="flex items-baseline gap-2">
               <h3 className="text-3xl font-black text-pink-400">{inquiriesCount}</h3>
-              <span className="text-[10px] text-pink-400 font-bold uppercase tracking-widest">Inspect Live</span>
+              <span className="text-xs text-pink-400 font-bold uppercase tracking-widest group-hover:text-pink-300">Inspect</span>
             </div>
-            <p className="text-slate-400 text-xs mt-2 flex items-center gap-1.5 font-medium group-hover:text-pink-300">
-              Click to view and chat <ArrowRight className="w-3 h-3" />
+            <p className="text-slate-500 text-sm mt-2 flex items-center gap-1.5 font-medium group-hover:text-pink-400 transition-colors">
+              Click to view and chat <ArrowRight className="w-3.5 h-3.5" />
             </p>
           </div>
         </motion.div>
@@ -292,22 +295,23 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col justify-between group hover:border-cyan-500/30 hover:bg-cyan-500/[0.02] transition-all cursor-pointer text-left"
+          className="p-6 rounded-[32px] bg-[#181a20] border-none flex flex-col justify-between group hover:bg-[#1f222a] transition-all cursor-pointer text-left relative overflow-hidden"
           onClick={() => handleCardTrigger('fintech', 'tabby-tamara')}
         >
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 text-cyan-400">
+          <div className="absolute top-0 right-0 p-16 bg-cyan-500/5 blur-[40px] rounded-full pointer-events-none group-hover:bg-cyan-500/10 transition-colors" />
+          <div className="flex items-center justify-between mb-6 relative z-10">
+            <div className="w-12 h-12 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400">
               <Activity className="w-5 h-5" />
             </div>
           </div>
-          <div>
-            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Tabby / Tamara Desk</p>
+          <div className="relative z-10">
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Tabby / Tamara Desk</p>
             <div className="flex items-baseline gap-2">
               <h3 className="text-3xl font-black text-cyan-400">{ttRequestsCount}</h3>
-              <span className="text-[10px] text-cyan-400 font-bold uppercase tracking-widest">Inspect Live</span>
+              <span className="text-xs text-cyan-400 font-bold uppercase tracking-widest group-hover:text-cyan-300">Inspect</span>
             </div>
-            <p className="text-slate-400 text-xs mt-2 flex items-center gap-1.5 font-medium group-hover:text-cyan-300">
-              Click to view or update links <ArrowRight className="w-3 h-3" />
+            <p className="text-slate-500 text-sm mt-2 flex items-center gap-1.5 font-medium group-hover:text-cyan-400 transition-colors">
+              Click to view or update links <ArrowRight className="w-3.5 h-3.5" />
             </p>
           </div>
         </motion.div>

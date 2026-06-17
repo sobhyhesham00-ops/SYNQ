@@ -25,7 +25,7 @@ interface ComplaintsWorkspaceProps {
   setSelectedComplaintId: (id: string | null) => void;
   complaintListFilter: "all" | "pending_tl" | "need_contact" | "closed";
   compDateFilter: string;
-  tcFilterClinic: string;
+  tcFilterClinics: string[];
   
   // Handling action callbacks
   activeComplaintHandlingId: string | null;
@@ -62,7 +62,7 @@ export const ComplaintsWorkspace: React.FC<ComplaintsWorkspaceProps> = ({
   setSelectedComplaintId,
   complaintListFilter,
   compDateFilter,
-  tcFilterClinic,
+  tcFilterClinics,
   activeComplaintHandlingId,
   setActiveComplaintHandlingId,
   tlComplaintResolutionType,
@@ -110,10 +110,8 @@ export const ComplaintsWorkspace: React.FC<ComplaintsWorkspaceProps> = ({
       c.status === complaintListFilter;
 
     const matchesProvider =
-      tcFilterClinic === "all" ||
-      (c.clinicName &&
-        c.clinicName?.toLowerCase() ===
-          tcFilterClinic.toLowerCase());
+      tcFilterClinics.length === 0 ||
+      (c.clinicName && tcFilterClinics.includes(c.clinicName));
 
     const matchesDate =
       !compDateFilter ||

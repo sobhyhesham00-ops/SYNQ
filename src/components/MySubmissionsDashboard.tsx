@@ -116,7 +116,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
 
   // Filters state
   const [subDate, setSubDate] = useState<string>(todayStr);
-  const [subClinic, setSubClinic] = useState<string>("all");
+  const [subClinics, setSubClinics] = useState<string[]>([]);
   const [subPhone, setSubPhone] = useState<string>("");
   const [subStatusFilter, setSubStatusFilter] = useState<"pending" | "all">("pending");
 
@@ -191,7 +191,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
     }
 
     // 2. Clinic filter
-    if (subClinic !== "all" && item.clinicName?.toLowerCase() !== subClinic.toLowerCase()) {
+    if (subClinics.length > 0 && item.clinicName && !subClinics.includes(item.clinicName)) {
       return false;
     }
 
@@ -237,93 +237,132 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
       };
 
   return (
-    <div className="space-y-6 animate-fade-in font-sans">
+    <div className="space-y-6 animate-fade-in font-sans p-1">
       {/* Header */}
-      <div>
-        <h2 className="text-3xl font-bold text-slate-100 font-display text-left">
-          My Submissions Dashboard
-        </h2>
-        <p className="text-slate-400 text-sm font-sans text-left mt-1">
-          Track and review inquiries, Tabby/Tamara Requests, and Patient Complaints submitted by you.
-        </p>
+      <div className="bg-[#181a20] p-6 rounded-[32px] border-none shadow-sm space-y-4 relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-32 bg-indigo-500/5 blur-[80px] rounded-full pointer-events-none" />
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-white font-display text-left flex items-center gap-3">
+              <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-full">
+                <ClipboardList className="w-6 h-6" />
+              </div>
+              My Submissions
+            </h2>
+            <p className="text-slate-400 text-sm font-sans text-left mt-2 max-w-xl font-medium">
+              Track and review inquiries, Tabby/Tamara Requests, and Patient Complaints submitted by you.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 self-start md:self-center bg-indigo-500/10 px-4 py-2.5 rounded-full">
+            <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+            <span className="text-xs font-bold text-indigo-300 uppercase tracking-widest">
+              {filteredList.length} Matching Records
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Unified Search and Filtering Controls */}
-      <div className="bg-white/[0.03] border border-white/10 p-5 rounded-2xl backdrop-blur-md space-y-4">
-        <p className="text-xs font-bold text-slate-300 uppercase tracking-wider text-left pl-1">
-          🔍 Filter Submission History
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {/* Date Picker */}
-          <div className="space-y-1 my-auto">
-            <label className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1.5 pl-1">
-              <Calendar className="w-3.5 h-3.5 text-indigo-400" />
-              Submission Date
-            </label>
-            <input
-              type="date"
-              value={subDate}
-              onChange={(e) => setSubDate(e.target.value)}
-              className="w-full bg-[#18181c] border border-slate-700/60 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-[#10b981] font-sans h-10 select-none cursor-pointer"
-            />
-          </div>
+      <div className="bg-[#181a20] p-6 rounded-[32px] gap-4 grid grid-cols-1 md:grid-cols-12 items-end">
+        {/* Date Picker */}
+        <div className="md:col-span-3 space-y-2 my-auto">
+          <label className="text-xs font-bold text-slate-400 flex items-center gap-1.5 ml-1">
+            <Calendar className="w-4 h-4 text-slate-500" />
+            Submission Date
+          </label>
+          <input
+            type="date"
+            value={subDate}
+            onChange={(e) => setSubDate(e.target.value)}
+            className="w-full bg-[#1f222a] border-none rounded-2xl px-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 select-none cursor-pointer font-medium"
+          />
+        </div>
 
-          {/* Clinic Dropdown */}
-          <div className="space-y-1 my-auto">
-            <label className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1.5 pl-1">
-              <Building className="w-3.5 h-3.5 text-rose-400" />
-              Clinic Provider
+        {/* Clinic Dropdown */}
+        <div className="md:col-span-3 space-y-2">
+          <div className="flex justify-between items-center mb-1">
+            <label className="text-xs font-bold text-slate-400 flex items-center gap-1.5 ml-1">
+              <Building className="w-4 h-4 text-slate-500" /> Clinics (Multi)
             </label>
-            <select
-              value={subClinic}
-              onChange={(e) => setSubClinic(e.target.value)}
-              className="w-full bg-[#18181c] border border-slate-700/60 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-[#10b981] font-sans h-10 cursor-pointer"
-            >
-              <option value="all">All Clinics</option>
-              {CLINIC_OPTIONS.map(c => (
-<option key={c.value} value={c.value}>{c.label}</option>
-))}
-            </select>
+            {subClinics.length > 0 && (
+              <button
+                onClick={() => setSubClinics([])}
+                className="text-[10px] text-rose-400 hover:text-rose-300 font-bold uppercase cursor-pointer"
+              >
+                Clear
+              </button>
+            )}
           </div>
+          <select
+            value=""
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val && !subClinics.includes(val)) {
+                setSubClinics([...subClinics, val]);
+              }
+            }}
+            className="w-full bg-[#1f222a] border-none rounded-2xl px-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 cursor-pointer font-medium appearance-none"
+          >
+            <option value="">➕ Add Clinic to Filter...</option>
+            {CLINIC_OPTIONS.filter(c => !subClinics.includes(c.value)).map(c => (
+              <option key={c.value} value={c.value}>{c.label}</option>
+            ))}
+          </select>
+          {subClinics.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {subClinics.map(c => {
+                const label = CLINIC_OPTIONS.find(opt => opt.value === c)?.label || c;
+                return (
+                  <span key={c} className="bg-indigo-500/10 text-indigo-300 border-none px-2.5 py-1 rounded-md text-[10px] font-bold flex items-center gap-1.5">
+                    {label}
+                    <button onClick={() => setSubClinics(prev => prev.filter(x => x !== c))} className="hover:text-white cursor-pointer">&times;</button>
+                  </span>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
-          {/* Phone Input */}
-          <div className="space-y-1 my-auto">
-            <label className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1.5 pl-1">
-              <Phone className="w-3.5 h-3.5 text-sky-400" />
-              Patient Phone No.
-            </label>
+        {/* Phone Input */}
+        <div className="md:col-span-3 space-y-2 my-auto">
+          <label className="text-xs font-bold text-slate-400 flex items-center gap-1.5 ml-1">
+            <Phone className="w-4 h-4 text-slate-500" />
+            Patient Phone No.
+          </label>
+          <div className="relative">
             <input
               type="text"
               placeholder="Search by phone..."
               value={subPhone}
               onChange={(e) => setSubPhone(e.target.value)}
-              className="w-full bg-[#18181c] border border-slate-700/60 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-[#10b981] font-sans h-10"
+              className="w-full bg-[#1f222a] border-none rounded-2xl pl-11 pr-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 font-mono"
             />
+            <Search className="w-4 h-4 text-slate-400 absolute left-4 top-4" />
           </div>
+        </div>
 
-          {/* Status filter */}
-          <div className="space-y-1 my-auto">
-            <label className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1.5 pl-1">
-              <ClipboardList className="w-3.5 h-3.5 text-amber-400" />
-              Status Category
-            </label>
-            <select
-              value={subStatusFilter}
-              onChange={(e) => setSubStatusFilter(e.target.value as "pending" | "all")}
-              className="w-full bg-[#18181c] border border-slate-700/60 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-[#10b981] font-sans h-10 cursor-pointer"
-            >
-              <option value="pending">⏳ Pending Cases Only</option>
-              <option value="all">📁 All submissions</option>
-            </select>
-          </div>
+        {/* Status filter */}
+        <div className="md:col-span-3 space-y-2 my-auto">
+          <label className="text-xs font-bold text-slate-400 flex items-center gap-1.5 ml-1">
+            <ClipboardList className="w-4 h-4 text-slate-500" />
+            Status Category
+          </label>
+          <select
+            value={subStatusFilter}
+            onChange={(e) => setSubStatusFilter(e.target.value as "pending" | "all")}
+            className="w-full bg-[#1f222a] border-none rounded-2xl px-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 cursor-pointer font-medium appearance-none"
+          >
+            <option value="pending">⏳ Pending Cases Only</option>
+            <option value="all">📁 All submissions</option>
+          </select>
         </div>
       </div>
 
       {/* Unified Case List Grid */}
       <div className="space-y-3">
         {filteredList.length === 0 ? (
-          <div className="p-12 text-center rounded-3xl border border-dashed border-white/10 bg-white/5 backdrop-blur-md/[0.02] space-y-2 animate-fade-in text-left">
-            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mx-auto text-slate-500 mb-2">
+          <div className="p-16 text-center rounded-[32px] bg-[#181a20] border-none shadow-sm space-y-2 animate-fade-in text-left">
+            <div className="w-12 h-12 rounded-full bg-[#1f222a] flex items-center justify-center mx-auto text-slate-400 mb-2">
               <ClipboardList className="w-6 h-6 text-indigo-400" />
             </div>
             <p className="text-sm font-bold text-slate-200">
@@ -378,8 +417,8 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
             return (
               <div
                 key={item.id}
-                className={`group p-5 bg-[#18181c] border border-slate-700/60 rounded-2xl hover:border-indigo-500/20 transition-all duration-300 relative flex flex-col w-full overflow-hidden ${
-                  !isExpanded ? "hover:bg-white/[0.04] cursor-pointer shadow-md" : "shadow-xl ring-1 ring-indigo-500/15"
+                className={`group p-5 bg-[#1f222a] border-none rounded-[24px] hover:bg-[#282c35] transition-all duration-300 relative flex flex-col w-full overflow-hidden shadow-sm ${
+                   isExpanded ? "shadow-md ring-1 ring-indigo-500/15" : "cursor-pointer hover:shadow-md"
                 }`}
                 onClick={() => {
                   if (!isExpanded) {

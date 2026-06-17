@@ -14,10 +14,10 @@ import { TabbyTamaraCard } from "./components/TabbyTamaraCard";
 import { InquiryCard } from "./components/InquiryCard";
 import { ClientCommCard } from "./components/ClientCommCard";
 import { ComplaintCard } from "./components/ComplaintCard";
-import { CRMWorkspace } from "./components/crm/CRMWorkspace";
 import * as mammoth from "mammoth";
 import React, { useState, useEffect, FormEvent, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart as RechartsPieChart, Pie, Legend } from "recharts";
 import {
   doc,
   collection,
@@ -104,6 +104,7 @@ import {
   Lock,
   Sparkles,
   Sun,
+  Moon,
   Cloudy,
   Cloud,
   Phone,
@@ -124,11 +125,13 @@ import {
   Loader2,
   ChevronUp,
   ChevronDown,
+  CreditCard,
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { AIChatWidget } from "./AIChatWidget";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { MessagingSystem } from "./components/MessagingSystem";
+import { PaginatedCaseList } from "./components/PaginatedCaseList";
 import { assignCase } from "./services/assignmentService";
 import { DataVault } from "./components/DataVault";
 import { IntegrationsManager } from "./components/IntegrationsManager";
@@ -150,6 +153,7 @@ import { RequestReplyThread } from "./components/RequestReplyThread";
 import { EnvironmentBadge } from "./components/EnvironmentBadge";
 import { ComplaintsWorkspace } from "./components/ComplaintsWorkspace";
 import { MySubmissionsDashboard } from "./components/MySubmissionsDashboard";
+import { SystemAnalyticsTab } from "./components/SystemAnalyticsTab";
 import { processAttachments } from "./services/attachmentService";
 import * as XLSX from "xlsx";
 import {
@@ -406,195 +410,166 @@ const getClinicBadgeColor = (clinic: string) => {
   return "bg-white/5 text-slate-300 border-white/10";
 };
 
-const CoolLogo = ({ className = "w-8 h-8" }: { className?: string }) => {
+const CoolLogo = ({ className = "w-48 h-48", showText = true }: { className?: string; showText?: boolean }) => {
   return (
     <svg
-      viewBox="0 0 100 100"
+      viewBox={showText ? "0 0 100 120" : "0 0 100 100"}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={`${className}`}
     >
       <style>{`
-        @keyframes logo-slow-spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+        @keyframes dna-rotate {
+          0% { transform: rotateX(0deg); }
+          100% { transform: rotateX(360deg); }
         }
-        @keyframes logo-counter-spin {
-          from { transform: rotate(360deg); }
-          to { transform: rotate(0deg); }
+        @keyframes particle-glow-cyan {
+          0%, 100% { filter: drop-shadow(0 0 5px rgba(0, 245, 255, 0.65)); opacity: 0.65; }
+          50% { filter: drop-shadow(0 0 15px rgba(0, 245, 255, 1)); opacity: 1; }
         }
-        @keyframes logo-neon-pulse {
-          0%, 100% {
-            filter: drop-shadow(0 0 2px rgba(0, 245, 255, 0.6)) drop-shadow(0 0 6px rgba(0, 102, 255, 0.4));
-            opacity: 0.9;
-          }
-          50% {
-            filter: drop-shadow(0 0 8px rgba(0, 245, 255, 0.95)) drop-shadow(0 0 18px rgba(255, 0, 60, 0.8));
-            opacity: 1;
-          }
+        @keyframes particle-glow-magenta {
+          0%, 100% { filter: drop-shadow(0 0 5px rgba(255, 0, 255, 0.65)); opacity: 0.65; }
+          50% { filter: drop-shadow(0 0 15px rgba(255, 0, 255, 1)); opacity: 1; }
         }
-        @keyframes logo-scale-breathe {
-          0%, 100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.05);
-          }
+        @keyframes sync-pulse-cyan {
+          0% { stroke-dashoffset: 200; }
+          100% { stroke-dashoffset: -200; }
         }
-        @keyframes logo-shimmer-sweep {
-          0% {
-            transform: translate(-100px, -100px);
-          }
-          30% {
-            transform: translate(100px, 100px);
-          }
-          100% {
-            transform: translate(100px, 100px);
-          }
+        @keyframes sync-pulse-magenta {
+          0% { stroke-dashoffset: -200; }
+          100% { stroke-dashoffset: 200; }
         }
-        .logo-spin-outer {
-          transform-origin: 50px 50px;
-          animation: logo-slow-spin 12s linear infinite;
+        @keyframes central-glow {
+          0%, 100% { opacity: 0.2; filter: drop-shadow(0 0 1px rgba(0, 245, 255, 0.2)); }
+          50% { opacity: 0.5; filter: drop-shadow(0 0 4px rgba(0, 245, 255, 0.6)); }
         }
-        .logo-spin-inner {
-          transform-origin: 50px 50px;
-          animation: logo-counter-spin 18s linear infinite;
+        @keyframes sonar-ring {
+          0% { transform: scale(1); opacity: 0.85; }
+          100% { transform: scale(3.5); opacity: 0; }
         }
-        .logo-core {
-          transform-origin: 50px 50px;
-          animation: logo-neon-pulse 3s ease-in-out infinite, logo-scale-breathe 4s ease-in-out infinite;
+        @keyframes sonar-text-pulse {
+          0%, 100% { text-shadow: 0 0 4px rgba(34, 211, 238, 0.4); opacity: 0.85; }
+          50% { text-shadow: 0 0 16px rgba(34, 211, 238, 0.95), 0 0 30px rgba(34, 211, 238, 0.5); opacity: 1; }
         }
-        .logo-shimmer {
-          animation: logo-shimmer-sweep 3.5s infinite linear;
+        .synq-text-futuristic {
+          font-family: 'Space Grotesk', system-ui, sans-serif;
+          font-size: 20px;
+          font-weight: 800;
+          fill: #ffffff;
+          letter-spacing: 6px;
+          filter: drop-shadow(0 0 8px rgba(0, 245, 255, 0.5));
+          text-anchor: middle;
         }
       `}</style>
 
-      {/* Orbiting Ring - Dash Outer */}
-      <circle
-        cx="50"
-        cy="50"
-        r="45"
-        stroke="url(#logo-cyan-blue)"
-        strokeWidth="2"
-        strokeDasharray="15 30 5 10 30 10"
-        strokeLinecap="round"
-        className="logo-spin-outer"
-      />
-
-      {/* Orbiting Ring - Dash Inner */}
-      <circle
-        cx="50"
-        cy="50"
-        r="39"
-        stroke="url(#logo-red-blue)"
-        strokeWidth="1.2"
-        strokeDasharray="6 12 18 12"
-        strokeLinecap="round"
-        opacity="0.75"
-        className="logo-spin-inner"
-      />
-
-      {/* Core Sharp Shield and Logo S Shape */}
-      <g className="logo-core" clipPath="url(#logo-shield-clip-outer)">
-        {/* Sharp Shield Background */}
-        <polygon
-          points="50,16 78,30 78,70 50,84 22,70 22,30"
-          fill="#0a0a0f"
-          stroke="url(#logo-cyan-blue)"
-          strokeWidth="2.5"
-        />
-
-        {/* Sharp Red Glow Edging Decorating the Sides */}
-        <polyline
-          points="22,35 22,30 50,16 78,30 78,35"
-          stroke="#ff003c"
-          strokeWidth="3.5"
-          strokeLinecap="round"
-          opacity="0.8"
-        />
-        <polyline
-          points="22,65 22,70 50,84 78,70 78,65"
-          stroke="#ff003c"
-          strokeWidth="3.5"
-          strokeLinecap="round"
-          opacity="0.8"
-        />
-
-        {/* Interlocking Sharp "S" cuts */}
-        {/* Upper Facet */}
-        <path
-          d="M 32,34 H 68 L 58,46 H 44 L 52,53 H 32 Z"
-          fill="url(#logo-cyan-blue)"
-        />
-        {/* Lower Facet */}
-        <path
-          d="M 68,66 H 32 L 42,54 H 56 L 48,47 H 68 Z"
-          fill="url(#logo-red-blue)"
-        />
-
-        {/* Neon Center Dot */}
-        <polygon
-          points="50,47 54,50 50,53 46,50"
-          fill="#00f5ff"
-          filter="url(#logo-glow)"
-        />
-
-        {/* Shimmer Shine Sweep Layer */}
-        <g clipPath="url(#logo-shield-clip-inner)">
-          <rect
-            x="-100"
-            y="-100"
-            width="300"
-            height="300"
-            fill="url(#logo-shimmer-grad)"
-            className="logo-shimmer"
-            style={{ mixBlendMode: "overlay" }}
-          />
-        </g>
-      </g>
+      {/* Decorative ambient background slow pulse glow */}
+      <circle cx="50" cy="50" r="35" fill="rgba(0, 245, 255, 0.04)" filter="blur(15px)" />
+      <circle cx="50" cy="50" r="25" fill="rgba(255, 0, 255, 0.04)" filter="blur(10px)" />
 
       <defs>
-        {/* Shimmer Linear Gradient */}
-        <linearGradient
-          id="logo-shimmer-grad"
-          x1="0%"
-          y1="0%"
-          x2="100%"
-          y2="100%"
-        >
-          <stop offset="0%" stopColor="rgba(255, 255, 255, 0)" />
-          <stop offset="35%" stopColor="rgba(255, 255, 255, 0)" />
-          <stop offset="50%" stopColor="rgba(255, 255, 255, 0.85)" />
-          <stop offset="65%" stopColor="rgba(255, 255, 255, 0)" />
-          <stop offset="100%" stopColor="rgba(255, 255, 255, 0)" />
+        <linearGradient id="lightning-cyan" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#00f5ff" stopOpacity="0" />
+          <stop offset="50%" stopColor="#ffffff" stopOpacity="1" />
+          <stop offset="100%" stopColor="#00f5ff" stopOpacity="0" />
         </linearGradient>
-
-        {/* Cyan to Electric Blue Gradient */}
-        <linearGradient id="logo-cyan-blue" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#00f5ff" />
-          <stop offset="100%" stopColor="#0066ff" />
+        <linearGradient id="lightning-magenta" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#ff00ff" stopOpacity="0" />
+          <stop offset="50%" stopColor="#ffffff" stopOpacity="1" />
+          <stop offset="100%" stopColor="#ff00ff" stopOpacity="0" />
         </linearGradient>
-
-        {/* Accent Red to Electric Blue Gradient */}
-        <linearGradient id="logo-red-blue" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#ff003c" />
-          <stop offset="100%" stopColor="#0066ff" />
-        </linearGradient>
-
-        {/* Simple inline neon filter */}
-        <filter id="logo-glow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="1" result="blur" />
-          <feComposite in="SourceGraphic" in2="blur" operator="over" />
-        </filter>
-
-        {/* Shield outline clips to contain shimmer */}
-        <clipPath id="logo-shield-clip-outer">
-          <rect x="0" y="0" width="100" height="100" />
-        </clipPath>
-        <clipPath id="logo-shield-clip-inner">
-          <polygon points="50,18 76,31 76,69 50,82 24,69 24,31" />
-        </clipPath>
       </defs>
+
+      {/* DNA Helix Horizontal Flow */}
+      <g transform="translate(0, 5)">
+        {/* Central connecting backbone link */}
+        <line 
+          x1="15" y1="45" 
+          x2="85" y2="45" 
+          stroke="rgba(0, 245, 255, 0.15)" 
+          strokeWidth="1" 
+          style={{ animation: "central-glow 3s ease-in-out infinite" }}
+        />
+
+        {/* Outer track reference guides */}
+        <path 
+          d="M 15,45 Q 22,25 29,45 T 43,45 T 57,45 T 71,45 T 85,45"
+          fill="none"
+          stroke="rgba(0, 245, 255, 0.1)"
+          strokeWidth="1"
+        />
+        <path 
+          d="M 15,45 Q 22,65 29,45 T 43,45 T 57,45 T 71,45 T 85,45"
+          fill="none"
+          stroke="rgba(255, 0, 255, 0.1)"
+          strokeWidth="1"
+        />
+
+        {/* Syncing horizontal lightning sparks traversing paths in opposite directions */}
+        <path 
+          d="M 15,45 Q 22,25 29,45 T 43,45 T 57,45 T 71,45 T 85,45"
+          fill="none"
+          stroke="url(#lightning-cyan)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeDasharray="20 180"
+          style={{ 
+            animation: "sync-pulse-cyan 4.5s linear infinite", 
+            filter: "drop-shadow(0 0 4px #00f5ff) drop-shadow(0 0 1.5px #ffffff)" 
+          }}
+        />
+        <path 
+          d="M 15,45 Q 22,65 29,45 T 43,45 T 57,45 T 71,45 T 85,45"
+          fill="none"
+          stroke="url(#lightning-magenta)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeDasharray="20 180"
+          style={{ 
+            animation: "sync-pulse-magenta 4.5s linear infinite", 
+            filter: "drop-shadow(0 0 4px #ff00ff) drop-shadow(0 0 1.5px #ffffff)" 
+          }}
+        />
+
+        {[0, 1, 2, 3, 4, 5].map((i) => {
+          const x = 15 + i * 14;
+          const delay = -i * 0.6;
+          return (
+            <g 
+              key={i} 
+              style={{ 
+                transformOrigin: `${x}px 45px`, 
+                animation: `dna-rotate 6s linear infinite ${delay}s` 
+              }}
+            >
+              {/* Vertical rung connecting the two strands */}
+              <line 
+                x1={x} y1="25" 
+                x2={x} y2="65" 
+                stroke="rgba(255, 255, 255, 0.15)" 
+                strokeWidth="1.5" 
+                style={{ filter: "drop-shadow(0 0 2px rgba(255,255,255,0.2))" }} 
+              />
+              {/* Outer Cyan Node */}
+              <circle 
+                cx={x} cy="25" 
+                r="4.5" fill="#00f5ff" 
+                style={{ animation: `particle-glow-cyan 5s ease-in-out infinite ${delay}s` }} 
+              />
+              {/* Outer Magenta Node */}
+              <circle 
+                cx={x} cy="65" 
+                r="4.5" fill="#ff00ff" 
+                style={{ animation: `particle-glow-magenta 5s ease-in-out infinite ${delay + 2.5}s` }} 
+              />
+            </g>
+          );
+        })}
+      </g>
+
+      {/* Overlay Text "SYNQ" */}
+      {showText && (
+        <text x="53" y="108" className="synq-text-futuristic">SYNQ</text>
+      )}
     </svg>
   );
 };
@@ -3650,7 +3625,7 @@ ${pageText}
     "my",
   );
   const [inquiryStatusFilter, setInquiryStatusFilter] = useState("");
-  const [inquiryClinicFilter, setInquiryClinicFilter] = useState("all");
+  const [inquiryClinicsFilter, setInquiryClinicsFilter] = useState<string[]>([]);
   const [expandedInquiryId, setExpandedInquiryId] = useState<string | null>(
     null,
   );
@@ -3883,11 +3858,11 @@ ${pageText}
         const matchesStatus =
           !inquiryStatusFilter || i.status === inquiryStatusFilter;
         const matchesClinic =
-          inquiryClinicFilter === "all" ||
-          i.clinicName?.toLowerCase() === inquiryClinicFilter.toLowerCase();
+          inquiryClinicsFilter.length === 0 ||
+          (i.clinicName && inquiryClinicsFilter.includes(i.clinicName));
         return matchesSearch && matchesStatus && matchesClinic;
       }),
-    [inquiries, inquirySearchQuery, inquiryStatusFilter, inquiryClinicFilter],
+    [inquiries, inquirySearchQuery, inquiryStatusFilter, inquiryClinicsFilter],
   );
 
   // Unified Screenshot Upload State
@@ -4052,7 +4027,8 @@ ${pageText}
   const [ttFilterProvider, setTtFilterProvider] = useState<
     "all" | "tabby" | "tamara" | "one_time_payment"
   >("all");
-  const [tcFilterClinic, setTcFilterClinic] = useState<string>("all");
+  // Tabby & Tamara and Complaints shared clinic filter
+  const [tcFilterClinics, setTcFilterClinics] = useState<string[]>([]);
 
   // Login Form States
   const [loginName, setLoginName] = useState("");
@@ -4066,6 +4042,7 @@ ${pageText}
   const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] =
     useState(false);
   const [newPasswordInput, setNewPasswordInput] = useState("");
+  const [isSynqVersionModalOpen, setIsSynqVersionModalOpen] = useState(false);
 
   // Active Menu / Tab States
   // For TL: 'dashboard' | 'overview' | 'all-requests' | 'report' | 'schedules' | 'time-logs'
@@ -9283,25 +9260,46 @@ ${ttNotes}`
       <div className="flex-1 flex flex-col w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 z-10">
         {/* Check Installation */}
         {!currentUser ? (
-          <div className="flex-1 flex flex-col items-center justify-center my-12 animate-fade-in">
-            <div className="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-3xl shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-pink-500"></div>
+          <div className="flex-1 flex flex-col items-center justify-center my-12 animate-fade-in relative">
+            <div className="w-full max-w-md bg-black/40 backdrop-blur-3xl border border-indigo-500/20 p-8 rounded-[2rem] shadow-[0_0_80px_-20px_rgba(79,70,229,0.3)] relative overflow-hidden group">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500 group-hover:h-1.5 transition-all duration-500"></div>
+              
+              <div className="absolute -inset-20 bg-indigo-500/10 blur-[100px] pointer-events-none group-hover:bg-indigo-500/20 transition-all duration-1000"></div>
 
-              <div className="flex flex-col items-center mb-8">
-                <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center shadow-lg shadow-black/80 mb-4 border border-white/10 relative group">
-                  <div className="absolute inset-0 bg-white/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <CoolLogo className="w-10 h-10 text-slate-100" />
+              <div className="flex flex-col items-center mb-10 relative z-10">
+                <div className="w-full flex items-center justify-center mb-6">
+                  <CoolLogo />
                 </div>
-                <h1 className="text-3xl font-black bg-gradient-to-r from-blue-300 via-indigo-200 to-pink-300 bg-clip-text text-transparent font-display">
-                  Synq
-                </h1>
-                <p className="text-indigo-300 text-xs font-semibold uppercase tracking-widest mt-1.5">
-                  Enterprise Shift & Work Console
-                </p>
+                
+                {(() => {
+                  const uname = String(loginName || "").trim().replace(/\s+/g, "").toLowerCase();
+                  const matchedName = uname ? (findAgentByUsername(uname, agentsList) || findAgentByUsername(uname, [...INITIAL_AGENTS, ...TEAM_LEADERS])) : null;
+                  
+                  if (matchedName && typeof matchedName === 'string') {
+                    return (
+                      <div className="text-center animate-fade-in">
+                        <h1 className="text-3xl font-black bg-gradient-to-r from-cyan-300 via-indigo-300 to-fuchsia-300 bg-clip-text text-transparent font-display tracking-tight">
+                          Welcome, {matchedName.split(' ')[0]}
+                        </h1>
+                        <p className="text-indigo-400/80 text-[10px] font-mono uppercase tracking-[0.3em] mt-2">
+                          Authentication Node Active
+                        </p>
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <div className="text-center">
+                      <p className="text-indigo-400/80 text-[10px] font-mono uppercase tracking-[0.3em] mt-1">
+                        Systems Authorization
+                      </p>
+                    </div>
+                  );
+                })()}
               </div>
 
               {showForcePasswordChange ? (
-                <div className="space-y-5">
+                <div className="space-y-5 relative z-10">
                   <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 text-xs text-amber-200">
                     <p className="font-bold text-slate-100 mb-1">
                       🔐 Password Reset Required
@@ -9312,18 +9310,18 @@ ${ttNotes}`
                     </p>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs uppercase tracking-widest text-slate-400 font-bold block text-left">
+                    <label className="text-[10px] uppercase tracking-widest text-indigo-300 font-bold block text-left">
                       New Password
                     </label>
                     <input
                       type="password"
                       value={forceNewPassword}
                       onChange={(e) => setForceNewPassword(e.target.value)}
-                      className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500 text-sm"
+                      className="w-full px-4 py-3.5 bg-black/40 border border-indigo-500/20 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500/50 text-sm font-mono transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs uppercase tracking-widest text-slate-400 font-bold block text-left">
+                    <label className="text-[10px] uppercase tracking-widest text-indigo-300 font-bold block text-left">
                       Confirm New Password
                     </label>
                     <input
@@ -9332,7 +9330,7 @@ ${ttNotes}`
                       onChange={(e) =>
                         setForceNewPasswordConfirm(e.target.value)
                       }
-                      className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500 text-sm"
+                      className="w-full px-4 py-3.5 bg-black/40 border border-indigo-500/20 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500/50 text-sm font-mono transition-all"
                     />
                   </div>
                   <button
@@ -9381,7 +9379,7 @@ ${ttNotes}`
                       completeLogin(uname, correspondingFullName);
                       toast.success("Password updated! You are now signed in.");
                     }}
-                    className="w-full py-3.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-bold text-sm border-none"
+                    className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white rounded-xl font-bold text-sm border-none shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all"
                   >
                     Set New Password & Sign In
                   </button>
@@ -9396,46 +9394,31 @@ ${ttNotes}`
                   </button>
                 </div>
               ) : isRegistering ? (
-                <div className="space-y-6">
-                  <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4 text-xs text-blue-200 flex items-start gap-2.5">
-                    <Info className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
-                    <div className="text-left">
-                      <p className="font-bold text-slate-100 mb-0.5">
-                        First-Time Setup Detected!
-                      </p>
-                      Password of your choice will be associated with the
-                      username{" "}
-                      <span className="font-semibold text-blue-300">
-                        "{loginName.toLowerCase()}"
-                      </span>
-                      . Record this password for future sign-ins.
-                    </div>
-                  </div>
-
+                <div className="space-y-6 relative z-10">
                   <div className="space-y-1">
-                    <span className="text-xs uppercase tracking-widest text-slate-400 font-bold block mb-1">
+                    <span className="text-[10px] uppercase tracking-widest text-indigo-300 font-bold block mb-1">
                       Confirming Username
                     </span>
-                    <div className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 font-medium text-sm font-mono tracking-wide text-left">
+                    <div className="px-4 py-3 bg-black/40 border border-indigo-500/20 rounded-xl text-slate-100 font-medium text-sm font-mono tracking-wide text-left shadow-inner shadow-black/50">
                       {loginName.toLowerCase()}
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <span className="text-xs uppercase tracking-widest text-slate-400 font-bold block mb-1">
-                      Set Password
+                    <span className="text-[10px] uppercase tracking-widest text-indigo-300 font-bold block mb-1">
+                      Set Initial Password
                     </span>
-                    <div className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 font-medium text-sm font-mono tracking-widest text-left">
-                      {loginPassword}
+                    <div className="px-4 py-3 bg-black/40 border border-indigo-500/20 rounded-xl text-slate-100 font-medium text-sm font-mono tracking-widest text-left shadow-inner shadow-black/50">
+                      ••••••••
                     </div>
                   </div>
 
                   <button
                     onClick={handleRegisterConfirm}
-                    className="w-full py-3.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-slate-100 rounded-xl font-bold text-sm tracking-wide shadow-lg shadow-indigo-500/25 transition-all flex items-center justify-center gap-2"
+                    className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-slate-100 rounded-xl font-bold text-sm tracking-wide shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all flex items-center justify-center gap-2"
                   >
                     <UserPlus className="w-4 h-4" />
-                    Create Password & Enter Tool
+                    Initialize Identity
                   </button>
 
                   <button
@@ -9443,54 +9426,24 @@ ${ttNotes}`
                       setIsRegistering(false);
                       setLoginPassword("");
                     }}
-                    className="w-full py-2.5 text-slate-400 hover:text-slate-100 text-xs font-semibold transition-colors"
+                    className="w-full py-2.5 text-indigo-400/70 hover:text-indigo-300 text-xs font-mono tracking-widest uppercase transition-colors"
                   >
-                    Go Back / Edit Username
+                    Abort Setup
                   </button>
                 </div>
               ) : (
-                <form onSubmit={handleLoginSubmit} className="space-y-5">
-                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 text-xs text-amber-200 flex items-start gap-2.5 mb-2">
-                    <Info className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-                    <div className="text-left">
-                      <p className="font-bold text-slate-100 mb-0.5">
-                        Important Notice: New Login Style!
-                      </p>
-                      <p className="mb-1.5 text-slate-300">
-                        Sessions were reset for a simpler login structure. Use
-                        your new username format:
-                      </p>
-                      <div className="bg-black/40 p-2 rounded-xl border border-white/10 mb-1">
-                        <p className="text-[10px] text-slate-400 font-mono">
-                          Format:{" "}
-                          <strong className="text-amber-300">
-                            first_letter.last_name
-                          </strong>
-                        </p>
-                        <p className="text-[10px] text-slate-400 font-mono">
-                          Example:{" "}
-                          <strong className="text-cyan-300">h.sobhy</strong>{" "}
-                          (for Hesham Sobhy)
-                        </p>
-                      </div>
-                      <p className="text-[10px] text-slate-400 mt-1">
-                        Your existing, pre-agreed password continues to work
-                        normally.
-                      </p>
-                    </div>
-                  </div>
-
+                <form onSubmit={handleLoginSubmit} className="space-y-5 relative z-10">
                   <div className="space-y-1.5">
                     <label
-                      className="text-xs uppercase tracking-widest text-slate-400 font-bold block text-left"
+                      className="text-[10px] uppercase tracking-widest text-indigo-300 font-bold block text-left"
                       htmlFor="login-name"
                     >
-                      Username
+                      User Name
                     </label>
                     <input
                       id="login-name"
                       type="text"
-                      className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-sm font-mono font-medium"
+                      className="w-full px-4 py-3.5 bg-black/40 border border-indigo-500/20 rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-500/50 transition-all text-sm font-mono shadow-inner shadow-black/50"
                       placeholder="e.g. h.sobhy"
                       value={loginName}
                       onChange={(e) => setLoginName(e.target.value)}
@@ -9500,7 +9453,7 @@ ${ttNotes}`
 
                   <div className="space-y-1.5 ">
                     <label
-                      className="text-xs uppercase tracking-widest text-slate-400 font-bold block text-left"
+                      className="text-[10px] uppercase tracking-widest text-indigo-300 font-bold block text-left"
                       htmlFor="login-password"
                     >
                       Password
@@ -9509,8 +9462,8 @@ ${ttNotes}`
                       <input
                         id="login-password"
                         type={showLoginPassword ? "text" : "password"}
-                        className="w-full pl-4 pr-12 py-3.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-sm font-sans"
-                        placeholder="Enter or set your password"
+                        className="w-full pl-4 pr-12 py-3.5 bg-black/40 border border-indigo-500/20 rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-500/50 transition-all text-sm font-mono shadow-inner shadow-black/50"
+                        placeholder="Enter credentials"
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
                         required
@@ -9518,7 +9471,7 @@ ${ttNotes}`
                       <button
                         type="button"
                         onClick={() => setShowLoginPassword(!showLoginPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-cyan-400 transition-colors"
                         tabIndex={-1}
                       >
                         {showLoginPassword ? (
@@ -9528,15 +9481,11 @@ ${ttNotes}`
                         )}
                       </button>
                     </div>
-                    <p className="text-[10px] text-slate-400 text-left">
-                      * If this is your first time using the app with your new
-                      username, you will set & register this password.
-                    </p>
                   </div>
 
                   {loginError && (
-                    <div className="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-300 rounded-xl text-xs flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                    <div className="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl text-[11px] font-mono flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
                       <span>{loginError}</span>
                     </div>
                   )}
@@ -9544,44 +9493,28 @@ ${ttNotes}`
                   <button
                     id="login-submit-btn"
                     type="submit"
-                    className="w-full py-3.5 bg-white/10 hover:bg-white/10 backdrop-blur-md/15 border border-white/10 hover:border-white/20 text-slate-100 rounded-xl font-bold text-sm tracking-wide transition-all shadow-lg shadow-white/5 mt-4"
+                    className="w-full relative overflow-hidden py-3.5 bg-gradient-to-r from-indigo-600 to-fuchsia-600 hover:from-indigo-500 hover:to-fuchsia-500 text-white rounded-xl font-bold text-sm tracking-[0.2em] uppercase transition-all mt-6 group shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_30px_rgba(79,70,229,0.6)]"
                   >
-                    Sign In / Access
+                    <span className="relative z-10">Engage Connection</span>
+                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                   </button>
+
+                  <div className="flex justify-center mt-6 pt-4 border-t border-white/5">
+                    <button
+                      type="button"
+                      onClick={() => setIsSynqVersionModalOpen(true)}
+                      className="px-4 py-2 bg-black/40 border border-cyan-500/20 hover:border-cyan-500/40 hover:bg-black/60 rounded-full text-[10px] font-bold tracking-widest text-slate-300 hover:text-cyan-400 transition-all flex items-center gap-3 cursor-pointer shadow-xl shadow-black/40 relative group overflow-hidden"
+                    >
+                      <div className="relative w-2.5 h-2.5 flex items-center justify-center shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 z-10 animate-pulse" />
+                        <span className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400/80 animate-sonar" style={{ animation: "sonar-ring 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite" }} />
+                        <span className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400/40 animate-sonar" style={{ animation: "sonar-ring 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite", animationDelay: "1s" }} />
+                      </div>
+                      <span className="font-mono uppercase">SYNQ V2.4.1</span>
+                    </button>
+                  </div>
                 </form>
               )}
-
-              {/* Roles guide to keep tool accessible */}
-              <div className="mt-8 pt-6 border-t border-white/5">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                  <Shield
-                    id="badge-shield-roles"
-                    className="w-3.5 h-3.5 text-indigo-400"
-                  />{" "}
-                  Authorized Roles
-                </p>
-                <div className="grid grid-cols-2 gap-3 text-xs text-slate-400">
-                  <div className="p-2 bg-white/5 border border-white/5 rounded-xl">
-                    <span className="font-bold text-indigo-300 block mb-0.5">
-                      Team Leaders (TL)
-                    </span>
-                    <span className="text-[10px] space-y-0.5 block">
-                      Hesham Sobhy, Shymaa Hassan, Amira Hassan, Emad Sayed
-                    </span>
-                  </div>
-                  <div className="p-2 bg-white/5 border border-white/5 rounded-xl">
-                    <span className="font-bold text-emerald-300 block mb-0.5">
-                      Agents
-                    </span>
-                    <span className="text-[10px] block">
-                      Type any other name to enter as a standard Agent
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Dynamic PWA Install / Download Prompt */}
-              {/* Install prompt removed from login screen */}
             </div>
           </div>
         ) : (
@@ -9590,12 +9523,13 @@ ${ttNotes}`
             {/* Global Workspace Header / Navbar with Global Search */}
             <header className="w-full bg-[#14141a]/60 backdrop-blur-xl border border-white/10 p-4 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl relative z-40">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-black/40 rounded-xl flex items-center justify-center border border-white/10">
-                  <Database className="w-5 h-5 text-indigo-400" />
+                <div className="w-9 h-9 bg-black/40 rounded-xl flex items-center justify-center border border-white/10 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-indigo-500/10 blur animate-pulse" />
+                  <CoolLogo className="w-6 h-6 z-10" showText={false} />
                 </div>
                 <div className="text-left">
                   <h1 className="text-sm font-black tracking-tight text-slate-100 font-display flex items-center gap-1.5">
-                    Synq Workspace{" "}
+                    Welcome, {currentUser.name.split(' ')[0]}!{" "}
                     <span className="text-[9px] uppercase tracking-wider font-extrabold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full font-sans">
                       CONSOLE
                     </span>
@@ -9705,7 +9639,7 @@ ${ttNotes}`
                                   setExpandedInquiryId(item.id);
                                   setGlobalInquirySearch("");
                                   setInquirySearchQuery("");
-                                  setInquiryClinicFilter("all");
+                                  setInquiryClinicsFilter([]);
                                   setInquiryStatusFilter("");
                                 } else if (item.type === "tabby_tamara") {
                                   setActiveTab("tabby-tamara");
@@ -9714,7 +9648,7 @@ ${ttNotes}`
                                   setTtSearch("");
                                   setTtDateFilter("");
                                   setTtFilterStatus("all");
-                                  setTcFilterClinic("all");
+                                  setTcFilterClinics([]);
                                 } else if (item.type === "complaint") {
                                   setActiveTab("complaints");
                                   setSelectedComplaintId(item.id);
@@ -9810,26 +9744,30 @@ ${ttNotes}`
               {/* Navigation / Sidebar Menu */}
               <aside className="w-full md:w-64 border border-white/10 bg-white/5 backdrop-blur-xl flex flex-col p-5 rounded-2xl sm:rounded-3xl shadow-xl space-y-6">
                 {/* Egypt Local Time & 10th of Ramadan Weather */}
-                <div className="p-3.5 rounded-xl bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-cyan-500/10 border border-white/10 space-y-2">
+                <div className="p-4 rounded-xl bg-black/40 border border-cyan-500/15 shadow-[0_4px_20px_rgba(0,0,0,0.3)] space-y-3 relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-indigo-500/5 opacity-40 pointer-events-none" />
+                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-400 to-indigo-500" />
+                  
                   <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-extrabold text-indigo-300 uppercase tracking-widest flex items-center gap-1.5">
-                      <span className="flex h-1.5 w-1.5 relative">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                    <span className="text-[10px] font-black text-cyan-400 uppercase tracking-widest flex items-center gap-2">
+                      <span className="flex h-2 w-2 relative">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400"></span>
                       </span>
-                      Cairo, Egypt
+                      Cairo Time
                     </span>
-                    <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">
+                    <span className="text-[10px] text-slate-400 font-mono tracking-wider">
                       {new Date().toLocaleDateString("en-US", {
                         timeZone: "Africa/Cairo",
                         month: "short",
                         day: "numeric",
+                        weekday: "short",
                       })}
                     </span>
                   </div>
 
-                  <div className="flex items-baseline justify-between">
-                    <p className="text-xl font-black text-slate-100 font-mono tracking-tight">
+                  <div className="flex items-baseline justify-between py-1 border-y border-white/5">
+                    <p className="text-2xl font-black bg-gradient-to-r from-white via-slate-100 to-cyan-300 bg-clip-text text-transparent font-mono tracking-tight">
                       {currentTime.toLocaleTimeString("en-US", {
                         timeZone: "Africa/Cairo",
                         hour: "2-digit",
@@ -9839,23 +9777,31 @@ ${ttNotes}`
                       })}
                     </p>
                     {ramadanTemp !== null && (
-                      <div className="flex items-center gap-1 text-xs text-[#FCD34D] font-bold font-mono">
-                        {ramadanWeatherCode === 0 ? (
-                          <Sun className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                        ) : ramadanWeatherCode < 3 ? (
-                          <Sun className="w-3.5 h-3.5 text-amber-400" />
-                        ) : (
-                          <Cloudy className="w-3.5 h-3.5 text-slate-400" />
-                        )}
-                        <span>{ramadanTemp.toFixed(1)}</span>
+                      <div className="flex flex-col items-end gap-0.5">
+                        <div className="flex items-center gap-1 text-sm text-[#FCD34D] font-black font-mono">
+                          {ramadanWeatherCode === 0 ? (
+                            <Sun className="w-4 h-4 text-amber-400 animate-pulse" />
+                          ) : ramadanWeatherCode < 3 ? (
+                            <Sun className="w-4 h-4 text-amber-400" />
+                          ) : (
+                            <Cloudy className="w-4 h-4 text-slate-400" />
+                          )}
+                          <span>{ramadanTemp.toFixed(1)}°C</span>
+                        </div>
+                        <span className="text-[7px] text-amber-400/80 uppercase font-mono tracking-widest font-extrabold animate-pulse">
+                          Real-time
+                        </span>
                       </div>
                     )}
                   </div>
 
-                  <div className="flex justify-between items-center text-[9px] text-slate-400 border-t border-white/5 pt-1.5">
-                    <span className="truncate">10th of Ramadan City</span>
+                  <div className="flex justify-between items-center text-[9px] text-slate-400">
+                    <span className="truncate flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                      10th of Ramadan
+                    </span>
                     <span className="font-mono text-slate-500">
-                      PC:{" "}
+                      Local:{" "}
                       {currentTime.toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
@@ -9868,8 +9814,9 @@ ${ttNotes}`
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center shadow-lg shadow-black/80 border border-white/10">
-                        <CoolLogo className="w-6 h-6 text-slate-100" />
+                      <div className="w-16 h-12 bg-black/40 rounded-xl flex items-center justify-center shadow-lg shadow-black/40 border border-cyan-500/20 hover:border-cyan-500/40 transition-all shrink-0 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-indigo-500/5 opacity-40 pointer-events-none" />
+                        <CoolLogo className="w-14 h-10" showText={false} />
                       </div>
                       <div>
                         <h1 className="text-sm font-black tracking-tight text-slate-100 font-display">
@@ -9881,7 +9828,7 @@ ${ttNotes}`
                           </span>
                           <div className="flex items-center gap-1 px-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-[7px] font-black text-emerald-400 uppercase tracking-tighter">
                             <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                            Offline
+                            Online
                           </div>
                         </div>
                       </div>
@@ -9896,20 +9843,20 @@ ${ttNotes}`
                             `Theme switched to ${!isDarkMode ? "Dark" : "Light"} Mode! `,
                           );
                         }}
-                        className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-slate-300 hover:text-slate-100 cursor-pointer flex items-center justify-center"
+                        className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-slate-300 hover:text-slate-101 cursor-pointer flex items-center justify-center shrink-0 w-10 h-10 shadow-md shadow-black/20"
                         title="Toggle Dark/Light Mode"
                       >
                         {isDarkMode ? (
-                          <span className="text-xs leading-none"></span>
+                          <Sun className="w-4 h-4 text-amber-400" />
                         ) : (
-                          <span className="text-xs leading-none"></span>
+                          <Moon className="w-4 h-4 text-indigo-500" />
                         )}
                       </button>
 
                       {/* Notification Center Trigger */}
                       <button
                         onClick={() => setIsNotifDrawerOpen(true)}
-                        className="relative p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-slate-300 hover:text-slate-100 cursor-pointer group flex items-center justify-center"
+                        className="relative p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-slate-300 hover:text-slate-100 cursor-pointer group flex items-center justify-center w-10 h-10 shadow-md shadow-black/20"
                         title="Real-time Alerts Inbox"
                       >
                         <Bell className="w-4 h-4" />
@@ -9925,34 +9872,64 @@ ${ttNotes}`
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center font-black text-sm text-slate-100">
-                        {(currentUser?.name || "")
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
+                  <div className="p-4 rounded-xl bg-black/45 border border-cyan-500/15 shadow-[0_4px_25px_rgba(0,0,0,0.35)] space-y-4 relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-pink-500/5 opacity-40 pointer-events-none" />
+                    <div className="absolute bottom-0 right-0 w-24 h-24 bg-cyan-400/5 rounded-full blur-2xl pointer-events-none" />
+
+                    <div className="flex items-center gap-3 relative">
+                      <div className="relative shrink-0">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-400 via-indigo-500 to-fuchsia-500 flex items-center justify-center font-black text-sm text-slate-100 border border-cyan-500/30 p-0.5 shadow-lg shadow-cyan-500/10">
+                          <div className="w-full h-full rounded-full bg-[#121217] flex items-center justify-center text-[11px] font-bold tracking-widest font-mono text-cyan-400">
+                            {(currentUser?.name || "")
+                              .split(".")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()}
+                          </div>
+                        </div>
+                        {/* Real-time status dot indicator in corner of avatar */}
+                        <span className="absolute bottom-0 right-0 flex h-3 w-3">
+                          <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                            (currentUser.status || "online") === "online" ? "bg-emerald-440" : (currentUser.status || "online") === "busy" ? "bg-rose-400" : "bg-amber-400"
+                          }`} />
+                          <span className={`relative inline-flex rounded-full h-3 w-3 border border-[#121217] ${
+                            (currentUser.status || "online") === "online" ? "bg-emerald-500" : (currentUser.status || "online") === "busy" ? "bg-rose-500" : "bg-amber-500"
+                          }`} />
+                        </span>
                       </div>
-                      <div className="overflow-hidden">
-                        <p className="text-xs font-bold text-slate-100 truncate">
+                      <div className="overflow-hidden grow">
+                        <p className="text-xs font-black text-slate-100 truncate tracking-wide">
                           {formatAgentName(currentUser.name)}
                         </p>
-                        <p className="text-[10px] uppercase tracking-widest font-mono text-indigo-300 font-semibold">
+                        <p className="text-[9px] text-slate-400 mt-0.5">
+                          Username: <span className="font-mono text-indigo-300 font-bold">{currentUser.name}</span>
+                        </p>
+                        <p className="text-[10px] uppercase tracking-widest font-mono text-cyan-400 font-bold mt-1">
                           {currentUser.role === "tl"
-                            ? " Team Leader"
+                            ? "Team Leader"
                             : supportAssignments[currentUser.name]
-                              ? " Support"
-                              : " Agent"}
+                              ? "Support Specialist"
+                              : "Productivity Agent"}
                         </p>
                       </div>
                     </div>
 
+                    {/* Direct Manager display with automatic system mapping or CTG override */}
+                    <div className="bg-black/30 border border-white/5 py-1.5 px-3 rounded-lg flex items-center justify-between text-[10px] space-y-0.5 font-mono">
+                      <span className="text-slate-400">Direct Manager:</span>
+                      <span className="font-bold text-cyan-400 truncate max-w-[120px] text-right">
+                        {((currentUser.role as string) === "tl" || (currentUser.role as string) === "director" || (currentUser.role as string) === "admin")
+                          ? "N/A (System CTO)"
+                          : getAgentTL(currentUser.name)}
+                      </span>
+                    </div>
+
                     {/* Spotlight Profile Window - Bio & Daily Updates with real-time Firebase syncing */}
-                    <div className="mt-3 pt-3 border-t border-white/5 space-y-2.5 font-sans">
-                      <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-slate-500 font-bold">
-                        <span>My Spotlight </span>
+                    <div className="mt-3 pt-3 border-t border-white/5 space-y-3 font-sans">
+                      <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-slate-400 font-black">
+                        <span>My Spotlight</span>
                         <span
-                          className={`px-1.5 py-0.5 rounded text-[8px] font-black tracking-normal uppercase ${
+                          className={`px-2 py-0.5 rounded text-[8px] font-black tracking-normal uppercase ${
                             (currentUser.status || "online") === "online"
                               ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 animate-pulse"
                               : (currentUser.status || "online") === "busy"
@@ -9989,7 +9966,7 @@ ${ttNotes}`
                           }}
                           placeholder="Tell others about yourself..."
                           rows={2}
-                          className="w-full bg-white/5 backdrop-blur-xl border border-white/20 rounded-lg px-2 py-1 text-[11px] text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/40 transition-all resize-none custom-scrollbar"
+                          className="w-full bg-black/40 border border-white/10 hover:border-cyan-500/30 focus:border-cyan-500/60 rounded-lg px-2 py-1 text-[11px] text-slate-200 placeholder:text-slate-500 focus:outline-none transition-all resize-none custom-scrollbar shadow-inner leading-relaxed"
                         />
                       </div>
 
@@ -10016,7 +9993,7 @@ ${ttNotes}`
                           }}
                           placeholder="E.g. working on social media posts..."
                           rows={2}
-                          className="w-full bg-white/5 backdrop-blur-xl border border-white/20 rounded-lg px-2 py-1 text-[11px] text-indigo-300 placeholder:text-slate-500 focus:outline-none focus:border-purple-500/45 transition-all resize-none custom-scrollbar"
+                          className="w-full bg-black/40 border border-white/10 hover:border-purple-500/30 focus:border-purple-500/60 rounded-lg px-2 py-1 text-[11px] text-indigo-300 placeholder:text-slate-500 focus:outline-none transition-all resize-none custom-scrollbar shadow-inner leading-relaxed"
                         />
                       </div>
                     </div>
@@ -10107,6 +10084,19 @@ ${ttNotes}`
                         Reset Password
                       </button>
                     ) : null}
+
+                    <button
+                      type="button"
+                      onClick={() => setIsSynqVersionModalOpen(true)}
+                      className="w-full px-3 py-2 bg-cyan-500/10 hover:bg-cyan-500/15 border border-cyan-500/20 hover:border-cyan-500/40 text-cyan-300 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-3.5 cursor-pointer mb-2 relative group overflow-hidden"
+                    >
+                      <div className="relative w-2.5 h-2.5 flex items-center justify-center shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 z-10 animate-pulse" />
+                        <span className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400/80" style={{ animation: "sonar-ring 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite" }} />
+                        <span className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400/40" style={{ animation: "sonar-ring 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite", animationDelay: "1s" }} />
+                      </div>
+                      <span className="font-mono">Synq v2.4.1</span>
+                    </button>
 
                     <button
                       id="signout-button"
@@ -15943,356 +15933,13 @@ ${ttNotes}`
                           </p>
                         </div>
 
-                        {/* SVG Dashboards & Charts Grid */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                          {/* Visual Chart 1: Real-time Agent Attendance Status (SVG Donut Chart) */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl">
-                            <div className="mb-4">
-                              <span className="text-[10px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-lg font-mono font-bold uppercase">
-                                LIVE ATTENDANCE STATUS
-                              </span>
-                              <h3 className="text-base font-bold text-slate-100 font-display mt-1.5 flex items-center gap-2">
-                                <Activity className="w-4 h-4 text-emerald-400" />
-                                On-Shift State Ratio
-                              </h3>
-                              <p className="text-xs text-slate-400">
-                                Current status composition of clocked agents
-                                under your supervision.
-                              </p>
-                            </div>
-
-                            <div className="flex flex-col sm:flex-row items-center justify-around gap-6 pt-2">
-                              {/* Custom status donut */}
-                              <div className="relative w-32 h-32 flex items-center justify-center shrink-0">
-                                {(() => {
-                                  const working = timeLogs.filter(
-                                    (t) => t.status === "working",
-                                  ).length;
-                                  const rest = timeLogs.filter(
-                                    (t) =>
-                                      t.status === "break" ||
-                                      t.status === "restroom",
-                                  ).length;
-                                  const lunch = timeLogs.filter(
-                                    (t) => t.status === "lunch",
-                                  ).length;
-                                  const offline = timeLogs.filter(
-                                    (t) => t.status === "clocked_out",
-                                  ).length;
-                                  const total =
-                                    working + rest + lunch + offline || 1;
-
-                                  const pctWorking = (working / total) * 188.5;
-                                  const pctRest = (rest / total) * 188.5;
-                                  const pctLunch = (lunch / total) * 188.5;
-                                  const pctOffline = (offline / total) * 188.5;
-
-                                  return (
-                                    <>
-                                      <svg
-                                        className="w-full h-full transform -rotate-90"
-                                        viewBox="0 0 80 80"
-                                      >
-                                        <circle
-                                          cx="40"
-                                          cy="40"
-                                          r="30"
-                                          fill="transparent"
-                                          stroke="rgba(255,255,255,0.03)"
-                                          strokeWidth="6.5"
-                                        />
-                                        {/* Working - Indigo */}
-                                        <circle
-                                          cx="40"
-                                          cy="40"
-                                          r="30"
-                                          fill="transparent"
-                                          stroke="#6366f1"
-                                          strokeWidth="7.5"
-                                          strokeDasharray="188.5"
-                                          strokeDashoffset={188.5 - pctWorking}
-                                          className="transition-all duration-1000"
-                                        />
-                                        {/* Rest/Break - Amber */}
-                                        <circle
-                                          cx="40"
-                                          cy="40"
-                                          r="30"
-                                          fill="transparent"
-                                          stroke="#f59e0b"
-                                          strokeWidth="7.5"
-                                          strokeDasharray="188.5"
-                                          strokeDashoffset={188.5 - pctRest}
-                                          style={{
-                                            transform: `rotate(${(working / total) * 360}deg)`,
-                                            transformOrigin: "center",
-                                          }}
-                                          className="transition-all duration-1000"
-                                        />
-                                        {/* Lunch - Pink */}
-                                        <circle
-                                          cx="40"
-                                          cy="40"
-                                          r="30"
-                                          fill="transparent"
-                                          stroke="#ec4899"
-                                          strokeWidth="7.5"
-                                          strokeDasharray="188.5"
-                                          strokeDashoffset={188.5 - pctLunch}
-                                          style={{
-                                            transform: `rotate(${((working + rest) / total) * 360}deg)`,
-                                            transformOrigin: "center",
-                                          }}
-                                          className="transition-all duration-1000"
-                                        />
-                                        {/* Offline - Slate */}
-                                        <circle
-                                          cx="40"
-                                          cy="40"
-                                          r="30"
-                                          fill="transparent"
-                                          stroke="#64748b"
-                                          strokeWidth="7.5"
-                                          strokeDasharray="188.5"
-                                          strokeDashoffset={188.5 - pctOffline}
-                                          style={{
-                                            transform: `rotate(${((working + rest + lunch) / total) * 360}deg)`,
-                                            transformOrigin: "center",
-                                          }}
-                                          className="transition-all duration-1000"
-                                        />
-                                      </svg>
-                                      <div className="absolute text-center select-none">
-                                        <p className="text-2xl font-black text-slate-100">
-                                          {total === 1 &&
-                                          working + rest + lunch + offline === 0
-                                            ? 0
-                                            : working + rest + lunch + offline}
-                                        </p>
-                                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
-                                          Active Logs
-                                        </p>
-                                      </div>
-                                    </>
-                                  );
-                                })()}
-                              </div>
-
-                              {/* Status Legend List */}
-                              <div className="space-y-2.5 text-xs font-semibold w-full sm:w-auto">
-                                <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-1.5 min-w-[150px]">
-                                  <span className="flex items-center gap-2 text-indigo-400">
-                                    <span className="w-2.5 h-2.5 bg-indigo-500 rounded-full"></span>
-                                    Active Operating
-                                  </span>
-                                  <span className="text-slate-100 font-bold">
-                                    {
-                                      timeLogs.filter(
-                                        (t) => t.status === "working",
-                                      ).length
-                                    }{" "}
-                                    agents
-                                  </span>
-                                </div>
-                                <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-1.5">
-                                  <span className="flex items-center gap-2 text-amber-400">
-                                    <span className="w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
-                                    On Breaks / Rest
-                                  </span>
-                                  <span className="text-slate-100 font-bold">
-                                    {
-                                      timeLogs.filter(
-                                        (t) =>
-                                          t.status === "break" ||
-                                          t.status === "restroom",
-                                      ).length
-                                    }{" "}
-                                    agents
-                                  </span>
-                                </div>
-                                <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-1.5">
-                                  <span className="flex items-center gap-2 text-pink-400">
-                                    <span className="w-2.5 h-2.5 bg-pink-500 rounded-full"></span>
-                                    On Lunch Duration
-                                  </span>
-                                  <span className="text-slate-100 font-bold">
-                                    {
-                                      timeLogs.filter(
-                                        (t) => t.status === "lunch",
-                                      ).length
-                                    }{" "}
-                                    agents
-                                  </span>
-                                </div>
-                                <div className="flex items-center justify-between gap-4 pb-0.5">
-                                  <span className="flex items-center gap-2 text-slate-400">
-                                    <span className="w-2.5 h-2.5 bg-slate-500 rounded-full"></span>
-                                    Clocked Out
-                                  </span>
-                                  <span className="text-slate-100 font-bold">
-                                    {
-                                      timeLogs.filter(
-                                        (t) => t.status === "clocked_out",
-                                      ).length
-                                    }{" "}
-                                    agents
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Visual Chart 2: Scheduling Requests & Swaps breakdown (SVG Pie Chart) */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl">
-                            <div className="mb-4">
-                              <span className="text-[10px] bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 px-2.5 py-1 rounded-lg font-mono font-bold uppercase">
-                                DECISIONS & LOGS SUMMARY
-                              </span>
-                              <h3 className="text-base font-bold text-slate-100 font-display mt-1.5 flex items-center gap-2">
-                                <PieChart className="w-4 h-4 text-indigo-400" />
-                                Roster Modification Ratio
-                              </h3>
-                              <p className="text-xs text-slate-400">
-                                Shift swap swaps and annual leave approval
-                                summaries.
-                              </p>
-                            </div>
-
-                            <div className="flex flex-col sm:flex-row items-center justify-around gap-6 pt-2">
-                              {/* Custom Requests pie */}
-                              <div className="relative w-32 h-32 flex items-center justify-center shrink-0">
-                                {(() => {
-                                  const swapsCount = requests.filter(
-                                    (r) => r.type === "swap",
-                                  ).length;
-                                  const annualsCount = requests.filter(
-                                    (r) => r.type === "annual",
-                                  ).length;
-                                  const totalRequests =
-                                    swapsCount + annualsCount || 1;
-
-                                  const pctSwaps =
-                                    (swapsCount / totalRequests) * 188.5;
-                                  const pctAnnuals =
-                                    (annualsCount / totalRequests) * 188.5;
-
-                                  return (
-                                    <>
-                                      <svg
-                                        className="w-full h-full transform -rotate-90"
-                                        viewBox="0 0 80 80"
-                                      >
-                                        <circle
-                                          cx="40"
-                                          cy="40"
-                                          r="30"
-                                          fill="transparent"
-                                          stroke="rgba(255,255,255,0.03)"
-                                          strokeWidth="6.5"
-                                        />
-                                        {/* Swaps - Blue */}
-                                        <circle
-                                          cx="40"
-                                          cy="40"
-                                          r="30"
-                                          fill="transparent"
-                                          stroke="#3b82f6"
-                                          strokeWidth="7.5"
-                                          strokeDasharray="188.5"
-                                          strokeDashoffset={188.5 - pctSwaps}
-                                          className="transition-all duration-1000"
-                                        />
-                                        {/* Annuals - Violet */}
-                                        <circle
-                                          cx="40"
-                                          cy="40"
-                                          r="30"
-                                          fill="transparent"
-                                          stroke="#8b5cf6"
-                                          strokeWidth="7.5"
-                                          strokeDasharray="188.5"
-                                          strokeDashoffset={188.5 - pctAnnuals}
-                                          style={{
-                                            transform: `rotate(${(swapsCount / totalRequests) * 360}deg)`,
-                                            transformOrigin: "center",
-                                          }}
-                                          className="transition-all duration-1000"
-                                        />
-                                      </svg>
-                                      <div className="absolute text-center select-none">
-                                        <p className="text-2xl font-black text-slate-100">
-                                          {requests.length}
-                                        </p>
-                                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
-                                          Requests
-                                        </p>
-                                      </div>
-                                    </>
-                                  );
-                                })()}
-                              </div>
-
-                              {/* Request Legend List */}
-                              <div className="space-y-2.5 text-xs font-semibold w-full sm:w-auto">
-                                <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-1.5 min-w-[150px]">
-                                  <span className="flex items-center gap-2 text-blue-400">
-                                    <span className="w-2.5 h-2.5 bg-blue-500 rounded-full"></span>
-                                    Shift Swaps
-                                  </span>
-                                  <span className="text-slate-100 font-bold">
-                                    {
-                                      requests.filter((r) => r.type === "swap")
-                                        .length
-                                    }{" "}
-                                    cases
-                                  </span>
-                                </div>
-                                <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-1.5">
-                                  <span className="flex items-center gap-2 text-violet-400">
-                                    <span className="w-2.5 h-2.5 bg-violet-500 rounded-full"></span>
-                                    Annual Leave
-                                  </span>
-                                  <span className="text-slate-100 font-bold">
-                                    {
-                                      requests.filter(
-                                        (r) => r.type === "annual",
-                                      ).length
-                                    }{" "}
-                                    cases
-                                  </span>
-                                </div>
-                                <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-1.5">
-                                  <span className="flex items-center gap-2 text-emerald-400">
-                                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
-                                    Approved Total
-                                  </span>
-                                  <span className="text-emerald-400 font-bold">
-                                    {
-                                      requests.filter(
-                                        (r) => r.status === "approved",
-                                      ).length
-                                    }
-                                  </span>
-                                </div>
-                                <div className="flex items-center justify-between gap-4 pb-0.5">
-                                  <span className="flex items-center gap-2 text-rose-400">
-                                    <span className="w-1.5 h-1.5 bg-rose-400 rounded-full"></span>
-                                    Declined / Denied
-                                  </span>
-                                  <span className="text-rose-400 font-bold">
-                                    {
-                                      requests.filter(
-                                        (r) =>
-                                          r.status === "declined" ||
-                                          r.status === "declined_by_partner",
-                                      ).length
-                                    }
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                        <SystemAnalyticsTab
+                          timeLogs={timeLogs}
+                          requests={requests}
+                          inquiries={inquiries}
+                          ttRequests={tabbyTamaraRequests}
+                          ttComplaints={tabbyTamaraComplaints}
+                        />
 
                         {/* Four-Column Quad Report Actions Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -17391,34 +17038,8 @@ ${ttNotes}`
                               </form>
                             </div>
 
-                            {/* Inquiry Logs and Progress (Right Side / Col Span 2) using CRM Workspace */}
-                            <div className="lg:col-span-2 h-full flex flex-col min-h-[500px]">
-                              <CRMWorkspace
-                                activeTab="inquiries"
-                                currentUser={currentUser}
-                                isTLOreSupport={isTLOreSupport}
-                                inquiries={inquiries}
-                                tabbyTamaraRequests={tabbyTamaraRequests}
-                                tabbyTamaraComplaints={tabbyTamaraComplaints}
-                                clientComms={clientComms}
-                                addSystemNotification={addSystemNotification}
-                                onEditItem={(item) => {
-                                  setEditingItem({
-                                    type: item.type as any,
-                                    id: item.id,
-                                    data: item.data,
-                                  });
-                                }}
-                                setInquiries={setInquiries}
-                                setTabbyTamaraRequests={setTabbyTamaraRequests}
-                                setTabbyTamaraComplaints={
-                                  setTabbyTamaraComplaints
-                                }
-                                setClientComms={setClientComms}
-                              />
-                            </div>
-                            {/* Legacy code skipped dynamically */}
-                            {false && (
+                            {/* Inquiry Logs and Progress (Right Side / Col Span 2) using native cards layout restored */}
+                            {true && (
                               <div className="lg:col-span-2 space-y-4">
                                 {/* View Toggles */}
                                 <div className="flex bg-white/5 border border-white/10 p-1.5 rounded-xl text-sm font-bold flex-wrap">
@@ -18743,140 +18364,40 @@ ${ttNotes}`
                               </p>
                             </div>
 
-                            <div className="flex items-center justify-around py-2 gap-4">
-                              {/* Custom SVG Donut chart */}
-                              <div className="relative w-28 h-28 flex items-center justify-center shrink-0">
-                                <svg
-                                  className="w-full h-full transform -rotate-90"
-                                  viewBox="0 0 80 80"
-                                >
-                                  {/* Background track circle */}
-                                  <circle
-                                    cx="40"
-                                    cy="40"
-                                    r="30"
-                                    fill="transparent"
-                                    stroke="rgba(255,255,255,0.03)"
-                                    strokeWidth="6.5"
-                                  />
-
-                                  {/* Slice 1: Answered (emerald) */}
-                                  <circle
-                                    cx="40"
-                                    cy="40"
-                                    r="30"
-                                    fill="transparent"
-                                    stroke="#10b981"
-                                    strokeWidth="7"
-                                    strokeDasharray="188.5"
-                                    strokeDashoffset={
-                                      188.5 -
-                                      (inquiries.filter(
-                                        (i) => i.status === "answered",
-                                      ).length /
-                                        (inquiries.length || 1)) *
-                                        188.5
-                                    }
-                                    className="transition-all duration-1000"
-                                  />
-
-                                  {/* Slice 2: Sent to Client (orange) */}
-                                  <circle
-                                    cx="40"
-                                    cy="40"
-                                    r="30"
-                                    fill="transparent"
-                                    stroke="#f97316"
-                                    strokeWidth="7"
-                                    strokeDasharray="188.5"
-                                    strokeDashoffset={
-                                      188.5 -
-                                      (inquiries.filter(
-                                        (i) => i.status === "sent",
-                                      ).length /
-                                        (inquiries.length || 1)) *
-                                        188.5
-                                    }
-                                    style={{
-                                      transform: `rotate(${(inquiries.filter((i) => i.status === "answered").length / (inquiries.length || 1)) * 360}deg)`,
-                                      transformOrigin: "center",
-                                    }}
-                                    className="transition-all duration-1000"
-                                  />
-
-                                  {/* Slice 3: Submitted / Unresolved (yellow) */}
-                                  <circle
-                                    cx="40"
-                                    cy="40"
-                                    r="30"
-                                    fill="transparent"
-                                    stroke="#eab308"
-                                    strokeWidth="7"
-                                    strokeDasharray="188.5"
-                                    strokeDashoffset={
-                                      188.5 -
-                                      (inquiries.filter(
-                                        (i) => i.status === "submitted",
-                                      ).length /
-                                        (inquiries.length || 1)) *
-                                        188.5
-                                    }
-                                    style={{
-                                      transform: `rotate(${((inquiries.filter((i) => i.status === "answered").length + inquiries.filter((i) => i.status === "sent").length) / (inquiries.length || 1)) * 360}deg)`,
-                                      transformOrigin: "center",
-                                    }}
-                                    className="transition-all duration-1000"
-                                  />
-                                </svg>
-                                <div className="absolute text-center select-none">
-                                  <p className="text-xl font-black text-slate-100">
-                                    {inquiries.length}
-                                  </p>
-                                  <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">
-                                    Total
-                                  </p>
-                                </div>
-                              </div>
-
-                              {/* Chart Legend */}
-                              <div className="space-y-2 text-xs font-semibold">
-                                <div className="flex items-center gap-2">
-                                  <span className="w-2.5 h-2.5 bg-emerald-500 rounded-sm"></span>
-                                  <span className="text-slate-300">
-                                    Answered (
+                            <div className="flex-1 flex flex-col items-center justify-around py-2 gap-4 h-48 w-full">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <RechartsPieChart>
+                                  <Pie
+                                    data={[
+                                      { name: "Answered", value: inquiries.filter((i) => i.status === "answered").length, color: "#10b981" },
+                                      { name: "Sent", value: inquiries.filter((i) => i.status === "sent").length, color: "#f97316" },
+                                      { name: "Submitted", value: inquiries.filter((i) => i.status === "submitted").length, color: "#eab308" },
+                                    ].filter(d => d.value > 0)}
+                                    dataKey="value"
+                                    nameKey="name"
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={40}
+                                    outerRadius={65}
+                                    paddingAngle={5}
+                                  >
                                     {
-                                      inquiries.filter(
-                                        (i) => i.status === "answered",
-                                      ).length
+                                      [
+                                        { name: "Answered", value: inquiries.filter((i) => i.status === "answered").length, color: "#10b981" },
+                                        { name: "Sent", value: inquiries.filter((i) => i.status === "sent").length, color: "#f97316" },
+                                        { name: "Submitted", value: inquiries.filter((i) => i.status === "submitted").length, color: "#eab308" },
+                                      ].filter(d => d.value > 0).map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.color} stroke="rgba(255,255,255,0.05)" />
+                                      ))
                                     }
-                                    )
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="w-2.5 h-2.5 bg-orange-500 rounded-sm"></span>
-                                  <span className="text-slate-300">
-                                    Sent (
-                                    {
-                                      inquiries.filter(
-                                        (i) => i.status === "sent",
-                                      ).length
-                                    }
-                                    )
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="w-2.5 h-2.5 bg-yellow-500 rounded-sm"></span>
-                                  <span className="text-slate-300">
-                                    Submitted (
-                                    {
-                                      inquiries.filter(
-                                        (i) => i.status === "submitted",
-                                      ).length
-                                    }
-                                    )
-                                  </span>
-                                </div>
-                              </div>
+                                  </Pie>
+                                  <Tooltip 
+                                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '8px' }}
+                                    itemStyle={{ color: '#f8fafc', fontSize: '12px' }}
+                                  />
+                                  <Legend verticalAlign="bottom" height={20} iconType="circle" wrapperStyle={{ fontSize: '10px' }} />
+                                </RechartsPieChart>
+                              </ResponsiveContainer>
                             </div>
                           </div>
 
@@ -18893,110 +18414,41 @@ ${ttNotes}`
                               </p>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-5 gap-3.5 pt-2">
-                              {[
-                                {
-                                  key: "dermadent",
-                                  display: "Dermadent",
-                                  color: "from-blue-400 to-indigo-500",
-                                  textCol: "text-blue-300",
-                                },
-                                {
-                                  key: "onetouch_mo3tred",
-                                  display: "One Touch AlMutarid",
-                                  color: "from-teal-400 to-emerald-500",
-                                  textCol: "text-emerald-300",
-                                },
-                                {
-                                  key: "onetouch_merkhnya",
-                                  display: "One Touch Markhaniya",
-                                  color: "from-cyan-400 to-cyan-500",
-                                  textCol: "text-cyan-300",
-                                },
-                                {
-                                  key: "welltouch",
-                                  display: "Well Touch",
-                                  color: "from-pink-500 to-rose-500",
-                                  textCol: "text-rose-300",
-                                },
-                                {
-                                  key: "newage",
-                                  display: "New Age",
-                                  color: "from-amber-400 to-orange-500",
-                                  textCol: "text-amber-300",
-                                },
-                              ].map((clin) => {
-                                const count = inquiries.filter(
-                                  (i) =>
-                                    (i.clinicName || "").toLowerCase() ===
-                                    clin.key.toLowerCase(),
-                                ).length;
-                                const pct =
-                                  inquiries.length > 0
-                                    ? (count / inquiries.length) * 100
-                                    : 0;
+                            <div className="h-48 w-full mt-2">
+                              {(() => {
+                                const clinicData = [
+                                  { name: "Dermadent", value: inquiries.filter((i) => (i.clinicName || "").toLowerCase() === "dermadent").length, color: "#6366f1" },
+                                  { name: "AlMutarid", value: inquiries.filter((i) => (i.clinicName || "").toLowerCase() === "onetouch_mo3tred").length, color: "#10b981" },
+                                  { name: "Markhaniya", value: inquiries.filter((i) => (i.clinicName || "").toLowerCase() === "onetouch_merkhnya").length, color: "#06b6d4" },
+                                  { name: "Well Touch", value: inquiries.filter((i) => (i.clinicName || "").toLowerCase() === "welltouch").length, color: "#f43f5e" },
+                                  { name: "New Age", value: inquiries.filter((i) => (i.clinicName || "").toLowerCase() === "newage").length, color: "#f59e0b" },
+                                ];
                                 return (
-                                  <div
-                                    key={clin.key}
-                                    className="bg-white/5 backdrop-blur-xl border border-white/10 p-3 rounded-2xl flex flex-col justify-between hover:border-white/10 transition-all select-none"
-                                  >
-                                    <div>
-                                      <p className="text-[10px] text-slate-400 font-bold uppercase truncate">
-                                        {clin.display}
-                                      </p>
-                                      <p className="text-2xl font-black text-slate-100 mt-1">
-                                        {count}
-                                      </p>
-                                    </div>
-
-                                    <div className="mt-4">
-                                      <div className="flex justify-between items-center text-[9px] text-slate-500 font-bold mb-1">
-                                        <span>Ratio</span>
-                                        <span className={clin.textCol}>
-                                          {pct.toFixed(0)}
-                                        </span>
-                                      </div>
-                                      <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                        <div
-                                          className={`h-full bg-gradient-to-r ${clin.color} transition-all duration-1000`}
-                                          style={{ width: `${pct}%` }}
-                                        ></div>
-                                      </div>
-                                    </div>
-                                  </div>
+                                  <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={clinicData}>
+                                      <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                                      <XAxis dataKey="name" tick={{fill: '#94a3b8', fontSize: 10}} axisLine={false} tickLine={false} />
+                                      <YAxis tick={{fill: '#94a3b8', fontSize: 10}} axisLine={false} tickLine={false} />
+                                      <Tooltip 
+                                        contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', borderRadius: '8px' }}
+                                        itemStyle={{ color: '#f1f5f9', fontSize: 12 }}
+                                        cursor={{fill: '#334155', opacity: 0.4}}
+                                      />
+                                      <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                                        {clinicData.map((entry, index) => (
+                                          <Cell key={`cell-${index}`} fill={entry.color} />
+                                        ))}
+                                      </Bar>
+                                    </BarChart>
+                                  </ResponsiveContainer>
                                 );
-                              })}
+                              })()}
                             </div>
                           </div>
                         </div>
 
-                        {/* Unified CRM Workspace for Team Leaders */}
-                        <div className="h-full flex flex-col min-h-[600px] mt-6">
-                          <CRMWorkspace
-                            activeTab="inquiries"
-                            currentUser={currentUser}
-                            isTLOreSupport={isTLOreSupport}
-                            inquiries={inquiries}
-                            tabbyTamaraRequests={tabbyTamaraRequests}
-                            tabbyTamaraComplaints={tabbyTamaraComplaints}
-                            clientComms={clientComms}
-                            addSystemNotification={addSystemNotification}
-                            onEditItem={(item) => {
-                              setEditingItem({
-                                type: item.type as any,
-                                id: item.id,
-                                data: item.data,
-                              });
-                            }}
-                            setInquiries={setInquiries}
-                            setTabbyTamaraRequests={setTabbyTamaraRequests}
-                            setTabbyTamaraComplaints={setTabbyTamaraComplaints}
-                            setClientComms={setClientComms}
-                          />
-                        </div>
-
-                        {/* Legacy Team Leader list skipped */}
-                        {false && (
+                        {/* Unified cards layout */}
+                        {true && (
                           <>
                             {/* Search & Filters */}
                             <div className="bg-white/5 border border-white/10 p-4 rounded-3xl flex flex-col md:flex-row gap-4 items-center">
@@ -19012,30 +18464,47 @@ ${ttNotes}`
                                   className="w-full pl-10 pr-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                 />
                               </div>
-                              <div className="flex gap-1.5 w-full md:w-auto shrink-0 border-r border-white/10 pr-4 mr-1">
+                              <div className="relative flex gap-1.5 w-full md:w-auto shrink-0 border-r border-white/10 pr-4 mr-1">
                                 <select
-                                  value={inquiryClinicFilter}
-                                  onChange={(e) =>
-                                    setInquiryClinicFilter(e.target.value)
-                                  }
+                                  value=""
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val && !inquiryClinicsFilter.includes(val)) {
+                                      setInquiryClinicsFilter([...inquiryClinicsFilter, val]);
+                                    }
+                                  }}
                                   className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-2.5 py-2 text-[11px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                                 >
-                                  <option
-                                    value="all"
-                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
-                                  >
-                                    All Clinics
+                                  <option value="" className="bg-white/10 backdrop-blur-md text-slate-100">
+                                    ➕ Add Clinic to Filter...
                                   </option>
-                                  {CLINIC_OPTIONS.map((c) => (
+                                  {CLINIC_OPTIONS.filter((c) => !inquiryClinicsFilter.includes(c.value)).map((c) => (
                                     <option
                                       key={c.value}
                                       value={c.value}
-                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                      className="bg-white/10 backdrop-blur-md text-slate-100"
                                     >
                                       {c.label}
                                     </option>
                                   ))}
                                 </select>
+                                {inquiryClinicsFilter.length > 0 && (
+                                  <div className="absolute top-full left-0 z-50 mt-1 flex flex-wrap gap-1 bg-slate-800 p-2 rounded-lg border border-slate-700 shadow-xl w-64">
+                                    <span className="w-full text-xs text-slate-400 font-bold mb-1 flex justify-between">
+                                      Selected Clinics:
+                                      <button onClick={() => setInquiryClinicsFilter([])} className="text-rose-400 hover:text-rose-300">Clear</button>
+                                    </span>
+                                    {inquiryClinicsFilter.map((c) => {
+                                      const label = CLINIC_OPTIONS.find((opt) => opt.value === c)?.label || c;
+                                      return (
+                                        <span key={c} className="bg-indigo-500/20 text-indigo-300 border-none px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
+                                          {label}
+                                          <button onClick={() => setInquiryClinicsFilter((prev) => prev.filter((x) => x !== c))} className="hover:text-white cursor-pointer">&times;</button>
+                                        </span>
+                                      );
+                                    })}
+                                  </div>
+                                )}
                               </div>
                               <div className="flex gap-1.5 w-full md:w-auto overflow-x-auto select-none py-1 md:py-0">
                                 {["all", "submitted", "sent", "answered"].map(
@@ -19067,109 +18536,54 @@ ${ttNotes}`
                             {/* Inquiries Records display */}
                             {(() => {
                               return (
-                                <div className="bg-white/5 border border-white/10 p-5 sm:p-6 rounded-3xl backdrop-blur-xl space-y-4">
-                                  <div className="border-b border-white/5 pb-3">
-                                    <h3 className="text-base font-bold text-slate-100 font-display">
-                                      Inquiry Record Pipeline
-                                    </h3>
-                                    <p className="text-xs text-slate-400">
-                                      Total matched cases waiting in queue:{" "}
-                                      {filteredInquiries.length}
-                                    </p>
-                                  </div>
-
-                                  <div className="space-y-4 max-h-[700px] overflow-y-auto pr-1">
-                                    {filteredInquiries.length === 0 ? (
-                                      <div className="text-center py-16">
-                                        <MessageSquare className="w-12 h-12 text-slate-400 mx-auto mb-2 animate-pulse" />
-                                        <p className="text-xs text-slate-400 italic">
-                                          No inquiries match the search filters
-                                          or the queue is currently empty.
-                                        </p>
-                                      </div>
-                                    ) : (
-                                      filteredInquiries.map((inq) => (
-                                        <InquiryCard
-                                          key={inq.id}
-                                          inq={inq}
-                                          currentUser={currentUser}
-                                          isExpanded={
-                                            expandedInquiryId === inq.id
-                                          }
-                                          onToggle={() =>
-                                            setExpandedInquiryId(
-                                              expandedInquiryId === inq.id
-                                                ? null
-                                                : inq.id,
-                                            )
-                                          }
-                                          isTLOreSupport={isTLOreSupport}
-                                          isSuperAdmin={isSuperAdmin}
-                                          handleTLViewInquiry={
-                                            handleTLViewInquiry
-                                          }
-                                          canEditItem={canEditItem}
-                                          getRemainingEditTime={
-                                            getRemainingEditTime
-                                          }
-                                          setEditingItem={setEditingItem}
-                                          addSystemNotification={
-                                            addSystemNotification
-                                          }
-                                          answeringInquiryId={
-                                            answeringInquiryId
-                                          }
-                                          setAnsweringInquiryId={
-                                            setAnsweringInquiryId
-                                          }
-                                          currentAnswerText={currentAnswerText}
-                                          setCurrentAnswerText={
-                                            setCurrentAnswerText
-                                          }
-                                          currentAnswerAttachments={
-                                            currentAnswerAttachments
-                                          }
-                                          setCurrentAnswerAttachments={
-                                            setCurrentAnswerAttachments
-                                          }
-                                          currentAnswerLinks={
-                                            currentAnswerLinks
-                                          }
-                                          setCurrentAnswerLinks={
-                                            setCurrentAnswerLinks
-                                          }
-                                          isSubmittingAnswer={
-                                            isSubmittingAnswer
-                                          }
-                                          handleSetInquiryAnswered={
-                                            handleSetInquiryAnswered
-                                          }
-                                          handleDeleteInquiry={
-                                            handleDeleteInquiry
-                                          }
-                                          handleUpdateContactedStatus={
-                                            handleUpdateContactedStatus
-                                          }
-                                          handleMarkInquiryRead={
-                                            handleMarkInquiryRead
-                                          }
-                                          handleMarkSentToClinic={
-                                            handleMarkSentToClinic
-                                          }
-                                          handleCloseInquiry={
-                                            handleCloseInquiry
-                                          }
-                                          handleReassignInquiry={
-                                            handleReassignInquiry
-                                          }
-                                          agentsList={agentsList}
-                                          inquiries={inquiries}
-                                          setInquiries={setInquiries}
-                                        />
-                                      ))
-                                    )}
-                                  </div>
-                                </div>
+                                <PaginatedCaseList
+                                  items={filteredInquiries}
+                                  icon={<MessageSquare className="w-5 h-5 text-indigo-400" />}
+                                  title="Inquiry Record Pipeline"
+                                  emptyMessage="No inquiries match the search filters or the queue is currently empty."
+                                  itemToPhone={(inq) => inq.phoneNumber}
+                                  itemToClinic={(inq) => inq.clinicName}
+                                  availableClinics={CLINIC_OPTIONS.map((c) => c.value)}
+                                  renderItem={(inq) => (
+                                    <InquiryCard
+                                      key={inq.id}
+                                      inq={inq}
+                                      currentUser={currentUser}
+                                      isExpanded={expandedInquiryId === inq.id}
+                                      onToggle={() =>
+                                        setExpandedInquiryId(
+                                          expandedInquiryId === inq.id ? null : inq.id,
+                                        )
+                                      }
+                                      isTLOreSupport={isTLOreSupport}
+                                      isSuperAdmin={isSuperAdmin}
+                                      handleTLViewInquiry={handleTLViewInquiry}
+                                      canEditItem={canEditItem}
+                                      getRemainingEditTime={getRemainingEditTime}
+                                      setEditingItem={setEditingItem}
+                                      addSystemNotification={addSystemNotification}
+                                      answeringInquiryId={answeringInquiryId}
+                                      setAnsweringInquiryId={setAnsweringInquiryId}
+                                      currentAnswerText={currentAnswerText}
+                                      setCurrentAnswerText={setCurrentAnswerText}
+                                      currentAnswerAttachments={currentAnswerAttachments}
+                                      setCurrentAnswerAttachments={setCurrentAnswerAttachments}
+                                      currentAnswerLinks={currentAnswerLinks}
+                                      setCurrentAnswerLinks={setCurrentAnswerLinks}
+                                      isSubmittingAnswer={isSubmittingAnswer}
+                                      handleSetInquiryAnswered={handleSetInquiryAnswered}
+                                      handleDeleteInquiry={handleDeleteInquiry}
+                                      handleUpdateContactedStatus={handleUpdateContactedStatus}
+                                      handleMarkInquiryRead={handleMarkInquiryRead}
+                                      handleMarkSentToClinic={handleMarkSentToClinic}
+                                      handleCloseInquiry={handleCloseInquiry}
+                                      handleReassignInquiry={handleReassignInquiry}
+                                      agentsList={agentsList}
+                                      inquiries={inquiries}
+                                      setInquiries={setInquiries}
+                                    />
+                                  )}
+                                />
                               );
                             })()}
                           </>
@@ -19794,308 +19208,174 @@ ${ttNotes}`
                                 </div>
 
                                 {/* Feed Stream list or empty message */}
-                                <div className="space-y-4 mt-2">
-                                  {sortedFilteredList.length === 0 ? (
-                                    <div className="text-center py-24 bg-white/[0.01] border border-white/5 rounded-2xl">
-                                      <Award className="w-10 h-10 text-slate-600 mx-auto mb-2 animate-bounce" />
-                                      <p className="font-bold text-slate-400 text-sm">
-                                        No match found inside your performance
-                                        lists.
-                                      </p>
-                                      <p className="text-xs text-slate-600 max-w-sm mx-auto mt-1 leading-relaxed">
-                                        We queried your processed items but
-                                        found no elements matching your selected
-                                        combination. Try clearing your search or
-                                        filters.
-                                      </p>
-                                    </div>
-                                  ) : (
-                                    <div className="grid grid-cols-1 gap-4">
-                                      {sortedFilteredList.map((item) => {
-                                        const uniqueKey = `${item.type}-${item.id}`;
-                                        const isExpanded =
-                                          myExpandedId === uniqueKey;
-                                        const onToggle = () =>
-                                          setMyExpandedId(
-                                            isExpanded ? null : uniqueKey,
-                                          );
+                                <PaginatedCaseList
+                                  items={sortedFilteredList}
+                                  icon={<Award className="w-5 h-5 text-indigo-400" />}
+                                  title="Agent Pipeline Feed"
+                                  emptyMessage="No match found inside your performance lists. Try clearing your search or filters."
+                                  itemToPhone={(item) => item.data.phoneNumber}
+                                  itemToClinic={(item) => item.data.clinicName}
+                                  availableClinics={CLINIC_OPTIONS.map((c) => c.value)}
+                                  renderItem={(item) => {
+                                    const uniqueKey = `${item.type}-${item.id}`;
+                                    const isExpanded = myExpandedId === uniqueKey;
+                                    const onToggle = () =>
+                                      setMyExpandedId(isExpanded ? null : uniqueKey);
 
-                                        if (item.type === "tabbyTamara") {
-                                          return (
-                                            <TabbyTamaraCard
-                                              key={uniqueKey}
-                                              req={item.data as any}
-                                              currentUser={currentUser}
-                                              isTLOreSupport={isTLOreSupport}
-                                              isSuperAdmin={isSuperAdmin}
-                                              activeFintechHandlingId={
-                                                activeFintechHandlingId
-                                              }
-                                              setActiveFintechHandlingId={
-                                                setActiveFintechHandlingId
-                                              }
-                                              tlFintechPaymentLink={
-                                                tlFintechPaymentLink
-                                              }
-                                              setTlFintechPaymentLink={
-                                                setTlFintechPaymentLink
-                                              }
-                                              tlFintechNotes={tlFintechNotes}
-                                              setTlFintechNotes={
-                                                setTlFintechNotes
-                                              }
-                                              tlFintechLinks={tlFintechLinks}
-                                              setTlFintechLinks={
-                                                setTlFintechLinks
-                                              }
-                                              handleConfirmTabbyTamara={
-                                                handleConfirmTabbyTamara
-                                              }
-                                              handleMarkPatientContactedTT={
-                                                handleContactTabbyTamara
-                                              }
-                                              getElapsedTimerString={
-                                                getElapsedTimerString
-                                              }
-                                              handleDeleteTabbyTamara={
-                                                handleDeleteTabbyTamara
-                                              }
-                                              canEditItem={canEditItem}
-                                              getRemainingEditTime={
-                                                getRemainingEditTime
-                                              }
-                                              editLimitMs={10 * 60 * 1000}
-                                              setEditingItem={(
-                                                editingItem: any,
-                                              ) => {
-                                                setEditingItem({
-                                                  type: "tt_request",
-                                                  id: editingItem.data.id,
-                                                  data: editingItem.data,
-                                                });
-                                              }}
-                                              addSystemNotification={
-                                                addSystemNotification
-                                              }
-                                              isExpanded={isExpanded}
-                                              onToggle={onToggle}
-                                            />
-                                          );
-                                        }
+                                    if (item.type === "tabbyTamara") {
+                                      return (
+                                        <TabbyTamaraCard
+                                          key={uniqueKey}
+                                          req={item.data as any}
+                                          currentUser={currentUser}
+                                          isTLOreSupport={isTLOreSupport}
+                                          isSuperAdmin={isSuperAdmin}
+                                          activeFintechHandlingId={activeFintechHandlingId}
+                                          setActiveFintechHandlingId={setActiveFintechHandlingId}
+                                          tlFintechPaymentLink={tlFintechPaymentLink}
+                                          setTlFintechPaymentLink={setTlFintechPaymentLink}
+                                          tlFintechNotes={tlFintechNotes}
+                                          setTlFintechNotes={setTlFintechNotes}
+                                          tlFintechLinks={tlFintechLinks}
+                                          setTlFintechLinks={setTlFintechLinks}
+                                          handleConfirmTabbyTamara={handleConfirmTabbyTamara}
+                                          handleMarkPatientContactedTT={handleContactTabbyTamara}
+                                          getElapsedTimerString={getElapsedTimerString}
+                                          handleDeleteTabbyTamara={handleDeleteTabbyTamara}
+                                          canEditItem={canEditItem}
+                                          getRemainingEditTime={getRemainingEditTime}
+                                          editLimitMs={10 * 60 * 1000}
+                                          setEditingItem={(editingItem: any) => {
+                                            setEditingItem({
+                                              type: "tt_request",
+                                              id: editingItem.data.id,
+                                              data: editingItem.data,
+                                            });
+                                          }}
+                                          addSystemNotification={addSystemNotification}
+                                          isExpanded={isExpanded}
+                                          onToggle={onToggle}
+                                        />
+                                      );
+                                    }
 
-                                        if (item.type === "complaint") {
-                                          return (
-                                            <ComplaintCard
-                                              key={uniqueKey}
-                                              comp={item.data as any}
-                                              currentUser={currentUser}
-                                              isTLOreSupport={isTLOreSupport}
-                                              isSuperAdmin={isSuperAdmin}
-                                              isExpanded={isExpanded}
-                                              onToggle={onToggle}
-                                              activeComplaintHandlingId={
-                                                activeComplaintHandlingId
-                                              }
-                                              setActiveComplaintHandlingId={
-                                                setActiveComplaintHandlingId
-                                              }
-                                              tlComplaintResolutionType={
-                                                tlComplaintResolutionType
-                                              }
-                                              setTlComplaintResolutionType={
-                                                setTlComplaintResolutionType
-                                              }
-                                              tlComplaintComment={
-                                                tlComplaintComment
-                                              }
-                                              setTlComplaintComment={
-                                                setTlComplaintComment
-                                              }
-                                              handleTLCommentComplaint={
-                                                handleTLCommentComplaint
-                                              }
-                                              handleToggleContactComplaint={
-                                                handleToggleContactComplaint
-                                              }
-                                              handleDeleteComplaint={
-                                                handleDeleteComplaint
-                                              }
-                                              handleAssignRecord={
-                                                handleAssignRecord
-                                              }
-                                              addSystemNotification={
-                                                addSystemNotification
-                                              }
-                                              canEditItem={canEditItem}
-                                              getRemainingEditTime={
-                                                getRemainingEditTime
-                                              }
-                                              setEditingItem={(
-                                                editingItem: any,
-                                              ) => {
-                                                setEditingItem({
-                                                  type: "tt_complaint",
-                                                  id: editingItem.data.id,
-                                                  data: editingItem.data,
-                                                });
-                                              }}
-                                              getElapsedTimerString={
-                                                getElapsedTimerString
-                                              }
-                                            />
-                                          );
-                                        }
+                                    if (item.type === "complaint") {
+                                      return (
+                                        <ComplaintCard
+                                          key={uniqueKey}
+                                          comp={item.data as any}
+                                          currentUser={currentUser}
+                                          isTLOreSupport={isTLOreSupport}
+                                          isSuperAdmin={isSuperAdmin}
+                                          isExpanded={isExpanded}
+                                          onToggle={onToggle}
+                                          activeComplaintHandlingId={activeComplaintHandlingId}
+                                          setActiveComplaintHandlingId={setActiveComplaintHandlingId}
+                                          tlComplaintResolutionType={tlComplaintResolutionType}
+                                          setTlComplaintResolutionType={setTlComplaintResolutionType}
+                                          tlComplaintComment={tlComplaintComment}
+                                          setTlComplaintComment={setTlComplaintComment}
+                                          handleTLCommentComplaint={handleTLCommentComplaint}
+                                          handleToggleContactComplaint={handleToggleContactComplaint}
+                                          handleDeleteComplaint={handleDeleteComplaint}
+                                          handleAssignRecord={handleAssignRecord}
+                                          addSystemNotification={addSystemNotification}
+                                          canEditItem={canEditItem}
+                                          getRemainingEditTime={getRemainingEditTime}
+                                          setEditingItem={(editingItem: any) => {
+                                            setEditingItem({
+                                              type: "tt_complaint",
+                                              id: editingItem.data.id,
+                                              data: editingItem.data,
+                                            });
+                                          }}
+                                          getElapsedTimerString={getElapsedTimerString}
+                                        />
+                                      );
+                                    }
 
-                                        if (item.type === "inquiry") {
-                                          return (
-                                            <InquiryCard
-                                              key={uniqueKey}
-                                              inq={item.data as any}
-                                              currentUser={currentUser}
-                                              isExpanded={isExpanded}
-                                              onToggle={onToggle}
-                                              isTLOreSupport={isTLOreSupport}
-                                              isSuperAdmin={isSuperAdmin}
-                                              handleTLViewInquiry={
-                                                handleTLViewInquiry
-                                              }
-                                              canEditItem={canEditItem}
-                                              getRemainingEditTime={
-                                                getRemainingEditTime
-                                              }
-                                              setEditingItem={(
-                                                editingItem: any,
-                                              ) => {
-                                                setEditingItem({
-                                                  type: "inquiry",
-                                                  id: editingItem.data.id,
-                                                  data: editingItem.data,
-                                                });
-                                              }}
-                                              addSystemNotification={
-                                                addSystemNotification
-                                              }
-                                              answeringInquiryId={
-                                                answeringInquiryId
-                                              }
-                                              setAnsweringInquiryId={
-                                                setAnsweringInquiryId
-                                              }
-                                              currentAnswerText={
-                                                currentAnswerText
-                                              }
-                                              setCurrentAnswerText={
-                                                setCurrentAnswerText
-                                              }
-                                              currentAnswerAttachments={
-                                                currentAnswerAttachments
-                                              }
-                                              setCurrentAnswerAttachments={
-                                                setCurrentAnswerAttachments
-                                              }
-                                              currentAnswerLinks={
-                                                currentAnswerLinks
-                                              }
-                                              setCurrentAnswerLinks={
-                                                setCurrentAnswerLinks
-                                              }
-                                              isSubmittingAnswer={
-                                                isSubmittingAnswer
-                                              }
-                                              handleSetInquiryAnswered={
-                                                handleSetInquiryAnswered
-                                              }
-                                              handleDeleteInquiry={
-                                                handleDeleteInquiry
-                                              }
-                                              handleUpdateContactedStatus={
-                                                handleUpdateContactedStatus
-                                              }
-                                              handleMarkInquiryRead={
-                                                handleMarkInquiryRead
-                                              }
-                                              handleMarkSentToClinic={
-                                                handleMarkSentToClinic
-                                              }
-                                              handleCloseInquiry={
-                                                handleCloseInquiry
-                                              }
-                                              handleReassignInquiry={
-                                                handleReassignInquiry
-                                              }
-                                              agentsList={agentsList}
-                                              inquiries={inquiries}
-                                              setInquiries={setInquiries}
-                                            />
-                                          );
-                                        }
+                                    if (item.type === "inquiry") {
+                                      return (
+                                        <InquiryCard
+                                          key={uniqueKey}
+                                          inq={item.data as any}
+                                          currentUser={currentUser}
+                                          isExpanded={isExpanded}
+                                          onToggle={onToggle}
+                                          isTLOreSupport={isTLOreSupport}
+                                          isSuperAdmin={isSuperAdmin}
+                                          handleTLViewInquiry={handleTLViewInquiry}
+                                          canEditItem={canEditItem}
+                                          getRemainingEditTime={getRemainingEditTime}
+                                          setEditingItem={(editingItem: any) => {
+                                            setEditingItem({
+                                              type: "inquiry",
+                                              id: editingItem.data.id,
+                                              data: editingItem.data,
+                                            });
+                                          }}
+                                          addSystemNotification={addSystemNotification}
+                                          answeringInquiryId={answeringInquiryId}
+                                          setAnsweringInquiryId={setAnsweringInquiryId}
+                                          currentAnswerText={currentAnswerText}
+                                          setCurrentAnswerText={setCurrentAnswerText}
+                                          currentAnswerAttachments={currentAnswerAttachments}
+                                          setCurrentAnswerAttachments={setCurrentAnswerAttachments}
+                                          currentAnswerLinks={currentAnswerLinks}
+                                          setCurrentAnswerLinks={setCurrentAnswerLinks}
+                                          isSubmittingAnswer={isSubmittingAnswer}
+                                          handleSetInquiryAnswered={handleSetInquiryAnswered}
+                                          handleDeleteInquiry={handleDeleteInquiry}
+                                          handleUpdateContactedStatus={handleUpdateContactedStatus}
+                                          handleMarkInquiryRead={handleMarkInquiryRead}
+                                          handleMarkSentToClinic={handleMarkSentToClinic}
+                                          handleCloseInquiry={handleCloseInquiry}
+                                          handleReassignInquiry={handleReassignInquiry}
+                                          agentsList={agentsList}
+                                          inquiries={inquiries}
+                                          setInquiries={setInquiries}
+                                        />
+                                      );
+                                    }
 
-                                        if (item.type === "clientComm") {
-                                          return (
-                                            <ClientCommCard
-                                              key={uniqueKey}
-                                              comm={item.data as any}
-                                              currentUser={currentUser}
-                                              isExpanded={isExpanded}
-                                              onToggle={onToggle}
-                                              isTLOreSupport={isTLOreSupport}
-                                              isSuperAdmin={isSuperAdmin}
-                                              activeCcHandlingId={
-                                                activeCcHandlingId
-                                              }
-                                              setActiveCcHandlingId={
-                                                setActiveCcHandlingId
-                                              }
-                                              ccHandlingNotes={ccHandlingNotes}
-                                              setCcHandlingNotes={
-                                                setCcHandlingNotes
-                                              }
-                                              ccHandlingPhotos={
-                                                ccHandlingPhotos
-                                              }
-                                              setCcHandlingPhotos={
-                                                setCcHandlingPhotos
-                                              }
-                                              handleProcessClientComms={
-                                                handleProcessClientComms
-                                              }
-                                              handleDeleteClientComms={
-                                                handleDeleteClientComms
-                                              }
-                                              canEditItem={canEditItem}
-                                              getRemainingEditTime={
-                                                getRemainingEditTime
-                                              }
-                                              setEditingItem={(
-                                                editingItem: any,
-                                              ) => {
-                                                setEditingItem({
-                                                  type: "client_comm",
-                                                  id: editingItem.data.id,
-                                                  data: editingItem.data,
-                                                });
-                                              }}
-                                              handleTakeClientComm={
-                                                handleTakeClientComm
-                                              }
-                                              handleMarkClientCommDone={
-                                                handleMarkClientCommDone
-                                              }
-                                              addSystemNotification={
-                                                addSystemNotification
-                                              }
-                                              getElapsedTimerString={
-                                                getElapsedTimerString
-                                              }
-                                            />
-                                          );
-                                        }
+                                    if (item.type === "clientComm") {
+                                      return (
+                                        <ClientCommCard
+                                          key={uniqueKey}
+                                          comm={item.data as any}
+                                          currentUser={currentUser}
+                                          isExpanded={isExpanded}
+                                          onToggle={onToggle}
+                                          isTLOreSupport={isTLOreSupport}
+                                          isSuperAdmin={isSuperAdmin}
+                                          activeCcHandlingId={activeCcHandlingId}
+                                          setActiveCcHandlingId={setActiveCcHandlingId}
+                                          ccHandlingNotes={ccHandlingNotes}
+                                          setCcHandlingNotes={setCcHandlingNotes}
+                                          ccHandlingPhotos={ccHandlingPhotos}
+                                          setCcHandlingPhotos={setCcHandlingPhotos}
+                                          handleProcessClientComms={handleProcessClientComms}
+                                          handleDeleteClientComms={handleDeleteClientComms}
+                                          canEditItem={canEditItem}
+                                          getRemainingEditTime={getRemainingEditTime}
+                                          setEditingItem={(editingItem: any) => {
+                                            setEditingItem({
+                                              type: "client_comm",
+                                              id: editingItem.data.id,
+                                              data: editingItem.data,
+                                            });
+                                          }}
+                                          handleTakeClientComm={handleTakeClientComm}
+                                          handleMarkClientCommDone={handleMarkClientCommDone}
+                                          addSystemNotification={addSystemNotification}
+                                          getElapsedTimerString={getElapsedTimerString}
+                                        />
+                                      );
+                                    }
 
-                                        return null;
-                                      })}
-                                    </div>
-                                  )}
-                                </div>
+                                    return null;
+                                  }}
+                                />
                               </div>
 
                               {/* Legacy Cases Collapsible Drawer (preserves old Firestore sub-collection database records if any exist) */}
@@ -24283,7 +23563,8 @@ ${ttNotes}`
 
                             {/* Summary Metric Cards */}
                             {localSubTab === "requests" ? (
-                              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                              <div className="space-y-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                                 {/* ... existing requests metrics ... */}
                                 <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
                                   <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">
@@ -24367,13 +23648,75 @@ ${ttNotes}`
                                             r.customerContacted === "contacted",
                                         ).length}
                                   </p>
-                                  <p className="text-[10px] text-emerald-300 mt-1">
-                                    Installment loop completed
-                                  </p>
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+                                  <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl h-56 shadow-xl">
+                                    <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
+                                      <Activity className="w-4 h-4 text-amber-400" />
+                                      T&T Request Load By Clinic
+                                    </h3>
+                                    {(() => {
+                                      const requestsToUse = isTLOreSupport ? tabbyTamaraRequests : tabbyTamaraRequests.filter(r => r.agentName?.toLowerCase() === currentUser?.name?.toLowerCase());
+                                      const clinicData = [
+                                        { name: "Dermadent", value: requestsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "dermadent").length, color: "#6366f1" },
+                                        { name: "AlMutarid", value: requestsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "onetouch_mo3tred").length, color: "#10b981" },
+                                        { name: "Markhaniya", value: requestsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "onetouch_merkhnya").length, color: "#06b6d4" },
+                                        { name: "Well Touch", value: requestsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "welltouch").length, color: "#f43f5e" },
+                                        { name: "New Age", value: requestsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "newage").length, color: "#f59e0b" },
+                                      ].filter(d => d.value > 0);
+                                      return (
+                                        <ResponsiveContainer width="100%" height="90%">
+                                          <BarChart data={clinicData}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                                            <XAxis dataKey="name" tick={{fill: '#94a3b8', fontSize: 10}} axisLine={false} tickLine={false} />
+                                            <Tooltip 
+                                              contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', borderRadius: '8px' }}
+                                              itemStyle={{ color: '#f1f5f9', fontSize: 12 }}
+                                              cursor={{fill: '#334155', opacity: 0.4}}
+                                            />
+                                            <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                                              {clinicData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={entry.color} />
+                                              ))}
+                                            </Bar>
+                                          </BarChart>
+                                        </ResponsiveContainer>
+                                      );
+                                    })()}
+                                  </div>
+                                  <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl h-56 shadow-xl">
+                                    <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
+                                      <PieChart className="w-4 h-4 text-emerald-400" />
+                                      T&T Approvals vs Rejected
+                                    </h3>
+                                    {(() => {
+                                      const requestsToUse = isTLOreSupport ? tabbyTamaraRequests : tabbyTamaraRequests.filter(r => r.agentName?.toLowerCase() === currentUser?.name?.toLowerCase());
+                                      const statusData = [
+                                        { name: "Confirmed", value: requestsToUse.filter((i) => i.status === "confirmed").length, color: "#10b981" },
+                                        { name: "Not Conf.", value: requestsToUse.filter((i) => i.status === "not_confirmed").length, color: "#f59e0b" },
+                                        { name: "Rejected", value: requestsToUse.filter((i) => i.status === "rejected").length, color: "#ef4444" },
+                                      ].filter(d => d.value > 0);
+                                      return (
+                                        <ResponsiveContainer width="100%" height="90%">
+                                          <RechartsPieChart>
+                                            <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={40} outerRadius={60} paddingAngle={5}>
+                                              {statusData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={entry.color} />
+                                              ))}
+                                            </Pie>
+                                            <Tooltip contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', borderRadius: '8px' }} itemStyle={{ color: '#f1f5f9', fontSize: 12 }} />
+                                            <Legend verticalAlign="bottom" height={20} iconType="circle" wrapperStyle={{ fontSize: '10px' }} />
+                                          </RechartsPieChart>
+                                        </ResponsiveContainer>
+                                      );
+                                    })()}
+                                  </div>
                                 </div>
                               </div>
                             ) : localSubTab === "complaints" ? (
-                              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 animate-fade-in">
+                              <div className="space-y-6 animate-fade-in">
+                                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                                 {/* ... existing complaints metrics ... */}
                                 <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
                                   <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">
@@ -24456,8 +23799,46 @@ ${ttNotes}`
                                   </p>
                                 </div>
                               </div>
+                              <div className="grid grid-cols-1 mt-6">
+                                <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl h-56 shadow-xl">
+                                  <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
+                                    <Activity className="w-4 h-4 text-rose-400" />
+                                    Complaints Load By Clinic
+                                  </h3>
+                                  {(() => {
+                                    const reqsToUse = isTLOreSupport ? tabbyTamaraComplaints : tabbyTamaraComplaints.filter(c => c.agentName?.toLowerCase() === currentUser?.name?.toLowerCase());
+                                    const clinicData = [
+                                      { name: "Dermadent", value: reqsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "dermadent").length, color: "#6366f1" },
+                                      { name: "AlMutarid", value: reqsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "onetouch_mo3tred").length, color: "#10b981" },
+                                      { name: "Markhaniya", value: reqsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "onetouch_merkhnya").length, color: "#06b6d4" },
+                                      { name: "Well Touch", value: reqsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "welltouch").length, color: "#f43f5e" },
+                                      { name: "New Age", value: reqsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "newage").length, color: "#f59e0b" },
+                                    ].filter(d => d.value > 0);
+                                    return (
+                                      <ResponsiveContainer width="100%" height="90%">
+                                        <BarChart data={clinicData}>
+                                          <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                                          <XAxis dataKey="name" tick={{fill: '#94a3b8', fontSize: 10}} axisLine={false} tickLine={false} />
+                                          <Tooltip 
+                                            contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', borderRadius: '8px' }}
+                                            itemStyle={{ color: '#f1f5f9', fontSize: 12 }}
+                                            cursor={{fill: '#334155', opacity: 0.4}}
+                                          />
+                                          <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                                            {clinicData.map((entry, index) => (
+                                              <Cell key={`cell-${index}`} fill={entry.color} />
+                                            ))}
+                                          </Bar>
+                                        </BarChart>
+                                      </ResponsiveContainer>
+                                    );
+                                  })()}
+                                </div>
+                              </div>
+                            </div>
                             ) : (
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
+                              <div className="space-y-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
                                 <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
                                   <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">
                                     Total Requests
@@ -24501,6 +23882,41 @@ ${ttNotes}`
                                   </p>
                                 </div>
                               </div>
+                              <div className="grid grid-cols-1 mt-6">
+                                <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl h-56 shadow-xl">
+                                  <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
+                                    <Activity className="w-4 h-4 text-indigo-400" />
+                                    Comms By Status
+                                  </h3>
+                                  {(() => {
+                                    const reqsToUse = isTLOreSupport ? clientComms : clientComms.filter(c => c.callCenterAgentName?.toLowerCase() === currentUser?.name?.toLowerCase() || c.handledBy?.toLowerCase() === currentUser?.name?.toLowerCase());
+                                    const prioData = [
+                                      { name: "Pending", value: reqsToUse.filter((i) => i.status === "pending").length, color: "#ef4444" },
+                                      { name: "In Progress", value: reqsToUse.filter((i) => i.status === "in_progress").length, color: "#f97316" },
+                                      { name: "Contacted", value: reqsToUse.filter((i) => i.status === "contacted").length, color: "#10b981" },
+                                    ].filter(d => d.value > 0);
+                                    return (
+                                      <ResponsiveContainer width="100%" height="90%">
+                                        <BarChart data={prioData}>
+                                          <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                                          <XAxis dataKey="name" tick={{fill: '#94a3b8', fontSize: 10}} axisLine={false} tickLine={false} />
+                                          <Tooltip 
+                                            contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', borderRadius: '8px' }}
+                                            itemStyle={{ color: '#f1f5f9', fontSize: 12 }}
+                                            cursor={{fill: '#334155', opacity: 0.4}}
+                                          />
+                                          <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                                            {prioData.map((entry, index) => (
+                                              <Cell key={`cell-${index}`} fill={entry.color} />
+                                            ))}
+                                          </Bar>
+                                        </BarChart>
+                                      </ResponsiveContainer>
+                                    );
+                                  })()}
+                                </div>
+                              </div>
+                            </div>
                             )}
 
                             {/* Core Layout Split */}
@@ -25383,86 +24799,52 @@ ${ttNotes}`
                                         </div>
 
                                         {/* Cards list */}
-                                        <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
-                                          {filteredCc.length === 0 ? (
-                                            <div className="text-center py-12 bg-white/[0.01] border border-white/5 rounded-2xl italic text-slate-500 text-xs">
-                                              No client communication records
-                                              found.
-                                            </div>
-                                          ) : (
-                                            filteredCc.map((comm) => {
-                                              const isExpanded =
-                                                selectedClientCommId ===
-                                                comm.id;
-                                              const onToggle = () =>
-                                                setSelectedClientCommId(
-                                                  isExpanded ? null : comm.id,
-                                                );
-                                              return (
-                                                <ClientCommCard
-                                                  key={comm.id}
-                                                  comm={comm}
-                                                  currentUser={currentUser}
-                                                  isExpanded={isExpanded}
-                                                  onToggle={onToggle}
-                                                  isTLOreSupport={
-                                                    isTLOreSupport
-                                                  }
-                                                  isSuperAdmin={isSuperAdmin}
-                                                  activeCcHandlingId={
-                                                    activeCcHandlingId
-                                                  }
-                                                  setActiveCcHandlingId={
-                                                    setActiveCcHandlingId
-                                                  }
-                                                  ccHandlingNotes={
-                                                    ccHandlingNotes
-                                                  }
-                                                  setCcHandlingNotes={
-                                                    setCcHandlingNotes
-                                                  }
-                                                  ccHandlingPhotos={
-                                                    ccHandlingPhotos
-                                                  }
-                                                  setCcHandlingPhotos={
-                                                    setCcHandlingPhotos
-                                                  }
-                                                  handleProcessClientComms={
-                                                    handleProcessClientComms
-                                                  }
-                                                  handleDeleteClientComms={
-                                                    handleDeleteClientComms
-                                                  }
-                                                  canEditItem={canEditItem}
-                                                  getRemainingEditTime={
-                                                    getRemainingEditTime
-                                                  }
-                                                  setEditingItem={(
-                                                    editingItem: any,
-                                                  ) => {
-                                                    setEditingItem({
-                                                      type: "client_comm",
-                                                      id: editingItem.data.id,
-                                                      data: editingItem.data,
-                                                    });
-                                                  }}
-                                                  handleTakeClientComm={
-                                                    handleTakeClientComm
-                                                  }
-                                                  handleMarkClientCommDone={
-                                                    handleMarkClientCommDone
-                                                  }
-                                                  addSystemNotification={
-                                                    addSystemNotification
-                                                  }
-                                                  getElapsedTimerString={
-                                                    getElapsedTimerString
-                                                  }
-                                                />
-                                              );
-                                            })
-                                          )}
-                                        </div>
+                                        <PaginatedCaseList
+                                          items={filteredCc}
+                                          icon={<MessageSquare className="w-5 h-5 text-indigo-400" />}
+                                          title="Client Communications"
+                                          emptyMessage="No client communication records found."
+                                          itemToPhone={(comm) => comm.phoneNumber || ""}
+                                          itemToClinic={(comm) => comm.clinicName}
+                                          availableClinics={CLINIC_OPTIONS.map((c) => c.value)}
+                                          renderItem={(comm) => {
+                                            const isExpanded = selectedClientCommId === comm.id;
+                                            const onToggle = () =>
+                                              setSelectedClientCommId(isExpanded ? null : comm.id);
+                                            return (
+                                              <ClientCommCard
+                                                key={comm.id}
+                                                comm={comm}
+                                                currentUser={currentUser}
+                                                isExpanded={isExpanded}
+                                                onToggle={onToggle}
+                                                isTLOreSupport={isTLOreSupport}
+                                                isSuperAdmin={isSuperAdmin}
+                                                activeCcHandlingId={activeCcHandlingId}
+                                                setActiveCcHandlingId={setActiveCcHandlingId}
+                                                ccHandlingNotes={ccHandlingNotes}
+                                                setCcHandlingNotes={setCcHandlingNotes}
+                                                ccHandlingPhotos={ccHandlingPhotos}
+                                                setCcHandlingPhotos={setCcHandlingPhotos}
+                                                handleProcessClientComms={handleProcessClientComms}
+                                                handleDeleteClientComms={handleDeleteClientComms}
+                                                canEditItem={canEditItem}
+                                                getRemainingEditTime={getRemainingEditTime}
+                                                setEditingItem={(editingItem: any) => {
+                                                  setEditingItem({
+                                                    type: "client_comm",
+                                                    id: editingItem.data.id,
+                                                    data: editingItem.data,
+                                                  });
+                                                }}
+                                                handleTakeClientComm={handleTakeClientComm}
+                                                handleMarkClientCommDone={handleMarkClientCommDone}
+                                                addSystemNotification={addSystemNotification}
+                                                getElapsedTimerString={getElapsedTimerString}
+                                              />
+                                            );
+                                          }}
+                                        />
                                       </div>
                                     );
                                   })()}
@@ -25586,88 +24968,54 @@ ${ttNotes}`
                                         </div>
 
                                         {/* Cards list */}
-                                        <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
-                                          {filteredTT.length === 0 ? (
-                                            <div className="text-center py-12 bg-white/[0.01] border border-white/5 rounded-2xl italic text-slate-500 text-xs">
-                                              No installment requests found.
-                                            </div>
-                                          ) : (
-                                            filteredTT.map((req) => {
-                                              const isExpanded =
-                                                selectedTTId === req.id;
-                                              const onToggle = () =>
-                                                setSelectedTTId(
-                                                  isExpanded ? null : req.id,
-                                                );
-                                              return (
-                                                <TabbyTamaraCard
-                                                  key={req.id}
-                                                  req={req}
-                                                  currentUser={currentUser}
-                                                  isTLOreSupport={
-                                                    isTLOreSupport
-                                                  }
-                                                  isSuperAdmin={isSuperAdmin}
-                                                  activeFintechHandlingId={
-                                                    activeFintechHandlingId
-                                                  }
-                                                  setActiveFintechHandlingId={
-                                                    setActiveFintechHandlingId
-                                                  }
-                                                  tlFintechPaymentLink={
-                                                    tlFintechPaymentLink
-                                                  }
-                                                  setTlFintechPaymentLink={
-                                                    setTlFintechPaymentLink
-                                                  }
-                                                  tlFintechNotes={
-                                                    tlFintechNotes
-                                                  }
-                                                  setTlFintechNotes={
-                                                    setTlFintechNotes
-                                                  }
-                                                  tlFintechLinks={
-                                                    tlFintechLinks
-                                                  }
-                                                  setTlFintechLinks={
-                                                    setTlFintechLinks
-                                                  }
-                                                  handleConfirmTabbyTamara={
-                                                    handleConfirmTabbyTamara
-                                                  }
-                                                  handleMarkPatientContactedTT={
-                                                    handleContactTabbyTamara
-                                                  }
-                                                  getElapsedTimerString={
-                                                    getElapsedTimerString
-                                                  }
-                                                  handleDeleteTabbyTamara={
-                                                    handleDeleteTabbyTamara
-                                                  }
-                                                  canEditItem={canEditItem}
-                                                  getRemainingEditTime={
-                                                    getRemainingEditTime
-                                                  }
-                                                  editLimitMs={10 * 60 * 1000}
-                                                  setEditingItem={(
-                                                    editingItem: any,
-                                                  ) => {
-                                                    setEditingItem({
-                                                      type: "tt_request",
-                                                      id: editingItem.data.id,
-                                                      data: editingItem.data,
-                                                    });
-                                                  }}
-                                                  addSystemNotification={
-                                                    addSystemNotification
-                                                  }
-                                                  isExpanded={isExpanded}
-                                                  onToggle={onToggle}
-                                                />
-                                              );
-                                            })
-                                          )}
-                                        </div>
+                                        <PaginatedCaseList
+                                          items={filteredTT}
+                                          icon={<CreditCard className="w-5 h-5 text-indigo-400" />}
+                                          title="Installment Requests"
+                                          emptyMessage="No installment requests found."
+                                          itemToPhone={(req) => req.phoneNumber}
+                                          itemToClinic={(req) => req.clinicName}
+                                          availableClinics={CLINIC_OPTIONS.map((c) => c.value)}
+                                          renderItem={(req) => {
+                                            const isExpanded = selectedTTId === req.id;
+                                            const onToggle = () =>
+                                              setSelectedTTId(isExpanded ? null : req.id);
+                                            return (
+                                              <TabbyTamaraCard
+                                                key={req.id}
+                                                req={req}
+                                                currentUser={currentUser}
+                                                isTLOreSupport={isTLOreSupport}
+                                                isSuperAdmin={isSuperAdmin}
+                                                activeFintechHandlingId={activeFintechHandlingId}
+                                                setActiveFintechHandlingId={setActiveFintechHandlingId}
+                                                tlFintechPaymentLink={tlFintechPaymentLink}
+                                                setTlFintechPaymentLink={setTlFintechPaymentLink}
+                                                tlFintechNotes={tlFintechNotes}
+                                                setTlFintechNotes={setTlFintechNotes}
+                                                tlFintechLinks={tlFintechLinks}
+                                                setTlFintechLinks={setTlFintechLinks}
+                                                handleConfirmTabbyTamara={handleConfirmTabbyTamara}
+                                                handleMarkPatientContactedTT={handleContactTabbyTamara}
+                                                getElapsedTimerString={getElapsedTimerString}
+                                                handleDeleteTabbyTamara={handleDeleteTabbyTamara}
+                                                canEditItem={canEditItem}
+                                                getRemainingEditTime={getRemainingEditTime}
+                                                editLimitMs={10 * 60 * 1000}
+                                                setEditingItem={(editingItem: any) => {
+                                                  setEditingItem({
+                                                    type: "tt_request",
+                                                    id: editingItem.data.id,
+                                                    data: editingItem.data,
+                                                  });
+                                                }}
+                                                addSystemNotification={addSystemNotification}
+                                                isExpanded={isExpanded}
+                                                onToggle={onToggle}
+                                              />
+                                            );
+                                          }}
+                                        />
                                       </div>
                                     );
                                   })()}
@@ -25790,84 +25138,52 @@ ${ttNotes}`
                                         </div>
 
                                         {/* Cards list */}
-                                        <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
-                                          {filteredComplaints.length === 0 ? (
-                                            <div className="text-center py-12 bg-white/[0.01] border border-white/5 rounded-2xl italic text-slate-500 text-xs">
-                                              No patient complaints found.
-                                            </div>
-                                          ) : (
-                                            filteredComplaints.map((comp) => {
-                                              const isExpanded =
-                                                selectedComplaintId === comp.id;
-                                              const onToggle = () =>
-                                                setSelectedComplaintId(
-                                                  isExpanded ? null : comp.id,
-                                                );
-                                              return (
-                                                <ComplaintCard
-                                                  key={comp.id}
-                                                  comp={comp}
-                                                  currentUser={currentUser}
-                                                  isTLOreSupport={
-                                                    isTLOreSupport
-                                                  }
-                                                  isSuperAdmin={isSuperAdmin}
-                                                  isExpanded={isExpanded}
-                                                  onToggle={onToggle}
-                                                  activeComplaintHandlingId={
-                                                    activeComplaintHandlingId
-                                                  }
-                                                  setActiveComplaintHandlingId={
-                                                    setActiveComplaintHandlingId
-                                                  }
-                                                  tlComplaintResolutionType={
-                                                    tlComplaintResolutionType
-                                                  }
-                                                  setTlComplaintResolutionType={
-                                                    setTlComplaintResolutionType
-                                                  }
-                                                  tlComplaintComment={
-                                                    tlComplaintComment
-                                                  }
-                                                  setTlComplaintComment={
-                                                    setTlComplaintComment
-                                                  }
-                                                  handleTLCommentComplaint={
-                                                    handleTLCommentComplaint
-                                                  }
-                                                  handleToggleContactComplaint={
-                                                    handleToggleContactComplaint
-                                                  }
-                                                  handleDeleteComplaint={
-                                                    handleDeleteComplaint
-                                                  }
-                                                  handleAssignRecord={
-                                                    handleAssignRecord
-                                                  }
-                                                  addSystemNotification={
-                                                    addSystemNotification
-                                                  }
-                                                  canEditItem={canEditItem}
-                                                  getRemainingEditTime={
-                                                    getRemainingEditTime
-                                                  }
-                                                  setEditingItem={(
-                                                    editingItem: any,
-                                                  ) => {
-                                                    setEditingItem({
-                                                      type: "tt_complaint",
-                                                      id: editingItem.data.id,
-                                                      data: editingItem.data,
-                                                    });
-                                                  }}
-                                                  getElapsedTimerString={
-                                                    getElapsedTimerString
-                                                  }
-                                                />
-                                              );
-                                            })
-                                          )}
-                                        </div>
+                                        <PaginatedCaseList
+                                          items={filteredComplaints}
+                                          icon={<AlertTriangle className="w-5 h-5 text-indigo-400" />}
+                                          title="Patient Complaints"
+                                          emptyMessage="No patient complaints found."
+                                          itemToPhone={(comp) => comp.phoneNumber}
+                                          itemToClinic={(comp) => comp.clinicName}
+                                          availableClinics={CLINIC_OPTIONS.map((c) => c.value)}
+                                          renderItem={(comp) => {
+                                            const isExpanded = selectedComplaintId === comp.id;
+                                            const onToggle = () =>
+                                              setSelectedComplaintId(isExpanded ? null : comp.id);
+                                            return (
+                                              <ComplaintCard
+                                                key={comp.id}
+                                                comp={comp}
+                                                currentUser={currentUser}
+                                                isTLOreSupport={isTLOreSupport}
+                                                isSuperAdmin={isSuperAdmin}
+                                                isExpanded={isExpanded}
+                                                onToggle={onToggle}
+                                                activeComplaintHandlingId={activeComplaintHandlingId}
+                                                setActiveComplaintHandlingId={setActiveComplaintHandlingId}
+                                                tlComplaintResolutionType={tlComplaintResolutionType}
+                                                setTlComplaintResolutionType={setTlComplaintResolutionType}
+                                                tlComplaintComment={tlComplaintComment}
+                                                setTlComplaintComment={setTlComplaintComment}
+                                                handleTLCommentComplaint={handleTLCommentComplaint}
+                                                handleToggleContactComplaint={handleToggleContactComplaint}
+                                                handleDeleteComplaint={handleDeleteComplaint}
+                                                handleAssignRecord={handleAssignRecord}
+                                                addSystemNotification={addSystemNotification}
+                                                canEditItem={canEditItem}
+                                                getRemainingEditTime={getRemainingEditTime}
+                                                setEditingItem={(editingItem: any) => {
+                                                  setEditingItem({
+                                                    type: "tt_complaint",
+                                                    id: editingItem.data.id,
+                                                    data: editingItem.data,
+                                                  });
+                                                }}
+                                                getElapsedTimerString={getElapsedTimerString}
+                                              />
+                                            );
+                                          }}
+                                        />
                                       </div>
                                     );
                                   })()}
@@ -27744,6 +27060,67 @@ ${ttNotes}`
                   className={`px-4 py-2 text-white rounded-xl text-xs font-black transition-colors cursor-pointer ${confirmDialog.confirmButtonClass}`}
                 >
                   {confirmDialog.confirmText}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isSynqVersionModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, y: 20, opacity: 0 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              className="bg-[#121217] border border-cyan-500/30 rounded-[2rem] p-8 max-w-sm w-full shadow-[0_0_50px_rgba(6,182,212,0.15)] space-y-6 mx-4 relative overflow-hidden text-center"
+            >
+              <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500"></div>
+
+              <div className="absolute -top-12 -right-12 w-28 h-28 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
+              <div className="absolute -bottom-12 -left-12 w-28 h-28 bg-fuchsia-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-16 h-16 bg-gradient-to-br from-cyan-400/20 to-indigo-500/20 rounded-2xl flex items-center justify-center border border-cyan-500/30 relative">
+                  <div className="absolute inset-0 bg-cyan-400/5 blur animate-pulse rounded-2xl" />
+                  <CoolLogo className="w-12 h-12 text-cyan-400" showText={false} />
+                </div>
+                <h2 className="text-xl font-black bg-gradient-to-r from-cyan-400 to-indigo-300 bg-clip-text text-transparent font-display tracking-tight mt-2">
+                  Synq Build v2.4.1
+                </h2>
+                <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[9px] font-mono tracking-widest text-slate-400 uppercase">
+                  Production Node Enabled
+                </div>
+              </div>
+
+              <div className="py-5 px-6 bg-black/50 border border-cyan-500/20 rounded-3xl relative overflow-hidden shadow-inner flex flex-col items-center">
+                {/* Sonar ambient waves radiating in the background underneath the text */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
+                  <div className="absolute w-24 h-24 rounded-full border border-cyan-500/30" style={{ animation: 'sonar-ring 4s cubic-bezier(0.1, 0.8, 0.3, 1) infinite' }} />
+                  <div className="absolute w-24 h-24 rounded-full border border-cyan-500/15" style={{ animation: 'sonar-ring 4s cubic-bezier(0.1, 0.8, 0.3, 1) infinite', animationDelay: '2s' }} />
+                </div>
+                <p className="text-sm font-black text-slate-100 relative z-10 tracking-wide select-none" style={{ animation: 'sonar-text-pulse 3.5s ease-in-out infinite' }}>
+                  "App made by Hesham Sobhy"
+                </p>
+                <p className="text-[9px] text-cyan-400 font-mono tracking-[0.2em] mt-2 uppercase relative z-10 font-bold">
+                  Lead Software Architect
+                </p>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsSynqVersionModalOpen(false)}
+                  className="w-full py-3 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white rounded-xl font-bold text-xs tracking-[0.2em] uppercase shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all cursor-pointer"
+                >
+                  Acknowledge & Close
                 </button>
               </div>
             </motion.div>

@@ -512,10 +512,10 @@ export const TabbyTamaraCard = ({
   const pricing = calculateTabbyTamaraPrice(req.priceWithoutTax || 0);
 
   return (
-    <div 
-      id={`request-${req.id}`} 
-      className={`bg-[#18181c] border border-slate-700/60 rounded-2xl shadow-xl shadow-black/40 hover:shadow-black/60 hover:border-slate-600/80 transition-all duration-300 flex flex-col relative overflow-hidden max-w-full group/card ${
-        !isExpanded ? "hover:bg-white/[0.04] cursor-pointer" : "ring-1 ring-indigo-500/15"
+    <div
+      id={`request-${req.id}`}
+      className={`p-5 bg-[#1f222a] border-none rounded-[24px] hover:bg-[#282c35] transition-all duration-300 relative flex flex-col w-full overflow-hidden shadow-sm ${
+        isExpanded ? "shadow-md ring-1 ring-white/5 space-y-4" : "cursor-pointer hover:shadow-md"
       }`}
       onClick={() => {
         if (!isExpanded && onToggle) {
@@ -523,21 +523,16 @@ export const TabbyTamaraCard = ({
         }
       }}
     >
-      {/* Platform color strip */}
-      <div className={`h-1.5 w-full rounded-t-2xl ${
-        req.platform === 'tabby' ? 'bg-gradient-to-r from-amber-400 to-amber-600' :
-        req.platform === 'tamara' ? 'bg-gradient-to-r from-rose-400 to-rose-600' :
-        req.platform === 'one_time_payment' ? 'bg-gradient-to-r from-blue-400 to-blue-600' :
-        'bg-gradient-to-r from-slate-500 to-slate-700'
+      <div className={`absolute top-0 bottom-0 left-0 w-[5px] ${
+        req.platform === "tabby" ? "bg-amber-500" :
+        req.platform === "tamara" ? "bg-rose-500" :
+        req.platform === "one_time_payment" ? "bg-blue-500" :
+        "bg-slate-700"
       }`} />
-      {/* SLA Accent Row */}
-      {isPendingContact && (
-        <div className={`h-0.5 w-full ${isOverdue ? 'bg-red-500' : isWarning ? 'bg-amber-500' : 'bg-emerald-500'}`} />
-      )}
-
-      {/* HEADER STRIP */}
+      
+      {/* Unexpanded / Header State */}
       <div 
-        className={`flex items-center justify-between px-5 pt-4 pb-2.5 ${isExpanded ? 'cursor-pointer hover:opacity-85' : ''}`}
+        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full ${isExpanded ? "border-b border-white/5 pb-3 cursor-pointer hover:opacity-80" : ""}`}
         onClick={(e) => {
           if (isExpanded && onToggle) {
             e.stopPropagation();
@@ -545,101 +540,100 @@ export const TabbyTamaraCard = ({
           }
         }}
       >
-         <div className="flex items-center gap-3">
-           <ProviderGlowBadge platform={req.platform} />
-         </div>
-         <div className="flex items-center gap-2">
-           {isPendingContact && (
-              <span className={`hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-widest bg-orange-500/10 text-orange-400 border border-orange-500/20 ${isOverdue ? 'bg-red-500/10 text-red-400 border-red-500/20' : ''}`}>
-                <AlertCircle className="w-3.5 h-3.5 animate-pulse" /> {getElapsedTimerString(req.confirmedAt || req.createdAt)}
-              </span>
-           )}
-           <div className="font-mono text-[10px] text-slate-500 uppercase tracking-wider hidden sm:block mr-2">
-             Ref: {formatCaseRef(req.id, 'tt_request', req.createdAt, req.caseRef)}
-           </div>
-           <StatusBadge status={req.status} customerContacted={req.customerContacted} workflowStatus={workflowStatus} />
-           <div className="text-slate-400 hover:text-indigo-400 p-1 rounded-md transition-all shrink-0 ml-1 flex items-center justify-center">
-             {isExpanded ? <ChevronUp className="w-4 h-4 text-indigo-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-           </div>
-         </div>
-      </div>
-
-      {/* BODY */}
-      <div className='px-5 pb-4 border-b border-slate-700/40'>
-        <h3 
-          className='text-2xl font-black text-white tracking-tight cursor-pointer hover:text-amber-100 active:scale-95 transition-all w-fit flex items-center gap-2 group/name'  
-          onClick={() => copyToClipboard(req.patientName || "Unknown", "Patient name copied!")}
-          title="Tap to copy patient name"
-        >
-          {req.patientName || "Unknown"}
-          <Copy className="w-4 h-4 text-amber-100/60 group-hover/name:text-amber-100 transition-colors" />
-        </h3>
-        <div className='flex items-center flex-wrap gap-2 mt-1.5'>
-          <span className='text-[10px] text-slate-400 font-mono bg-white/[0.04] px-2 py-0.5 rounded-md'>File: {req.fileNumber || req.idNumber || 'N/A'}</span>
-          <span className='w-1 h-1 rounded-full bg-slate-700' />
-          
-          {/* Source Channel Badge */}
-          <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${
-            sourceChannel === 'call_center' 
-              ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' 
-              : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-          }`}>
-            {sourceChannel === 'call_center' ? ' Call Center' : ' Social Media'}
-          </span>
-          <span className='w-1 h-1 rounded-full bg-slate-700' />
-
-          {/* Assignee */}
-          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md border ${
-            req.assignedToName ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-amber-500/10 text-amber-500/80 border-amber-500/20'
-          }`}>
-             {req.assignedToName ? `Assigned to: ${req.assignedToName}` : 'Unassigned'}
-          </span>
-          <span className='w-1 h-1 rounded-full bg-slate-700' />
-
-          {req.isOldCustomer && (
-            <>
-               <span className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase bg-slate-800 text-slate-300 border border-slate-700/50">Returning Pt</span>
-               <span className='w-1 h-1 rounded-full bg-slate-700' />
-            </>
-          )}
-          <span className='text-[10px] text-slate-400 font-semibold flex items-center gap-1 bg-white/[0.04] px-2 py-0.5 rounded-md'><User className="w-3 h-3 text-slate-500"/> Submitter: {req.submittedByName || req.agentName}</span>
-        </div>
-      </div>
-
-      <div className='grid grid-cols-3 divide-x divide-slate-700/40 border-b border-slate-700/40'>
-        <div
-          className="px-4 py-3 cursor-pointer hover:bg-slate-700/30 active:bg-slate-700/50 transition-colors group/phone"
-          onClick={() => copyToClipboard(formatPhoneLocalForCopy(req.phoneNumber), `Copied: ${formatPhoneLocalForCopy(req.phoneNumber)}`)}
-          title="Tap to copy phone number (without country code)"
-        >
-          <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><Phone className="w-3 h-3 text-blue-400" /> Phone</span>
-            <span className="text-[15px] font-semibold text-slate-100 mt-1.5 break-words flex items-center gap-1.5">
-              {req.phoneNumber || "N/A"}
-              <Copy className="w-3.5 h-3.5 text-slate-500 group-hover/phone:text-blue-400 transition-colors shrink-0" />
+        <div className="flex flex-col space-y-1">
+          {/* Row 1: Agent & Badges */}
+          <div className="flex items-center gap-2 flex-wrap text-left">
+            <span
+              onClick={(e) => {
+                e.stopPropagation();
+                copyToClipboard(req.submittedByName || req.agentName || "", "Agent name copied!");
+              }}
+              className="text-xs font-bold text-slate-100 uppercase tracking-wide cursor-pointer hover:text-indigo-300 transition-colors shrink-0"
+            >
+              {req.submittedByName || req.agentName}
             </span>
+            <span className="text-[10px] text-slate-400 lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded font-sans shrink-0">
+              {getAgentLOB(req.submittedByName || req.agentName || "")}
+            </span>
+            <span className="font-mono text-[10px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded shrink-0">
+              {formatCaseRef(req.id, "tt_request", req.createdAt, req.caseRef)}
+            </span>
+            <span className="text-[9px] text-slate-500 font-mono shrink-0">
+               {new Date(req.createdAt).toLocaleString()}
+            </span>
+            <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border shrink-0 ${
+              sourceChannel === 'call_center' 
+                ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' 
+                : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+            }`}>
+              {sourceChannel === 'call_center' ? 'Call Center' : 'Social Media'}
+            </span>
+             {req.isOldCustomer && (
+                 <span className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase bg-slate-800 text-slate-300 border border-slate-700/50 shrink-0">Returning Pt</span>
+             )}
+          </div>
+
+          {/* Row 2: Patient Name, Clinic, Phone */}
+          <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-300 flex-wrap">
+            {req.patientName && <span className="font-bold">{req.patientName}</span>}
+            {req.clinicName && <span>• {getClinicLabel(req.clinicName)}</span>}
+            {req.phoneNumber && <span>• {req.phoneNumber}</span>}
+            
+            <span className={`text-[10px] px-2 py-0.5 border rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-2 ${
+                req.platform === 'tabby' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                req.platform === 'tamara' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
+                req.platform === 'one_time_payment' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                'bg-slate-500/10 text-slate-400 border-slate-500/20'
+            }`}>
+               💳 {req.platform?.toUpperCase() || 'N/A'}
+            </span>
+
+            <span className="text-[10px] bg-white/5 text-slate-300 px-2 py-0.5 border border-white/10 rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-1">
+               📁 File: {req.fileNumber || req.idNumber || "N/A"}
+            </span>
+
+            <span className="text-[10px] bg-white/5 text-slate-300 px-2 py-0.5 border border-white/10 rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-1">
+               💰 {pricing.finalPriceFormatted} {req.paymentLength ? `(${req.paymentLength}mo)` : ''}
+            </span>
+
           </div>
         </div>
-        <div className="px-4 py-3 flex flex-col">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><Hospital className="w-3 h-3 text-emerald-500" /> Clinic</span>
-          <span className="text-[15px] font-semibold text-slate-100 mt-1.5 break-words">{getClinicLabel(req.clinicName)}</span>
-        </div>
-        <div className="px-4 py-3 flex flex-col">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><Calendar className="w-3 h-3 text-slate-400" /> Date</span>
-          <span className="text-[15px] font-semibold text-slate-100 mt-1.5 break-words">{new Date(req.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-        </div>
-      </div>
-      
-      <div className='px-5 py-4 flex flex-wrap items-center justify-between border-b border-slate-700/40 bg-slate-800/30'>
-        <div className='flex items-baseline gap-1.5'>
-          <span className='text-sm text-slate-400 font-bold'>Entered</span>
-          <span className='text-3xl font-black text-slate-300 font-mono tracking-tight'>{pricing.priceBeforeFeeFormatted}</span>
-          {req.paymentLength && <span className="ml-[10px] text-[10px] text-slate-400 font-bold uppercase tracking-widest bg-slate-700/60 border border-slate-600 px-2 py-0.5 rounded-full">{req.paymentLength} Mo. Plan</span>}
-        </div>
-        <div className='text-right'>
-           <p className='text-[10px] text-indigo-400 uppercase tracking-wider font-bold'>Final Amount</p>
-           <p className='text-2xl font-black text-white font-mono tracking-tight'>{pricing.finalPriceFormatted}</p>
-           <p className='text-[10px] text-slate-400 uppercase tracking-wider mt-0.5'>Inc. 5% Fee ({pricing.feeAmountFormatted})</p>
+
+        {/* Right side: Status, Badges, Toggle */}
+        <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+            {isPendingContact && (
+              <span className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-widest bg-orange-500/10 text-orange-400 border border-orange-500/20 ${isOverdue ? 'bg-red-500/10 text-red-400 border-red-500/20' : ''}`}>
+                <AlertCircle className="w-3.5 h-3.5 animate-pulse" /> {getElapsedTimerString(req.confirmedAt || req.createdAt)}
+              </span>
+            )}
+            <StatusBadge status={req.status} customerContacted={req.customerContacted} workflowStatus={workflowStatus} />
+          
+            <button
+              onClick={async (e) => {
+                e.stopPropagation();
+                const payload = buildCaseClipboardPayload(req);
+                const success = await copyToClipboard(payload.text, "Full request copied to clipboard!", payload.html);
+                if (!success) {
+                  toast.error("Failed to copy request details.");
+                }
+              }}
+              className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer hidden sm:flex"
+              title="Copy details with links and attachments"
+            >
+              <Copy className="w-3 h-3" /> Copy
+            </button>
+
+           <button
+            onClick={(e) => {
+              if (isExpanded && onToggle) {
+                e.stopPropagation();
+                onToggle();
+              }
+            }}
+            className="p-1 rounded-md hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+          >
+            {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+          </button>
         </div>
       </div>
 
@@ -1092,7 +1086,17 @@ export const TabbyTamaraCard = ({
           </div>
         )}
 
-        <button onClick={handleCopyTextOnly} className="px-3 py-1.5 text-slate-400 hover:text-white bg-slate-700/60 hover:bg-slate-600/80 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-widest border border-slate-600/40">
+        <button 
+          onClick={async (e) => {
+            e.stopPropagation();
+            const payload = buildCaseClipboardPayload(req);
+            const success = await copyToClipboard(payload.text, "Full request copied to clipboard!", payload.html);
+            if (!success) {
+              toast.error("Failed to copy request details.");
+            }
+          }} 
+          className="px-3 py-1.5 text-slate-400 hover:text-white bg-slate-700/60 hover:bg-slate-600/80 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-widest border border-slate-600/40"
+        >
           <Copy className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Copy Text</span>
         </button>
 

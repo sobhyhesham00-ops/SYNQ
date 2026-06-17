@@ -463,7 +463,7 @@ export const AgentRequestsLogs = ({
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterDate, setFilterDate] = useState('');
-  const [filterClinic, setFilterClinic] = useState('all');
+  const [filterClinics, setFilterClinics] = useState<string[]>([]);
   const [filterPhone, setFilterPhone] = useState('');
   const [sortBy, setSortBy] = useState<'date_desc'|'date_asc'|'status'>('date_desc');
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -508,7 +508,7 @@ export const AgentRequestsLogs = ({
     return allRequests.filter(r => ['approved','answered','confirmed','closed','contacted'].includes(r.status)).length;
   }, [allRequests]);
 
-  const isNoFiltersActive = !filterDate && filterClinic === 'all' && !filterPhone && search === '' && filterType === 'all';
+  const isNoFiltersActive = !filterDate && filterClinics.length === 0 && !filterPhone && search === '' && filterType === 'all';
   const todayIso = new Date().toISOString().split('T')[0];
 
   const filtered = allRequests.filter(r => {
@@ -530,7 +530,7 @@ export const AgentRequestsLogs = ({
     }
 
     const matchesDate = !filterDate || (r.createdAt && r.createdAt.startsWith(filterDate));
-    const matchesClinic = filterClinic === 'all' || (r.clinicName && r.clinicName.toLowerCase() === filterClinic.toLowerCase());
+    const matchesClinic = filterClinics.length === 0 || (r.clinicName && filterClinics.includes(r.clinicName));
     const matchesPhone = !filterPhone || (r.phoneNumber || '').replace(/\D/g, '').includes(filterPhone.replace(/\D/g, ''));
     return matchesDate && matchesClinic && matchesPhone;
   });
@@ -615,16 +615,40 @@ export const AgentRequestsLogs = ({
             onChange={(e) => setFilterDate(e.target.value)} 
             className="w-full bg-slate-900/60 border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 [color-scheme:dark]" 
           />
-          <select 
-            value={filterClinic} 
-            onChange={(e) => setFilterClinic(e.target.value)} 
-            className="w-full bg-slate-900/60 border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500"
-          >
-            <option value="all">All Clinics</option>
-            {CLINIC_OPTIONS.map(c => (
-<option key={c.value} value={c.value}>{c.label}</option>
-))}
-          </select>
+          <div className="relative">
+            <select 
+              value="" 
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val && !filterClinics.includes(val)) {
+                  setFilterClinics([...filterClinics, val]);
+                }
+              }} 
+              className="w-full bg-slate-900/60 border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500"
+            >
+              <option value="">➕ Add Clinic to Filter...</option>
+              {CLINIC_OPTIONS.filter(c => !filterClinics.includes(c.value)).map(c => (
+                <option key={c.value} value={c.value}>{c.label}</option>
+              ))}
+            </select>
+            {filterClinics.length > 0 && (
+              <div className="absolute top-full left-0 z-50 mt-1 flex flex-wrap gap-1 bg-slate-800 p-2 rounded-lg border border-slate-700 shadow-xl w-64">
+                <span className="w-full text-xs text-slate-400 font-bold mb-1 flex justify-between">
+                  Selected Clinics:
+                  <button onClick={() => setFilterClinics([])} className="text-rose-400 hover:text-rose-300">Clear</button>
+                </span>
+                {filterClinics.map(c => {
+                  const label = CLINIC_OPTIONS.find(opt => opt.value === c)?.label || c;
+                  return (
+                    <span key={c} className="bg-indigo-500/20 text-indigo-300 border-none px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
+                      {label}
+                      <button onClick={() => setFilterClinics(prev => prev.filter(x => x !== c))} className="hover:text-white cursor-pointer">&times;</button>
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+          </div>
           <input 
             type="text" 
             placeholder="Search by phone..." 
@@ -652,7 +676,7 @@ export const AgentRequestsLogs = ({
               <button 
                 onClick={() => {
                   setFilterDate('');
-                  setFilterClinic('all');
+                  setFilterClinics([]);
                   setFilterPhone('');
                   setSearch('');
                   setFilterType('all');

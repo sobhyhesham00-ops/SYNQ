@@ -210,7 +210,9 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
   return (
     <div
       id={`inquiry-${inq.id}`}
-      className={`p-4 bg-[#121216] border-y border-r border-slate-700/60 border-l-4 ${borderLeftColor} rounded-xl hover:bg-white/[0.04] transition-all duration-300 relative flex flex-col w-full ${isExpanded ? "shadow-xl ring-1 ring-white/5 space-y-4" : "cursor-pointer shadow-md"}`}
+      className={`p-5 bg-[#1f222a] border-none rounded-[24px] hover:bg-[#282c35] transition-all duration-300 relative flex flex-col w-full overflow-hidden shadow-sm ${
+        isExpanded ? "shadow-md ring-1 ring-emerald-500/10 space-y-4" : "cursor-pointer hover:shadow-md"
+      }`}
       onClick={() => {
         if (!isExpanded) {
           onToggle();
@@ -220,6 +222,8 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
         }
       }}
     >
+      <div className={`absolute top-0 bottom-0 left-0 w-[5px] ${borderLeftColor.replace('border-l-', 'bg-')}`} />
+      
       {/* Unexpanded / Header State */}
       <div 
         className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full ${isExpanded ? "border-b border-white/5 pb-3 cursor-pointer hover:opacity-80" : ""}`}

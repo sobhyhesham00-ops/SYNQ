@@ -116,7 +116,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
   handleTLCommentComplaint
 }) => {
   // Filters state
-  const [filterClinic, setFilterClinic] = useState<string>("all");
+  const [filterClinics, setFilterClinics] = useState<string[]>([]);
   const [filterDate, setFilterDate] = useState<string>("");
   const [filterPhone, setFilterPhone] = useState<string>("");
   const [sortOldestFirst, setSortOldestFirst] = useState<boolean>(false);
@@ -186,7 +186,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
   // Apply filters
   const filteredList = allSubmissions.filter((item) => {
     // 1. Clinic filter
-    if (filterClinic !== "all" && item.clinicName?.toLowerCase() !== filterClinic.toLowerCase()) {
+    if (filterClinics.length > 0 && item.clinicName && !filterClinics.includes(item.clinicName)) {
       return false;
     }
 
@@ -228,67 +228,73 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
       };
 
   return (
-    <div className="space-y-6 animate-fade-in p-1">
+    <div className="space-y-6 animate-fade-in p-1 font-sans">
       {/* Summary Header Cards */}
-      <div className="bg-[#121216]/65 border border-slate-800 p-6 rounded-3xl backdrop-blur-md space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-[#181a20] p-6 rounded-[32px] border-none shadow-sm space-y-4 relative overflow-hidden">
+        {/* Subtle decorative blob */}
+        <div className="absolute top-0 right-0 p-32 bg-emerald-500/5 blur-[80px] rounded-full pointer-events-none" />
+        
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-slate-100 flex items-center gap-2">
-              <ClipboardList className="w-7 h-7 text-emerald-400" /> All Agent Submissions
+            <h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-3">
+              <div className="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-full">
+                <ClipboardList className="w-6 h-6" />
+              </div>
+              All Agent Submissions
             </h2>
-            <p className="text-xs text-slate-400 mt-1 max-w-2xl">
+            <p className="text-xs text-slate-400 mt-2 max-w-2xl font-medium">
               Centralized Team Leader dashboard monitoring pending inquiries, alternative payment requests, and support complaints submitted by all workspace agents.
             </p>
           </div>
           
-          <div className="flex items-center gap-2 self-start md:self-center bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-2 rounded-2xl">
+          <div className="flex items-center gap-2 self-start md:self-center bg-emerald-500/10 px-4 py-2.5 rounded-full">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[11px] font-black text-emerald-300 uppercase tracking-wider">
+            <span className="text-xs font-bold text-emerald-300 uppercase tracking-widest">
               {filteredList.length} Active SLA Items
             </span>
           </div>
         </div>
 
         {/* Counter grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-          <div className="bg-amber-500/10 border border-amber-500/15 p-4 rounded-2xl flex items-center gap-3">
-            <div className="p-2.5 bg-amber-500/15 text-amber-400 rounded-xl">
-              <HelpCircle className="w-5 h-5" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 relative z-10">
+          <div className="bg-[#1f222a] p-5 rounded-[24px] flex items-center gap-4 transition-transform hover:scale-[1.02]">
+            <div className="p-3.5 bg-amber-500/10 text-amber-400 rounded-full">
+              <HelpCircle className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-[10px] text-amber-400 uppercase tracking-widest font-black">
+              <p className="text-[11px] text-amber-400 uppercase tracking-widest font-bold">
                 Pending Inquiries
               </p>
-              <p className="text-xl font-bold text-slate-100 mt-0.5">
-                {totalPendingInquiries} cases
+              <p className="text-3xl font-black text-white mt-1">
+                {totalPendingInquiries} <span className="text-base font-semibold text-slate-500">cases</span>
               </p>
             </div>
           </div>
 
-          <div className="bg-[#2bc9d7]/10 border border-[#2bc9d7]/15 p-4 rounded-2xl flex items-center gap-3">
-            <div className="p-2.5 bg-[#2bc9d7]/15 text-[#2bc9d7] rounded-xl">
-              <Wallet className="w-5 h-5" />
+          <div className="bg-[#1f222a] p-5 rounded-[24px] flex items-center gap-4 transition-transform hover:scale-[1.02]">
+            <div className="p-3.5 bg-[#2bc9d7]/10 text-[#2bc9d7] rounded-full">
+              <Wallet className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-[10px] text-[#2bc9d7] uppercase tracking-widest font-black">
+              <p className="text-[11px] text-[#2bc9d7] uppercase tracking-widest font-bold">
                 Tabby & Tamara
               </p>
-              <p className="text-xl font-bold text-slate-100 mt-0.5">
-                {totalPendingTT} requests
+              <p className="text-3xl font-black text-white mt-1">
+                {totalPendingTT} <span className="text-base font-semibold text-slate-500">requests</span>
               </p>
             </div>
           </div>
 
-          <div className="bg-rose-500/10 border border-rose-500/15 p-4 rounded-2xl flex items-center gap-3">
-            <div className="p-2.5 bg-rose-500/15 text-rose-400 rounded-xl">
-              <AlertTriangle className="w-5 h-5" />
+          <div className="bg-[#1f222a] p-5 rounded-[24px] flex items-center gap-4 transition-transform hover:scale-[1.02]">
+            <div className="p-3.5 bg-rose-500/10 text-rose-400 rounded-full">
+              <AlertTriangle className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-[10px] text-rose-400 uppercase tracking-widest font-black">
+              <p className="text-[11px] text-rose-400 uppercase tracking-widest font-bold">
                 Active Complaints
               </p>
-              <p className="text-xl font-bold text-slate-100 mt-0.5">
-                {totalPendingComplaints} open
+              <p className="text-3xl font-black text-white mt-1">
+                {totalPendingComplaints} <span className="text-base font-semibold text-slate-500">open</span>
               </p>
             </div>
           </div>
@@ -296,34 +302,62 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
       </div>
 
       {/* Filter Bar Controls */}
-      <div className="bg-[#18181c]/50 border border-slate-700/50 p-5 rounded-2xl gap-4 grid grid-cols-1 md:grid-cols-12 items-end">
+      <div className="bg-[#181a20] p-6 rounded-[32px] gap-4 grid grid-cols-1 md:grid-cols-12 items-end">
         {/* Clinic Dropdown */}
-        <div className="md:col-span-3 space-y-1.5 text-left">
-          <label className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold flex items-center gap-1.5">
-            <Building className="w-3.5 h-3.5 text-emerald-400" /> Filter by Clinic
-          </label>
+        <div className="md:col-span-3 space-y-2 text-left">
+          <div className="flex justify-between items-center mb-1">
+            <label className="text-xs font-bold text-slate-400 flex items-center gap-1.5 ml-1">
+              <Building className="w-4 h-4 text-slate-500" /> Clinics (Multi)
+            </label>
+            {filterClinics.length > 0 && (
+              <button
+                onClick={() => setFilterClinics([])}
+                className="text-[10px] text-rose-400 hover:text-rose-300 font-bold uppercase cursor-pointer"
+              >
+                Clear
+              </button>
+            )}
+          </div>
           <select
-            value={filterClinic}
-            onChange={(e) => setFilterClinic(e.target.value)}
-            className="w-full bg-[#18181c] border border-slate-700/60 rounded-xl px-3 py-2 text-xs text-slate-100 focus:ring-1 focus:ring-emerald-500/30 focus:border-emerald-500 outline-none h-10 cursor-pointer font-sans"
+            value=""
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val && !filterClinics.includes(val)) {
+                setFilterClinics([...filterClinics, val]);
+              }
+            }}
+            className="w-full bg-[#1f222a] border-none rounded-2xl px-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-emerald-500/50 outline-none h-12 cursor-pointer font-medium appearance-none"
           >
-            <option value="all">🏢 All Clinics</option>
-            {CLINIC_OPTIONS.map(c => (
-<option key={c.value} value={c.value}>{c.label}</option>
-))}
+            <option value="">➕ Add Clinic to Filter...</option>
+            {CLINIC_OPTIONS.filter(c => !filterClinics.includes(c.value)).map(c => (
+              <option key={c.value} value={c.value}>{c.label}</option>
+            ))}
           </select>
+          {filterClinics.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {filterClinics.map(c => {
+                const label = CLINIC_OPTIONS.find(opt => opt.value === c)?.label || c;
+                return (
+                  <span key={c} className="bg-emerald-500/10 text-emerald-300 border-none px-2.5 py-1 rounded-md text-[10px] font-bold flex items-center gap-1.5">
+                    {label}
+                    <button onClick={() => setFilterClinics(prev => prev.filter(x => x !== c))} className="hover:text-white cursor-pointer">&times;</button>
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Date Picker */}
-        <div className="md:col-span-3 space-y-1.5 text-left">
-          <div className="flex justify-between items-center">
-            <label className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-blue-400" /> Filter by Date (optional)
+        <div className="md:col-span-3 space-y-2 text-left relative">
+          <div className="flex justify-between items-center ml-1">
+            <label className="text-xs text-slate-400 font-bold flex items-center gap-1.5">
+              <Calendar className="w-4 h-4 text-slate-500" /> Date
             </label>
             {filterDate && (
               <button
                 onClick={() => setFilterDate("")}
-                className="text-[9px] text-rose-400 hover:text-rose-300 font-bold tracking-wider uppercase underline bg-transparent border-none p-0 cursor-pointer"
+                className="text-[10px] text-rose-400 hover:text-rose-300 font-bold uppercase"
               >
                 Clear
               </button>
@@ -333,24 +367,24 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
             type="date"
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
-            className="w-full bg-[#18181c] border border-slate-700/60 rounded-xl px-3 py-2 text-xs text-slate-100 focus:ring-1 focus:ring-emerald-500/30 focus:border-emerald-500 outline-none h-10 cursor-pointer font-sans"
+            className="w-full bg-[#1f222a] border-none rounded-2xl px-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-emerald-500/50 outline-none h-12 cursor-pointer font-medium"
           />
         </div>
 
         {/* Phone number Search */}
-        <div className="md:col-span-3 space-y-1.5 text-left">
-          <label className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold flex items-center gap-1.5">
-            <Phone className="w-3.5 h-3.5 text-sky-400" /> Phone Number Search
+        <div className="md:col-span-3 space-y-2 text-left">
+          <label className="text-xs text-slate-400 font-bold flex items-center gap-1.5 ml-1">
+            <Phone className="w-4 h-4 text-slate-500" /> Phone Number
           </label>
           <div className="relative">
             <input
               type="text"
-              placeholder="e.g. +9715..."
+              placeholder="Search e.g. +9715..."
               value={filterPhone}
               onChange={(e) => setFilterPhone(e.target.value)}
-              className="w-full bg-[#18181c] border border-slate-700/60 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-100 focus:ring-1 focus:ring-emerald-500/30 focus:border-emerald-500 outline-none h-10 font-mono"
+              className="w-full bg-[#1f222a] border-none rounded-2xl pl-11 pr-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-emerald-500/50 outline-none h-12 font-mono"
             />
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-4 top-4" />
           </div>
         </div>
 
@@ -359,14 +393,14 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
           <button
             type="button"
             onClick={() => setSortOldestFirst(!sortOldestFirst)}
-            className={`w-full h-10 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`w-full h-12 rounded-2xl text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
               sortOldestFirst
-                ? "bg-amber-500/10 border-amber-500/30 text-amber-300 shadow-md shadow-amber-500/5 animate-pulse"
-                : "bg-slate-800 border-slate-700/60 text-slate-300 hover:bg-slate-700/60"
+                ? "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
+                : "bg-[#1f222a] text-slate-300 hover:bg-[#282c35]"
             }`}
           >
-            <ArrowUpDown className="w-3.5 h-3.5 shrink-0" />
-            {sortOldestFirst ? "⚠️ SLA Sort: Oldest First" : "🗓️ Sort: Latest First"}
+            <ArrowUpDown className="w-4 h-4 shrink-0" />
+            {sortOldestFirst ? "⚠️ Oldest First" : "🗓️ Latest First"}
           </button>
         </div>
       </div>
@@ -374,11 +408,11 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
       {/* Case List Grid Stack */}
       <div className="space-y-3">
         {filteredList.length === 0 ? (
-          <div className="p-16 text-center rounded-3xl border border-dashed border-white/10 bg-[#121216]/25 backdrop-blur-sm space-y-2 animate-fade-in">
-            <div className="w-12 h-12 rounded-full bg-slate-800/50 flex items-center justify-center mx-auto text-slate-400 mb-2">
+          <div className="p-16 text-center rounded-[32px] bg-[#181a20] border-none shadow-sm space-y-2 animate-fade-in">
+            <div className="w-12 h-12 rounded-full bg-[#1f222a] flex items-center justify-center mx-auto text-slate-400 mb-2">
               <Filter className="w-6 h-6 text-slate-500" />
             </div>
-            <p className="text-sm font-bold text-slate-200">
+            <p className="text-sm font-bold text-white">
               No pending cases found.
             </p>
             <p className="text-xs text-slate-400 max-w-md mx-auto">
@@ -439,8 +473,8 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
             return (
               <div
                 key={item.id}
-                className={`group p-5 bg-[#18181c] border border-slate-700/60 rounded-2xl hover:border-emerald-500/25 transition-all duration-300 relative flex flex-col w-full overflow-hidden ${
-                  !isExpanded ? "hover:bg-white/[0.04] cursor-pointer shadow-md" : "shadow-xl ring-1 ring-emerald-500/10"
+                className={`group p-5 bg-[#1f222a] border-none rounded-[24px] hover:bg-[#282c35] transition-all duration-300 relative flex flex-col w-full overflow-hidden shadow-sm ${
+                   isExpanded ? "shadow-md ring-1 ring-emerald-500/10" : "cursor-pointer hover:shadow-md"
                 }`}
                 onClick={() => {
                   if (!isExpanded) {
