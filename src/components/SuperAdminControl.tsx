@@ -21,7 +21,8 @@ import {
 import { doc } from 'firebase/firestore';
 import { db, wrappedSetDoc as setDoc, wrappedDeleteDoc as deleteDoc } from '../firebase';
 import { toast } from 'sonner';
-import { getUsernameFromFullName } from '../utils';
+import { getUsernameFromFullName, getAgentTL } from '../utils';
+import { INITIAL_AGENTS, TEAM_LEADERS, AGENT_LOBS } from '../types';
 
 interface UserProfile {
   id: string;
@@ -55,6 +56,17 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
+
+  const syntheticUsers: UserProfile[] = [...INITIAL_AGENTS, ...TEAM_LEADERS]
+    .filter((name, i, arr) => arr.indexOf(name) === i) // dedupe
+    .filter(name => !registeredUsers.some(u => u.name?.toLowerCase() === name.toLowerCase()))
+    .map(name => ({
+      id: getUsernameFromFullName(name),
+      name,
+      role: TEAM_LEADERS.includes(name) ? 'tl' : 'agent',
+      lob: TEAM_LEADERS.includes(name) ? '' : (AGENT_LOBS[name] === 'Call Center' ? 'Call Center' : 'Chat'),
+    }));
+  const allUsers = [...registeredUsers, ...syntheticUsers];
 
   const isGlobalAdminUser = currentUser?.name?.toLowerCase() === "h.sobhy" ||
                             currentUser?.name?.toLowerCase() === "hesham sobhy" ||
@@ -93,7 +105,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
       return;
     }
 
-    const docId = newUserName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+    const docId = getUsernameFromFullName(newUserName.trim()) + '_' + Date.now();
     const newUser: UserProfile = {
       id: `usr_${Date.now()}`,
       name: String(newUserName || '').trim(),
@@ -135,7 +147,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   };
 
   const handleSaveEdit = async (user: UserProfile) => {
-    const docId = user.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+    const docId = user.id;
     const updatedUser = {
       ...user,
       role: editRole,
@@ -166,17 +178,14 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
       return;
     }
 
-    const usernameKey = getUsernameFromFullName(userName).toLowerCase();
-    const fullNameKey = String(userName || '').trim();
-    const lowerFullNameKey = fullNameKey.toLowerCase();
-    const oldNormalizeKey = String(userName || '').trim().toLowerCase().replace(/\s+/g, '');
+    const usernameKey = getUsernameFromFullName(userName);
+    const usernameKeyLower = usernameKey.toLowerCase();
+    const cleanPassword = String(newPasswordValue || '').trim();
 
     const updatedCreds = { 
       ...credentials, 
-      [usernameKey]: String(newPasswordValue || '').trim(),
-      [fullNameKey]: String(newPasswordValue || '').trim(),
-      [lowerFullNameKey]: String(newPasswordValue || '').trim(),
-      [oldNormalizeKey]: String(newPasswordValue || '').trim()
+      [usernameKey]: cleanPassword,
+      [usernameKeyLower]: cleanPassword
     };
 
     try {
@@ -195,12 +204,10 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   };
 
   const handleLock = async (userName: string) => {
-    const usernameKey = getUsernameFromFullName(userName).toLowerCase();
-    const fullNameKey = String(userName || '').trim();
-    const lowerFullNameKey = fullNameKey.toLowerCase();
-    const oldNormalizeKey = String(userName || '').trim().toLowerCase().replace(/\s+/g, '');
+    const usernameKey = getUsernameFromFullName(userName);
+    const usernameKeyLower = usernameKey.toLowerCase();
 
-    const keysToLock = [usernameKey, fullNameKey, lowerFullNameKey, oldNormalizeKey];
+    const keysToLock = [usernameKey, usernameKeyLower];
     let updated = [...lockedAccounts];
     keysToLock.forEach(k => {
       if (!updated.includes(k)) {
@@ -218,14 +225,12 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   };
 
   const handleUnlock = async (userName: string) => {
-    const usernameKey = getUsernameFromFullName(userName).toLowerCase();
-    const fullNameKey = String(userName || '').trim();
-    const lowerFullNameKey = fullNameKey.toLowerCase();
-    const oldNormalizeKey = String(userName || '').trim().toLowerCase().replace(/\s+/g, '');
+    const usernameKey = getUsernameFromFullName(userName);
+    const usernameKeyLower = usernameKey.toLowerCase();
 
-    const keysToRemove = [usernameKey, fullNameKey, lowerFullNameKey, oldNormalizeKey];
+    const keysToRemove = [usernameKey, usernameKeyLower];
 
-    const updated = lockedAccounts.filter(name => !keysToRemove.includes(name));
+    const updated = lockedAccounts.filter(name => !keysToRemove.includes(name) && !keysToRemove.includes(name.toLowerCase()));
     try {
       await setDoc(doc(db, "system", "sched_locked_accounts"), { data: updated });
       
@@ -233,6 +238,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
       const updatedAttempts = { ...failedAttempts };
       keysToRemove.forEach(k => {
         delete updatedAttempts[k];
+        delete updatedAttempts[k.toLowerCase()];
       });
       await setDoc(doc(db, "system", "sched_failed_attempts"), { data: updatedAttempts });
 
@@ -244,16 +250,15 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   };
 
   const handleClearAttempts = async (userName: string) => {
-    const usernameKey = getUsernameFromFullName(userName).toLowerCase();
-    const fullNameKey = String(userName || '').trim();
-    const lowerFullNameKey = fullNameKey.toLowerCase();
-    const oldNormalizeKey = String(userName || '').trim().toLowerCase().replace(/\s+/g, '');
+    const usernameKey = getUsernameFromFullName(userName);
+    const usernameKeyLower = usernameKey.toLowerCase();
 
-    const keysToRemove = [usernameKey, fullNameKey, lowerFullNameKey, oldNormalizeKey];
+    const keysToRemove = [usernameKey, usernameKeyLower];
 
     const updatedAttempts = { ...failedAttempts };
     keysToRemove.forEach(k => {
       delete updatedAttempts[k];
+      delete updatedAttempts[k.toLowerCase()];
     });
 
     try {
@@ -272,15 +277,13 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
     }
 
     try {
-      const docId = cleanName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+      const docId = user.id;
       await deleteDoc(doc(db, "users", docId));
 
-      const usernameKey = getUsernameFromFullName(cleanName).toLowerCase();
-      const fullNameKey = String(cleanName || '').trim();
-      const lowerFullNameKey = fullNameKey.toLowerCase();
-      const oldNormalizeKey = String(cleanName || '').trim().toLowerCase().replace(/\s+/g, '');
+      const usernameKey = getUsernameFromFullName(cleanName);
+      const usernameKeyLower = usernameKey.toLowerCase();
 
-      const keysToRemove = [usernameKey, fullNameKey, lowerFullNameKey, oldNormalizeKey];
+      const keysToRemove = [usernameKey, usernameKeyLower];
 
       // Remove from credentials
       const updatedCreds = { ...credentials };
@@ -317,18 +320,15 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
     }
   };
 
-  // Filter registered users based on search
-  const filteredUsers = registeredUsers.filter(u => {
-    if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      (u.name || '').toLowerCase().includes(q) ||
-      (u.email || '').toLowerCase().includes(q) ||
-      (u.role || '').toLowerCase().includes(q) ||
-      (u.lob || '').toLowerCase().includes(q) ||
-      (u.teamLeader || '').toLowerCase().includes(q) ||
-      getUsernameFromFullName(u.name).toLowerCase().includes(q)
-    );
+  // Filter users based on search
+  const filteredUsers = allUsers.filter(user => {
+    const matchesSearch = !searchQuery || 
+      (user.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      getUsernameFromFullName(user.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (user.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (user.role || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (user.lob || '').toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
   });
 
   return (
@@ -365,12 +365,12 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
             <div className="grid grid-cols-2 gap-4 text-center">
               <div className="p-4 bg-black/20 border border-white/5 rounded-2xl">
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Agents</p>
-                <p className="text-2xl font-black text-slate-200 mt-1">{registeredUsers.filter(u => u.role !== 'tl').length}</p>
+                <p className="text-2xl font-black text-slate-200 mt-1">{allUsers.filter(u => u.role !== 'tl').length}</p>
               </div>
 
               <div className="p-4 bg-black/20 border border-white/5 rounded-2xl">
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Leaders/TLs</p>
-                <p className="text-2xl font-black text-indigo-400 mt-1">{registeredUsers.filter(u => u.role === 'tl').length}</p>
+                <p className="text-2xl font-black text-indigo-400 mt-1">{allUsers.filter(u => u.role === 'tl').length}</p>
               </div>
 
               <div className="p-4 bg-black/20 border border-rose-500/20 rounded-2xl">
@@ -517,22 +517,12 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
             <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
               {filteredUsers.map((user) => {
-                const usernameKey = getUsernameFromFullName(user.name).toLowerCase();
-                const fullNameKey = String(user.name || '').trim();
-                const lowerFullNameKey = fullNameKey.toLowerCase();
-                const oldNormalizeKey = String(user.name || '').trim().toLowerCase().replace(/\s+/g, '');
-
-                const isUserLocked = lockedAccounts.includes(usernameKey) || 
-                                     lockedAccounts.includes(fullNameKey) || 
-                                     lockedAccounts.includes(lowerFullNameKey) || 
-                                     lockedAccounts.includes(oldNormalizeKey);
+                const uname = getUsernameFromFullName(user.name);
+                const hasPassword = !!(credentials[uname] || credentials[uname.toLowerCase()]);
+                const isUserLocked = lockedAccounts.includes(uname) || lockedAccounts.includes(uname.toLowerCase());
+                const failureCount = failedAttempts[uname] || failedAttempts[uname.toLowerCase()] || 0;
 
                 const isEditing = editingUserId === user.id;
-
-                const failureCount = failedAttempts[usernameKey] || 
-                                     failedAttempts[fullNameKey] || 
-                                     failedAttempts[lowerFullNameKey] || 
-                                     failedAttempts[oldNormalizeKey] || 0;
                 
                 return (
                   <div 
@@ -642,9 +632,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                             <div>
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className="font-bold text-slate-100 text-sm whitespace-nowrap">{user.name}</span>
-                                <span className="text-[10px] bg-cyan-950/40 text-cyan-400 px-2.5 py-0.5 rounded-lg border border-cyan-500/20 font-mono font-bold" title="App Username for Login">
-                                  {getUsernameFromFullName(user.name)}
-                                </span>
+                                <span className="font-mono text-xs text-cyan-300">{getUsernameFromFullName(user.name)}</span>
                                 <span className={`text-[9px] px-2 py-0.5 rounded-full border font-black uppercase tracking-wider ${
                                   user.role === 'tl' 
                                     ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-300' 
@@ -652,17 +640,35 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                                 }`}>
                                   {user.role}
                                 </span>
+                                {hasPassword ? (
+                                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-extrabold flex items-center gap-0.5">
+                                    <ShieldCheck className="w-2.5 h-2.5 text-emerald-400" /> PW SET
+                                  </span>
+                                ) : (
+                                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 font-extrabold flex items-center gap-0.5" title="No custom password set. Defining on first login is allowed.">
+                                    <AlertCircle className="w-2.5 h-2.5 text-amber-500" /> NO PW
+                                  </span>
+                                )}
                                 {isUserLocked && (
                                   <span className="text-[9px] px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 font-extrabold flex items-center gap-0.5">
                                     <Lock className="w-2.5 h-2.5" /> LOCKED
                                   </span>
                                 )}
                               </div>
-                              <p className="text-[10px] text-slate-400 mt-0.5 space-x-2">
+                              <div className="text-[10px] text-slate-500 font-sans mt-0.5 animate-none font-medium flex items-center gap-1.5">
+                                <span>Direct Manager:</span>
+                                <span className="text-xs text-slate-300">{user.teamLeader || '—'}</span>
+                              </div>
+                              <p className="text-[10px] text-slate-400 mt-0.5 space-x-2 flex flex-wrap items-center gap-y-1">
+                                <span className="text-rose-400 font-mono font-bold bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.5 rounded mr-1">
+                                  App Username: {getUsernameFromFullName(user.name)}
+                                </span>
+                                <span className="text-indigo-400 font-mono font-bold bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded mr-1">
+                                  Direct Manager: {user.role === 'tl' ? '—' : (user.teamLeader || '—')}
+                                </span>
                                 <span>{user.email || 'No Email'}</span>
                                 {user.phone && <span className="text-emerald-400 font-mono">• {user.phone}</span>}
                                 {user.lob && <span>• <span className="text-indigo-300 font-semibold">{user.lob}</span></span>}
-                                {user.teamLeader && <span>• TL: <span className="text-cyan-400">{user.teamLeader}</span></span>}
                               </p>
                             </div>
                           </div>

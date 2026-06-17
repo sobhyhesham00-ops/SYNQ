@@ -3,6 +3,7 @@ import { User, Check, RefreshCw } from "lucide-react";
 import { AGENT_LOBS } from "../../types";
 import { CRMCase } from "./CRMTypes";
 import { assignCase } from "../../services/assignmentService";
+import { getAgentLOB } from "../../utils";
 import { toast } from "sonner";
 
 import { SlideToConfirm } from '../SlideToConfirm';
@@ -87,9 +88,9 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
           <p className="text-sm font-bold text-slate-200 truncate">
             {currentAssigneeName || "Unassigned Queue"}
           </p>
-          {currentAssigneeName && (
+          {currentAssigneeName && getAgentLOB(currentAssigneeName) && (
             <p className="text-[9px] text-slate-500 font-mono mt-0.5">
-              LOB: {AGENT_LOBS[currentAssigneeName] || "General"}
+              LOB: {getAgentLOB(currentAssigneeName)}
             </p>
           )}
         </div>
@@ -137,7 +138,7 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
                   >
                     <span>{agent}</span>
                     <span className="text-[8px] opacity-60 font-semibold uppercase tracking-wider">
-                      {AGENT_LOBS[agent]}
+                      {getAgentLOB(agent)}
                     </span>
                   </button>
                 ))}

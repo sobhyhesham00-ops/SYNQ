@@ -206,6 +206,7 @@ import {
   AnnualRequest,
   TEAM_LEADERS,
   INITIAL_AGENTS,
+  AGENT_TL_MAP,
   SHIFTS,
   User,
   Role,
@@ -243,6 +244,13 @@ function readStoredJson<T>(key: string, defaultValue: T): T {
   } catch (e) {
     return defaultValue;
   }
+}
+
+function normalizeAgentLob(lob: string | undefined, role: string): string {
+  if (role === 'tl') return '';
+  if (!lob) return 'Chat';
+  if (lob.toLowerCase() === 'call center') return 'Call Center';
+  return 'Chat'; // Social Media, General, Quality, etc. all become Chat
 }
 
 const parseBoldText = (text: string) => {
@@ -3269,6 +3277,9 @@ ${pageText}
 
   // Inquiries Search and Filter states
   const [directorySearchQuery, setDirectorySearchQuery] = useState("");
+  const [dirSearch, setDirSearch] = useState('');
+  const [dirPage, setDirPage] = useState(0);
+  const DIR_PAGE_SIZE = 25;
 
   // KPI Calculator States
   const [kpiMaxBonus, setKpiMaxBonus] = useState<number>(3000);
@@ -3483,6 +3494,13 @@ ${pageText}
   const [myCasesStatusFilter, setMyCasesStatusFilter] = useState("all");
   const [myCasesSortOrder, setMyCasesSortOrder] = useState("desc");
   const [myExpandedId, setMyExpandedId] = useState<string | null>(null);
+  const [selectedClientCommId, setSelectedClientCommId] = useState<string | null>(null);
+  const [selectedTTId, setSelectedTTId] = useState<string | null>(null);
+  const [clientCommSearch, setClientCommSearch] = useState("");
+  const [clientCommStatusFilter, setClientCommStatusFilter] = useState("all");
+  const [tabbyTamaraSearch, setTabbyTamaraSearch] = useState("");
+  const [tabbyTamaraStatusFilter, setTabbyTamaraStatusFilter] = useState("all");
+  const [complaintStatusFilter, setComplaintStatusFilter] = useState("all");
   const [showLegacyCases, setShowLegacyCases] = useState(false);
   const [logAgentFilter, setLogAgentFilter] = useState("all");
   const [logTypeFilter, setLogTypeFilter] = useState("all");
@@ -4149,7 +4167,10 @@ ${pageText}
     }
 
     const formattedUsername = trimmedInput.toLowerCase();
-    const matchedFullName = findAgentByUsername(formattedUsername, agentsList);
+    let matchedFullName = findAgentByUsername(formattedUsername, agentsList);
+    if (!matchedFullName) {
+      matchedFullName = findAgentByUsername(formattedUsername, [...INITIAL_AGENTS, ...TEAM_LEADERS]);
+    }
 
     // Check for flexible Admin names to NEVER lock them out
     const isAdminUser =
@@ -7060,7 +7081,7 @@ ${ttNotes}`
         const socialMediaAgents = Object.entries(AGENT_LOBS)
           .filter(
             ([name, lob]) =>
-              lob === "Social Media" && name !== currentUser?.name,
+              lob === "Chat" && name !== currentUser?.name,
           )
           .map(([name]) => name);
 
@@ -7171,12 +7192,12 @@ ${ttNotes}`
           r.id,
         );
 
-        // If submitter is Call Center, notify all Social Media agents to contact patient
+        // If submitter is Call Center, notify all Chat agents to contact patient
         if (status === "confirmed" && paymentLink) {
-          const submitterLOB = AGENT_LOBS[r.agentName] || "Unknown";
+          const submitterLOB = getAgentLOB(r.agentName) || "Unknown";
           if (submitterLOB === "Call Center") {
             const socialMediaAgents = Object.entries(AGENT_LOBS)
-              .filter(([name, lob]) => lob === "Social Media")
+              .filter(([name, lob]) => lob === "Chat")
               .map(([name]) => name);
 
             socialMediaAgents.forEach((agentName) => {
@@ -7589,12 +7610,7 @@ ${ttNotes}`
       setActiveLinks([]);
 
       // Route notification to correct LOB team based on channel
-      const targetLob =
-        ccChannel === "social_media"
-          ? "Social Media"
-          : ccChannel === "chat"
-            ? "Chat"
-            : "Social Media";
+      const targetLob = "Chat";
       const targetedAgents = Object.entries(AGENT_LOBS)
         .filter(
           ([name, lob]) => lob === targetLob && name !== currentUser?.name,
@@ -10597,6 +10613,11 @@ ${ttNotes}`
                                 LOB: {getAgentLOB(currentUser.name)}
                               </p>
                             </div>
+                            {currentUser.role === "agent" && currentUser.teamLeader && (
+                              <div className="text-xs text-slate-500 font-sans mt-1 animate-none">
+                                TL: {currentUser.teamLeader}
+                              </div>
+                            )}
                             <p className="text-slate-400 font-medium mt-1">
                               {currentUser.role === "tl"
                                 ? "Team Leader & Operations Supervisor "
@@ -13662,17 +13683,17 @@ ${ttNotes}`
                                           const socialInq = opInquiries.filter(
                                             (i) => {
                                               const lob =
-                                                AGENT_LOBS[i.agentName] || "";
+                                                getAgentLOB(i.agentName) || "";
                                               return lob
                                                 .toLowerCase()
-                                                .includes("social");
+                                                .includes("chat");
                                             },
                                           ).length;
 
                                           const callInq = opInquiries.filter(
                                             (i) => {
                                               const lob =
-                                                AGENT_LOBS[i.agentName] || "";
+                                                getAgentLOB(i.agentName) || "";
                                               return (
                                                 lob
                                                   .toLowerCase()
@@ -13698,7 +13719,7 @@ ${ttNotes}`
                                               <div className="space-y-1">
                                                 <div className="flex justify-between text-xs">
                                                   <span className="font-bold text-slate-300">
-                                                    Social Media Load
+                                                    Chat Load
                                                   </span>
                                                   <span className="text-slate-100 font-black font-mono">
                                                     {socialInq} ({socialPercent}
@@ -14401,7 +14422,7 @@ ${ttNotes}`
                                     });
                                   const events = [
                                     `Patient assessment dispatch record active`,
-                                    `Inbound call routed to Social Media Queue`,
+                                    `Inbound call routed to Chat Queue`,
                                     `Fintech installment agreement callback processed`,
                                     `Case inquiry record established`,
                                   ];
@@ -22975,8 +22996,7 @@ ${ttNotes}`
                                     Client Communication
                                   </h2>
                                   <p className="text-slate-400 text-sm">
-                                    Submit and monitor requests for Chat and
-                                    Social Media agents.
+                                    Submit and monitor requests for Chat agents.
                                   </p>
                                 </>
                               ) : isComplaintsTab ? (
@@ -23969,29 +23989,371 @@ ${ttNotes}`
                             <div
                               className={`${["agent", "sme"].includes(currentUser?.role as string) ? "lg:col-span-8" : "lg:col-span-12"} h-full flex flex-col min-h-[600px]`}
                             >
-                              <CRMWorkspace
-                                activeTab={activeTab as any}
-                                currentUser={currentUser}
-                                isTLOreSupport={isTLOreSupport}
-                                inquiries={inquiries}
-                                tabbyTamaraRequests={tabbyTamaraRequests}
-                                tabbyTamaraComplaints={tabbyTamaraComplaints}
-                                clientComms={clientComms}
-                                addSystemNotification={addSystemNotification}
-                                onEditItem={(item) => {
-                                  setEditingItem({
-                                    type: item.type as any,
-                                    id: item.id,
-                                    data: item.data,
-                                  });
-                                }}
-                                setInquiries={setInquiries}
-                                setTabbyTamaraRequests={setTabbyTamaraRequests}
-                                setTabbyTamaraComplaints={
-                                  setTabbyTamaraComplaints
-                                }
-                                setClientComms={setClientComms}
-                              />
+                              {activeTab === "client-comms" && (() => {
+                                const baseCcList = isTLOreSupport
+                                  ? clientComms
+                                  : clientComms.filter(
+                                      (c) =>
+                                        c.callCenterAgentName?.toLowerCase() === currentUser?.name?.toLowerCase() ||
+                                        c.handledBy?.toLowerCase() === currentUser?.name?.toLowerCase()
+                                    );
+
+                                const filteredCc = baseCcList.filter(c => {
+                                  if (clientCommStatusFilter !== "all" && c.status !== clientCommStatusFilter) {
+                                    return false;
+                                  }
+                                  if (clientCommSearch) {
+                                    const q = clientCommSearch.toLowerCase();
+                                    return (
+                                      (c.patientName || "").toLowerCase().includes(q) ||
+                                      (c.phoneNumber || "").toLowerCase().includes(q) ||
+                                      (c.notes || "").toLowerCase().includes(q) ||
+                                      (c.callCenterAgentName || "").toLowerCase().includes(q) ||
+                                      (c.handledBy || "").toLowerCase().includes(q) ||
+                                      (c.clinicName || "").toLowerCase().includes(q) ||
+                                      (c.caseRef || "").toLowerCase().includes(q)
+                                    );
+                                  }
+                                  return true;
+                                }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+                                return (
+                                  <div className="space-y-4 h-full flex flex-col">
+                                    {/* Filter and Search Bar */}
+                                    <div className="flex flex-col sm:flex-row gap-3 bg-white/5 border border-white/10 p-4 rounded-2xl">
+                                      {/* Search */}
+                                      <div className="relative flex-1">
+                                        <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                                        <input
+                                          type="text"
+                                          placeholder="Search client communication requests..."
+                                          value={clientCommSearch}
+                                          onChange={(e) => {
+                                            setClientCommSearch(e.target.value);
+                                            setSelectedClientCommId(null);
+                                          }}
+                                          className="w-full bg-black/20 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-sans"
+                                        />
+                                      </div>
+                                      {/* Status Filters */}
+                                      <div className="flex items-center gap-1.5 flex-wrap">
+                                        <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider">Status:</span>
+                                        {[
+                                          { id: "all", label: "All" },
+                                          { id: "pending", label: "👥 Pending" },
+                                          { id: "taken", label: "⚡ Under Action" },
+                                          { id: "done", label: "✅ Done" }
+                                        ].map((pill) => (
+                                          <button
+                                            key={pill.id}
+                                            onClick={() => {
+                                              setClientCommStatusFilter(pill.id);
+                                              setSelectedClientCommId(null);
+                                            }}
+                                            className={`px-2.5 py-1.5 rounded-full text-[10px] font-bold transition-all border cursor-pointer ${
+                                              clientCommStatusFilter === pill.id
+                                                ? "bg-indigo-500 text-white border-indigo-400"
+                                                : "bg-black/20 hover:bg-white/5 text-slate-400 hover:text-slate-200 border-white/5"
+                                            }`}
+                                          >
+                                            {pill.label}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+
+                                    {/* Cards list */}
+                                    <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
+                                      {filteredCc.length === 0 ? (
+                                        <div className="text-center py-12 bg-white/[0.01] border border-white/5 rounded-2xl italic text-slate-500 text-xs">
+                                          No client communication records found.
+                                        </div>
+                                      ) : (
+                                        filteredCc.map((comm) => {
+                                          const isExpanded = selectedClientCommId === comm.id;
+                                          const onToggle = () => setSelectedClientCommId(isExpanded ? null : comm.id);
+                                          return (
+                                            <ClientCommCard
+                                              key={comm.id}
+                                              comm={comm}
+                                              currentUser={currentUser}
+                                              isExpanded={isExpanded}
+                                              onToggle={onToggle}
+                                              isTLOreSupport={isTLOreSupport}
+                                              isSuperAdmin={isSuperAdmin}
+                                              activeCcHandlingId={activeCcHandlingId}
+                                              setActiveCcHandlingId={setActiveCcHandlingId}
+                                              ccHandlingNotes={ccHandlingNotes}
+                                              setCcHandlingNotes={setCcHandlingNotes}
+                                              ccHandlingPhotos={ccHandlingPhotos}
+                                              setCcHandlingPhotos={setCcHandlingPhotos}
+                                              handleProcessClientComms={handleProcessClientComms}
+                                              handleDeleteClientComms={handleDeleteClientComms}
+                                              canEditItem={canEditItem}
+                                              getRemainingEditTime={getRemainingEditTime}
+                                              setEditingItem={(editingItem: any) => {
+                                                setEditingItem({
+                                                  type: "client_comm",
+                                                  id: editingItem.data.id,
+                                                  data: editingItem.data,
+                                                });
+                                              }}
+                                              handleTakeClientComm={handleTakeClientComm}
+                                              handleMarkClientCommDone={handleMarkClientCommDone}
+                                              addSystemNotification={addSystemNotification}
+                                              getElapsedTimerString={getElapsedTimerString}
+                                            />
+                                          );
+                                        })
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })()}
+
+                              {activeTab === "tabby-tamara" && (() => {
+                                const baseTTList = isTLOreSupport
+                                  ? tabbyTamaraRequests
+                                  : tabbyTamaraRequests.filter(
+                                      (r) => r.agentName?.toLowerCase() === currentUser?.name?.toLowerCase()
+                                    );
+
+                                const filteredTT = baseTTList.filter(r => {
+                                  if (tabbyTamaraStatusFilter !== "all" && r.status !== tabbyTamaraStatusFilter) {
+                                    return false;
+                                  }
+                                  if (tabbyTamaraSearch) {
+                                    const q = tabbyTamaraSearch.toLowerCase();
+                                    return (
+                                      (r.patientName || "").toLowerCase().includes(q) ||
+                                      (r.phoneNumber || "").toLowerCase().includes(q) ||
+                                      (r.idNumber || "").toLowerCase().includes(q) ||
+                                      (r.fileNumber || "").toLowerCase().includes(q) ||
+                                      (r.caseRef || "").toLowerCase().includes(q) ||
+                                      (r.priceWithoutTax || "").toString().toLowerCase().includes(q) ||
+                                      (r.platform || "").toLowerCase().includes(q) ||
+                                      (r.agentName || "").toLowerCase().includes(q)
+                                    );
+                                  }
+                                  return true;
+                                }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+                                return (
+                                  <div className="space-y-4 h-full flex flex-col">
+                                    {/* Filter and Search Bar */}
+                                    <div className="flex flex-col sm:flex-row gap-3 bg-white/5 border border-white/10 p-4 rounded-2xl">
+                                      {/* Search */}
+                                      <div className="relative flex-1">
+                                        <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                                        <input
+                                          type="text"
+                                          placeholder="Search tabby/tamara requests..."
+                                          value={tabbyTamaraSearch}
+                                          onChange={(e) => {
+                                            setTabbyTamaraSearch(e.target.value);
+                                            setSelectedTTId(null);
+                                          }}
+                                          className="w-full bg-black/20 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-sans"
+                                        />
+                                      </div>
+                                      {/* Status Filters */}
+                                      <div className="flex items-center gap-1.5 flex-wrap">
+                                        <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider">Status:</span>
+                                        {[
+                                          { id: "all", label: "All" },
+                                          { id: "not_confirmed", label: "⏳ Unconfirmed" },
+                                          { id: "confirmed", label: "✅ Confirmed" },
+                                          { id: "cancelled", label: "❌ Cancelled" }
+                                        ].map((pill) => (
+                                          <button
+                                            key={pill.id}
+                                            onClick={() => {
+                                              setTabbyTamaraStatusFilter(pill.id);
+                                              setSelectedTTId(null);
+                                            }}
+                                            className={`px-2.5 py-1.5 rounded-full text-[10px] font-bold transition-all border cursor-pointer ${
+                                              tabbyTamaraStatusFilter === pill.id
+                                                ? "bg-indigo-500 text-white border-indigo-400"
+                                                : "bg-black/20 hover:bg-white/5 text-slate-400 hover:text-slate-200 border-white/5"
+                                            }`}
+                                          >
+                                            {pill.label}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+
+                                    {/* Cards list */}
+                                    <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
+                                      {filteredTT.length === 0 ? (
+                                        <div className="text-center py-12 bg-white/[0.01] border border-white/5 rounded-2xl italic text-slate-500 text-xs">
+                                          No installment requests found.
+                                        </div>
+                                      ) : (
+                                        filteredTT.map((req) => {
+                                          const isExpanded = selectedTTId === req.id;
+                                          const onToggle = () => setSelectedTTId(isExpanded ? null : req.id);
+                                          return (
+                                            <TabbyTamaraCard
+                                              key={req.id}
+                                              req={req}
+                                              currentUser={currentUser}
+                                              isTLOreSupport={isTLOreSupport}
+                                              isSuperAdmin={isSuperAdmin}
+                                              activeFintechHandlingId={activeFintechHandlingId}
+                                              setActiveFintechHandlingId={setActiveFintechHandlingId}
+                                              tlFintechPaymentLink={tlFintechPaymentLink}
+                                              setTlFintechPaymentLink={setTlFintechPaymentLink}
+                                              tlFintechNotes={tlFintechNotes}
+                                              setTlFintechNotes={setTlFintechNotes}
+                                              tlFintechLinks={tlFintechLinks}
+                                              setTlFintechLinks={setTlFintechLinks}
+                                              handleConfirmTabbyTamara={handleConfirmTabbyTamara}
+                                              handleMarkPatientContactedTT={handleContactTabbyTamara}
+                                              getElapsedTimerString={getElapsedTimerString}
+                                              handleDeleteTabbyTamara={handleDeleteTabbyTamara}
+                                              canEditItem={canEditItem}
+                                              getRemainingEditTime={getRemainingEditTime}
+                                              editLimitMs={10 * 60 * 1000}
+                                              setEditingItem={(editingItem: any) => {
+                                                setEditingItem({
+                                                  type: "tt_request",
+                                                  id: editingItem.data.id,
+                                                  data: editingItem.data,
+                                               });
+                                              }}
+                                              addSystemNotification={addSystemNotification}
+                                              isExpanded={isExpanded}
+                                              onToggle={onToggle}
+                                            />
+                                          );
+                                        })
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })()}
+
+                              {activeTab === "complaints" && (() => {
+                                const baseComplaintList = isTLOreSupport
+                                  ? tabbyTamaraComplaints
+                                  : tabbyTamaraComplaints.filter(
+                                      (c) => c.agentName?.toLowerCase() === currentUser?.name?.toLowerCase()
+                                    );
+
+                                const filteredComplaints = baseComplaintList.filter(c => {
+                                  if (complaintStatusFilter !== "all" && c.status !== complaintStatusFilter) {
+                                    return false;
+                                  }
+                                  if (complaintSearch) {
+                                    const q = complaintSearch.toLowerCase();
+                                    return (
+                                      (c.patientName || "").toLowerCase().includes(q) ||
+                                      (c.phoneNumber || "").toLowerCase().includes(q) ||
+                                      (c.fileNumber || "").toLowerCase().includes(q) ||
+                                      (c.caseRef || "").toLowerCase().includes(q) ||
+                                      (c.complaintDetails || "").toLowerCase().includes(q) ||
+                                      (c.agentName || "").toLowerCase().includes(q) ||
+                                      (c.assignedTo || "").toLowerCase().includes(q) ||
+                                      (c.clinicName || "").toLowerCase().includes(q)
+                                    );
+                                  }
+                                  return true;
+                                }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+                                return (
+                                  <div className="space-y-4 h-full flex flex-col">
+                                    {/* Filter and Search Bar */}
+                                    <div className="flex flex-col sm:flex-row gap-3 bg-white/5 border border-white/10 p-4 rounded-2xl">
+                                      {/* Search */}
+                                      <div className="relative flex-1">
+                                        <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                                        <input
+                                          type="text"
+                                          placeholder="Search patient complaints..."
+                                          value={complaintSearch}
+                                          onChange={(e) => {
+                                            setComplaintSearch(e.target.value);
+                                            setSelectedComplaintId(null);
+                                          }}
+                                          className="w-full bg-black/20 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-sans"
+                                        />
+                                      </div>
+                                      {/* Status Filters */}
+                                      <div className="flex items-center gap-1.5 flex-wrap">
+                                        <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider">Status:</span>
+                                        {[
+                                          { id: "all", label: "All" },
+                                          { id: "pending_tl", label: "⏳ Awaiting TL" },
+                                          { id: "need_contact", label: "📞 Need Contact" },
+                                          { id: "closed", label: "✅ Closed" }
+                                        ].map((pill) => (
+                                          <button
+                                            key={pill.id}
+                                            onClick={() => {
+                                              setComplaintStatusFilter(pill.id);
+                                              setSelectedComplaintId(null);
+                                            }}
+                                            className={`px-2.5 py-1.5 rounded-full text-[10px] font-bold transition-all border cursor-pointer ${
+                                              complaintStatusFilter === pill.id
+                                                ? "bg-indigo-500 text-white border-indigo-400"
+                                                : "bg-black/20 hover:bg-white/5 text-slate-400 hover:text-slate-200 border-white/5"
+                                            }`}
+                                          >
+                                            {pill.label}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+
+                                    {/* Cards list */}
+                                    <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
+                                      {filteredComplaints.length === 0 ? (
+                                        <div className="text-center py-12 bg-white/[0.01] border border-white/5 rounded-2xl italic text-slate-500 text-xs">
+                                          No patient complaints found.
+                                        </div>
+                                      ) : (
+                                        filteredComplaints.map((comp) => {
+                                          const isExpanded = selectedComplaintId === comp.id;
+                                          const onToggle = () => setSelectedComplaintId(isExpanded ? null : comp.id);
+                                          return (
+                                            <ComplaintCard
+                                              key={comp.id}
+                                              comp={comp}
+                                              currentUser={currentUser}
+                                              isTLOreSupport={isTLOreSupport}
+                                              isSuperAdmin={isSuperAdmin}
+                                              isExpanded={isExpanded}
+                                              onToggle={onToggle}
+                                              activeComplaintHandlingId={activeComplaintHandlingId}
+                                              setActiveComplaintHandlingId={setActiveComplaintHandlingId}
+                                              tlComplaintResolutionType={tlComplaintResolutionType}
+                                              setTlComplaintResolutionType={setTlComplaintResolutionType}
+                                              tlComplaintComment={tlComplaintComment}
+                                              setTlComplaintComment={setTlComplaintComment}
+                                              handleTLCommentComplaint={handleTLCommentComplaint}
+                                              handleToggleContactComplaint={handleToggleContactComplaint}
+                                              handleDeleteComplaint={handleDeleteComplaint}
+                                              handleAssignRecord={handleAssignRecord}
+                                              addSystemNotification={addSystemNotification}
+                                              canEditItem={canEditItem}
+                                              getRemainingEditTime={getRemainingEditTime}
+                                              setEditingItem={(editingItem: any) => {
+                                                setEditingItem({
+                                                  type: "tt_complaint",
+                                                  id: editingItem.data.id,
+                                                  data: editingItem.data,
+                                                });
+                                              }}
+                                              getElapsedTimerString={getElapsedTimerString}
+                                            />
+                                          );
+                                        })
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })()}
                             </div>
                           </div>
                         </div>
@@ -24573,6 +24935,35 @@ ${ttNotes}`
                   {activeTab === "directory" &&
                     (() => {
                       const globalMeta = getAgentMeta();
+
+                      const matchDir = (row: AgentDirectoryRow) => {
+                        if (!dirSearch.trim()) return true;
+                        const q = dirSearch.toLowerCase();
+                        if (row.agentName?.toLowerCase().includes(q)) return true;
+                        return Object.values(row.data || {}).some(v => String(v).toLowerCase().includes(q));
+                      };
+
+                      const matchUser = (u: any) => {
+                        if (!dirSearch.trim()) return true;
+                        const q = dirSearch.toLowerCase();
+                        return (
+                          (u.name || '').toLowerCase().includes(q) ||
+                          (u.email || '').toLowerCase().includes(q) ||
+                          (u.phone && String(u.phone).toLowerCase().includes(q)) ||
+                          (u.lob || '').toLowerCase().includes(q) ||
+                          (u.teamLeader || AGENT_TL_MAP[u.name] || '').toLowerCase().includes(q) ||
+                          getUsernameFromFullName(u.name || '').toLowerCase().includes(q)
+                        );
+                      };
+
+                      const hasAgentDir = !!(agentDirectory && agentDirectory.length > 0);
+                      const filteredDir = hasAgentDir
+                        ? agentDirectory.filter(matchDir)
+                        : (registeredUsers || []).filter(matchUser);
+
+                      const totalPages = Math.ceil(filteredDir.length / DIR_PAGE_SIZE);
+                      const pagedDir = filteredDir.slice(dirPage * DIR_PAGE_SIZE, (dirPage + 1) * DIR_PAGE_SIZE);
+
                       return (
                         <div
                           id="directory-desk-root"
@@ -24589,24 +24980,44 @@ ${ttNotes}`
                                 contacts
                               </p>
                             </div>
-
-                            <div className="flex items-center gap-3">
-                              <div className="relative w-full sm:w-64">
-                                <span className="absolute left-3 top-2.5 text-slate-400">
-                                  <Search className="w-4 h-4" />
-                                </span>
-                                <input
-                                  type="text"
-                                  placeholder="Search names, phones, emails..."
-                                  value={directorySearchQuery}
-                                  onChange={(e) =>
-                                    setDirectorySearchQuery(e.target.value)
-                                  }
-                                  className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-500 font-sans font-medium"
-                                />
-                              </div>
-                            </div>
                           </div>
+
+                          <div className="relative mb-4">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                            <input
+                              type="text"
+                              placeholder="Search by name, phone, email, username, LOB, team leader..."
+                              value={dirSearch}
+                              onChange={e => { setDirSearch(e.target.value); setDirPage(0); }}
+                              className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
+                            />
+                          </div>
+
+                          <p className="text-xs text-slate-400 mb-2">Showing {pagedDir.length} of {filteredDir.length} entries</p>
+
+                          {/* Pagination - TOP */}
+                          {totalPages > 1 && (
+                            <div className="flex items-center justify-between py-2 mb-3 border-b border-white/10">
+                              <button
+                                disabled={dirPage === 0}
+                                onClick={() => setDirPage(p => p - 1)}
+                                className="px-4 py-1.5 bg-white/10 rounded-lg text-sm disabled:opacity-30 hover:bg-white/20 transition-colors"
+                              >← Prev</button>
+                              <div className="flex items-center gap-2">
+                                {Array.from({ length: totalPages }, (_, i) => (
+                                  <button key={i}
+                                    onClick={() => setDirPage(i)}
+                                    className={`w-8 h-8 rounded-lg text-sm font-bold transition-colors ${dirPage === i ? 'bg-indigo-600 text-white' : 'bg-white/10 text-slate-300 hover:bg-white/20'}`}
+                                  >{i + 1}</button>
+                                ))}
+                              </div>
+                              <button
+                                disabled={dirPage >= totalPages - 1}
+                                onClick={() => setDirPage(p => p + 1)}
+                                className="px-4 py-1.5 bg-white/10 rounded-lg text-sm disabled:opacity-30 hover:bg-white/20 transition-colors"
+                              >Next →</button>
+                            </div>
+                          )}
 
                           {/* Headcount Upload Console directly under directory tab for Hesham & Amira */}
                           {isSuperAdmin && (
@@ -24744,22 +25155,13 @@ ${ttNotes}`
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-white/5 font-medium">
-                                {agentDirectory && agentDirectory.length > 0 ? (
-                                  agentDirectory
-                                    .filter((row) => {
-                                      if (!directorySearchQuery) return true;
-                                      const q = directorySearchQuery.toLowerCase();
-                                      return (
-                                        row.agentName.toLowerCase().includes(q) ||
-                                        Object.values(row.data).some((v) =>
-                                          String(v || "").toLowerCase().includes(q)
-                                        ) ||
-                                        getUsernameFromFullName(row.agentName)
-                                          .toLowerCase()
-                                          .includes(q)
-                                      );
-                                    })
-                                    .map((row, idx) => {
+                                {pagedDir && pagedDir.length > 0 ? (
+                                  pagedDir.map((item: any, pagedIdx) => {
+                                    const idx = dirPage * DIR_PAGE_SIZE + pagedIdx;
+                                    const isRow = 'agentName' in item;
+
+                                    if (isRow) {
+                                      const row = item;
                                       const directoryHeadersArray = directoryHeaders || [];
                                       const tlHeader = directoryHeadersArray.find((h) => {
                                         const lh = String(h || "").toLowerCase().trim();
@@ -24793,10 +25195,23 @@ ${ttNotes}`
                                       const roleVal = roleHeader && row.data[roleHeader] ? row.data[roleHeader] : "-";
                                       const tlVal = tlHeader && row.data[tlHeader] ? row.data[tlHeader] : "-";
 
+                                      const matchingUser = (registeredUsers || []).find(
+                                        (u) => u && u.name && u.name.toLowerCase() === row.agentName.toLowerCase()
+                                      );
+                                      const computedRole = matchingUser ? matchingUser.role : (roleVal.toLowerCase().includes("tl") || roleVal.toLowerCase().includes("leader") ? "tl" : roleVal.toLowerCase().includes("qa") ? "qa" : "agent");
+
+                                      const tlName = row.data?.['Team Leader'] || row.data?.['teamLeader'] || row.data?.['TL'] || '';
+                                      const isNotTL = computedRole !== 'tl';
+
                                       return (
                                         <tr key={row.id} className="hover:bg-white/5 transition-all">
                                           <td className="p-4 text-slate-500 font-mono text-[11px]">{idx + 1}</td>
-                                          <td className="p-4 text-slate-100 font-bold">{row.agentName}</td>
+                                          <td className="p-4 text-slate-100 font-bold">
+                                            <div>{row.agentName}</div>
+                                            {tlName && isNotTL && (
+                                              <div className="text-xs text-slate-400 mt-0.5 font-normal">📋 {tlName}</div>
+                                            )}
+                                          </td>
                                           <td className="p-4 text-cyan-400 font-black font-mono">
                                             {getUsernameFromFullName(row.agentName)}
                                           </td>
@@ -24821,19 +25236,15 @@ ${ttNotes}`
                                                 )}
                                               </td>
                                               <td className="p-4">
-                                                {lobVal ? (
+                                                {normalizeAgentLob(lobVal || AGENT_LOBS[row.agentName], computedRole) ? (
                                                   <span
                                                     className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
-                                                      lobVal.toLowerCase().includes("call")
+                                                      normalizeAgentLob(lobVal || AGENT_LOBS[row.agentName], computedRole).toLowerCase().includes("call")
                                                         ? "bg-blue-500/15 text-blue-300 border border-blue-500/20"
-                                                        : lobVal.toLowerCase().includes("chat")
-                                                          ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"
-                                                          : lobVal.toLowerCase().includes("social")
-                                                            ? "bg-pink-500/15 text-pink-300 border border-pink-500/20"
-                                                            : "bg-white/10 text-slate-300 border border-white/10"
+                                                        : "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"
                                                     }`}
                                                   >
-                                                    {lobVal}
+                                                    {normalizeAgentLob(lobVal || AGENT_LOBS[row.agentName], computedRole)}
                                                   </span>
                                                 ) : (
                                                   <span className="text-slate-600">-</span>
@@ -24858,85 +25269,101 @@ ${ttNotes}`
                                           )}
                                         </tr>
                                       );
-                                    })
-                                ) : registeredUsers.length > 0 ? (
-                                  registeredUsers
-                                    .filter((m) => {
-                                      if (!directorySearchQuery) return true;
-                                      const q = directorySearchQuery.toLowerCase();
+                                    } else {
+                                      const meta = item;
+                                      const tlName = meta.teamLeader || AGENT_TL_MAP[meta.name] || agentMeta[meta.name]?.tlName || '';
+                                      const isNotTL = meta.role !== 'tl';
                                       return (
-                                        m.name.toLowerCase().includes(q) ||
-                                        (m.email && m.email.toLowerCase().includes(q)) ||
-                                        (m.phone && String(m.phone).toLowerCase().includes(q)) ||
-                                        getUsernameFromFullName(m.name).toLowerCase().includes(q)
-                                      );
-                                    })
-                                    .map((meta, idx) => (
-                                      <tr key={idx} className="hover:bg-white/5 transition-all">
-                                        <td className="p-4 text-slate-500 font-mono text-[11px]">{idx + 1}</td>
-                                        <td className="p-4 text-slate-100 font-bold">{meta.name}</td>
-                                        <td className="p-4 text-cyan-400 font-black font-mono">
-                                          {getUsernameFromFullName(meta.name)}
-                                        </td>
-                                        <td className="p-4">{meta.email || "-"}</td>
-                                        <td className="p-4 font-mono text-[12px]">
-                                          {meta.phone ? (
-                                            <span className="text-emerald-400">
-                                              {meta.phone.replace(/\s+/g, "").startsWith("+")
-                                                ? meta.phone.replace(/\s+/g, "")
-                                                : meta.phone}
-                                            </span>
-                                          ) : (
-                                            <span className="text-slate-600">-</span>
-                                          )}
-                                        </td>
-                                        <td className="p-4">
-                                          {meta.lob ? (
+                                        <tr key={idx} className="hover:bg-white/5 transition-all">
+                                          <td className="p-4 text-slate-500 font-mono text-[11px]">{idx + 1}</td>
+                                          <td className="p-4 text-slate-100 font-bold">
+                                            <div>{meta.name}</div>
+                                            {tlName && isNotTL && (
+                                              <div className="text-xs text-slate-400 mt-0.5 font-normal">📋 {tlName}</div>
+                                            )}
+                                          </td>
+                                          <td className="p-4 text-cyan-400 font-black font-mono">
+                                            {getUsernameFromFullName(meta.name)}
+                                          </td>
+                                          <td className="p-4">{meta.email || "-"}</td>
+                                          <td className="p-4 font-mono text-[12px]">
+                                            {meta.phone ? (
+                                              <span className="text-emerald-400">
+                                                {meta.phone.replace(/\s+/g, "").startsWith("+")
+                                                  ? meta.phone.replace(/\s+/g, "")
+                                                  : meta.phone}
+                                              </span>
+                                            ) : (
+                                              <span className="text-slate-600">-</span>
+                                            )}
+                                          </td>
+                                          <td className="p-4">
+                                            {normalizeAgentLob(meta.lob || AGENT_LOBS[meta.name], meta.role) ? (
+                                              <span
+                                                className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
+                                                  normalizeAgentLob(meta.lob || AGENT_LOBS[meta.name], meta.role).toLowerCase().includes("call")
+                                                    ? "bg-blue-500/15 text-blue-300 border border-blue-500/20"
+                                                    : "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"
+                                                }`}
+                                              >
+                                                {normalizeAgentLob(meta.lob || AGENT_LOBS[meta.name], meta.role)}
+                                              </span>
+                                            ) : (
+                                              <span className="text-slate-600">-</span>
+                                            )}
+                                          </td>
+                                          <td className="p-4">{meta.lobTeam || "-"}</td>
+                                          <td className="p-4">
                                             <span
-                                              className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
-                                                meta.lob.toLowerCase().includes("call")
-                                                  ? "bg-blue-500/15 text-blue-300 border border-blue-500/20"
-                                                  : meta.lob.toLowerCase().includes("chat")
-                                                    ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"
-                                                    : meta.lob.toLowerCase().includes("social")
-                                                      ? "bg-pink-500/15 text-pink-300 border border-pink-500/20"
-                                                      : "bg-white/10 text-slate-300 border border-white/10"
+                                              className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${
+                                                meta.role === "tl"
+                                                  ? "bg-amber-950/30 text-amber-400 border-amber-500/20"
+                                                  : meta.role === "qa"
+                                                    ? "bg-purple-950/30 text-purple-400 border-purple-500/20"
+                                                    : "bg-slate-800 text-slate-400 border-slate-700"
                                               }`}
                                             >
-                                              {meta.lob}
-                                            </span>
-                                          ) : (
-                                            <span className="text-slate-600">-</span>
-                                          )}
-                                        </td>
-                                        <td className="p-4">{meta.lobTeam || "-"}</td>
-                                        <td className="p-4">
-                                          <span
-                                            className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${
-                                              meta.role === "tl"
-                                                ? "bg-amber-950/30 text-amber-400 border-amber-500/20"
+                                              {meta.role === "tl"
+                                                ? "Team Leader"
                                                 : meta.role === "qa"
-                                                  ? "bg-purple-950/30 text-purple-400 border-purple-500/20"
-                                                  : "bg-slate-800 text-slate-400 border-slate-700"
-                                            }`}
-                                          >
-                                            {meta.role === "tl"
-                                              ? "Team Leader"
-                                              : meta.role === "qa"
-                                                ? "QA"
-                                                : "Agent"}
-                                          </span>
-                                        </td>
-                                        <td className="p-4 text-cyan-300 font-bold">{meta.teamLeader || "-"}</td>
-                                      </tr>
-                                    ))
+                                                  ? "QA"
+                                                  : "Agent"}
+                                            </span>
+                                          </td>
+                                          <td className="p-4 text-cyan-300 font-bold">{tlName || "-"}</td>
+                                        </tr>
+                                      );
+                                    }
+                                  })
                                 ) : null}
                               </tbody>
                             </table>
-                            {(!agentDirectory || agentDirectory.length === 0) && registeredUsers.length === 0 && (
+                            {(!pagedDir || pagedDir.length === 0) && (
                               <div className="text-center p-8 text-slate-500 font-medium font-sans">
-                                No directory data active. Please upload a
-                                headcount file.
+                                No headcount data matches your filters/search.
+                              </div>
+                            )}
+
+                            {totalPages > 1 && (
+                              <div className="flex items-center justify-between mt-4 border-t border-white/5 pt-4">
+                                <button
+                                  disabled={dirPage === 0}
+                                  onClick={() => setDirPage(p => p - 1)}
+                                  className="px-4 py-1.5 bg-white/10 rounded-lg text-sm disabled:opacity-30 hover:bg-white/20 transition-colors cursor-pointer"
+                                >← Prev</button>
+                                <div className="flex items-center gap-2">
+                                  {Array.from({ length: totalPages }, (_, i) => (
+                                    <button key={i}
+                                      onClick={() => setDirPage(i)}
+                                      className={`w-8 h-8 rounded-lg text-sm font-bold transition-colors ${dirPage === i ? 'bg-indigo-600 text-white' : 'bg-white/10 text-slate-300 hover:bg-white/20'} cursor-pointer`}
+                                    >{i + 1}</button>
+                                  ))}
+                                </div>
+                                <button
+                                  disabled={dirPage >= totalPages - 1}
+                                  onClick={() => setDirPage(p => p + 1)}
+                                  className="px-4 py-1.5 bg-white/10 rounded-lg text-sm disabled:opacity-30 hover:bg-white/20 transition-colors cursor-pointer"
+                                >Next →</button>
                               </div>
                             )}
                           </div>

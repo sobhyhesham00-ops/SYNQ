@@ -150,7 +150,7 @@ export const TabbyTamaraCard = ({
   const sourceChannel = getSafeTTSourceChannel(req);
   const userLOB = getAgentLOB(currentUser?.name || '');
   
-  const isSocialMedia = userLOB === 'Social Media';
+  const isSocialMedia = userLOB === 'Chat';
   const isUnassigned = !req.assignedToId;
   const isCallCenterRequest = sourceChannel === 'call_center';
   const isSubmitter = (req.submittedByName || req.agentName)?.toLowerCase() === currentUser?.name?.toLowerCase();
@@ -161,7 +161,7 @@ export const TabbyTamaraCard = ({
   const [showAssignDropdown, setShowAssignDropdown] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
   const socialMediaAgents = Object.entries(AGENT_LOBS)
-    .filter(([_, lob]) => lob === 'Social Media')
+    .filter(([_, lob]) => lob === 'Chat')
     .map(([name]) => name);
 
   // Client Materials Mode
@@ -1086,7 +1086,7 @@ export const TabbyTamaraCard = ({
             </button>
             {showAssignDropdown && (
               <div className="absolute bottom-10 right-0 z-50 bg-[#1e1e24] border border-slate-700 rounded-xl w-56 shadow-2xl p-2 space-y-1">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-2 py-1">Select Social Media Agent</p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-2 py-1">Select Chat Agent</p>
                 {socialMediaAgents.length === 0 ? (
                   <p className="text-xs text-slate-400 px-2 py-1">No agents found</p>
                 ) : (

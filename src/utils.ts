@@ -1,4 +1,4 @@
-import { SchedulingRequest, SHIFTS, TEAM_LEADERS, INITIAL_AGENTS, SwapRequest, AnnualRequest, ScheduledShift, AGENT_LOBS, Inquiry, TimeLog, AgentDirectoryRow, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, CaseRecord, SystemNotification, Order, FileAttachment, TTWorkflowStatus } from './types';
+import { SchedulingRequest, SHIFTS, TEAM_LEADERS, INITIAL_AGENTS, SwapRequest, AnnualRequest, ScheduledShift, AGENT_LOBS, AGENT_TL_MAP, Inquiry, TimeLog, AgentDirectoryRow, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, CaseRecord, SystemNotification, Order, FileAttachment, TTWorkflowStatus } from './types';
 
 // Simple client-side storage helpers
 import { db, auth, wrappedSetDoc as setDoc, wrappedDeleteDoc as deleteDoc } from './firebase';
@@ -354,11 +354,11 @@ export const findAgentByUsername = (username: string, referenceList: string[] = 
 
   const found = combinedList.find(refName => {
     if (!refName || typeof refName !== 'string') return false;
-    const username = getUsernameFromFullName(refName);
+    const derivedUser = getUsernameFromFullName(refName).toLowerCase();
     const compactName = refName?.toLowerCase().replace(/\s+/g, '');
     const normalName = refName?.toLowerCase();
     
-    return username === target || compactName === target.replace(/\s+/g, '') || normalName === target;
+    return derivedUser === target || compactName === target.replace(/\s+/g, '') || normalName === target;
   });
   return found || null;
 };
@@ -443,21 +443,30 @@ export const getAgentMeta = (): Record<string, { roleType: string; tlName: strin
 
 // Retrieve Line of Business (LOB) for an agent or TL
 export const getAgentLOB = (name: string): string => {
-  if (!name) return 'General';
+  if (!name) return 'Chat';
   const fullName = findAgentByUsername(name) || name;
   const cleanName = (fullName || '').trim().toLowerCase().replace(/\s+/g, ' ');
   
+  if (isTLName(fullName)) return '';
+
   const meta = getAgentMeta();
   const overrideKey = Object.keys(meta).find(k => String(k || '').trim().toLowerCase().replace(/\s+/g, ' ') === cleanName);
   if (overrideKey && meta[overrideKey].roleType) {
-    return meta[overrideKey].roleType;
+    const roleType = meta[overrideKey].roleType;
+    if (roleType.toLowerCase() === 'tl' || roleType.toLowerCase() === 'team leader' || roleType.toLowerCase().includes('manager')) {
+      return '';
+    }
+    if (roleType.toLowerCase() === 'call center') return 'Call Center';
+    return 'Chat';
   }
 
   const matchedKey = Object.keys(AGENT_LOBS).find(
     key => String(key || '').trim().toLowerCase().replace(/\s+/g, ' ') === cleanName
   );
   
-  return matchedKey ? AGENT_LOBS[matchedKey] : 'General';
+  const rawLob = matchedKey ? AGENT_LOBS[matchedKey] : 'Chat';
+  if (rawLob.toLowerCase() === 'call center') return 'Call Center';
+  return 'Chat';
 };
 
 export const getAgentTL = (name: string): string => {
@@ -470,6 +479,15 @@ export const getAgentTL = (name: string): string => {
   if (overrideKey && meta[overrideKey].tlName) {
     return meta[overrideKey].tlName;
   }
+
+  // Fallback to AGENT_TL_MAP
+  const tlMapKey = Object.keys(AGENT_TL_MAP).find(
+    k => String(k || '').trim().toLowerCase().replace(/\s+/g, ' ') === cleanName
+  );
+  if (tlMapKey && AGENT_TL_MAP[tlMapKey]) {
+    return AGENT_TL_MAP[tlMapKey];
+  }
+
   return 'Unassigned';
 };
 
