@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { 
   ChevronUp, 
   ChevronDown, 
@@ -114,6 +114,17 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
   const [localAnswerText, setLocalAnswerText] = useState("");
   const [localAnswerAttachments, setLocalAnswerAttachments] = useState<any[]>([]);
   const [localAnswerLinks, setLocalAnswerLinks] = useState<string[]>([]);
+
+  const [localPatientName, setLocalPatientName] = useState(inq.patientName || '');
+  const [localFileId, setLocalFileId] = useState(inq.fileId || inq.fileNumber || '');
+  const [localPatientId, setLocalPatientId] = useState(inq.patientId || '');
+  const saveDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
+    };
+  }, []);
 
   // Resolve active states
   const activeAnsweringId = answeringInquiryId !== undefined ? answeringInquiryId : localAnsweringInquiryId;
@@ -436,15 +447,19 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                     </label>
                     <input
                       type="text"
-                      value={inq.patientName || ""}
-                      onChange={async (e) => {
+                      value={localPatientName}
+                      onChange={(e) => {
                         const val = e.target.value;
-                        if (setInquiries && inquiries) {
-                          const updated = inquiries.map(i => i.id === inq.id ? { ...i, patientName: val } : i);
-                          setInquiries(updated);
-                          setStorageItem("sched_inquiries", updated);
-                        }
-                        await updateDoc(doc(db, "inquiries", inq.id), { patientName: val }).catch(err => console.error(err));
+                        setLocalPatientName(val);
+                        if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
+                        saveDebounceRef.current = setTimeout(() => {
+                          if (setInquiries && inquiries) {
+                            const updated = inquiries.map(i => i.id === inq.id ? { ...i, patientName: val } : i);
+                            setInquiries(updated);
+                            setStorageItem("sched_inquiries", updated);
+                          }
+                          updateDoc(doc(db, "inquiries", inq.id), { patientName: val }).catch(err => console.error(err));
+                        }, 600);
                       }}
                       className="w-full px-2.5 py-1.5 bg-black/30 border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-indigo-500 font-sans font-bold"
                       placeholder="Review/Edit Patient Name"
@@ -456,15 +471,19 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                     </label>
                     <input
                       type="text"
-                      value={inq.fileId || inq.fileNumber || ""}
-                      onChange={async (e) => {
+                      value={localFileId}
+                      onChange={(e) => {
                         const val = e.target.value;
-                        if (setInquiries && inquiries) {
-                          const updated = inquiries.map(i => i.id === inq.id ? { ...i, fileId: val, fileNumber: val } : i);
-                          setInquiries(updated);
-                          setStorageItem("sched_inquiries", updated);
-                        }
-                        await updateDoc(doc(db, "inquiries", inq.id), { fileId: val, fileNumber: val }).catch(err => console.error(err));
+                        setLocalFileId(val);
+                        if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
+                        saveDebounceRef.current = setTimeout(() => {
+                          if (setInquiries && inquiries) {
+                            const updated = inquiries.map(i => i.id === inq.id ? { ...i, fileId: val, fileNumber: val } : i);
+                            setInquiries(updated);
+                            setStorageItem("sched_inquiries", updated);
+                          }
+                          updateDoc(doc(db, "inquiries", inq.id), { fileId: val, fileNumber: val }).catch(err => console.error(err));
+                        }, 600);
                       }}
                       className="w-full px-2.5 py-1.5 bg-black/30 border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-indigo-500 font-sans font-bold"
                       placeholder="Review/Edit File ID"
@@ -476,15 +495,19 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                     </label>
                     <input
                       type="text"
-                      value={inq.patientId || ""}
-                      onChange={async (e) => {
+                      value={localPatientId}
+                      onChange={(e) => {
                         const val = e.target.value;
-                        if (setInquiries && inquiries) {
-                          const updated = inquiries.map(i => i.id === inq.id ? { ...i, patientId: val } : i);
-                          setInquiries(updated);
-                          setStorageItem("sched_inquiries", updated);
-                        }
-                        await updateDoc(doc(db, "inquiries", inq.id), { patientId: val }).catch(err => console.error(err));
+                        setLocalPatientId(val);
+                        if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
+                        saveDebounceRef.current = setTimeout(() => {
+                          if (setInquiries && inquiries) {
+                            const updated = inquiries.map(i => i.id === inq.id ? { ...i, patientId: val } : i);
+                            setInquiries(updated);
+                            setStorageItem("sched_inquiries", updated);
+                          }
+                          updateDoc(doc(db, "inquiries", inq.id), { patientId: val }).catch(err => console.error(err));
+                        }, 600);
                       }}
                       className="w-full px-2.5 py-1.5 bg-black/30 border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-indigo-500 font-sans font-bold"
                       placeholder="Review/Edit Patient ID"

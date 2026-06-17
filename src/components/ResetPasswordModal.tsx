@@ -29,7 +29,7 @@ export const ResetPasswordModal = ({
           <div>
             <label className="block text-xs font-bold text-slate-300 mb-1">New Password</label>
             <input
-              type="text"
+              type="password"
               required
               value={newPasswordInput}
               onChange={(e) => setNewPasswordInput(e.target.value)}

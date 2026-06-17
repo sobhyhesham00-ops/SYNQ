@@ -241,25 +241,11 @@ export const TabbyTamaraCard = ({
   const handleAssignAgent = async (agentName: string) => {
     try {
       setIsAssigning(true);
-      const assignActivity = {
-        id: "act_" + Math.random().toString(36).substring(2, 11),
-        senderName: "System",
-        authorId: "system",
-        authorRole: "system",
-        text: `${currentUser.name} assigned this request to ${agentName}. Status set to: Awaiting Client Contact.`,
-        createdAt: new Date().toISOString()
-      };
       
       const assigneeId = "usr_" + agentName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
       
       // Central assignment service call
       await assignCase('tt_request', req.id, { id: assigneeId, name: agentName }, currentUser);
-
-      // Remaining doc updates specific to tabby tamara card
-      await updateDoc(doc(db, "tt_requests", req.id), {
-        workflowStatus: "awaiting_client_contact",
-        replies: arrayUnion(assignActivity)
-      });
 
       if (addSystemNotification) {
         addSystemNotification(

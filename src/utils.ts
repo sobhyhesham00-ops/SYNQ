@@ -5,6 +5,14 @@ import { db, auth, wrappedSetDoc as setDoc, wrappedDeleteDoc as deleteDoc } from
 import { doc } from 'firebase/firestore';
 import { toast } from "sonner";
 
+export function normalizeAgentLob(lob: string | undefined | null, role: string): string {
+  if (role === 'tl' || role === 'qa' || role === 'director') return '';
+  if (!lob) return 'Chat';
+  const l = lob.toLowerCase();
+  if (l === 'call center' || l === 'call_center') return 'Call Center';
+  return 'Chat'; // Social Media, General, Quality, etc. all → Chat
+}
+
 export const TABBY_TAMARA_FEE_RATE = 0.05;
 
 export const calculateTabbyTamaraPrice = (

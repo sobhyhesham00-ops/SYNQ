@@ -18,7 +18,7 @@ import {
   PhoneOff,
   UserX,
 } from "lucide-react";
-import { getAgentLOB, getUsernameFromFullName } from "../utils";
+import { getAgentLOB, getUsernameFromFullName, normalizeAgentLob } from "../utils";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
@@ -93,7 +93,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
         const name = (row.agentName || "").trim();
         if (name && !seen.has(name.toLowerCase())) {
           seen.add(name.toLowerCase());
-          const lob = row.data?.["lob"] || row.data?.["LOB"] || getAgentLOB(name) || "General";
+          const lob = normalizeAgentLob(row.data?.["lob"] || row.data?.["LOB"] || getAgentLOB(name) || "Chat", "agent");
           list.push({ name, lob });
         }
       });
@@ -107,7 +107,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
           const name = (u.name || "").trim();
           if (name && !seen.has(name.toLowerCase())) {
             seen.add(name.toLowerCase());
-            const lob = u.lob || getAgentLOB(name) || "General";
+            const lob = normalizeAgentLob(u.lob || getAgentLOB(name) || "Chat", "agent");
             list.push({ name, lob });
           }
         });
@@ -119,7 +119,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
         const cleanName = name.trim();
         if (cleanName && !seen.has(cleanName.toLowerCase())) {
           seen.add(cleanName.toLowerCase());
-          list.push({ name: cleanName, lob: getAgentLOB(cleanName) || "General" });
+          list.push({ name: cleanName, lob: normalizeAgentLob(getAgentLOB(cleanName) || "Chat", "agent") });
         }
       });
     }

@@ -1,0 +1,156 @@
+36-  getAccessToken,
+37-  logout,
+38-  wrappedOnSnapshot as onSnapshot,
+39-  wrappedOnSnapshot,
+40-  wrappedSetDoc as setDoc,
+41:  wrappedUpdateDoc as updateDoc,
+42-  wrappedDeleteDoc as deleteDoc,
+43-  wrappedGetDocs as getDocs,
+44-  wrappedGetDoc as getDoc,
+45-  wrappedAddDoc as addDoc,
+46-} from "./firebase";
+--
+1840-      timeoutId = setTimeout(() => {
+1841-        // Log out the user
+1842-        if (currentUser?.role === 'tl') {
+1843-          const today = new Date().toISOString().split('T')[0];
+1844-          const docId = `${getUsernameFromFullName(currentUser.name)}_${today}`;
+1845:          updateDoc(doc(db, 'tl_login_logs', docId), { 
+1846-            onlineStatus: 'offline', 
+1847-            lastSeenAt: new Date().toISOString() 
+1848-          }).catch(() => {});
+1849-        }
+1850-        setCurrentUser(null);
+--
+1871-    const markOffline = () => {
+1872-      const today = new Date().toISOString().split('T')[0];
+1873-      const docId = `${getUsernameFromFullName(currentUser.name)}_${today}`;
+1874-      // Use sendBeacon for reliability on tab close
+1875-      navigator.sendBeacon('/api/noop'); // dummy beacon to keep tab alive briefly
+1876:      updateDoc(doc(db, 'tl_login_logs', docId), { 
+1877-        onlineStatus: 'offline',
+1878-        lastSeenAt: new Date().toISOString()
+1879-      }).catch(() => {});
+1880-    };
+1881-    window.addEventListener('beforeunload', markOffline);
+--
+2607-    const n = notifications.find((item) => item.id === id);
+2608-    if (n) {
+2609-      const seenSet = new Set(n.seenByUsers || []);
+2610-      if (!seenSet.has(currentUser.id)) {
+2611-        seenSet.add(currentUser.id);
+2612:        updateDoc(doc(db, "notifications", n.id), {
+2613-          seenByUsers: Array.from(seenSet),
+2614-        }).catch((e) => console.error("Mark Single Read Error:", e));
+2615-      }
+2616-    }
+2617-  };
+--
+3128-          );
+3129-
+3130-          const updatedReminderTime = now.toISOString();
+3131-
+3132-          // Update the database
+3133:          await updateDoc(doc(db, "inquiries", inq.id), {
+3134-            lastHourlyReminderAt: updatedReminderTime
+3135-          }).catch((e) => console.error("Update lastHourlyReminderAt error:", e));
+3136-
+3137-          // Also update local inquiries state
+3138-          setInquiries((prev) =>
+--
+3700-        </div>,
+3701-        { duration: 10000 }
+3702-      );
+3703-
+3704-      // Save notified state to prevent repeated triggers
+3705:      updateDoc(doc(db, "todos", t.id), { notified: true }).catch((err) => {
+3706-        console.error("Error setting notified state on personal reminder:", err);
+3707-      });
+3708-    });
+3709-  };
+3710-
+--
+4406-          loggedInAt: new Date().toISOString(),
+4407-          onlineStatus: 'online',
+4408-        });
+4409-      } else {
+4410-        // Update online status only, don't overwrite first login time
+4411:        await updateDoc(tlLogRef, { onlineStatus: 'online' });
+4412-      }
+4413-    };
+4414-    captureTLLoginTime(authenticatedUser);
+4415-
+4416-    const userDocId = correspondingFullName
+--
+4589-
+4590-  const handleSignOut = () => {
+4591-    if (currentUser?.role === 'tl') {
+4592-      const today = new Date().toISOString().split('T')[0];
+4593-      const docId = `${getUsernameFromFullName(currentUser.name)}_${today}`;
+4594:      updateDoc(doc(db, 'tl_login_logs', docId), { 
+4595-        onlineStatus: 'offline', 
+4596-        lastSeenAt: new Date().toISOString() 
+4597-      }).catch(() => {});
+4598-    }
+4599-    setCurrentUser(null);
+--
+6798-    const updated = inquiries.map((i) =>
+6799-      i.id === inquiryId ? { ...i, status: newStatus as any, readBy: currentUser.name, readAt: now } : i
+6800-    );
+6801-    setInquiries(updated);
+6802-    setStorageItem("sched_inquiries", updated);
+6803:    await updateDoc(doc(db, "inquiries", inquiryId), { 
+6804-      status: newStatus, readBy: currentUser.name, readAt: now 
+6805-    }).catch((e) => console.error("Mark read error:", e));
+6806-  };
+6807-
+6808-  const handleMarkSentToClinic = async (inquiryId: string) => {
+--
+6830-        ? { ...i, status: 'sent_to_clinic' as const, sentBy: currentUser.name, sentAt: now, sentToClinicCount: newCount }
+6831-        : i
+6832-    );
+6833-    setInquiries(updated);
+6834-    setStorageItem("sched_inquiries", updated);
+6835:    await updateDoc(doc(db, "inquiries", inquiryId), { 
+6836-      status: 'sent_to_clinic', sentBy: currentUser.name, sentAt: now, sentToClinicCount: newCount,
+6837-    }).catch((e) => console.error("Mark sent error:", e));
+6838-
+6839-    addSystemNotification(
+6840-      "Inquiry Sent to Clinic",
+--
+6852-    const updated = inquiries.map((i) =>
+6853-      i.id === inquiryId ? { ...i, status: 'closed' as const, closedBy: currentUser.name, closedAt: now } : i
+6854-    );
+6855-    setInquiries(updated);
+6856-    setStorageItem("sched_inquiries", updated);
+6857:    await updateDoc(doc(db, "inquiries", inquiryId), { 
+6858-      status: 'closed', closedBy: currentUser.name, closedAt: now 
+6859-    }).catch((e) => console.error("Close inquiry error:", e));
+6860-    
+6861-    let timerMessage = "";
+6862-    if (inq.answeredAt) {
+--
+7366-      else if (collectionName === "inquiries") entityType = "inquiry";
+7367-
+7368-      // Central assignment service call
+7369-      await assignCase(entityType, recordId, { id: assigneeId, name: toAgent }, currentUser);
+7370-
+7371:      const { updateDoc, doc } = await import("firebase/firestore");
+7372:      await updateDoc(doc(db, collectionName, recordId), {
+7373-        assignedTo: toAgent,
+7374-      });
+7375-
+7376-      // Update local state based on collectionName
+7377-      if (collectionName === "inquiries") {
+--
+11003-                                      <input
+11004-                                        type="checkbox"
+11005-                                        checked={t.isCompleted}
+11006-                                        onChange={() => {
+11007-                                          const done = !t.isCompleted;
+11008:                                          updateDoc(doc(db, "todos", t.id), {
+11009-                                            isCompleted: done,
+11010-                                          }).catch(console.error);
+11011-                                          if (done)
+11012-                                            addSystemNotification(
+11013-                                              "Goal Reached!",

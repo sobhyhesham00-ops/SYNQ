@@ -34,7 +34,7 @@ import { AttachmentsDisplay } from "./AttachmentsDisplay";
 import { RequestReplyThread } from "./RequestReplyThread";
 import { SlideToConfirm } from "./SlideToConfirm";
 import { CopyWrap } from "./CopyWrap";
-import { Inquiry, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, User as UserType } from "../types";
+import { Inquiry, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, User as UserType, TEAM_LEADERS } from "../types";
 import { CLINIC_OPTIONS,  formatCaseRef, normalizePhone, copyToClipboard, getClinicLabel, generateInquiryCopyText, generateComplaintCopyText, generateTabbyTamaraCopyText } from "../utils";
 import { toast } from "sonner";
 
@@ -82,6 +82,7 @@ interface GlobalDashboardProps {
   setTlComplaintComment: (comment: string) => void;
   handleTLCommentComplaint: (id: string, comment: string, resolutionType: string) => void;
   tlShiftLogs?: any[];
+  tlLoginLogs?: any[];
 
   // InquiryCard specific props passed down
   handleTLViewInquiry?: any;
@@ -124,6 +125,7 @@ type SubmissionItem =
   | { type: "complaint"; id: string; createdAt: string; clinicName: string; phoneNumber: string; status: string; agentName: string; data: TabbyTamaraComplaint }
   | { type: "clientComm"; id: string; createdAt: string; clinicName: string; phoneNumber: string; status: string; agentName: string; data: ClientCommunicationRequest };
 
+// TODO: Migrate to React context to reduce prop drilling
 export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
   inquiries,
   tabbyTamaraRequests,
@@ -158,6 +160,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
   setTlComplaintComment,
   handleTLCommentComplaint,
   tlShiftLogs = [],
+  tlLoginLogs = [],
   handleTLViewInquiry,
   answeringInquiryId,
   setAnsweringInquiryId,
@@ -280,53 +283,8 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
   // Combined master list of items
   const combinedList = [...allInquiries, ...allTTRequests, ...allComplaints, ...allClientComms];
 
-  // Under the "default today only" view: find count of items created today & strictly pending
-  const todayPendingInquiriesCount = allInquiries.filter(i => isToday(i.createdAt) && isInquiryPending(i.data as any)).length;
-  const todayPendingTTRequestsCount = allTTRequests.filter(i => isToday(i.createdAt) && isTTPending(i.data as any)).length;
-  const todayPendingComplaintsCount = allComplaints.filter(i => isToday(i.createdAt) && isComplaintPending(i.data as any)).length;
-  const todayPendingClientCommsCount = allClientComms.filter(i => isToday(i.createdAt) && isCcPending(i.data as any)).length;
-
-  // Under default today view, combined pending today
-  const combinedPendingTodayAll = todayPendingInquiriesCount + todayPendingTTRequestsCount + todayPendingComplaintsCount + todayPendingClientCommsCount;
-
-  // Summary counts row values (reflects current filtering context for clarity, OR default today if unfiltered)
-  // Let's make sure if we are filtering, the counters show the numbers corresponding to the active list
-  const displayInquiriesCount = isAnyFilterActive
-    ? combinedList.filter(i => i.type === "inquiry" && isInquiryPending(i.data as any) && 
-        (filterClinic === "all" || i.clinicName?.toLowerCase() === filterClinic.toLowerCase()) &&
-        (!filterDate || i.createdAt.startsWith(filterDate)) &&
-        (!filterPhone || normalizePhone(i.phoneNumber).includes(normalizePhone(filterPhone)))
-      ).length
-    : todayPendingInquiriesCount;
-
-  const displayTTRequestsCount = isAnyFilterActive
-    ? combinedList.filter(i => i.type === "tabbyTamara" && isTTPending(i.data as any) &&
-        (filterClinic === "all" || i.clinicName?.toLowerCase() === filterClinic.toLowerCase()) &&
-        (!filterDate || i.createdAt.startsWith(filterDate)) &&
-        (!filterPhone || normalizePhone(i.phoneNumber).includes(normalizePhone(filterPhone)))
-      ).length
-    : todayPendingTTRequestsCount;
-
-  const displayComplaintsCount = isAnyFilterActive
-    ? combinedList.filter(i => i.type === "complaint" && isComplaintPending(i.data as any) &&
-        (filterClinic === "all" || i.clinicName?.toLowerCase() === filterClinic.toLowerCase()) &&
-        (!filterDate || i.createdAt.startsWith(filterDate)) &&
-        (!filterPhone || normalizePhone(i.phoneNumber).includes(normalizePhone(filterPhone)))
-      ).length
-    : todayPendingComplaintsCount;
-
-  const displayClientCommsCount = isAnyFilterActive
-    ? combinedList.filter(i => i.type === "clientComm" && isCcPending(i.data as any) &&
-        (filterClinic === "all" || i.clinicName?.toLowerCase() === filterClinic.toLowerCase()) &&
-        (!filterDate || i.createdAt.startsWith(filterDate)) &&
-        (!filterPhone || normalizePhone(i.phoneNumber).includes(normalizePhone(filterPhone)))
-      ).length
-    : todayPendingClientCommsCount;
-
-  const displayTotalCount = displayInquiriesCount + displayTTRequestsCount + displayComplaintsCount + displayClientCommsCount;
-
-  // Filter the list based on state criteria
-  const filteredList = combinedList.filter((item) => {
+  // Base filtered list (ignores the specific selectedTypeFilter)
+  const baseFilteredList = combinedList.filter((item) => {
     // 1. Pending checks per type (Always keep it pending focus, except we search historical)
     // Wait, the specification says: "By default (no filters), show items from inquiries, tabbyTamaraRequests, and tabbyTamaraComplaints where created today and status indicates pending. When any filter is changed from default, REMOVE the today only constraint and instead filter by the selected criteria across all time"
     const isPending =
@@ -337,17 +295,12 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
 
     if (!isPending) return false;
 
-    // 2. Type quick-filter (clickable count buttons)
-    if (selectedTypeFilter !== "all" && item.type !== selectedTypeFilter) {
-      return false;
-    }
-
-    // 3. Clinic filter
+    // 2. Clinic filter
     if (filterClinic !== "all" && item.clinicName?.toLowerCase() !== filterClinic.toLowerCase()) {
       return false;
     }
 
-    // 4. Phone filter
+    // 3. Phone filter
     if (filterPhone.trim() !== "") {
       const qPhone = normalizePhone(filterPhone);
       const itemPhone = normalizePhone(item.phoneNumber);
@@ -356,7 +309,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
       }
     }
 
-    // 5. Date filter OR Today constraint (Today constraint applies ONLY if NO filter is changed!)
+    // 4. Date filter OR Today constraint (Today constraint applies ONLY if NO filter is changed!)
     if (filterDate !== "") {
       if (!item.createdAt || !item.createdAt.startsWith(filterDate)) {
         return false;
@@ -370,6 +323,16 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
 
     return true;
   });
+
+  const displayInquiriesCount = baseFilteredList.filter(i => i.type === "inquiry").length;
+  const displayTTRequestsCount = baseFilteredList.filter(i => i.type === "tabbyTamara").length;
+  const displayComplaintsCount = baseFilteredList.filter(i => i.type === "complaint").length;
+  const displayClientCommsCount = baseFilteredList.filter(i => i.type === "clientComm").length;
+  const displayTotalCount = baseFilteredList.length;
+
+  const filteredList = selectedTypeFilter === "all" 
+    ? baseFilteredList 
+    : baseFilteredList.filter(i => i.type === selectedTypeFilter);
 
   // Sorting
   filteredList.sort((a, b) => {
@@ -493,35 +456,22 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
           </div>
         </div>
 
-        {tlShiftLogs.filter(log => log.loggedInAt && new Date(log.loggedInAt).toDateString() === new Date().toDateString()).length === 0 ? (
-          <div className="flex items-center gap-1.5 text-slate-500 font-mono text-[10px] bg-slate-800/20 px-3 py-1.5 rounded-xl border border-slate-850">
-            <span className="w-1.5 h-1.5 rounded-full bg-slate-600" />
-            No leaders logged in yet today
-          </div>
-        ) : (
-          <div className="flex flex-wrap items-center gap-2">
-            {tlShiftLogs
-              .filter(log => log.loggedInAt && new Date(log.loggedInAt).toDateString() === new Date().toDateString())
-              .map((log, index) => {
-                const loginTime = log.loggedInAt 
-                  ? new Date(log.loggedInAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                  : "";
-                return (
-                  <div 
-                    key={log.id || index}
-                    className="flex items-center gap-2 bg-indigo-500/5 border border-indigo-500/15 px-3 py-1 rounded-xl text-[11px]"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="font-bold text-slate-200">{log.tlName}</span>
-                    <span className="text-[9px] text-slate-400 bg-indigo-500/10 px-1.5 py-0.2 rounded font-mono uppercase tracking-widest">{log.shift}</span>
-                    {loginTime && (
-                      <span className="text-[9px] text-slate-500 font-mono">at {loginTime}</span>
-                    )}
-                  </div>
-                );
-              })}
-          </div>
-        )}
+        <div className="flex flex-wrap items-center gap-4">
+          {TEAM_LEADERS.map(tlName => {
+            const log = tlLoginLogs.find(l => l.tlName === tlName);
+            return (
+              <div key={tlName} className="flex items-center gap-2 text-sm bg-slate-800/20 px-3 py-1.5 rounded-xl border border-slate-850">
+                <div className={`w-2 h-2 rounded-full ${log?.onlineStatus === 'online' ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`} />
+                <span className="font-bold text-slate-200">{tlName}</span>
+                {log ? (
+                  <span className="text-[10px] text-slate-400 font-mono">First login: {new Date(log.loggedInAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                ) : (
+                  <span className="text-[10px] text-slate-500 font-mono">Not logged in today</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Summary Clickable Counter Cards */}
@@ -748,7 +698,6 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
           </div>
         ) : (
           (() => {
-            console.log("[GlobalDashboard] filteredList:", filteredList.length, filteredList.map(i => ({id: i.id, type: i.type})));
             return filteredList.map((item) => {
               const uniqueKey = `${item.type}-${item.id}`;
               const isExpanded = expandedId === uniqueKey;

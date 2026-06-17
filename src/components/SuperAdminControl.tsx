@@ -21,7 +21,7 @@ import {
 import { doc } from 'firebase/firestore';
 import { db, wrappedSetDoc as setDoc, wrappedDeleteDoc as deleteDoc } from '../firebase';
 import { toast } from 'sonner';
-import { getUsernameFromFullName, getAgentTL } from '../utils';
+import { getUsernameFromFullName, getAgentTL, normalizeAgentLob } from '../utils';
 import { INITIAL_AGENTS, TEAM_LEADERS, AGENT_LOBS } from '../types';
 
 interface UserProfile {
@@ -112,7 +112,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
       role: newUserRole,
       email: String(newUserEmail || '').trim() || undefined,
       phone: String(newUserPhone || '').trim() || undefined,
-      lob: String(newUserLob || '').trim() || undefined,
+      lob: normalizeAgentLob(String(newUserLob || '').trim() || undefined, newUserRole) || undefined,
       lobTeam: String(newUserTeam || '').trim() || undefined,
       teamLeader: String(newUserTL || '').trim() || undefined
     };
@@ -153,7 +153,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
       role: editRole,
       email: String(editEmail || '').trim() || undefined,
       phone: String(editPhone || '').trim() || undefined,
-      lob: String(editLob || '').trim() || undefined,
+      lob: normalizeAgentLob(String(editLob || '').trim() || undefined, editRole) || undefined,
       lobTeam: String(editTeam || '').trim() || undefined,
       teamLeader: String(editTL || '').trim() || undefined
     };
@@ -179,17 +179,18 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
     }
 
     const usernameKey = getUsernameFromFullName(userName);
-    const usernameKeyLower = usernameKey.toLowerCase();
     const cleanPassword = String(newPasswordValue || '').trim();
 
     const updatedCreds = { 
       ...credentials, 
-      [usernameKey]: cleanPassword,
-      [usernameKeyLower]: cleanPassword
+      [usernameKey]: cleanPassword
     };
 
     try {
-      await setDoc(doc(db, "system", "sched_credentials"), { data: updatedCreds });
+      await setDoc(doc(db, "system", "sched_credentials"), { 
+        data: updatedCreds,
+        mustChangePassword: { [usernameKey]: true }
+      }, { merge: true });
       
       // Also automatically unlock if is locked
       await handleUnlock(userName);
@@ -205,15 +206,11 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
   const handleLock = async (userName: string) => {
     const usernameKey = getUsernameFromFullName(userName);
-    const usernameKeyLower = usernameKey.toLowerCase();
 
-    const keysToLock = [usernameKey, usernameKeyLower];
     let updated = [...lockedAccounts];
-    keysToLock.forEach(k => {
-      if (!updated.includes(k)) {
-        updated.push(k);
-      }
-    });
+    if (!updated.includes(usernameKey)) {
+      updated.push(usernameKey);
+    }
 
     try {
       await setDoc(doc(db, "system", "sched_locked_accounts"), { data: updated });
@@ -226,20 +223,15 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
   const handleUnlock = async (userName: string) => {
     const usernameKey = getUsernameFromFullName(userName);
-    const usernameKeyLower = usernameKey.toLowerCase();
 
-    const keysToRemove = [usernameKey, usernameKeyLower];
-
-    const updated = lockedAccounts.filter(name => !keysToRemove.includes(name) && !keysToRemove.includes(name.toLowerCase()));
+    const updated = lockedAccounts.filter(name => name !== usernameKey);
     try {
       await setDoc(doc(db, "system", "sched_locked_accounts"), { data: updated });
       
       // Reset failed attempts as well
       const updatedAttempts = { ...failedAttempts };
-      keysToRemove.forEach(k => {
-        delete updatedAttempts[k];
-        delete updatedAttempts[k.toLowerCase()];
-      });
+      delete updatedAttempts[usernameKey];
+
       await setDoc(doc(db, "system", "sched_failed_attempts"), { data: updatedAttempts });
 
       toast.success(`Unlocked and clear attempts for "${userName}"!`);
@@ -251,15 +243,9 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
   const handleClearAttempts = async (userName: string) => {
     const usernameKey = getUsernameFromFullName(userName);
-    const usernameKeyLower = usernameKey.toLowerCase();
-
-    const keysToRemove = [usernameKey, usernameKeyLower];
 
     const updatedAttempts = { ...failedAttempts };
-    keysToRemove.forEach(k => {
-      delete updatedAttempts[k];
-      delete updatedAttempts[k.toLowerCase()];
-    });
+    delete updatedAttempts[usernameKey];
 
     try {
       await setDoc(doc(db, "system", "sched_failed_attempts"), { data: updatedAttempts });
@@ -281,25 +267,16 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
       await deleteDoc(doc(db, "users", docId));
 
       const usernameKey = getUsernameFromFullName(cleanName);
-      const usernameKeyLower = usernameKey.toLowerCase();
-
-      const keysToRemove = [usernameKey, usernameKeyLower];
 
       // Remove from credentials
       const updatedCreds = { ...credentials };
-      let hadCreds = false;
-      keysToRemove.forEach(k => {
-        if (updatedCreds[k]) {
-          delete updatedCreds[k];
-          hadCreds = true;
-        }
-      });
-      if (hadCreds) {
+      if (updatedCreds[usernameKey]) {
+        delete updatedCreds[usernameKey];
         await setDoc(doc(db, "system", "sched_credentials"), { data: updatedCreds });
       }
 
       // Remove from locked accounts
-      const updatedLocked = lockedAccounts.filter(l => !keysToRemove.includes(l));
+      const updatedLocked = lockedAccounts.filter(l => l !== usernameKey);
       await setDoc(doc(db, "system", "sched_locked_accounts"), { data: updatedLocked });
 
       toast.success(`Fully removed user "${cleanName}"!`);
@@ -518,9 +495,9 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
             <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
               {filteredUsers.map((user) => {
                 const uname = getUsernameFromFullName(user.name);
-                const hasPassword = !!(credentials[uname] || credentials[uname.toLowerCase()]);
-                const isUserLocked = lockedAccounts.includes(uname) || lockedAccounts.includes(uname.toLowerCase());
-                const failureCount = failedAttempts[uname] || failedAttempts[uname.toLowerCase()] || 0;
+                const hasPassword = !!(credentials[uname]);
+                const isUserLocked = lockedAccounts.includes(uname);
+                const failureCount = failedAttempts[uname] || 0;
 
                 const isEditing = editingUserId === user.id;
                 
@@ -668,7 +645,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                                 </span>
                                 <span>{user.email || 'No Email'}</span>
                                 {user.phone && <span className="text-emerald-400 font-mono">• {user.phone}</span>}
-                                {user.lob && <span>• <span className="text-indigo-300 font-semibold">{user.lob}</span></span>}
+                                {normalizeAgentLob(user.lob, user.role) && <span>• <span className="text-indigo-300 font-semibold">{normalizeAgentLob(user.lob, user.role)}</span></span>}
                               </p>
                             </div>
                           </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { normalizeAgentLob } from '../utils';
 import { 
   Calendar, 
   Clock, 
@@ -15,7 +16,7 @@ import {
 } from 'lucide-react';
 
 interface DashboardSummaryProps {
-  currentUser: { name: string; role: string };
+  currentUser: { name: string; role: string; teamLeader?: string; lob?: string };
   myNextShift: any;
   pendingRequestsCount: number;
   activeCasesCount: number;
@@ -25,6 +26,7 @@ interface DashboardSummaryProps {
   onNavigate: (tab: string) => void;
   onCardClick?: (cardType: 'queue' | 'qa' | 'inquiry' | 'fintech') => void;
   announcements?: any[];
+  agentMeta?: Record<string, { tlName?: string; roleType?: string }>;
 }
 
 export const DashboardSummary: React.FC<DashboardSummaryProps> = ({ 
@@ -37,7 +39,8 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
   qaScores = [],
   onNavigate,
   onCardClick,
-  announcements = []
+  announcements = [],
+  agentMeta = {}
 }) => {
   const isAgent = ['agent', 'sme'].includes(currentUser.role as string);
   const isTL = currentUser.role === 'tl';
@@ -133,7 +136,32 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
               </div>
               <div>
                 <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em]">Operational Overview</p>
-                <h2 className="text-2xl font-black text-white tracking-tight">Salam, {(currentUser?.name || '').split(' ')[0]}</h2>
+                <h2 className="text-2xl font-black text-white tracking-tight">Salam, {(currentUser?.name || '').split(' ')[0]} 👋</h2>
+                <p className="text-sm text-indigo-200 mt-1">{currentUser?.name}</p>
+                
+                {currentUser?.role === 'agent' && (currentUser?.teamLeader || agentMeta?.[currentUser.name]?.tlName) && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
+                    <span className="text-xs text-indigo-300 font-medium">
+                      Direct Manager: {currentUser?.teamLeader || agentMeta?.[currentUser.name]?.tlName}
+                    </span>
+                  </div>
+                )}
+                
+                {currentUser?.role === 'tl' && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <Users className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-xs text-emerald-300 font-medium">Team Leader</span>
+                  </div>
+                )}
+
+                {currentUser?.role === 'agent' && normalizeAgentLob(currentUser?.lob, currentUser?.role) && (
+                  <div className="mt-2">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                      {normalizeAgentLob(currentUser.lob, currentUser.role) === 'Call Center' ? '📞 Call Center' : '💬 Chat'}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
             <p className="text-indigo-100/80 text-sm max-w-md leading-relaxed mt-4">
