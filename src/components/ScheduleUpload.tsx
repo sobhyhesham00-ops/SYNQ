@@ -246,7 +246,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
             Import Schedule Roster
           </h2>
           <p className="text-slate-400 text-xs mt-0.5">
-            Supported formats: Excel (.xlsx, .xls, .xlsm), OpenDocument (.ods), Numbers, and Plain (.csv, .tsv, .txt)
+            Supported formats: Any file type (Excel .xlsx, .xls, .xlsm, OpenDocument .ods, Numbers, CSV, TSV, TXT, or any other file format)
           </p>
         </div>
       </div>
@@ -265,7 +265,6 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
       >
         <input
           type="file"
-          accept=".xlsx,.xls,.csv,.tsv,.txt,.xlsm,.ods,.numbers"
           onChange={handleChange}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
         />
@@ -280,10 +279,13 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
             <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-transform ${dragActive ? 'bg-indigo-500 text-white scale-110' : 'bg-slate-800 text-slate-400'}`}>
               <Upload className="w-5 h-5" />
             </div>
-            <h4 className="text-slate-200 font-bold text-sm mb-0.5">Drag & drop your roster file here</h4>
+            <h4 className="text-slate-200 font-bold text-sm mb-0.5">Drag & drop your roster or any schedule file here</h4>
             <p className="text-slate-500 text-xs mb-3">or click to browse from your device</p>
             <div className="flex flex-wrap justify-center gap-1.5">
-              {['.XLSX', '.XLS', '.XLSM', '.ODS', '.NUMBERS', '.CSV', '.TSV', '.TXT'].map(fType => (
+              <span className="px-2.5 py-1 bg-indigo-500/10 rounded-lg text-[10px] font-extrabold font-sans text-indigo-300 border border-indigo-500/20 uppercase tracking-wide">
+                ⭐ Any File Supported
+              </span>
+              {['.XLSX', '.XLS', '.CSV', '.TXT', 'ALL FORMATS'].map(fType => (
                 <span key={fType} className="px-2 py-0.5 bg-slate-900 rounded text-[9px] font-mono text-slate-400 border border-slate-800">
                   {fType}
                 </span>

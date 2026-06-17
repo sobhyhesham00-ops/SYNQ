@@ -21701,7 +21701,7 @@ ${ttNotes}`
                             </p>
                           </div>
 
-                          {isSuperAdmin && (
+                          {(isSuperAdmin || isTLOreSupport || currentUser?.role === "tl") && (
                             <button
                               onClick={clearTargetSchedules}
                               className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 hover:border-rose-500/35 text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer self-stretch md:self-auto justify-center"
@@ -21713,7 +21713,7 @@ ${ttNotes}`
                         </div>
 
                         {/* Schedule Upload Module */}
-                        {isSuperAdmin && (
+                        {(isSuperAdmin || isTLOreSupport || currentUser?.role === "tl") && (
                           <div className="w-full">
                             <ScheduleUpload
                               agentsList={agentsList}
@@ -21740,7 +21740,7 @@ ${ttNotes}`
                         )}
 
                         {/* Roster Live Toggle Switch purely for Hesham & Amira */}
-                        {isSuperAdmin && (
+                        {(isSuperAdmin || isTLOreSupport || currentUser?.role === "tl") && (
                           <div className="bg-gradient-to-r from-violet-500/15 via-indigo-500/10 to-blue-500/15 border border-indigo-500/30 rounded-3xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 shadow-xl">
                             <div className="space-y-1 text-left">
                               <div className="flex items-center gap-2">
@@ -21796,7 +21796,7 @@ ${ttNotes}`
                         )}
 
                         {/* Manual Single-Shift Roster Submission Form */}
-                        {isSuperAdmin && (
+                        {(isSuperAdmin || isTLOreSupport || currentUser?.role === "tl") && (
                           <div className="bg-white/5 border border-white/10 rounded-3xl shadow-sm text-slate-100 p-6 shadow-2xl space-y-5 text-left">
                             <div>
                               <h3 className="font-extrabold text-slate-100 text-base font-display flex items-center gap-2">
