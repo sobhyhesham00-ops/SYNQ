@@ -928,44 +928,79 @@ export default function App() {
     const fetchWeather = async () => {
       if (!isMountedRef.current) return;
       try {
-        const cached = localStorage.getItem("sched_ramadan_weather_cache");
+        const cached = localStorage.getItem("sched_dual_weather_cache2");
         if (cached) {
           const parsed = JSON.parse(cached);
           if (Date.now() - parsed.timestamp < 30 * 60 * 1000) {
-            setRamadanTemp(parsed.temp);
-            setRamadanWeatherCode(parsed.code);
+            setRamadanTemp(parsed.ramadanTemp);
+            setRamadanWeatherCode(parsed.ramadanWeatherCode);
+            setUaeTemp(parsed.uaeTemp);
+            setUaeWeatherCode(parsed.uaeWeatherCode);
             return;
           }
         }
 
-        const res = await fetch(
-          "https://api.open-meteo.com/v1/forecast?latitude=30.30&longitude=31.75&current_weather=true",
-        );
-        const data = await res.json();
-        if (data && data.current_weather) {
-          const temp = data.current_weather.temperature;
-          const code = data.current_weather.weathercode;
-          setRamadanTemp(temp);
-          setRamadanWeatherCode(code);
-          localStorage.setItem(
-            "sched_ramadan_weather_cache",
-            JSON.stringify({
-              timestamp: Date.now(),
-              temp,
-              code,
-            }),
-          );
+        const [egyptRes, uaeRes] = await Promise.all([
+          fetch("https://api.open-meteo.com/v1/forecast?latitude=30.30&longitude=31.75&current_weather=true"),
+          fetch("https://api.open-meteo.com/v1/forecast?latitude=25.2048&longitude=55.2708&current_weather=true")
+        ]);
+
+        const egyptData = await egyptRes.json();
+        const uaeData = await uaeRes.json();
+
+        let rTemp = 28;
+        let rCode = 0;
+        let uTemp = 35;
+        let uCode = 0;
+
+        if (egyptData && egyptData.current_weather) {
+          rTemp = egyptData.current_weather.temperature;
+          rCode = egyptData.current_weather.weathercode;
         }
+        if (uaeData && uaeData.current_weather) {
+          uTemp = uaeData.current_weather.temperature;
+          uCode = uaeData.current_weather.weathercode;
+        }
+
+        setRamadanTemp(rTemp);
+        setRamadanWeatherCode(rCode);
+        setUaeTemp(uTemp);
+        setUaeWeatherCode(uCode);
+
+        localStorage.setItem(
+          "sched_dual_weather_cache2",
+          JSON.stringify({
+            timestamp: Date.now(),
+            ramadanTemp: rTemp,
+            ramadanWeatherCode: rCode,
+            uaeTemp: uTemp,
+            uaeWeatherCode: uCode,
+          })
+        );
       } catch (e) {
-        // Silently fall back to default weather values to prevent console spam
+        // Fallbacks
         const hr = new Date().getHours();
-        let fallbackTemp = 28;
-        if (hr >= 11 && hr <= 16) fallbackTemp = 32;
-        else if (hr >= 17 && hr <= 20) fallbackTemp = 29;
-        else if (hr >= 21 || hr <= 5) fallbackTemp = 23;
-        else fallbackTemp = 25;
-        setRamadanTemp(fallbackTemp);
+        let fallbackRamadanTemp = 28;
+        let fallbackUaeTemp = 35;
+
+        if (hr >= 11 && hr <= 16) {
+          fallbackRamadanTemp = 32;
+          fallbackUaeTemp = 39;
+        } else if (hr >= 17 && hr <= 20) {
+          fallbackRamadanTemp = 29;
+          fallbackUaeTemp = 36;
+        } else if (hr >= 21 || hr <= 5) {
+          fallbackRamadanTemp = 23;
+          fallbackUaeTemp = 30;
+        } else {
+          fallbackRamadanTemp = 25;
+          fallbackUaeTemp = 32;
+        }
+
+        setRamadanTemp(fallbackRamadanTemp);
         setRamadanWeatherCode(0);
+        setUaeTemp(fallbackUaeTemp);
+        setUaeWeatherCode(0);
       }
     };
 
@@ -1578,6 +1613,24 @@ export default function App() {
         },
       );
 
+      const unsubDeletedUsers = onSnapshot(
+        doc(db, "system", "sched_deleted_users"),
+        (snap) => {
+          if (snap.exists()) {
+            const data = snap.data().data || [];
+            setDeletedUsers(data);
+            setStorageItem("sched_deleted_users", data, false);
+          }
+        },
+        (error) => {
+          console.error(
+            "sched_deleted_users snapshot error:",
+            error.code,
+            error.message,
+          );
+        },
+      );
+
       const unsubFailedAttempts = onSnapshot(
         doc(db, "system", "sched_failed_attempts"),
         (snap) => {
@@ -1793,19 +1846,12 @@ export default function App() {
   );
 
   // Theme support
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    const saved = localStorage.getItem("theme_mode");
-    return saved !== "light";
-  });
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
 
   useEffect(() => {
-    if (isDarkMode) {
-      document.body.classList.remove("theme-light");
-    } else {
-      document.body.classList.add("theme-light");
-    }
-    localStorage.setItem("theme_mode", isDarkMode ? "dark" : "light");
-  }, [isDarkMode]);
+    document.body.classList.remove("theme-light");
+    localStorage.setItem("theme_mode", "dark");
+  }, []);
 
   // Auth States
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
@@ -2207,6 +2253,9 @@ export default function App() {
   });
 
   // Known Agent Names (can grow if user adds/registers new custom names)
+  const [deletedUsers, setDeletedUsers] = useState<string[]>(() => {
+    return getStorageItem<string[]>("sched_deleted_users", []);
+  });
   const [agentsList, setAgentsList] = useState<string[]>(INITIAL_AGENTS);
   const [selectedPendingRequests, setSelectedPendingRequests] = useState<
     Set<string>
@@ -2265,10 +2314,15 @@ export default function App() {
       }
     });
 
-    const sortedList = Array.from(uniqueNames).sort();
+    const sortedList = Array.from(uniqueNames)
+      .filter((name) => {
+        const uname = getUsernameFromFullName ? getUsernameFromFullName(name) : name.toLowerCase().replace(/[^a-z0-9]/g, "");
+        return !deletedUsers.includes(uname) && !deletedUsers.includes(name.toLowerCase());
+      })
+      .sort();
     setAgentsList(sortedList);
     setStorageItem("sched_agents_list", sortedList);
-  }, [registeredUsers, agentDirectory]);
+  }, [registeredUsers, agentDirectory, deletedUsers]);
 
   const [agentMeta, setAgentMeta] = useState<
     Record<string, { roleType: string; tlName: string }>
@@ -3276,6 +3330,11 @@ ${pageText}
   // 10th of Ramadan Weather States
   const [ramadanTemp, setRamadanTemp] = useState<number | null>(null);
   const [ramadanWeatherCode, setRamadanWeatherCode] = useState<number>(0);
+  const [uaeTemp, setUaeTemp] = useState<number | null>(null);
+  const [uaeWeatherCode, setUaeWeatherCode] = useState<number>(0);
+  const [selectedWeatherLoc, setSelectedWeatherLoc] = useState<"both" | "egypt" | "uae">(() => {
+    return getStorageItem<"both" | "egypt" | "uae">("sched_weather_location_pref", "both");
+  });
 
   // Tabby/Tamara form inputs
   const [ttPatientName, setTtPatientName] = useState("");
@@ -3401,6 +3460,13 @@ ${pageText}
   const [dirSearch, setDirSearch] = useState("");
   const [dirPage, setDirPage] = useState(0);
   const DIR_PAGE_SIZE = 25;
+
+  // Headcount / Directory Editing & Multi-select States
+  const [selectedAgentIds, setSelectedAgentIds] = useState<string[]>([]);
+  const [editingAgentId, setEditingAgentId] = useState<string | null>(null);
+  const [editAgentFields, setEditAgentFields] = useState<Record<string, string>>({});
+  const [bulkEditField, setBulkEditField] = useState<string>("Team Leader");
+  const [bulkEditVal, setBulkEditVal] = useState<string>("");
 
   // KPI Calculator States
   const [kpiMaxBonus, setKpiMaxBonus] = useState<number>(3000);
@@ -8433,6 +8499,252 @@ ${ttNotes}`
     return;
   };
 
+  const handleDeleteSyntheticUser = async (name: string) => {
+    const uname = getUsernameFromFullName(name);
+    const updated = Array.from(new Set([...deletedUsers, uname, name.toLowerCase()]));
+    try {
+      await setDoc(doc(db, "system", "sched_deleted_users"), { data: updated });
+      setDeletedUsers(updated);
+      setStorageItem("sched_deleted_users", updated);
+      toast.success(`Synthetic user "${name}" removed from the system!`);
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Failed to delete synthetic user profile.");
+    }
+  };
+
+  const handleDeleteHeadcountRow = async (id: string, name: string) => {
+    if (!window.confirm(`Are you absolutely sure you want to delete or exclude "${name}" from Headcount?`)) {
+      return;
+    }
+
+    try {
+      // 1. Remove from agentDirectory if exists
+      const inDir = agentDirectory.some(item => item.id === id);
+      if (inDir) {
+        const updatedDir = agentDirectory.filter(item => item.id !== id);
+        setAgentDirectory(updatedDir);
+        setStorageItem("sched_agent_directory", updatedDir);
+        await setDoc(doc(db, "system", "sched_agent_directory"), { data: updatedDir });
+      }
+
+      // 2. Remove from users collection on Firebase (registeredUsers is real users loaded from Firestore)
+      const isRegistered = registeredUsers.some(u => u.id === id || u.name?.toLowerCase() === name.toLowerCase());
+      if (isRegistered) {
+        const docId = id;
+        await deleteDoc(doc(db, "users", docId));
+      } else {
+        // If it's a synthetic user, add to deletedUsers
+        await handleDeleteSyntheticUser(name);
+      }
+
+      toast.success(`Successfully removed "${name}" from Headcount & syncing directories!`);
+    } catch (e: any) {
+      console.error(e);
+      toast.error(`Deletion failed: ${e.message}`);
+    }
+  };
+
+  const handleSaveInlineEdit = async (id: string, isFromDir: boolean) => {
+    try {
+      if (isFromDir) {
+        const row = agentDirectory.find(item => item.id === id);
+        if (!row) return;
+
+        const updatedName = editAgentFields.agentName || row.agentName;
+        const updatedData = { ...row.data };
+        (directoryHeaders || []).forEach(header => {
+          if (editAgentFields[header] !== undefined) {
+            updatedData[header] = editAgentFields[header];
+          }
+        });
+
+        const updatedDir = agentDirectory.map(item => {
+          if (item.id === id) {
+            return { ...item, agentName: updatedName, data: updatedData };
+          }
+          return item;
+        });
+
+        setAgentDirectory(updatedDir);
+        setStorageItem("sched_agent_directory", updatedDir);
+        await setDoc(doc(db, "system", "sched_agent_directory"), { data: updatedDir });
+
+        const userDocId = updatedName.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+        const emailHeader = (directoryHeaders || []).find(h => ["email", "mail"].includes(String(h || "").toLowerCase().trim()));
+        const phoneHeader = (directoryHeaders || []).find(h => ["phone", "mobile"].includes(String(h || "").toLowerCase().trim()));
+        const lobHeader = (directoryHeaders || []).find(h => ["lob", "line of business"].includes(String(h || "").toLowerCase().trim()));
+        const teamHeader = (directoryHeaders || []).find(h => ["lob team", "team"].includes(String(h || "").toLowerCase().trim()));
+        const roleHeader = (directoryHeaders || []).find(h => ["role", "job title"].includes(String(h || "").toLowerCase().trim()));
+        const tlHeader = (directoryHeaders || []).find(h => ["tl", "team leader", "manager"].includes(String(h || "").toLowerCase().trim()));
+
+        const emailVal = emailHeader ? updatedData[emailHeader] : "";
+        const phoneVal = phoneHeader ? updatedData[phoneHeader] : "";
+        const lobVal = lobHeader ? updatedData[lobHeader] : "";
+        const lobTeamVal = teamHeader ? updatedData[teamHeader] : "";
+        const roleVal = roleHeader ? updatedData[roleHeader] : "agent";
+        const tlVal = tlHeader ? updatedData[tlHeader] : "";
+
+        await setDoc(doc(db, "users", userDocId), {
+          id: userDocId,
+          name: updatedName,
+          email: emailVal || undefined,
+          phone: phoneVal || undefined,
+          lob: lobVal || undefined,
+          lobTeam: lobTeamVal || undefined,
+          role: roleVal || "agent",
+          teamLeader: tlVal || undefined,
+          directoryData: updatedData
+        }, { merge: true });
+
+      } else {
+        const user = registeredUsers.find(item => item.id === id);
+        if (!user) return;
+
+        const updatedName = editAgentFields.name || user.name;
+        const userDocId = updatedName.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+
+        const emailVal = editAgentFields.email !== undefined ? editAgentFields.email : (user.email || "");
+        const phoneVal = editAgentFields.phone !== undefined ? editAgentFields.phone : (user.phone || "");
+        const lobVal = editAgentFields.lob !== undefined ? editAgentFields.lob : (user.lob || "");
+        const lobTeamVal = editAgentFields.lobTeam !== undefined ? editAgentFields.lobTeam : (user.lobTeam || "");
+        const roleVal = editAgentFields.role !== undefined ? editAgentFields.role : (user.role || "agent");
+        const tlVal = editAgentFields.teamLeader !== undefined ? editAgentFields.teamLeader : (user.teamLeader || "");
+
+        if (userDocId !== id) {
+          await deleteDoc(doc(db, "users", id));
+        }
+
+        await setDoc(doc(db, "users", userDocId), {
+          id: userDocId,
+          name: updatedName,
+          email: emailVal || undefined,
+          phone: phoneVal || undefined,
+          lob: lobVal || undefined,
+          lobTeam: lobTeamVal || undefined,
+          role: roleVal,
+          teamLeader: tlVal || undefined
+        }, { merge: true });
+      }
+
+      toast.success("Successfully updated agent details!");
+      setEditingAgentId(null);
+    } catch (e: any) {
+      console.error(e);
+      toast.error(`Failed to update agent: ${e.message}`);
+    }
+  };
+
+  const handleBulkEditSelected = async () => {
+    if (selectedAgentIds.length === 0) {
+      toast.error("No agents selected!");
+      return;
+    }
+    if (!bulkEditVal.trim()) {
+      toast.error("Please specify a new value!");
+      return;
+    }
+
+    try {
+      const fieldToUpdate = bulkEditField;
+      const valToSet = bulkEditVal.trim();
+
+      let updatedDir = [...agentDirectory];
+      let dirModified = false;
+
+      for (const id of selectedAgentIds) {
+        const dirIdx = updatedDir.findIndex(item => item.id === id);
+        if (dirIdx !== -1) {
+          dirModified = true;
+          const row = updatedDir[dirIdx];
+          const updatedData = { ...row.data };
+          
+          let targetKey = fieldToUpdate;
+          const matchingKey = Object.keys(updatedData).find(
+            k => k.toLowerCase().trim() === fieldToUpdate.toLowerCase().trim()
+          );
+          if (matchingKey) {
+            targetKey = matchingKey;
+          }
+          updatedData[targetKey] = valToSet;
+          updatedDir[dirIdx] = { ...row, data: updatedData };
+
+          const userDocId = row.agentName.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+          const matchingUser = registeredUsers.find(u => u.name?.toLowerCase() === row.agentName.toLowerCase());
+          
+          let userProfile: any = matchingUser ? { ...matchingUser } : {
+            id: userDocId,
+            name: row.agentName,
+            role: "agent"
+          };
+
+          const fk = fieldToUpdate.toLowerCase();
+          if (fk.includes("leader") || fk === "tl") {
+            userProfile.teamLeader = valToSet;
+          } else if (fk.includes("team") || fk === "lobteam") {
+            userProfile.lobTeam = valToSet;
+          } else if (fk === "lob" || fk.includes("channel") || fk.includes("business")) {
+            userProfile.lob = valToSet;
+          } else if (fk === "role" || fk.includes("title")) {
+            userProfile.role = valToSet;
+          } else if (fk === "email" || fk === "mail") {
+            userProfile.email = valToSet;
+          }
+
+          userProfile.directoryData = updatedData;
+          await setDoc(doc(db, "users", userDocId), userProfile, { merge: true });
+        }
+
+        const user = registeredUsers.find(u => u.id === id);
+        if (user) {
+          const userDocId = user.id;
+          const userProfile = { ...user };
+          
+          const fk = fieldToUpdate.toLowerCase();
+          if (fk.includes("leader") || fk === "tl") {
+            userProfile.teamLeader = valToSet;
+          } else if (fk.includes("team") || fk === "lobteam") {
+            userProfile.lobTeam = valToSet;
+          } else if (fk === "lob" || fk.includes("channel") || fk.includes("business")) {
+            userProfile.lob = valToSet;
+          } else if (fk === "role" || fk.includes("title")) {
+            userProfile.role = valToSet;
+          } else if (fk === "email" || fk === "mail") {
+            userProfile.email = valToSet;
+          }
+
+          if (userProfile.directoryData) {
+            const updatedData = { ...userProfile.directoryData };
+            let targetKey = fieldToUpdate;
+            const matchingKey = Object.keys(updatedData).find(
+              k => k.toLowerCase().trim() === fieldToUpdate.toLowerCase().trim()
+            );
+            if (matchingKey) {
+              targetKey = matchingKey;
+            }
+            updatedData[targetKey] = valToSet;
+            userProfile.directoryData = updatedData;
+          }
+
+          await setDoc(doc(db, "users", userDocId), userProfile, { merge: true });
+        }
+      }
+
+      if (dirModified) {
+        setAgentDirectory(updatedDir);
+        setStorageItem("sched_agent_directory", updatedDir);
+        await setDoc(doc(db, "system", "sched_agent_directory"), { data: updatedDir });
+      }
+
+      toast.success(`Successfully updated ${selectedAgentIds.length} agents bulk edit!`);
+      setSelectedAgentIds([]);
+      setBulkEditVal("");
+    } catch (e: any) {
+      console.error(e);
+      toast.error(`Bulk edit failed: ${e.message}`);
+    }
+  };
+
   const downloadFullXLSX = () => {
     const data = requests.map((r) => ({
       ID: r.id,
@@ -9521,22 +9833,171 @@ ${ttNotes}`
           /* User Logged In Portal */
           <div className="flex-1 flex flex-col gap-6 my-4 lg:my-6">
             {/* Global Workspace Header / Navbar with Global Search */}
-            <header className="w-full bg-[#14141a]/60 backdrop-blur-xl border border-white/10 p-4 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl relative z-40">
+            <header className="w-full bg-[#14141a]/60 backdrop-blur-xl border border-white/10 p-4 rounded-3xl flex flex-col xl:flex-row xl:items-center justify-between gap-4 shadow-xl relative z-40">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-black/40 rounded-xl flex items-center justify-center border border-white/10 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-indigo-500/10 blur animate-pulse" />
-                  <CoolLogo className="w-6 h-6 z-10" showText={false} />
-                </div>
                 <div className="text-left">
-                  <h1 className="text-sm font-black tracking-tight text-slate-100 font-display flex items-center gap-1.5">
-                    Welcome, {currentUser.name.split(' ')[0]}!{" "}
-                    <span className="text-[9px] uppercase tracking-wider font-extrabold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full font-sans">
-                      CONSOLE
-                    </span>
-                  </h1>
+                  <motion.div
+                    initial={{ opacity: 0, x: -15 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 15 }}
+                    transition={{ duration: 0.65, ease: "easeOut" }}
+                  >
+                    <h1 className="text-sm font-black tracking-tight text-slate-100 font-display flex items-center gap-1.5 flex-wrap">
+                      <span>Welcome,</span>
+                      <motion.span
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ delay: 0.15, duration: 0.45 }}
+                        className="text-cyan-400 font-black relative drop-shadow-[0_0_10px_rgba(34,211,238,0.2)]"
+                      >
+                        {currentUser.name.split(' ')[0]}
+                      </motion.span>!{" "}
+                      <span className="text-[9px] uppercase tracking-wider font-extrabold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full font-sans">
+                        CONSOLE
+                      </span>
+                    </h1>
+                  </motion.div>
                   <p className="text-[10px] text-slate-500 font-mono font-bold tracking-tight">
                     Active Portal Access
                   </p>
+                </div>
+              </div>
+
+              {/* Timezones & Weather Active Control Selector */}
+              <div id="timezone-weather-selector" className="flex flex-col sm:flex-row items-center gap-3 bg-black/40 border border-white/10 rounded-2xl p-1.5 self-start xl:self-auto shadow-inner">
+                <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedWeatherLoc("both");
+                      localStorage.setItem("sched_weather_location_pref", "both");
+                    }}
+                    className={`px-2.5 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer ${
+                      selectedWeatherLoc === "both"
+                        ? "bg-gradient-to-r from-indigo-600 to-cyan-500 text-white shadow-md shadow-indigo-500/20"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    All Zones
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedWeatherLoc("egypt");
+                      localStorage.setItem("sched_weather_location_pref", "egypt");
+                    }}
+                    className={`px-2.5 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                      selectedWeatherLoc === "egypt"
+                        ? "bg-[#C2185B] text-white shadow-md"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    🇪🇬 Cairo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedWeatherLoc("uae");
+                      localStorage.setItem("sched_weather_location_pref", "uae");
+                    }}
+                    className={`px-2.5 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                      selectedWeatherLoc === "uae"
+                        ? "bg-emerald-600 text-white shadow-md"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    🇦🇪 UAE
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-4 px-2">
+                  <AnimatePresence mode="wait">
+                    {/* EGYPT DISPLAY */}
+                    {(selectedWeatherLoc === "both" || selectedWeatherLoc === "egypt") && (
+                      <motion.div
+                        key="egypt-disp"
+                        initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 4 }}
+                        transition={{ duration: 0.25 }}
+                        className="flex items-center gap-2"
+                      >
+                        <div className="text-left font-mono">
+                          <div className="text-[8px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.1">
+                            <span>🇪🇬 Cairo</span>
+                            <span className="w-1 h-1 rounded-full bg-[#10B981] animate-pulse" />
+                          </div>
+                          <div className="text-xs font-black text-slate-200">
+                            {currentTime.toLocaleTimeString("en-US", {
+                              timeZone: "Africa/Cairo",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true,
+                            })}
+                          </div>
+                        </div>
+
+                        {ramadanTemp !== null && (
+                          <div className="flex items-center gap-1 text-[11px] font-mono text-[#FCD34D] bg-[#FCD34D]/5 border border-[#FCD34D]/15 px-1.5 py-0.5 rounded-lg select-none">
+                            {ramadanWeatherCode === 0 ? (
+                              <Sun className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                            ) : ramadanWeatherCode < 3 ? (
+                              <Sun className="w-3.5 h-3.5 text-amber-400" />
+                            ) : (
+                              <Cloudy className="w-3.5 h-3.5 text-slate-400" />
+                            )}
+                            <span className="font-bold">{ramadanTemp.toFixed(1)}°C</span>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+
+                    {/* SEPARATOR */}
+                    {selectedWeatherLoc === "both" && (
+                      <div className="h-5 w-px bg-white/10 shrink-0 self-center" key="separator-line" />
+                    )}
+
+                    {/* UAE DISPLAY */}
+                    {(selectedWeatherLoc === "both" || selectedWeatherLoc === "uae") && (
+                      <motion.div
+                        key="uae-disp"
+                        initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 4 }}
+                        transition={{ duration: 0.25 }}
+                        className="flex items-center gap-2"
+                      >
+                        <div className="text-left font-mono">
+                          <div className="text-[8px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.1">
+                            <span>🇦🇪 Dubai</span>
+                            <span className="w-1 h-1 rounded-full bg-cyan-400 animate-pulse" />
+                          </div>
+                          <div className="text-xs font-black text-slate-200">
+                            {currentTime.toLocaleTimeString("en-US", {
+                              timeZone: "Asia/Dubai",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true,
+                            })}
+                          </div>
+                        </div>
+
+                        {uaeTemp !== null && (
+                          <div className="flex items-center gap-1 text-[11px] font-mono text-[#60A5FA] bg-[#60A5FA]/5 border border-[#60A5FA]/15 px-1.5 py-0.5 rounded-lg select-none">
+                            {uaeWeatherCode === 0 ? (
+                              <Sun className="w-3.5 h-3.5 text-orange-400 animate-pulse" />
+                            ) : uaeWeatherCode < 3 ? (
+                              <Sun className="w-3.5 h-3.5 text-orange-400" />
+                            ) : (
+                              <Cloudy className="w-3.5 h-3.5 text-slate-300" />
+                            )}
+                            <span className="font-bold">{uaeTemp.toFixed(1)}°C</span>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
 
@@ -9826,33 +10287,11 @@ ${ttNotes}`
                           <span className="text-[9px] text-indigo-300 font-extrabold uppercase tracking-wide">
                             Work Portal
                           </span>
-                          <div className="flex items-center gap-1 px-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-[7px] font-black text-emerald-400 uppercase tracking-tighter">
-                            <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                            Online
-                          </div>
                         </div>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                      {/* Dark/Light mode toggle */}
-                      <button
-                        onClick={() => {
-                          setIsDarkMode(!isDarkMode);
-                          toast.success(
-                            `Theme switched to ${!isDarkMode ? "Dark" : "Light"} Mode! `,
-                          );
-                        }}
-                        className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-slate-300 hover:text-slate-101 cursor-pointer flex items-center justify-center shrink-0 w-10 h-10 shadow-md shadow-black/20"
-                        title="Toggle Dark/Light Mode"
-                      >
-                        {isDarkMode ? (
-                          <Sun className="w-4 h-4 text-amber-400" />
-                        ) : (
-                          <Moon className="w-4 h-4 text-indigo-500" />
-                        )}
-                      </button>
-
                       {/* Notification Center Trigger */}
                       <button
                         onClick={() => setIsNotifDrawerOpen(true)}
@@ -25768,6 +26207,8 @@ ${ttNotes}`
                         failedAttempts={failedAttempts}
                         onResetAllData={handleResetAllData}
                         TRIGGER_CURRENT_APP_VERSION={CURRENT_APP_VERSION}
+                        deletedUsers={deletedUsers}
+                        onDeleteSyntheticUser={handleDeleteSyntheticUser}
                       />
                     )}
 
@@ -25991,410 +26432,528 @@ ${ttNotes}`
                                 </div>
                               </div>
                             )}
+                            {isSuperAdmin && selectedAgentIds.length > 0 && (
+                              <div className="bg-cyan-950/20 border border-cyan-500/20 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+                                <div className="flex items-center gap-2 text-cyan-300 font-bold text-sm">
+                                  <Users className="w-5 h-5 text-cyan-400" />
+                                  <span>Selected <span className="text-white bg-cyan-600 px-2 py-0.5 rounded-full text-xs">{selectedAgentIds.length}</span> agents to bulk edit</span>
+                                </div>
+                                <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
+                                  <span className="text-xs text-slate-400">Update</span>
+                                  <select
+                                    value={bulkEditField}
+                                    onChange={(e) => setBulkEditField(e.target.value)}
+                                    className="bg-black/40 border border-white/15 text-slate-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none cursor-pointer"
+                                  >
+                                    <option value="Team Leader">Team Leader</option>
+                                    <option value="LOB">LOB / Channel</option>
+                                    <option value="LOB Team">LOB Team</option>
+                                    <option value="Role">Role</option>
+                                    <option value="Email">Email</option>
+                                  </select>
+                                  <span className="text-xs text-slate-400">to</span>
+                                  <input
+                                    type="text"
+                                    value={bulkEditVal}
+                                    onChange={(e) => setBulkEditVal(e.target.value)}
+                                    placeholder="e.g. Aly Ibrahim"
+                                    className="bg-black/40 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none w-full sm:w-48"
+                                  />
+                                  <button
+                                    onClick={handleBulkEditSelected}
+                                    className="px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-black transition-all cursor-pointer shadow"
+                                  >
+                                    Apply Update
+                                  </button>
+                                  <button
+                                    onClick={() => setSelectedAgentIds([])}
+                                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-bold rounded-xl text-xs transition-all cursor-pointer"
+                                  >
+                                    Clear
+                                  </button>
+                                </div>
+                              </div>
+                            )}
 
                             <div className="bg-white/5 border border-white/10 rounded-3xl p-6 shadow-sm overflow-x-auto">
                               <table className="w-full text-left text-xs text-slate-300 whitespace-nowrap">
                                 <thead className="text-slate-400 bg-white/5 text-[10px] uppercase font-bold tracking-wider">
                                   <tr>
+                                    {isSuperAdmin && (
+                                      <th className="p-4 w-10">
+                                        <input
+                                          type="checkbox"
+                                          checked={pagedDir.length > 0 && pagedDir.every(item => selectedAgentIds.includes(item.id))}
+                                          onChange={(e) => {
+                                            if (e.target.checked) {
+                                              const pageIds = pagedDir.map(item => item.id);
+                                              setSelectedAgentIds(prev => Array.from(new Set([...prev, ...pageIds])));
+                                            } else {
+                                              const pageIds = pagedDir.map(item => item.id);
+                                              setSelectedAgentIds(prev => prev.filter(id => !pageIds.includes(id)));
+                                            }
+                                          }}
+                                          className="rounded border-white/20 bg-black/40 text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4"
+                                        />
+                                      </th>
+                                    )}
                                     <th className="p-4 rounded-l-xl w-12">#</th>
-                                    <th className="p-4">Agent Name</th>
+                                    <th className="p-4 font-bold">Agent Name</th>
                                     <th className="p-4">App Username</th>
                                     {(directoryHeaders || []).length > 0 ? (
-                                      (directoryHeaders || []).map(
-                                        (header, hIdx) => {
-                                          const isLast =
-                                            hIdx ===
-                                            (directoryHeaders || []).length - 1;
-                                          return (
-                                            <th
-                                              key={hIdx}
-                                              className={`p-4 ${isLast ? "rounded-r-xl" : ""}`}
-                                            >
-                                              {header}
-                                            </th>
-                                          );
-                                        },
-                                      )
+                                      <>
+                                        {(directoryHeaders || []).map((header, hIdx) => (
+                                          <th key={hIdx} className="p-4">{header}</th>
+                                        ))}
+                                      </>
                                     ) : (
                                       <>
                                         <th className="p-4">Email</th>
                                         <th className="p-4">Phone</th>
-                                        <th className="p-4">LOB</th>
+                                        <th className="p-4">LOB (Channel)</th>
                                         <th className="p-4">LOB Team</th>
                                         <th className="p-4">Role</th>
-                                        <th className="p-4 rounded-r-xl">
-                                          Team Leader
-                                        </th>
+                                        <th className="p-4">Team Leader</th>
                                       </>
+                                    )}
+                                    {isSuperAdmin && (
+                                      <th className="p-4 rounded-r-xl w-28 text-center">Actions</th>
                                     )}
                                   </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5 font-medium">
                                   {pagedDir && pagedDir.length > 0
                                     ? pagedDir.map((item: any, pagedIdx) => {
-                                        const idx =
-                                          dirPage * DIR_PAGE_SIZE + pagedIdx;
+                                        const idx = dirPage * DIR_PAGE_SIZE + pagedIdx;
                                         const isRow = "agentName" in item;
+                                        const isEditing = editingAgentId === item.id;
 
                                         if (isRow) {
                                           const row = item;
-                                          const directoryHeadersArray =
-                                            directoryHeaders || [];
-                                          const tlHeader =
-                                            directoryHeadersArray.find((h) => {
-                                              const lh = String(h || "")
-                                                .toLowerCase()
-                                                .trim();
-                                              return (
-                                                lh === "tl" ||
-                                                lh === "team leader" ||
-                                                lh.includes("manager") ||
-                                                lh.includes("supervisor") ||
-                                                lh.includes("lead")
-                                              );
-                                            });
-                                          const roleHeader =
-                                            directoryHeadersArray.find((h) => {
-                                              const lh = String(h || "")
-                                                .toLowerCase()
-                                                .trim();
-                                              return (
-                                                lh === "role" ||
-                                                lh === "lob" ||
-                                                lh.includes("job title") ||
-                                                lh.includes("designation")
-                                              );
-                                            });
-                                          const lobHeader =
-                                            directoryHeadersArray.find((h) => {
-                                              const lh = String(h || "")
-                                                .toLowerCase()
-                                                .trim();
-                                              return (
-                                                lh === "lob" ||
-                                                lh.includes("line") ||
-                                                lh.includes("account") ||
-                                                lh.includes("function")
-                                              );
-                                            });
-                                          const lobTeamHeader =
-                                            directoryHeadersArray.find((h) => {
-                                              const lh = String(h || "")
-                                                .toLowerCase()
-                                                .trim();
-                                              return (
-                                                lh === "lob team" ||
-                                                lh === "team" ||
-                                                lh.includes("sub") ||
-                                                lh.includes("squad")
-                                              );
-                                            });
-                                          const emailHeader =
-                                            directoryHeadersArray.find((h) => {
-                                              const lh = String(h || "")
-                                                .toLowerCase()
-                                                .trim();
-                                              return (
-                                                lh === "email" ||
-                                                lh === "mail" ||
-                                                lh === "corporate email" ||
-                                                lh === "work email"
-                                              );
-                                            });
-                                          const phoneHeader =
-                                            directoryHeadersArray.find((h) => {
-                                              const lh = String(h || "")
-                                                .toLowerCase()
-                                                .trim();
-                                              return (
-                                                lh === "phone" ||
-                                                lh === "mobile" ||
-                                                lh === "contact" ||
-                                                lh === "tel"
-                                              );
-                                            });
+                                          const directoryHeadersArray = directoryHeaders || [];
+                                          const tlHeader = directoryHeadersArray.find((h) => {
+                                            const lh = String(h || "").toLowerCase().trim();
+                                            return lh === "tl" || lh === "team leader" || lh.includes("manager") || lh.includes("supervisor") || lh.includes("lead");
+                                          });
+                                          const roleHeader = directoryHeadersArray.find((h) => {
+                                            const lh = String(h || "").toLowerCase().trim();
+                                            return lh === "role" || lh === "lob" || lh.includes("job title") || lh.includes("designation");
+                                          });
+                                          const lobHeader = directoryHeadersArray.find((h) => {
+                                            const lh = String(h || "").toLowerCase().trim();
+                                            return lh === "lob" || lh.includes("line") || lh.includes("account") || lh.includes("function");
+                                          });
+                                          const lobTeamHeader = directoryHeadersArray.find((h) => {
+                                            const lh = String(h || "").toLowerCase().trim();
+                                            return lh === "lob team" || lh === "team" || lh.includes("sub") || lh.includes("squad");
+                                          });
+                                          const emailHeader = directoryHeadersArray.find((h) => {
+                                            const lh = String(h || "").toLowerCase().trim();
+                                            return lh === "email" || lh === "mail" || lh === "corporate email" || lh === "work email";
+                                          });
+                                          const phoneHeader = directoryHeadersArray.find((h) => {
+                                            const lh = String(h || "").toLowerCase().trim();
+                                            return lh === "phone" || lh === "mobile" || lh === "contact" || lh === "tel";
+                                          });
 
-                                          const emailVal =
-                                            emailHeader && row.data[emailHeader]
-                                              ? row.data[emailHeader]
-                                              : "-";
-                                          const phoneVal =
-                                            phoneHeader && row.data[phoneHeader]
-                                              ? row.data[phoneHeader]
-                                              : "-";
-                                          const lobVal =
-                                            lobHeader && row.data[lobHeader]
-                                              ? row.data[lobHeader]
-                                              : "";
-                                          const lobTeamVal =
-                                            lobTeamHeader &&
-                                            row.data[lobTeamHeader]
-                                              ? row.data[lobTeamHeader]
-                                              : "-";
-                                          const roleVal =
-                                            roleHeader && row.data[roleHeader]
-                                              ? row.data[roleHeader]
-                                              : "-";
-                                          const tlVal =
-                                            tlHeader && row.data[tlHeader]
-                                              ? row.data[tlHeader]
-                                              : "-";
+                                          const emailVal = emailHeader && row.data[emailHeader] ? row.data[emailHeader] : "-";
+                                          const phoneVal = phoneHeader && row.data[phoneHeader] ? row.data[phoneHeader] : "-";
+                                          const lobVal = lobHeader && row.data[lobHeader] ? row.data[lobHeader] : "";
+                                          const lobTeamVal = lobTeamHeader && row.data[lobTeamHeader] ? row.data[lobTeamHeader] : "-";
+                                          const roleVal = roleHeader && row.data[roleHeader] ? row.data[roleHeader] : "-";
+                                          const tlVal = tlHeader && row.data[tlHeader] ? row.data[tlHeader] : "-";
 
-                                          const matchingUser = (
-                                            registeredUsers || []
-                                          ).find(
-                                            (u) =>
-                                              u &&
-                                              u.name &&
-                                              u.name.toLowerCase() ===
-                                                row.agentName.toLowerCase(),
+                                          const matchingUser = (registeredUsers || []).find(
+                                            (u) => u && u.name && u.name.toLowerCase() === row.agentName.toLowerCase(),
                                           );
                                           const computedRole = matchingUser
                                             ? matchingUser.role
-                                            : roleVal
-                                                  .toLowerCase()
-                                                  .includes("tl") ||
-                                                roleVal
-                                                  .toLowerCase()
-                                                  .includes("leader")
+                                            : roleVal.toLowerCase().includes("tl") || roleVal.toLowerCase().includes("leader")
                                               ? "tl"
-                                              : roleVal
-                                                    .toLowerCase()
-                                                    .includes("qa")
+                                              : roleVal.toLowerCase().includes("qa")
                                                 ? "qa"
                                                 : "agent";
 
-                                          const tlName =
-                                            row.data?.["Team Leader"] ||
-                                            row.data?.["teamLeader"] ||
-                                            row.data?.["TL"] ||
-                                            "";
+                                          const tlName = row.data?.["Team Leader"] || row.data?.["teamLeader"] || row.data?.["TL"] || "";
                                           const isNotTL = computedRole !== "tl";
 
                                           return (
-                                            <tr
-                                              key={row.id}
-                                              className="hover:bg-white/5 transition-all"
-                                            >
+                                            <tr key={row.id} className="hover:bg-white/5 transition-all">
+                                              {isSuperAdmin && (
+                                                <td className="p-4 w-10">
+                                                  <input
+                                                    type="checkbox"
+                                                    checked={selectedAgentIds.includes(row.id)}
+                                                    onChange={() => {
+                                                      if (selectedAgentIds.includes(row.id)) {
+                                                        setSelectedAgentIds(prev => prev.filter(id => id !== row.id));
+                                                      } else {
+                                                        setSelectedAgentIds(prev => [...prev, row.id]);
+                                                      }
+                                                    }}
+                                                    className="rounded border-white/20 bg-black/40 text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4"
+                                                  />
+                                                </td>
+                                              )}
                                               <td className="p-4 text-slate-500 font-mono text-[11px]">
                                                 {idx + 1}
                                               </td>
                                               <td className="p-4 text-slate-100 font-bold">
-                                                <div>{row.agentName}</div>
-                                                {tlName && isNotTL && (
-                                                  <div className="text-xs text-slate-400 mt-0.5 font-normal">
-                                                    📋 {tlName}
-                                                  </div>
+                                                {isEditing ? (
+                                                  <input
+                                                    type="text"
+                                                    value={editAgentFields.agentName || ""}
+                                                    onChange={e => setEditAgentFields({ ...editAgentFields, agentName: e.target.value })}
+                                                    className="bg-black/60 border border-white/25 rounded px-2.5 py-1 text-xs text-slate-100定位 focus:outline-none w-44"
+                                                  />
+                                                ) : (
+                                                  <>
+                                                    <div>{row.agentName}</div>
+                                                    {tlName && isNotTL && (
+                                                      <div className="text-xs text-slate-400 mt-0.5 font-normal">
+                                                        📋 {tlName}
+                                                      </div>
+                                                    )}
+                                                  </>
                                                 )}
                                               </td>
                                               <td className="p-4 text-cyan-400 font-black font-mono">
-                                                {getUsernameFromFullName(
-                                                  row.agentName,
-                                                )}
+                                                {getUsernameFromFullName(row.agentName)}
                                               </td>
-                                              {(directoryHeadersArray || [])
-                                                .length > 0 ? (
-                                                (
-                                                  directoryHeadersArray || []
-                                                ).map((header, hIdx) => (
-                                                  <td
-                                                    key={hIdx}
-                                                    className="p-4"
-                                                  >
-                                                    {row.data[header] || "-"}
+                                              {directoryHeadersArray.length > 0 ? (
+                                                directoryHeadersArray.map((header, hIdx) => (
+                                                  <td key={hIdx} className="p-4">
+                                                    {isEditing ? (
+                                                      <input
+                                                        type="text"
+                                                        value={editAgentFields[header] !== undefined ? editAgentFields[header] : (row.data[header] || "")}
+                                                        onChange={e => setEditAgentFields({ ...editAgentFields, [header]: e.target.value })}
+                                                        className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
+                                                      />
+                                                    ) : (
+                                                      row.data[header] || "-"
+                                                    )}
                                                   </td>
                                                 ))
                                               ) : (
                                                 <>
                                                   <td className="p-4">
-                                                    {emailVal}
+                                                    {isEditing ? (
+                                                      <input
+                                                        type="text"
+                                                        value={editAgentFields[emailHeader || "Email"] !== undefined ? editAgentFields[emailHeader || "Email"] : (row.data[emailHeader || "Email"] || "")}
+                                                        onChange={e => setEditAgentFields({ ...editAgentFields, [emailHeader || "Email"]: e.target.value })}
+                                                        className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
+                                                      />
+                                                    ) : (
+                                                      emailVal
+                                                    )}
                                                   </td>
                                                   <td className="p-4 font-mono text-[12px]">
-                                                    {phoneVal !== "-" ? (
+                                                    {isEditing ? (
+                                                      <input
+                                                        type="text"
+                                                        value={editAgentFields[phoneHeader || "Phone"] !== undefined ? editAgentFields[phoneHeader || "Phone"] : (row.data[phoneHeader || "Phone"] || "")}
+                                                        onChange={e => setEditAgentFields({ ...editAgentFields, [phoneHeader || "Phone"]: e.target.value })}
+                                                        className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-28"
+                                                      />
+                                                    ) : phoneVal !== "-" ? (
                                                       <span className="text-emerald-400">
-                                                        {phoneVal
-                                                          .replace(/\s+/g, "")
-                                                          .startsWith("+")
-                                                          ? phoneVal.replace(
-                                                              /\s+/g,
-                                                              "",
-                                                            )
-                                                          : phoneVal}
+                                                        {phoneVal.replace(/\s+/g, "")}
                                                       </span>
                                                     ) : (
-                                                      <span className="text-slate-600">
-                                                        -
-                                                      </span>
+                                                      <span className="text-slate-600">-</span>
                                                     )}
                                                   </td>
                                                   <td className="p-4">
-                                                    {normalizeAgentLob(
-                                                      lobVal ||
-                                                        AGENT_LOBS[
-                                                          row.agentName
-                                                        ],
-                                                      computedRole,
-                                                    ) ? (
-                                                      <span
-                                                        className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
-                                                          normalizeAgentLob(
-                                                            lobVal ||
-                                                              AGENT_LOBS[
-                                                                row.agentName
-                                                              ],
-                                                            computedRole,
-                                                          )
-                                                            .toLowerCase()
-                                                            .includes("call")
-                                                            ? "bg-blue-500/15 text-blue-300 border border-blue-500/20"
-                                                            : "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"
-                                                        }`}
-                                                      >
-                                                        {normalizeAgentLob(
-                                                          lobVal ||
-                                                            AGENT_LOBS[
-                                                              row.agentName
-                                                            ],
-                                                          computedRole,
-                                                        )}
+                                                    {isEditing ? (
+                                                      <input
+                                                        type="text"
+                                                        value={editAgentFields[lobHeader || "LOB"] !== undefined ? editAgentFields[lobHeader || "LOB"] : (row.data[lobHeader || "LOB"] || "")}
+                                                        onChange={e => setEditAgentFields({ ...editAgentFields, [lobHeader || "LOB"]: e.target.value })}
+                                                        className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-24"
+                                                      />
+                                                    ) : normalizeAgentLob(lobVal || AGENT_LOBS[row.agentName], computedRole) ? (
+                                                      <span className={`px-2 py-1 rounded-lg text-[11px] font-bold ${normalizeAgentLob(lobVal || AGENT_LOBS[row.agentName], computedRole).toLowerCase().includes("call") ? "bg-blue-500/15 text-blue-300 border border-blue-500/20" : "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"}`}>
+                                                        {normalizeAgentLob(lobVal || AGENT_LOBS[row.agentName], computedRole)}
                                                       </span>
                                                     ) : (
-                                                      <span className="text-slate-600">
-                                                        -
-                                                      </span>
+                                                      <span className="text-slate-600">-</span>
                                                     )}
                                                   </td>
                                                   <td className="p-4">
-                                                    {lobTeamVal}
+                                                    {isEditing ? (
+                                                      <input
+                                                        type="text"
+                                                        value={editAgentFields[lobTeamHeader || "LOB Team"] !== undefined ? editAgentFields[lobTeamHeader || "LOB Team"] : (row.data[lobTeamHeader || "LOB Team"] || "")}
+                                                        onChange={e => setEditAgentFields({ ...editAgentFields, [lobTeamHeader || "LOB Team"]: e.target.value })}
+                                                        className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-28"
+                                                      />
+                                                    ) : (
+                                                      lobTeamVal
+                                                    )}
                                                   </td>
                                                   <td className="p-4">
-                                                    <span
-                                                      className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${
-                                                        roleVal.toLowerCase() ===
-                                                          "tl" ||
-                                                        roleVal.toLowerCase() ===
-                                                          "team leader"
-                                                          ? "bg-amber-950/30 text-amber-400 border-amber-500/20"
-                                                          : roleVal.toLowerCase() ===
-                                                              "qa"
-                                                            ? "bg-purple-950/30 text-purple-400 border-purple-500/20"
-                                                            : "bg-slate-800 text-slate-400 border-slate-700"
-                                                      }`}
-                                                    >
-                                                      {roleVal}
-                                                    </span>
+                                                    {isEditing ? (
+                                                      <input
+                                                        type="text"
+                                                        value={editAgentFields[roleHeader || "Role"] !== undefined ? editAgentFields[roleHeader || "Role"] : (row.data[roleHeader || "Role"] || "")}
+                                                        onChange={e => setEditAgentFields({ ...editAgentFields, [roleHeader || "Role"]: e.target.value })}
+                                                        className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-24"
+                                                      />
+                                                    ) : (
+                                                      <span className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${roleVal.toLowerCase() === "tl" || roleVal.toLowerCase() === "team leader" ? "bg-amber-950/30 text-amber-400 border-amber-500/20" : roleVal.toLowerCase() === "qa" ? "bg-purple-950/30 text-purple-400 border-purple-500/20" : "bg-slate-800 text-slate-400 border-slate-700"}`}>
+                                                        {roleVal}
+                                                      </span>
+                                                    )}
                                                   </td>
                                                   <td className="p-4 text-cyan-300 font-bold">
-                                                    {tlVal}
+                                                    {isEditing ? (
+                                                      <input
+                                                        type="text"
+                                                        value={editAgentFields[tlHeader || "Team Leader"] !== undefined ? editAgentFields[tlHeader || "Team Leader"] : (row.data[tlHeader || "Team Leader"] || "")}
+                                                        onChange={e => setEditAgentFields({ ...editAgentFields, [tlHeader || "Team Leader"]: e.target.value })}
+                                                        className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
+                                                      />
+                                                    ) : (
+                                                      tlVal
+                                                    )}
                                                   </td>
                                                 </>
+                                              )}
+                                              {isSuperAdmin && (
+                                                <td className="p-4 text-center">
+                                                  {isEditing ? (
+                                                    <div className="flex gap-1.5 justify-center">
+                                                      <button
+                                                        onClick={() => handleSaveInlineEdit(row.id, true)}
+                                                        className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[11px] font-bold cursor-pointer"
+                                                      >
+                                                        Save
+                                                      </button>
+                                                      <button
+                                                        onClick={() => setEditingAgentId(null)}
+                                                        className="px-2 py-1 bg-white/10 hover:bg-white/15 text-slate-300 rounded text-[11px] font-bold cursor-pointer"
+                                                      >
+                                                        Cancel
+                                                      </button>
+                                                    </div>
+                                                  ) : (
+                                                    <div className="flex gap-2 justify-center">
+                                                      <button
+                                                        onClick={() => {
+                                                          setEditingAgentId(row.id);
+                                                          const initialFields: Record<string, string> = { agentName: row.agentName };
+                                                          directoryHeadersArray.forEach(h => {
+                                                            initialFields[h] = row.data[h] || "";
+                                                          });
+                                                          if (directoryHeadersArray.length === 0) {
+                                                            initialFields[emailHeader || "Email"] = row.data[emailHeader || "Email"] || "";
+                                                            initialFields[phoneHeader || "Phone"] = row.data[phoneHeader || "Phone"] || "";
+                                                            initialFields[lobHeader || "LOB"] = row.data[lobHeader || "LOB"] || "";
+                                                            initialFields[lobTeamHeader || "LOB Team"] = row.data[lobTeamHeader || "LOB Team"] || "";
+                                                            initialFields[roleHeader || "Role"] = row.data[roleHeader || "Role"] || "";
+                                                            initialFields[tlHeader || "Team Leader"] = row.data[tlHeader || "Team Leader"] || "";
+                                                          }
+                                                          setEditAgentFields(initialFields);
+                                                        }}
+                                                        className="text-cyan-400 hover:text-cyan-300 font-bold hover:underline cursor-pointer"
+                                                      >
+                                                        Edit
+                                                      </button>
+                                                      <span className="text-white/10">|</span>
+                                                      <button
+                                                        onClick={() => handleDeleteHeadcountRow(row.id, row.agentName)}
+                                                        className="text-rose-500 hover:text-rose-400 font-bold hover:underline cursor-pointer"
+                                                      >
+                                                        Delete
+                                                      </button>
+                                                    </div>
+                                                  )}
+                                                </td>
                                               )}
                                             </tr>
                                           );
                                         } else {
                                           const meta = item;
-                                          const tlName =
-                                            meta.teamLeader ||
-                                            AGENT_TL_MAP[meta.name] ||
-                                            agentMeta[meta.name]?.tlName ||
-                                            "";
+                                          const tlName = meta.teamLeader || AGENT_TL_MAP[meta.name] || agentMeta[meta.name]?.tlName || "";
                                           const isNotTL = meta.role !== "tl";
                                           return (
-                                            <tr
-                                              key={idx}
-                                              className="hover:bg-white/5 transition-all"
-                                            >
+                                            <tr key={meta.id} className="hover:bg-white/5 transition-all">
+                                              {isSuperAdmin && (
+                                                <td className="p-4 w-10">
+                                                  <input
+                                                    type="checkbox"
+                                                    checked={selectedAgentIds.includes(meta.id)}
+                                                    onChange={() => {
+                                                      if (selectedAgentIds.includes(meta.id)) {
+                                                        setSelectedAgentIds(prev => prev.filter(id => id !== meta.id));
+                                                      } else {
+                                                        setSelectedAgentIds(prev => [...prev, meta.id]);
+                                                      }
+                                                    }}
+                                                    className="rounded border-white/20 bg-black/40 text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4"
+                                                  />
+                                                </td>
+                                              )}
                                               <td className="p-4 text-slate-500 font-mono text-[11px]">
                                                 {idx + 1}
                                               </td>
                                               <td className="p-4 text-slate-100 font-bold">
-                                                <div>{meta.name}</div>
-                                                {tlName && isNotTL && (
-                                                  <div className="text-xs text-slate-400 mt-0.5 font-normal">
-                                                    📋 {tlName}
-                                                  </div>
+                                                {isEditing ? (
+                                                  <input
+                                                    type="text"
+                                                    value={editAgentFields.name || ""}
+                                                    onChange={e => setEditAgentFields({ ...editAgentFields, name: e.target.value })}
+                                                    className="bg-black/60 border border-white/25 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-44"
+                                                  />
+                                                ) : (
+                                                  <>
+                                                    <div>{meta.name}</div>
+                                                    {tlName && isNotTL && (
+                                                      <div className="text-xs text-slate-400 mt-0.5 font-normal">
+                                                        📋 {tlName}
+                                                      </div>
+                                                    )}
+                                                  </>
                                                 )}
                                               </td>
                                               <td className="p-4 text-cyan-400 font-black font-mono">
-                                                {getUsernameFromFullName(
-                                                  meta.name,
-                                                )}
+                                                {getUsernameFromFullName(meta.name)}
                                               </td>
                                               <td className="p-4">
-                                                {meta.email || "-"}
+                                                {isEditing ? (
+                                                  <input
+                                                    type="text"
+                                                    value={editAgentFields.email !== undefined ? editAgentFields.email : (meta.email || "")}
+                                                    onChange={e => setEditAgentFields({ ...editAgentFields, email: e.target.value })}
+                                                    className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
+                                                  />
+                                                ) : (
+                                                  meta.email || "-"
+                                                )}
                                               </td>
                                               <td className="p-4 font-mono text-[12px]">
-                                                {meta.phone ? (
+                                                {isEditing ? (
+                                                  <input
+                                                    type="text"
+                                                    value={editAgentFields.phone !== undefined ? editAgentFields.phone : (meta.phone || "")}
+                                                    onChange={e => setEditAgentFields({ ...editAgentFields, phone: e.target.value })}
+                                                    className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-28"
+                                                  />
+                                                ) : meta.phone ? (
                                                   <span className="text-emerald-400">
-                                                    {meta.phone
-                                                      .replace(/\s+/g, "")
-                                                      .startsWith("+")
-                                                      ? meta.phone.replace(
-                                                          /\s+/g,
-                                                          "",
-                                                        )
-                                                      : meta.phone}
+                                                    {meta.phone.replace(/\s+/g, "")}
                                                   </span>
                                                 ) : (
-                                                  <span className="text-slate-600">
-                                                    -
-                                                  </span>
+                                                  <span className="text-slate-600">-</span>
                                                 )}
                                               </td>
                                               <td className="p-4">
-                                                {normalizeAgentLob(
-                                                  meta.lob ||
-                                                    AGENT_LOBS[meta.name],
-                                                  meta.role,
-                                                ) ? (
-                                                  <span
-                                                    className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
-                                                      normalizeAgentLob(
-                                                        meta.lob ||
-                                                          AGENT_LOBS[meta.name],
-                                                        meta.role,
-                                                      )
-                                                        .toLowerCase()
-                                                        .includes("call")
-                                                        ? "bg-blue-500/15 text-blue-300 border border-blue-500/20"
-                                                        : "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"
-                                                    }`}
+                                                {isEditing ? (
+                                                  <input
+                                                    type="text"
+                                                    value={editAgentFields.lob !== undefined ? editAgentFields.lob : (meta.lob || "")}
+                                                    onChange={e => setEditAgentFields({ ...editAgentFields, lob: e.target.value })}
+                                                    className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-24"
+                                                  />
+                                                ) : normalizeAgentLob(meta.lob || AGENT_LOBS[meta.name], meta.role) ? (
+                                                  <span className={`px-2 py-1 rounded-lg text-[11px] font-bold ${normalizeAgentLob(meta.lob || AGENT_LOBS[meta.name], meta.role).toLowerCase().includes("call") ? "bg-blue-500/15 text-blue-300 border border-blue-500/20" : "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"}`}>
+                                                    {normalizeAgentLob(meta.lob || AGENT_LOBS[meta.name], meta.role)}
+                                                  </span>
+                                                ) : (
+                                                  <span className="text-slate-600">-</span>
+                                                )}
+                                              </td>
+                                              <td className="p-4">
+                                                {isEditing ? (
+                                                  <input
+                                                    type="text"
+                                                    value={editAgentFields.lobTeam !== undefined ? editAgentFields.lobTeam : (meta.lobTeam || "")}
+                                                    onChange={e => setEditAgentFields({ ...editAgentFields, lobTeam: e.target.value })}
+                                                    className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-28"
+                                                  />
+                                                ) : (
+                                                  meta.lobTeam || "-"
+                                                )}
+                                              </td>
+                                              <td className="p-4">
+                                                {isEditing ? (
+                                                  <select
+                                                    value={editAgentFields.role !== undefined ? editAgentFields.role : (meta.role || "agent")}
+                                                    onChange={e => setEditAgentFields({ ...editAgentFields, role: e.target.value })}
+                                                    className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-24 cursor-pointer"
                                                   >
-                                                    {normalizeAgentLob(
-                                                      meta.lob ||
-                                                        AGENT_LOBS[meta.name],
-                                                      meta.role,
-                                                    )}
-                                                  </span>
+                                                    <option value="agent">Agent</option>
+                                                    <option value="tl">Team Leader</option>
+                                                    <option value="qa">QA</option>
+                                                    <option value="director">Director</option>
+                                                  </select>
                                                 ) : (
-                                                  <span className="text-slate-600">
-                                                    -
+                                                  <span className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${meta.role === "tl" ? "bg-amber-950/30 text-amber-400 border-amber-500/20" : meta.role === "qa" ? "bg-purple-950/30 text-purple-400 border-purple-500/20" : "bg-slate-800 text-slate-400 border-slate-700"}`}>
+                                                    {meta.role === "tl" ? "Team Leader" : meta.role === "qa" ? "QA" : meta.role === "director" ? "Director" : "Agent"}
                                                   </span>
                                                 )}
-                                              </td>
-                                              <td className="p-4">
-                                                {meta.lobTeam || "-"}
-                                              </td>
-                                              <td className="p-4">
-                                                <span
-                                                  className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${
-                                                    meta.role === "tl"
-                                                      ? "bg-amber-950/30 text-amber-400 border-amber-500/20"
-                                                      : meta.role === "qa"
-                                                        ? "bg-purple-950/30 text-purple-400 border-purple-500/20"
-                                                        : "bg-slate-800 text-slate-400 border-slate-700"
-                                                  }`}
-                                                >
-                                                  {meta.role === "tl"
-                                                    ? "Team Leader"
-                                                    : meta.role === "qa"
-                                                      ? "QA"
-                                                      : "Agent"}
-                                                </span>
                                               </td>
                                               <td className="p-4 text-cyan-300 font-bold">
-                                                {tlName || "-"}
+                                                {isEditing ? (
+                                                  <input
+                                                    type="text"
+                                                    value={editAgentFields.teamLeader !== undefined ? editAgentFields.teamLeader : (meta.teamLeader || "")}
+                                                    onChange={e => setEditAgentFields({ ...editAgentFields, teamLeader: e.target.value })}
+                                                    className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
+                                                  />
+                                                ) : (
+                                                  tlName || "-"
+                                                )}
                                               </td>
+                                              {isSuperAdmin && (
+                                                <td className="p-4 text-center">
+                                                  {isEditing ? (
+                                                    <div className="flex gap-1.5 justify-center">
+                                                      <button
+                                                        onClick={() => handleSaveInlineEdit(meta.id, false)}
+                                                        className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[11px] font-bold cursor-pointer"
+                                                      >
+                                                        Save
+                                                      </button>
+                                                      <button
+                                                        onClick={() => setEditingAgentId(null)}
+                                                        className="px-2 py-1 bg-white/10 hover:bg-white/15 text-slate-300 rounded text-[11px] font-bold cursor-pointer"
+                                                      >
+                                                        Cancel
+                                                      </button>
+                                                    </div>
+                                                  ) : (
+                                                    <div className="flex gap-2 justify-center">
+                                                      <button
+                                                        onClick={() => {
+                                                          setEditingAgentId(meta.id);
+                                                          setEditAgentFields({
+                                                            name: meta.name,
+                                                            email: meta.email || "",
+                                                            phone: meta.phone || "",
+                                                            lob: meta.lob || "",
+                                                            lobTeam: meta.lobTeam || "",
+                                                            role: meta.role || "agent",
+                                                            teamLeader: meta.teamLeader || ""
+                                                          });
+                                                        }}
+                                                        className="text-cyan-400 hover:text-cyan-300 font-bold hover:underline cursor-pointer"
+                                                      >
+                                                        Edit
+                                                      </button>
+                                                      <span className="text-white/10">|</span>
+                                                      <button
+                                                        onClick={() => handleDeleteHeadcountRow(meta.id, meta.name)}
+                                                        className="text-rose-500 hover:text-rose-400 font-bold hover:underline cursor-pointer"
+                                                      >
+                                                        Delete
+                                                      </button>
+                                                    </div>
+                                                  )}
+                                                </td>
+                                              )}
                                             </tr>
                                           );
                                         }
@@ -26403,6 +26962,10 @@ ${ttNotes}`
                                 </tbody>
                               </table>
                               {(!pagedDir || pagedDir.length === 0) && (
+                                <div className="text-center p-8 text-slate-500 font-medium font-sans">
+                                  No headcount data matches your filters/search.
+                                </div>
+                              )}        {(!pagedDir || pagedDir.length === 0) && (
                                 <div className="text-center p-8 text-slate-500 font-medium font-sans">
                                   No headcount data matches your filters/search.
                                 </div>

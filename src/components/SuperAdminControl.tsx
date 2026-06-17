@@ -43,6 +43,8 @@ interface SuperAdminControlProps {
   failedAttempts: Record<string, number>;
   onResetAllData: () => void;
   TRIGGER_CURRENT_APP_VERSION: number;
+  deletedUsers?: string[];
+  onDeleteSyntheticUser?: (name: string) => Promise<void>;
 }
 
 export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
@@ -52,7 +54,9 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   lockedAccounts,
   failedAttempts,
   onResetAllData,
-  TRIGGER_CURRENT_APP_VERSION
+  TRIGGER_CURRENT_APP_VERSION,
+  deletedUsers = [],
+  onDeleteSyntheticUser
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
@@ -60,6 +64,10 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   const syntheticUsers: UserProfile[] = [...INITIAL_AGENTS, ...TEAM_LEADERS]
     .filter((name, i, arr) => arr.indexOf(name) === i) // dedupe
     .filter(name => !registeredUsers.some(u => u.name?.toLowerCase() === name.toLowerCase()))
+    .filter(name => {
+      const uname = getUsernameFromFullName(name);
+      return !deletedUsers.includes(uname) && !deletedUsers.includes(name.toLowerCase());
+    })
     .map(name => ({
       id: getUsernameFromFullName(name),
       name,
@@ -264,7 +272,12 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
     try {
       const docId = user.id;
-      await deleteDoc(doc(db, "users", docId));
+      const isRegistered = registeredUsers.some(u => u.id === user.id);
+      if (isRegistered) {
+        await deleteDoc(doc(db, "users", docId));
+      } else if (onDeleteSyntheticUser) {
+        await onDeleteSyntheticUser(cleanName);
+      }
 
       const usernameKey = getUsernameFromFullName(cleanName);
 
