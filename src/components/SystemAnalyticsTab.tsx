@@ -81,7 +81,7 @@ export const SystemAnalyticsTab: React.FC<SystemAnalyticsTabProps> = ({
             <Activity className="w-4 h-4 text-emerald-400" />
             Live Attendance
           </h3>
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={230}>
             <RechartsPieChart>
               <Pie
                 data={attendanceData}
@@ -112,7 +112,7 @@ export const SystemAnalyticsTab: React.FC<SystemAnalyticsTabProps> = ({
             <PieChart className="w-4 h-4 text-indigo-400" />
             Roster Requests
           </h3>
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={230}>
             <RechartsPieChart>
               <Pie
                 data={requestsData}
@@ -143,7 +143,7 @@ export const SystemAnalyticsTab: React.FC<SystemAnalyticsTabProps> = ({
             <FileText className="w-4 h-4 text-blue-400" />
             General Inquiries Status
           </h3>
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={230}>
             <BarChart data={inquiriesData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
               <XAxis dataKey="name" tick={{fill: '#94a3b8', fontSize: 12}} axisLine={false} tickLine={false} />
@@ -168,7 +168,7 @@ export const SystemAnalyticsTab: React.FC<SystemAnalyticsTabProps> = ({
             <Activity className="w-4 h-4 text-emerald-400" />
             Complaints / Payments
           </h3>
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={230}>
             <BarChart data={complaintsTtData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" horizontal={false} />
               <XAxis type="number" tick={{fill: '#94a3b8', fontSize: 12}} axisLine={false} tickLine={false} />
@@ -194,7 +194,7 @@ export const SystemAnalyticsTab: React.FC<SystemAnalyticsTabProps> = ({
           <TrendingUp className="w-4 h-4 text-indigo-400" />
           General Inquiries, Tabby/Tamara, And Complaints Creation Volume (Daily Trends)
         </h3>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height={320}>
           <AreaChart data={dailyTrendsData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="colorInquiries" x1="0" y1="0" x2="0" y2="1">

@@ -42,6 +42,7 @@ interface SuperAdminControlProps {
   lockedAccounts: string[];
   failedAttempts: Record<string, number>;
   onResetAllData: () => void;
+  onCloseAllCases?: () => void;
   TRIGGER_CURRENT_APP_VERSION: number;
   deletedUsers?: string[];
   onDeleteSyntheticUser?: (name: string) => Promise<void>;
@@ -54,6 +55,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   lockedAccounts,
   failedAttempts,
   onResetAllData,
+  onCloseAllCases,
   TRIGGER_CURRENT_APP_VERSION,
   deletedUsers = [],
   onDeleteSyntheticUser
@@ -385,6 +387,27 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
               </p>
             </div>
           </div>
+
+          {/* Close All Cases Card (h.sobhy exclusive) */}
+          {isGlobalAdminUser && onCloseAllCases && (
+            <div className="bg-gradient-to-br from-rose-500/10 to-orange-500/10 border border-rose-500/20 p-6 rounded-3xl space-y-4">
+              <h3 className="font-bold text-rose-400 text-sm font-display uppercase tracking-wider flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-rose-500" />
+                SLA & CRM Batch Actions
+              </h3>
+              <p className="text-xs text-slate-300 leading-relaxed font-sans font-medium">
+                Instantly close all open CRM/SLA tickets across all databases, including Tabby, Tamara, Complaints, General Inquiries, and Client Comm logs. Only visible to creator/CTO (**h.sobhy**).
+              </p>
+              <button
+                type="button"
+                onClick={onCloseAllCases}
+                className="w-full px-4 py-2 bg-rose-600 hover:bg-rose-500 hover:scale-[1.01] active:scale-[0.99] text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-rose-600/10 hover:shadow-rose-600/20"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                Close All Open Cases & SLAs
+              </button>
+            </div>
+          )}
 
           {/* Quick manual user addition card toggle */}
           <div className="bg-white/5 border border-white/10 p-6 rounded-3xl space-y-4">

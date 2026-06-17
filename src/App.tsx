@@ -26,6 +26,7 @@ import {
   disableNetwork,
   where,
   orderBy,
+  arrayUnion,
 } from "firebase/firestore";
 import {
   db,
@@ -8499,6 +8500,113 @@ ${ttNotes}`
     return;
   };
 
+  const handleCloseAllCases = async () => {
+    if (!isGlobalAdmin) {
+      toast.error("Unauthorized: This action is restricted to Hesham Sobhy (h.sobhy).");
+      return;
+    }
+
+    showConfirm(
+      "Close All Cases & SLAs",
+      "Are you absolutely sure you want to close ALL cases across all SLA departments (Tabby, Tamara, Complaints, General Inquiries, Client Communications, and general CRM Cases)?",
+      "Close All Cases",
+      "bg-rose-700 hover:bg-rose-600",
+      async () => {
+        setIsSyncingCalendar(true);
+        try {
+          const now = new Date().toISOString();
+          const closedBy = currentUser?.name || "Hesham Sobhy";
+          const promises: Promise<any>[] = [];
+
+          // 1. inquiries
+          const openInqs = inquiries.filter((i) => i.status !== "closed");
+          openInqs.forEach((inq) => {
+            promises.push(
+              updateDoc(doc(db, "inquiries", inq.id), {
+                status: "closed",
+                closedBy,
+                closedAt: now,
+              })
+            );
+          });
+
+          // 2. tt_requests (Tabby & Tamara Requests)
+          const openTTRequests = tabbyTamaraRequests.filter(
+            (r) => r.workflowStatus !== "completed" && r.workflowStatus !== "rejected"
+          );
+          openTTRequests.forEach((req) => {
+            promises.push(
+              updateDoc(doc(db, "tt_requests", req.id), {
+                workflowStatus: "completed",
+                status: "confirmed",
+                confirmedBy: closedBy,
+                confirmedAt: now,
+                updatedAt: now,
+              })
+            );
+          });
+
+          // 3. tt_complaints (Tabby & Tamara Complaints)
+          const openTTComplaints = tabbyTamaraComplaints.filter((c) => c.status !== "closed");
+          openTTComplaints.forEach((comp) => {
+            const sysActivity = {
+              id: "act_" + Math.random().toString(36).substring(2, 11),
+              senderName: "System",
+              authorId: "system",
+              text: `${closedBy} executed SLA bulk-close tool to close this ticket.`,
+              createdAt: now,
+            };
+            promises.push(
+              updateDoc(doc(db, "tt_complaints", comp.id), {
+                status: "closed",
+                customerContacted: "contacted",
+                contactedAt: now,
+                tlHandledBy: closedBy,
+                tlHandledAt: now,
+                replies: arrayUnion(sysActivity),
+              })
+            );
+          });
+
+          // 4. client_comms (Client Communication Requests)
+          const openClientComms = (clientComms || []).filter((cc) => cc.status !== "contacted");
+          openClientComms.forEach((cc) => {
+            promises.push(
+              updateDoc(doc(db, "client_comms", cc.id), {
+                status: "contacted",
+                handledBy: closedBy,
+                handledAt: now,
+              })
+            );
+          });
+
+          // 5. cases (general CRM Cases)
+          const openCases = cases.filter((c) => c.status !== "closed");
+          openCases.forEach((c) => {
+            promises.push(
+              updateDoc(doc(db, "cases", c.id), {
+                status: "closed",
+              })
+            );
+          });
+
+          if (promises.length === 0) {
+            toast.info("There are no open cases or SLAs to close.");
+            return;
+          }
+
+          await Promise.all(promises);
+          toast.success(`Successfully closed all ${promises.length} open cases and SLAs across all channels!`);
+        } catch (error: any) {
+          console.error("Failed to bulk close all cases:", error);
+          toast.error("Failed to bulk close all cases: " + error.message);
+        } finally {
+          setIsSyncingCalendar(false);
+        }
+      }
+    );
+  };
+
   const handleDeleteSyntheticUser = async (name: string) => {
     const uname = getUsernameFromFullName(name);
     const updated = Array.from(new Set([...deletedUsers, uname, name.toLowerCase()]));
@@ -10748,12 +10856,13 @@ ${ttNotes}`
                           )}
 
                           {groupTitle("System Controls", "", "text-slate-400")}
-                          {buildBtn(
-                            "integrations",
-                            <Sparkles className="w-4 h-4 text-amber-400" />,
-                            "Integrations Hub",
-                            "bg-indigo-900/30 border-indigo-800",
-                          )}
+                          {isGlobalAdminUser &&
+                            buildBtn(
+                              "integrations",
+                              <Sparkles className="w-4 h-4 text-amber-400" />,
+                              "Integrations Hub",
+                              "bg-indigo-900/30 border-indigo-800",
+                            )}
                           {buildBtn(
                             "directory",
                             <Users className="w-4 h-4 text-cyan-600" />,
@@ -18804,7 +18913,7 @@ ${ttNotes}`
                             </div>
 
                             <div className="flex-1 flex flex-col items-center justify-around py-2 gap-4 h-48 w-full">
-                              <ResponsiveContainer width="100%" height="100%">
+                              <ResponsiveContainer width="100%" height={170}>
                                 <RechartsPieChart>
                                   <Pie
                                     data={[
@@ -18863,7 +18972,7 @@ ${ttNotes}`
                                   { name: "New Age", value: inquiries.filter((i) => (i.clinicName || "").toLowerCase() === "newage").length, color: "#f59e0b" },
                                 ];
                                 return (
-                                  <ResponsiveContainer width="100%" height="100%">
+                                  <ResponsiveContainer width="100%" height={180}>
                                     <BarChart data={clinicData}>
                                       <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                                       <XAxis dataKey="name" tick={{fill: '#94a3b8', fontSize: 10}} axisLine={false} tickLine={false} />
@@ -24105,7 +24214,7 @@ ${ttNotes}`
                                         { name: "New Age", value: requestsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "newage").length, color: "#f59e0b" },
                                       ].filter(d => d.value > 0);
                                       return (
-                                        <ResponsiveContainer width="100%" height="90%">
+                                        <ResponsiveContainer width="100%" height={160}>
                                           <BarChart data={clinicData}>
                                             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                                             <XAxis dataKey="name" tick={{fill: '#94a3b8', fontSize: 10}} axisLine={false} tickLine={false} />
@@ -24137,7 +24246,7 @@ ${ttNotes}`
                                         { name: "Rejected", value: requestsToUse.filter((i) => i.status === "rejected").length, color: "#ef4444" },
                                       ].filter(d => d.value > 0);
                                       return (
-                                        <ResponsiveContainer width="100%" height="90%">
+                                        <ResponsiveContainer width="100%" height={160}>
                                           <RechartsPieChart>
                                             <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={40} outerRadius={60} paddingAngle={5}>
                                               {statusData.map((entry, index) => (
@@ -24254,7 +24363,7 @@ ${ttNotes}`
                                       { name: "New Age", value: reqsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "newage").length, color: "#f59e0b" },
                                     ].filter(d => d.value > 0);
                                     return (
-                                      <ResponsiveContainer width="100%" height="90%">
+                                      <ResponsiveContainer width="100%" height={160}>
                                         <BarChart data={clinicData}>
                                           <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                                           <XAxis dataKey="name" tick={{fill: '#94a3b8', fontSize: 10}} axisLine={false} tickLine={false} />
@@ -24335,7 +24444,7 @@ ${ttNotes}`
                                       { name: "Contacted", value: reqsToUse.filter((i) => i.status === "contacted").length, color: "#10b981" },
                                     ].filter(d => d.value > 0);
                                     return (
-                                      <ResponsiveContainer width="100%" height="90%">
+                                      <ResponsiveContainer width="100%" height={160}>
                                         <BarChart data={prioData}>
                                           <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                                           <XAxis dataKey="name" tick={{fill: '#94a3b8', fontSize: 10}} axisLine={false} tickLine={false} />
@@ -26206,6 +26315,7 @@ ${ttNotes}`
                         lockedAccounts={lockedAccounts}
                         failedAttempts={failedAttempts}
                         onResetAllData={handleResetAllData}
+                        onCloseAllCases={handleCloseAllCases}
                         TRIGGER_CURRENT_APP_VERSION={CURRENT_APP_VERSION}
                         deletedUsers={deletedUsers}
                         onDeleteSyntheticUser={handleDeleteSyntheticUser}

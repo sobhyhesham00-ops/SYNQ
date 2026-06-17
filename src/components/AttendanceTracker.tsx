@@ -17,6 +17,11 @@ import {
   AlertOctagon,
   PhoneOff,
   UserX,
+  Search,
+  Filter,
+  Users,
+  Check,
+  RefreshCw,
 } from "lucide-react";
 import { getAgentLOB, getUsernameFromFullName, normalizeAgentLob } from "../utils";
 import { toast } from "sonner";
@@ -45,6 +50,9 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
   // Date range export states
   const [rangeFrom, setRangeFrom] = useState<string>("");
   const [rangeTo, setRangeTo] = useState<string>("");
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedLOB, setSelectedLOB] = useState("ALL");
 
   // Sync / load late values whenever records or selectedDate changes
   useEffect(() => {
@@ -332,40 +340,104 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
     toast.success(`Exported ${rows.length} range records to attendance-${rangeFrom}-to-${rangeTo}.xlsx`);
   };
 
+  // Helper selectors
+  const availableLOBs = useMemo(() => {
+    const lobs = new Set<string>();
+    rosterOfAgents.forEach((a) => {
+      if (a.lob) lobs.add(a.lob);
+    });
+    return ["ALL", ...Array.from(lobs).sort()];
+  }, [rosterOfAgents]);
+
+  const lobCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    rosterOfAgents.forEach((a) => {
+      counts[a.lob] = (counts[a.lob] || 0) + 1;
+    });
+    return counts;
+  }, [rosterOfAgents]);
+
+  const markingProgress = useMemo(() => {
+    const total = stats.total;
+    const marked = total - stats.notMarked;
+    const percent = total > 0 ? Math.round((marked / total) * 100) : 0;
+    return { total, marked, percent };
+  }, [stats]);
+
+  const filteredRoster = useMemo(() => {
+    return processedRoster.filter((item) => {
+      const matchSearch =
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.lob.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.status.replace("_", " ").toLowerCase().includes(searchTerm.toLowerCase());
+      const matchLOB = selectedLOB === "ALL" || item.lob === selectedLOB;
+      return matchSearch && matchLOB;
+    });
+  }, [processedRoster, searchTerm, selectedLOB]);
+
+  const getInitials = (name: string) => {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return (name[0] || "A").toUpperCase();
+  };
+
+  const getLOBGradient = (lob: string) => {
+    const clean = (lob || "").toLowerCase();
+    if (clean.includes("chat")) return "from-indigo-500 to-blue-600 shadow-indigo-500/20";
+    if (clean.includes("voice")) return "from-sky-400 to-blue-500 shadow-sky-500/20";
+    if (clean.includes("care")) return "from-emerald-400 to-teal-500 shadow-emerald-400/20";
+    if (clean.includes("operation")) return "from-orange-400 to-red-500 shadow-orange-400/20";
+    return "from-slate-500 to-slate-700 shadow-slate-500/10";
+  };
+
   return (
     <div className="space-y-6 animate-fade-in text-left font-sans">
-      {/* Top Header */}
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-slate-900/40 border border-slate-800 p-6 rounded-3xl backdrop-blur-md">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-100 flex items-center gap-2.5">
-            <UserCheck className="w-7 h-7 text-indigo-400" />
-            Daily Attendance Log
-          </h2>
-          <p className="text-xs text-slate-400 mt-1 max-w-2xl">
-            Purely manual, Team Leader-driven attendance tracker. Entries are stored in local Firestore databases and are independent of user logs.
-          </p>
+      {/* Salesforce style Top Command Bar */}
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-slate-900/60 border border-white/10 p-6 rounded-3xl backdrop-blur-md">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl text-indigo-400">
+              <UserCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                Daily Attendance Log
+                <span className="text-xs font-semibold bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full">
+                  CRM Live Workspace
+                </span>
+              </h2>
+              <p className="text-xs text-slate-400">
+                LOB compliance ledger. Realtime manually-controlled logs stored in secure cloud databases.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Date Selector Navigation Panel */}
-        <div className="flex flex-wrap items-center gap-3 bg-slate-950/60 p-2 rounded-2xl border border-slate-800">
+        <div className="flex flex-wrap items-center gap-2 bg-slate-950/40 p-2 rounded-2xl border border-white/5 shadow-inner">
           <button
             onClick={handlePrevDay}
-            className="p-1.5 hover:bg-slate-800 text-slate-300 rounded-lg transition-colors cursor-pointer"
+            className="p-2 hover:bg-white/5 active:bg-white/10 text-slate-300 rounded-xl transition-all cursor-pointer"
             title="Previous Day"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
 
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="bg-transparent text-slate-100 text-xs font-bold font-mono focus:outline-none border-none py-1 cursor-pointer"
-          />
+          <div className="relative flex items-center gap-1.5 px-3 bg-white/5 border border-white/5 rounded-xl h-9">
+            <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="bg-transparent text-slate-100 text-xs font-bold font-mono focus:outline-none border-none cursor-pointer w-28 text-center"
+            />
+          </div>
 
           <button
             onClick={handleNextDay}
-            className="p-1.5 hover:bg-slate-800 text-slate-300 rounded-lg transition-colors cursor-pointer"
+            className="p-2 hover:bg-white/5 active:bg-white/10 text-slate-300 rounded-xl transition-all cursor-pointer"
             title="Next Day"
           >
             <ChevronRight className="w-4 h-4" />
@@ -373,103 +445,133 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
 
           <button
             onClick={handleJumpToToday}
-            className="px-2.5 py-1 text-[10px] uppercase font-black bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/10 rounded-lg transition-all cursor-pointer"
+            className="h-9 px-3.5 text-xs font-bold bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/20 rounded-xl transition-all cursor-pointer ml-1 active:scale-95"
           >
-            Today
+            Go Today
           </button>
         </div>
       </div>
 
       {/* Date Range Export Console */}
-      <div className="bg-slate-900/25 border border-slate-800/80 p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-5">
+      <div className="bg-slate-900/30 border border-white/5 p-5 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-5 shadow-sm">
         <div className="space-y-1">
-          <h3 className="text-xs font-black uppercase text-slate-300 tracking-wider">Date Range Analytics Export</h3>
-          <p className="text-[11px] text-slate-500">Select any window range to pull complete attendance histories into an Excel sheet.</p>
+          <h4 className="text-xs font-bold uppercase text-slate-300 tracking-wider flex items-center gap-1.5">
+            <RefreshCw className="w-3.5 h-3.5 text-slate-500 animate-spin-slow" />
+            Roster Ledger Excel Exporter
+          </h4>
+          <p className="text-xs text-slate-400">Select an analytics window to compile complete historical CSV/Excel sheets.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <span className="text-[10px] uppercase font-bold text-slate-500">From</span>
             <input
               type="date"
               value={rangeFrom}
               onChange={(e) => setRangeFrom(e.target.value)}
-              className="bg-slate-950/50 border border-slate-800 rounded-lg px-2.5 py-1 text-xs font-mono text-slate-200"
+              className="bg-slate-950/60 border border-white/10 rounded-xl px-3 py-1.5 text-xs font-mono text-slate-200 focus:border-indigo-500/50 focus:outline-none"
             />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <span className="text-[10px] uppercase font-bold text-slate-500">To</span>
             <input
               type="date"
               value={rangeTo}
               onChange={(e) => setRangeTo(e.target.value)}
-              className="bg-slate-950/50 border border-slate-800 rounded-lg px-2.5 py-1 text-xs font-mono text-slate-200"
+              className="bg-slate-950/60 border border-white/10 rounded-xl px-3 py-1.5 text-xs font-mono text-slate-200 focus:border-indigo-500/50 focus:outline-none"
             />
           </div>
           <button
             onClick={handleExportRange}
-            className="px-3.5 py-1.5 bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/20 text-indigo-300 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer"
+            className="h-9 px-4 bg-indigo-600/90 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow active:scale-95 border border-indigo-500/10"
           >
             <Download className="w-3.5 h-3.5" /> Range Export
           </button>
         </div>
       </div>
 
-      {/* Quick Stats Summary Grid & Interactive Chart */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-3 grid grid-cols-2 xl:grid-cols-4 gap-4">
-          <div className="p-4 bg-[#18181c]/50 border border-slate-800 rounded-2xl text-center flex flex-col justify-center">
-            <p className="text-[10px] uppercase font-black text-slate-500 tracking-wider">Total Active</p>
-            <p className="text-3xl font-black text-slate-200 mt-1">{stats.total}</p>
+      {/* Main Stats Ribbon & Interactive Ratio Pie Chart */}
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+        {/* Metric Cards Ribbon */}
+        <div className="xl:col-span-3 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+          <div className="p-4 bg-slate-900/40 border border-white/5 rounded-2xl text-center flex flex-col justify-center shadow-lg relative overflow-hidden group">
+            <div className="absolute top-0 inset-x-0 h-[3px] bg-slate-500" />
+            <p className="text-[10px] uppercase font-extrabold text-slate-500 tracking-widest">Global Roster</p>
+            <p className="text-3xl font-black text-slate-100 mt-1">{stats.total}</p>
+            <span className="text-[9px] text-slate-500 mt-0.5">Agents Total</span>
           </div>
-          <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl text-center flex flex-col justify-center">
-            <p className="text-[10px] uppercase font-black text-emerald-500 tracking-wider">Present</p>
+
+          <div className="p-4 bg-emerald-500/10 border border-emerald-500/15 rounded-2xl text-center flex flex-col justify-center shadow-lg relative overflow-hidden group">
+            <div className="absolute top-0 inset-x-0 h-[3px] bg-emerald-500" />
+            <p className="text-[10px] uppercase font-extrabold text-emerald-400 tracking-widest">Present</p>
             <p className="text-3xl font-black text-emerald-400 mt-1">{stats.present}</p>
+            <span className="text-[9px] text-emerald-500/80 mt-0.5">On Duty</span>
           </div>
-          <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-2xl text-center flex flex-col justify-center">
-            <p className="text-[10px] uppercase font-black text-amber-500 tracking-wider">Late</p>
+
+          <div className="p-4 bg-amber-500/10 border border-amber-500/15 rounded-2xl text-center flex flex-col justify-center shadow-lg relative overflow-hidden group">
+            <div className="absolute top-0 inset-x-0 h-[3px] bg-amber-500" />
+            <p className="text-[10px] uppercase font-extrabold text-amber-400 tracking-widest">Late</p>
             <p className="text-3xl font-black text-amber-400 mt-1">{stats.late}</p>
+            <span className="text-[9px] text-amber-500/80 mt-0.5">Delayed</span>
           </div>
-          <div className="p-4 bg-rose-500/5 border border-rose-500/10 rounded-2xl text-center flex flex-col justify-center">
-            <p className="text-[10px] uppercase font-black text-rose-500 tracking-wider">Absent</p>
+
+          <div className="p-4 bg-rose-500/10 border border-rose-500/15 rounded-2xl text-center flex flex-col justify-center shadow-lg relative overflow-hidden group">
+            <div className="absolute top-0 inset-x-0 h-[3px] bg-rose-500" />
+            <p className="text-[10px] uppercase font-extrabold text-rose-400 tracking-widest">Absent</p>
             <p className="text-3xl font-black text-rose-400 mt-1">{stats.absent}</p>
+            <span className="text-[9px] text-rose-500/80 mt-0.5">Off Duty</span>
           </div>
-          <div className="p-4 bg-blue-500/5 border border-blue-500/10 rounded-2xl text-center flex flex-col justify-center">
-            <p className="text-[10px] uppercase font-black text-blue-500 tracking-wider">On Leave</p>
+
+          <div className="p-4 bg-blue-500/10 border border-blue-500/15 rounded-2xl text-center flex flex-col justify-center shadow-lg relative overflow-hidden group">
+            <div className="absolute top-0 inset-x-0 h-[3px] bg-blue-500" />
+            <p className="text-[10px] uppercase font-extrabold text-blue-400 tracking-widest">On Leave</p>
             <p className="text-3xl font-black text-blue-400 mt-1">{stats.onLeave}</p>
+            <span className="text-[9px] text-blue-500/80 mt-0.5">Approved Out</span>
           </div>
-          <div className="p-4 bg-red-500/5 border border-red-500/10 rounded-2xl text-center flex flex-col justify-center">
-            <p className="text-[10px] uppercase font-black text-red-500 tracking-wider">NSNC</p>
+
+          <div className="p-4 bg-red-500/15 border border-red-500/25 rounded-2xl text-center flex flex-col justify-center shadow-lg relative overflow-hidden group">
+            <div className="absolute top-0 inset-x-0 h-[3px] bg-red-500" />
+            <p className="text-[10px] uppercase font-extrabold text-red-400 tracking-widest">NSNC</p>
             <p className="text-3xl font-black text-red-400 mt-1">{stats.noShowNoCall}</p>
+            <span className="text-[9px] text-red-500/80 mt-0.5">No Show</span>
           </div>
-          <div className="p-4 bg-slate-800/10 border border-slate-800 rounded-2xl text-center flex flex-col justify-center lg:col-span-2 xl:col-span-1">
-            <p className="text-[10px] uppercase font-black text-slate-400 tracking-wider">Not Marked</p>
+
+          <div className="p-4 bg-slate-800/20 border border-white/5 rounded-2xl text-center flex flex-col justify-center shadow-lg relative overflow-hidden group">
+            <div className="absolute top-0 inset-x-0 h-[3px] bg-slate-700" />
+            <p className="text-[10px] uppercase font-extrabold text-slate-400 tracking-widest">Unmarked</p>
             <p className="text-3xl font-black text-slate-400 mt-1">{stats.notMarked}</p>
+            <span className="text-[9px] text-slate-500 mt-0.5">Pending TL</span>
           </div>
         </div>
-        
-        <div className="bg-slate-900/25 border border-slate-800/80 p-5 rounded-2xl h-64 flex flex-col">
-          <h3 className="text-[10px] font-black uppercase text-slate-300 tracking-wider mb-2">Daily Attendance Ratio</h3>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={[
-                  { name: "Present", value: stats.present, color: "#10b981" },
-                  { name: "Late", value: stats.late, color: "#f59e0b" },
-                  { name: "Absent", value: stats.absent, color: "#f43f5e" },
-                  { name: "On Leave", value: stats.onLeave, color: "#3b82f6" },
-                  { name: "NSNC", value: stats.noShowNoCall, color: "#ef4444" },
-                  { name: "Not Marked", value: stats.notMarked, color: "#64748b" }
-                ].filter(d => d.value > 0)}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                innerRadius={45}
-                outerRadius={65}
-                paddingAngle={5}
-              >
-                {
-                  [
+
+        {/* Bounded Pie Chart container to prevent Recharts -1 dimensions warnings */}
+        <div className="bg-slate-900/40 border border-white/10 p-5 rounded-3xl flex flex-col shadow-lg">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-[11px] font-bold uppercase text-slate-300 tracking-wider">Attendance Breakdown</h4>
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+          </div>
+
+          {/* Wrapper has a fixed pixel height dimension and relative parent. ResponsiveContainer works flawlessly. */}
+          <div className="relative h-[150px] w-full mt-auto mb-auto flex items-center justify-center">
+            <ResponsiveContainer width="99%" height={150}>
+              <PieChart>
+                <Pie
+                  data={[
+                    { name: "Present", value: stats.present, color: "#10b981" },
+                    { name: "Late", value: stats.late, color: "#f59e0b" },
+                    { name: "Absent", value: stats.absent, color: "#f43f5e" },
+                    { name: "On Leave", value: stats.onLeave, color: "#3b82f6" },
+                    { name: "NSNC", value: stats.noShowNoCall, color: "#ef4444" },
+                    { name: "Not Marked", value: stats.notMarked, color: "#64748b" }
+                  ].filter(d => d.value > 0)}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={38}
+                  outerRadius={55}
+                  paddingAngle={4}
+                >
+                  {[
                     { name: "Present", value: stats.present, color: "#10b981" },
                     { name: "Late", value: stats.late, color: "#f59e0b" },
                     { name: "Absent", value: stats.absent, color: "#f43f5e" },
@@ -477,269 +579,338 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                     { name: "NSNC", value: stats.noShowNoCall, color: "#ef4444" },
                     { name: "Not Marked", value: stats.notMarked, color: "#64748b" }
                   ].filter(d => d.value > 0).map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} stroke="rgba(255,255,255,0.05)" />
-                  ))
-                }
-              </Pie>
-              <Tooltip 
-                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '8px' }}
-                itemStyle={{ color: '#f8fafc', fontSize: '12px' }}
-              />
-              <Legend verticalAlign="bottom" height={20} iconType="circle" wrapperStyle={{ fontSize: '10px' }} />
-            </PieChart>
-          </ResponsiveContainer>
+                    <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#0f172a', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                  itemStyle={{ color: '#f8fafc', fontSize: '11px' }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
 
-      {/* Control Banner & Single Date Export */}
-      <div className="flex items-center justify-between bg-[#18181c]/40 border border-slate-800 px-5 py-3 rounded-2xl">
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-slate-700 block" />
-          <span className="text-xs text-slate-400">
-            Currently displaying records for <strong className="text-slate-200 font-mono">{selectedDate}</strong> sorted with <strong className="text-indigo-400">Not Marked</strong> first.
+      {/* Roster Marking Path Tracker (Salesforce visual style) */}
+      <div className="bg-slate-900/30 border border-white/5 p-5 rounded-3xl space-y-3 shadow-inner">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div className="flex items-center gap-2">
+            <span className={`w-2.5 h-2.5 rounded-full ${markingProgress.percent === 100 ? "bg-emerald-500" : "bg-indigo-500 animate-pulse"}`} />
+            <h4 className="text-xs font-bold uppercase text-slate-300 tracking-wider">
+              Marking Progress Level
+            </h4>
+          </div>
+          <span className="text-xs font-bold font-mono text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-xl">
+            {markingProgress.percent}% Complete ({markingProgress.marked}/{markingProgress.total} Roster Assigned)
           </span>
         </div>
-
-        <button
-          onClick={handleExportSingleDate}
-          disabled={processedRoster.length === 0}
-          className="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Download className="w-3.5 h-3.5" /> Export Selected Date
-        </button>
+        <div className="w-full bg-slate-950 h-3.5 rounded-full overflow-hidden border border-white/5 p-[2px]">
+          <div
+            style={{ width: `${markingProgress.percent}%` }}
+            className={`h-full rounded-full bg-gradient-to-r ${markingProgress.percent === 100 ? "from-emerald-500 to-green-400" : "from-indigo-500 via-purple-500 to-pink-500"} transition-all duration-500 shadow-md`}
+          />
+        </div>
       </div>
 
-      {/* Roster & Tracking Matrix */}
-      <div className="bg-[#18181c]/65 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
-        {processedRoster.length === 0 ? (
-          <div className="p-12 text-center text-slate-500">
-            No agents found in global database directory roster fallback lists.
+      {/* Main Console Split View: Left LOB Sidebar / Right Table Workspace */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+        {/* Salesforce Lightning Left Side Department Filter Navigation */}
+        <div className="bg-slate-900/40 border border-white/10 rounded-3xl p-4 space-y-2 lg:sticky lg:top-4 shadow-xl">
+          <h3 className="text-[10px] font-black uppercase text-slate-500 tracking-widest px-3 mb-2.5 flex items-center gap-2">
+            <Filter className="w-3 h-3" />
+            LOB Departments
+          </h3>
+          <div className="flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 scrollbar-none">
+            {availableLOBs.map((lob) => {
+              const isActive = selectedLOB === lob;
+              const count = lob === "ALL" ? rosterOfAgents.length : (lobCounts[lob] || 0);
+
+              return (
+                <button
+                  key={lob}
+                  onClick={() => setSelectedLOB(lob)}
+                  className={`flex items-center justify-between gap-3 px-3 py-2.5 rounded-2xl w-full text-left font-semibold text-xs transition-all border shrink-0 lg:shrink-1 ${
+                    isActive
+                      ? "bg-indigo-500/15 border-indigo-500/30 text-slate-100 shadow"
+                      : "bg-transparent border-transparent text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                  }`}
+                >
+                  <span className="flex items-center gap-2 truncate">
+                    <span className={`w-2 h-2 rounded-full ${
+                      lob === "ALL"
+                        ? "bg-slate-400"
+                        : lob.toLowerCase().includes("chat")
+                          ? "bg-indigo-400"
+                          : lob.toLowerCase().includes("voice")
+                            ? "bg-sky-400"
+                            : "bg-emerald-400"
+                    }`} />
+                    {lob === "ALL" ? "All Departments" : `${lob} Desk`}
+                  </span>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg border font-mono ${isActive ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-300" : "bg-slate-950/40 border-white/5 text-slate-500"}`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            {/* Desktop Table View */}
-            <table className="w-full text-left border-collapse hidden md:table">
-              <thead>
-                <tr className="border-b border-slate-800 bg-slate-900/35 text-slate-400 text-xs font-black uppercase tracking-wider">
-                  <th className="p-4 pl-6">Agent Name</th>
-                  <th className="p-4">Department / LOB</th>
-                  <th className="p-4 text-center">Current Status Badge</th>
-                  <th className="p-4 pl-10 pr-6">Quick Attendance Selector Tools</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-850">
-                {processedRoster.map((item) => {
-                  const badgeColor = getStatusBadgeColor(item.status);
+        </div>
 
-                  return (
-                    <tr
-                      key={item.name}
-                      className="hover:bg-slate-800/10 transition-colors"
-                    >
-                      {/* Name & Mark Details */}
-                      <td className="p-4 pl-6">
-                        <div className="font-bold text-slate-200">{item.name}</div>
-                        {item.record?.markedBy && (
-                          <div className="text-[10px] text-slate-500 mt-0.5">
-                            Marked by {item.record.markedBy} at {new Date(item.record.markedAt || "").toLocaleTimeString()}
-                          </div>
-                        )}
-                      </td>
+        {/* Right CRM Records Table Workspace */}
+        <div className="lg:col-span-3 space-y-4">
+          {/* Controls Belt */}
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-900/60 border border-white/10 p-4 rounded-3xl">
+            {/* Search Input */}
+            <div className="relative w-full md:w-80">
+              <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search staff, LOB or marked status..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-slate-950/50 border border-white/5 focus:border-indigo-500/50 hover:border-white/10 rounded-2xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none transition-all font-medium shadow-inner"
+              />
+            </div>
 
-                      {/* LOB */}
-                      <td className="p-4">
-                        <span className="text-xs bg-slate-800/50 border border-slate-800 px-2.5 py-1 rounded-lg text-slate-300 font-medium">
-                          {item.lob}
-                        </span>
-                      </td>
+            <div className="flex items-center justify-between w-full md:w-auto gap-4">
+              <span className="text-[11px] text-slate-500 font-bold font-mono">
+                Showing {filteredRoster.length} of {processedRoster.length} matches
+              </span>
 
-                      {/* Current Status Badge with Late Arrival Options inline */}
-                      <td className="p-4">
-                        <div className="flex flex-col items-center justify-center gap-1.5">
-                          <span className={`px-2.5 py-1 text-[10px] uppercase font-black border rounded-full ${badgeColor}`}>
-                            {item.status === "not_marked"
-                              ? "NOT MARKED"
-                              : item.status === "nsnc"
-                                ? "NSNC 🚫"
-                                : item.status.replace("_", " ")}
-                            {item.status === "late" && (item.record?.lateTime || lateTimes[item.name]) ? (
-                              <span className="ml-1 text-slate-100 font-bold font-mono">
-                                ({item.record?.lateTime || lateTimes[item.name]})
+              <button
+                onClick={handleExportSingleDate}
+                disabled={processedRoster.length === 0}
+                className="h-9 px-4 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+              >
+                <Download className="w-3.5 h-3.5" /> Export {selectedDate}
+              </button>
+            </div>
+          </div>
+
+          {/* Roster Ledger Cards/Table Container */}
+          <div className="bg-slate-900/40 border border-white/10 rounded-3xl overflow-hidden shadow-2xl backdrop-blur-sm">
+            {filteredRoster.length === 0 ? (
+              <div className="p-12 text-center text-slate-500 space-y-2">
+                <AlertOctagon className="w-8 h-8 text-slate-600 mx-auto" />
+                <p className="font-semibold text-slate-400">No agent records matches active filter</p>
+                <p className="text-xs text-slate-600">Clear search input or change selected desk filter to view all roster lists.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto scrollbar-thin">
+                {/* Desktop High-Density Table */}
+                <table className="w-full text-left border-collapse hidden md:table">
+                  <thead>
+                    <tr className="border-b border-white/5 bg-slate-950/20 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+                      <th className="p-4 pl-6">Personnel Agent Roster</th>
+                      <th className="p-4">Desk LOB</th>
+                      <th className="p-4 text-center">Marking Status Status</th>
+                      <th className="p-4 pr-6 text-right">Quick Ledger Action Panel</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {filteredRoster.map((item) => {
+                      const badgeColor = getStatusBadgeColor(item.status);
+
+                      return (
+                        <tr
+                          key={item.name}
+                          className="hover:bg-white/[0.02] transition-colors group"
+                        >
+                          {/* Name & Initials Avatar */}
+                          <td className="p-4 pl-6">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${getLOBGradient(item.lob)} flex items-center justify-center text-white text-[11px] font-bold tracking-wider shadow-sm`}>
+                                {getInitials(item.name)}
+                              </div>
+                              <div>
+                                <div className="font-bold text-slate-200 text-xs">{item.name}</div>
+                                {item.record?.markedBy ? (
+                                  <div className="text-[10px] text-slate-500 mt-0.5 font-mono">
+                                    Marked by {item.record.markedBy} at {new Date(item.record.markedAt || "").toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  </div>
+                                ) : (
+                                  <div className="text-[10px] text-indigo-400/60 mt-0.5 tracking-wider uppercase font-extrabold text-[9px]">
+                                    Awaiting Decision
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* LOB Desk Badge */}
+                          <td className="p-4">
+                            <span className="text-[10px] font-bold bg-slate-950/40 border border-white/5 px-2.5 py-1 rounded-xl text-slate-300 uppercase tracking-wider">
+                              {item.lob}
+                            </span>
+                          </td>
+
+                          {/* Interactive Status Indicator with dynamic fields */}
+                          <td className="p-4">
+                            <div className="flex flex-col items-center justify-center gap-1.5">
+                              <span className={`px-2.5 py-1 text-[9px] uppercase font-bold border rounded-full font-mono ${badgeColor}`}>
+                                {item.status === "not_marked"
+                                  ? "NOT MARKED"
+                                  : item.status === "nsnc"
+                                    ? "NSNC 🚫"
+                                    : item.status.replace("_", " ")}
+                                {item.status === "late" && (item.record?.lateTime || lateTimes[item.name]) ? (
+                                  <span className="ml-1 text-slate-100 font-bold font-mono">
+                                    ({item.record?.lateTime || lateTimes[item.name]})
+                                  </span>
+                                ) : null}
                               </span>
-                            ) : null}
-                          </span>
 
-                          {/* Inline late arrival entry fields */}
-                          {item.status === "late" && (
-                            <div className="flex items-center gap-1 mt-1">
-                              <span className="text-[9px] text-slate-500 uppercase font-extrabold mr-1">Time:</span>
-                              <input
-                                type="time"
-                                value={lateTimes[item.name] || "09:00"}
-                                onChange={(e) => handleLateTimeChange(item.name, e.target.value)}
-                                className="bg-slate-950 border border-slate-800 text-slate-100 rounded px-1.5 py-0.5 text-xs font-mono font-bold focus:outline-none focus:border-indigo-500"
+                              {/* Inline Late Entry Time Dial */}
+                              {item.status === "late" && (
+                                <div className="flex items-center gap-1 mt-1">
+                                  <span className="text-[9px] text-slate-500 uppercase font-extrabold mr-1">Time:</span>
+                                  <input
+                                    type="time"
+                                    value={lateTimes[item.name] || "09:00"}
+                                    onChange={(e) => handleLateTimeChange(item.name, e.target.value)}
+                                    className="bg-slate-950 border border-white/10 text-slate-100 rounded px-1.5 py-0.5 text-[10px] font-mono font-bold focus:outline-none focus:border-indigo-500/50"
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          </td>
+
+                          {/* Actions Controller Buttons */}
+                          <td className="p-4 pr-6">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <StatusSelectorButton
+                                label="Present"
+                                icon={<CheckCircle2 className="w-3.5 h-3.5" />}
+                                isActive={item.status === "present"}
+                                activeStyle="bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                                onClick={() => handleMarkStatus(item.name, "present")}
+                              />
+                              <StatusSelectorButton
+                                label="Late"
+                                icon={<Clock className="w-3.5 h-3.5" />}
+                                isActive={item.status === "late"}
+                                activeStyle="bg-amber-500/10 text-amber-400 border-amber-500/30"
+                                onClick={() => handleMarkStatus(item.name, "late")}
+                              />
+                              <StatusSelectorButton
+                                label="Leave"
+                                icon={<Palmtree className="w-3.5 h-3.5" />}
+                                isActive={["annual", "sick", "casual"].includes(item.status)}
+                                activeStyle="bg-blue-500/10 text-blue-300 border-blue-500/30"
+                                onClick={() => handleMarkStatus(item.name, "annual")}
+                              />
+                              <StatusSelectorButton
+                                label="Absent"
+                                icon={<XCircle className="w-3.5 h-3.5" />}
+                                isActive={item.status === "absent"}
+                                activeStyle="bg-rose-500/10 text-rose-400 border-rose-500/30"
+                                onClick={() => handleMarkStatus(item.name, "absent")}
+                              />
+                              <StatusSelectorButton
+                                label="NSNC"
+                                icon={<AlertOctagon className="w-3.5 h-3.5" />}
+                                isActive={item.status === "nsnc"}
+                                activeStyle="bg-red-500/15 text-red-400 border-red-500/30 animate-pulse"
+                                onClick={() => handleMarkStatus(item.name, "nsnc")}
                               />
                             </div>
-                          )}
-                        </div>
-                      </td>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
 
-                      {/* Buttons controller */}
-                      <td className="p-4 pl-10 pr-6">
-                        <div className="flex flex-wrap gap-1.5">
+                {/* Mobile Responsive Cards View */}
+                <div className="block md:hidden divide-y divide-white/5">
+                  {filteredRoster.map((item) => {
+                    const badgeColor = getStatusBadgeColor(item.status);
+
+                    return (
+                      <div key={item.name} className="p-5 space-y-4 hover:bg-slate-800/10 transition-colors">
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${getLOBGradient(item.lob)} flex items-center justify-center text-white text-[11px] font-bold shadow`}>
+                              {getInitials(item.name)}
+                            </div>
+                            <div>
+                              <h4 className="font-bold text-slate-100 text-xs">{item.name}</h4>
+                              <p className="text-[10px] text-slate-500 mt-0.5">Section LOB: {item.lob}</p>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col items-end gap-1.5">
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] uppercase font-bold border ${badgeColor}`}>
+                              {item.status === "not_marked"
+                                ? "NOT MARKED"
+                                : item.status === "nsnc"
+                                  ? "NSNC 🚫"
+                                  : item.status.replace("_", " ")}
+                              {item.status === "late" && (item.record?.lateTime || lateTimes[item.name]) ? (
+                                <span className="ml-1 font-mono">({item.record?.lateTime || lateTimes[item.name]})</span>
+                              ) : null}
+                            </span>
+
+                            {item.status === "late" && (
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[9px] text-slate-500 font-bold uppercase">Time:</span>
+                                <input
+                                  type="time"
+                                  value={lateTimes[item.name] || "09:00"}
+                                  onChange={(e) => handleLateTimeChange(item.name, e.target.value)}
+                                  className="bg-slate-950 border border-white/10 text-slate-100 rounded px-1.5 py-0.5 text-xs font-mono font-bold focus:outline-none focus:border-indigo-500/50"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-1.5 pt-1">
                           <StatusSelectorButton
                             label="Present"
-                            icon="✅"
+                            icon={<CheckCircle2 className="w-3.5 h-3.5" />}
                             isActive={item.status === "present"}
-                            activeStyle="bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                            activeStyle="bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
                             onClick={() => handleMarkStatus(item.name, "present")}
                           />
                           <StatusSelectorButton
                             label="Late"
-                            icon="⏰"
+                            icon={<Clock className="w-3.5 h-3.5" />}
                             isActive={item.status === "late"}
-                            activeStyle="bg-amber-500/20 text-amber-300 border-amber-500/40"
+                            activeStyle="bg-amber-500/10 text-amber-400 border-amber-500/30"
                             onClick={() => handleMarkStatus(item.name, "late")}
                           />
                           <StatusSelectorButton
-                            label="Casual"
-                            icon="🏠"
-                            isActive={item.status === "casual"}
-                            activeStyle="bg-sky-500/20 text-sky-300 border-sky-500/40"
-                            onClick={() => handleMarkStatus(item.name, "casual")}
-                          />
-                          <StatusSelectorButton
-                            label="Annual"
-                            icon="🏖️"
-                            isActive={item.status === "annual"}
-                            activeStyle="bg-blue-500/20 text-blue-300 border-blue-500/40"
+                            label="Leave"
+                            icon={<Palmtree className="w-3.5 h-3.5" />}
+                            isActive={["annual", "sick", "casual"].includes(item.status)}
+                            activeStyle="bg-blue-500/10 text-blue-300 border-blue-500/30"
                             onClick={() => handleMarkStatus(item.name, "annual")}
                           />
                           <StatusSelectorButton
-                            label="Sick"
-                            icon="🤒"
-                            isActive={item.status === "sick"}
-                            activeStyle="bg-purple-500/20 text-purple-300 border-purple-500/40"
-                            onClick={() => handleMarkStatus(item.name, "sick")}
-                          />
-                          <StatusSelectorButton
                             label="Absent"
-                            icon="❌"
+                            icon={<XCircle className="w-3.5 h-3.5" />}
                             isActive={item.status === "absent"}
-                            activeStyle="bg-rose-500/20 text-rose-300 border-rose-500/40"
+                            activeStyle="bg-rose-500/10 text-rose-400 border-rose-500/30"
                             onClick={() => handleMarkStatus(item.name, "absent")}
                           />
                           <StatusSelectorButton
                             label="NSNC"
-                            icon="🚫"
+                            icon={<AlertOctagon className="w-3.5 h-3.5" />}
                             isActive={item.status === "nsnc"}
-                            activeStyle="bg-red-500/25 text-red-00 border-red-500/40"
+                            activeStyle="bg-red-500/15 text-red-00 border-red-500/30"
                             onClick={() => handleMarkStatus(item.name, "nsnc")}
                           />
                         </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-
-            {/* Mobile Cards Layout */}
-            <div className="block md:hidden divide-y divide-slate-800">
-              {processedRoster.map((item) => {
-                const badgeColor = getStatusBadgeColor(item.status);
-
-                return (
-                  <div key={item.name} className="p-5 space-y-4 hover:bg-slate-800/10 transition-colors">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-bold text-slate-100">{item.name}</h4>
-                        <p className="text-[10px] text-slate-400 mt-0.5">Department: {item.lob}</p>
                       </div>
-
-                      <div className="flex flex-col items-end gap-1.5">
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] uppercase font-bold border ${badgeColor}`}>
-                          {item.status === "not_marked"
-                            ? "NOT MARKED"
-                            : item.status === "nsnc"
-                              ? "NSNC 🚫"
-                              : item.status.replace("_", " ")}
-                          {item.status === "late" && (item.record?.lateTime || lateTimes[item.name]) ? (
-                            <span className="ml-1 font-mono">({item.record?.lateTime || lateTimes[item.name]})</span>
-                          ) : null}
-                        </span>
-
-                        {item.status === "late" && (
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[9px] text-slate-500 font-bold uppercase">Time:</span>
-                            <input
-                              type="time"
-                              value={lateTimes[item.name] || "09:00"}
-                              onChange={(e) => handleLateTimeChange(item.name, e.target.value)}
-                              className="bg-slate-950 border border-slate-800 text-slate-100 rounded px-1.5 py-0.5 text-xs font-mono font-bold"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      <StatusSelectorButton
-                        label="Present"
-                        icon="✅"
-                        isActive={item.status === "present"}
-                        activeStyle="bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                        onClick={() => handleMarkStatus(item.name, "present")}
-                      />
-                      <StatusSelectorButton
-                        label="Late"
-                        icon="⏰"
-                        isActive={item.status === "late"}
-                        activeStyle="bg-amber-500/20 text-amber-300 border-amber-500/40"
-                        onClick={() => handleMarkStatus(item.name, "late")}
-                      />
-                      <StatusSelectorButton
-                        label="Casual"
-                        icon="🏠"
-                        isActive={item.status === "casual"}
-                        activeStyle="bg-sky-500/20 text-sky-300 border-sky-500/40"
-                        onClick={() => handleMarkStatus(item.name, "casual")}
-                      />
-                      <StatusSelectorButton
-                        label="Annual"
-                        icon="🏖️"
-                        isActive={item.status === "annual"}
-                        activeStyle="bg-blue-500/20 text-blue-300 border-blue-500/40"
-                        onClick={() => handleMarkStatus(item.name, "annual")}
-                      />
-                      <StatusSelectorButton
-                        label="Sick"
-                        icon="🤒"
-                        isActive={item.status === "sick"}
-                        activeStyle="bg-purple-500/20 text-purple-300 border-purple-500/40"
-                        onClick={() => handleMarkStatus(item.name, "sick")}
-                      />
-                      <StatusSelectorButton
-                        label="Absent"
-                        icon="❌"
-                        isActive={item.status === "absent"}
-                        activeStyle="bg-rose-500/20 text-rose-300 border-rose-500/40"
-                        onClick={() => handleMarkStatus(item.name, "absent")}
-                      />
-                      <StatusSelectorButton
-                        label="NSNC"
-                        icon="🚫"
-                        isActive={item.status === "nsnc"}
-                        activeStyle="bg-red-500/25 text-red-100 border-red-500/40"
-                        onClick={() => handleMarkStatus(item.name, "nsnc")}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
@@ -749,18 +920,18 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
 const getStatusBadgeColor = (status: AttendanceRecord["status"]) => {
   switch (status) {
     case "present":
-      return "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+      return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
     case "late":
-      return "bg-amber-500/20 text-amber-400 border-amber-500/30";
+      return "bg-amber-500/10 text-amber-400 border-amber-500/20";
     case "absent":
     case "nsnc":
-      return "bg-rose-500/20 text-rose-400 border-rose-500/30";
+      return "bg-rose-500/10 text-rose-400 border-rose-500/20";
     case "annual":
     case "sick":
     case "casual":
-      return "bg-blue-500/15 text-blue-300 border-blue-500/25";
+      return "bg-blue-500/10 text-blue-300 border-blue-500/20";
     default:
-      return "bg-slate-800 text-slate-400 border-slate-700";
+      return "bg-slate-800 text-slate-400 border-slate-700/60";
   }
 };
 
@@ -772,7 +943,7 @@ const StatusSelectorButton = ({
   onClick,
 }: {
   label: string;
-  icon: string | React.ReactNode;
+  icon: React.ReactNode;
   isActive: boolean;
   activeStyle: string;
   onClick: () => void;
@@ -780,13 +951,13 @@ const StatusSelectorButton = ({
   return (
     <button
       onClick={onClick}
-      className={`px-2 py-1 rounded-lg border text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer hover:border-slate-700 ${
+      className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
         isActive
           ? activeStyle
-          : "bg-slate-950/50 border-slate-800 text-slate-400 hover:text-slate-100 hover:bg-slate-900"
+          : "bg-slate-950/40 border-white/5 text-slate-400 hover:text-slate-100 hover:bg-slate-900 hover:border-slate-700/50"
       }`}
     >
-      <span>{icon}</span>
+      <span className="flex items-center justify-center">{icon}</span>
       <span>{label}</span>
     </button>
   );
