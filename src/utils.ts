@@ -88,31 +88,9 @@ export const copyToClipboard = async (value: string, successMessage: string = "C
     toast.error("Nothing to copy");
     return false;
   }
-  try {
-    if (navigator.clipboard && window.isSecureContext) {
-      if (htmlValue && typeof ClipboardItem !== 'undefined') {
-        try {
-          const textBlob = new Blob([value], { type: "text/plain" });
-          const htmlBlob = new Blob([htmlValue], { type: "text/html" });
-          const item = new ClipboardItem({
-             "text/plain": textBlob,
-             "text/html": htmlBlob
-          });
-          await navigator.clipboard.write([item]);
-          toast.success(successMessage);
-          return true;
-        } catch (itemErr) {
-          console.warn("Rich text copy failed, falling back to plain text", itemErr);
-          await navigator.clipboard.writeText(value);
-          toast.success(successMessage);
-          return true;
-        }
-      } else {
-        await navigator.clipboard.writeText(value);
-        toast.success(successMessage);
-        return true;
-      }
-    } else {
+
+  const runFallback = (): boolean => {
+    try {
       const textArea = document.createElement("textarea");
       textArea.value = value;
       textArea.style.position = "fixed";
@@ -128,15 +106,54 @@ export const copyToClipboard = async (value: string, successMessage: string = "C
       if (successful) {
         toast.success(successMessage);
         return true;
-      } else {
-        toast.error("Failed to copy to clipboard.");
-        return false;
       }
+    } catch (fallbackErr) {
+      console.error("ExecCommand fallback failed:", fallbackErr);
     }
-  } catch (err) {
-    console.error("Clipboard copy failed:", err);
     toast.error("Failed to copy to clipboard.");
     return false;
+  };
+
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      if (htmlValue && typeof ClipboardItem !== 'undefined') {
+        try {
+          const textBlob = new Blob([value], { type: "text/plain" });
+          const htmlBlob = new Blob([htmlValue], { type: "text/html" });
+          const item = new ClipboardItem({
+             "text/plain": textBlob,
+             "text/html": htmlBlob
+          });
+          await navigator.clipboard.write([item]);
+          toast.success(successMessage);
+          return true;
+        } catch (itemErr) {
+          console.warn("Rich text copy failed, falling back to plain text", itemErr);
+          try {
+            await navigator.clipboard.writeText(value);
+            toast.success(successMessage);
+            return true;
+          } catch (writeTextErr) {
+            console.warn("writeText failed, heading to element fallback...", writeTextErr);
+            return runFallback();
+          }
+        }
+      } else {
+        try {
+          await navigator.clipboard.writeText(value);
+          toast.success(successMessage);
+          return true;
+        } catch (writeTextErr) {
+          console.warn("writeText failed, heading to element fallback...", writeTextErr);
+          return runFallback();
+        }
+      }
+    } else {
+      return runFallback();
+    }
+  } catch (err) {
+    console.warn("Main clipboard path failed, heading to element fallback...", err);
+    return runFallback();
   }
 };
 

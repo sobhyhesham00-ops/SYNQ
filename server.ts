@@ -57,6 +57,24 @@ async function startServer() {
     res.json({ status: 'ok' });
   });
 
+  // ─── API: Proxy Request ───────────────────────────────────────────────────
+  app.get("/api/proxy", async (req, res) => {
+    const url = req.query.url as string;
+    if (!url) return res.status(400).json({ error: "Missing 'url' parameter" });
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to fetch from proxied url");
+      const buffer = await response.arrayBuffer();
+      const contentType = response.headers.get("content-type") || "application/octet-stream";
+      res.setHeader("Content-Type", contentType);
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.send(Buffer.from(buffer));
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Failed to proxy request" });
+    }
+  });
+
   // ─── API: Safe Beacon/Ping Endpoint ──────────────────────────────────────
   app.all('/api/noop', (req, res) => {
     res.sendStatus(204);

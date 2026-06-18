@@ -53,8 +53,14 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLOB, setSelectedLOB] = useState("ALL");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 25;
 
   // Sync / load late values whenever records or selectedDate changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedLOB, selectedDate]);
+
   useEffect(() => {
     const times: Record<string, string> = {};
     attendanceRecords.forEach((r) => {
@@ -165,6 +171,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
     let late = 0;
     let absent = 0;
     let onLeave = 0; // Annual + Sick + Casual
+    let offCount = 0; // Off Days
     let noShowNoCall = 0; // No Show + No Call
     let notMarked = 0;
 
@@ -173,6 +180,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
       else if (item.status === "late") late++;
       else if (item.status === "absent") absent++;
       else if (["annual", "sick", "casual"].includes(item.status)) onLeave++;
+      else if (item.status === "off") offCount++;
       else if (item.status === "nsnc") noShowNoCall++;
       else notMarked++;
     });
@@ -183,6 +191,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
       late,
       absent,
       onLeave,
+      offCount,
       noShowNoCall,
       notMarked,
     };
@@ -375,6 +384,15 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
     });
   }, [processedRoster, searchTerm, selectedLOB]);
 
+  const totalPages = useMemo(() => {
+    return Math.max(1, Math.ceil(filteredRoster.length / itemsPerPage));
+  }, [filteredRoster.length, itemsPerPage]);
+
+  const paginatedRoster = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredRoster.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredRoster, currentPage, itemsPerPage]);
+
   const getInitials = (name: string) => {
     const parts = name.trim().split(/\s+/);
     if (parts.length >= 2) {
@@ -492,7 +510,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
       {/* Main Stats Ribbon & Interactive Ratio Pie Chart */}
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
         {/* Metric Cards Ribbon */}
-        <div className="xl:col-span-3 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        <div className="xl:col-span-3 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
           <div className="p-4 bg-slate-900/40 border border-white/5 rounded-2xl text-center flex flex-col justify-center shadow-lg relative overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-[3px] bg-slate-500" />
             <p className="text-[10px] uppercase font-extrabold text-slate-500 tracking-widest">Global Roster</p>
@@ -528,10 +546,17 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
             <span className="text-[9px] text-blue-500/80 mt-0.5">Approved Out</span>
           </div>
 
+          <div className="p-4 bg-slate-500/10 border border-slate-500/25 rounded-2xl text-center flex flex-col justify-center shadow-lg relative overflow-hidden group">
+            <div className="absolute top-0 inset-x-0 h-[3px] bg-slate-500" />
+            <p className="text-[10px] uppercase font-extrabold text-slate-300 tracking-widest">OFF</p>
+            <p className="text-3xl font-black text-slate-300 mt-1">{stats.offCount}</p>
+            <span className="text-[9px] text-slate-400 mt-0.5">Weekly Rest</span>
+          </div>
+
           <div className="p-4 bg-red-500/15 border border-red-500/25 rounded-2xl text-center flex flex-col justify-center shadow-lg relative overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-[3px] bg-red-500" />
-            <p className="text-[10px] uppercase font-extrabold text-red-400 tracking-widest">NSNC</p>
-            <p className="text-3xl font-black text-red-400 mt-1">{stats.noShowNoCall}</p>
+            <p className="text-[10px] uppercase font-extrabold text-red-500 tracking-widest">NSNC</p>
+            <p className="text-3xl font-black text-red-500 mt-1">{stats.noShowNoCall}</p>
             <span className="text-[9px] text-red-500/80 mt-0.5">No Show</span>
           </div>
 
@@ -560,6 +585,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                     { name: "Late", value: stats.late, color: "#f59e0b" },
                     { name: "Absent", value: stats.absent, color: "#f43f5e" },
                     { name: "On Leave", value: stats.onLeave, color: "#3b82f6" },
+                    { name: "OFF", value: stats.offCount, color: "#94a3b8" },
                     { name: "NSNC", value: stats.noShowNoCall, color: "#ef4444" },
                     { name: "Not Marked", value: stats.notMarked, color: "#64748b" }
                   ].filter(d => d.value > 0)}
@@ -697,19 +723,19 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                 <p className="text-xs text-slate-600">Clear search input or change selected desk filter to view all roster lists.</p>
               </div>
             ) : (
-              <div className="overflow-x-auto scrollbar-thin">
+              <div className="overflow-x-auto custom-scrollbar scrollbar-thin">
                 {/* Desktop High-Density Table */}
-                <table className="w-full text-left border-collapse hidden md:table min-w-[920px]">
+                <table className="w-full text-left border-collapse hidden md:table">
                   <thead>
                     <tr className="border-b border-white/5 bg-slate-950/20 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-                      <th className="p-4 pl-6 w-[280px]">Personnel Agent Roster</th>
-                      <th className="p-4 w-[110px]">Desk LOB</th>
-                      <th className="p-4 text-center w-[170px]">Attendance Status</th>
-                      <th className="p-4 pr-6 text-right">Quick Ledger Action Panel</th>
+                      <th className="p-3 pl-4">Personnel Agent Roster</th>
+                      <th className="p-3">Desk LOB</th>
+                      <th className="p-3 text-center">Attendance Status</th>
+                      <th className="p-3 pr-4 text-right">Quick Ledger Action Panel</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
-                    {filteredRoster.map((item) => {
+                    {paginatedRoster.map((item) => {
                       const badgeColor = getStatusBadgeColor(item.status);
 
                       return (
@@ -718,7 +744,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                           className="hover:bg-white/[0.02] transition-colors group"
                         >
                           {/* Name & Initials Avatar */}
-                          <td className="p-4 pl-6">
+                          <td className="p-3 pl-4">
                             <div className="flex items-center gap-3">
                               <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${getLOBGradient(item.lob)} flex items-center justify-center text-white text-[11px] font-bold tracking-wider shadow-sm`}>
                                 {getInitials(item.name)}
@@ -739,14 +765,14 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                           </td>
 
                           {/* LOB Desk Badge */}
-                          <td className="p-4">
+                          <td className="p-3">
                             <span className="text-[10px] font-bold bg-slate-950/40 border border-white/5 px-2.5 py-1 rounded-xl text-slate-300 uppercase tracking-wider">
                               {item.lob}
                             </span>
                           </td>
 
                           {/* Interactive Status Indicator with dynamic fields */}
-                          <td className="p-4">
+                          <td className="p-3">
                             <div className="flex flex-col items-center justify-center gap-1.5">
                               <span className={`px-2.5 py-1 text-[9px] uppercase font-bold border rounded-full font-mono ${badgeColor}`}>
                                 {item.status === "not_marked"
@@ -777,8 +803,8 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                           </td>
 
                           {/* Actions Controller Buttons */}
-                          <td className="p-4 pr-6">
-                            <div className="flex items-center justify-end gap-1.5">
+                          <td className="p-3 pr-4">
+                            <div className="flex items-center justify-end gap-1">
                               <StatusSelectorButton
                                 label="Present"
                                 icon={<CheckCircle2 className="w-3.5 h-3.5" />}
@@ -808,6 +834,13 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                                 onClick={() => handleMarkStatus(item.name, "absent")}
                               />
                               <StatusSelectorButton
+                                label="OFF"
+                                icon={<Home className="w-3.5 h-3.5" />}
+                                isActive={item.status === "off"}
+                                activeStyle="bg-slate-500/20 text-slate-300 border-slate-500/50"
+                                onClick={() => handleMarkStatus(item.name, "off")}
+                              />
+                              <StatusSelectorButton
                                 label="NSNC"
                                 icon={<AlertOctagon className="w-3.5 h-3.5" />}
                                 isActive={item.status === "nsnc"}
@@ -824,7 +857,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
 
                 {/* Mobile Responsive Cards View */}
                 <div className="block md:hidden divide-y divide-white/5">
-                  {filteredRoster.map((item) => {
+                  {paginatedRoster.map((item) => {
                     const badgeColor = getStatusBadgeColor(item.status);
 
                     return (
@@ -896,16 +929,87 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                             onClick={() => handleMarkStatus(item.name, "absent")}
                           />
                           <StatusSelectorButton
+                            label="OFF"
+                            icon={<Home className="w-3.5 h-3.5" />}
+                            isActive={item.status === "off"}
+                            activeStyle="bg-slate-500/20 text-slate-300 border-slate-500/50"
+                            onClick={() => handleMarkStatus(item.name, "off")}
+                          />
+                          <StatusSelectorButton
                             label="NSNC"
                             icon={<AlertOctagon className="w-3.5 h-3.5" />}
                             isActive={item.status === "nsnc"}
-                            activeStyle="bg-red-500/15 text-red-00 border-red-500/30"
+                            activeStyle="bg-red-500/15 text-red-400 border-red-500/30 animate-pulse"
                             onClick={() => handleMarkStatus(item.name, "nsnc")}
                           />
                         </div>
                       </div>
                     );
                   })}
+                </div>
+              </div>
+            )}
+
+            {/* Unified Pagination Controls Bar */}
+            {totalPages > 1 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-950/40 border-t border-white/10 p-4">
+                <div className="text-[11px] text-slate-400 font-semibold font-mono">
+                  Showing {Math.min(filteredRoster.length, (currentPage - 1) * itemsPerPage + 1)}-{Math.min(filteredRoster.length, currentPage * itemsPerPage)} of {filteredRoster.length} matches
+                </div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <button
+                    onClick={() => setCurrentPage(1)}
+                    disabled={currentPage === 1}
+                    className="h-8 px-2.5 bg-slate-900/60 border border-white/5 hover:border-white/10 text-slate-400 hover:text-slate-200 disabled:opacity-35 rounded-xl text-xs font-bold transition-all disabled:cursor-not-allowed select-none"
+                  >
+                    &laquo;
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="h-8 px-3 bg-slate-900/60 border border-white/5 hover:border-white/10 text-slate-400 hover:text-slate-200 disabled:opacity-35 rounded-xl text-xs font-bold transition-all disabled:cursor-not-allowed flex items-center gap-1 select-none"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" /> Prev
+                  </button>
+                  
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+                      .map((p, idx, arr) => {
+                        const prevVal = arr[idx - 1];
+                        const showEllipsis = prevVal && p - prevVal > 1;
+                        return (
+                          <React.Fragment key={p}>
+                            {showEllipsis && <span className="text-slate-600 px-1 text-xs font-bold">...</span>}
+                            <button
+                              onClick={() => setCurrentPage(p)}
+                              className={`w-8 h-8 rounded-xl text-xs font-bold flex items-center justify-center transition-all ${
+                                currentPage === p
+                                  ? "bg-indigo-500 border border-indigo-500/30 text-white shadow"
+                                  : "bg-slate-950/30 border border-white/5 text-slate-400 hover:text-slate-100 hover:bg-slate-900"
+                              }`}
+                            >
+                              {p}
+                            </button>
+                          </React.Fragment>
+                        );
+                      })}
+                  </div>
+
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="h-8 px-3 bg-slate-900/60 border border-white/5 hover:border-white/10 text-slate-400 hover:text-slate-200 disabled:opacity-35 rounded-xl text-xs font-bold transition-all disabled:cursor-not-allowed flex items-center gap-1 select-none"
+                  >
+                    Next <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(totalPages)}
+                    disabled={currentPage === totalPages}
+                    className="h-8 px-2.5 bg-slate-900/60 border border-white/5 hover:border-white/10 text-slate-400 hover:text-slate-200 disabled:opacity-35 rounded-xl text-xs font-bold transition-all disabled:cursor-not-allowed select-none"
+                  >
+                    &raquo;
+                  </button>
                 </div>
               </div>
             )}
@@ -924,8 +1028,11 @@ const getStatusBadgeColor = (status: AttendanceRecord["status"]) => {
     case "late":
       return "bg-amber-500/10 text-amber-400 border-amber-500/20";
     case "absent":
-    case "nsnc":
       return "bg-rose-500/10 text-rose-400 border-rose-500/20";
+    case "nsnc":
+      return "bg-red-500/15 text-red-500 border-red-500/30";
+    case "off":
+      return "bg-slate-500/20 text-slate-300 border-slate-500/50";
     case "annual":
     case "sick":
     case "casual":
@@ -951,13 +1058,13 @@ const StatusSelectorButton = ({
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
+      className={`px-2.5 py-1.5 rounded-xl border text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer active:scale-95 shrink-0 select-none ${
         isActive
           ? activeStyle
           : "bg-slate-950/40 border-white/5 text-slate-400 hover:text-slate-100 hover:bg-slate-900 hover:border-slate-700/50"
       }`}
     >
-      <span className="flex items-center justify-center">{icon}</span>
+      <span className="flex items-center justify-center shrink-0">{icon}</span>
       <span>{label}</span>
     </button>
   );

@@ -77,31 +77,83 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
 
   if (!hasAttachments && !hasLinks && !hasTlAttachments && !hasTlLinks) return null;
 
+  const handleOpenUrl = (url: string) => {
+    try {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      console.error("Failed to open URL", err);
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  };
+
+  const handleDownloadFile = async (url: string, filename: string) => {
+    toast.info(`Preparing secure download: ${filename}...`);
+    try {
+      // 1. Try to download via proxy fetch to blob for cross-origin iframe support
+      const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`;
+      const res = await fetch(proxyUrl);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1500);
+      toast.success("Download started successfully!");
+    } catch (err) {
+      console.warn("Direct blob download failed (expected for external/CORS locked files). Directing to simple open...", err);
+      // 2. Clear failover back to target _blank layout
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      toast.success("Attempting to open/download in a new tab.");
+    }
+  };
+
   const handleCopyImage = async (imageUrl: string) => {
     try {
       if (!navigator.clipboard || !navigator.clipboard.write) {
-        toast.error("Image copy not supported in this browser");
+        toast.error("Image copy is not supported in this browser environment");
         return;
       }
-      toast.info("Copying image...");
-      const res = await fetch(imageUrl);
+      toast.info("Copying image payload...");
+      const proxyUrl = `/api/proxy?url=${encodeURIComponent(imageUrl)}`;
+      const res = await fetch(proxyUrl);
       const blob = await res.blob();
       let writeBlob = blob;
       
-      // Convert to PNG if needed for Clipboard API
+      // Convert to standard PNG if needed
       if (blob.type !== 'image/png') {
          const img = new Image();
-         img.src = imageUrl;
+         const blobUrl = URL.createObjectURL(blob);
+         img.src = blobUrl;
          await new Promise((resolve) => { img.onload = resolve; img.onerror = resolve; });
          const canvas = document.createElement('canvas');
          canvas.width = img.width || 500;
          canvas.height = img.height || 500;
          const ctx = canvas.getContext('2d');
          if (ctx) {
-           ctx.fillStyle = '#FFFFFF';
-           ctx.fillRect(0, 0, canvas.width, canvas.height);
-           ctx.drawImage(img, 0, 0);
-           writeBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png')) as Blob;
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+            const rBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+            if (rBlob) writeBlob = rBlob as Blob;
          }
       }
 
@@ -111,22 +163,21 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
       toast.success("Image copied to clipboard!");
     } catch (e: any) {
       console.error("Clipboard copy failed", e);
-      toast.error("Failed to copy image. Browser restriction or CORS.");
+      toast.error("Failed to copy image. Trying fallback copy...");
+      // Try string fallback
+      const ok = await copyToClipboard(imageUrl, "Image URL copied to clipboard!");
+      if (!ok) {
+        toast.error("Process restricted by browser CORS guidelines.");
+      }
     }
   };
 
   const downloadAll = async () => {
-    toast.info("Downloading attachments...");
+    toast.info("Downloading all attachments sequentially...");
     for (let i = 0; i < normalizedAttachments.length; i++) {
         const att = normalizedAttachments[i];
-        const a = document.createElement('a');
-        a.href = att.url;
-        a.download = att.name || `attachment-${i + 1}`;
-        a.target = "_blank";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        await new Promise(r => setTimeout(r, 300));
+        await handleDownloadFile(att.url, att.name || `attachment-${i + 1}`);
+        await new Promise(r => setTimeout(r, 450));
     }
   };
 
@@ -144,39 +195,97 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
               <Download className="w-3 h-3" /> Download All
             </button>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {normalizedAttachments.map((att) => {
               const fileTitle = att.name;
               const isImage = att.type?.startsWith('image/') || att.url.startsWith('data:image/') || (!att.type?.includes('pdf') && att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i));
               
               return (
-              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[380px] bg-black/55 rounded-xl border border-white/10 hover:border-indigo-500/50 transition-all overflow-hidden flex flex-col">
+              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[380px] bg-slate-900 border border-white/10 hover:border-indigo-500/50 transition-all rounded-xl overflow-hidden flex flex-col shadow-lg">
                 {isImage ? (
-                  <div className="w-full flex-1 min-h-[140px] flex items-center justify-center p-1 relative">
-                    <img referrerPolicy="no-referrer" src={att.url} alt={fileTitle} className="w-full h-auto object-contain max-h-[320px] rounded" />
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/photo:opacity-100 transition-opacity flex flex-wrap items-center justify-center gap-2 p-2 backdrop-blur-sm">
-                       <a href={att.url} target="_blank" rel="noreferrer" className="px-2 py-1.5 bg-white/10 hover:bg-white/20 rounded font-bold text-xs text-white flex items-center gap-1.5">
-                         <ExternalLink className="w-3.5 h-3.5" /> Open
-                       </a>
-                       <button onClick={() => handleCopyImage(att.url)} className="px-2 py-1.5 bg-white/10 hover:bg-white/20 rounded font-bold text-xs text-white flex items-center gap-1.5">
-                         <Copy className="w-3.5 h-3.5" /> Copy
-                       </button>
-                       <a href={att.url} download={fileTitle} className="px-2 py-1.5 bg-indigo-500 hover:bg-indigo-400 rounded font-bold text-xs text-slate-900 flex items-center gap-1.5">
-                         <Download className="w-3.5 h-3.5" /> Download
-                       </a>
+                  <>
+                    {/* Image Preview Window */}
+                    <div className="w-full flex items-center justify-center p-2 bg-slate-950/40 relative min-h-[160px] max-h-[280px] overflow-hidden">
+                      <img 
+                        referrerPolicy="no-referrer" 
+                        src={att.url} 
+                        alt={fileTitle} 
+                        className="w-full h-auto max-h-[260px] object-contain rounded" 
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          const parent = e.currentTarget.parentElement;
+                          if (parent) {
+                            // Clear other children except the image
+                            Array.from(parent.children).forEach(child => {
+                              if (child !== e.currentTarget) child.remove();
+                            });
+                            const placeholder = document.createElement('div');
+                            placeholder.className = 'flex flex-col items-center justify-center p-6 text-slate-400 select-none';
+                            placeholder.innerHTML = `
+                              <svg class="w-10 h-10 text-slate-500 mb-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                              </svg>
+                              <span class="text-xs text-slate-400 font-semibold text-center break-words px-2 max-w-[280px]">Image URL inaccessible (Direct options below)</span>
+                            `;
+                            parent.appendChild(placeholder);
+                          }
+                        }}
+                      />
                     </div>
-                  </div>
+                    {/* Information Bar + Touch Friendly Persistent Controls (Never Hidden!) */}
+                    <div className="p-3 bg-slate-950/70 border-t border-white/5 flex flex-col gap-2.5">
+                      <div className="flex items-center gap-2">
+                        <ImageIcon className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                        <span className="text-xs text-slate-300 font-medium truncate flex-1 font-sans" title={fileTitle}>
+                          {fileTitle}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-1.5 pt-0.5">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenUrl(att.url)}
+                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-[11px] font-bold text-slate-200 transition-colors border border-white/10"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5 shrink-0" /> Open
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyImage(att.url)}
+                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-[11px] font-bold text-slate-200 transition-colors border border-white/10"
+                        >
+                          <Copy className="w-3.5 h-3.5 shrink-0" /> Copy
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadFile(att.url, fileTitle)}
+                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-indigo-500 hover:bg-indigo-400 text-slate-950 rounded-lg text-[11px] font-bold transition-colors"
+                        >
+                          <Download className="w-3.5 h-3.5 shrink-0" /> Download
+                        </button>
+                      </div>
+                    </div>
+                  </>
                 ) : (
-                  <div className="flex flex-col items-center justify-center p-6 w-full flex-1">
+                  <div className="flex flex-col items-center justify-center p-6 w-full flex-1 min-h-[160px]">
                     <FileText className="w-8 h-8 text-indigo-400 mb-2" />
-                    <span className="text-sm text-slate-200 font-medium font-sans mb-3 text-center break-words w-full px-2 line-clamp-2" title={fileTitle}>{fileTitle}</span>
-                    <div className="flex items-center gap-2">
-                       <a href={att.url} target="_blank" rel="noreferrer" className="px-2.5 py-1.5 bg-white/10 hover:bg-white/20 rounded font-bold text-xs text-white flex items-center gap-1.5">
-                         <ExternalLink className="w-3 h-3" /> Open
-                       </a>
-                       <a href={att.url} download={fileTitle} className="px-2.5 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 rounded font-bold text-xs flex items-center gap-1.5 border border-indigo-500/30">
-                         <Download className="w-3 h-3" /> Download
-                       </a>
+                    <span className="text-sm text-slate-200 font-medium font-sans mb-3 text-center break-words w-full px-2 line-clamp-2" title={fileTitle}>
+                      {fileTitle}
+                    </span>
+                    <div className="flex items-center gap-2 w-full justify-center">
+                       <button
+                         type="button"
+                         onClick={() => handleOpenUrl(att.url)}
+                         className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg font-bold text-xs text-white flex items-center gap-1.5 border border-white/10 transition-colors"
+                       >
+                         <ExternalLink className="w-3.5 h-3.5" /> Open
+                       </button>
+                       <button
+                         type="button"
+                         onClick={() => handleDownloadFile(att.url, fileTitle)}
+                         className="px-3 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 rounded-lg font-bold text-xs flex items-center gap-1.5 border border-indigo-500/30 transition-colors"
+                       >
+                         <Download className="w-3.5 h-3.5" /> Download
+                       </button>
                     </div>
                   </div>
                 )}
@@ -206,44 +315,102 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
               ⚠️ TL / Supervisor Files ({normalizedTlAttachments.length}):
             </span>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {normalizedTlAttachments.map((att) => {
               const fileTitle = att.name;
               const isImage = att.type?.startsWith('image/') || att.url.startsWith('data:image/') || (!att.type?.includes('pdf') && att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i));
               
               return (
-              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[380px] bg-black/55 rounded-xl border border-amber-500/20 hover:border-amber-400/50 transition-all overflow-hidden flex flex-col">
+              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[380px] bg-slate-900 border border-amber-500/20 hover:border-amber-400/50 transition-all rounded-xl overflow-hidden flex flex-col shadow-lg">
                 {showSideBadges && (
                   <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-amber-500 text-slate-950 font-black text-[9px] rounded uppercase shadow-md z-10 select-none">
                     TL
                   </div>
                 )}
                 {isImage ? (
-                  <div className="w-full flex-1 min-h-[140px] flex items-center justify-center p-1 relative">
-                    <img referrerPolicy="no-referrer" src={att.url} alt={fileTitle} className="w-full h-auto object-contain max-h-[320px] rounded" />
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/photo:opacity-100 transition-opacity flex flex-wrap items-center justify-center gap-2 p-2 backdrop-blur-sm">
-                       <a href={att.url} target="_blank" rel="noreferrer" className="px-2 py-1.5 bg-white/10 hover:bg-white/20 rounded font-bold text-xs text-white flex items-center gap-1.5">
-                         <ExternalLink className="w-3.5 h-3.5" /> Open
-                       </a>
-                       <button onClick={() => handleCopyImage(att.url)} className="px-2 py-1.5 bg-white/10 hover:bg-white/20 rounded font-bold text-xs text-white flex items-center gap-1.5">
-                         <Copy className="w-3.5 h-3.5" /> Copy
-                       </button>
-                       <a href={att.url} download={fileTitle} className="px-2 py-1.5 bg-amber-500 hover:bg-amber-400 rounded font-bold text-xs text-slate-900 flex items-center gap-1.5">
-                         <Download className="w-3.5 h-3.5" /> Download
-                       </a>
+                  <>
+                    {/* TL Image Preview Window */}
+                    <div className="w-full flex items-center justify-center p-2 bg-slate-950/40 relative min-h-[160px] max-h-[280px] overflow-hidden">
+                      <img 
+                        referrerPolicy="no-referrer" 
+                        src={att.url} 
+                        alt={fileTitle} 
+                        className="w-full h-auto max-h-[260px] object-contain rounded" 
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          const parent = e.currentTarget.parentElement;
+                          if (parent) {
+                            // Clear other children except the image
+                            Array.from(parent.children).forEach(child => {
+                              if (child !== e.currentTarget) child.remove();
+                            });
+                            const placeholder = document.createElement('div');
+                            placeholder.className = 'flex flex-col items-center justify-center p-6 text-amber-500 select-none';
+                            placeholder.innerHTML = `
+                              <svg class="w-10 h-10 text-amber-600/70 mb-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                              </svg>
+                              <span class="text-xs text-amber-500/80 font-semibold text-center break-words px-2 max-w-[280px]">Supervisor image URL inaccessible (Direct options below)</span>
+                            `;
+                            parent.appendChild(placeholder);
+                          }
+                        }}
+                      />
                     </div>
-                  </div>
+                    {/* TL Information Bar + Touch Friendly Persistent Controls */}
+                    <div className="p-3 bg-slate-950/70 border-t border-amber-500/10 flex flex-col gap-2.5">
+                      <div className="flex items-center gap-2">
+                        <ImageIcon className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                        <span className="text-xs text-amber-400 font-medium truncate flex-1 font-sans" title={fileTitle}>
+                          {fileTitle}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-1.5 pt-0.5">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenUrl(att.url)}
+                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-[11px] font-bold text-slate-200 transition-colors border border-white/10"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5 shrink-0" /> Open
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyImage(att.url)}
+                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-[11px] font-bold text-slate-200 transition-colors border border-white/10"
+                        >
+                          <Copy className="w-3.5 h-3.5 shrink-0" /> Copy
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadFile(att.url, fileTitle)}
+                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-[11px] font-bold transition-colors"
+                        >
+                          <Download className="w-3.5 h-3.5 shrink-0" /> Download
+                        </button>
+                      </div>
+                    </div>
+                  </>
                 ) : (
-                  <div className="flex flex-col items-center justify-center p-6 w-full flex-1">
+                  <div className="flex flex-col items-center justify-center p-6 w-full flex-1 min-h-[160px]">
                     <FileText className="w-8 h-8 text-amber-500 mb-2" />
-                    <span className="text-sm text-slate-200 font-medium font-sans mb-3 text-center break-words w-full px-2 line-clamp-2" title={fileTitle}>{fileTitle}</span>
-                    <div className="flex items-center gap-2">
-                       <a href={att.url} target="_blank" rel="noreferrer" className="px-2.5 py-1.5 bg-white/10 hover:bg-white/20 rounded font-bold text-xs text-white flex items-center gap-1.5">
-                         <ExternalLink className="w-3 h-3" /> Open
-                       </a>
-                       <a href={att.url} download={fileTitle} className="px-2.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded font-bold text-xs flex items-center gap-1.5 border border-amber-500/30">
-                         <Download className="w-3 h-3" /> Download
-                       </a>
+                    <span className="text-sm text-slate-200 font-medium font-sans mb-3 text-center break-words w-full px-2 line-clamp-2" title={fileTitle}>
+                      {fileTitle}
+                    </span>
+                    <div className="flex items-center gap-2 w-full justify-center">
+                       <button
+                         type="button"
+                         onClick={() => handleOpenUrl(att.url)}
+                         className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg font-bold text-xs text-white flex items-center gap-1.5 border border-white/10 transition-colors"
+                       >
+                         <ExternalLink className="w-3.5 h-3.5" /> Open
+                       </button>
+                       <button
+                         type="button"
+                         onClick={() => handleDownloadFile(att.url, fileTitle)}
+                         className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-lg font-bold text-xs flex items-center gap-1.5 border border-amber-500/30 transition-colors"
+                       >
+                         <Download className="w-3.5 h-3.5" /> Download
+                       </button>
                     </div>
                   </div>
                 )}
