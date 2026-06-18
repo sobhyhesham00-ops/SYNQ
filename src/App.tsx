@@ -1889,7 +1889,8 @@ export default function App() {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         // Log out the user
-        if (currentUser?.role === "tl") {
+        const isTL = currentUser?.role === "tl" || (currentUser?.name && isTLName(currentUser.name));
+        if (isTL) {
           const today = new Date().toISOString().split("T")[0];
           const docId = `${getUsernameFromFullName(currentUser.name)}_${today}`;
           updateDoc(doc(db, "tl_login_logs", docId), {
@@ -1930,7 +1931,9 @@ export default function App() {
   }, [currentUser]); // Re-run when user logs in/out
 
   useEffect(() => {
-    if (!currentUser || currentUser.role !== "tl") return;
+    if (!currentUser) return;
+    const isTL = currentUser.role === "tl" || (currentUser.name && isTLName(currentUser.name));
+    if (!isTL) return;
     const markOffline = () => {
       const today = new Date().toISOString().split("T")[0];
       const docId = `${getUsernameFromFullName(currentUser.name)}_${today}`;
@@ -4602,7 +4605,8 @@ ${pageText}
 
     const captureTLLoginTime = async (user: User) => {
       if (!isMountedRef.current) return;
-      if (user.role !== "tl") return;
+      const isTL = user.role === "tl" || (user.name && isTLName(user.name));
+      if (!isTL) return;
       const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
       const docId = `${getUsernameFromFullName(user.name)}_${today}`;
       const tlLogRef = doc(db, "tl_login_logs", docId);
@@ -4819,7 +4823,8 @@ ${pageText}
   };
 
   const handleSignOut = () => {
-    if (currentUser?.role === "tl") {
+    const isTL = currentUser?.role === "tl" || (currentUser?.name && isTLName(currentUser.name));
+    if (isTL) {
       const today = new Date().toISOString().split("T")[0];
       const docId = `${getUsernameFromFullName(currentUser.name)}_${today}`;
       updateDoc(doc(db, "tl_login_logs", docId), {

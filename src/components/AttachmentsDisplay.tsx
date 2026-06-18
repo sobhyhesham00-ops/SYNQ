@@ -255,13 +255,14 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
                         </span>
                       </div>
                       <div className="grid grid-cols-3 gap-1.5 pt-0.5">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenUrl(att.url)}
+                        <a
+                          href={att.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-[11px] font-bold text-slate-200 transition-colors border border-white/10"
                         >
                           <ExternalLink className="w-3.5 h-3.5 shrink-0" /> Open
-                        </button>
+                        </a>
                         <button
                           type="button"
                           onClick={() => handleCopyImage(att.url)}
@@ -286,20 +287,21 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
                       {fileTitle}
                     </span>
                     <div className="flex items-center gap-2 w-full justify-center">
-                       <button
-                         type="button"
-                         onClick={() => handleOpenUrl(att.url)}
-                         className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg font-bold text-xs text-white flex items-center gap-1.5 border border-white/10 transition-colors"
-                       >
-                         <ExternalLink className="w-3.5 h-3.5" /> Open
-                       </button>
-                       <button
-                         type="button"
-                         onClick={() => handleDownloadFile(att.url, fileTitle)}
-                         className="px-3 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 rounded-lg font-bold text-xs flex items-center gap-1.5 border border-indigo-500/30 transition-colors"
-                       >
-                         <Download className="w-3.5 h-3.5" /> Download
-                       </button>
+                        <a
+                          href={att.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg font-bold text-xs text-white flex items-center gap-1.5 border border-white/10 transition-colors inline-flex"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" /> Open
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadFile(att.url, fileTitle)}
+                          className="px-3 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 rounded-lg font-bold text-xs flex items-center gap-1.5 border border-indigo-500/30 transition-colors"
+                        >
+                          <Download className="w-3.5 h-3.5" /> Download
+                        </button>
                     </div>
                   </div>
                 )}
