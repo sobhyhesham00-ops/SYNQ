@@ -1,9 +1,10 @@
 import { SchedulingRequest, SHIFTS, TEAM_LEADERS, INITIAL_AGENTS, SwapRequest, AnnualRequest, ScheduledShift, AGENT_LOBS, AGENT_TL_MAP, Inquiry, TimeLog, AgentDirectoryRow, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, CaseRecord, SystemNotification, Order, FileAttachment, TTWorkflowStatus } from './types';
 
 // Simple client-side storage helpers
-import { db, auth, wrappedSetDoc as setDoc, wrappedDeleteDoc as deleteDoc } from './firebase';
+import { db, auth, wrappedSetDoc as setDoc, wrappedDeleteDoc as deleteDoc, storage } from './firebase';
 import { doc } from 'firebase/firestore';
 import { toast } from "sonner";
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 export function normalizeAgentLob(lob: string | undefined | null, role: string): string {
   if (role === 'tl' || role === 'qa' || role === 'director') return '';
@@ -181,7 +182,12 @@ export const compressPastedImage = (base64Str: string, maxWidth = 1024, quality 
   });
 };
 
-export const handleGlobalImagePaste = (e: React.ClipboardEvent, photos: string[], setPhotos: (photos: string[]) => void) => {
+export const handleGlobalImagePaste = async (
+  e: React.ClipboardEvent,
+  photos: string[],
+  setPhotos: (photos: string[]) => void,
+  setUploading?: (uploading: boolean) => void
+) => {
   const items = e.clipboardData?.items;
   if (!items) return;
   const filesArray: File[] = [];
@@ -192,25 +198,47 @@ export const handleGlobalImagePaste = (e: React.ClipboardEvent, photos: string[]
     }
   }
   if (filesArray.length > 0) {
-    Promise.all(filesArray.map(file => {
-      return new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-          if (event.target?.result) {
-            const compressed = await compressPastedImage(event.target.result as string);
-            resolve(compressed);
-          } else {
-            resolve('');
-          }
-        };
-        reader.readAsDataURL(file);
-      });
-    })).then(newCompressedPhotos => {
-      const filtered = newCompressedPhotos.filter(Boolean);
+    if (setUploading) setUploading(true);
+    const toastId = toast.loading("Uploading pasted image...");
+    try {
+      const uploadedUrls: string[] = [];
+      for (const file of filesArray) {
+        const timestamp = Date.now();
+        const safeFileName = file.name ? file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_") : `pasted_image_${timestamp}.png`;
+        const path = `case-attachments/general/upload/root/${timestamp}-${safeFileName}`;
+        const storageRef = ref(storage, path);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+        
+        const url = await new Promise<string>((resolve, reject) => {
+          uploadTask.on(
+            'state_changed',
+            null,
+            (error) => reject(error),
+            async () => {
+              try {
+                const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                resolve(downloadUrl);
+              } catch (err) {
+                reject(err);
+              }
+            }
+          );
+        });
+        if (url) uploadedUrls.push(url);
+      }
+      const filtered = uploadedUrls.filter(Boolean);
       if (filtered.length > 0) {
         setPhotos([...photos, ...filtered]);
+        toast.success(`Successfully uploaded ${filtered.length} pasted file(s)`, { id: toastId });
+      } else {
+        toast.dismiss(toastId);
       }
-    });
+    } catch (err: any) {
+      console.error("Paste upload failed", err);
+      toast.error(`Failed to upload pasted image: ${err.message}`, { id: toastId });
+    } finally {
+      if (setUploading) setUploading(false);
+    }
   }
 };
 

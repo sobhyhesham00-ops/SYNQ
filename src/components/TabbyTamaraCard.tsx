@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Copy, ExternalLink, MessageCircle, AlertCircle, Phone, CheckCircle2, 
   Hospital, Hash, User, Calendar, DollarSign, PenTool, Trash2, Pencil, 
-  Check, Clock, CheckIcon, Download, LinkIcon, FileText, Share, CornerDownRight, ChevronDown, ChevronUp, Loader2, Eye 
+  Check, Clock, CheckIcon, Download, LinkIcon, FileText, Share, CornerDownRight, ChevronDown, ChevronUp, Loader2, Eye,
+  Search, X
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { doc, arrayUnion } from 'firebase/firestore';
@@ -159,7 +160,35 @@ export const TabbyTamaraCard = ({
   
   // Reassign / Assign State
   const [showAssignDropdown, setShowAssignDropdown] = useState(false);
+  const [assignSearchQuery, setAssignSearchQuery] = useState("");
   const [isAssigning, setIsAssigning] = useState(false);
+  const assignDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (assignDropdownRef.current && !assignDropdownRef.current.contains(event.target as Node)) {
+        setShowAssignDropdown(false);
+      }
+    }
+    if (showAssignDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showAssignDropdown]);
+
+  useEffect(() => {
+    if (!showAssignDropdown) {
+      setAssignSearchQuery("");
+    }
+  }, [showAssignDropdown]);
+
+  const allAgents = Object.keys(AGENT_LOBS).sort((a, b) => a.localeCompare(b));
+  const filteredAgents = allAgents.filter(agentName => 
+    agentName.toLowerCase().includes(assignSearchQuery.toLowerCase())
+  );
+
   const socialMediaAgents = Object.entries(AGENT_LOBS)
     .filter(([_, lob]) => lob === 'Chat')
     .map(([name]) => name);
@@ -173,6 +202,7 @@ export const TabbyTamaraCard = ({
 
   const [tlFormPhotos, setTlFormPhotos] = useState<string[]>([]);
   const [tlFormLinks, setTlFormLinks] = useState<string[]>([]);
+  const [tlFormUploading, setTlFormUploading] = useState(false);
   const [crmContactNotes, setCrmContactNotes] = useState("");
 
   // Sent To Partner Panel
@@ -988,18 +1018,19 @@ export const TabbyTamaraCard = ({
                  onPhotosChange={setTlFormPhotos}
                  onLinksChange={setTlFormLinks}
                  photosLabel="Payment screenshot, ID, or any supporting file"
+                  onUploadStateChange={setTlFormUploading}
                />
              </div>
              <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 pt-3 border-t border-slate-700/40">
                <SlideToConfirm
-                 label="Slide to Reject"
+                 label="Slide to Reject" disabled={tlFormUploading}
                  confirmedLabel="Rejected!"
                  colorClass="from-red-600 to-rose-500"
                  icon={<Trash2 className="w-5 h-5 text-white" />}
                  onConfirm={() => { handleConfirmTabbyTamara(req.id, tlFintechPaymentLink, tlFintechNotes, tlFintechLinks, "rejected", tlFormPhotos, tlFormLinks); setTlFormPhotos([]); setTlFormLinks([]); setActiveFintechHandlingId(null); }}
                />
                <SlideToConfirm
-                 label="Slide to Issue Link"
+                 label="Slide to Issue Link" disabled={tlFormUploading}
                  confirmedLabel="Issued!"
                  colorClass="from-indigo-600 to-blue-500"
                  icon={<CheckCircle2 className="w-5 h-5 text-white" />}
@@ -1057,7 +1088,7 @@ export const TabbyTamaraCard = ({
 
         {/* Assign Dropdown (TL only) */}
         {isTLOreSupport && (
-          <div className="relative">
+          <div className="relative" ref={assignDropdownRef}>
             <button
               onClick={() => setShowAssignDropdown(!showAssignDropdown)}
               className="px-3 py-1.5 text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-widest border border-indigo-500/20 cursor-pointer"
@@ -1065,22 +1096,76 @@ export const TabbyTamaraCard = ({
               <User className="w-3.5 h-3.5" /> {req.assignedToName ? "Reassign" : "Assign Agent"}
             </button>
             {showAssignDropdown && (
-              <div className="absolute bottom-10 right-0 z-50 bg-[#1e1e24] border border-slate-700 rounded-xl w-56 shadow-2xl p-2 space-y-1">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-2 py-1">Select Chat Agent</p>
-                {socialMediaAgents.length === 0 ? (
-                  <p className="text-xs text-slate-400 px-2 py-1">No agents found</p>
-                ) : (
-                  socialMediaAgents.map((agentName) => (
-                    <button
-                      key={agentName}
-                      onClick={() => handleAssignAgent(agentName)}
-                      disabled={isAssigning}
-                      className="w-full text-left px-2 py-1.5 hover:bg-white/[0.04] text-xs text-slate-200 rounded-lg hover:text-white transition-colors"
-                    >
-                      {agentName} {req.assignedToName === agentName ? '' : ''}
-                    </button>
-                  ))
-                )}
+              <div className="absolute bottom-full right-0 mb-2 z-50 bg-[#141419] border border-slate-700/60 rounded-xl w-72 shadow-2xl flex flex-col overflow-hidden">
+                {/* Header */}
+                <div className="p-2.5 border-b border-slate-700/40 bg-[#18181f] flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Assign Agent</span>
+                  <button 
+                    onClick={() => setShowAssignDropdown(false)}
+                    className="text-slate-500 hover:text-slate-350 p-0.5 rounded-md hover:bg-white/5 transition-colors cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Search Input */}
+                <div className="p-2 border-b border-slate-700/20 bg-[#16161b]">
+                  <div className="relative flex items-center">
+                    <Search className="absolute left-2.5 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
+                    <input
+                      type="text"
+                      placeholder="Search agent name..."
+                      value={assignSearchQuery}
+                      onChange={(e) => setAssignSearchQuery(e.target.value)}
+                      className="w-full bg-[#1e1e24] border border-slate-700/40 rounded-lg text-xs py-1.5 pl-8 pr-7 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/85 transition-colors font-sans"
+                      autoFocus
+                    />
+                    {assignSearchQuery && (
+                      <button
+                        onClick={() => setAssignSearchQuery("")}
+                        className="absolute right-2 px-1 text-slate-500 hover:text-slate-350 cursor-pointer"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Scrollable list of agents */}
+                <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5 bg-[#15151a] scrollbar-thin">
+                  {filteredAgents.length === 0 ? (
+                    <p className="text-center py-6 text-xs text-slate-500 font-sans">No agents found</p>
+                  ) : (
+                    filteredAgents.map((agentName) => {
+                      const lob = getAgentLOB(agentName);
+                      const isSelected = req.assignedToName === agentName;
+                      const isChat = lob === 'Chat';
+                      return (
+                        <button
+                          key={agentName}
+                          onClick={() => handleAssignAgent(agentName)}
+                          disabled={isAssigning}
+                          className={`w-full text-left px-2.5 py-1.5 text-xs rounded-lg transition-all flex items-center justify-between font-medium cursor-pointer ${
+                            isSelected
+                              ? "bg-indigo-500/15 text-indigo-300 font-bold border border-indigo-500/20"
+                              : "text-slate-300 hover:bg-white/[0.04] hover:text-white"
+                          }`}
+                        >
+                          <span className="truncate pr-2">{agentName}</span>
+                          {lob && (
+                            <span className={`shrink-0 text-[8px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                              isChat 
+                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
+                                : "bg-blue-500/10 text-blue-450 border border-blue-500/20"
+                            }`}>
+                              {lob === 'Chat' ? 'Chat' : 'Call'}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
               </div>
             )}
           </div>

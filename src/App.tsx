@@ -630,6 +630,91 @@ const compStatusLabels: Record<string, string> = {
   closed: " Resolved & Closed",
 };
 
+const isNotificationForUser = (
+  notif: any,
+  user: any,
+  inqs: any[],
+  reqs: any[],
+  ttrs: any[],
+  comps: any[],
+  comms: any[],
+  isTLOreSupport: boolean
+) => {
+  if (!user) return false;
+
+  const isTlOrAdmin = 
+    user.role === "tl" || 
+    user.role === "qa" || 
+    user.role === "admin" || 
+    user.role === "super_admin" || 
+    user.role === "director" ||
+    isTLOreSupport;
+
+  if (isTlOrAdmin) {
+    return true;
+  }
+
+  const userLower = (user.name || "").trim().toLowerCase();
+  const cleanedUser = userLower.replace(/[^a-zA-Z0-9]/g, "");
+
+  // 1. Is it explicitly targeted to this agent?
+  const isTargetedToMe = 
+    (notif.targetAgent && notif.targetAgent.toLowerCase() === userLower) ||
+    (notif.targetGroups && (
+      notif.targetGroups.includes(user.id) ||
+      notif.targetGroups.includes(`usr_${cleanedUser}`) ||
+      notif.targetGroups.includes(`usr_${userLower}`)
+    ));
+
+  if (isTargetedToMe) {
+    return true;
+  }
+
+  // 2. If it is targeted to "all" (meaning a broadcast):
+  if (notif.targetGroups?.includes("all") || notif.targetAgent === "all") {
+    if (notif.entityType && notif.entityId) {
+      if (notif.entityType === "inquiry") {
+        const item = inqs.find((i) => i.id === notif.entityId);
+        return item ? (item.agentName || "").toLowerCase() === userLower : false;
+      }
+      if (notif.entityType === "scheduling_request") {
+        const item = reqs.find((r) => r.id === notif.entityId);
+        return item
+          ? (item.agentName || "").toLowerCase() === userLower ||
+              (item.openedBy || "").toLowerCase() === userLower
+          : false;
+      }
+      if (notif.entityType === "tt_request") {
+        const item = ttrs.find((r) => r.id === notif.entityId);
+        return item
+          ? (item.agentName || "").toLowerCase() === userLower ||
+              (item.submittedByName || "").toLowerCase() === userLower
+          : false;
+      }
+      if (notif.entityType === "tt_complaint") {
+        const item = comps.find((c) => c.id === notif.entityId);
+        return item ? (item.agentName || "").toLowerCase() === userLower : false;
+      }
+      if (notif.entityType === "client_comm") {
+        const item = comms.find((c) => c.id === notif.entityId);
+        return item
+          ? (item.agentName || "").toLowerCase() === userLower ||
+              (item.callCenterAgentName || "").toLowerCase() === userLower
+          : false;
+      }
+    }
+
+    // If it's a general announcement or broadcast message with no entity, let them see it
+    if (!notif.entityType) {
+      return true;
+    }
+
+    return false;
+  }
+
+  return false;
+};
+
 export default function App() {
   const isMountedRef = useRef(true);
   useEffect(() => {
@@ -1878,6 +1963,44 @@ export default function App() {
     }
   }, [currentUser]);
 
+  // Early initialization of states used by visibleNotifs / isNotificationForUser
+  const [inquiries, setInquiries] = useState<Inquiry[]>(() => {
+    return getStorageItem<Inquiry[]>("sched_inquiries", []);
+  });
+  const [requests, setRequests] = useState<SchedulingRequest[]>(() => {
+    return getStorageItem<SchedulingRequest[]>("sched_requests", []);
+  });
+  const [tabbyTamaraRequests, setTabbyTamaraRequests] = useState<
+    TabbyTamaraRequest[]
+  >(() => {
+    return getStorageItem<TabbyTamaraRequest[]>("sched_tabby_tamara", []);
+  });
+  const [tabbyTamaraComplaints, setTabbyTamaraComplaints] = useState<
+    TabbyTamaraComplaint[]
+  >(() => {
+    return getStorageItem<TabbyTamaraComplaint[]>("sched_tt_complaints", []);
+  });
+  const [clientComms, setClientComms] = useState<ClientCommunicationRequest[]>(
+    () => {
+      return getStorageItem<ClientCommunicationRequest[]>(
+        "sched_client_comms",
+        [],
+      );
+    },
+  );
+
+  const inquiriesRef = React.useRef(inquiries);
+  const requestsRef = React.useRef(requests);
+  const tabbyTamaraRequestsRef = React.useRef(tabbyTamaraRequests);
+  const tabbyTamaraComplaintsRef = React.useRef(tabbyTamaraComplaints);
+  const clientCommsRef = React.useRef(clientComms);
+
+  useEffect(() => { inquiriesRef.current = inquiries; }, [inquiries]);
+  useEffect(() => { requestsRef.current = requests; }, [requests]);
+  useEffect(() => { tabbyTamaraRequestsRef.current = tabbyTamaraRequests; }, [tabbyTamaraRequests]);
+  useEffect(() => { tabbyTamaraComplaintsRef.current = tabbyTamaraComplaints; }, [tabbyTamaraComplaints]);
+  useEffect(() => { clientCommsRef.current = clientComms; }, [clientComms]);
+
   // Auto-logout after 60 minutes of inactivity
   useEffect(() => {
     if (!currentUser) return;
@@ -2008,7 +2131,17 @@ export default function App() {
             const isUnreadByMe = !latest.seenByUsers?.includes(
               currentUser?.id || "",
             );
-            if (isUnreadByMe) {
+            const isLatestForMe = isNotificationForUser(
+              latest,
+              currentUserRef.current,
+              inquiriesRef.current,
+              requestsRef.current,
+              tabbyTamaraRequestsRef.current,
+              tabbyTamaraComplaintsRef.current,
+              clientCommsRef.current,
+              isTLOreSupport,
+            );
+            if (isUnreadByMe && isLatestForMe) {
               const isAnnouncementNotification =
                 latest.title.toLowerCase().includes("announcement") ||
                 latest.title.toLowerCase().includes("broadcast");
@@ -2040,7 +2173,17 @@ export default function App() {
           const isUnreadByMe = !latest.seenByUsers?.includes(
             currentUser?.id || "",
           );
-          if (isUnreadByMe) {
+          const isLatestForMe = isNotificationForUser(
+            latest,
+            currentUserRef.current,
+            inquiriesRef.current,
+            requestsRef.current,
+            tabbyTamaraRequestsRef.current,
+            tabbyTamaraComplaintsRef.current,
+            clientCommsRef.current,
+            isTLOreSupport,
+          );
+          if (isUnreadByMe && isLatestForMe) {
             localStorage.setItem("sched_last_notified_notif_id", latest.id);
 
             const isAnnouncementNotification =
@@ -2251,10 +2394,7 @@ export default function App() {
     }
   }, [timeLogs, currentUser, lastActivityAlertId]);
 
-  // Requests database
-  const [requests, setRequests] = useState<SchedulingRequest[]>(() => {
-    return getStorageItem<SchedulingRequest[]>("sched_requests", []);
-  });
+  // Requests database defined early in parent scope
 
   // Known Agent Names (can grow if user adds/registers new custom names)
   const [deletedUsers, setDeletedUsers] = useState<string[]>(() => {
@@ -2648,7 +2788,16 @@ export default function App() {
       if (!currentUser) return false;
       if (notif.clearedByUsers && notif.clearedByUsers.includes(currentUser.id))
         return false;
-      return true; // Already filtered by query (targetGroups)
+      return isNotificationForUser(
+        notif,
+        currentUser,
+        inquiries,
+        requests,
+        tabbyTamaraRequests,
+        tabbyTamaraComplaints,
+        clientComms,
+        isTLOreSupport
+      );
     })
     .filter(
       (notif, index, self) =>
@@ -3160,10 +3309,7 @@ ${pageText}
 
   const [tlLoginLogs, setTlLoginLogs] = useState<any[]>([]);
 
-  // Inquiries database (persists in localStorage)
-  const [inquiries, setInquiries] = useState<Inquiry[]>(() => {
-    return getStorageItem<Inquiry[]>("sched_inquiries", []);
-  });
+  // Inquiries database defined early in parent scope
 
   // Hourly notification reminder check for answered cases that must be closed manually
   useEffect(() => {
@@ -3273,28 +3419,42 @@ ${pageText}
     ]);
   });
 
-  // Tabby & Tamara requests database
-  const [tabbyTamaraRequests, setTabbyTamaraRequests] = useState<
-    TabbyTamaraRequest[]
-  >(() => {
-    return getStorageItem<TabbyTamaraRequest[]>("sched_tabby_tamara", []);
-  });
+  // Tabby, Tamara, and Client Comms states defined early in parent scope
 
-  // Tabby & Tamara complaints database
-  const [tabbyTamaraComplaints, setTabbyTamaraComplaints] = useState<
-    TabbyTamaraComplaint[]
-  >(() => {
-    return getStorageItem<TabbyTamaraComplaint[]>("sched_tt_complaints", []);
-  });
+  // Automatically capture TL login logs on startup, refresh, or whenever a TL user session is active/restored
+  useEffect(() => {
+    if (!currentUser) return;
+    const isTL = currentUser.role === "tl" || (currentUser.name && isTLName(currentUser.name));
+    if (!isTL) return;
 
-  const [clientComms, setClientComms] = useState<ClientCommunicationRequest[]>(
-    () => {
-      return getStorageItem<ClientCommunicationRequest[]>(
-        "sched_client_comms",
-        [],
-      );
-    },
-  );
+    const recordTodayLogin = async () => {
+      const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+      const docId = `${getUsernameFromFullName(currentUser.name)}_${today}`;
+      const tlLogRef = doc(db, "tl_login_logs", docId);
+
+      try {
+        const docSnap = await getDoc(tlLogRef);
+        if (!docSnap.exists()) {
+          await setDoc(tlLogRef, {
+            tlName: currentUser.name,
+            username: getUsernameFromFullName(currentUser.name),
+            date: today,
+            loggedInAt: new Date().toISOString(),
+            onlineStatus: "online",
+          }, { merge: true });
+        } else {
+          await updateDoc(tlLogRef, {
+            onlineStatus: "online",
+            lastSeenAt: new Date().toISOString(),
+          }).catch(() => {});
+        }
+      } catch (err) {
+        console.error("Error checking or updating TL login status:", err);
+      }
+    };
+
+    recordTodayLogin();
+  }, [currentUser]);
 
   const [cases, setCases] = useState<CaseRecord[]>(() => {
     return getStorageItem<CaseRecord[]>("sched_cases", []);
@@ -3414,6 +3574,12 @@ ${pageText}
 
   // Form submission and confirmation states
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
+  const [isTtUploading, setIsTtUploading] = useState(false);
+  const [isTcUploading, setIsTcUploading] = useState(false);
+  const [isCcUploading, setIsCcUploading] = useState(false);
+  const [isSwapUploading, setIsSwapUploading] = useState(false);
+  const [isAnnualUploading, setIsAnnualUploading] = useState(false);
+  const [isP2pUploading, setIsP2pUploading] = useState(false);
   const [submissionConfirmation, setSubmissionConfirmation] = useState<{
     title: string;
     message: string;
@@ -11186,7 +11352,12 @@ ${ttNotes}`
                               ? requests.filter((r) => r.status === "pending")
                                   .length
                               : clientComms.filter(
-                                  (c) => c.status === "pending",
+                                  (c) =>
+                                    c.status === "pending" &&
+                                    ((c as any).agentName?.toLowerCase() ===
+                                      currentUser?.name?.toLowerCase() ||
+                                      c.callCenterAgentName?.toLowerCase() ===
+                                        currentUser?.name?.toLowerCase()),
                                 ).length
                           }
                           activeCasesCount={
@@ -17012,6 +17183,7 @@ ${ttNotes}`
                                     onPhotosChange={setSwapPhotos}
                                     onLinksChange={setSwapLinks}
                                     photosLabel="Optional Attachment"
+                                    onUploadStateChange={setIsSwapUploading}
                                   />
                                 </div>
 
@@ -17033,15 +17205,24 @@ ${ttNotes}`
                                 <button
                                   id="submit-swap-btn"
                                   type="submit"
-                                  disabled={swapWarning !== null}
+                                  disabled={swapWarning !== null || isSwapUploading}
                                   className={`w-full py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
-                                    swapWarning !== null
+                                    swapWarning !== null || isSwapUploading
                                       ? "bg-[#1e1e1e]/40 backdrop-blur-lg/40/20 backdrop-blur-md text-slate-500 cursor-not-allowed border border-white/5"
                                       : "bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/25 cursor-pointer"
                                   }`}
                                 >
-                                  <ArrowRight className="w-4 h-4" /> Apply for
-                                  Swap (Awaiting TL)
+                                  {isSwapUploading ? (
+                                    <>
+                                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                      Uploading files...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ArrowRight className="w-4 h-4" /> Apply for
+                                      Swap (Awaiting TL)
+                                    </>
+                                  )}
                                 </button>
                               </form>
                             </div>
@@ -17140,6 +17321,7 @@ ${ttNotes}`
                                     onPhotosChange={setAnnualPhotos}
                                     onLinksChange={setAnnualLinks}
                                     photosLabel="Optional Attachment"
+                                    onUploadStateChange={setIsAnnualUploading}
                                   />
                                 </div>
 
@@ -17161,15 +17343,24 @@ ${ttNotes}`
                                 <button
                                   id="submit-annual-btn"
                                   type="submit"
-                                  disabled={annualWarning !== null}
+                                  disabled={annualWarning !== null || isAnnualUploading}
                                   className={`w-full py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
-                                    annualWarning !== null
+                                    annualWarning !== null || isAnnualUploading
                                       ? "bg-[#1e1e1e]/40 backdrop-blur-lg/40/20 backdrop-blur-md text-slate-500 cursor-not-allowed border border-white/5"
                                       : "bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/25 cursor-pointer"
                                   }`}
                                 >
-                                  <ArrowRight className="w-4 h-4" /> Apply for
-                                  Annual Leave (Awaiting TL)
+                                  {isAnnualUploading ? (
+                                    <>
+                                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                      Uploading files...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ArrowRight className="w-4 h-4" /> Apply for
+                                      Annual Leave (Awaiting TL)
+                                    </>
+                                  )}
                                 </button>
                               </form>
                             </div>
@@ -23740,6 +23931,7 @@ ${ttNotes}`
                                         onPhotosChange={setP2pPhotos}
                                         onLinksChange={setP2pLinks}
                                         photosLabel="Optional Attachment"
+                                        onUploadStateChange={setIsP2pUploading}
                                       />
                                     </div>
 
@@ -23845,10 +24037,20 @@ ${ttNotes}`
                                         setP2pPhotos([]);
                                         setP2pLinks([]);
                                       }}
-                                      className="w-full py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white font-extrabold text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer font-sans"
+                                      disabled={isP2pUploading}
+                                      className="w-full py-2.5 bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer font-sans"
                                     >
-                                      <PlusCircle className="w-4 h-4 text-slate-100" />
-                                      Publish Trade Offer
+                                      {isP2pUploading ? (
+                                        <>
+                                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                          Uploading...
+                                        </>
+                                      ) : (
+                                        <>
+                                          <PlusCircle className="w-4 h-4 text-slate-100" />
+                                          Publish Trade Offer
+                                        </>
+                                      )}
                                     </button>
                                   </div>
                                 </div>
@@ -24498,6 +24700,7 @@ ${ttNotes}`
                                             e,
                                             activePhotos,
                                             setActivePhotos,
+                                            setIsTtUploading
                                           )
                                         }
                                         className="space-y-4 pt-2 text-left"
@@ -24781,17 +24984,23 @@ ${ttNotes}`
                                           onPhotosChange={setActivePhotos}
                                           onLinksChange={setActiveLinks}
                                           photosLabel="Payment / Identity Photos"
+                                          onUploadStateChange={setIsTtUploading}
                                         />
 
                                         <button
                                           type="submit"
-                                          disabled={isFormSubmitting}
-                                          className={`w-full py-3.5 text-slate-100 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow ${isFormSubmitting ? "bg-indigo-800 opacity-65 pointer-events-none" : "bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] shadow-indigo-500/10"}`}
+                                          disabled={isFormSubmitting || isTtUploading}
+                                          className={`w-full py-3.5 text-slate-100 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow ${isFormSubmitting || isTtUploading ? "bg-indigo-800 opacity-65 pointer-events-none" : "bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] shadow-indigo-500/10"}`}
                                         >
                                           {isFormSubmitting ? (
                                             <>
                                               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                               Submitting Request...
+                                            </>
+                                         ) : isTtUploading ? (
+                                            <>
+                                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                              Uploading Files...
                                             </>
                                           ) : (
                                             <>
@@ -24823,6 +25032,7 @@ ${ttNotes}`
                                             e,
                                             activePhotos,
                                             setActivePhotos,
+                                            setIsTcUploading
                                           )
                                         }
                                         className="space-y-4 pt-2 text-left"
@@ -24907,6 +25117,7 @@ ${ttNotes}`
                                           onPhotosChange={setActivePhotos}
                                           onLinksChange={setActiveLinks}
                                           photosLabel="Complaint Evidence"
+                                          onUploadStateChange={setIsTcUploading}
                                         />
 
                                         {/* Phone Number */}
@@ -24993,13 +25204,18 @@ ${ttNotes}`
 
                                         <button
                                           type="submit"
-                                          disabled={isFormSubmitting}
-                                          className={`w-full py-3.5 text-slate-100 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow ${isFormSubmitting ? "bg-pink-900 opacity-65 pointer-events-none" : "bg-gradient-to-r from-pink-500 to-pink-600 hover:brightness-110 active:scale-[0.99] shadow-pink-500/10"}`}
+                                          disabled={isFormSubmitting || isTcUploading}
+                                          className={`w-full py-3.5 text-slate-100 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow ${isFormSubmitting || isTcUploading ? "bg-pink-900 opacity-65 pointer-events-none" : "bg-gradient-to-r from-pink-500 to-pink-600 hover:brightness-110 active:scale-[0.99] shadow-pink-500/10"}`}
                                         >
                                           {isFormSubmitting ? (
                                             <>
                                               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                               Submitting Complaint...
+                                            </>
+                                          ) : isTcUploading ? (
+                                            <>
+                                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                              Uploading Evidence...
                                             </>
                                           ) : (
                                             <>
@@ -25028,6 +25244,7 @@ ${ttNotes}`
                                             e,
                                             activePhotos,
                                             setActivePhotos,
+                                            setIsCcUploading
                                           )
                                         }
                                         className="space-y-4 pt-2 text-left"
@@ -25218,16 +25435,30 @@ ${ttNotes}`
                                           onPhotosChange={setActivePhotos}
                                           onLinksChange={setActiveLinks}
                                           photosLabel="Customer Inquiry Screenshot"
+                                          onUploadStateChange={setIsCcUploading}
                                         />
 
                                         <button
                                           type="submit"
-                                          className="w-full py-3.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] text-slate-100 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow shadow-indigo-500/10"
+                                          disabled={isFormSubmitting || isCcUploading}
+                                          className={`w-full py-3.5 text-slate-100 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow ${isFormSubmitting || isCcUploading ? "bg-indigo-800 opacity-65 pointer-events-none" : "bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] shadow-indigo-500/10"}`}
                                         >
-                                          <Send className="w-3.5 h-3.5" />
-                                          {isFormSubmitting
-                                            ? "Submitting..."
-                                            : "Submit Request"}
+                                          {isFormSubmitting ? (
+                                            <>
+                                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                              Submitting...
+                                            </>
+                                          ) : isCcUploading ? (
+                                            <>
+                                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                              Uploading Files...
+                                            </>
+                                          ) : (
+                                            <>
+                                              <Send className="w-3.5 h-3.5" />
+                                              Submit Request
+                                            </>
+                                          )}
                                         </button>
                                       </form>
                                     </div>

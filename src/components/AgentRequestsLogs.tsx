@@ -479,12 +479,15 @@ export const AgentRequestsLogs = ({
   
   const allRequests = useMemo(() => {
     if (!currentUser) return [];
-    const isTlOrAdmin = currentUser.role === 'tl' || currentUser.role === 'qa' || currentUser.role === 'admin' || currentUser.role === 'super_admin';
+    const isTlOrAdmin = currentUser.role === 'tl' || currentUser.role === 'qa' || currentUser.role === 'admin' || currentUser.role === 'super_admin' || isTLOreSupport;
     const myName = currentUser.name;
     const res: any[] = [];
     
+    // An agent is actively searching if search keyword is typed or filters are placed.
+    const isSearching = search.trim() !== '' || filterPhone.trim() !== '' || filterDate !== '' || filterClinics.length > 0 || filterType !== 'all';
+
     const myReqs = (arr: any[], nameField: string) =>
-      isTlOrAdmin ? arr : arr.filter(r => (r[nameField] || '').toLowerCase() === myName.toLowerCase());
+      (isTlOrAdmin || isSearching) ? arr : arr.filter(r => (r[nameField] || '').toLowerCase() === myName.toLowerCase());
 
     myReqs(requests, 'agentName').forEach(r => res.push({...r, _cType: 'sched'}));
     myReqs(inquiries, 'agentName').forEach(r => res.push({...r, _cType: 'inq'}));
@@ -492,13 +495,17 @@ export const AgentRequestsLogs = ({
     myReqs(complaints, 'agentName').forEach(r => res.push({...r, _cType: 'tt_complaint'}));
     
     // Client comms: check both fields
-    (isTlOrAdmin ? clientComms : clientComms.filter(r =>
-      (r.callCenterAgentName || '').toLowerCase() === myName.toLowerCase() ||
-      (r.agentName || '').toLowerCase() === myName.toLowerCase()
-    )).forEach(r => res.push({...r, _cType: 'comm'}));
+    if (isTlOrAdmin || isSearching) {
+      clientComms.forEach(r => res.push({...r, _cType: 'comm'}));
+    } else {
+      clientComms.filter(r =>
+        (r.callCenterAgentName || '').toLowerCase() === myName.toLowerCase() ||
+        (r.agentName || '').toLowerCase() === myName.toLowerCase()
+      ).forEach(r => res.push({...r, _cType: 'comm'}));
+    }
     
     return res.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [requests, inquiries, tabbyTamaraRequests, complaints, clientComms, currentUser]);
+  }, [requests, inquiries, tabbyTamaraRequests, complaints, clientComms, currentUser, isTLOreSupport, search, filterPhone, filterDate, filterClinics, filterType]);
 
   const pendingCount = useMemo(() => {
     return allRequests.filter(r => ['pending','pending_partner','submitted','not_confirmed','pending_tl'].includes(r.status)).length;
