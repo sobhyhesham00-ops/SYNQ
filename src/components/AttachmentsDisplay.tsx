@@ -95,12 +95,19 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
   const handleDownloadFile = async (url: string, filename: string) => {
     toast.info(`Preparing secure download: ${filename}...`);
     try {
-      // 1. Try to download via proxy fetch to blob for cross-origin iframe support
-      const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`;
-      const res = await fetch(proxyUrl);
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
+      let blobUrl = "";
+      if (url.startsWith('data:')) {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        blobUrl = URL.createObjectURL(blob);
+      } else {
+        // 1. Try to download via proxy fetch to blob for cross-origin iframe support
+        const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`;
+        const res = await fetch(proxyUrl);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const blob = await res.blob();
+        blobUrl = URL.createObjectURL(blob);
+      }
       
       const a = document.createElement('a');
       a.href = blobUrl;
@@ -133,9 +140,16 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
         return;
       }
       toast.info("Copying image payload...");
-      const proxyUrl = `/api/proxy?url=${encodeURIComponent(imageUrl)}`;
-      const res = await fetch(proxyUrl);
-      const blob = await res.blob();
+      
+      let blob;
+      if (imageUrl.startsWith('data:')) {
+        const res = await fetch(imageUrl);
+        blob = await res.blob();
+      } else {
+        const proxyUrl = `/api/proxy?url=${encodeURIComponent(imageUrl)}`;
+        const res = await fetch(proxyUrl);
+        blob = await res.blob();
+      }
       let writeBlob = blob;
       
       // Convert to standard PNG if needed

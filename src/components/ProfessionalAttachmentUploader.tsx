@@ -181,7 +181,7 @@ export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUplo
                        <UploadCloud className="w-8 h-8 text-slate-400 mb-1" />
                        <span className="text-xs font-semibold text-slate-200">Click to upload or drag & drop</span>
                        <span className="text-[10px] font-medium text-slate-400 leading-relaxed">
-                         Max 4 files, 10MB each. Files are stored locally on this device, not uploaded to the cloud.
+                         Max 4 files, 10MB each. Files are uploaded securely to the cloud on submission.
                        </span>
                    </div>
                 )}

@@ -25,40 +25,6 @@ export const processAttachments = async (
   const processed = await Promise.all(
     attachments.map((att) => {
       return new Promise<FileAttachment>((resolve, reject) => {
-        // Support local-only processing for inquiry attachments
-        if (entityType === "inquiry") {
-          if (att.file) {
-            try {
-              const localUrl = URL.createObjectURL(att.file);
-              console.log(`[processAttachments] Local blob URL generated for inquiry attachment ${att.name}: ${localUrl}`);
-              const result: FileAttachment = {
-                id: att.id,
-                name: att.name,
-                type: att.type,
-                size: att.size,
-                url: localUrl,
-                uploadedAt: att.uploadedAt || new Date().toISOString(),
-                uploadedBy: att.uploadedBy
-              };
-              // Define file as non-enumerable so we can access it locally,
-              // but Firestore setDoc/addDoc will not trigger serialization failures.
-              Object.defineProperty(result, 'file', {
-                value: att.file,
-                enumerable: false,
-                configurable: true,
-                writable: true
-              });
-              resolve(result);
-            } catch (err: any) {
-              console.error(`[processAttachments] Failed to generate local blob URL for ${att.name}:`, err);
-              reject(new Error(`Failed to process ${att.name} locally: ${err.message}`));
-            }
-          } else {
-            resolve(att);
-          }
-          return;
-        }
-
         // If there's no file object, it means it's either an old base64 attachment,
         // or an already uploaded file. Keep it exactly as is (metadata only).
         if (!att.file) {

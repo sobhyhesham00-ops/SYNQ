@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link, Camera, X, ImageIcon, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { compressImage } from '../utils';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { storage } from '../firebase';
 
 interface MultiAttachmentUploadProps {
   photos: string[];
@@ -35,8 +37,32 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
   React.useEffect(() => {
     if (onUploadStateChange) onUploadStateChange(isUploading);
   }, [isUploading, onUploadStateChange]);
+
+  const uploadSingleFile = async (file: File): Promise<string> => {
+    const timestamp = Date.now();
+    const safeFileName = file.name ? file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_") : `pasted_image_${timestamp}.png`;
+    const path = `case-attachments/general/upload/root/${timestamp}-${safeFileName}`;
+    const storageRef = ref(storage, path);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+    
+    return new Promise<string>((resolve, reject) => {
+      uploadTask.on(
+        'state_changed',
+        null,
+        (error) => reject(error),
+        async () => {
+          try {
+            const url = await getDownloadURL(uploadTask.snapshot.ref);
+            resolve(url);
+          } catch (err) {
+            reject(err);
+          }
+        }
+      );
+    });
+  };
   
-  const handlePaste = (e: React.ClipboardEvent) => {
+  const handlePaste = async (e: React.ClipboardEvent) => {
     const items = e.clipboardData.items;
     const filesArray: File[] = [];
     for (let i = 0; i < items.length; i++) {
@@ -57,26 +83,32 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
           toast.warning(`Only ${sliceArray.length} pasted file(s) were processed due to the file limit.`);
         }
 
-        Promise.all(sliceArray.map(file => {
-          return new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onload = async (event) => {
-              if (event.target?.result) {
-                const compressed = await compressImage(event.target.result as string);
-                resolve(compressed);
-              } else {
-                resolve('');
-              }
-            };
-            reader.readAsDataURL(file);
-          });
-        })).then(newCompressedPhotos => {
-          const filtered = newCompressedPhotos.filter(Boolean);
+        setIsUploading(true);
+        setUploadProgress({ current: 0, total: sliceArray.length });
+
+        try {
+          const uploadedUrls: string[] = [];
+          for (let i = 0; i < sliceArray.length; i++) {
+            const file = sliceArray[i];
+            const url = await uploadSingleFile(file);
+            if (url) {
+              uploadedUrls.push(url);
+            }
+            setUploadProgress({ current: i + 1, total: sliceArray.length });
+          }
+          const filtered = uploadedUrls.filter(Boolean);
           if (filtered.length > 0) {
             const uniquePhotos = Array.from(new Set([...photos, ...filtered]));
             onPhotosChange(uniquePhotos);
+            toast.success(`Successfully uploaded ${filtered.length} pasted file(s)`);
           }
-        });
+        } catch (err: any) {
+          console.error("Paste upload failed", err);
+          toast.error(`Failed to upload pasted image: ${err.message}`);
+        } finally {
+          setIsUploading(false);
+          setUploadProgress(null);
+        }
     }
   };
 
@@ -162,30 +194,13 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
         }
 
         try {
-            const dataUrl = await new Promise<string>((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = async (event) => {
-                    if (event.target?.result) {
-                        try {
-                            const compressed = await compressImage(event.target.result as string);
-                            resolve(compressed);
-                        } catch (err) {
-                            reject(err);
-                        }
-                    } else {
-                        resolve('');
-                    }
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-            
-            if (dataUrl && !photos.includes(dataUrl) && !newPhotos.includes(dataUrl)) {
-                 newPhotos.push(dataUrl);
+            const downloadUrl = await uploadSingleFile(file);
+            if (downloadUrl && !photos.includes(downloadUrl) && !newPhotos.includes(downloadUrl)) {
+                 newPhotos.push(downloadUrl);
             }
-        } catch (e) {
-            console.error('File read error', e);
-            toast.error(`Failed to process ${file.name}`);
+        } catch (e: any) {
+            console.error('File upload error', e);
+            toast.error(`Failed to upload ${file.name}: ${e.message}`);
         }
 
         setUploadProgress({ current: i + 1, total: files.length });
@@ -193,7 +208,7 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
 
     if (newPhotos.length > 0) {
         onPhotosChange([...photos, ...newPhotos]);
-        toast.success(`Successfully added ${newPhotos.length} attachment(s)`);
+        toast.success(`Successfully uploaded ${newPhotos.length} attachment(s)`);
     }
     
     setIsUploading(false);
