@@ -10,8 +10,7 @@ import {
   getDocs as firestoreGetDocs,
   getDoc as firestoreGetDoc,
   connectFirestoreEmulator,
-  persistentLocalCache,
-  persistentMultipleTabManager,
+  memoryLocalCache,
 } from "firebase/firestore";
 import {
   getAuth,
@@ -85,9 +84,7 @@ export const db = isFirstInit
       app,
       {
         ignoreUndefinedProperties: true,
-        localCache: persistentLocalCache({
-          tabManager: persistentMultipleTabManager(),
-        }),
+        localCache: memoryLocalCache(),
       },
       firebaseConfig.firestoreDatabaseId
     )
