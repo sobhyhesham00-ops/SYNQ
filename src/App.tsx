@@ -19919,8 +19919,10 @@ ${ttNotes}`
                               if (isAgent) {
                                 return (
                                   req.agentName?.toLowerCase() === nameInput ||
-                                  req.submittedByName?.toLowerCase() ===
-                                    nameInput
+                                  req.submittedByName?.toLowerCase() === nameInput ||
+                                  req.assignedToName?.toLowerCase() === nameInput ||
+                                  req.assignedTo?.toLowerCase() === nameInput ||
+                                  req.assignedToId === currentUser?.id
                                 );
                               } else {
                                 return (
@@ -26659,8 +26661,10 @@ ${ttNotes}`
                                       ? tabbyTamaraRequests
                                       : tabbyTamaraRequests.filter(
                                           (r) =>
-                                            r.agentName?.toLowerCase() ===
-                                            currentUser?.name?.toLowerCase(),
+                                            r.agentName?.toLowerCase() === currentUser?.name?.toLowerCase() ||
+                                            r.assignedToName?.toLowerCase() === currentUser?.name?.toLowerCase() ||
+                                            r.assignedTo?.toLowerCase() === currentUser?.name?.toLowerCase() ||
+                                            r.assignedToId === currentUser?.id,
                                         );
 
                                     const filteredTT = baseTTList
@@ -26863,8 +26867,10 @@ ${ttNotes}`
                                       ? tabbyTamaraComplaints
                                       : tabbyTamaraComplaints.filter(
                                           (c) =>
-                                            c.agentName?.toLowerCase() ===
-                                            currentUser?.name?.toLowerCase(),
+                                            c.agentName?.toLowerCase() === currentUser?.name?.toLowerCase() ||
+                                            c.assignedToName?.toLowerCase() === currentUser?.name?.toLowerCase() ||
+                                            c.assignedTo?.toLowerCase() === currentUser?.name?.toLowerCase() ||
+                                            c.assignedToId === currentUser?.id,
                                         );
 
                                     const filteredComplaints = baseComplaintList

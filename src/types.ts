@@ -273,6 +273,11 @@ export interface TabbyTamaraComplaint {
   text?: string;
   tlResolutionType?: string;
   assignedTo?: string;
+  assignedToId?: string;
+  assignedToName?: string;
+  assignedAt?: string;
+  assignedById?: string;
+  assignedByName?: string;
   tlPhotos?: string[];
   tlLinks?: string[];
 }
