@@ -2745,6 +2745,10 @@ export default function App() {
     entityType?: SystemNotification["entityType"],
     entityId?: string,
   ) => {
+    if (stableId && notifications.some((n) => n.id === stableId)) {
+      return;
+    }
+
     let targetGroups: string[] = [];
     if (!targetAgent || targetAgent === "all") {
       targetGroups = ["all"];
@@ -3480,7 +3484,7 @@ ${pageText}
     const checkHourlyReminders = async () => {
       if (!isMountedRef.current) return;
       // Find all inquiries that are in "answered" status.
-      const answeredInquiries = inquiries.filter(
+      const answeredInquiries = inquiriesRef.current.filter(
         (inq) => inq.status === "answered",
       );
 
@@ -3565,7 +3569,7 @@ ${pageText}
     checkHourlyReminders();
 
     return () => clearInterval(interval);
-  }, [currentUser, inquiries, db]);
+  }, [currentUser, db]);
 
   const [qaScores, setQaScores] = useState<QAScore[]>(() => {
     return getStorageItem<QAScore[]>("sched_qa_scores", []);
