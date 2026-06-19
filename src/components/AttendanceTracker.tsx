@@ -725,7 +725,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
             ) : (
               <div className="overflow-x-auto custom-scrollbar scrollbar-thin">
                 {/* Desktop High-Density Table */}
-                <table className="w-full text-left border-collapse hidden md:table">
+                <table className="w-full min-w-[1050px] text-left border-collapse hidden md:table">
                   <thead>
                     <tr className="border-b border-white/5 bg-slate-950/20 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
                       <th className="p-3 pl-4">Personnel Agent Roster</th>
