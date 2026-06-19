@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { doc, setDoc, query, collection, where, getDocs, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { AttendanceRecord, User, AgentDirectoryRow, INITIAL_AGENTS } from "../types";
@@ -55,6 +55,45 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
   const [selectedLOB, setSelectedLOB] = useState("ALL");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 25;
+
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const checkScroll = () => {
+    const el = scrollContainerRef.current;
+    if (el) {
+      const { scrollLeft, scrollWidth, clientWidth } = el;
+      setCanScrollLeft(scrollLeft > 1);
+      setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1);
+    }
+  };
+
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+
+    checkScroll();
+
+    el.addEventListener("scroll", checkScroll);
+    window.addEventListener("resize", checkScroll);
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(() => {
+        checkScroll();
+      });
+      resizeObserver.observe(el);
+    }
+
+    return () => {
+      el.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
+  }, [attendanceRecords, selectedDate, searchTerm, selectedLOB, currentPage]);
 
   // Sync / load late values whenever records or selectedDate changes
   useEffect(() => {
@@ -723,229 +762,249 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                 <p className="text-xs text-slate-600">Clear search input or change selected desk filter to view all roster lists.</p>
               </div>
             ) : (
-              <div className="overflow-x-auto custom-scrollbar scrollbar-thin">
-                {/* Desktop High-Density Table */}
-                <table className="w-full min-w-[1050px] text-left border-collapse hidden md:table">
-                  <thead>
-                    <tr className="border-b border-white/5 bg-slate-950/20 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-                      <th className="p-3 pl-4">Personnel Agent Roster</th>
-                      <th className="p-3">Desk LOB</th>
-                      <th className="p-3 text-center">Attendance Status</th>
-                      <th className="p-3 pr-4 text-right">Quick Ledger Action Panel</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
+              <div className="relative">
+                {/* Left gradient indicator */}
+                {canScrollLeft && (
+                  <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-900/40 to-transparent pointer-events-none z-10" />
+                )}
+                {/* Right gradient indicator */}
+                {canScrollRight && (
+                  <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-900/40 to-transparent pointer-events-none z-10" />
+                )}
+
+                <div 
+                  ref={scrollContainerRef}
+                  className="overflow-x-auto custom-scrollbar scrollbar-thin"
+                >
+                  {/* Desktop High-Density Table */}
+                  <table className="w-full min-w-[820px] text-left border-collapse hidden md:table">
+                    <thead>
+                      <tr className="border-b border-white/5 bg-slate-950/20 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+                        <th className="p-3 pl-4">Personnel Agent Roster</th>
+                        <th className="p-3">Desk LOB</th>
+                        <th className="p-3 text-center">Attendance Status</th>
+                        <th className="p-3 pr-4 text-right">Quick Ledger Action Panel</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {paginatedRoster.map((item) => {
+                        const badgeColor = getStatusBadgeColor(item.status);
+
+                        return (
+                          <tr
+                            key={item.name}
+                            className="hover:bg-white/[0.02] transition-colors group"
+                          >
+                            {/* Name & Initials Avatar */}
+                            <td className="p-3 pl-4">
+                              <div className="flex items-center gap-3">
+                                <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${getLOBGradient(item.lob)} flex items-center justify-center text-white text-[11px] font-bold tracking-wider shadow-sm`}>
+                                  {getInitials(item.name)}
+                                </div>
+                                <div>
+                                  <div className="font-bold text-slate-200 text-xs">{item.name}</div>
+                                  {item.record?.markedBy ? (
+                                    <div className="text-[10px] text-slate-500 mt-0.5 font-mono">
+                                      Marked by {item.record.markedBy} at {new Date(item.record.markedAt || "").toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </div>
+                                  ) : (
+                                    <div className="text-[10px] text-indigo-400/60 mt-0.5 tracking-wider uppercase font-extrabold text-[9px]">
+                                      Awaiting Decision
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* LOB Desk Badge */}
+                            <td className="p-3">
+                              <span className="text-[10px] font-bold bg-slate-950/40 border border-white/5 px-2.5 py-1 rounded-xl text-slate-300 uppercase tracking-wider">
+                                {item.lob}
+                              </span>
+                            </td>
+
+                            {/* Interactive Status Indicator with dynamic fields */}
+                            <td className="p-3">
+                              <div className="flex flex-col items-center justify-center gap-1.5">
+                                <span className={`px-2.5 py-1 text-[9px] uppercase font-bold border rounded-full font-mono ${badgeColor}`}>
+                                  {item.status === "not_marked"
+                                    ? "NOT MARKED"
+                                    : item.status === "nsnc"
+                                      ? "NSNC 🚫"
+                                      : item.status.replace("_", " ")}
+                                  {item.status === "late" && (item.record?.lateTime || lateTimes[item.name]) ? (
+                                    <span className="ml-1 text-slate-100 font-bold font-mono">
+                                      ({item.record?.lateTime || lateTimes[item.name]})
+                                    </span>
+                                  ) : null}
+                                </span>
+
+                                {/* Inline Late Entry Time Dial */}
+                                {item.status === "late" && (
+                                  <div className="flex items-center gap-1 mt-1">
+                                    <span className="text-[9px] text-slate-500 uppercase font-extrabold mr-1">Time:</span>
+                                    <input
+                                      type="time"
+                                      value={lateTimes[item.name] || "09:00"}
+                                      onChange={(e) => handleLateTimeChange(item.name, e.target.value)}
+                                      className="bg-slate-950 border border-white/10 text-slate-100 rounded px-1.5 py-0.5 text-[10px] font-mono font-bold focus:outline-none focus:border-indigo-500/50"
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+
+                            {/* Actions Controller Buttons */}
+                            <td className="p-3 pr-4">
+                              <div className="flex items-center justify-end gap-1">
+                                <StatusSelectorButton
+                                  label="Present"
+                                  icon={<CheckCircle2 className="w-3.5 h-3.5" />}
+                                  isActive={item.status === "present"}
+                                  activeStyle="bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                                  onClick={() => handleMarkStatus(item.name, "present")}
+                                  iconOnly={true}
+                                />
+                                <StatusSelectorButton
+                                  label="Late"
+                                  icon={<Clock className="w-3.5 h-3.5" />}
+                                  isActive={item.status === "late"}
+                                  activeStyle="bg-amber-500/10 text-amber-400 border-amber-500/30"
+                                  onClick={() => handleMarkStatus(item.name, "late")}
+                                  iconOnly={true}
+                                />
+                                <StatusSelectorButton
+                                  label="Leave"
+                                  icon={<Palmtree className="w-3.5 h-3.5" />}
+                                  isActive={["annual", "sick", "casual"].includes(item.status)}
+                                  activeStyle="bg-blue-500/10 text-blue-300 border-blue-500/30"
+                                  onClick={() => handleMarkStatus(item.name, "annual")}
+                                  iconOnly={true}
+                                />
+                                <StatusSelectorButton
+                                  label="Absent"
+                                  icon={<XCircle className="w-3.5 h-3.5" />}
+                                  isActive={item.status === "absent"}
+                                  activeStyle="bg-rose-500/10 text-rose-400 border-rose-500/30"
+                                  onClick={() => handleMarkStatus(item.name, "absent")}
+                                  iconOnly={true}
+                                />
+                                <StatusSelectorButton
+                                  label="OFF"
+                                  icon={<Home className="w-3.5 h-3.5" />}
+                                  isActive={item.status === "off"}
+                                  activeStyle="bg-slate-500/20 text-slate-300 border-slate-500/50"
+                                  onClick={() => handleMarkStatus(item.name, "off")}
+                                  iconOnly={true}
+                                />
+                                <StatusSelectorButton
+                                  label="NSNC"
+                                  icon={<AlertOctagon className="w-3.5 h-3.5" />}
+                                  isActive={item.status === "nsnc"}
+                                  activeStyle="bg-red-500/15 text-red-400 border-red-500/30 animate-pulse"
+                                  onClick={() => handleMarkStatus(item.name, "nsnc")}
+                                  iconOnly={true}
+                                />
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+
+                  {/* Mobile Responsive Cards View */}
+                  <div className="block md:hidden divide-y divide-white/5">
                     {paginatedRoster.map((item) => {
                       const badgeColor = getStatusBadgeColor(item.status);
 
                       return (
-                        <tr
-                          key={item.name}
-                          className="hover:bg-white/[0.02] transition-colors group"
-                        >
-                          {/* Name & Initials Avatar */}
-                          <td className="p-3 pl-4">
+                        <div key={item.name} className="p-5 space-y-4 hover:bg-slate-800/10 transition-colors">
+                          <div className="flex justify-between items-start">
                             <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${getLOBGradient(item.lob)} flex items-center justify-center text-white text-[11px] font-bold tracking-wider shadow-sm`}>
+                              <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${getLOBGradient(item.lob)} flex items-center justify-center text-white text-[11px] font-bold shadow`}>
                                 {getInitials(item.name)}
                               </div>
                               <div>
-                                <div className="font-bold text-slate-200 text-xs">{item.name}</div>
-                                {item.record?.markedBy ? (
-                                  <div className="text-[10px] text-slate-500 mt-0.5 font-mono">
-                                    Marked by {item.record.markedBy} at {new Date(item.record.markedAt || "").toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                  </div>
-                                ) : (
-                                  <div className="text-[10px] text-indigo-400/60 mt-0.5 tracking-wider uppercase font-extrabold text-[9px]">
-                                    Awaiting Decision
-                                  </div>
-                                )}
+                                <h4 className="font-bold text-slate-100 text-xs">{item.name}</h4>
+                                <p className="text-[10px] text-slate-500 mt-0.5">Section LOB: {item.lob}</p>
                               </div>
                             </div>
-                          </td>
 
-                          {/* LOB Desk Badge */}
-                          <td className="p-3">
-                            <span className="text-[10px] font-bold bg-slate-950/40 border border-white/5 px-2.5 py-1 rounded-xl text-slate-300 uppercase tracking-wider">
-                              {item.lob}
-                            </span>
-                          </td>
-
-                          {/* Interactive Status Indicator with dynamic fields */}
-                          <td className="p-3">
-                            <div className="flex flex-col items-center justify-center gap-1.5">
-                              <span className={`px-2.5 py-1 text-[9px] uppercase font-bold border rounded-full font-mono ${badgeColor}`}>
+                            <div className="flex flex-col items-end gap-1.5">
+                              <span className={`px-2 py-0.5 rounded-full text-[9px] uppercase font-bold border ${badgeColor}`}>
                                 {item.status === "not_marked"
                                   ? "NOT MARKED"
                                   : item.status === "nsnc"
                                     ? "NSNC 🚫"
                                     : item.status.replace("_", " ")}
                                 {item.status === "late" && (item.record?.lateTime || lateTimes[item.name]) ? (
-                                  <span className="ml-1 text-slate-100 font-bold font-mono">
-                                    ({item.record?.lateTime || lateTimes[item.name]})
-                                  </span>
+                                  <span className="ml-1 font-mono">({item.record?.lateTime || lateTimes[item.name]})</span>
                                 ) : null}
                               </span>
 
-                              {/* Inline Late Entry Time Dial */}
                               {item.status === "late" && (
-                                <div className="flex items-center gap-1 mt-1">
-                                  <span className="text-[9px] text-slate-500 uppercase font-extrabold mr-1">Time:</span>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[9px] text-slate-500 font-bold uppercase">Time:</span>
                                   <input
                                     type="time"
                                     value={lateTimes[item.name] || "09:00"}
                                     onChange={(e) => handleLateTimeChange(item.name, e.target.value)}
-                                    className="bg-slate-950 border border-white/10 text-slate-100 rounded px-1.5 py-0.5 text-[10px] font-mono font-bold focus:outline-none focus:border-indigo-500/50"
+                                    className="bg-slate-950 border border-white/10 text-slate-100 rounded px-1.5 py-0.5 text-xs font-mono font-bold focus:outline-none focus:border-indigo-500/50"
                                   />
                                 </div>
                               )}
                             </div>
-                          </td>
+                          </div>
 
-                          {/* Actions Controller Buttons */}
-                          <td className="p-3 pr-4">
-                            <div className="flex items-center justify-end gap-1">
-                              <StatusSelectorButton
-                                label="Present"
-                                icon={<CheckCircle2 className="w-3.5 h-3.5" />}
-                                isActive={item.status === "present"}
-                                activeStyle="bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                                onClick={() => handleMarkStatus(item.name, "present")}
-                              />
-                              <StatusSelectorButton
-                                label="Late"
-                                icon={<Clock className="w-3.5 h-3.5" />}
-                                isActive={item.status === "late"}
-                                activeStyle="bg-amber-500/10 text-amber-400 border-amber-500/30"
-                                onClick={() => handleMarkStatus(item.name, "late")}
-                              />
-                              <StatusSelectorButton
-                                label="Leave"
-                                icon={<Palmtree className="w-3.5 h-3.5" />}
-                                isActive={["annual", "sick", "casual"].includes(item.status)}
-                                activeStyle="bg-blue-500/10 text-blue-300 border-blue-500/30"
-                                onClick={() => handleMarkStatus(item.name, "annual")}
-                              />
-                              <StatusSelectorButton
-                                label="Absent"
-                                icon={<XCircle className="w-3.5 h-3.5" />}
-                                isActive={item.status === "absent"}
-                                activeStyle="bg-rose-500/10 text-rose-400 border-rose-500/30"
-                                onClick={() => handleMarkStatus(item.name, "absent")}
-                              />
-                              <StatusSelectorButton
-                                label="OFF"
-                                icon={<Home className="w-3.5 h-3.5" />}
-                                isActive={item.status === "off"}
-                                activeStyle="bg-slate-500/20 text-slate-300 border-slate-500/50"
-                                onClick={() => handleMarkStatus(item.name, "off")}
-                              />
-                              <StatusSelectorButton
-                                label="NSNC"
-                                icon={<AlertOctagon className="w-3.5 h-3.5" />}
-                                isActive={item.status === "nsnc"}
-                                activeStyle="bg-red-500/15 text-red-400 border-red-500/30 animate-pulse"
-                                onClick={() => handleMarkStatus(item.name, "nsnc")}
-                              />
-                            </div>
-                          </td>
-                        </tr>
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            <StatusSelectorButton
+                              label="Present"
+                              icon={<CheckCircle2 className="w-3.5 h-3.5" />}
+                              isActive={item.status === "present"}
+                              activeStyle="bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                              onClick={() => handleMarkStatus(item.name, "present")}
+                            />
+                            <StatusSelectorButton
+                              label="Late"
+                              icon={<Clock className="w-3.5 h-3.5" />}
+                              isActive={item.status === "late"}
+                              activeStyle="bg-amber-500/10 text-amber-400 border-amber-500/30"
+                              onClick={() => handleMarkStatus(item.name, "late")}
+                            />
+                            <StatusSelectorButton
+                              label="Leave"
+                              icon={<Palmtree className="w-3.5 h-3.5" />}
+                              isActive={["annual", "sick", "casual"].includes(item.status)}
+                              activeStyle="bg-blue-500/10 text-blue-300 border-blue-500/30"
+                              onClick={() => handleMarkStatus(item.name, "annual")}
+                            />
+                            <StatusSelectorButton
+                              label="Absent"
+                              icon={<XCircle className="w-3.5 h-3.5" />}
+                              isActive={item.status === "absent"}
+                              activeStyle="bg-rose-500/10 text-rose-400 border-rose-500/30"
+                              onClick={() => handleMarkStatus(item.name, "absent")}
+                            />
+                            <StatusSelectorButton
+                              label="OFF"
+                              icon={<Home className="w-3.5 h-3.5" />}
+                              isActive={item.status === "off"}
+                              activeStyle="bg-slate-500/20 text-slate-300 border-slate-500/50"
+                              onClick={() => handleMarkStatus(item.name, "off")}
+                            />
+                            <StatusSelectorButton
+                              label="NSNC"
+                              icon={<AlertOctagon className="w-3.5 h-3.5" />}
+                              isActive={item.status === "nsnc"}
+                              activeStyle="bg-red-500/15 text-red-400 border-red-500/30 animate-pulse"
+                              onClick={() => handleMarkStatus(item.name, "nsnc")}
+                            />
+                          </div>
+                        </div>
                       );
                     })}
-                  </tbody>
-                </table>
-
-                {/* Mobile Responsive Cards View */}
-                <div className="block md:hidden divide-y divide-white/5">
-                  {paginatedRoster.map((item) => {
-                    const badgeColor = getStatusBadgeColor(item.status);
-
-                    return (
-                      <div key={item.name} className="p-5 space-y-4 hover:bg-slate-800/10 transition-colors">
-                        <div className="flex justify-between items-start">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${getLOBGradient(item.lob)} flex items-center justify-center text-white text-[11px] font-bold shadow`}>
-                              {getInitials(item.name)}
-                            </div>
-                            <div>
-                              <h4 className="font-bold text-slate-100 text-xs">{item.name}</h4>
-                              <p className="text-[10px] text-slate-500 mt-0.5">Section LOB: {item.lob}</p>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col items-end gap-1.5">
-                            <span className={`px-2 py-0.5 rounded-full text-[9px] uppercase font-bold border ${badgeColor}`}>
-                              {item.status === "not_marked"
-                                ? "NOT MARKED"
-                                : item.status === "nsnc"
-                                  ? "NSNC 🚫"
-                                  : item.status.replace("_", " ")}
-                              {item.status === "late" && (item.record?.lateTime || lateTimes[item.name]) ? (
-                                <span className="ml-1 font-mono">({item.record?.lateTime || lateTimes[item.name]})</span>
-                              ) : null}
-                            </span>
-
-                            {item.status === "late" && (
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-[9px] text-slate-500 font-bold uppercase">Time:</span>
-                                <input
-                                  type="time"
-                                  value={lateTimes[item.name] || "09:00"}
-                                  onChange={(e) => handleLateTimeChange(item.name, e.target.value)}
-                                  className="bg-slate-950 border border-white/10 text-slate-100 rounded px-1.5 py-0.5 text-xs font-mono font-bold focus:outline-none focus:border-indigo-500/50"
-                                />
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-1.5 pt-1">
-                          <StatusSelectorButton
-                            label="Present"
-                            icon={<CheckCircle2 className="w-3.5 h-3.5" />}
-                            isActive={item.status === "present"}
-                            activeStyle="bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                            onClick={() => handleMarkStatus(item.name, "present")}
-                          />
-                          <StatusSelectorButton
-                            label="Late"
-                            icon={<Clock className="w-3.5 h-3.5" />}
-                            isActive={item.status === "late"}
-                            activeStyle="bg-amber-500/10 text-amber-400 border-amber-500/30"
-                            onClick={() => handleMarkStatus(item.name, "late")}
-                          />
-                          <StatusSelectorButton
-                            label="Leave"
-                            icon={<Palmtree className="w-3.5 h-3.5" />}
-                            isActive={["annual", "sick", "casual"].includes(item.status)}
-                            activeStyle="bg-blue-500/10 text-blue-300 border-blue-500/30"
-                            onClick={() => handleMarkStatus(item.name, "annual")}
-                          />
-                          <StatusSelectorButton
-                            label="Absent"
-                            icon={<XCircle className="w-3.5 h-3.5" />}
-                            isActive={item.status === "absent"}
-                            activeStyle="bg-rose-500/10 text-rose-400 border-rose-500/30"
-                            onClick={() => handleMarkStatus(item.name, "absent")}
-                          />
-                          <StatusSelectorButton
-                            label="OFF"
-                            icon={<Home className="w-3.5 h-3.5" />}
-                            isActive={item.status === "off"}
-                            activeStyle="bg-slate-500/20 text-slate-300 border-slate-500/50"
-                            onClick={() => handleMarkStatus(item.name, "off")}
-                          />
-                          <StatusSelectorButton
-                            label="NSNC"
-                            icon={<AlertOctagon className="w-3.5 h-3.5" />}
-                            isActive={item.status === "nsnc"}
-                            activeStyle="bg-red-500/15 text-red-400 border-red-500/30 animate-pulse"
-                            onClick={() => handleMarkStatus(item.name, "nsnc")}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
+                  </div>
                 </div>
               </div>
             )}
@@ -1048,24 +1107,29 @@ const StatusSelectorButton = ({
   isActive,
   activeStyle,
   onClick,
+  iconOnly,
 }: {
   label: string;
   icon: React.ReactNode;
   isActive: boolean;
   activeStyle: string;
   onClick: () => void;
+  iconOnly?: boolean;
 }) => {
   return (
     <button
       onClick={onClick}
-      className={`px-2.5 py-1.5 rounded-xl border text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer active:scale-95 shrink-0 select-none ${
+      title={iconOnly ? label : undefined}
+      className={`rounded-xl border text-[11px] font-bold transition-all flex items-center justify-center cursor-pointer active:scale-95 shrink-0 select-none ${
+        iconOnly ? "px-2 py-1.5" : "px-2.5 py-1.5 gap-1"
+      } ${
         isActive
           ? activeStyle
           : "bg-slate-950/40 border-white/5 text-slate-400 hover:text-slate-100 hover:bg-slate-900 hover:border-slate-700/50"
       }`}
     >
       <span className="flex items-center justify-center shrink-0">{icon}</span>
-      <span>{label}</span>
+      {!iconOnly && <span>{label}</span>}
     </button>
   );
 };
