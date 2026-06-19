@@ -1,5 +1,0 @@
-src/components/AnnouncementsTab.tsx:                            <span>{emoji}</span>
-src/components/DashboardSummary.tsx:              <h3 className="text-3xl font-black text-pink-400">{inquiriesCount}</h3>
-src/components/DashboardSummary.tsx:              <h3 className="text-3xl font-black text-cyan-400">{ttRequestsCount}</h3>
-src/components/PatientSearchHub.tsx:              Results found: <span className="text-cyan-400">{totalResults}</span>
-src/components/QAScorecards.tsx:                {agentsList.map(a => <option key={a} value={a}>{a}</option>)}

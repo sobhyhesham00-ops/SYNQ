@@ -150,12 +150,12 @@ service cloud.firestore {
     match /qa_scores/{scoreId} { allow read, write: if isSignedIn(); }
     match /system/{docId} { allow read, write: if isSignedIn(); }
     match /system/sched_agent_directory {
-      allow read: if request.auth != null || request.auth == null;  // allow all reads from cache
-      allow write: if request.auth != null;  // require any auth (anon or real user)
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
     }
     match /system/sched_agent_directory_headers {
-      allow read: if request.auth != null || request.auth == null;
-      allow write: if request.auth != null;
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
     }
     match /announcements/{annId} { allow read, write: if isSignedIn(); }
     match /tl_feedbacks/{fbId} { allow read, write: if isSignedIn(); }
@@ -178,7 +178,7 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow create, update, delete: if isSignedIn() && (
         isSuperAdmin() || isTLOrSupport() ||
-        (request.auth.token.role == 'qa')
+        (getUserRole() == 'qa')
       );
     }
   }
