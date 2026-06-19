@@ -777,13 +777,19 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                   className="overflow-x-auto custom-scrollbar scrollbar-thin"
                 >
                   {/* Desktop High-Density Table */}
-                  <table className="w-full min-w-[820px] text-left border-collapse hidden md:table">
+                  <table className="w-full table-fixed text-left border-collapse hidden md:table">
+                    <colgroup>
+                      <col className="w-[38%]" />
+                      <col className="w-[16%]" />
+                      <col className="w-[24%]" />
+                      <col className="w-[22%]" />
+                    </colgroup>
                     <thead>
                       <tr className="border-b border-white/5 bg-slate-950/20 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-                        <th className="p-3 pl-4">Personnel Agent Roster</th>
-                        <th className="p-3">Desk LOB</th>
-                        <th className="p-3 text-center">Attendance Status</th>
-                        <th className="p-3 pr-4 text-right">Quick Ledger Action Panel</th>
+                        <th className="p-2.5 pl-4">Personnel Agent Roster</th>
+                        <th className="p-2.5">Desk LOB</th>
+                        <th className="p-2.5 text-center">Attendance Status</th>
+                        <th className="p-2.5 pr-4 text-right">Quick Ledger Action Panel</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
@@ -796,19 +802,21 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                             className="hover:bg-white/[0.02] transition-colors group"
                           >
                             {/* Name & Initials Avatar */}
-                            <td className="p-3 pl-4">
-                              <div className="flex items-center gap-3">
-                                <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${getLOBGradient(item.lob)} flex items-center justify-center text-white text-[11px] font-bold tracking-wider shadow-sm`}>
+                            <td className="p-2.5 pl-4">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${getLOBGradient(item.lob)} flex items-center justify-center text-white text-[11px] font-bold tracking-wider shadow-sm shrink-0`}>
                                   {getInitials(item.name)}
                                 </div>
-                                <div>
-                                  <div className="font-bold text-slate-200 text-xs">{item.name}</div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="font-bold text-slate-200 text-xs truncate max-w-full" title={item.name}>
+                                    {item.name}
+                                  </div>
                                   {item.record?.markedBy ? (
-                                    <div className="text-[10px] text-slate-500 mt-0.5 font-mono">
+                                    <div className="text-[10px] text-slate-500 mt-0.5 font-mono truncate max-w-full" title={`Marked by ${item.record.markedBy}`}>
                                       Marked by {item.record.markedBy} at {new Date(item.record.markedAt || "").toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </div>
                                   ) : (
-                                    <div className="text-[10px] text-indigo-400/60 mt-0.5 tracking-wider uppercase font-extrabold text-[9px]">
+                                    <div className="text-[10px] text-indigo-400/60 mt-0.5 tracking-wider uppercase font-extrabold text-[9px] truncate max-w-full">
                                       Awaiting Decision
                                     </div>
                                   )}
@@ -817,16 +825,16 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                             </td>
 
                             {/* LOB Desk Badge */}
-                            <td className="p-3">
-                              <span className="text-[10px] font-bold bg-slate-950/40 border border-white/5 px-2.5 py-1 rounded-xl text-slate-300 uppercase tracking-wider">
+                            <td className="p-2.5">
+                              <span className="text-[10px] font-bold bg-slate-950/40 border border-white/5 px-2.5 py-1 rounded-xl text-slate-300 uppercase tracking-wider truncate inline-block max-w-full">
                                 {item.lob}
                               </span>
                             </td>
 
                             {/* Interactive Status Indicator with dynamic fields */}
-                            <td className="p-3">
-                              <div className="flex flex-col items-center justify-center gap-1.5">
-                                <span className={`px-2.5 py-1 text-[9px] uppercase font-bold border rounded-full font-mono ${badgeColor}`}>
+                            <td className="p-2.5">
+                              <div className="flex flex-col items-center justify-center gap-1.5 min-w-0">
+                                <span className={`px-2.5 py-1 text-[9px] uppercase font-bold border rounded-full font-mono truncate max-w-full ${badgeColor}`}>
                                   {item.status === "not_marked"
                                     ? "NOT MARKED"
                                     : item.status === "nsnc"
@@ -841,7 +849,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
 
                                 {/* Inline Late Entry Time Dial */}
                                 {item.status === "late" && (
-                                  <div className="flex items-center gap-1 mt-1">
+                                  <div className="flex items-center gap-1 mt-1 shrink-0">
                                     <span className="text-[9px] text-slate-500 uppercase font-extrabold mr-1">Time:</span>
                                     <input
                                       type="time"
@@ -855,8 +863,8 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                             </td>
 
                             {/* Actions Controller Buttons */}
-                            <td className="p-3 pr-4">
-                              <div className="flex items-center justify-end gap-1">
+                            <td className="p-2.5 pr-4">
+                              <div className="flex items-center justify-end gap-0.5">
                                 <StatusSelectorButton
                                   label="Present"
                                   icon={<CheckCircle2 className="w-3.5 h-3.5" />}
@@ -1121,7 +1129,7 @@ const StatusSelectorButton = ({
       onClick={onClick}
       title={iconOnly ? label : undefined}
       className={`rounded-xl border text-[11px] font-bold transition-all flex items-center justify-center cursor-pointer active:scale-95 shrink-0 select-none ${
-        iconOnly ? "px-2 py-1.5" : "px-2.5 py-1.5 gap-1"
+        iconOnly ? "w-7 h-7 p-0" : "px-2.5 py-1.5 gap-1"
       } ${
         isActive
           ? activeStyle
