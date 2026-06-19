@@ -1,93 +1,51 @@
 const originalConsoleError = console.error;
-console.error = (...args) => {
-  const msg = args.map(a => {
-    try {
-      if (typeof a === 'string') return a;
-      if (a instanceof Error) return a.message + ' ' + (a as any).code;
-      if (typeof a === 'object' && a !== null) return JSON.stringify(a);
-      return String(a);
-    } catch {
-      return 'Unknown';
-    }
-  }).join(' ');
-  if (
-    msg.includes('Quota exceeded') || 
-    msg.includes('resource-exhausted') || 
-    msg.includes('update time that is in the future') ||
-    msg.includes('failed to connect to websocket') ||
-    msg.includes('WebSocket') ||
-    msg.includes('websocket')
-  ) return;
-  originalConsoleError(...args);
-};
-
 const originalConsoleWarn = console.warn;
-console.warn = (...args) => {
-  const msg = args.map(a => {
-    try {
+const originalConsoleLog = console.log;
+const originalConsoleInfo = console.info;
+
+let lastWebSocketLogTime = 0;
+const WEBSOCKET_LOG_INTERVAL = 30000; // allow once every 30 seconds
+
+function isWebSocketMessage(args: any[]): boolean {
+  try {
+    const msg = args.map(a => {
       if (typeof a === 'string') return a;
       if (a instanceof Error) return a.message + ' ' + (a as any).code;
       if (typeof a === 'object' && a !== null) return JSON.stringify(a);
       return String(a);
-    } catch {
-      return 'Unknown';
+    }).join(' ');
+    
+    return msg.toLowerCase().includes('websocket') || msg.toLowerCase().includes('failed to connect');
+  } catch {
+    return false;
+  }
+}
+
+function handleWebSocketConsoleCall(originalFn: (...args: any[]) => void, args: any[]) {
+  if (isWebSocketMessage(args)) {
+    const now = Date.now();
+    if (now - lastWebSocketLogTime > WEBSOCKET_LOG_INTERVAL) {
+      lastWebSocketLogTime = now;
+      originalFn(...args);
     }
-  }).join(' ');
-  if (
-    msg.includes('Using maximum backoff delay') || 
-    msg.includes('update time that is in the future') ||
-    msg.includes('failed to connect to websocket') ||
-    msg.includes('WebSocket') ||
-    msg.includes('websocket')
-  ) return;
-  originalConsoleWarn(...args);
+    // otherwise suppress
+  } else {
+    originalFn(...args);
+  }
+}
+
+console.error = (...args) => {
+  handleWebSocketConsoleCall(originalConsoleError, args);
 };
 
-const originalConsoleLog = console.log;
+console.warn = (...args) => {
+  handleWebSocketConsoleCall(originalConsoleWarn, args);
+};
+
 console.log = (...args) => {
-  const msg = args.map(a => {
-    try {
-      if (typeof a === 'string') return a;
-      if (typeof a === 'object' && a !== null) return JSON.stringify(a);
-      return String(a);
-    } catch { return 'Unknown'; }
-  }).join(' ');
-  if (msg.includes('WebSocket') || msg.includes('websocket')) return;
-  originalConsoleLog(...args);
+  handleWebSocketConsoleCall(originalConsoleLog, args);
 };
 
-const originalConsoleInfo = console.info;
 console.info = (...args) => {
-  const msg = args.map(a => {
-    try {
-      if (typeof a === 'string') return a;
-      if (typeof a === 'object' && a !== null) return JSON.stringify(a);
-      return String(a);
-    } catch { return 'Unknown'; }
-  }).join(' ');
-  if (msg.includes('WebSocket') || msg.includes('websocket')) return;
-  originalConsoleInfo(...args);
+  handleWebSocketConsoleCall(originalConsoleInfo, args);
 };
-
-// Also suppress WebSocket-related global uncaught errors to prevent error overlays or crash logs
-window.addEventListener('error', (event) => {
-  if (event && event.message && (
-    event.message.includes('WebSocket') || 
-    event.message.includes('websocket') || 
-    event.message.includes('failed to connect')
-  )) {
-    event.preventDefault();
-    event.stopPropagation();
-  }
-}, true);
-
-window.addEventListener('unhandledrejection', (event) => {
-  if (event && event.reason) {
-    const reasonStr = String(event.reason);
-    if (reasonStr.includes('WebSocket') || reasonStr.includes('websocket') || reasonStr.includes('failed to connect')) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-  }
-}, true);
-

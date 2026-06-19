@@ -6,49 +6,57 @@ service cloud.firestore {
     function isSignedIn() { return request.auth != null; }
 
     function getUserData() {
-      let path = /databases/$(database)/documents/users/$(request.auth.uid);
-      return exists(path) ? get(path).data : null;
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data : null;
     }
 
     function getUserName() {
-      let data = getUserData();
-      return data != null ? data.name : null;
-    }
-
-    function getUserNameLower() {
-      let name = getUserName();
-      return name != null ? name.toLowerCase() : null;
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name : null;
     }
 
     function getUserRole() {
-      let data = getUserData();
-      return data != null ? data.role : null;
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role : null;
     }
 
     // Checking roles handles TL, Admin, and Superadmin roles securely
     function isSuperAdmin() {
-      let role = getUserRole();
-      return role == 'tl' || role == 'admin' || role == 'superadmin';
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'director' &&
+             (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name == 'Hesham Sobhy' || 
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username == 'h.sobhy');
     }
 
+    // Directors other than h.sobhy have the same level of access as TLs. 
     function isTLOrSupport() {
-      return getUserRole() == 'tl';
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) && (
+               get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'tl' || (
+                 get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'director' &&
+                 !(get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name == 'Hesham Sobhy' || 
+                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username == 'h.sobhy')
+               )
+             );
     }
 
     function isRecipientOf(notifData) {
-      let uid = request.auth.uid;
-      let role = getUserRole();
-      let name = getUserName();
-      let nameLower = getUserNameLower();
-      return notifData.targetAgent == uid ||
+      return notifData.targetAgent == request.auth.uid ||
              notifData.targetAgent == "all" ||
-             (role != null && notifData.targetAgent == role) ||
-             (notifData.targetGroups != null && (
-               notifData.targetGroups.hasAny([uid, "usr_" + uid, "all"]) ||
-               (role != null && role in notifData.targetGroups) ||
-               (name != null && name in notifData.targetGroups) ||
-               (nameLower != null && nameLower in notifData.targetGroups)
+             (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && (
+                notifData.targetAgent == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role ||
+                (notifData.targetGroups != null && (
+                   notifData.targetGroups.hasAny([request.auth.uid, "usr_" + request.auth.uid, "all"]) ||
+                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in notifData.targetGroups ||
+                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name in notifData.targetGroups
+                ))
              ));
+    }
+
+    function canWriteFintech() {
+      return request.auth != null && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && (
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'director' && (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name == 'Hesham Sobhy' || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username == 'h.sobhy')) || 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'tl' || (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'director' && !(get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name == 'Hesham Sobhy' || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username == 'h.sobhy'))) || 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'qa') || 
+        (resource != null && resource.data.agentName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name) || 
+        (request.resource != null && request.resource.data.agentName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name)
+      );
     }
 
     // Users
@@ -56,7 +64,7 @@ service cloud.firestore {
     // evaluation loop that happens when a getUserRole() lookup triggers a read of its own users collection.
     match /users/{userId} {
       allow read: if isSignedIn();
-      allow write: if isSignedIn() && (request.auth.uid == resource.data.uid || getUserRole() == 'director' || !exists(/databases/$(database)/documents/users/$(request.auth.uid)));
+      allow write: if isSignedIn() && (request.auth.uid == userId || getUserRole() == 'director' || !exists(/databases/$(database)/documents/users/$(request.auth.uid)));
     }
 
     // Cases, Requests, Inquiries
@@ -65,15 +73,6 @@ service cloud.firestore {
       allow write: if request.auth != null && (
         isSuperAdmin() || 
         isTLOrSupport() || 
-        (resource != null && resource.data.agentName == getUserName()) || 
-        (request.resource != null && request.resource.data.agentName == getUserName())
-      );
-    }
-    function canWriteFintech() {
-      return request.auth != null && (
-        isSuperAdmin() || 
-        isTLOrSupport() || 
-        getUserRole() == 'qa' || 
         (resource != null && resource.data.agentName == getUserName()) || 
         (request.resource != null && request.resource.data.agentName == getUserName())
       );
@@ -123,6 +122,12 @@ service cloud.firestore {
         (resource == null && request.resource.data.tlName == getUserName()) ||
         (resource != null && resource.data.tlName == getUserName() && request.resource.data.tlName == getUserName())
       );
+    }
+
+    // TL Login Logs
+    match /tl_login_logs/{logId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && (isSuperAdmin() || isTLOrSupport());
     }
 
     // Notifications

@@ -1272,6 +1272,8 @@ export default function App() {
       );
       setAuthReady(true);
 
+
+
       // Define local onSnapshot helper to register unsubscribes
       const onSnapshot = (ref: any, nextCb: any, overrideErrCb?: any) => {
         const path = ref.path || (ref.query && ref.query.path) || "unknown";
@@ -1315,7 +1317,7 @@ export default function App() {
       const unsubInquiries = onSnapshot(
         collection(db, "inquiries"),
         (snap) => {
-          const arr = snap.docs.map((d) => d.data() as Inquiry);
+          const arr = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Inquiry);
           arr.sort(
             (a, b) =>
               new Date(b.createdAt || 0).getTime() -
@@ -1332,7 +1334,7 @@ export default function App() {
       const unsubQa = onSnapshot(
         collection(db, "qa_scores"),
         (snap) => {
-          const arr = snap.docs.map((d) => d.data() as QAScore);
+          const arr = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as QAScore);
           arr.sort(
             (a, b) =>
               new Date(b.createdAt || 0).getTime() -
@@ -1366,7 +1368,7 @@ export default function App() {
       const unsubTT = onSnapshot(
         collection(db, "tt_requests"),
         (snap) => {
-          const arr = snap.docs.map((d) => d.data() as TabbyTamaraRequest);
+          const arr = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as TabbyTamaraRequest);
           arr.sort(
             (a, b) =>
               new Date(b.createdAt || 0).getTime() -
@@ -1386,7 +1388,7 @@ export default function App() {
       const unsubComp = onSnapshot(
         collection(db, "tt_complaints"),
         (snap) => {
-          const arr = snap.docs.map((d) => d.data() as TabbyTamaraComplaint);
+          const arr = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as TabbyTamaraComplaint);
           arr.sort(
             (a, b) =>
               new Date(b.createdAt || 0).getTime() -
@@ -1406,7 +1408,7 @@ export default function App() {
       const unsubTLShiftLogs = onSnapshot(
         collection(db, "tl_shift_logs"),
         (snap) => {
-          const arr = snap.docs.map((d) => d.data() as any);
+          const arr = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as any);
           arr.sort(
             (a, b) =>
               new Date(b.loggedInAt || 0).getTime() -
@@ -1427,7 +1429,7 @@ export default function App() {
         collection(db, "client_comms"),
         (snap) => {
           const arr = snap.docs.map(
-            (d) => d.data() as ClientCommunicationRequest,
+            (d) => ({ id: d.id, ...d.data() }) as ClientCommunicationRequest,
           );
           arr.sort(
             (a, b) =>
@@ -1448,7 +1450,7 @@ export default function App() {
       const unsubReq = onSnapshot(
         collection(db, "scheduling_requests"),
         (snap) => {
-          const arr = snap.docs.map((d) => d.data() as SchedulingRequest);
+          const arr = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as SchedulingRequest);
           arr.sort(
             (a, b) =>
               new Date(b.createdAt || 0).getTime() -
@@ -1469,7 +1471,7 @@ export default function App() {
         collection(db, "timelogs"),
         (snap) => {
           console.log("Got timelogs snapshot, docs =", snap.size);
-          const arr = snap.docs.map((d) => d.data() as TimeLog);
+          const arr = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as TimeLog);
           arr.sort((a, b) => {
             const d1 = a.date
               ? new Date(a.date).getTime()
@@ -1504,7 +1506,7 @@ export default function App() {
         collection(db, "announcements"),
         (snap) => {
           console.log("Got announcement snapshot, document size:", snap.size);
-          const arr = snap.docs.map((d) => d.data() as Announcement);
+          const arr = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Announcement);
           arr.sort(
             (a, b) =>
               new Date(b.createdAt || 0).getTime() -
@@ -1622,7 +1624,7 @@ export default function App() {
       const unsubCases = onSnapshot(
         collection(db, "cases"),
         (snap) => {
-          const arr = snap.docs.map((d) => d.data() as CaseRecord);
+          const arr = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as CaseRecord);
           arr.sort(
             (a, b) =>
               new Date(b.createdAt || 0).getTime() -
@@ -1797,7 +1799,7 @@ export default function App() {
       const unsubFeedbacks = onSnapshot(
         collection(db, "tl_feedbacks"),
         (snap) => {
-          const arr = snap.docs.map((d) => d.data() as TlFeedback);
+          const arr = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as TlFeedback);
           arr.sort(
             (a, b) =>
               new Date(b.createdAt || 0).getTime() -
@@ -2156,7 +2158,7 @@ export default function App() {
     const unsubSched = onSnapshot(
       collection(db, "schedules"),
       (snapshot) => {
-        const data = snapshot.docs.map((d) => d.data() as ScheduledShift);
+        const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }) as ScheduledShift);
         setSchedules(data);
       },
       (error) => {
@@ -2190,7 +2192,7 @@ export default function App() {
     const unsubNotifs = onSnapshot(
       qNotifs,
       (snapshot) => {
-        const arr = snapshot.docs.map((d) => d.data() as SystemNotification);
+        const arr = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }) as SystemNotification);
         arr.sort(
           (a, b) =>
             new Date(b.createdAt || 0).getTime() -
@@ -2291,7 +2293,7 @@ export default function App() {
     const unsubOrders = onSnapshot(
       collection(db, "orders"),
       (snapshot) => {
-        const data = snapshot.docs.map((d) => d.data() as Order);
+        const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }) as Order);
         setOrders(data);
       },
       (error) => {
@@ -8769,13 +8771,21 @@ ${ttNotes}`
           // 1. Delete Firestore Collections
           const collectionsToWipe = [
             "schedules",
-            "requests",
+            "scheduling_requests",
             "inquiries",
-            "clientComms",
+            "client_comms",
             "cases",
-            "timeLogs",
+            "timelogs",
             "announcements",
             "orders",
+            "tt_requests",
+            "tt_complaints",
+            "qa_scores",
+            "notifications",
+            "tl_shift_logs",
+            "attendance_records",
+            "tl_feedbacks",
+            "todos",
           ];
 
           for (const colName of collectionsToWipe) {
@@ -8786,6 +8796,9 @@ ${ttNotes}`
               batch.delete(doc.ref);
             });
             await batch.commit();
+            console.log(
+              `Wiped collection "${colName}": Deleted ${snapshot.size} documents.`,
+            );
           }
 
           // Also clear all local data
