@@ -28,6 +28,7 @@ export interface User {
   lobTeam?: string;
   teamLeader?: string;
   directoryData?: Record<string, string>;
+  lastLoginAt?: string;
 }
 
 export interface QAQuestion {
@@ -379,7 +380,6 @@ export interface AgentDirectoryRow {
 export const TEAM_LEADERS = [
   'Hesham Sobhy',
   'Shymaa Hassan',
-  'Shaymaa Hassan',
   'Amira Hassan',
   'AbdelAlem Essam AbdelAlem',
   'Emad Sayed'
@@ -470,7 +470,7 @@ export const AGENT_TL_MAP: Record<string, string> = {
   'Mahmoud Mohamed Gamal Eldin': 'Hesham Sobhy',
   'Moaz Salah Al-Nagar': 'Hesham Sobhy',
 
-  // Shymaa/Shaymaa Hassan's team  
+  // Shymaa Hassan's team  
   'Ammar Ismail Helmy': 'Shymaa Hassan',
   'Hager Nagy': 'Shymaa Hassan',
   'Hussam Mahmoud Yousef Ahmed': 'Shymaa Hassan',

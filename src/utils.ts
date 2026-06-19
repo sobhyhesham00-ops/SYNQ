@@ -401,7 +401,6 @@ export const findAgentByUsername = (username: string, referenceList: string[] = 
     'Hesham Sobhy',
     'Amira Hassan',
     'Shymaa Hassan',
-    'Shaymaa Hassan',
     'Hesso'
   ]));
 

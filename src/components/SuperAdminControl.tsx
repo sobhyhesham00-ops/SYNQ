@@ -18,8 +18,8 @@ import {
   Shield,
   UserPlus
 } from 'lucide-react';
-import { doc } from 'firebase/firestore';
-import { db, wrappedSetDoc as setDoc, wrappedDeleteDoc as deleteDoc } from '../firebase';
+import { doc, collection } from 'firebase/firestore';
+import { db, wrappedSetDoc as setDoc, wrappedDeleteDoc as deleteDoc, wrappedAddDoc as addDoc } from '../firebase';
 import { toast } from 'sonner';
 import { getUsernameFromFullName, getAgentTL, normalizeAgentLob } from '../utils';
 import { INITIAL_AGENTS, TEAM_LEADERS, AGENT_LOBS } from '../types';
@@ -33,6 +33,15 @@ interface UserProfile {
   lob?: string;
   lobTeam?: string;
   teamLeader?: string;
+  lastLoginAt?: string;
+}
+
+interface AuditLogEntry {
+  id: string;
+  action: string;
+  targetUser: string;
+  performedBy: string;
+  timestamp: string;
 }
 
 interface SuperAdminControlProps {
@@ -46,6 +55,8 @@ interface SuperAdminControlProps {
   TRIGGER_CURRENT_APP_VERSION: number;
   deletedUsers?: string[];
   onDeleteSyntheticUser?: (name: string) => Promise<void>;
+  isSuperAdmin: boolean;
+  auditLog: AuditLogEntry[];
 }
 
 export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
@@ -58,14 +69,53 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   onCloseAllCases,
   TRIGGER_CURRENT_APP_VERSION,
   deletedUsers = [],
-  onDeleteSyntheticUser
+  onDeleteSyntheticUser,
+  isSuperAdmin,
+  auditLog
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
 
+  const formatRelativeTime = (isoString?: string): string => {
+    if (!isoString) return 'Never';
+    try {
+      const date = new Date(isoString);
+      const diffMs = Date.now() - date.getTime();
+      const diffSec = Math.floor(diffMs / 1000);
+      const diffMin = Math.floor(diffSec / 60);
+      const diffHr = Math.floor(diffMin / 60);
+      const diffDays = Math.floor(diffHr / 24);
+
+      if (diffSec < 10) return 'Just now';
+      if (diffSec < 60) return `${diffSec}s ago`;
+      if (diffMin < 60) return `${diffMin}m ago`;
+      if (diffHr < 24) return `${diffHr}h ago`;
+      return `${diffDays}d ago`;
+    } catch (err) {
+      return 'Never';
+    }
+  };
+
+  const logAdminAction = async (action: string, targetUser: string) => {
+    try {
+      await addDoc(collection(db, "admin_audit_log"), {
+        action,
+        targetUser,
+        performedBy: currentUser?.name || "unknown",
+        timestamp: new Date().toISOString()
+      });
+    } catch (err) {
+      console.error("[AUDIT LOG ERROR]", err);
+    }
+  };
+
+  const registeredUsernames = new Set(
+    registeredUsers.map(u => getUsernameFromFullName(u.name || ''))
+  );
+
   const syntheticUsers: UserProfile[] = [...INITIAL_AGENTS, ...TEAM_LEADERS]
-    .filter((name, i, arr) => arr.indexOf(name) === i) // dedupe
-    .filter(name => !registeredUsers.some(u => u.name?.toLowerCase() === name.toLowerCase()))
+    .filter((name, i, arr) => arr.indexOf(name) === i) // dedupe within the static list itself
+    .filter(name => !registeredUsernames.has(getUsernameFromFullName(name)))
     .filter(name => {
       const uname = getUsernameFromFullName(name);
       return !deletedUsers.includes(uname) && !deletedUsers.includes(name.toLowerCase());
@@ -76,11 +126,15 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
       role: TEAM_LEADERS.includes(name) ? 'tl' : 'agent',
       lob: TEAM_LEADERS.includes(name) ? '' : (AGENT_LOBS[name] === 'Call Center' ? 'Call Center' : 'Chat'),
     }));
-  const allUsers = [...registeredUsers, ...syntheticUsers];
 
-  const isGlobalAdminUser = currentUser?.name?.toLowerCase() === "h.sobhy" ||
-                            currentUser?.name?.toLowerCase() === "hesham sobhy" ||
-                            currentUser?.name?.toLowerCase() === "hesso";
+  const seen = new Map<string, UserProfile>();
+  [...registeredUsers, ...syntheticUsers].forEach(u => {
+    const key = getUsernameFromFullName(u.name || '');
+    if (!seen.has(key) || registeredUsers.includes(u)) {
+      seen.set(key, u);
+    }
+  });
+  const allUsers = Array.from(seen.values());
   
   // States for new user
   const [showAddForm, setShowAddForm] = useState(false);
@@ -110,15 +164,29 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!String(newUserName || '').trim()) {
+    const trimmedName = String(newUserName || '').trim();
+    if (!trimmedName) {
       toast.error('Name is required!');
       return;
     }
 
-    const docId = getUsernameFromFullName(newUserName.trim()) + '_' + Date.now();
+    const normalizedNewUsername = getUsernameFromFullName(trimmedName).toLowerCase();
+
+    // Check this normalized username against ALL existing users — both registeredUsers AND syntheticUsers
+    const existingUser = allUsers.find(u => {
+      const uName = u.name || '';
+      return getUsernameFromFullName(uName).toLowerCase() === normalizedNewUsername;
+    });
+
+    if (existingUser) {
+      toast.error(`A user with this name already exists: ${existingUser.name}. Edit their existing profile instead of creating a duplicate.`);
+      return;
+    }
+
+    const docId = getUsernameFromFullName(trimmedName);
     const newUser: UserProfile = {
-      id: `usr_${Date.now()}`,
-      name: String(newUserName || '').trim(),
+      id: docId,
+      name: trimmedName,
       role: newUserRole,
       email: String(newUserEmail || '').trim() || undefined,
       phone: String(newUserPhone || '').trim() || undefined,
@@ -129,7 +197,8 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
     try {
       await setDoc(doc(db, "users", docId), newUser);
-      toast.success(`Successfully registered user profile: ${newUserName}!`);
+      await logAdminAction("create_user", trimmedName);
+      toast.success(`Successfully registered user profile: ${trimmedName}!`);
       
       // Reset form
       setNewUserName('');
@@ -170,6 +239,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
     try {
       await setDoc(doc(db, "users", docId), updatedUser, { merge: true });
+      await logAdminAction("edit_user", user.name);
       toast.success(`Updated profile for ${user.name}`);
       setEditingUserId(null);
     } catch (err) {
@@ -179,7 +249,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   };
 
   const handleSetPassword = async (userName: string) => {
-    if (!isGlobalAdminUser) {
+    if (!isSuperAdmin) {
       toast.error('Only the global super admin (h.sobhy) can reset credentials.');
       return;
     }
@@ -202,6 +272,8 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
         mustChangePassword: { [usernameKey]: true }
       }, { merge: true });
       
+      await logAdminAction("reset_password", userName);
+
       // Also automatically unlock if is locked
       await handleUnlock(userName);
 
@@ -224,6 +296,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
     try {
       await setDoc(doc(db, "system", "sched_locked_accounts"), { data: updated });
+      await logAdminAction("lock_account", userName);
       toast.success(`Locked login account for "${userName}"`);
     } catch (err) {
       console.error(err);
@@ -244,6 +317,8 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
       await setDoc(doc(db, "system", "sched_failed_attempts"), { data: updatedAttempts });
 
+      await logAdminAction("unlock_account", userName);
+
       toast.success(`Unlocked and clear attempts for "${userName}"!`);
     } catch (err) {
       console.error(err);
@@ -259,6 +334,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
     try {
       await setDoc(doc(db, "system", "sched_failed_attempts"), { data: updatedAttempts });
+      await logAdminAction("clear_attempts", userName);
       toast.success(`Failed attempts counters reset for "${userName}"`);
     } catch (err) {
       console.error(err);
@@ -280,6 +356,8 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
       } else if (onDeleteSyntheticUser) {
         await onDeleteSyntheticUser(cleanName);
       }
+
+      await logAdminAction("delete_user", cleanName);
 
       const usernameKey = getUsernameFromFullName(cleanName);
 
@@ -388,8 +466,44 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
             </div>
           </div>
 
+          {/* Recent Admin Activity Log Card */}
+          <div className="bg-white/5 border border-white/10 p-6 rounded-3xl space-y-4">
+            <h3 className="font-bold text-slate-100 text-sm font-display uppercase tracking-wider flex items-center gap-2">
+              <RefreshCw className="w-4 h-4 text-indigo-400" />
+              Recent Admin Activity
+            </h3>
+            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+              {!auditLog || auditLog.length === 0 ? (
+                <p className="text-xs text-slate-500 italic text-center py-4 font-sans font-medium">No recent activity logged.</p>
+              ) : (
+                auditLog.map((log) => {
+                  let displayAction = log.action;
+                  if (log.action === "lock_account") displayAction = "locked account";
+                  else if (log.action === "unlock_account") displayAction = "unlocked account";
+                  else if (log.action === "clear_attempts") displayAction = "cleared attempts";
+                  else if (log.action === "reset_password") displayAction = "reset password";
+                  else if (log.action === "create_user") displayAction = "created profile";
+                  else if (log.action === "edit_user") displayAction = "updated profile";
+                  else if (log.action === "delete_user") displayAction = "deleted profile";
+
+                  return (
+                    <div key={log.id} className="text-xs text-slate-300 bg-black/20 p-3 rounded-xl border border-white/5 space-y-1 font-sans font-medium">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-slate-200">{log.performedBy}</span>
+                        <span className="text-[10px] text-slate-400">{formatRelativeTime(log.timestamp)}</span>
+                      </div>
+                      <div className="text-slate-400">
+                        {displayAction} for <span className="text-indigo-300">{log.targetUser}</span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
           {/* Close All Cases Card (h.sobhy exclusive) */}
-          {isGlobalAdminUser && onCloseAllCases && (
+          {isSuperAdmin && onCloseAllCases && (
             <div className="bg-gradient-to-br from-rose-500/10 to-orange-500/10 border border-rose-500/20 p-6 rounded-3xl space-y-4">
               <h3 className="font-bold text-rose-400 text-sm font-display uppercase tracking-wider flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-rose-500" />
@@ -682,6 +796,9 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                                 <span>{user.email || 'No Email'}</span>
                                 {user.phone && <span className="text-emerald-400 font-mono">• {user.phone}</span>}
                                 {normalizeAgentLob(user.lob, user.role) && <span>• <span className="text-indigo-300 font-semibold">{normalizeAgentLob(user.lob, user.role)}</span></span>}
+                                <span className="text-gray-400 font-mono font-bold bg-white/5 border border-white/10 px-1.5 py-0.5 rounded">
+                                  Last seen: {user.lastLoginAt ? formatRelativeTime(user.lastLoginAt) : 'Never'}
+                                </span>
                               </p>
                             </div>
                           </div>
@@ -719,7 +836,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                         {/* Lower row: Inline password reset or profile action button triggers */}
                         <div className="flex items-center justify-between border-t border-white/5 pt-2.5 text-xs text-slate-400">
                           <div className="flex items-center gap-3">
-                            {isGlobalAdminUser ? (
+                            {isSuperAdmin ? (
                               targetPasswordChange === user.id ? (
                                 <div className="flex items-center gap-2">
                                   <input

@@ -178,9 +178,25 @@
         "loggedInAt": { "type": "string" },
         "date": { "type": "string" }
       }
+    },
+    "admin_audit_log": {
+      "title": "AdminAuditLog",
+      "description": "Log of admin actions performed by directors or super admins",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "action": { "type": "string" },
+        "targetUser": { "type": "string" },
+        "performedBy": { "type": "string" },
+        "timestamp": { "type": "string" }
+      }
     }
   },
   "firestore": {
+    "admin_audit_log/{logId}": {
+      "schema": { "$ref": "#/entities/admin_audit_log" },
+      "description": "Audit logs of actions taken by super admins or directors"
+    },
     "users/{userId}": {
       "schema": { "$ref": "#/entities/user" },
       "description": "User profiles"

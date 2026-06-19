@@ -479,7 +479,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
 
         <div className="flex flex-wrap items-center gap-3">
           {TEAM_LEADERS.map(tlName => {
-            const log = tlLoginLogs.find(l => l.tlName === tlName);
+            const log = tlLoginLogs.find(l => l.tlName === tlName && l.date === todayStr);
             return (
               <div key={tlName} className="flex items-center gap-2 text-sm bg-[#1f222a] px-4 py-2 rounded-full border-none">
                 <div className={`w-2.5 h-2.5 rounded-full ${log?.onlineStatus === 'online' ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`} />

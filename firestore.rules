@@ -187,5 +187,12 @@ service cloud.firestore {
         (getUserRole() == 'qa')
       );
     }
+
+    // Admin Audit Log
+    match /admin_audit_log/{logId} {
+      allow read: if isSignedIn() && isSuperAdmin();
+      allow create: if isSignedIn() && isSuperAdmin();
+      allow update, delete: if false;
+    }
   }
 }

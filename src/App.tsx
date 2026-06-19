@@ -39,6 +39,7 @@ import {
   where,
   orderBy,
   arrayUnion,
+  limit,
 } from "firebase/firestore";
 import {
   db,
@@ -2480,6 +2481,31 @@ export default function App() {
     Set<string>
   >(new Set());
   const [registeredUsers, setRegisteredUsers] = useState<any[]>([]);
+  const [auditLog, setAuditLog] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!authReady || !isSuperAdmin) {
+      setAuditLog([]);
+      return;
+    }
+    const unsub = onSnapshot(
+      query(
+        collection(db, "admin_audit_log"),
+        orderBy("timestamp", "desc"),
+        limit(50),
+      ),
+      (snap) => {
+        const arr = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as any);
+        setAuditLog(arr);
+      },
+      (error) => {
+        if (error.code !== "permission-denied") {
+          console.error("[Firestore] Audit log fetch error:", error.message);
+        }
+      },
+    );
+    return () => unsub();
+  }, [authReady, isSuperAdmin]);
   const [attendanceRecords, setAttendanceRecords] = useState<
     AttendanceRecord[]
   >([]);
@@ -2504,6 +2530,62 @@ export default function App() {
     );
     return () => unsub();
   }, [authReady]);
+
+  // One-time database migration to merge and correct Team Leader "Shaymaa Hassan" to "Shymaa Hassan"
+  useEffect(() => {
+    if (!authReady || !currentUser) return;
+    const isAuthorized = currentUser.role === "tl" || currentUser.role === "director";
+    if (!isAuthorized) return;
+
+    const runShaymaaMigration = async () => {
+      // Prevent running multiple times in the same session
+      if ((window as any).__shaymaa_migrated__) return;
+      (window as any).__shaymaa_migrated__ = true;
+
+      try {
+        console.log("[MIGRATION] Running one-time 'Shaymaa Hassan' -> 'Shymaa Hassan' correction...");
+        const { getDocs, query, collection, where, doc, updateDoc, getDoc, setDoc, deleteDoc, writeBatch } = await import("firebase/firestore");
+
+        // 1. Correct any user documents with name == "Shaymaa Hassan"
+        const qUsers = query(collection(db, "users"), where("name", "==", "Shaymaa Hassan"));
+        const snapshotUsers = await getDocs(qUsers);
+        for (const userDoc of snapshotUsers.docs) {
+          console.log(`[MIGRATION] Correcting user doc: ${userDoc.id}`);
+          await updateDoc(doc(db, "users", userDoc.id), { name: "Shymaa Hassan" }).catch(console.error);
+        }
+
+        // 2. Correct if a user document with ID "shaymaahassan" exists (copy to "shymaahassan" and delete old)
+        const oldUserRef = doc(db, "users", "shaymaahassan");
+        const oldUserSnap = await getDoc(oldUserRef);
+        if (oldUserSnap.exists()) {
+          console.log("[MIGRATION] Copying users/shaymaahassan to users/shymaahassan...");
+          const userData = oldUserSnap.data();
+          await setDoc(doc(db, "users", "shymaahassan"), {
+            ...userData,
+            name: "Shymaa Hassan"
+          }, { merge: true }).catch(console.error);
+          await deleteDoc(oldUserRef).catch(console.error);
+        }
+
+        // 3. Correct in "tl_login_logs" collection
+        const qLogs = query(collection(db, "tl_login_logs"), where("tlName", "==", "Shaymaa Hassan"));
+        const snapshotLogs = await getDocs(qLogs);
+        if (!snapshotLogs.empty) {
+          console.log(`[MIGRATION] Found ${snapshotLogs.size} logs with typo. Migrating...`);
+          const batch = writeBatch(db);
+          snapshotLogs.docs.forEach((ldoc) => {
+            batch.update(doc(db, "tl_login_logs", ldoc.id), { tlName: "Shymaa Hassan" });
+          });
+          await batch.commit().catch(console.error);
+        }
+
+        console.log("[MIGRATION] Finished database corrections successfully.");
+      } catch (err) {
+        console.error("[MIGRATION ERROR]", err);
+      }
+    };
+    runShaymaaMigration();
+  }, [authReady, currentUser]);
 
   // Moved agentDirectory up to fix usage before declaration
   const [agentDirectory, setAgentDirectory] = useState<AgentDirectoryRow[]>(
@@ -4859,6 +4941,7 @@ ${pageText}
       id: `usr_${correspondingFullName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}`,
       name: correspondingFullName,
       role: userRole,
+      lastLoginAt: new Date().toISOString(),
     };
 
     setCurrentUser(authenticatedUser);
@@ -4872,24 +4955,28 @@ ${pageText}
       const docId = `${getUsernameFromFullName(user.name)}_${today}`;
       const tlLogRef = doc(db, "tl_login_logs", docId);
 
-      const alreadyHasLog = tlLoginLogs.some((log: any) => log.id === docId);
-      if (!alreadyHasLog) {
-        await setDoc(
-          tlLogRef,
-          {
-            tlName: user.name,
-            username: getUsernameFromFullName(user.name),
-            date: today,
-            loggedInAt: new Date().toISOString(),
-            onlineStatus: "online",
-          },
-          { merge: true },
-        ); // using merge to be safe
-      } else {
-        // Update online status only, don't overwrite first login time
-        await updateDoc(tlLogRef, { onlineStatus: "online" }).catch((err) =>
-          console.error("Error updating online status:", err),
-        );
+      try {
+        const docSnap = await getDoc(tlLogRef);
+        if (!docSnap.exists()) {
+          await setDoc(
+            tlLogRef,
+            {
+              tlName: user.name,
+              username: getUsernameFromFullName(user.name),
+              date: today,
+              loggedInAt: new Date().toISOString(),
+              onlineStatus: "online",
+            },
+            { merge: true },
+          );
+        } else {
+          // Update online status only, don't overwrite first login time
+          await updateDoc(tlLogRef, { onlineStatus: "online" }).catch((err) =>
+            console.error("Error updating online status:", err),
+          );
+        }
+      } catch (err) {
+        console.error("Error capturing TL login status:", err);
       }
     };
     captureTLLoginTime(authenticatedUser);
@@ -5027,6 +5114,7 @@ ${pageText}
       id: `usr_${correspondingFullName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}`,
       name: correspondingFullName,
       role: userRole,
+      lastLoginAt: new Date().toISOString(),
     };
 
     setCurrentUser(authenticatedUser);
@@ -12690,7 +12778,7 @@ ${ttNotes}`
                               currentUser?.name?.toLowerCase() ===
                                 "amira hassan" ||
                               currentUser?.name?.toLowerCase() ===
-                                "shaymaa hassan"
+                                "shymaa hassan"
                             )
                               return true;
                             return (
@@ -27653,6 +27741,8 @@ ${ttNotes}`
                         TRIGGER_CURRENT_APP_VERSION={CURRENT_APP_VERSION}
                         deletedUsers={deletedUsers}
                         onDeleteSyntheticUser={handleDeleteSyntheticUser}
+                        isSuperAdmin={isSuperAdmin}
+                        auditLog={auditLog}
                       />
                     )}
 
