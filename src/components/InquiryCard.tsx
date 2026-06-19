@@ -1,16 +1,20 @@
 import React, { useState, useRef, useEffect } from "react";
-import { 
-  ChevronUp, 
-  ChevronDown, 
-  Copy, 
-  Send, 
-  Trash2, 
-  CheckCircle2, 
-  MessageSquare, 
-  Pencil 
+import {
+  ChevronUp,
+  ChevronDown,
+  Copy,
+  Send,
+  Trash2,
+  CheckCircle2,
+  MessageSquare,
+  Pencil,
 } from "lucide-react";
 import { Inquiry, User } from "../types";
-import { db, wrappedUpdateDoc as updateDoc, wrappedSetDoc as setDoc } from "../firebase";
+import {
+  db,
+  wrappedUpdateDoc as updateDoc,
+  wrappedSetDoc as setDoc,
+} from "../firebase";
 import { doc } from "firebase/firestore";
 import { toast } from "sonner";
 import { CopyWrap } from "./CopyWrap";
@@ -46,7 +50,7 @@ interface InquiryCardProps {
     targetAgent: string,
     payload?: any,
     actionType?: string,
-    actionId?: string
+    actionId?: string,
   ) => void;
 
   // Answering & Answering Dialog States (Optional with local fallback)
@@ -110,14 +114,22 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
   setInquiries,
 }) => {
   // Local fallback states if the parent doesn't provide them (e.g. in GlobalDashboard)
-  const [localAnsweringInquiryId, setLocalAnsweringInquiryId] = useState<string | null>(null);
+  const [localAnsweringInquiryId, setLocalAnsweringInquiryId] = useState<
+    string | null
+  >(null);
   const [localAnswerText, setLocalAnswerText] = useState("");
-  const [localAnswerAttachments, setLocalAnswerAttachments] = useState<any[]>([]);
+  const [localAnswerAttachments, setLocalAnswerAttachments] = useState<any[]>(
+    [],
+  );
   const [localAnswerLinks, setLocalAnswerLinks] = useState<string[]>([]);
 
-  const [localPatientName, setLocalPatientName] = useState(inq.patientName || '');
-  const [localFileId, setLocalFileId] = useState(inq.fileId || inq.fileNumber || '');
-  const [localPatientId, setLocalPatientId] = useState(inq.patientId || '');
+  const [localPatientName, setLocalPatientName] = useState(
+    inq.patientName || "",
+  );
+  const [localFileId, setLocalFileId] = useState(
+    inq.fileId || inq.fileNumber || "",
+  );
+  const [localPatientId, setLocalPatientId] = useState(inq.patientId || "");
   const saveDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -127,27 +139,66 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
   }, []);
 
   // Resolve active states
-  const activeAnsweringId = answeringInquiryId !== undefined ? answeringInquiryId : localAnsweringInquiryId;
+  const activeAnsweringId =
+    answeringInquiryId !== undefined
+      ? answeringInquiryId
+      : localAnsweringInquiryId;
   const setAnsweringId = setAnsweringInquiryId || setLocalAnsweringInquiryId;
 
-  const answerText = currentAnswerText !== undefined ? currentAnswerText : localAnswerText;
+  const answerText =
+    currentAnswerText !== undefined ? currentAnswerText : localAnswerText;
   const setAnswerText = setCurrentAnswerText || setLocalAnswerText;
 
-  const answerAttachments = currentAnswerAttachments !== undefined ? currentAnswerAttachments : localAnswerAttachments;
-  const setAnswerAttachments = setCurrentAnswerAttachments || setLocalAnswerAttachments;
+  const answerAttachments =
+    currentAnswerAttachments !== undefined
+      ? currentAnswerAttachments
+      : localAnswerAttachments;
+  const setAnswerAttachments =
+    setCurrentAnswerAttachments || setLocalAnswerAttachments;
 
-  const answerLinks = currentAnswerLinks !== undefined ? currentAnswerLinks : localAnswerLinks;
+  const answerLinks =
+    currentAnswerLinks !== undefined ? currentAnswerLinks : localAnswerLinks;
   const setAnswerLinks = setCurrentAnswerLinks || setLocalAnswerLinks;
 
-  const isSubmitting = isSubmittingAnswer !== undefined ? isSubmittingAnswer : false;
+  const isSubmitting =
+    isSubmittingAnswer !== undefined ? isSubmittingAnswer : false;
 
-  const STATUS_CONFIG: Record<string, { color: string; label: string; emoji: string }> = {
-    submitted: { color: "bg-yellow-500/10 border-yellow-500/20 text-yellow-400 animate-pulse", label: "New", emoji: "🆕" },
-    tl_reviewing: { color: "bg-blue-500/10 border-blue-500/20 text-blue-400", label: "TL Reviewing", emoji: "👀" },
-    sent_to_clinic: { color: "bg-orange-500/10 border-orange-500/20 text-orange-400 animate-pulse", label: "Sent to Clinic", emoji: "📤" },
-    answered: { color: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400", label: "Answered", emoji: "✅" },
-    closed: { color: "bg-slate-700/40 border-slate-600/40 text-slate-400", label: "Closed", emoji: "🔒" },
-    sent: { color: "bg-orange-500/10 border-orange-500/20 text-orange-400", label: "Sent to Client", emoji: "📤" }, // legacy fallback
+  const STATUS_CONFIG: Record<
+    string,
+    { color: string; label: string; emoji: string }
+  > = {
+    submitted: {
+      color:
+        "bg-yellow-500/10 border-yellow-500/20 text-yellow-400 animate-pulse",
+      label: "New",
+      emoji: "🆕",
+    },
+    tl_reviewing: {
+      color: "bg-blue-500/10 border-blue-500/20 text-blue-400",
+      label: "TL Reviewing",
+      emoji: "👀",
+    },
+    sent_to_clinic: {
+      color:
+        "bg-orange-500/10 border-orange-500/20 text-orange-400 animate-pulse",
+      label: "Sent to Clinic",
+      emoji: "📤",
+    },
+    answered: {
+      color: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
+      label: "Answered",
+      emoji: "✅",
+    },
+    closed: {
+      color: "bg-slate-700/40 border-slate-600/40 text-slate-400",
+      label: "Closed",
+      emoji: "🔒",
+    },
+    sent: {
+      color: "bg-orange-500/10 border-orange-500/20 text-orange-400",
+      label: "Sent to Client",
+      emoji: "📤",
+    }, // legacy fallback
   };
 
   const statusConfig = STATUS_CONFIG[inq.status] || STATUS_CONFIG.submitted;
@@ -174,12 +225,15 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
   };
 
   const generateClinicTemplateLocal = (inqData: Inquiry): string => {
-    const ref = inqData.caseRef || `INQ-${inqData.id.substring(0, 8).toUpperCase()}`;
+    const ref =
+      inqData.caseRef || `INQ-${inqData.id.substring(0, 8).toUpperCase()}`;
     const pName = inqData.patientName || "N/A";
     const fId = inqData.fileId || inqData.fileNumber || "N/A";
     const pId = inqData.patientId || "N/A";
-    const pPhone = inqData.phoneNumber ? formatPhoneForCopy(inqData.phoneNumber) : "N/A";
-    
+    const pPhone = inqData.phoneNumber
+      ? formatPhoneForCopy(inqData.phoneNumber)
+      : "N/A";
+
     return [
       `📋 *CLINICAL INQUIRY TEMPLATE*`,
       `-----------------------------------`,
@@ -194,7 +248,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
       `-----------------------------------`,
       `🧑‍💼 *Agent:* ${inqData.agentName}`,
       `📅 *Date:* ${inqData.createdAt ? new Date(inqData.createdAt).toLocaleString() : "N/A"}`,
-    ].join('\n');
+    ].join("\n");
   };
 
   const STATUS_BORDER_COLORS: Record<string, string> = {
@@ -203,15 +257,18 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
     sent_to_clinic: "border-l-orange-500",
     answered: "border-l-emerald-500",
     closed: "border-l-slate-600",
-    sent: "border-l-orange-500"
+    sent: "border-l-orange-500",
   };
-  const borderLeftColor = STATUS_BORDER_COLORS[inq.status] || "border-l-slate-700";
+  const borderLeftColor =
+    STATUS_BORDER_COLORS[inq.status] || "border-l-slate-700";
 
   return (
     <div
       id={`inquiry-${inq.id}`}
       className={`p-5 bg-[#1f222a] border-none rounded-[24px] hover:bg-[#282c35] transition-all duration-300 relative flex flex-col w-full overflow-hidden shadow-sm ${
-        isExpanded ? "shadow-md ring-1 ring-emerald-500/10 space-y-4" : "cursor-pointer hover:shadow-md"
+        isExpanded
+          ? "shadow-md ring-1 ring-emerald-500/10 space-y-4"
+          : "cursor-pointer hover:shadow-md"
       }`}
       onClick={() => {
         if (!isExpanded) {
@@ -222,10 +279,12 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
         }
       }}
     >
-      <div className={`absolute top-0 bottom-0 left-0 w-[5px] ${borderLeftColor.replace('border-l-', 'bg-')}`} />
-      
+      <div
+        className={`absolute top-0 bottom-0 left-0 w-[5px] ${borderLeftColor.replace("border-l-", "bg-")}`}
+      />
+
       {/* Unexpanded / Header State */}
-      <div 
+      <div
         className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full ${isExpanded ? "border-b border-white/5 pb-3 cursor-pointer hover:opacity-80" : ""}`}
         onClick={(e) => {
           if (isExpanded) {
@@ -260,10 +319,14 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
 
           {/* Row 2: Patient Name, Clinic, Phone */}
           <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-300 flex-wrap">
-            {inq.patientName && <span className="font-bold">{inq.patientName}</span>}
-            {inq.clinicName && <span>• {getClinicLabelText(inq.clinicName)}</span>}
+            {inq.patientName && (
+              <span className="font-bold">{inq.patientName}</span>
+            )}
+            {inq.clinicName && (
+              <span>• {getClinicLabelText(inq.clinicName)}</span>
+            )}
             {inq.phoneNumber && <span>• {inq.phoneNumber}</span>}
-            
+
             {inq.platform && (
               <span className="text-[10px] bg-white/5 text-slate-300 px-2 py-0.5 border border-white/10 rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-2">
                 🌐 {inq.platform}
@@ -272,7 +335,9 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
             {inq.customerType && (
               <span
                 className={`text-[10px] px-2 py-0.5 border rounded font-sans font-bold flex items-center gap-1 shrink-0 ${
-                  inq.customerType === "new" ? "bg-teal-500/10 text-teal-300 border-teal-500/20" : "bg-purple-500/10 text-purple-300 border-purple-500/20"
+                  inq.customerType === "new"
+                    ? "bg-teal-500/10 text-teal-300 border-teal-500/20"
+                    : "bg-purple-500/10 text-purple-300 border-purple-500/20"
                 }`}
               >
                 {inq.customerType === "new" ? "🆕 New" : "📂 Old"}
@@ -298,18 +363,22 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
             onClick={(e) => {
               e.stopPropagation();
               const text = generateInquiryCopyText(inq);
-              copyToClipboard(text, 'Inquiry details copied!');
+              copyToClipboard(text, "Inquiry details copied!");
             }}
             className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer hidden sm:flex"
             title="Copy Details"
           >
             <Copy className="w-3 h-3" /> Copy
           </button>
-          <span className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg uppercase tracking-wider shrink-0 ${statusColor}`}>
+          <span
+            className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg uppercase tracking-wider shrink-0 ${statusColor}`}
+          >
             {statusText}
           </span>
           {inq.status !== "answered" && (
-            <span className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 ${ageBadgeColor}`}>
+            <span
+              className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 ${ageBadgeColor}`}
+            >
               ⏱ {ageLabel}
             </span>
           )}
@@ -326,7 +395,11 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
             </button>
           )}
           <div className="text-slate-400 hover:text-indigo-400 p-1 rounded-md transition-all shrink-0 ml-1 flex items-center justify-center">
-            {isExpanded ? <ChevronUp className="w-4.5 h-4.5 text-indigo-400" /> : <ChevronDown className="w-4.5 h-4.5 text-slate-400" />}
+            {isExpanded ? (
+              <ChevronUp className="w-4.5 h-4.5 text-indigo-400" />
+            ) : (
+              <ChevronDown className="w-4.5 h-4.5 text-slate-400" />
+            )}
           </div>
         </div>
       </div>
@@ -358,10 +431,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
               <div className="flex flex-wrap bg-slate-900/50 p-1 rounded-lg gap-1 border border-white/5 mt-3 w-max">
                 <button
                   onClick={() =>
-                    handleUpdateContactedStatus(
-                      inq.id,
-                      "not_contacted",
-                    )
+                    handleUpdateContactedStatus(inq.id, "not_contacted")
                   }
                   className={`text-[10px] px-2 py-1 rounded transition-colors ${!inq.customerContacted || inq.customerContacted === "not_contacted" ? "bg-rose-500/20 text-rose-300 font-bold" : "text-slate-400 hover:bg-white/5"}`}
                 >
@@ -369,10 +439,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                 </button>
                 <button
                   onClick={() =>
-                    handleUpdateContactedStatus(
-                      inq.id,
-                      "attempted",
-                    )
+                    handleUpdateContactedStatus(inq.id, "attempted")
                   }
                   className={`text-[10px] px-2 py-1 rounded transition-colors ${inq.customerContacted === "attempted" ? "bg-amber-500/20 text-amber-300 font-bold" : "text-slate-400 hover:bg-white/5"}`}
                 >
@@ -380,10 +447,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                 </button>
                 <button
                   onClick={() =>
-                    handleUpdateContactedStatus(
-                      inq.id,
-                      "contacted",
-                    )
+                    handleUpdateContactedStatus(inq.id, "contacted")
                   }
                   className={`text-[10px] px-2 py-1 rounded transition-colors ${inq.customerContacted === "contacted" ? "bg-emerald-500/20 text-emerald-300 font-bold" : "text-slate-400 hover:bg-white/5"}`}
                 >
@@ -397,7 +461,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
           <div className="pt-2 border-t border-white/5 space-y-3">
             {/* Default action stage button rows */}
             <div className="flex flex-wrap gap-2 items-center">
-              {inq.status === 'submitted' && handleMarkInquiryRead && (
+              {inq.status === "submitted" && handleMarkInquiryRead && (
                 <button
                   onClick={() => handleMarkInquiryRead(inq.id)}
                   className="px-3.5 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/25 text-blue-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 font-sans"
@@ -406,22 +470,28 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                 </button>
               )}
 
-              {(inq.status === 'tl_reviewing' || inq.status === 'submitted') && handleMarkSentToClinic && (
-                <button
-                  onClick={() => handleMarkSentToClinic(inq.id)}
-                  className="px-3.5 py-1.5 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/25 text-orange-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 font-sans"
-                >
-                  <Send className="w-3.5 h-3.5" /> 📤 Sent to Clinic (Copy)
-                </button>
-              )}
+              {(inq.status === "tl_reviewing" || inq.status === "submitted") &&
+                handleMarkSentToClinic && (
+                  <button
+                    onClick={() => handleMarkSentToClinic(inq.id)}
+                    className="px-3.5 py-1.5 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/25 text-orange-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 font-sans"
+                  >
+                    <Send className="w-3.5 h-3.5" /> 📤 Sent to Clinic (Copy)
+                  </button>
+                )}
 
-              {(inq.status === 'sent_to_clinic' || inq.status === 'sent') && (
+              {(inq.status === "sent_to_clinic" || inq.status === "sent") && (
                 <>
                   <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-orange-400 uppercase">
                     <Send className="w-3.5 h-3.5 animate-pulse" />
                     <span>
-                      Sent by {inq.sentBy || "Unknown"} on {inq.sentAt ? new Date(inq.sentAt).toLocaleString() : "Unknown"}
-                      {inq.sentToClinicCount && inq.sentToClinicCount > 1 ? ` (Follow-up #${inq.sentToClinicCount})` : ''}
+                      Sent by {inq.sentBy || "Unknown"} on{" "}
+                      {inq.sentAt
+                        ? new Date(inq.sentAt).toLocaleString()
+                        : "Unknown"}
+                      {inq.sentToClinicCount && inq.sentToClinicCount > 1
+                        ? ` (Follow-up #${inq.sentToClinicCount})`
+                        : ""}
                     </span>
                   </div>
                   {handleMarkSentToClinic && (
@@ -436,19 +506,64 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                 </>
               )}
 
-              {(inq.status === 'sent_to_clinic' || inq.status === 'sent' || inq.status === 'tl_reviewing') && (
-                <button
-                  onClick={() => { 
-                    setAnsweringId(inq.id); 
-                    setAnswerText(inq.answer || ''); 
-                  }}
-                  className="px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 text-emerald-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 font-sans"
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Paste Clinic's Answer
-                </button>
+              {/* Reply trigger logic */}
+              {inq.status !== "closed" && (
+                <>
+                  {/* Show "Paste Clinic's Answer" only for TL/Support in reviewing/clinic states */}
+                  {isTLOreSupport &&
+                    (inq.status === "sent_to_clinic" ||
+                      inq.status === "sent" ||
+                      inq.status === "tl_reviewing") && (
+                      <button
+                        onClick={() => {
+                          setAnsweringId(inq.id);
+                          setAnswerText(inq.answer || "");
+                        }}
+                        className="px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 text-emerald-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 font-sans"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Paste Clinic's
+                        Answer
+                      </button>
+                    )}
+
+                  {/* Show "Reply to Answer" for Submitter Agent when inquiry is answered */}
+                  {!isTLOreSupport &&
+                    inq.agentName?.toLowerCase() ===
+                      currentUser?.name?.toLowerCase() &&
+                    inq.status === "answered" && (
+                      <button
+                        onClick={() => {
+                          setAnsweringId(inq.id);
+                          setAnswerText("");
+                        }}
+                        className="px-3.5 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/25 text-indigo-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 font-sans"
+                      >
+                        💬 Reply to Answer
+                      </button>
+                    )}
+
+                  {/* Show general reply option when status isn't matched above but thread is active */}
+                  {((isTLOreSupport && inq.status === "answered") ||
+                    (!isTLOreSupport &&
+                      inq.agentName?.toLowerCase() ===
+                        currentUser?.name?.toLowerCase() &&
+                      (inq.status === "sent_to_clinic" ||
+                        inq.status === "sent" ||
+                        inq.status === "tl_reviewing"))) && (
+                    <button
+                      onClick={() => {
+                        setAnsweringId(inq.id);
+                        setAnswerText("");
+                      }}
+                      className="px-3.5 py-1.5 bg-slate-700/40 hover:bg-slate-700/60 border border-slate-600/40 text-slate-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 font-sans"
+                    >
+                      💬 Send Additional Reply
+                    </button>
+                  )}
+                </>
               )}
 
-              {inq.status === 'answered' && handleCloseInquiry && (
+              {inq.status === "answered" && handleCloseInquiry && (
                 <button
                   onClick={() => handleCloseInquiry(inq.id)}
                   className="px-3.5 py-1.5 bg-slate-700/40 hover:bg-slate-700/60 border border-slate-600/40 text-slate-300 text-[11px] font-bold rounded-lg cursor-pointer transition-all flex items-center gap-1.5 active:scale-95 font-sans"
@@ -457,24 +572,23 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                 </button>
               )}
 
-              {inq.status === 'closed' && (
+              {inq.status === "closed" && (
                 <span className="text-[10px] text-slate-500 font-mono">
-                  🔒 Closed by {inq.closedBy} on {new Date(inq.closedAt || '').toLocaleString()}
+                  🔒 Closed by {inq.closedBy} on{" "}
+                  {new Date(inq.closedAt || "").toLocaleString()}
                 </span>
               )}
             </div>
 
             <div className="relative">
-              <InquiryRepliesViewer
-                inquiry={inq}
-              />
-              {inq.status === "answered" && (
+              <InquiryRepliesViewer inquiry={inq} />
+              {inq.status === "answered" && isTLOreSupport && (
                 <button
                   onClick={() => {
                     setAnsweringId(inq.id);
                     setAnswerText(inq.answer || "");
                   }}
-                  className="mt-2 text-[10px] text-indigo-400 hover:text-indigo-300 font-bold block"
+                  className="mt-2 text-[10px] text-indigo-400 hover:text-indigo-300 font-bold block pb-1 cursor-pointer"
                 >
                   Reply Again / Edit
                 </button>
@@ -490,10 +604,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                 <select
                   value={inq.agentName}
                   onChange={(e) =>
-                    handleReassignInquiry(
-                      inq.id,
-                      e.target.value,
-                    )
+                    handleReassignInquiry(inq.id, e.target.value)
                   }
                   className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-2.5 py-1 text-[11px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                 >
@@ -562,7 +673,9 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                   ) : (
                     <button
                       onClick={async () => {
-                        toast.error("Answering from this dashboard is read-only.");
+                        toast.error(
+                          "Answering from this dashboard is read-only.",
+                        );
                       }}
                       className="w-full py-2 bg-slate-700/50 text-slate-400 font-bold text-xs rounded-lg cursor-not-allowed"
                     >
@@ -589,7 +702,11 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                 className="px-3 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-lg text-emerald-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 title={`Edit Inquiry (${getRemainingEditTime ? getRemainingEditTime(inq.createdAt) : ""})`}
               >
-                <Pencil className="w-3.5 h-3.5" /> Edit ({getRemainingEditTime ? getRemainingEditTime(inq.createdAt) : ""})
+                <Pencil className="w-3.5 h-3.5" /> Edit (
+                {getRemainingEditTime
+                  ? getRemainingEditTime(inq.createdAt)
+                  : ""}
+                )
               </button>
             </div>
           )}

@@ -17,7 +17,19 @@ import { ComplaintCard } from "./components/ComplaintCard";
 import * as mammoth from "mammoth";
 import React, { useState, useEffect, FormEvent, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart as RechartsPieChart, Pie, Legend } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+  PieChart as RechartsPieChart,
+  Pie,
+  Legend,
+} from "recharts";
 import {
   doc,
   collection,
@@ -411,7 +423,13 @@ const getClinicBadgeColor = (clinic: string) => {
   return "bg-white/5 text-slate-300 border-white/10";
 };
 
-const CoolLogo = ({ className = "w-48 h-48", showText = true }: { className?: string; showText?: boolean }) => {
+const CoolLogo = ({
+  className = "w-48 h-48",
+  showText = true,
+}: {
+  className?: string;
+  showText?: boolean;
+}) => {
   return (
     <svg
       viewBox={showText ? "0 0 100 120" : "0 0 100 100"}
@@ -464,8 +482,20 @@ const CoolLogo = ({ className = "w-48 h-48", showText = true }: { className?: st
       `}</style>
 
       {/* Decorative ambient background slow pulse glow */}
-      <circle cx="50" cy="50" r="35" fill="rgba(0, 245, 255, 0.04)" filter="blur(15px)" />
-      <circle cx="50" cy="50" r="25" fill="rgba(255, 0, 255, 0.04)" filter="blur(10px)" />
+      <circle
+        cx="50"
+        cy="50"
+        r="35"
+        fill="rgba(0, 245, 255, 0.04)"
+        filter="blur(15px)"
+      />
+      <circle
+        cx="50"
+        cy="50"
+        r="25"
+        fill="rgba(255, 0, 255, 0.04)"
+        filter="blur(10px)"
+      />
 
       <defs>
         <linearGradient id="lightning-cyan" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -473,7 +503,13 @@ const CoolLogo = ({ className = "w-48 h-48", showText = true }: { className?: st
           <stop offset="50%" stopColor="#ffffff" stopOpacity="1" />
           <stop offset="100%" stopColor="#00f5ff" stopOpacity="0" />
         </linearGradient>
-        <linearGradient id="lightning-magenta" x1="0%" y1="0%" x2="100%" y2="0%">
+        <linearGradient
+          id="lightning-magenta"
+          x1="0%"
+          y1="0%"
+          x2="100%"
+          y2="0%"
+        >
           <stop offset="0%" stopColor="#ff00ff" stopOpacity="0" />
           <stop offset="50%" stopColor="#ffffff" stopOpacity="1" />
           <stop offset="100%" stopColor="#ff00ff" stopOpacity="0" />
@@ -483,22 +519,24 @@ const CoolLogo = ({ className = "w-48 h-48", showText = true }: { className?: st
       {/* DNA Helix Horizontal Flow */}
       <g transform="translate(0, 5)">
         {/* Central connecting backbone link */}
-        <line 
-          x1="15" y1="45" 
-          x2="85" y2="45" 
-          stroke="rgba(0, 245, 255, 0.15)" 
-          strokeWidth="1" 
+        <line
+          x1="15"
+          y1="45"
+          x2="85"
+          y2="45"
+          stroke="rgba(0, 245, 255, 0.15)"
+          strokeWidth="1"
           style={{ animation: "central-glow 3s ease-in-out infinite" }}
         />
 
         {/* Outer track reference guides */}
-        <path 
+        <path
           d="M 15,45 Q 22,25 29,45 T 43,45 T 57,45 T 71,45 T 85,45"
           fill="none"
           stroke="rgba(0, 245, 255, 0.1)"
           strokeWidth="1"
         />
-        <path 
+        <path
           d="M 15,45 Q 22,65 29,45 T 43,45 T 57,45 T 71,45 T 85,45"
           fill="none"
           stroke="rgba(255, 0, 255, 0.1)"
@@ -506,28 +544,30 @@ const CoolLogo = ({ className = "w-48 h-48", showText = true }: { className?: st
         />
 
         {/* Syncing horizontal lightning sparks traversing paths in opposite directions */}
-        <path 
+        <path
           d="M 15,45 Q 22,25 29,45 T 43,45 T 57,45 T 71,45 T 85,45"
           fill="none"
           stroke="url(#lightning-cyan)"
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeDasharray="20 180"
-          style={{ 
-            animation: "sync-pulse-cyan 4.5s linear infinite", 
-            filter: "drop-shadow(0 0 4px #00f5ff) drop-shadow(0 0 1.5px #ffffff)" 
+          style={{
+            animation: "sync-pulse-cyan 4.5s linear infinite",
+            filter:
+              "drop-shadow(0 0 4px #00f5ff) drop-shadow(0 0 1.5px #ffffff)",
           }}
         />
-        <path 
+        <path
           d="M 15,45 Q 22,65 29,45 T 43,45 T 57,45 T 71,45 T 85,45"
           fill="none"
           stroke="url(#lightning-magenta)"
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeDasharray="20 180"
-          style={{ 
-            animation: "sync-pulse-magenta 4.5s linear infinite", 
-            filter: "drop-shadow(0 0 4px #ff00ff) drop-shadow(0 0 1.5px #ffffff)" 
+          style={{
+            animation: "sync-pulse-magenta 4.5s linear infinite",
+            filter:
+              "drop-shadow(0 0 4px #ff00ff) drop-shadow(0 0 1.5px #ffffff)",
           }}
         />
 
@@ -535,32 +575,42 @@ const CoolLogo = ({ className = "w-48 h-48", showText = true }: { className?: st
           const x = 15 + i * 14;
           const delay = -i * 0.6;
           return (
-            <g 
-              key={i} 
-              style={{ 
-                transformOrigin: `${x}px 45px`, 
-                animation: `dna-rotate 6s linear infinite ${delay}s` 
+            <g
+              key={i}
+              style={{
+                transformOrigin: `${x}px 45px`,
+                animation: `dna-rotate 6s linear infinite ${delay}s`,
               }}
             >
               {/* Vertical rung connecting the two strands */}
-              <line 
-                x1={x} y1="25" 
-                x2={x} y2="65" 
-                stroke="rgba(255, 255, 255, 0.15)" 
-                strokeWidth="1.5" 
-                style={{ filter: "drop-shadow(0 0 2px rgba(255,255,255,0.2))" }} 
+              <line
+                x1={x}
+                y1="25"
+                x2={x}
+                y2="65"
+                stroke="rgba(255, 255, 255, 0.15)"
+                strokeWidth="1.5"
+                style={{ filter: "drop-shadow(0 0 2px rgba(255,255,255,0.2))" }}
               />
               {/* Outer Cyan Node */}
-              <circle 
-                cx={x} cy="25" 
-                r="4.5" fill="#00f5ff" 
-                style={{ animation: `particle-glow-cyan 5s ease-in-out infinite ${delay}s` }} 
+              <circle
+                cx={x}
+                cy="25"
+                r="4.5"
+                fill="#00f5ff"
+                style={{
+                  animation: `particle-glow-cyan 5s ease-in-out infinite ${delay}s`,
+                }}
               />
               {/* Outer Magenta Node */}
-              <circle 
-                cx={x} cy="65" 
-                r="4.5" fill="#ff00ff" 
-                style={{ animation: `particle-glow-magenta 5s ease-in-out infinite ${delay + 2.5}s` }} 
+              <circle
+                cx={x}
+                cy="65"
+                r="4.5"
+                fill="#ff00ff"
+                style={{
+                  animation: `particle-glow-magenta 5s ease-in-out infinite ${delay + 2.5}s`,
+                }}
               />
             </g>
           );
@@ -569,7 +619,9 @@ const CoolLogo = ({ className = "w-48 h-48", showText = true }: { className?: st
 
       {/* Overlay Text "SYNQ" */}
       {showText && (
-        <text x="53" y="108" className="synq-text-futuristic">SYNQ</text>
+        <text x="53" y="108" className="synq-text-futuristic">
+          SYNQ
+        </text>
       )}
     </svg>
   );
@@ -638,15 +690,15 @@ const isNotificationForUser = (
   ttrs: any[],
   comps: any[],
   comms: any[],
-  isTLOreSupport: boolean
+  isTLOreSupport: boolean,
 ) => {
   if (!user) return false;
 
-  const isTlOrAdmin = 
-    user.role === "tl" || 
-    user.role === "qa" || 
-    user.role === "admin" || 
-    user.role === "super_admin" || 
+  const isTlOrAdmin =
+    user.role === "tl" ||
+    user.role === "qa" ||
+    user.role === "admin" ||
+    user.role === "super_admin" ||
     user.role === "director" ||
     isTLOreSupport;
 
@@ -658,13 +710,12 @@ const isNotificationForUser = (
   const cleanedUser = userLower.replace(/[^a-zA-Z0-9]/g, "");
 
   // 1. Is it explicitly targeted to this agent?
-  const isTargetedToMe = 
+  const isTargetedToMe =
     (notif.targetAgent && notif.targetAgent.toLowerCase() === userLower) ||
-    (notif.targetGroups && (
-      notif.targetGroups.includes(user.id) ||
-      notif.targetGroups.includes(`usr_${cleanedUser}`) ||
-      notif.targetGroups.includes(`usr_${userLower}`)
-    ));
+    (notif.targetGroups &&
+      (notif.targetGroups.includes(user.id) ||
+        notif.targetGroups.includes(`usr_${cleanedUser}`) ||
+        notif.targetGroups.includes(`usr_${userLower}`)));
 
   if (isTargetedToMe) {
     return true;
@@ -675,7 +726,9 @@ const isNotificationForUser = (
     if (notif.entityType && notif.entityId) {
       if (notif.entityType === "inquiry") {
         const item = inqs.find((i) => i.id === notif.entityId);
-        return item ? (item.agentName || "").toLowerCase() === userLower : false;
+        return item
+          ? (item.agentName || "").toLowerCase() === userLower
+          : false;
       }
       if (notif.entityType === "scheduling_request") {
         const item = reqs.find((r) => r.id === notif.entityId);
@@ -693,7 +746,9 @@ const isNotificationForUser = (
       }
       if (notif.entityType === "tt_complaint") {
         const item = comps.find((c) => c.id === notif.entityId);
-        return item ? (item.agentName || "").toLowerCase() === userLower : false;
+        return item
+          ? (item.agentName || "").toLowerCase() === userLower
+          : false;
       }
       if (notif.entityType === "client_comm") {
         const item = comms.find((c) => c.id === notif.entityId);
@@ -1027,8 +1082,12 @@ export default function App() {
         }
 
         const [egyptRes, uaeRes] = await Promise.all([
-          fetch("https://api.open-meteo.com/v1/forecast?latitude=30.30&longitude=31.75&current_weather=true"),
-          fetch("https://api.open-meteo.com/v1/forecast?latitude=25.2048&longitude=55.2708&current_weather=true")
+          fetch(
+            "https://api.open-meteo.com/v1/forecast?latitude=30.30&longitude=31.75&current_weather=true",
+          ),
+          fetch(
+            "https://api.open-meteo.com/v1/forecast?latitude=25.2048&longitude=55.2708&current_weather=true",
+          ),
         ]);
 
         const egyptData = await egyptRes.json();
@@ -1061,7 +1120,7 @@ export default function App() {
             ramadanWeatherCode: rCode,
             uaeTemp: uTemp,
             uaeWeatherCode: uCode,
-          })
+          }),
         );
       } catch (e) {
         // Fallbacks
@@ -1995,11 +2054,21 @@ export default function App() {
   const tabbyTamaraComplaintsRef = React.useRef(tabbyTamaraComplaints);
   const clientCommsRef = React.useRef(clientComms);
 
-  useEffect(() => { inquiriesRef.current = inquiries; }, [inquiries]);
-  useEffect(() => { requestsRef.current = requests; }, [requests]);
-  useEffect(() => { tabbyTamaraRequestsRef.current = tabbyTamaraRequests; }, [tabbyTamaraRequests]);
-  useEffect(() => { tabbyTamaraComplaintsRef.current = tabbyTamaraComplaints; }, [tabbyTamaraComplaints]);
-  useEffect(() => { clientCommsRef.current = clientComms; }, [clientComms]);
+  useEffect(() => {
+    inquiriesRef.current = inquiries;
+  }, [inquiries]);
+  useEffect(() => {
+    requestsRef.current = requests;
+  }, [requests]);
+  useEffect(() => {
+    tabbyTamaraRequestsRef.current = tabbyTamaraRequests;
+  }, [tabbyTamaraRequests]);
+  useEffect(() => {
+    tabbyTamaraComplaintsRef.current = tabbyTamaraComplaints;
+  }, [tabbyTamaraComplaints]);
+  useEffect(() => {
+    clientCommsRef.current = clientComms;
+  }, [clientComms]);
 
   // Auto-logout after 60 minutes of inactivity
   useEffect(() => {
@@ -2012,7 +2081,9 @@ export default function App() {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         // Log out the user
-        const isTL = currentUser?.role === "tl" || (currentUser?.name && isTLName(currentUser.name));
+        const isTL =
+          currentUser?.role === "tl" ||
+          (currentUser?.name && isTLName(currentUser.name));
         if (isTL) {
           const today = new Date().toISOString().split("T")[0];
           const docId = `${getUsernameFromFullName(currentUser.name)}_${today}`;
@@ -2055,7 +2126,9 @@ export default function App() {
 
   useEffect(() => {
     if (!currentUser) return;
-    const isTL = currentUser.role === "tl" || (currentUser.name && isTLName(currentUser.name));
+    const isTL =
+      currentUser.role === "tl" ||
+      (currentUser.name && isTLName(currentUser.name));
     if (!isTL) return;
     const markOffline = () => {
       const today = new Date().toISOString().split("T")[0];
@@ -2460,8 +2533,13 @@ export default function App() {
 
     const sortedList = Array.from(uniqueNames)
       .filter((name) => {
-        const uname = getUsernameFromFullName ? getUsernameFromFullName(name) : name.toLowerCase().replace(/[^a-z0-9]/g, "");
-        return !deletedUsers.includes(uname) && !deletedUsers.includes(name.toLowerCase());
+        const uname = getUsernameFromFullName
+          ? getUsernameFromFullName(name)
+          : name.toLowerCase().replace(/[^a-z0-9]/g, "");
+        return (
+          !deletedUsers.includes(uname) &&
+          !deletedUsers.includes(name.toLowerCase())
+        );
       })
       .sort();
     setAgentsList(sortedList);
@@ -2796,7 +2874,7 @@ export default function App() {
         tabbyTamaraRequests,
         tabbyTamaraComplaints,
         clientComms,
-        isTLOreSupport
+        isTLOreSupport,
       );
     })
     .filter(
@@ -3424,7 +3502,9 @@ ${pageText}
   // Automatically capture TL login logs on startup, refresh, or whenever a TL user session is active/restored
   useEffect(() => {
     if (!currentUser) return;
-    const isTL = currentUser.role === "tl" || (currentUser.name && isTLName(currentUser.name));
+    const isTL =
+      currentUser.role === "tl" ||
+      (currentUser.name && isTLName(currentUser.name));
     if (!isTL) return;
 
     const recordTodayLogin = async () => {
@@ -3435,13 +3515,17 @@ ${pageText}
       try {
         const docSnap = await getDoc(tlLogRef);
         if (!docSnap.exists()) {
-          await setDoc(tlLogRef, {
-            tlName: currentUser.name,
-            username: getUsernameFromFullName(currentUser.name),
-            date: today,
-            loggedInAt: new Date().toISOString(),
-            onlineStatus: "online",
-          }, { merge: true });
+          await setDoc(
+            tlLogRef,
+            {
+              tlName: currentUser.name,
+              username: getUsernameFromFullName(currentUser.name),
+              date: today,
+              loggedInAt: new Date().toISOString(),
+              onlineStatus: "online",
+            },
+            { merge: true },
+          );
         } else {
           await updateDoc(tlLogRef, {
             onlineStatus: "online",
@@ -3496,8 +3580,13 @@ ${pageText}
   const [ramadanWeatherCode, setRamadanWeatherCode] = useState<number>(0);
   const [uaeTemp, setUaeTemp] = useState<number | null>(null);
   const [uaeWeatherCode, setUaeWeatherCode] = useState<number>(0);
-  const [selectedWeatherLoc, setSelectedWeatherLoc] = useState<"both" | "egypt" | "uae">(() => {
-    return getStorageItem<"both" | "egypt" | "uae">("sched_weather_location_pref", "both");
+  const [selectedWeatherLoc, setSelectedWeatherLoc] = useState<
+    "both" | "egypt" | "uae"
+  >(() => {
+    return getStorageItem<"both" | "egypt" | "uae">(
+      "sched_weather_location_pref",
+      "both",
+    );
   });
 
   // Tabby/Tamara form inputs
@@ -3634,7 +3723,9 @@ ${pageText}
   // Headcount / Directory Editing & Multi-select States
   const [selectedAgentIds, setSelectedAgentIds] = useState<string[]>([]);
   const [editingAgentId, setEditingAgentId] = useState<string | null>(null);
-  const [editAgentFields, setEditAgentFields] = useState<Record<string, string>>({});
+  const [editAgentFields, setEditAgentFields] = useState<
+    Record<string, string>
+  >({});
   const [bulkEditField, setBulkEditField] = useState<string>("Team Leader");
   const [bulkEditVal, setBulkEditVal] = useState<string>("");
 
@@ -3861,7 +3952,9 @@ ${pageText}
     "my",
   );
   const [inquiryStatusFilter, setInquiryStatusFilter] = useState("");
-  const [inquiryClinicsFilter, setInquiryClinicsFilter] = useState<string[]>([]);
+  const [inquiryClinicsFilter, setInquiryClinicsFilter] = useState<string[]>(
+    [],
+  );
   const [expandedInquiryId, setExpandedInquiryId] = useState<string | null>(
     null,
   );
@@ -4989,7 +5082,9 @@ ${pageText}
   };
 
   const handleSignOut = () => {
-    const isTL = currentUser?.role === "tl" || (currentUser?.name && isTLName(currentUser.name));
+    const isTL =
+      currentUser?.role === "tl" ||
+      (currentUser?.name && isTLName(currentUser.name));
     if (isTL) {
       const today = new Date().toISOString().split("T")[0];
       const docId = `${getUsernameFromFullName(currentUser.name)}_${today}`;
@@ -7407,7 +7502,7 @@ ${result.errors.slice(0, 5).join("\n")}${
   };
 
   const handleSetInquiryAnswered = async (inquiryId: string) => {
-    if (!currentUser || currentUser.role !== "tl") return;
+    if (!currentUser) return;
     if (isSubmittingAnswer) return;
 
     const answerText = String(currentAnswerText || "").trim();
@@ -7436,6 +7531,11 @@ ${result.errors.slice(0, 5).join("\n")}${
       let updatedInqObject: Inquiry | null = null;
       let finalAnswerString = answerText || "See structured reply timeline...";
 
+      const isAgent = currentUser.role === "agent";
+      const newStatus = isAgent
+        ? ("tl_reviewing" as const)
+        : ("answered" as const);
+
       const updated = inquiries.map((inq) => {
         if (inq.id === inquiryId) {
           targetAgentName = inq.agentName;
@@ -7458,11 +7558,15 @@ ${result.errors.slice(0, 5).join("\n")}${
 
           const updatedInq: Inquiry = {
             ...inq,
-            status: "answered" as const,
-            answer: finalAnswerString, // keep for backward compatibility
-            answeredBy: currentUser.name,
-            answeredAt: new Date().toISOString(),
-            seenByAgent: false,
+            status: newStatus,
+            answer: isAgent
+              ? inq.answer || finalAnswerString
+              : finalAnswerString, // keep for backward compatibility
+            answeredBy: isAgent ? inq.answeredBy || null : currentUser.name,
+            answeredAt: isAgent
+              ? inq.answeredAt || null
+              : new Date().toISOString(),
+            seenByAgent: isAgent ? true : false,
             replies: [...(inq.replies || []), newReply],
           };
           updatedInqObject = updatedInq;
@@ -7481,16 +7585,28 @@ ${result.errors.slice(0, 5).join("\n")}${
       setInquiries(updated);
       setStorageItem("sched_inquiries", updated);
 
-      if (targetAgentName) {
+      if (isAgent) {
         addSystemNotification(
-          "Inquiry Answered by TL",
-          `Your inquiry regarding clinic "${clinicName}" has been answered by ${currentUser.name}.`,
+          "Inquiry Replied by Agent",
+          `Agent ${currentUser.name} has replied to the inquiry regarding clinic "${clinicName}".`,
           "inquiry",
-          targetAgentName,
+          "tl",
           undefined,
           "inquiry",
           inquiryId,
         );
+      } else {
+        if (targetAgentName) {
+          addSystemNotification(
+            "Inquiry Answered by TL",
+            `Your inquiry regarding clinic "${clinicName}" has been answered by ${currentUser.name}.`,
+            "inquiry",
+            targetAgentName,
+            undefined,
+            "inquiry",
+            inquiryId,
+          );
+        }
       }
       handleMentionsInText(answerText, "Inquiry Response", currentUser.name);
 
@@ -7499,7 +7615,9 @@ ${result.errors.slice(0, 5).join("\n")}${
       setCurrentAnswerAttachments([]);
       setCurrentAnswerLinks([]);
       toast.success(
-        "Answer response committed successfully! Agent will receive a live notification.",
+        isAgent
+          ? "Reply sent successfully! TL will receive a live notification."
+          : "Answer response committed successfully! Agent will receive a live notification.",
       );
     } catch (e: any) {
       console.error("Inquiry Answer Error:", e);
@@ -7764,13 +7882,29 @@ ${ttNotes}`
     const updated = tabbyTamaraRequests.map((r) => {
       if (r.id === requestId) {
         const isRejected = status === "rejected";
+        const isAlreadyConfirmed = r.status === "confirmed";
+
+        const existingLinks = Array.isArray((r as any).paymentLinks)
+          ? (r as any).paymentLinks
+          : r.paymentLink
+            ? [r.paymentLink]
+            : [];
+        let updatedLinks = [...existingLinks];
+        if (paymentLink && !updatedLinks.includes(paymentLink)) {
+          updatedLinks.push(paymentLink);
+        }
+
         const newWorkflowStatus: TTWorkflowStatus = isRejected
           ? "rejected"
-          : "tl_link_ready";
+          : isAlreadyConfirmed
+            ? r.workflowStatus || "tl_link_ready"
+            : "tl_link_ready";
 
         const activityText = isRejected
           ? `${currentUser.name} (TL) rejected this request. Notes: ${tlNotes || ""}`
-          : `${currentUser.name} (TL) processed the request. Payment link attached. Workflow set to: Link Ready.`;
+          : isAlreadyConfirmed
+            ? `${currentUser.name} (TL) added an additional payment link: ${paymentLink}.`
+            : `${currentUser.name} (TL) processed the request. Payment link attached. Workflow set to: Link Ready.`;
 
         const activityEntry = {
           id: "act_" + Math.random().toString(36).substr(2, 9),
@@ -7787,12 +7921,13 @@ ${ttNotes}`
 
         const updatedReq = {
           ...r,
-          status: status,
-          confirmedAt: new Date().toISOString(),
-          confirmedBy: currentUser.name,
-          paymentLink: paymentLink || null,
-          tlNotes: tlNotes || null,
-          tlLinks: tlLinks || undefined,
+          status: isAlreadyConfirmed ? ("confirmed" as const) : status,
+          confirmedAt: r.confirmedAt || new Date().toISOString(),
+          confirmedBy: r.confirmedBy || currentUser.name,
+          paymentLink: paymentLink || r.paymentLink || null,
+          paymentLinks: updatedLinks,
+          tlNotes: tlNotes || r.tlNotes || null,
+          tlLinks: tlLinks || r.tlLinks || undefined,
           tlPhotos: tlPhotos || r.tlPhotos || [],
           tlSupportingLinks: tlSupportingLinks || [],
           workflowStatus: newWorkflowStatus,
@@ -8673,7 +8808,9 @@ ${ttNotes}`
 
   const handleCloseAllCases = async () => {
     if (!isGlobalAdmin) {
-      toast.error("Unauthorized: This action is restricted to Hesham Sobhy (h.sobhy).");
+      toast.error(
+        "Unauthorized: This action is restricted to Hesham Sobhy (h.sobhy).",
+      );
       return;
     }
 
@@ -8697,13 +8834,15 @@ ${ttNotes}`
                 status: "closed",
                 closedBy,
                 closedAt: now,
-              })
+              }),
             );
           });
 
           // 2. tt_requests (Tabby & Tamara Requests)
           const openTTRequests = tabbyTamaraRequests.filter(
-            (r) => r.workflowStatus !== "completed" && r.workflowStatus !== "rejected"
+            (r) =>
+              r.workflowStatus !== "completed" &&
+              r.workflowStatus !== "rejected",
           );
           openTTRequests.forEach((req) => {
             promises.push(
@@ -8713,12 +8852,14 @@ ${ttNotes}`
                 confirmedBy: closedBy,
                 confirmedAt: now,
                 updatedAt: now,
-              })
+              }),
             );
           });
 
           // 3. tt_complaints (Tabby & Tamara Complaints)
-          const openTTComplaints = tabbyTamaraComplaints.filter((c) => c.status !== "closed");
+          const openTTComplaints = tabbyTamaraComplaints.filter(
+            (c) => c.status !== "closed",
+          );
           openTTComplaints.forEach((comp) => {
             const sysActivity = {
               id: "act_" + Math.random().toString(36).substring(2, 11),
@@ -8735,19 +8876,21 @@ ${ttNotes}`
                 tlHandledBy: closedBy,
                 tlHandledAt: now,
                 replies: arrayUnion(sysActivity),
-              })
+              }),
             );
           });
 
           // 4. client_comms (Client Communication Requests)
-          const openClientComms = (clientComms || []).filter((cc) => cc.status !== "contacted");
+          const openClientComms = (clientComms || []).filter(
+            (cc) => cc.status !== "contacted",
+          );
           openClientComms.forEach((cc) => {
             promises.push(
               updateDoc(doc(db, "client_comms", cc.id), {
                 status: "contacted",
                 handledBy: closedBy,
                 handledAt: now,
-              })
+              }),
             );
           });
 
@@ -8757,7 +8900,7 @@ ${ttNotes}`
             promises.push(
               updateDoc(doc(db, "cases", c.id), {
                 status: "closed",
-              })
+              }),
             );
           });
 
@@ -8767,20 +8910,24 @@ ${ttNotes}`
           }
 
           await Promise.all(promises);
-          toast.success(`Successfully closed all ${promises.length} open cases and SLAs across all channels!`);
+          toast.success(
+            `Successfully closed all ${promises.length} open cases and SLAs across all channels!`,
+          );
         } catch (error: any) {
           console.error("Failed to bulk close all cases:", error);
           toast.error("Failed to bulk close all cases: " + error.message);
         } finally {
           setIsSyncingCalendar(false);
         }
-      }
+      },
     );
   };
 
   const handleDeleteSyntheticUser = async (name: string) => {
     const uname = getUsernameFromFullName(name);
-    const updated = Array.from(new Set([...deletedUsers, uname, name.toLowerCase()]));
+    const updated = Array.from(
+      new Set([...deletedUsers, uname, name.toLowerCase()]),
+    );
     try {
       await setDoc(doc(db, "system", "sched_deleted_users"), { data: updated });
       setDeletedUsers(updated);
@@ -8793,22 +8940,30 @@ ${ttNotes}`
   };
 
   const handleDeleteHeadcountRow = async (id: string, name: string) => {
-    if (!window.confirm(`Are you absolutely sure you want to delete or exclude "${name}" from Headcount?`)) {
+    if (
+      !window.confirm(
+        `Are you absolutely sure you want to delete or exclude "${name}" from Headcount?`,
+      )
+    ) {
       return;
     }
 
     try {
       // 1. Remove from agentDirectory if exists
-      const inDir = agentDirectory.some(item => item.id === id);
+      const inDir = agentDirectory.some((item) => item.id === id);
       if (inDir) {
-        const updatedDir = agentDirectory.filter(item => item.id !== id);
+        const updatedDir = agentDirectory.filter((item) => item.id !== id);
         setAgentDirectory(updatedDir);
         setStorageItem("sched_agent_directory", updatedDir);
-        await setDoc(doc(db, "system", "sched_agent_directory"), { data: updatedDir });
+        await setDoc(doc(db, "system", "sched_agent_directory"), {
+          data: updatedDir,
+        });
       }
 
       // 2. Remove from users collection on Firebase (registeredUsers is real users loaded from Firestore)
-      const isRegistered = registeredUsers.some(u => u.id === id || u.name?.toLowerCase() === name.toLowerCase());
+      const isRegistered = registeredUsers.some(
+        (u) => u.id === id || u.name?.toLowerCase() === name.toLowerCase(),
+      );
       if (isRegistered) {
         const docId = id;
         await deleteDoc(doc(db, "users", docId));
@@ -8817,7 +8972,9 @@ ${ttNotes}`
         await handleDeleteSyntheticUser(name);
       }
 
-      toast.success(`Successfully removed "${name}" from Headcount & syncing directories!`);
+      toast.success(
+        `Successfully removed "${name}" from Headcount & syncing directories!`,
+      );
     } catch (e: any) {
       console.error(e);
       toast.error(`Deletion failed: ${e.message}`);
@@ -8827,18 +8984,18 @@ ${ttNotes}`
   const handleSaveInlineEdit = async (id: string, isFromDir: boolean) => {
     try {
       if (isFromDir) {
-        const row = agentDirectory.find(item => item.id === id);
+        const row = agentDirectory.find((item) => item.id === id);
         if (!row) return;
 
         const updatedName = editAgentFields.agentName || row.agentName;
         const updatedData = { ...row.data };
-        (directoryHeaders || []).forEach(header => {
+        (directoryHeaders || []).forEach((header) => {
           if (editAgentFields[header] !== undefined) {
             updatedData[header] = editAgentFields[header];
           }
         });
 
-        const updatedDir = agentDirectory.map(item => {
+        const updatedDir = agentDirectory.map((item) => {
           if (item.id === id) {
             return { ...item, agentName: updatedName, data: updatedData };
           }
@@ -8847,15 +9004,56 @@ ${ttNotes}`
 
         setAgentDirectory(updatedDir);
         setStorageItem("sched_agent_directory", updatedDir);
-        await setDoc(doc(db, "system", "sched_agent_directory"), { data: updatedDir });
+        await setDoc(doc(db, "system", "sched_agent_directory"), {
+          data: updatedDir,
+        });
 
-        const userDocId = updatedName.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
-        const emailHeader = (directoryHeaders || []).find(h => ["email", "mail"].includes(String(h || "").toLowerCase().trim()));
-        const phoneHeader = (directoryHeaders || []).find(h => ["phone", "mobile"].includes(String(h || "").toLowerCase().trim()));
-        const lobHeader = (directoryHeaders || []).find(h => ["lob", "line of business"].includes(String(h || "").toLowerCase().trim()));
-        const teamHeader = (directoryHeaders || []).find(h => ["lob team", "team"].includes(String(h || "").toLowerCase().trim()));
-        const roleHeader = (directoryHeaders || []).find(h => ["role", "job title"].includes(String(h || "").toLowerCase().trim()));
-        const tlHeader = (directoryHeaders || []).find(h => ["tl", "team leader", "manager"].includes(String(h || "").toLowerCase().trim()));
+        const userDocId = updatedName
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, "");
+        const emailHeader = (directoryHeaders || []).find((h) =>
+          ["email", "mail"].includes(
+            String(h || "")
+              .toLowerCase()
+              .trim(),
+          ),
+        );
+        const phoneHeader = (directoryHeaders || []).find((h) =>
+          ["phone", "mobile"].includes(
+            String(h || "")
+              .toLowerCase()
+              .trim(),
+          ),
+        );
+        const lobHeader = (directoryHeaders || []).find((h) =>
+          ["lob", "line of business"].includes(
+            String(h || "")
+              .toLowerCase()
+              .trim(),
+          ),
+        );
+        const teamHeader = (directoryHeaders || []).find((h) =>
+          ["lob team", "team"].includes(
+            String(h || "")
+              .toLowerCase()
+              .trim(),
+          ),
+        );
+        const roleHeader = (directoryHeaders || []).find((h) =>
+          ["role", "job title"].includes(
+            String(h || "")
+              .toLowerCase()
+              .trim(),
+          ),
+        );
+        const tlHeader = (directoryHeaders || []).find((h) =>
+          ["tl", "team leader", "manager"].includes(
+            String(h || "")
+              .toLowerCase()
+              .trim(),
+          ),
+        );
 
         const emailVal = emailHeader ? updatedData[emailHeader] : "";
         const phoneVal = phoneHeader ? updatedData[phoneHeader] : "";
@@ -8864,46 +9062,74 @@ ${ttNotes}`
         const roleVal = roleHeader ? updatedData[roleHeader] : "agent";
         const tlVal = tlHeader ? updatedData[tlHeader] : "";
 
-        await setDoc(doc(db, "users", userDocId), {
-          id: userDocId,
-          name: updatedName,
-          email: emailVal || undefined,
-          phone: phoneVal || undefined,
-          lob: lobVal || undefined,
-          lobTeam: lobTeamVal || undefined,
-          role: roleVal || "agent",
-          teamLeader: tlVal || undefined,
-          directoryData: updatedData
-        }, { merge: true });
-
+        await setDoc(
+          doc(db, "users", userDocId),
+          {
+            id: userDocId,
+            name: updatedName,
+            email: emailVal || undefined,
+            phone: phoneVal || undefined,
+            lob: lobVal || undefined,
+            lobTeam: lobTeamVal || undefined,
+            role: roleVal || "agent",
+            teamLeader: tlVal || undefined,
+            directoryData: updatedData,
+          },
+          { merge: true },
+        );
       } else {
-        const user = registeredUsers.find(item => item.id === id);
+        const user = registeredUsers.find((item) => item.id === id);
         if (!user) return;
 
         const updatedName = editAgentFields.name || user.name;
-        const userDocId = updatedName.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+        const userDocId = updatedName
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, "");
 
-        const emailVal = editAgentFields.email !== undefined ? editAgentFields.email : (user.email || "");
-        const phoneVal = editAgentFields.phone !== undefined ? editAgentFields.phone : (user.phone || "");
-        const lobVal = editAgentFields.lob !== undefined ? editAgentFields.lob : (user.lob || "");
-        const lobTeamVal = editAgentFields.lobTeam !== undefined ? editAgentFields.lobTeam : (user.lobTeam || "");
-        const roleVal = editAgentFields.role !== undefined ? editAgentFields.role : (user.role || "agent");
-        const tlVal = editAgentFields.teamLeader !== undefined ? editAgentFields.teamLeader : (user.teamLeader || "");
+        const emailVal =
+          editAgentFields.email !== undefined
+            ? editAgentFields.email
+            : user.email || "";
+        const phoneVal =
+          editAgentFields.phone !== undefined
+            ? editAgentFields.phone
+            : user.phone || "";
+        const lobVal =
+          editAgentFields.lob !== undefined
+            ? editAgentFields.lob
+            : user.lob || "";
+        const lobTeamVal =
+          editAgentFields.lobTeam !== undefined
+            ? editAgentFields.lobTeam
+            : user.lobTeam || "";
+        const roleVal =
+          editAgentFields.role !== undefined
+            ? editAgentFields.role
+            : user.role || "agent";
+        const tlVal =
+          editAgentFields.teamLeader !== undefined
+            ? editAgentFields.teamLeader
+            : user.teamLeader || "";
 
         if (userDocId !== id) {
           await deleteDoc(doc(db, "users", id));
         }
 
-        await setDoc(doc(db, "users", userDocId), {
-          id: userDocId,
-          name: updatedName,
-          email: emailVal || undefined,
-          phone: phoneVal || undefined,
-          lob: lobVal || undefined,
-          lobTeam: lobTeamVal || undefined,
-          role: roleVal,
-          teamLeader: tlVal || undefined
-        }, { merge: true });
+        await setDoc(
+          doc(db, "users", userDocId),
+          {
+            id: userDocId,
+            name: updatedName,
+            email: emailVal || undefined,
+            phone: phoneVal || undefined,
+            lob: lobVal || undefined,
+            lobTeam: lobTeamVal || undefined,
+            role: roleVal,
+            teamLeader: tlVal || undefined,
+          },
+          { merge: true },
+        );
       }
 
       toast.success("Successfully updated agent details!");
@@ -8932,15 +9158,16 @@ ${ttNotes}`
       let dirModified = false;
 
       for (const id of selectedAgentIds) {
-        const dirIdx = updatedDir.findIndex(item => item.id === id);
+        const dirIdx = updatedDir.findIndex((item) => item.id === id);
         if (dirIdx !== -1) {
           dirModified = true;
           const row = updatedDir[dirIdx];
           const updatedData = { ...row.data };
-          
+
           let targetKey = fieldToUpdate;
           const matchingKey = Object.keys(updatedData).find(
-            k => k.toLowerCase().trim() === fieldToUpdate.toLowerCase().trim()
+            (k) =>
+              k.toLowerCase().trim() === fieldToUpdate.toLowerCase().trim(),
           );
           if (matchingKey) {
             targetKey = matchingKey;
@@ -8948,21 +9175,32 @@ ${ttNotes}`
           updatedData[targetKey] = valToSet;
           updatedDir[dirIdx] = { ...row, data: updatedData };
 
-          const userDocId = row.agentName.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
-          const matchingUser = registeredUsers.find(u => u.name?.toLowerCase() === row.agentName.toLowerCase());
-          
-          let userProfile: any = matchingUser ? { ...matchingUser } : {
-            id: userDocId,
-            name: row.agentName,
-            role: "agent"
-          };
+          const userDocId = row.agentName
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, "");
+          const matchingUser = registeredUsers.find(
+            (u) => u.name?.toLowerCase() === row.agentName.toLowerCase(),
+          );
+
+          let userProfile: any = matchingUser
+            ? { ...matchingUser }
+            : {
+                id: userDocId,
+                name: row.agentName,
+                role: "agent",
+              };
 
           const fk = fieldToUpdate.toLowerCase();
           if (fk.includes("leader") || fk === "tl") {
             userProfile.teamLeader = valToSet;
           } else if (fk.includes("team") || fk === "lobteam") {
             userProfile.lobTeam = valToSet;
-          } else if (fk === "lob" || fk.includes("channel") || fk.includes("business")) {
+          } else if (
+            fk === "lob" ||
+            fk.includes("channel") ||
+            fk.includes("business")
+          ) {
             userProfile.lob = valToSet;
           } else if (fk === "role" || fk.includes("title")) {
             userProfile.role = valToSet;
@@ -8971,20 +9209,26 @@ ${ttNotes}`
           }
 
           userProfile.directoryData = updatedData;
-          await setDoc(doc(db, "users", userDocId), userProfile, { merge: true });
+          await setDoc(doc(db, "users", userDocId), userProfile, {
+            merge: true,
+          });
         }
 
-        const user = registeredUsers.find(u => u.id === id);
+        const user = registeredUsers.find((u) => u.id === id);
         if (user) {
           const userDocId = user.id;
           const userProfile = { ...user };
-          
+
           const fk = fieldToUpdate.toLowerCase();
           if (fk.includes("leader") || fk === "tl") {
             userProfile.teamLeader = valToSet;
           } else if (fk.includes("team") || fk === "lobteam") {
             userProfile.lobTeam = valToSet;
-          } else if (fk === "lob" || fk.includes("channel") || fk.includes("business")) {
+          } else if (
+            fk === "lob" ||
+            fk.includes("channel") ||
+            fk.includes("business")
+          ) {
             userProfile.lob = valToSet;
           } else if (fk === "role" || fk.includes("title")) {
             userProfile.role = valToSet;
@@ -8996,7 +9240,8 @@ ${ttNotes}`
             const updatedData = { ...userProfile.directoryData };
             let targetKey = fieldToUpdate;
             const matchingKey = Object.keys(updatedData).find(
-              k => k.toLowerCase().trim() === fieldToUpdate.toLowerCase().trim()
+              (k) =>
+                k.toLowerCase().trim() === fieldToUpdate.toLowerCase().trim(),
             );
             if (matchingKey) {
               targetKey = matchingKey;
@@ -9005,17 +9250,23 @@ ${ttNotes}`
             userProfile.directoryData = updatedData;
           }
 
-          await setDoc(doc(db, "users", userDocId), userProfile, { merge: true });
+          await setDoc(doc(db, "users", userDocId), userProfile, {
+            merge: true,
+          });
         }
       }
 
       if (dirModified) {
         setAgentDirectory(updatedDir);
         setStorageItem("sched_agent_directory", updatedDir);
-        await setDoc(doc(db, "system", "sched_agent_directory"), { data: updatedDir });
+        await setDoc(doc(db, "system", "sched_agent_directory"), {
+          data: updatedDir,
+        });
       }
 
-      toast.success(`Successfully updated ${selectedAgentIds.length} agents bulk edit!`);
+      toast.success(
+        `Successfully updated ${selectedAgentIds.length} agents bulk edit!`,
+      );
       setSelectedAgentIds([]);
       setBulkEditVal("");
     } catch (e: any) {
@@ -9854,23 +10105,32 @@ ${ttNotes}`
           <div className="flex-1 flex flex-col items-center justify-center my-12 animate-fade-in relative">
             <div className="w-full max-w-md bg-black/40 backdrop-blur-3xl border border-indigo-500/20 p-8 rounded-[2rem] shadow-[0_0_80px_-20px_rgba(79,70,229,0.3)] relative overflow-hidden group">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500 group-hover:h-1.5 transition-all duration-500"></div>
-              
+
               <div className="absolute -inset-20 bg-indigo-500/10 blur-[100px] pointer-events-none group-hover:bg-indigo-500/20 transition-all duration-1000"></div>
 
               <div className="flex flex-col items-center mb-10 relative z-10">
                 <div className="w-full flex items-center justify-center mb-6">
                   <CoolLogo />
                 </div>
-                
+
                 {(() => {
-                  const uname = String(loginName || "").trim().replace(/\s+/g, "").toLowerCase();
-                  const matchedName = uname ? (findAgentByUsername(uname, agentsList) || findAgentByUsername(uname, [...INITIAL_AGENTS, ...TEAM_LEADERS])) : null;
-                  
-                  if (matchedName && typeof matchedName === 'string') {
+                  const uname = String(loginName || "")
+                    .trim()
+                    .replace(/\s+/g, "")
+                    .toLowerCase();
+                  const matchedName = uname
+                    ? findAgentByUsername(uname, agentsList) ||
+                      findAgentByUsername(uname, [
+                        ...INITIAL_AGENTS,
+                        ...TEAM_LEADERS,
+                      ])
+                    : null;
+
+                  if (matchedName && typeof matchedName === "string") {
                     return (
                       <div className="text-center animate-fade-in">
                         <h1 className="text-3xl font-black bg-gradient-to-r from-cyan-300 via-indigo-300 to-fuchsia-300 bg-clip-text text-transparent font-display tracking-tight">
-                          Welcome, {matchedName.split(' ')[0]}
+                          Welcome, {matchedName.split(" ")[0]}
                         </h1>
                         <p className="text-indigo-400/80 text-[10px] font-mono uppercase tracking-[0.3em] mt-2">
                           Authentication Node Active
@@ -9878,7 +10138,7 @@ ${ttNotes}`
                       </div>
                     );
                   }
-                  
+
                   return (
                     <div className="text-center">
                       <p className="text-indigo-400/80 text-[10px] font-mono uppercase tracking-[0.3em] mt-1">
@@ -10023,7 +10283,10 @@ ${ttNotes}`
                   </button>
                 </div>
               ) : (
-                <form onSubmit={handleLoginSubmit} className="space-y-5 relative z-10">
+                <form
+                  onSubmit={handleLoginSubmit}
+                  className="space-y-5 relative z-10"
+                >
                   <div className="space-y-1.5">
                     <label
                       className="text-[10px] uppercase tracking-widest text-indigo-300 font-bold block text-left"
@@ -10098,8 +10361,21 @@ ${ttNotes}`
                     >
                       <div className="relative w-2.5 h-2.5 flex items-center justify-center shrink-0">
                         <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 z-10 animate-pulse" />
-                        <span className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400/80 animate-sonar" style={{ animation: "sonar-ring 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite" }} />
-                        <span className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400/40 animate-sonar" style={{ animation: "sonar-ring 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite", animationDelay: "1s" }} />
+                        <span
+                          className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400/80 animate-sonar"
+                          style={{
+                            animation:
+                              "sonar-ring 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite",
+                          }}
+                        />
+                        <span
+                          className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400/40 animate-sonar"
+                          style={{
+                            animation:
+                              "sonar-ring 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite",
+                            animationDelay: "1s",
+                          }}
+                        />
                       </div>
                       <span className="font-mono uppercase">SYNQ V2.4.1</span>
                     </button>
@@ -10130,8 +10406,9 @@ ${ttNotes}`
                         transition={{ delay: 0.15, duration: 0.45 }}
                         className="text-cyan-400 font-black relative drop-shadow-[0_0_10px_rgba(34,211,238,0.2)]"
                       >
-                        {currentUser.name.split(' ')[0]}
-                      </motion.span>!{" "}
+                        {currentUser.name.split(" ")[0]}
+                      </motion.span>
+                      !{" "}
                       <span className="text-[9px] uppercase tracking-wider font-extrabold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full font-sans">
                         CONSOLE
                       </span>
@@ -10144,13 +10421,19 @@ ${ttNotes}`
               </div>
 
               {/* Timezones & Weather Active Control Selector */}
-              <div id="timezone-weather-selector" className="flex flex-col sm:flex-row items-center gap-3 bg-black/40 border border-white/10 rounded-2xl p-1.5 self-start xl:self-auto shadow-inner">
+              <div
+                id="timezone-weather-selector"
+                className="flex flex-col sm:flex-row items-center gap-3 bg-black/40 border border-white/10 rounded-2xl p-1.5 self-start xl:self-auto shadow-inner"
+              >
                 <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl">
                   <button
                     type="button"
                     onClick={() => {
                       setSelectedWeatherLoc("both");
-                      localStorage.setItem("sched_weather_location_pref", "both");
+                      localStorage.setItem(
+                        "sched_weather_location_pref",
+                        "both",
+                      );
                     }}
                     className={`px-2.5 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer ${
                       selectedWeatherLoc === "both"
@@ -10164,7 +10447,10 @@ ${ttNotes}`
                     type="button"
                     onClick={() => {
                       setSelectedWeatherLoc("egypt");
-                      localStorage.setItem("sched_weather_location_pref", "egypt");
+                      localStorage.setItem(
+                        "sched_weather_location_pref",
+                        "egypt",
+                      );
                     }}
                     className={`px-2.5 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
                       selectedWeatherLoc === "egypt"
@@ -10178,7 +10464,10 @@ ${ttNotes}`
                     type="button"
                     onClick={() => {
                       setSelectedWeatherLoc("uae");
-                      localStorage.setItem("sched_weather_location_pref", "uae");
+                      localStorage.setItem(
+                        "sched_weather_location_pref",
+                        "uae",
+                      );
                     }}
                     className={`px-2.5 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
                       selectedWeatherLoc === "uae"
@@ -10193,7 +10482,8 @@ ${ttNotes}`
                 <div className="flex items-center gap-4 px-2">
                   <AnimatePresence>
                     {/* EGYPT DISPLAY */}
-                    {(selectedWeatherLoc === "both" || selectedWeatherLoc === "egypt") && (
+                    {(selectedWeatherLoc === "both" ||
+                      selectedWeatherLoc === "egypt") && (
                       <motion.div
                         key="egypt-disp"
                         initial={{ opacity: 0, scale: 0.95, y: -4 }}
@@ -10226,7 +10516,9 @@ ${ttNotes}`
                             ) : (
                               <Cloudy className="w-3.5 h-3.5 text-slate-400" />
                             )}
-                            <span className="font-bold">{ramadanTemp.toFixed(1)}°C</span>
+                            <span className="font-bold">
+                              {ramadanTemp.toFixed(1)}°C
+                            </span>
                           </div>
                         )}
                       </motion.div>
@@ -10234,11 +10526,15 @@ ${ttNotes}`
 
                     {/* SEPARATOR */}
                     {selectedWeatherLoc === "both" && (
-                      <div className="h-5 w-px bg-white/10 shrink-0 self-center" key="separator-line" />
+                      <div
+                        className="h-5 w-px bg-white/10 shrink-0 self-center"
+                        key="separator-line"
+                      />
                     )}
 
                     {/* UAE DISPLAY */}
-                    {(selectedWeatherLoc === "both" || selectedWeatherLoc === "uae") && (
+                    {(selectedWeatherLoc === "both" ||
+                      selectedWeatherLoc === "uae") && (
                       <motion.div
                         key="uae-disp"
                         initial={{ opacity: 0, scale: 0.95, y: -4 }}
@@ -10271,7 +10567,9 @@ ${ttNotes}`
                             ) : (
                               <Cloudy className="w-3.5 h-3.5 text-slate-300" />
                             )}
-                            <span className="font-bold">{uaeTemp.toFixed(1)}°C</span>
+                            <span className="font-bold">
+                              {uaeTemp.toFixed(1)}°C
+                            </span>
                           </div>
                         )}
                       </motion.div>
@@ -10487,7 +10785,7 @@ ${ttNotes}`
                 <div className="p-4 rounded-xl bg-black/40 border border-cyan-500/15 shadow-[0_4px_20px_rgba(0,0,0,0.3)] space-y-3 relative overflow-hidden group">
                   <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-indigo-500/5 opacity-40 pointer-events-none" />
                   <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-400 to-indigo-500" />
-                  
+
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] font-black text-cyan-400 uppercase tracking-widest flex items-center gap-2">
                       <span className="flex h-2 w-2 relative">
@@ -10607,12 +10905,24 @@ ${ttNotes}`
                         </div>
                         {/* Real-time status dot indicator in corner of avatar */}
                         <span className="absolute bottom-0 right-0 flex h-3 w-3">
-                          <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                            (currentUser.status || "online") === "online" ? "bg-emerald-440" : (currentUser.status || "online") === "busy" ? "bg-rose-400" : "bg-amber-400"
-                          }`} />
-                          <span className={`relative inline-flex rounded-full h-3 w-3 border border-[#121217] ${
-                            (currentUser.status || "online") === "online" ? "bg-emerald-500" : (currentUser.status || "online") === "busy" ? "bg-rose-500" : "bg-amber-500"
-                          }`} />
+                          <span
+                            className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                              (currentUser.status || "online") === "online"
+                                ? "bg-emerald-440"
+                                : (currentUser.status || "online") === "busy"
+                                  ? "bg-rose-400"
+                                  : "bg-amber-400"
+                            }`}
+                          />
+                          <span
+                            className={`relative inline-flex rounded-full h-3 w-3 border border-[#121217] ${
+                              (currentUser.status || "online") === "online"
+                                ? "bg-emerald-500"
+                                : (currentUser.status || "online") === "busy"
+                                  ? "bg-rose-500"
+                                  : "bg-amber-500"
+                            }`}
+                          />
                         </span>
                       </div>
                       <div className="overflow-hidden grow">
@@ -10620,7 +10930,10 @@ ${ttNotes}`
                           {formatAgentName(currentUser.name)}
                         </p>
                         <p className="text-[9px] text-slate-400 mt-0.5">
-                          Username: <span className="font-mono text-indigo-300 font-bold">{currentUser.name}</span>
+                          Username:{" "}
+                          <span className="font-mono text-indigo-300 font-bold">
+                            {currentUser.name}
+                          </span>
                         </p>
                         <p className="text-[10px] uppercase tracking-widest font-mono text-cyan-400 font-bold mt-1">
                           {currentUser.role === "tl"
@@ -10636,7 +10949,9 @@ ${ttNotes}`
                     <div className="bg-black/30 border border-white/5 py-1.5 px-3 rounded-lg flex items-center justify-between text-[10px] space-y-0.5 font-mono">
                       <span className="text-slate-400">Direct Manager:</span>
                       <span className="font-bold text-cyan-400 truncate max-w-[120px] text-right">
-                        {((currentUser.role as string) === "tl" || (currentUser.role as string) === "director" || (currentUser.role as string) === "admin")
+                        {(currentUser.role as string) === "tl" ||
+                        (currentUser.role as string) === "director" ||
+                        (currentUser.role as string) === "admin"
                           ? "N/A (System CTO)"
                           : getAgentTL(currentUser.name)}
                       </span>
@@ -10810,8 +11125,21 @@ ${ttNotes}`
                     >
                       <div className="relative w-2.5 h-2.5 flex items-center justify-center shrink-0">
                         <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 z-10 animate-pulse" />
-                        <span className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400/80" style={{ animation: "sonar-ring 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite" }} />
-                        <span className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400/40" style={{ animation: "sonar-ring 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite", animationDelay: "1s" }} />
+                        <span
+                          className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400/80"
+                          style={{
+                            animation:
+                              "sonar-ring 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite",
+                          }}
+                        />
+                        <span
+                          className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400/40"
+                          style={{
+                            animation:
+                              "sonar-ring 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite",
+                            animationDelay: "1s",
+                          }}
+                        />
                       </div>
                       <span className="font-mono">Synq v2.4.1</span>
                     </button>
@@ -15456,10 +15784,12 @@ ${ttNotes}`
                                                   }
                                                 }
 
-                                                const agentLOB = normalizeAgentLob(
-                                                  AGENT_LOBS[log.agentName] ||
-                                                  "Operations", "agent"
-                                                );
+                                                const agentLOB =
+                                                  normalizeAgentLob(
+                                                    AGENT_LOBS[log.agentName] ||
+                                                      "Operations",
+                                                    "agent",
+                                                  );
 
                                                 let timelineStart = 0;
                                                 let timelineWidth = 0;
@@ -17205,7 +17535,9 @@ ${ttNotes}`
                                 <button
                                   id="submit-swap-btn"
                                   type="submit"
-                                  disabled={swapWarning !== null || isSwapUploading}
+                                  disabled={
+                                    swapWarning !== null || isSwapUploading
+                                  }
                                   className={`w-full py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
                                     swapWarning !== null || isSwapUploading
                                       ? "bg-[#1e1e1e]/40 backdrop-blur-lg/40/20 backdrop-blur-md text-slate-500 cursor-not-allowed border border-white/5"
@@ -17219,8 +17551,8 @@ ${ttNotes}`
                                     </>
                                   ) : (
                                     <>
-                                      <ArrowRight className="w-4 h-4" /> Apply for
-                                      Swap (Awaiting TL)
+                                      <ArrowRight className="w-4 h-4" /> Apply
+                                      for Swap (Awaiting TL)
                                     </>
                                   )}
                                 </button>
@@ -17343,7 +17675,9 @@ ${ttNotes}`
                                 <button
                                   id="submit-annual-btn"
                                   type="submit"
-                                  disabled={annualWarning !== null || isAnnualUploading}
+                                  disabled={
+                                    annualWarning !== null || isAnnualUploading
+                                  }
                                   className={`w-full py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
                                     annualWarning !== null || isAnnualUploading
                                       ? "bg-[#1e1e1e]/40 backdrop-blur-lg/40/20 backdrop-blur-md text-slate-500 cursor-not-allowed border border-white/5"
@@ -17357,8 +17691,8 @@ ${ttNotes}`
                                     </>
                                   ) : (
                                     <>
-                                      <ArrowRight className="w-4 h-4" /> Apply for
-                                      Annual Leave (Awaiting TL)
+                                      <ArrowRight className="w-4 h-4" /> Apply
+                                      for Annual Leave (Awaiting TL)
                                     </>
                                   )}
                                 </button>
@@ -19113,10 +19447,28 @@ ${ttNotes}`
                                 <RechartsPieChart>
                                   <Pie
                                     data={[
-                                      { name: "Answered", value: inquiries.filter((i) => i.status === "answered").length, color: "#10b981" },
-                                      { name: "Sent", value: inquiries.filter((i) => i.status === "sent").length, color: "#f97316" },
-                                      { name: "Submitted", value: inquiries.filter((i) => i.status === "submitted").length, color: "#eab308" },
-                                    ].filter(d => d.value > 0)}
+                                      {
+                                        name: "Answered",
+                                        value: inquiries.filter(
+                                          (i) => i.status === "answered",
+                                        ).length,
+                                        color: "#10b981",
+                                      },
+                                      {
+                                        name: "Sent",
+                                        value: inquiries.filter(
+                                          (i) => i.status === "sent",
+                                        ).length,
+                                        color: "#f97316",
+                                      },
+                                      {
+                                        name: "Submitted",
+                                        value: inquiries.filter(
+                                          (i) => i.status === "submitted",
+                                        ).length,
+                                        color: "#eab308",
+                                      },
+                                    ].filter((d) => d.value > 0)}
                                     dataKey="value"
                                     nameKey="name"
                                     cx="50%"
@@ -19125,21 +19477,55 @@ ${ttNotes}`
                                     outerRadius={65}
                                     paddingAngle={5}
                                   >
-                                    {
-                                      [
-                                        { name: "Answered", value: inquiries.filter((i) => i.status === "answered").length, color: "#10b981" },
-                                        { name: "Sent", value: inquiries.filter((i) => i.status === "sent").length, color: "#f97316" },
-                                        { name: "Submitted", value: inquiries.filter((i) => i.status === "submitted").length, color: "#eab308" },
-                                      ].filter(d => d.value > 0).map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} stroke="rgba(255,255,255,0.05)" />
-                                      ))
-                                    }
+                                    {[
+                                      {
+                                        name: "Answered",
+                                        value: inquiries.filter(
+                                          (i) => i.status === "answered",
+                                        ).length,
+                                        color: "#10b981",
+                                      },
+                                      {
+                                        name: "Sent",
+                                        value: inquiries.filter(
+                                          (i) => i.status === "sent",
+                                        ).length,
+                                        color: "#f97316",
+                                      },
+                                      {
+                                        name: "Submitted",
+                                        value: inquiries.filter(
+                                          (i) => i.status === "submitted",
+                                        ).length,
+                                        color: "#eab308",
+                                      },
+                                    ]
+                                      .filter((d) => d.value > 0)
+                                      .map((entry, index) => (
+                                        <Cell
+                                          key={`cell-${index}`}
+                                          fill={entry.color}
+                                          stroke="rgba(255,255,255,0.05)"
+                                        />
+                                      ))}
                                   </Pie>
-                                  <Tooltip 
-                                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '8px' }}
-                                    itemStyle={{ color: '#f8fafc', fontSize: '12px' }}
+                                  <Tooltip
+                                    contentStyle={{
+                                      backgroundColor: "#0f172a",
+                                      borderColor: "#1e293b",
+                                      borderRadius: "8px",
+                                    }}
+                                    itemStyle={{
+                                      color: "#f8fafc",
+                                      fontSize: "12px",
+                                    }}
                                   />
-                                  <Legend verticalAlign="bottom" height={20} iconType="circle" wrapperStyle={{ fontSize: '10px' }} />
+                                  <Legend
+                                    verticalAlign="bottom"
+                                    height={20}
+                                    iconType="circle"
+                                    wrapperStyle={{ fontSize: "10px" }}
+                                  />
                                 </RechartsPieChart>
                               </ResponsiveContainer>
                             </div>
@@ -19161,26 +19547,98 @@ ${ttNotes}`
                             <div className="h-48 w-full mt-2">
                               {(() => {
                                 const clinicData = [
-                                  { name: "Dermadent", value: inquiries.filter((i) => (i.clinicName || "").toLowerCase() === "dermadent").length, color: "#6366f1" },
-                                  { name: "AlMutarid", value: inquiries.filter((i) => (i.clinicName || "").toLowerCase() === "onetouch_mo3tred").length, color: "#10b981" },
-                                  { name: "Markhaniya", value: inquiries.filter((i) => (i.clinicName || "").toLowerCase() === "onetouch_merkhnya").length, color: "#06b6d4" },
-                                  { name: "Well Touch", value: inquiries.filter((i) => (i.clinicName || "").toLowerCase() === "welltouch").length, color: "#f43f5e" },
-                                  { name: "New Age", value: inquiries.filter((i) => (i.clinicName || "").toLowerCase() === "newage").length, color: "#f59e0b" },
+                                  {
+                                    name: "Dermadent",
+                                    value: inquiries.filter(
+                                      (i) =>
+                                        (i.clinicName || "").toLowerCase() ===
+                                        "dermadent",
+                                    ).length,
+                                    color: "#6366f1",
+                                  },
+                                  {
+                                    name: "AlMutarid",
+                                    value: inquiries.filter(
+                                      (i) =>
+                                        (i.clinicName || "").toLowerCase() ===
+                                        "onetouch_mo3tred",
+                                    ).length,
+                                    color: "#10b981",
+                                  },
+                                  {
+                                    name: "Markhaniya",
+                                    value: inquiries.filter(
+                                      (i) =>
+                                        (i.clinicName || "").toLowerCase() ===
+                                        "onetouch_merkhnya",
+                                    ).length,
+                                    color: "#06b6d4",
+                                  },
+                                  {
+                                    name: "Well Touch",
+                                    value: inquiries.filter(
+                                      (i) =>
+                                        (i.clinicName || "").toLowerCase() ===
+                                        "welltouch",
+                                    ).length,
+                                    color: "#f43f5e",
+                                  },
+                                  {
+                                    name: "New Age",
+                                    value: inquiries.filter(
+                                      (i) =>
+                                        (i.clinicName || "").toLowerCase() ===
+                                        "newage",
+                                    ).length,
+                                    color: "#f59e0b",
+                                  },
                                 ];
                                 return (
-                                  <ResponsiveContainer width="100%" height={180}>
+                                  <ResponsiveContainer
+                                    width="100%"
+                                    height={180}
+                                  >
                                     <BarChart data={clinicData}>
-                                      <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                                      <XAxis dataKey="name" tick={{fill: '#94a3b8', fontSize: 10}} axisLine={false} tickLine={false} />
-                                      <YAxis tick={{fill: '#94a3b8', fontSize: 10}} axisLine={false} tickLine={false} />
-                                      <Tooltip 
-                                        contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', borderRadius: '8px' }}
-                                        itemStyle={{ color: '#f1f5f9', fontSize: 12 }}
-                                        cursor={{fill: '#334155', opacity: 0.4}}
+                                      <CartesianGrid
+                                        strokeDasharray="3 3"
+                                        stroke="#334155"
+                                        vertical={false}
                                       />
-                                      <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                                      <XAxis
+                                        dataKey="name"
+                                        tick={{ fill: "#94a3b8", fontSize: 10 }}
+                                        axisLine={false}
+                                        tickLine={false}
+                                      />
+                                      <YAxis
+                                        tick={{ fill: "#94a3b8", fontSize: 10 }}
+                                        axisLine={false}
+                                        tickLine={false}
+                                      />
+                                      <Tooltip
+                                        contentStyle={{
+                                          backgroundColor: "#1e293b",
+                                          borderColor: "#334155",
+                                          borderRadius: "8px",
+                                        }}
+                                        itemStyle={{
+                                          color: "#f1f5f9",
+                                          fontSize: 12,
+                                        }}
+                                        cursor={{
+                                          fill: "#334155",
+                                          opacity: 0.4,
+                                        }}
+                                      />
+                                      <Bar
+                                        dataKey="value"
+                                        radius={[4, 4, 0, 0]}
+                                      >
                                         {clinicData.map((entry, index) => (
-                                          <Cell key={`cell-${index}`} fill={entry.color} />
+                                          <Cell
+                                            key={`cell-${index}`}
+                                            fill={entry.color}
+                                          />
                                         ))}
                                       </Bar>
                                     </BarChart>
@@ -19213,16 +19671,28 @@ ${ttNotes}`
                                   value=""
                                   onChange={(e) => {
                                     const val = e.target.value;
-                                    if (val && !inquiryClinicsFilter.includes(val)) {
-                                      setInquiryClinicsFilter([...inquiryClinicsFilter, val]);
+                                    if (
+                                      val &&
+                                      !inquiryClinicsFilter.includes(val)
+                                    ) {
+                                      setInquiryClinicsFilter([
+                                        ...inquiryClinicsFilter,
+                                        val,
+                                      ]);
                                     }
                                   }}
                                   className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-2.5 py-2 text-[11px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                                 >
-                                  <option value="" className="bg-white/10 backdrop-blur-md text-slate-100">
+                                  <option
+                                    value=""
+                                    className="bg-white/10 backdrop-blur-md text-slate-100"
+                                  >
                                     ➕ Add Clinic to Filter...
                                   </option>
-                                  {CLINIC_OPTIONS.filter((c) => !inquiryClinicsFilter.includes(c.value)).map((c) => (
+                                  {CLINIC_OPTIONS.filter(
+                                    (c) =>
+                                      !inquiryClinicsFilter.includes(c.value),
+                                  ).map((c) => (
                                     <option
                                       key={c.value}
                                       value={c.value}
@@ -19236,14 +19706,36 @@ ${ttNotes}`
                                   <div className="absolute top-full left-0 z-50 mt-1 flex flex-wrap gap-1 bg-slate-800 p-2 rounded-lg border border-slate-700 shadow-xl w-64">
                                     <span className="w-full text-xs text-slate-400 font-bold mb-1 flex justify-between">
                                       Selected Clinics:
-                                      <button onClick={() => setInquiryClinicsFilter([])} className="text-rose-400 hover:text-rose-300">Clear</button>
+                                      <button
+                                        onClick={() =>
+                                          setInquiryClinicsFilter([])
+                                        }
+                                        className="text-rose-400 hover:text-rose-300"
+                                      >
+                                        Clear
+                                      </button>
                                     </span>
                                     {inquiryClinicsFilter.map((c) => {
-                                      const label = CLINIC_OPTIONS.find((opt) => opt.value === c)?.label || c;
+                                      const label =
+                                        CLINIC_OPTIONS.find(
+                                          (opt) => opt.value === c,
+                                        )?.label || c;
                                       return (
-                                        <span key={c} className="bg-indigo-500/20 text-indigo-300 border-none px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
+                                        <span
+                                          key={c}
+                                          className="bg-indigo-500/20 text-indigo-300 border-none px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1"
+                                        >
                                           {label}
-                                          <button onClick={() => setInquiryClinicsFilter((prev) => prev.filter((x) => x !== c))} className="hover:text-white cursor-pointer">&times;</button>
+                                          <button
+                                            onClick={() =>
+                                              setInquiryClinicsFilter((prev) =>
+                                                prev.filter((x) => x !== c),
+                                              )
+                                            }
+                                            className="hover:text-white cursor-pointer"
+                                          >
+                                            &times;
+                                          </button>
                                         </span>
                                       );
                                     })}
@@ -19282,12 +19774,16 @@ ${ttNotes}`
                               return (
                                 <PaginatedCaseList
                                   items={filteredInquiries}
-                                  icon={<MessageSquare className="w-5 h-5 text-indigo-400" />}
+                                  icon={
+                                    <MessageSquare className="w-5 h-5 text-indigo-400" />
+                                  }
                                   title="Inquiry Record Pipeline"
                                   emptyMessage="No inquiries match the search filters or the queue is currently empty."
                                   itemToPhone={(inq) => inq.phoneNumber}
                                   itemToClinic={(inq) => inq.clinicName}
-                                  availableClinics={CLINIC_OPTIONS.map((c) => c.value)}
+                                  availableClinics={CLINIC_OPTIONS.map(
+                                    (c) => c.value,
+                                  )}
                                   renderItem={(inq) => (
                                     <InquiryCard
                                       key={inq.id}
@@ -19296,32 +19792,58 @@ ${ttNotes}`
                                       isExpanded={expandedInquiryId === inq.id}
                                       onToggle={() =>
                                         setExpandedInquiryId(
-                                          expandedInquiryId === inq.id ? null : inq.id,
+                                          expandedInquiryId === inq.id
+                                            ? null
+                                            : inq.id,
                                         )
                                       }
                                       isTLOreSupport={isTLOreSupport}
                                       isSuperAdmin={isSuperAdmin}
                                       handleTLViewInquiry={handleTLViewInquiry}
                                       canEditItem={canEditItem}
-                                      getRemainingEditTime={getRemainingEditTime}
+                                      getRemainingEditTime={
+                                        getRemainingEditTime
+                                      }
                                       setEditingItem={setEditingItem}
-                                      addSystemNotification={addSystemNotification}
+                                      addSystemNotification={
+                                        addSystemNotification
+                                      }
                                       answeringInquiryId={answeringInquiryId}
-                                      setAnsweringInquiryId={setAnsweringInquiryId}
+                                      setAnsweringInquiryId={
+                                        setAnsweringInquiryId
+                                      }
                                       currentAnswerText={currentAnswerText}
-                                      setCurrentAnswerText={setCurrentAnswerText}
-                                      currentAnswerAttachments={currentAnswerAttachments}
-                                      setCurrentAnswerAttachments={setCurrentAnswerAttachments}
+                                      setCurrentAnswerText={
+                                        setCurrentAnswerText
+                                      }
+                                      currentAnswerAttachments={
+                                        currentAnswerAttachments
+                                      }
+                                      setCurrentAnswerAttachments={
+                                        setCurrentAnswerAttachments
+                                      }
                                       currentAnswerLinks={currentAnswerLinks}
-                                      setCurrentAnswerLinks={setCurrentAnswerLinks}
+                                      setCurrentAnswerLinks={
+                                        setCurrentAnswerLinks
+                                      }
                                       isSubmittingAnswer={isSubmittingAnswer}
-                                      handleSetInquiryAnswered={handleSetInquiryAnswered}
+                                      handleSetInquiryAnswered={
+                                        handleSetInquiryAnswered
+                                      }
                                       handleDeleteInquiry={handleDeleteInquiry}
-                                      handleUpdateContactedStatus={handleUpdateContactedStatus}
-                                      handleMarkInquiryRead={handleMarkInquiryRead}
-                                      handleMarkSentToClinic={handleMarkSentToClinic}
+                                      handleUpdateContactedStatus={
+                                        handleUpdateContactedStatus
+                                      }
+                                      handleMarkInquiryRead={
+                                        handleMarkInquiryRead
+                                      }
+                                      handleMarkSentToClinic={
+                                        handleMarkSentToClinic
+                                      }
                                       handleCloseInquiry={handleCloseInquiry}
-                                      handleReassignInquiry={handleReassignInquiry}
+                                      handleReassignInquiry={
+                                        handleReassignInquiry
+                                      }
                                       agentsList={agentsList}
                                       inquiries={inquiries}
                                       setInquiries={setInquiries}
@@ -19954,17 +20476,24 @@ ${ttNotes}`
                                 {/* Feed Stream list or empty message */}
                                 <PaginatedCaseList
                                   items={sortedFilteredList}
-                                  icon={<Award className="w-5 h-5 text-indigo-400" />}
+                                  icon={
+                                    <Award className="w-5 h-5 text-indigo-400" />
+                                  }
                                   title="Agent Pipeline Feed"
                                   emptyMessage="No match found inside your performance lists. Try clearing your search or filters."
                                   itemToPhone={(item) => item.data.phoneNumber}
                                   itemToClinic={(item) => item.data.clinicName}
-                                  availableClinics={CLINIC_OPTIONS.map((c) => c.value)}
+                                  availableClinics={CLINIC_OPTIONS.map(
+                                    (c) => c.value,
+                                  )}
                                   renderItem={(item) => {
                                     const uniqueKey = `${item.type}-${item.id}`;
-                                    const isExpanded = myExpandedId === uniqueKey;
+                                    const isExpanded =
+                                      myExpandedId === uniqueKey;
                                     const onToggle = () =>
-                                      setMyExpandedId(isExpanded ? null : uniqueKey);
+                                      setMyExpandedId(
+                                        isExpanded ? null : uniqueKey,
+                                      );
 
                                     if (item.type === "tabbyTamara") {
                                       return (
@@ -19974,29 +20503,51 @@ ${ttNotes}`
                                           currentUser={currentUser}
                                           isTLOreSupport={isTLOreSupport}
                                           isSuperAdmin={isSuperAdmin}
-                                          activeFintechHandlingId={activeFintechHandlingId}
-                                          setActiveFintechHandlingId={setActiveFintechHandlingId}
-                                          tlFintechPaymentLink={tlFintechPaymentLink}
-                                          setTlFintechPaymentLink={setTlFintechPaymentLink}
+                                          activeFintechHandlingId={
+                                            activeFintechHandlingId
+                                          }
+                                          setActiveFintechHandlingId={
+                                            setActiveFintechHandlingId
+                                          }
+                                          tlFintechPaymentLink={
+                                            tlFintechPaymentLink
+                                          }
+                                          setTlFintechPaymentLink={
+                                            setTlFintechPaymentLink
+                                          }
                                           tlFintechNotes={tlFintechNotes}
                                           setTlFintechNotes={setTlFintechNotes}
                                           tlFintechLinks={tlFintechLinks}
                                           setTlFintechLinks={setTlFintechLinks}
-                                          handleConfirmTabbyTamara={handleConfirmTabbyTamara}
-                                          handleMarkPatientContactedTT={handleContactTabbyTamara}
-                                          getElapsedTimerString={getElapsedTimerString}
-                                          handleDeleteTabbyTamara={handleDeleteTabbyTamara}
+                                          handleConfirmTabbyTamara={
+                                            handleConfirmTabbyTamara
+                                          }
+                                          handleMarkPatientContactedTT={
+                                            handleContactTabbyTamara
+                                          }
+                                          getElapsedTimerString={
+                                            getElapsedTimerString
+                                          }
+                                          handleDeleteTabbyTamara={
+                                            handleDeleteTabbyTamara
+                                          }
                                           canEditItem={canEditItem}
-                                          getRemainingEditTime={getRemainingEditTime}
+                                          getRemainingEditTime={
+                                            getRemainingEditTime
+                                          }
                                           editLimitMs={10 * 60 * 1000}
-                                          setEditingItem={(editingItem: any) => {
+                                          setEditingItem={(
+                                            editingItem: any,
+                                          ) => {
                                             setEditingItem({
                                               type: "tt_request",
                                               id: editingItem.data.id,
                                               data: editingItem.data,
                                             });
                                           }}
-                                          addSystemNotification={addSystemNotification}
+                                          addSystemNotification={
+                                            addSystemNotification
+                                          }
                                           isExpanded={isExpanded}
                                           onToggle={onToggle}
                                         />
@@ -20013,27 +20564,55 @@ ${ttNotes}`
                                           isSuperAdmin={isSuperAdmin}
                                           isExpanded={isExpanded}
                                           onToggle={onToggle}
-                                          activeComplaintHandlingId={activeComplaintHandlingId}
-                                          setActiveComplaintHandlingId={setActiveComplaintHandlingId}
-                                          tlComplaintResolutionType={tlComplaintResolutionType}
-                                          setTlComplaintResolutionType={setTlComplaintResolutionType}
-                                          tlComplaintComment={tlComplaintComment}
-                                          setTlComplaintComment={setTlComplaintComment}
-                                          handleTLCommentComplaint={handleTLCommentComplaint}
-                                          handleToggleContactComplaint={handleToggleContactComplaint}
-                                          handleDeleteComplaint={handleDeleteComplaint}
-                                          handleAssignRecord={handleAssignRecord}
-                                          addSystemNotification={addSystemNotification}
+                                          activeComplaintHandlingId={
+                                            activeComplaintHandlingId
+                                          }
+                                          setActiveComplaintHandlingId={
+                                            setActiveComplaintHandlingId
+                                          }
+                                          tlComplaintResolutionType={
+                                            tlComplaintResolutionType
+                                          }
+                                          setTlComplaintResolutionType={
+                                            setTlComplaintResolutionType
+                                          }
+                                          tlComplaintComment={
+                                            tlComplaintComment
+                                          }
+                                          setTlComplaintComment={
+                                            setTlComplaintComment
+                                          }
+                                          handleTLCommentComplaint={
+                                            handleTLCommentComplaint
+                                          }
+                                          handleToggleContactComplaint={
+                                            handleToggleContactComplaint
+                                          }
+                                          handleDeleteComplaint={
+                                            handleDeleteComplaint
+                                          }
+                                          handleAssignRecord={
+                                            handleAssignRecord
+                                          }
+                                          addSystemNotification={
+                                            addSystemNotification
+                                          }
                                           canEditItem={canEditItem}
-                                          getRemainingEditTime={getRemainingEditTime}
-                                          setEditingItem={(editingItem: any) => {
+                                          getRemainingEditTime={
+                                            getRemainingEditTime
+                                          }
+                                          setEditingItem={(
+                                            editingItem: any,
+                                          ) => {
                                             setEditingItem({
                                               type: "tt_complaint",
                                               id: editingItem.data.id,
                                               data: editingItem.data,
                                             });
                                           }}
-                                          getElapsedTimerString={getElapsedTimerString}
+                                          getElapsedTimerString={
+                                            getElapsedTimerString
+                                          }
                                         />
                                       );
                                     }
@@ -20048,33 +20627,71 @@ ${ttNotes}`
                                           onToggle={onToggle}
                                           isTLOreSupport={isTLOreSupport}
                                           isSuperAdmin={isSuperAdmin}
-                                          handleTLViewInquiry={handleTLViewInquiry}
+                                          handleTLViewInquiry={
+                                            handleTLViewInquiry
+                                          }
                                           canEditItem={canEditItem}
-                                          getRemainingEditTime={getRemainingEditTime}
-                                          setEditingItem={(editingItem: any) => {
+                                          getRemainingEditTime={
+                                            getRemainingEditTime
+                                          }
+                                          setEditingItem={(
+                                            editingItem: any,
+                                          ) => {
                                             setEditingItem({
                                               type: "inquiry",
                                               id: editingItem.data.id,
                                               data: editingItem.data,
                                             });
                                           }}
-                                          addSystemNotification={addSystemNotification}
-                                          answeringInquiryId={answeringInquiryId}
-                                          setAnsweringInquiryId={setAnsweringInquiryId}
+                                          addSystemNotification={
+                                            addSystemNotification
+                                          }
+                                          answeringInquiryId={
+                                            answeringInquiryId
+                                          }
+                                          setAnsweringInquiryId={
+                                            setAnsweringInquiryId
+                                          }
                                           currentAnswerText={currentAnswerText}
-                                          setCurrentAnswerText={setCurrentAnswerText}
-                                          currentAnswerAttachments={currentAnswerAttachments}
-                                          setCurrentAnswerAttachments={setCurrentAnswerAttachments}
-                                          currentAnswerLinks={currentAnswerLinks}
-                                          setCurrentAnswerLinks={setCurrentAnswerLinks}
-                                          isSubmittingAnswer={isSubmittingAnswer}
-                                          handleSetInquiryAnswered={handleSetInquiryAnswered}
-                                          handleDeleteInquiry={handleDeleteInquiry}
-                                          handleUpdateContactedStatus={handleUpdateContactedStatus}
-                                          handleMarkInquiryRead={handleMarkInquiryRead}
-                                          handleMarkSentToClinic={handleMarkSentToClinic}
-                                          handleCloseInquiry={handleCloseInquiry}
-                                          handleReassignInquiry={handleReassignInquiry}
+                                          setCurrentAnswerText={
+                                            setCurrentAnswerText
+                                          }
+                                          currentAnswerAttachments={
+                                            currentAnswerAttachments
+                                          }
+                                          setCurrentAnswerAttachments={
+                                            setCurrentAnswerAttachments
+                                          }
+                                          currentAnswerLinks={
+                                            currentAnswerLinks
+                                          }
+                                          setCurrentAnswerLinks={
+                                            setCurrentAnswerLinks
+                                          }
+                                          isSubmittingAnswer={
+                                            isSubmittingAnswer
+                                          }
+                                          handleSetInquiryAnswered={
+                                            handleSetInquiryAnswered
+                                          }
+                                          handleDeleteInquiry={
+                                            handleDeleteInquiry
+                                          }
+                                          handleUpdateContactedStatus={
+                                            handleUpdateContactedStatus
+                                          }
+                                          handleMarkInquiryRead={
+                                            handleMarkInquiryRead
+                                          }
+                                          handleMarkSentToClinic={
+                                            handleMarkSentToClinic
+                                          }
+                                          handleCloseInquiry={
+                                            handleCloseInquiry
+                                          }
+                                          handleReassignInquiry={
+                                            handleReassignInquiry
+                                          }
                                           agentsList={agentsList}
                                           inquiries={inquiries}
                                           setInquiries={setInquiries}
@@ -20087,32 +20704,58 @@ ${ttNotes}`
                                         <ClientCommCard
                                           key={uniqueKey}
                                           comm={item.data as any}
+                                           agentsList={agentsList}
+                                           handleAssignRecord={handleAssignRecord}
                                           currentUser={currentUser}
                                           isExpanded={isExpanded}
                                           onToggle={onToggle}
                                           isTLOreSupport={isTLOreSupport}
                                           isSuperAdmin={isSuperAdmin}
-                                          activeCcHandlingId={activeCcHandlingId}
-                                          setActiveCcHandlingId={setActiveCcHandlingId}
+                                          activeCcHandlingId={
+                                            activeCcHandlingId
+                                          }
+                                          setActiveCcHandlingId={
+                                            setActiveCcHandlingId
+                                          }
                                           ccHandlingNotes={ccHandlingNotes}
-                                          setCcHandlingNotes={setCcHandlingNotes}
+                                          setCcHandlingNotes={
+                                            setCcHandlingNotes
+                                          }
                                           ccHandlingPhotos={ccHandlingPhotos}
-                                          setCcHandlingPhotos={setCcHandlingPhotos}
-                                          handleProcessClientComms={handleProcessClientComms}
-                                          handleDeleteClientComms={handleDeleteClientComms}
+                                          setCcHandlingPhotos={
+                                            setCcHandlingPhotos
+                                          }
+                                          handleProcessClientComms={
+                                            handleProcessClientComms
+                                          }
+                                          handleDeleteClientComms={
+                                            handleDeleteClientComms
+                                          }
                                           canEditItem={canEditItem}
-                                          getRemainingEditTime={getRemainingEditTime}
-                                          setEditingItem={(editingItem: any) => {
+                                          getRemainingEditTime={
+                                            getRemainingEditTime
+                                          }
+                                          setEditingItem={(
+                                            editingItem: any,
+                                          ) => {
                                             setEditingItem({
                                               type: "client_comm",
                                               id: editingItem.data.id,
                                               data: editingItem.data,
                                             });
                                           }}
-                                          handleTakeClientComm={handleTakeClientComm}
-                                          handleMarkClientCommDone={handleMarkClientCommDone}
-                                          addSystemNotification={addSystemNotification}
-                                          getElapsedTimerString={getElapsedTimerString}
+                                          handleTakeClientComm={
+                                            handleTakeClientComm
+                                          }
+                                          handleMarkClientCommDone={
+                                            handleMarkClientCommDone
+                                          }
+                                          addSystemNotification={
+                                            addSystemNotification
+                                          }
+                                          getElapsedTimerString={
+                                            getElapsedTimerString
+                                          }
                                         />
                                       );
                                     }
@@ -22006,7 +22649,9 @@ ${ttNotes}`
                             </p>
                           </div>
 
-                          {(isSuperAdmin || isTLOreSupport || currentUser?.role === "tl") && (
+                          {(isSuperAdmin ||
+                            isTLOreSupport ||
+                            currentUser?.role === "tl") && (
                             <button
                               onClick={clearTargetSchedules}
                               className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 hover:border-rose-500/35 text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer self-stretch md:self-auto justify-center"
@@ -22018,7 +22663,9 @@ ${ttNotes}`
                         </div>
 
                         {/* Schedule Upload Module */}
-                        {(isSuperAdmin || isTLOreSupport || currentUser?.role === "tl") && (
+                        {(isSuperAdmin ||
+                          isTLOreSupport ||
+                          currentUser?.role === "tl") && (
                           <div className="w-full">
                             <ScheduleUpload
                               agentsList={agentsList}
@@ -22045,7 +22692,9 @@ ${ttNotes}`
                         )}
 
                         {/* Roster Live Toggle Switch purely for Hesham & Amira */}
-                        {(isSuperAdmin || isTLOreSupport || currentUser?.role === "tl") && (
+                        {(isSuperAdmin ||
+                          isTLOreSupport ||
+                          currentUser?.role === "tl") && (
                           <div className="bg-gradient-to-r from-violet-500/15 via-indigo-500/10 to-blue-500/15 border border-indigo-500/30 rounded-3xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 shadow-xl">
                             <div className="space-y-1 text-left">
                               <div className="flex items-center gap-2">
@@ -22101,7 +22750,9 @@ ${ttNotes}`
                         )}
 
                         {/* Manual Single-Shift Roster Submission Form */}
-                        {(isSuperAdmin || isTLOreSupport || currentUser?.role === "tl") && (
+                        {(isSuperAdmin ||
+                          isTLOreSupport ||
+                          currentUser?.role === "tl") && (
                           <div className="bg-white/5 border border-white/10 rounded-3xl shadow-sm text-slate-100 p-6 shadow-2xl space-y-5 text-left">
                             <div>
                               <h3 className="font-extrabold text-slate-100 text-base font-display flex items-center gap-2">
@@ -24320,120 +24971,208 @@ ${ttNotes}`
                             {localSubTab === "requests" ? (
                               <div className="space-y-6">
                                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                                {/* ... existing requests metrics ... */}
-                                <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-                                  <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">
-                                    Total Submissions
-                                  </p>
-                                  <p className="text-2xl font-black text-slate-100">
-                                    {isTLOreSupport
-                                      ? tabbyTamaraRequests.length
-                                      : tabbyTamaraRequests.filter(
-                                          (r) =>
-                                            r.agentName?.toLowerCase() ===
-                                            currentUser?.name?.toLowerCase(),
-                                        ).length}
-                                  </p>
-                                  <p className="text-[10px] text-indigo-300 mt-1">
-                                    Logged requests in standalone storage
-                                  </p>
-                                </div>
+                                  {/* ... existing requests metrics ... */}
+                                  <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
+                                    <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">
+                                      Total Submissions
+                                    </p>
+                                    <p className="text-2xl font-black text-slate-100">
+                                      {isTLOreSupport
+                                        ? tabbyTamaraRequests.length
+                                        : tabbyTamaraRequests.filter(
+                                            (r) =>
+                                              r.agentName?.toLowerCase() ===
+                                              currentUser?.name?.toLowerCase(),
+                                          ).length}
+                                    </p>
+                                    <p className="text-[10px] text-indigo-300 mt-1">
+                                      Logged requests in standalone storage
+                                    </p>
+                                  </div>
 
-                                <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl backdrop-blur-sm">
-                                  <p className="text-[10px] uppercase tracking-widest text-amber-300 font-bold mb-1">
-                                    ⏳ Awaiting TL Confirm
-                                  </p>
-                                  <p className="text-2xl font-black text-amber-400">
-                                    {isTLOreSupport
-                                      ? tabbyTamaraRequests.filter(
-                                          (r) => r.status === "not_confirmed",
-                                        ).length
-                                      : tabbyTamaraRequests.filter(
-                                          (r) =>
-                                            r.agentName?.toLowerCase() ===
-                                              currentUser?.name?.toLowerCase() &&
-                                            r.status === "not_confirmed",
-                                        ).length}
-                                  </p>
-                                  <p className="text-[10px] text-amber-200 mt-1">
-                                    Requires Team Leader review
-                                  </p>
-                                </div>
+                                  <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl backdrop-blur-sm">
+                                    <p className="text-[10px] uppercase tracking-widest text-amber-300 font-bold mb-1">
+                                      ⏳ Awaiting TL Confirm
+                                    </p>
+                                    <p className="text-2xl font-black text-amber-400">
+                                      {isTLOreSupport
+                                        ? tabbyTamaraRequests.filter(
+                                            (r) => r.status === "not_confirmed",
+                                          ).length
+                                        : tabbyTamaraRequests.filter(
+                                            (r) =>
+                                              r.agentName?.toLowerCase() ===
+                                                currentUser?.name?.toLowerCase() &&
+                                              r.status === "not_confirmed",
+                                          ).length}
+                                    </p>
+                                    <p className="text-[10px] text-amber-200 mt-1">
+                                      Requires Team Leader review
+                                    </p>
+                                  </div>
 
-                                <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl backdrop-blur-sm">
-                                  <p className="text-[10px] uppercase tracking-widest text-rose-300 font-bold mb-1">
-                                    Confirmed / Pending Contact
-                                  </p>
-                                  <p className="text-2xl font-black text-rose-400">
-                                    {isTLOreSupport
-                                      ? tabbyTamaraRequests.filter(
-                                          (r) =>
-                                            r.status === "confirmed" &&
-                                            r.customerContacted ===
-                                              "not_contacted",
-                                        ).length
-                                      : tabbyTamaraRequests.filter(
-                                          (r) =>
-                                            r.agentName?.toLowerCase() ===
-                                              currentUser?.name?.toLowerCase() &&
-                                            r.status === "confirmed" &&
-                                            r.customerContacted ===
-                                              "not_contacted",
-                                        ).length}
-                                  </p>
-                                  <p className="text-[10px] text-rose-300 mt-1">
-                                    Confirmed but client not contacted yet
-                                  </p>
-                                </div>
+                                  <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl backdrop-blur-sm">
+                                    <p className="text-[10px] uppercase tracking-widest text-rose-300 font-bold mb-1">
+                                      Confirmed / Pending Contact
+                                    </p>
+                                    <p className="text-2xl font-black text-rose-400">
+                                      {isTLOreSupport
+                                        ? tabbyTamaraRequests.filter(
+                                            (r) =>
+                                              r.status === "confirmed" &&
+                                              r.customerContacted ===
+                                                "not_contacted",
+                                          ).length
+                                        : tabbyTamaraRequests.filter(
+                                            (r) =>
+                                              r.agentName?.toLowerCase() ===
+                                                currentUser?.name?.toLowerCase() &&
+                                              r.status === "confirmed" &&
+                                              r.customerContacted ===
+                                                "not_contacted",
+                                          ).length}
+                                    </p>
+                                    <p className="text-[10px] text-rose-300 mt-1">
+                                      Confirmed but client not contacted yet
+                                    </p>
+                                  </div>
 
-                                <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl backdrop-blur-sm">
-                                  <p className="text-[10px] uppercase tracking-widest text-emerald-300 font-bold mb-1">
-                                    Successfully Contacted
-                                  </p>
-                                  <p className="text-2xl font-black text-emerald-400">
-                                    {isTLOreSupport
-                                      ? tabbyTamaraRequests.filter(
-                                          (r) =>
-                                            r.customerContacted === "contacted",
-                                        ).length
-                                      : tabbyTamaraRequests.filter(
-                                          (r) =>
-                                            r.agentName?.toLowerCase() ===
-                                              currentUser?.name?.toLowerCase() &&
-                                            r.customerContacted === "contacted",
-                                        ).length}
-                                  </p>
+                                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl backdrop-blur-sm">
+                                    <p className="text-[10px] uppercase tracking-widest text-emerald-300 font-bold mb-1">
+                                      Successfully Contacted
+                                    </p>
+                                    <p className="text-2xl font-black text-emerald-400">
+                                      {isTLOreSupport
+                                        ? tabbyTamaraRequests.filter(
+                                            (r) =>
+                                              r.customerContacted ===
+                                              "contacted",
+                                          ).length
+                                        : tabbyTamaraRequests.filter(
+                                            (r) =>
+                                              r.agentName?.toLowerCase() ===
+                                                currentUser?.name?.toLowerCase() &&
+                                              r.customerContacted ===
+                                                "contacted",
+                                          ).length}
+                                    </p>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
                                   <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl h-56 shadow-xl">
                                     <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
                                       <Activity className="w-4 h-4 text-amber-400" />
                                       T&T Request Load By Clinic
                                     </h3>
                                     {(() => {
-                                      const requestsToUse = isTLOreSupport ? tabbyTamaraRequests : tabbyTamaraRequests.filter(r => r.agentName?.toLowerCase() === currentUser?.name?.toLowerCase());
+                                      const requestsToUse = isTLOreSupport
+                                        ? tabbyTamaraRequests
+                                        : tabbyTamaraRequests.filter(
+                                            (r) =>
+                                              r.agentName?.toLowerCase() ===
+                                              currentUser?.name?.toLowerCase(),
+                                          );
                                       const clinicData = [
-                                        { name: "Dermadent", value: requestsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "dermadent").length, color: "#6366f1" },
-                                        { name: "AlMutarid", value: requestsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "onetouch_mo3tred").length, color: "#10b981" },
-                                        { name: "Markhaniya", value: requestsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "onetouch_merkhnya").length, color: "#06b6d4" },
-                                        { name: "Well Touch", value: requestsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "welltouch").length, color: "#f43f5e" },
-                                        { name: "New Age", value: requestsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "newage").length, color: "#f59e0b" },
-                                      ].filter(d => d.value > 0);
+                                        {
+                                          name: "Dermadent",
+                                          value: requestsToUse.filter(
+                                            (i) =>
+                                              (
+                                                i.clinicName || ""
+                                              ).toLowerCase() === "dermadent",
+                                          ).length,
+                                          color: "#6366f1",
+                                        },
+                                        {
+                                          name: "AlMutarid",
+                                          value: requestsToUse.filter(
+                                            (i) =>
+                                              (
+                                                i.clinicName || ""
+                                              ).toLowerCase() ===
+                                              "onetouch_mo3tred",
+                                          ).length,
+                                          color: "#10b981",
+                                        },
+                                        {
+                                          name: "Markhaniya",
+                                          value: requestsToUse.filter(
+                                            (i) =>
+                                              (
+                                                i.clinicName || ""
+                                              ).toLowerCase() ===
+                                              "onetouch_merkhnya",
+                                          ).length,
+                                          color: "#06b6d4",
+                                        },
+                                        {
+                                          name: "Well Touch",
+                                          value: requestsToUse.filter(
+                                            (i) =>
+                                              (
+                                                i.clinicName || ""
+                                              ).toLowerCase() === "welltouch",
+                                          ).length,
+                                          color: "#f43f5e",
+                                        },
+                                        {
+                                          name: "New Age",
+                                          value: requestsToUse.filter(
+                                            (i) =>
+                                              (
+                                                i.clinicName || ""
+                                              ).toLowerCase() === "newage",
+                                          ).length,
+                                          color: "#f59e0b",
+                                        },
+                                      ].filter((d) => d.value > 0);
                                       return (
-                                        <ResponsiveContainer width="100%" height={160}>
+                                        <ResponsiveContainer
+                                          width="100%"
+                                          height={160}
+                                        >
                                           <BarChart data={clinicData}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                                            <XAxis dataKey="name" tick={{fill: '#94a3b8', fontSize: 10}} axisLine={false} tickLine={false} />
-                                            <Tooltip 
-                                              contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', borderRadius: '8px' }}
-                                              itemStyle={{ color: '#f1f5f9', fontSize: 12 }}
-                                              cursor={{fill: '#334155', opacity: 0.4}}
+                                            <CartesianGrid
+                                              strokeDasharray="3 3"
+                                              stroke="#334155"
+                                              vertical={false}
                                             />
-                                            <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                                              {clinicData.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={entry.color} />
-                                              ))}
+                                            <XAxis
+                                              dataKey="name"
+                                              tick={{
+                                                fill: "#94a3b8",
+                                                fontSize: 10,
+                                              }}
+                                              axisLine={false}
+                                              tickLine={false}
+                                            />
+                                            <Tooltip
+                                              contentStyle={{
+                                                backgroundColor: "#1e293b",
+                                                borderColor: "#334155",
+                                                borderRadius: "8px",
+                                              }}
+                                              itemStyle={{
+                                                color: "#f1f5f9",
+                                                fontSize: 12,
+                                              }}
+                                              cursor={{
+                                                fill: "#334155",
+                                                opacity: 0.4,
+                                              }}
+                                            />
+                                            <Bar
+                                              dataKey="value"
+                                              radius={[4, 4, 0, 0]}
+                                            >
+                                              {clinicData.map(
+                                                (entry, index) => (
+                                                  <Cell
+                                                    key={`cell-${index}`}
+                                                    fill={entry.color}
+                                                  />
+                                                ),
+                                              )}
                                             </Bar>
                                           </BarChart>
                                         </ResponsiveContainer>
@@ -24446,22 +25185,80 @@ ${ttNotes}`
                                       T&T Approvals vs Rejected
                                     </h3>
                                     {(() => {
-                                      const requestsToUse = isTLOreSupport ? tabbyTamaraRequests : tabbyTamaraRequests.filter(r => r.agentName?.toLowerCase() === currentUser?.name?.toLowerCase());
+                                      const requestsToUse = isTLOreSupport
+                                        ? tabbyTamaraRequests
+                                        : tabbyTamaraRequests.filter(
+                                            (r) =>
+                                              r.agentName?.toLowerCase() ===
+                                              currentUser?.name?.toLowerCase(),
+                                          );
                                       const statusData = [
-                                        { name: "Confirmed", value: requestsToUse.filter((i) => i.status === "confirmed").length, color: "#10b981" },
-                                        { name: "Not Conf.", value: requestsToUse.filter((i) => i.status === "not_confirmed").length, color: "#f59e0b" },
-                                        { name: "Rejected", value: requestsToUse.filter((i) => i.status === "rejected").length, color: "#ef4444" },
-                                      ].filter(d => d.value > 0);
+                                        {
+                                          name: "Confirmed",
+                                          value: requestsToUse.filter(
+                                            (i) => i.status === "confirmed",
+                                          ).length,
+                                          color: "#10b981",
+                                        },
+                                        {
+                                          name: "Not Conf.",
+                                          value: requestsToUse.filter(
+                                            (i) => i.status === "not_confirmed",
+                                          ).length,
+                                          color: "#f59e0b",
+                                        },
+                                        {
+                                          name: "Rejected",
+                                          value: requestsToUse.filter(
+                                            (i) => i.status === "rejected",
+                                          ).length,
+                                          color: "#ef4444",
+                                        },
+                                      ].filter((d) => d.value > 0);
                                       return (
-                                        <ResponsiveContainer width="100%" height={160}>
+                                        <ResponsiveContainer
+                                          width="100%"
+                                          height={160}
+                                        >
                                           <RechartsPieChart>
-                                            <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={40} outerRadius={60} paddingAngle={5}>
-                                              {statusData.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={entry.color} />
-                                              ))}
+                                            <Pie
+                                              data={statusData}
+                                              dataKey="value"
+                                              nameKey="name"
+                                              cx="50%"
+                                              cy="50%"
+                                              innerRadius={40}
+                                              outerRadius={60}
+                                              paddingAngle={5}
+                                            >
+                                              {statusData.map(
+                                                (entry, index) => (
+                                                  <Cell
+                                                    key={`cell-${index}`}
+                                                    fill={entry.color}
+                                                  />
+                                                ),
+                                              )}
                                             </Pie>
-                                            <Tooltip contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', borderRadius: '8px' }} itemStyle={{ color: '#f1f5f9', fontSize: 12 }} />
-                                            <Legend verticalAlign="bottom" height={20} iconType="circle" wrapperStyle={{ fontSize: '10px' }} />
+                                            <Tooltip
+                                              contentStyle={{
+                                                backgroundColor: "#1e293b",
+                                                borderColor: "#334155",
+                                                borderRadius: "8px",
+                                              }}
+                                              itemStyle={{
+                                                color: "#f1f5f9",
+                                                fontSize: 12,
+                                              }}
+                                            />
+                                            <Legend
+                                              verticalAlign="bottom"
+                                              height={20}
+                                              iconType="circle"
+                                              wrapperStyle={{
+                                                fontSize: "10px",
+                                              }}
+                                            />
                                           </RechartsPieChart>
                                         </ResponsiveContainer>
                                       );
@@ -24472,206 +25269,357 @@ ${ttNotes}`
                             ) : localSubTab === "complaints" ? (
                               <div className="space-y-6 animate-fade-in">
                                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                                {/* ... existing complaints metrics ... */}
-                                <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-                                  <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">
-                                    Total Complaints
-                                  </p>
-                                  <p className="text-2xl font-black text-slate-100">
-                                    {isTLOreSupport
-                                      ? tabbyTamaraComplaints.length
-                                      : tabbyTamaraComplaints.filter(
-                                          (c) =>
-                                            c.agentName?.toLowerCase() ===
-                                            currentUser?.name?.toLowerCase(),
-                                        ).length}
-                                  </p>
-                                  <p className="text-[10px] text-pink-300 mt-1 font-sans">
-                                    Registered complaints in session
-                                  </p>
-                                </div>
+                                  {/* ... existing complaints metrics ... */}
+                                  <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
+                                    <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">
+                                      Total Complaints
+                                    </p>
+                                    <p className="text-2xl font-black text-slate-100">
+                                      {isTLOreSupport
+                                        ? tabbyTamaraComplaints.length
+                                        : tabbyTamaraComplaints.filter(
+                                            (c) =>
+                                              c.agentName?.toLowerCase() ===
+                                              currentUser?.name?.toLowerCase(),
+                                          ).length}
+                                    </p>
+                                    <p className="text-[10px] text-pink-300 mt-1 font-sans">
+                                      Registered complaints in session
+                                    </p>
+                                  </div>
 
-                                <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl backdrop-blur-sm">
-                                  <p className="text-[10px] uppercase tracking-widest text-amber-300 font-bold mb-1">
-                                    ⏳ Awaiting TL Action
-                                  </p>
-                                  <p className="text-2xl font-black text-amber-400">
-                                    {isTLOreSupport
-                                      ? tabbyTamaraComplaints.filter(
-                                          (c) => c.status === "pending_tl",
-                                        ).length
-                                      : tabbyTamaraComplaints.filter(
-                                          (c) =>
-                                            c.agentName?.toLowerCase() ===
-                                              currentUser?.name?.toLowerCase() &&
-                                            c.status === "pending_tl",
-                                        ).length}
-                                  </p>
-                                  <p className="text-[10px] text-amber-200 mt-1 font-sans">
-                                    Pending Team Leader comment
-                                  </p>
-                                </div>
+                                  <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl backdrop-blur-sm">
+                                    <p className="text-[10px] uppercase tracking-widest text-amber-300 font-bold mb-1">
+                                      ⏳ Awaiting TL Action
+                                    </p>
+                                    <p className="text-2xl font-black text-amber-400">
+                                      {isTLOreSupport
+                                        ? tabbyTamaraComplaints.filter(
+                                            (c) => c.status === "pending_tl",
+                                          ).length
+                                        : tabbyTamaraComplaints.filter(
+                                            (c) =>
+                                              c.agentName?.toLowerCase() ===
+                                                currentUser?.name?.toLowerCase() &&
+                                              c.status === "pending_tl",
+                                          ).length}
+                                    </p>
+                                    <p className="text-[10px] text-amber-200 mt-1 font-sans">
+                                      Pending Team Leader comment
+                                    </p>
+                                  </div>
 
-                                <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl backdrop-blur-sm">
-                                  <p className="text-[10px] uppercase tracking-widest text-rose-300 font-bold mb-1">
-                                    Pending Client Contact
-                                  </p>
-                                  <p className="text-2xl font-black text-rose-400">
-                                    {isTLOreSupport
-                                      ? tabbyTamaraComplaints.filter(
-                                          (c) => c.status === "need_contact",
-                                        ).length
-                                      : tabbyTamaraComplaints.filter(
-                                          (c) =>
-                                            c.agentName?.toLowerCase() ===
-                                              currentUser?.name?.toLowerCase() &&
-                                            c.status === "need_contact",
-                                        ).length}
-                                  </p>
-                                  <p className="text-[10px] text-rose-300 mt-1 font-sans font-medium animate-pulse">
-                                    Pending client contacted action
-                                  </p>
-                                </div>
+                                  <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl backdrop-blur-sm">
+                                    <p className="text-[10px] uppercase tracking-widest text-rose-300 font-bold mb-1">
+                                      Pending Client Contact
+                                    </p>
+                                    <p className="text-2xl font-black text-rose-400">
+                                      {isTLOreSupport
+                                        ? tabbyTamaraComplaints.filter(
+                                            (c) => c.status === "need_contact",
+                                          ).length
+                                        : tabbyTamaraComplaints.filter(
+                                            (c) =>
+                                              c.agentName?.toLowerCase() ===
+                                                currentUser?.name?.toLowerCase() &&
+                                              c.status === "need_contact",
+                                          ).length}
+                                    </p>
+                                    <p className="text-[10px] text-rose-300 mt-1 font-sans font-medium animate-pulse">
+                                      Pending client contacted action
+                                    </p>
+                                  </div>
 
-                                <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl backdrop-blur-sm">
-                                  <p className="text-[10px] uppercase tracking-widest text-emerald-300 font-bold mb-1">
-                                    Successfully Closed
-                                  </p>
-                                  <p className="text-2xl font-black text-emerald-400">
-                                    {isTLOreSupport
-                                      ? tabbyTamaraComplaints.filter(
-                                          (c) => c.status === "closed",
-                                        ).length
-                                      : tabbyTamaraComplaints.filter(
-                                          (c) =>
-                                            c.agentName?.toLowerCase() ===
-                                              currentUser?.name?.toLowerCase() &&
-                                            c.status === "closed",
-                                        ).length}
-                                  </p>
-                                  <p className="text-[10px] text-emerald-300 mt-1 font-sans">
-                                    Closed complaints loop
-                                  </p>
+                                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl backdrop-blur-sm">
+                                    <p className="text-[10px] uppercase tracking-widest text-emerald-300 font-bold mb-1">
+                                      Successfully Closed
+                                    </p>
+                                    <p className="text-2xl font-black text-emerald-400">
+                                      {isTLOreSupport
+                                        ? tabbyTamaraComplaints.filter(
+                                            (c) => c.status === "closed",
+                                          ).length
+                                        : tabbyTamaraComplaints.filter(
+                                            (c) =>
+                                              c.agentName?.toLowerCase() ===
+                                                currentUser?.name?.toLowerCase() &&
+                                              c.status === "closed",
+                                          ).length}
+                                    </p>
+                                    <p className="text-[10px] text-emerald-300 mt-1 font-sans">
+                                      Closed complaints loop
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-1 mt-6">
+                                  <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl h-56 shadow-xl">
+                                    <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
+                                      <Activity className="w-4 h-4 text-rose-400" />
+                                      Complaints Load By Clinic
+                                    </h3>
+                                    {(() => {
+                                      const reqsToUse = isTLOreSupport
+                                        ? tabbyTamaraComplaints
+                                        : tabbyTamaraComplaints.filter(
+                                            (c) =>
+                                              c.agentName?.toLowerCase() ===
+                                              currentUser?.name?.toLowerCase(),
+                                          );
+                                      const clinicData = [
+                                        {
+                                          name: "Dermadent",
+                                          value: reqsToUse.filter(
+                                            (i) =>
+                                              (
+                                                i.clinicName || ""
+                                              ).toLowerCase() === "dermadent",
+                                          ).length,
+                                          color: "#6366f1",
+                                        },
+                                        {
+                                          name: "AlMutarid",
+                                          value: reqsToUse.filter(
+                                            (i) =>
+                                              (
+                                                i.clinicName || ""
+                                              ).toLowerCase() ===
+                                              "onetouch_mo3tred",
+                                          ).length,
+                                          color: "#10b981",
+                                        },
+                                        {
+                                          name: "Markhaniya",
+                                          value: reqsToUse.filter(
+                                            (i) =>
+                                              (
+                                                i.clinicName || ""
+                                              ).toLowerCase() ===
+                                              "onetouch_merkhnya",
+                                          ).length,
+                                          color: "#06b6d4",
+                                        },
+                                        {
+                                          name: "Well Touch",
+                                          value: reqsToUse.filter(
+                                            (i) =>
+                                              (
+                                                i.clinicName || ""
+                                              ).toLowerCase() === "welltouch",
+                                          ).length,
+                                          color: "#f43f5e",
+                                        },
+                                        {
+                                          name: "New Age",
+                                          value: reqsToUse.filter(
+                                            (i) =>
+                                              (
+                                                i.clinicName || ""
+                                              ).toLowerCase() === "newage",
+                                          ).length,
+                                          color: "#f59e0b",
+                                        },
+                                      ].filter((d) => d.value > 0);
+                                      return (
+                                        <ResponsiveContainer
+                                          width="100%"
+                                          height={160}
+                                        >
+                                          <BarChart data={clinicData}>
+                                            <CartesianGrid
+                                              strokeDasharray="3 3"
+                                              stroke="#334155"
+                                              vertical={false}
+                                            />
+                                            <XAxis
+                                              dataKey="name"
+                                              tick={{
+                                                fill: "#94a3b8",
+                                                fontSize: 10,
+                                              }}
+                                              axisLine={false}
+                                              tickLine={false}
+                                            />
+                                            <Tooltip
+                                              contentStyle={{
+                                                backgroundColor: "#1e293b",
+                                                borderColor: "#334155",
+                                                borderRadius: "8px",
+                                              }}
+                                              itemStyle={{
+                                                color: "#f1f5f9",
+                                                fontSize: 12,
+                                              }}
+                                              cursor={{
+                                                fill: "#334155",
+                                                opacity: 0.4,
+                                              }}
+                                            />
+                                            <Bar
+                                              dataKey="value"
+                                              radius={[4, 4, 0, 0]}
+                                            >
+                                              {clinicData.map(
+                                                (entry, index) => (
+                                                  <Cell
+                                                    key={`cell-${index}`}
+                                                    fill={entry.color}
+                                                  />
+                                                ),
+                                              )}
+                                            </Bar>
+                                          </BarChart>
+                                        </ResponsiveContainer>
+                                      );
+                                    })()}
+                                  </div>
                                 </div>
                               </div>
-                              <div className="grid grid-cols-1 mt-6">
-                                <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl h-56 shadow-xl">
-                                  <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
-                                    <Activity className="w-4 h-4 text-rose-400" />
-                                    Complaints Load By Clinic
-                                  </h3>
-                                  {(() => {
-                                    const reqsToUse = isTLOreSupport ? tabbyTamaraComplaints : tabbyTamaraComplaints.filter(c => c.agentName?.toLowerCase() === currentUser?.name?.toLowerCase());
-                                    const clinicData = [
-                                      { name: "Dermadent", value: reqsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "dermadent").length, color: "#6366f1" },
-                                      { name: "AlMutarid", value: reqsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "onetouch_mo3tred").length, color: "#10b981" },
-                                      { name: "Markhaniya", value: reqsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "onetouch_merkhnya").length, color: "#06b6d4" },
-                                      { name: "Well Touch", value: reqsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "welltouch").length, color: "#f43f5e" },
-                                      { name: "New Age", value: reqsToUse.filter((i) => (i.clinicName || "").toLowerCase() === "newage").length, color: "#f59e0b" },
-                                    ].filter(d => d.value > 0);
-                                    return (
-                                      <ResponsiveContainer width="100%" height={160}>
-                                        <BarChart data={clinicData}>
-                                          <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                                          <XAxis dataKey="name" tick={{fill: '#94a3b8', fontSize: 10}} axisLine={false} tickLine={false} />
-                                          <Tooltip 
-                                            contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', borderRadius: '8px' }}
-                                            itemStyle={{ color: '#f1f5f9', fontSize: 12 }}
-                                            cursor={{fill: '#334155', opacity: 0.4}}
-                                          />
-                                          <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                                            {clinicData.map((entry, index) => (
-                                              <Cell key={`cell-${index}`} fill={entry.color} />
-                                            ))}
-                                          </Bar>
-                                        </BarChart>
-                                      </ResponsiveContainer>
-                                    );
-                                  })()}
-                                </div>
-                              </div>
-                            </div>
                             ) : (
                               <div className="space-y-6">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
-                                <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-                                  <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">
-                                    Total Requests
-                                  </p>
-                                  <p className="text-2xl font-black text-slate-100">
-                                    {isTLOreSupport
-                                      ? clientComms.length
-                                      : clientComms.filter(
-                                          (c) =>
-                                            c.callCenterAgentName?.toLowerCase() ===
-                                              currentUser?.name?.toLowerCase() ||
-                                            c.handledBy?.toLowerCase() ===
-                                              currentUser?.name?.toLowerCase(),
-                                        ).length}
-                                  </p>
-                                  <p className="text-[10px] text-indigo-300 mt-1 font-sans">
-                                    All communication requests in session
-                                  </p>
-                                </div>
-
-                                <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl backdrop-blur-sm">
-                                  <p className="text-[10px] uppercase tracking-widest text-amber-300 font-bold mb-1">
-                                    ⏳ Pending Response
-                                  </p>
-                                  <p className="text-2xl font-black text-amber-400">
-                                    {isTLOreSupport
-                                      ? clientComms.filter(
-                                          (c) => c.status === "pending",
-                                        ).length
-                                      : clientComms.filter(
-                                          (c) =>
-                                            (c.callCenterAgentName?.toLowerCase() ===
-                                              currentUser?.name?.toLowerCase() ||
+                                  <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
+                                    <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">
+                                      Total Requests
+                                    </p>
+                                    <p className="text-2xl font-black text-slate-100">
+                                      {isTLOreSupport
+                                        ? clientComms.length
+                                        : clientComms.filter(
+                                            (c) =>
+                                              c.callCenterAgentName?.toLowerCase() ===
+                                                currentUser?.name?.toLowerCase() ||
                                               c.handledBy?.toLowerCase() ===
-                                                currentUser?.name?.toLowerCase()) &&
-                                            c.status === "pending",
-                                        ).length}
-                                  </p>
-                                  <p className="text-[10px] text-amber-200 mt-1 font-sans">
-                                    Currently awaiting agent interaction
-                                  </p>
+                                                currentUser?.name?.toLowerCase() ||
+                                              c.assignedTo?.toLowerCase() ===
+                                                currentUser?.name?.toLowerCase() ||
+                                              c.openedBy?.toLowerCase() ===
+                                                currentUser?.name?.toLowerCase(),
+                                          ).length}
+                                    </p>
+                                    <p className="text-[10px] text-indigo-300 mt-1 font-sans">
+                                      All communication requests in session
+                                    </p>
+                                  </div>
+
+                                  <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl backdrop-blur-sm">
+                                    <p className="text-[10px] uppercase tracking-widest text-amber-300 font-bold mb-1">
+                                      ⏳ Pending Response
+                                    </p>
+                                    <p className="text-2xl font-black text-amber-400">
+                                      {isTLOreSupport
+                                        ? clientComms.filter(
+                                            (c) => c.status === "pending",
+                                          ).length
+                                        : clientComms.filter(
+                                            (c) =>
+                                              (c.callCenterAgentName?.toLowerCase() ===
+                                                currentUser?.name?.toLowerCase() ||
+                                                c.handledBy?.toLowerCase() ===
+                                                  currentUser?.name?.toLowerCase()) &&
+                                              c.status === "pending",
+                                          ).length}
+                                    </p>
+                                    <p className="text-[10px] text-amber-200 mt-1 font-sans">
+                                      Currently awaiting agent interaction
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-1 mt-6">
+                                  <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl h-56 shadow-xl">
+                                    <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
+                                      <Activity className="w-4 h-4 text-indigo-400" />
+                                      Comms By Status
+                                    </h3>
+                                    {(() => {
+                                      const reqsToUse = isTLOreSupport
+                                        ? clientComms
+                                        : clientComms.filter(
+                                            (c) =>
+                                              c.callCenterAgentName?.toLowerCase() ===
+                                                currentUser?.name?.toLowerCase() ||
+                                              c.handledBy?.toLowerCase() ===
+                                                currentUser?.name?.toLowerCase() ||
+                                              c.assignedTo?.toLowerCase() ===
+                                                currentUser?.name?.toLowerCase() ||
+                                              c.openedBy?.toLowerCase() ===
+                                                currentUser?.name?.toLowerCase(),
+                                          );
+                                      const prioData = [
+                                        {
+                                          name: "Pending",
+                                          value: reqsToUse.filter(
+                                            (i) => i.status === "pending",
+                                          ).length,
+                                          color: "#ef4444",
+                                        },
+                                        {
+                                          name: "In Progress",
+                                          value: reqsToUse.filter(
+                                            (i) => i.status === "in_progress",
+                                          ).length,
+                                          color: "#f97316",
+                                        },
+                                        {
+                                          name: "Contacted",
+                                          value: reqsToUse.filter(
+                                            (i) => i.status === "contacted",
+                                          ).length,
+                                          color: "#10b981",
+                                        },
+                                      ].filter((d) => d.value > 0);
+                                      return (
+                                        <ResponsiveContainer
+                                          width="100%"
+                                          height={160}
+                                        >
+                                          <BarChart data={prioData}>
+                                            <CartesianGrid
+                                              strokeDasharray="3 3"
+                                              stroke="#334155"
+                                              vertical={false}
+                                            />
+                                            <XAxis
+                                              dataKey="name"
+                                              tick={{
+                                                fill: "#94a3b8",
+                                                fontSize: 10,
+                                              }}
+                                              axisLine={false}
+                                              tickLine={false}
+                                            />
+                                            <Tooltip
+                                              contentStyle={{
+                                                backgroundColor: "#1e293b",
+                                                borderColor: "#334155",
+                                                borderRadius: "8px",
+                                              }}
+                                              itemStyle={{
+                                                color: "#f1f5f9",
+                                                fontSize: 12,
+                                              }}
+                                              cursor={{
+                                                fill: "#334155",
+                                                opacity: 0.4,
+                                              }}
+                                            />
+                                            <Bar
+                                              dataKey="value"
+                                              radius={[4, 4, 0, 0]}
+                                            >
+                                              {prioData.map((entry, index) => (
+                                                <Cell
+                                                  key={`cell-${index}`}
+                                                  fill={entry.color}
+                                                />
+                                              ))}
+                                            </Bar>
+                                          </BarChart>
+                                        </ResponsiveContainer>
+                                      );
+                                    })()}
+                                  </div>
                                 </div>
                               </div>
-                              <div className="grid grid-cols-1 mt-6">
-                                <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl h-56 shadow-xl">
-                                  <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
-                                    <Activity className="w-4 h-4 text-indigo-400" />
-                                    Comms By Status
-                                  </h3>
-                                  {(() => {
-                                    const reqsToUse = isTLOreSupport ? clientComms : clientComms.filter(c => c.callCenterAgentName?.toLowerCase() === currentUser?.name?.toLowerCase() || c.handledBy?.toLowerCase() === currentUser?.name?.toLowerCase());
-                                    const prioData = [
-                                      { name: "Pending", value: reqsToUse.filter((i) => i.status === "pending").length, color: "#ef4444" },
-                                      { name: "In Progress", value: reqsToUse.filter((i) => i.status === "in_progress").length, color: "#f97316" },
-                                      { name: "Contacted", value: reqsToUse.filter((i) => i.status === "contacted").length, color: "#10b981" },
-                                    ].filter(d => d.value > 0);
-                                    return (
-                                      <ResponsiveContainer width="100%" height={160}>
-                                        <BarChart data={prioData}>
-                                          <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                                          <XAxis dataKey="name" tick={{fill: '#94a3b8', fontSize: 10}} axisLine={false} tickLine={false} />
-                                          <Tooltip 
-                                            contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', borderRadius: '8px' }}
-                                            itemStyle={{ color: '#f1f5f9', fontSize: 12 }}
-                                            cursor={{fill: '#334155', opacity: 0.4}}
-                                          />
-                                          <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                                            {prioData.map((entry, index) => (
-                                              <Cell key={`cell-${index}`} fill={entry.color} />
-                                            ))}
-                                          </Bar>
-                                        </BarChart>
-                                      </ResponsiveContainer>
-                                    );
-                                  })()}
-                                </div>
-                              </div>
-                            </div>
                             )}
 
                             {/* Core Layout Split */}
@@ -24700,7 +25648,7 @@ ${ttNotes}`
                                             e,
                                             activePhotos,
                                             setActivePhotos,
-                                            setIsTtUploading
+                                            setIsTtUploading,
                                           )
                                         }
                                         className="space-y-4 pt-2 text-left"
@@ -24989,7 +25937,9 @@ ${ttNotes}`
 
                                         <button
                                           type="submit"
-                                          disabled={isFormSubmitting || isTtUploading}
+                                          disabled={
+                                            isFormSubmitting || isTtUploading
+                                          }
                                           className={`w-full py-3.5 text-slate-100 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow ${isFormSubmitting || isTtUploading ? "bg-indigo-800 opacity-65 pointer-events-none" : "bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] shadow-indigo-500/10"}`}
                                         >
                                           {isFormSubmitting ? (
@@ -24997,7 +25947,7 @@ ${ttNotes}`
                                               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                               Submitting Request...
                                             </>
-                                         ) : isTtUploading ? (
+                                          ) : isTtUploading ? (
                                             <>
                                               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                               Uploading Files...
@@ -25032,7 +25982,7 @@ ${ttNotes}`
                                             e,
                                             activePhotos,
                                             setActivePhotos,
-                                            setIsTcUploading
+                                            setIsTcUploading,
                                           )
                                         }
                                         className="space-y-4 pt-2 text-left"
@@ -25204,7 +26154,9 @@ ${ttNotes}`
 
                                         <button
                                           type="submit"
-                                          disabled={isFormSubmitting || isTcUploading}
+                                          disabled={
+                                            isFormSubmitting || isTcUploading
+                                          }
                                           className={`w-full py-3.5 text-slate-100 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow ${isFormSubmitting || isTcUploading ? "bg-pink-900 opacity-65 pointer-events-none" : "bg-gradient-to-r from-pink-500 to-pink-600 hover:brightness-110 active:scale-[0.99] shadow-pink-500/10"}`}
                                         >
                                           {isFormSubmitting ? (
@@ -25244,7 +26196,7 @@ ${ttNotes}`
                                             e,
                                             activePhotos,
                                             setActivePhotos,
-                                            setIsCcUploading
+                                            setIsCcUploading,
                                           )
                                         }
                                         className="space-y-4 pt-2 text-left"
@@ -25440,7 +26392,9 @@ ${ttNotes}`
 
                                         <button
                                           type="submit"
-                                          disabled={isFormSubmitting || isCcUploading}
+                                          disabled={
+                                            isFormSubmitting || isCcUploading
+                                          }
                                           className={`w-full py-3.5 text-slate-100 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow ${isFormSubmitting || isCcUploading ? "bg-indigo-800 opacity-65 pointer-events-none" : "bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] shadow-indigo-500/10"}`}
                                         >
                                           {isFormSubmitting ? (
@@ -25478,6 +26432,10 @@ ${ttNotes}`
                                             c.callCenterAgentName?.toLowerCase() ===
                                               currentUser?.name?.toLowerCase() ||
                                             c.handledBy?.toLowerCase() ===
+                                              currentUser?.name?.toLowerCase() ||
+                                            c.assignedTo?.toLowerCase() ===
+                                              currentUser?.name?.toLowerCase() ||
+                                            c.openedBy?.toLowerCase() ===
                                               currentUser?.name?.toLowerCase(),
                                         );
 
@@ -25585,46 +26543,87 @@ ${ttNotes}`
                                         {/* Cards list */}
                                         <PaginatedCaseList
                                           items={filteredCc}
-                                          icon={<MessageSquare className="w-5 h-5 text-indigo-400" />}
+                                          icon={
+                                            <MessageSquare className="w-5 h-5 text-indigo-400" />
+                                          }
                                           title="Client Communications"
                                           emptyMessage="No client communication records found."
-                                          itemToPhone={(comm) => comm.phoneNumber || ""}
-                                          itemToClinic={(comm) => comm.clinicName}
-                                          availableClinics={CLINIC_OPTIONS.map((c) => c.value)}
+                                          itemToPhone={(comm) =>
+                                            comm.phoneNumber || ""
+                                          }
+                                          itemToClinic={(comm) =>
+                                            comm.clinicName
+                                          }
+                                          availableClinics={CLINIC_OPTIONS.map(
+                                            (c) => c.value,
+                                          )}
                                           renderItem={(comm) => {
-                                            const isExpanded = selectedClientCommId === comm.id;
+                                            const isExpanded =
+                                              selectedClientCommId === comm.id;
                                             const onToggle = () =>
-                                              setSelectedClientCommId(isExpanded ? null : comm.id);
+                                              setSelectedClientCommId(
+                                                isExpanded ? null : comm.id,
+                                              );
                                             return (
                                               <ClientCommCard
                                                 key={comm.id}
                                                 comm={comm}
+                                                 agentsList={agentsList}
+                                                 handleAssignRecord={handleAssignRecord}
                                                 currentUser={currentUser}
                                                 isExpanded={isExpanded}
                                                 onToggle={onToggle}
                                                 isTLOreSupport={isTLOreSupport}
                                                 isSuperAdmin={isSuperAdmin}
-                                                activeCcHandlingId={activeCcHandlingId}
-                                                setActiveCcHandlingId={setActiveCcHandlingId}
-                                                ccHandlingNotes={ccHandlingNotes}
-                                                setCcHandlingNotes={setCcHandlingNotes}
-                                                ccHandlingPhotos={ccHandlingPhotos}
-                                                setCcHandlingPhotos={setCcHandlingPhotos}
-                                                handleProcessClientComms={handleProcessClientComms}
-                                                handleDeleteClientComms={handleDeleteClientComms}
+                                                activeCcHandlingId={
+                                                  activeCcHandlingId
+                                                }
+                                                setActiveCcHandlingId={
+                                                  setActiveCcHandlingId
+                                                }
+                                                ccHandlingNotes={
+                                                  ccHandlingNotes
+                                                }
+                                                setCcHandlingNotes={
+                                                  setCcHandlingNotes
+                                                }
+                                                ccHandlingPhotos={
+                                                  ccHandlingPhotos
+                                                }
+                                                setCcHandlingPhotos={
+                                                  setCcHandlingPhotos
+                                                }
+                                                handleProcessClientComms={
+                                                  handleProcessClientComms
+                                                }
+                                                handleDeleteClientComms={
+                                                  handleDeleteClientComms
+                                                }
                                                 canEditItem={canEditItem}
-                                                getRemainingEditTime={getRemainingEditTime}
-                                                setEditingItem={(editingItem: any) => {
+                                                getRemainingEditTime={
+                                                  getRemainingEditTime
+                                                }
+                                                setEditingItem={(
+                                                  editingItem: any,
+                                                ) => {
                                                   setEditingItem({
                                                     type: "client_comm",
                                                     id: editingItem.data.id,
                                                     data: editingItem.data,
                                                   });
                                                 }}
-                                                handleTakeClientComm={handleTakeClientComm}
-                                                handleMarkClientCommDone={handleMarkClientCommDone}
-                                                addSystemNotification={addSystemNotification}
-                                                getElapsedTimerString={getElapsedTimerString}
+                                                handleTakeClientComm={
+                                                  handleTakeClientComm
+                                                }
+                                                handleMarkClientCommDone={
+                                                  handleMarkClientCommDone
+                                                }
+                                                addSystemNotification={
+                                                  addSystemNotification
+                                                }
+                                                getElapsedTimerString={
+                                                  getElapsedTimerString
+                                                }
                                               />
                                             );
                                           }}
@@ -25754,16 +26753,23 @@ ${ttNotes}`
                                         {/* Cards list */}
                                         <PaginatedCaseList
                                           items={filteredTT}
-                                          icon={<CreditCard className="w-5 h-5 text-indigo-400" />}
+                                          icon={
+                                            <CreditCard className="w-5 h-5 text-indigo-400" />
+                                          }
                                           title="Installment Requests"
                                           emptyMessage="No installment requests found."
                                           itemToPhone={(req) => req.phoneNumber}
                                           itemToClinic={(req) => req.clinicName}
-                                          availableClinics={CLINIC_OPTIONS.map((c) => c.value)}
+                                          availableClinics={CLINIC_OPTIONS.map(
+                                            (c) => c.value,
+                                          )}
                                           renderItem={(req) => {
-                                            const isExpanded = selectedTTId === req.id;
+                                            const isExpanded =
+                                              selectedTTId === req.id;
                                             const onToggle = () =>
-                                              setSelectedTTId(isExpanded ? null : req.id);
+                                              setSelectedTTId(
+                                                isExpanded ? null : req.id,
+                                              );
                                             return (
                                               <TabbyTamaraCard
                                                 key={req.id}
@@ -25771,29 +26777,55 @@ ${ttNotes}`
                                                 currentUser={currentUser}
                                                 isTLOreSupport={isTLOreSupport}
                                                 isSuperAdmin={isSuperAdmin}
-                                                activeFintechHandlingId={activeFintechHandlingId}
-                                                setActiveFintechHandlingId={setActiveFintechHandlingId}
-                                                tlFintechPaymentLink={tlFintechPaymentLink}
-                                                setTlFintechPaymentLink={setTlFintechPaymentLink}
+                                                activeFintechHandlingId={
+                                                  activeFintechHandlingId
+                                                }
+                                                setActiveFintechHandlingId={
+                                                  setActiveFintechHandlingId
+                                                }
+                                                tlFintechPaymentLink={
+                                                  tlFintechPaymentLink
+                                                }
+                                                setTlFintechPaymentLink={
+                                                  setTlFintechPaymentLink
+                                                }
                                                 tlFintechNotes={tlFintechNotes}
-                                                setTlFintechNotes={setTlFintechNotes}
+                                                setTlFintechNotes={
+                                                  setTlFintechNotes
+                                                }
                                                 tlFintechLinks={tlFintechLinks}
-                                                setTlFintechLinks={setTlFintechLinks}
-                                                handleConfirmTabbyTamara={handleConfirmTabbyTamara}
-                                                handleMarkPatientContactedTT={handleContactTabbyTamara}
-                                                getElapsedTimerString={getElapsedTimerString}
-                                                handleDeleteTabbyTamara={handleDeleteTabbyTamara}
+                                                setTlFintechLinks={
+                                                  setTlFintechLinks
+                                                }
+                                                handleConfirmTabbyTamara={
+                                                  handleConfirmTabbyTamara
+                                                }
+                                                handleMarkPatientContactedTT={
+                                                  handleContactTabbyTamara
+                                                }
+                                                getElapsedTimerString={
+                                                  getElapsedTimerString
+                                                }
+                                                handleDeleteTabbyTamara={
+                                                  handleDeleteTabbyTamara
+                                                }
                                                 canEditItem={canEditItem}
-                                                getRemainingEditTime={getRemainingEditTime}
+                                                getRemainingEditTime={
+                                                  getRemainingEditTime
+                                                }
                                                 editLimitMs={10 * 60 * 1000}
-                                                setEditingItem={(editingItem: any) => {
+                                                setEditingItem={(
+                                                  editingItem: any,
+                                                ) => {
                                                   setEditingItem({
                                                     type: "tt_request",
                                                     id: editingItem.data.id,
                                                     data: editingItem.data,
                                                   });
                                                 }}
-                                                addSystemNotification={addSystemNotification}
+                                                addSystemNotification={
+                                                  addSystemNotification
+                                                }
                                                 isExpanded={isExpanded}
                                                 onToggle={onToggle}
                                               />
@@ -25924,16 +26956,27 @@ ${ttNotes}`
                                         {/* Cards list */}
                                         <PaginatedCaseList
                                           items={filteredComplaints}
-                                          icon={<AlertTriangle className="w-5 h-5 text-indigo-400" />}
+                                          icon={
+                                            <AlertTriangle className="w-5 h-5 text-indigo-400" />
+                                          }
                                           title="Patient Complaints"
                                           emptyMessage="No patient complaints found."
-                                          itemToPhone={(comp) => comp.phoneNumber}
-                                          itemToClinic={(comp) => comp.clinicName}
-                                          availableClinics={CLINIC_OPTIONS.map((c) => c.value)}
+                                          itemToPhone={(comp) =>
+                                            comp.phoneNumber
+                                          }
+                                          itemToClinic={(comp) =>
+                                            comp.clinicName
+                                          }
+                                          availableClinics={CLINIC_OPTIONS.map(
+                                            (c) => c.value,
+                                          )}
                                           renderItem={(comp) => {
-                                            const isExpanded = selectedComplaintId === comp.id;
+                                            const isExpanded =
+                                              selectedComplaintId === comp.id;
                                             const onToggle = () =>
-                                              setSelectedComplaintId(isExpanded ? null : comp.id);
+                                              setSelectedComplaintId(
+                                                isExpanded ? null : comp.id,
+                                              );
                                             return (
                                               <ComplaintCard
                                                 key={comp.id}
@@ -25943,27 +26986,55 @@ ${ttNotes}`
                                                 isSuperAdmin={isSuperAdmin}
                                                 isExpanded={isExpanded}
                                                 onToggle={onToggle}
-                                                activeComplaintHandlingId={activeComplaintHandlingId}
-                                                setActiveComplaintHandlingId={setActiveComplaintHandlingId}
-                                                tlComplaintResolutionType={tlComplaintResolutionType}
-                                                setTlComplaintResolutionType={setTlComplaintResolutionType}
-                                                tlComplaintComment={tlComplaintComment}
-                                                setTlComplaintComment={setTlComplaintComment}
-                                                handleTLCommentComplaint={handleTLCommentComplaint}
-                                                handleToggleContactComplaint={handleToggleContactComplaint}
-                                                handleDeleteComplaint={handleDeleteComplaint}
-                                                handleAssignRecord={handleAssignRecord}
-                                                addSystemNotification={addSystemNotification}
+                                                activeComplaintHandlingId={
+                                                  activeComplaintHandlingId
+                                                }
+                                                setActiveComplaintHandlingId={
+                                                  setActiveComplaintHandlingId
+                                                }
+                                                tlComplaintResolutionType={
+                                                  tlComplaintResolutionType
+                                                }
+                                                setTlComplaintResolutionType={
+                                                  setTlComplaintResolutionType
+                                                }
+                                                tlComplaintComment={
+                                                  tlComplaintComment
+                                                }
+                                                setTlComplaintComment={
+                                                  setTlComplaintComment
+                                                }
+                                                handleTLCommentComplaint={
+                                                  handleTLCommentComplaint
+                                                }
+                                                handleToggleContactComplaint={
+                                                  handleToggleContactComplaint
+                                                }
+                                                handleDeleteComplaint={
+                                                  handleDeleteComplaint
+                                                }
+                                                handleAssignRecord={
+                                                  handleAssignRecord
+                                                }
+                                                addSystemNotification={
+                                                  addSystemNotification
+                                                }
                                                 canEditItem={canEditItem}
-                                                getRemainingEditTime={getRemainingEditTime}
-                                                setEditingItem={(editingItem: any) => {
+                                                getRemainingEditTime={
+                                                  getRemainingEditTime
+                                                }
+                                                setEditingItem={(
+                                                  editingItem: any,
+                                                ) => {
                                                   setEditingItem({
                                                     type: "tt_complaint",
                                                     id: editingItem.data.id,
                                                     data: editingItem.data,
                                                   });
                                                 }}
-                                                getElapsedTimerString={getElapsedTimerString}
+                                                getElapsedTimerString={
+                                                  getElapsedTimerString
+                                                }
                                               />
                                             );
                                           }}
@@ -26782,26 +27853,42 @@ ${ttNotes}`
                               <div className="bg-cyan-950/20 border border-cyan-500/20 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
                                 <div className="flex items-center gap-2 text-cyan-300 font-bold text-sm">
                                   <Users className="w-5 h-5 text-cyan-400" />
-                                  <span>Selected <span className="text-white bg-cyan-600 px-2 py-0.5 rounded-full text-xs">{selectedAgentIds.length}</span> agents to bulk edit</span>
+                                  <span>
+                                    Selected{" "}
+                                    <span className="text-white bg-cyan-600 px-2 py-0.5 rounded-full text-xs">
+                                      {selectedAgentIds.length}
+                                    </span>{" "}
+                                    agents to bulk edit
+                                  </span>
                                 </div>
                                 <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
-                                  <span className="text-xs text-slate-400">Update</span>
+                                  <span className="text-xs text-slate-400">
+                                    Update
+                                  </span>
                                   <select
                                     value={bulkEditField}
-                                    onChange={(e) => setBulkEditField(e.target.value)}
+                                    onChange={(e) =>
+                                      setBulkEditField(e.target.value)
+                                    }
                                     className="bg-black/40 border border-white/15 text-slate-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none cursor-pointer"
                                   >
-                                    <option value="Team Leader">Team Leader</option>
+                                    <option value="Team Leader">
+                                      Team Leader
+                                    </option>
                                     <option value="LOB">LOB / Channel</option>
                                     <option value="LOB Team">LOB Team</option>
                                     <option value="Role">Role</option>
                                     <option value="Email">Email</option>
                                   </select>
-                                  <span className="text-xs text-slate-400">to</span>
+                                  <span className="text-xs text-slate-400">
+                                    to
+                                  </span>
                                   <input
                                     type="text"
                                     value={bulkEditVal}
-                                    onChange={(e) => setBulkEditVal(e.target.value)}
+                                    onChange={(e) =>
+                                      setBulkEditVal(e.target.value)
+                                    }
                                     placeholder="e.g. Aly Ibrahim"
                                     className="bg-black/40 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none w-full sm:w-48"
                                   />
@@ -26829,14 +27916,36 @@ ${ttNotes}`
                                       <th className="p-4 w-10">
                                         <input
                                           type="checkbox"
-                                          checked={pagedDir.length > 0 && pagedDir.every(item => selectedAgentIds.includes(item.id))}
+                                          checked={
+                                            pagedDir.length > 0 &&
+                                            pagedDir.every((item) =>
+                                              selectedAgentIds.includes(
+                                                item.id,
+                                              ),
+                                            )
+                                          }
                                           onChange={(e) => {
                                             if (e.target.checked) {
-                                              const pageIds = pagedDir.map(item => item.id);
-                                              setSelectedAgentIds(prev => Array.from(new Set([...prev, ...pageIds])));
+                                              const pageIds = pagedDir.map(
+                                                (item) => item.id,
+                                              );
+                                              setSelectedAgentIds((prev) =>
+                                                Array.from(
+                                                  new Set([
+                                                    ...prev,
+                                                    ...pageIds,
+                                                  ]),
+                                                ),
+                                              );
                                             } else {
-                                              const pageIds = pagedDir.map(item => item.id);
-                                              setSelectedAgentIds(prev => prev.filter(id => !pageIds.includes(id)));
+                                              const pageIds = pagedDir.map(
+                                                (item) => item.id,
+                                              );
+                                              setSelectedAgentIds((prev) =>
+                                                prev.filter(
+                                                  (id) => !pageIds.includes(id),
+                                                ),
+                                              );
                                             }
                                           }}
                                           className="rounded border-white/20 bg-black/40 text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4"
@@ -26844,13 +27953,19 @@ ${ttNotes}`
                                       </th>
                                     )}
                                     <th className="p-4 rounded-l-xl w-12">#</th>
-                                    <th className="p-4 font-bold">Agent Name</th>
+                                    <th className="p-4 font-bold">
+                                      Agent Name
+                                    </th>
                                     <th className="p-4">App Username</th>
                                     {(directoryHeaders || []).length > 0 ? (
                                       <>
-                                        {(directoryHeaders || []).map((header, hIdx) => (
-                                          <th key={hIdx} className="p-4">{header}</th>
-                                        ))}
+                                        {(directoryHeaders || []).map(
+                                          (header, hIdx) => (
+                                            <th key={hIdx} className="p-4">
+                                              {header}
+                                            </th>
+                                          ),
+                                        )}
                                       </>
                                     ) : (
                                       <>
@@ -26863,78 +27978,188 @@ ${ttNotes}`
                                       </>
                                     )}
                                     {isSuperAdmin && (
-                                      <th className="p-4 rounded-r-xl w-28 text-center">Actions</th>
+                                      <th className="p-4 rounded-r-xl w-28 text-center">
+                                        Actions
+                                      </th>
                                     )}
                                   </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5 font-medium">
                                   {pagedDir && pagedDir.length > 0
                                     ? pagedDir.map((item: any, pagedIdx) => {
-                                        const idx = dirPage * DIR_PAGE_SIZE + pagedIdx;
+                                        const idx =
+                                          dirPage * DIR_PAGE_SIZE + pagedIdx;
                                         const isRow = "agentName" in item;
-                                        const isEditing = editingAgentId === item.id;
+                                        const isEditing =
+                                          editingAgentId === item.id;
 
                                         if (isRow) {
                                           const row = item;
-                                          const directoryHeadersArray = directoryHeaders || [];
-                                          const tlHeader = directoryHeadersArray.find((h) => {
-                                            const lh = String(h || "").toLowerCase().trim();
-                                            return lh === "tl" || lh === "team leader" || lh.includes("manager") || lh.includes("supervisor") || lh.includes("lead");
-                                          });
-                                          const roleHeader = directoryHeadersArray.find((h) => {
-                                            const lh = String(h || "").toLowerCase().trim();
-                                            return lh === "role" || lh === "lob" || lh.includes("job title") || lh.includes("designation");
-                                          });
-                                          const lobHeader = directoryHeadersArray.find((h) => {
-                                            const lh = String(h || "").toLowerCase().trim();
-                                            return lh === "lob" || lh.includes("line") || lh.includes("account") || lh.includes("function");
-                                          });
-                                          const lobTeamHeader = directoryHeadersArray.find((h) => {
-                                            const lh = String(h || "").toLowerCase().trim();
-                                            return lh === "lob team" || lh === "team" || lh.includes("sub") || lh.includes("squad");
-                                          });
-                                          const emailHeader = directoryHeadersArray.find((h) => {
-                                            const lh = String(h || "").toLowerCase().trim();
-                                            return lh === "email" || lh === "mail" || lh === "corporate email" || lh === "work email";
-                                          });
-                                          const phoneHeader = directoryHeadersArray.find((h) => {
-                                            const lh = String(h || "").toLowerCase().trim();
-                                            return lh === "phone" || lh === "mobile" || lh === "contact" || lh === "tel";
-                                          });
+                                          const directoryHeadersArray =
+                                            directoryHeaders || [];
+                                          const tlHeader =
+                                            directoryHeadersArray.find((h) => {
+                                              const lh = String(h || "")
+                                                .toLowerCase()
+                                                .trim();
+                                              return (
+                                                lh === "tl" ||
+                                                lh === "team leader" ||
+                                                lh.includes("manager") ||
+                                                lh.includes("supervisor") ||
+                                                lh.includes("lead")
+                                              );
+                                            });
+                                          const roleHeader =
+                                            directoryHeadersArray.find((h) => {
+                                              const lh = String(h || "")
+                                                .toLowerCase()
+                                                .trim();
+                                              return (
+                                                lh === "role" ||
+                                                lh === "lob" ||
+                                                lh.includes("job title") ||
+                                                lh.includes("designation")
+                                              );
+                                            });
+                                          const lobHeader =
+                                            directoryHeadersArray.find((h) => {
+                                              const lh = String(h || "")
+                                                .toLowerCase()
+                                                .trim();
+                                              return (
+                                                lh === "lob" ||
+                                                lh.includes("line") ||
+                                                lh.includes("account") ||
+                                                lh.includes("function")
+                                              );
+                                            });
+                                          const lobTeamHeader =
+                                            directoryHeadersArray.find((h) => {
+                                              const lh = String(h || "")
+                                                .toLowerCase()
+                                                .trim();
+                                              return (
+                                                lh === "lob team" ||
+                                                lh === "team" ||
+                                                lh.includes("sub") ||
+                                                lh.includes("squad")
+                                              );
+                                            });
+                                          const emailHeader =
+                                            directoryHeadersArray.find((h) => {
+                                              const lh = String(h || "")
+                                                .toLowerCase()
+                                                .trim();
+                                              return (
+                                                lh === "email" ||
+                                                lh === "mail" ||
+                                                lh === "corporate email" ||
+                                                lh === "work email"
+                                              );
+                                            });
+                                          const phoneHeader =
+                                            directoryHeadersArray.find((h) => {
+                                              const lh = String(h || "")
+                                                .toLowerCase()
+                                                .trim();
+                                              return (
+                                                lh === "phone" ||
+                                                lh === "mobile" ||
+                                                lh === "contact" ||
+                                                lh === "tel"
+                                              );
+                                            });
 
-                                          const emailVal = emailHeader && row.data[emailHeader] ? row.data[emailHeader] : "-";
-                                          const phoneVal = phoneHeader && row.data[phoneHeader] ? row.data[phoneHeader] : "-";
-                                          const lobVal = lobHeader && row.data[lobHeader] ? row.data[lobHeader] : "";
-                                          const lobTeamVal = lobTeamHeader && row.data[lobTeamHeader] ? row.data[lobTeamHeader] : "-";
-                                          const roleVal = roleHeader && row.data[roleHeader] ? row.data[roleHeader] : "-";
-                                          const tlVal = tlHeader && row.data[tlHeader] ? row.data[tlHeader] : "-";
+                                          const emailVal =
+                                            emailHeader && row.data[emailHeader]
+                                              ? row.data[emailHeader]
+                                              : "-";
+                                          const phoneVal =
+                                            phoneHeader && row.data[phoneHeader]
+                                              ? row.data[phoneHeader]
+                                              : "-";
+                                          const lobVal =
+                                            lobHeader && row.data[lobHeader]
+                                              ? row.data[lobHeader]
+                                              : "";
+                                          const lobTeamVal =
+                                            lobTeamHeader &&
+                                            row.data[lobTeamHeader]
+                                              ? row.data[lobTeamHeader]
+                                              : "-";
+                                          const roleVal =
+                                            roleHeader && row.data[roleHeader]
+                                              ? row.data[roleHeader]
+                                              : "-";
+                                          const tlVal =
+                                            tlHeader && row.data[tlHeader]
+                                              ? row.data[tlHeader]
+                                              : "-";
 
-                                          const matchingUser = (registeredUsers || []).find(
-                                            (u) => u && u.name && u.name.toLowerCase() === row.agentName.toLowerCase(),
+                                          const matchingUser = (
+                                            registeredUsers || []
+                                          ).find(
+                                            (u) =>
+                                              u &&
+                                              u.name &&
+                                              u.name.toLowerCase() ===
+                                                row.agentName.toLowerCase(),
                                           );
                                           const computedRole = matchingUser
                                             ? matchingUser.role
-                                            : roleVal.toLowerCase().includes("tl") || roleVal.toLowerCase().includes("leader")
+                                            : roleVal
+                                                  .toLowerCase()
+                                                  .includes("tl") ||
+                                                roleVal
+                                                  .toLowerCase()
+                                                  .includes("leader")
                                               ? "tl"
-                                              : roleVal.toLowerCase().includes("qa")
+                                              : roleVal
+                                                    .toLowerCase()
+                                                    .includes("qa")
                                                 ? "qa"
                                                 : "agent";
 
-                                          const tlName = row.data?.["Team Leader"] || row.data?.["teamLeader"] || row.data?.["TL"] || "";
+                                          const tlName =
+                                            row.data?.["Team Leader"] ||
+                                            row.data?.["teamLeader"] ||
+                                            row.data?.["TL"] ||
+                                            "";
                                           const isNotTL = computedRole !== "tl";
 
                                           return (
-                                            <tr key={row.id} className="hover:bg-white/5 transition-all">
+                                            <tr
+                                              key={row.id}
+                                              className="hover:bg-white/5 transition-all"
+                                            >
                                               {isSuperAdmin && (
                                                 <td className="p-4 w-10">
                                                   <input
                                                     type="checkbox"
-                                                    checked={selectedAgentIds.includes(row.id)}
+                                                    checked={selectedAgentIds.includes(
+                                                      row.id,
+                                                    )}
                                                     onChange={() => {
-                                                      if (selectedAgentIds.includes(row.id)) {
-                                                        setSelectedAgentIds(prev => prev.filter(id => id !== row.id));
+                                                      if (
+                                                        selectedAgentIds.includes(
+                                                          row.id,
+                                                        )
+                                                      ) {
+                                                        setSelectedAgentIds(
+                                                          (prev) =>
+                                                            prev.filter(
+                                                              (id) =>
+                                                                id !== row.id,
+                                                            ),
+                                                        );
                                                       } else {
-                                                        setSelectedAgentIds(prev => [...prev, row.id]);
+                                                        setSelectedAgentIds(
+                                                          (prev) => [
+                                                            ...prev,
+                                                            row.id,
+                                                          ],
+                                                        );
                                                       }
                                                     }}
                                                     className="rounded border-white/20 bg-black/40 text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4"
@@ -26948,8 +28173,17 @@ ${ttNotes}`
                                                 {isEditing ? (
                                                   <input
                                                     type="text"
-                                                    value={editAgentFields.agentName || ""}
-                                                    onChange={e => setEditAgentFields({ ...editAgentFields, agentName: e.target.value })}
+                                                    value={
+                                                      editAgentFields.agentName ||
+                                                      ""
+                                                    }
+                                                    onChange={(e) =>
+                                                      setEditAgentFields({
+                                                        ...editAgentFields,
+                                                        agentName:
+                                                          e.target.value,
+                                                      })
+                                                    }
                                                     className="bg-black/60 border border-white/25 rounded px-2.5 py-1 text-xs text-slate-100定位 focus:outline-none w-44"
                                                   />
                                                 ) : (
@@ -26964,31 +28198,75 @@ ${ttNotes}`
                                                 )}
                                               </td>
                                               <td className="p-4 text-cyan-400 font-black font-mono">
-                                                {getUsernameFromFullName(row.agentName)}
+                                                {getUsernameFromFullName(
+                                                  row.agentName,
+                                                )}
                                               </td>
-                                              {directoryHeadersArray.length > 0 ? (
-                                                directoryHeadersArray.map((header, hIdx) => (
-                                                  <td key={hIdx} className="p-4">
-                                                    {isEditing ? (
-                                                      <input
-                                                        type="text"
-                                                        value={editAgentFields[header] !== undefined ? editAgentFields[header] : (row.data[header] || "")}
-                                                        onChange={e => setEditAgentFields({ ...editAgentFields, [header]: e.target.value })}
-                                                        className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
-                                                      />
-                                                    ) : (
-                                                      row.data[header] || "-"
-                                                    )}
-                                                  </td>
-                                                ))
+                                              {directoryHeadersArray.length >
+                                              0 ? (
+                                                directoryHeadersArray.map(
+                                                  (header, hIdx) => (
+                                                    <td
+                                                      key={hIdx}
+                                                      className="p-4"
+                                                    >
+                                                      {isEditing ? (
+                                                        <input
+                                                          type="text"
+                                                          value={
+                                                            editAgentFields[
+                                                              header
+                                                            ] !== undefined
+                                                              ? editAgentFields[
+                                                                  header
+                                                                ]
+                                                              : row.data[
+                                                                  header
+                                                                ] || ""
+                                                          }
+                                                          onChange={(e) =>
+                                                            setEditAgentFields({
+                                                              ...editAgentFields,
+                                                              [header]:
+                                                                e.target.value,
+                                                            })
+                                                          }
+                                                          className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
+                                                        />
+                                                      ) : (
+                                                        row.data[header] || "-"
+                                                      )}
+                                                    </td>
+                                                  ),
+                                                )
                                               ) : (
                                                 <>
                                                   <td className="p-4">
                                                     {isEditing ? (
                                                       <input
                                                         type="text"
-                                                        value={editAgentFields[emailHeader || "Email"] !== undefined ? editAgentFields[emailHeader || "Email"] : (row.data[emailHeader || "Email"] || "")}
-                                                        onChange={e => setEditAgentFields({ ...editAgentFields, [emailHeader || "Email"]: e.target.value })}
+                                                        value={
+                                                          editAgentFields[
+                                                            emailHeader ||
+                                                              "Email"
+                                                          ] !== undefined
+                                                            ? editAgentFields[
+                                                                emailHeader ||
+                                                                  "Email"
+                                                              ]
+                                                            : row.data[
+                                                                emailHeader ||
+                                                                  "Email"
+                                                              ] || ""
+                                                        }
+                                                        onChange={(e) =>
+                                                          setEditAgentFields({
+                                                            ...editAgentFields,
+                                                            [emailHeader ||
+                                                            "Email"]:
+                                                              e.target.value,
+                                                          })
+                                                        }
                                                         className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
                                                       />
                                                     ) : (
@@ -26999,40 +28277,132 @@ ${ttNotes}`
                                                     {isEditing ? (
                                                       <input
                                                         type="text"
-                                                        value={editAgentFields[phoneHeader || "Phone"] !== undefined ? editAgentFields[phoneHeader || "Phone"] : (row.data[phoneHeader || "Phone"] || "")}
-                                                        onChange={e => setEditAgentFields({ ...editAgentFields, [phoneHeader || "Phone"]: e.target.value })}
+                                                        value={
+                                                          editAgentFields[
+                                                            phoneHeader ||
+                                                              "Phone"
+                                                          ] !== undefined
+                                                            ? editAgentFields[
+                                                                phoneHeader ||
+                                                                  "Phone"
+                                                              ]
+                                                            : row.data[
+                                                                phoneHeader ||
+                                                                  "Phone"
+                                                              ] || ""
+                                                        }
+                                                        onChange={(e) =>
+                                                          setEditAgentFields({
+                                                            ...editAgentFields,
+                                                            [phoneHeader ||
+                                                            "Phone"]:
+                                                              e.target.value,
+                                                          })
+                                                        }
                                                         className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-28"
                                                       />
                                                     ) : phoneVal !== "-" ? (
                                                       <span className="text-emerald-400">
-                                                        {phoneVal.replace(/\s+/g, "")}
+                                                        {phoneVal.replace(
+                                                          /\s+/g,
+                                                          "",
+                                                        )}
                                                       </span>
                                                     ) : (
-                                                      <span className="text-slate-600">-</span>
+                                                      <span className="text-slate-600">
+                                                        -
+                                                      </span>
                                                     )}
                                                   </td>
                                                   <td className="p-4">
                                                     {isEditing ? (
                                                       <input
                                                         type="text"
-                                                        value={editAgentFields[lobHeader || "LOB"] !== undefined ? editAgentFields[lobHeader || "LOB"] : (row.data[lobHeader || "LOB"] || "")}
-                                                        onChange={e => setEditAgentFields({ ...editAgentFields, [lobHeader || "LOB"]: e.target.value })}
+                                                        value={
+                                                          editAgentFields[
+                                                            lobHeader || "LOB"
+                                                          ] !== undefined
+                                                            ? editAgentFields[
+                                                                lobHeader ||
+                                                                  "LOB"
+                                                              ]
+                                                            : row.data[
+                                                                lobHeader ||
+                                                                  "LOB"
+                                                              ] || ""
+                                                        }
+                                                        onChange={(e) =>
+                                                          setEditAgentFields({
+                                                            ...editAgentFields,
+                                                            [lobHeader ||
+                                                            "LOB"]:
+                                                              e.target.value,
+                                                          })
+                                                        }
                                                         className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-24"
                                                       />
-                                                    ) : normalizeAgentLob(lobVal || AGENT_LOBS[row.agentName], computedRole) ? (
-                                                      <span className={`px-2 py-1 rounded-lg text-[11px] font-bold ${normalizeAgentLob(lobVal || AGENT_LOBS[row.agentName], computedRole).toLowerCase().includes("call") ? "bg-blue-500/15 text-blue-300 border border-blue-500/20" : "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"}`}>
-                                                        {normalizeAgentLob(lobVal || AGENT_LOBS[row.agentName], computedRole)}
+                                                    ) : normalizeAgentLob(
+                                                        lobVal ||
+                                                          AGENT_LOBS[
+                                                            row.agentName
+                                                          ],
+                                                        computedRole,
+                                                      ) ? (
+                                                      <span
+                                                        className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
+                                                          normalizeAgentLob(
+                                                            lobVal ||
+                                                              AGENT_LOBS[
+                                                                row.agentName
+                                                              ],
+                                                            computedRole,
+                                                          )
+                                                            .toLowerCase()
+                                                            .includes("call")
+                                                            ? "bg-blue-500/15 text-blue-300 border border-blue-500/20"
+                                                            : "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"
+                                                        }`}
+                                                      >
+                                                        {normalizeAgentLob(
+                                                          lobVal ||
+                                                            AGENT_LOBS[
+                                                              row.agentName
+                                                            ],
+                                                          computedRole,
+                                                        )}
                                                       </span>
                                                     ) : (
-                                                      <span className="text-slate-600">-</span>
+                                                      <span className="text-slate-600">
+                                                        -
+                                                      </span>
                                                     )}
                                                   </td>
                                                   <td className="p-4">
                                                     {isEditing ? (
                                                       <input
                                                         type="text"
-                                                        value={editAgentFields[lobTeamHeader || "LOB Team"] !== undefined ? editAgentFields[lobTeamHeader || "LOB Team"] : (row.data[lobTeamHeader || "LOB Team"] || "")}
-                                                        onChange={e => setEditAgentFields({ ...editAgentFields, [lobTeamHeader || "LOB Team"]: e.target.value })}
+                                                        value={
+                                                          editAgentFields[
+                                                            lobTeamHeader ||
+                                                              "LOB Team"
+                                                          ] !== undefined
+                                                            ? editAgentFields[
+                                                                lobTeamHeader ||
+                                                                  "LOB Team"
+                                                              ]
+                                                            : row.data[
+                                                                lobTeamHeader ||
+                                                                  "LOB Team"
+                                                              ] || ""
+                                                        }
+                                                        onChange={(e) =>
+                                                          setEditAgentFields({
+                                                            ...editAgentFields,
+                                                            [lobTeamHeader ||
+                                                            "LOB Team"]:
+                                                              e.target.value,
+                                                          })
+                                                        }
                                                         className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-28"
                                                       />
                                                     ) : (
@@ -27043,12 +28413,33 @@ ${ttNotes}`
                                                     {isEditing ? (
                                                       <input
                                                         type="text"
-                                                        value={editAgentFields[roleHeader || "Role"] !== undefined ? editAgentFields[roleHeader || "Role"] : (row.data[roleHeader || "Role"] || "")}
-                                                        onChange={e => setEditAgentFields({ ...editAgentFields, [roleHeader || "Role"]: e.target.value })}
+                                                        value={
+                                                          editAgentFields[
+                                                            roleHeader || "Role"
+                                                          ] !== undefined
+                                                            ? editAgentFields[
+                                                                roleHeader ||
+                                                                  "Role"
+                                                              ]
+                                                            : row.data[
+                                                                roleHeader ||
+                                                                  "Role"
+                                                              ] || ""
+                                                        }
+                                                        onChange={(e) =>
+                                                          setEditAgentFields({
+                                                            ...editAgentFields,
+                                                            [roleHeader ||
+                                                            "Role"]:
+                                                              e.target.value,
+                                                          })
+                                                        }
                                                         className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-24"
                                                       />
                                                     ) : (
-                                                      <span className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${roleVal.toLowerCase() === "tl" || roleVal.toLowerCase() === "team leader" ? "bg-amber-950/30 text-amber-400 border-amber-500/20" : roleVal.toLowerCase() === "qa" ? "bg-purple-950/30 text-purple-400 border-purple-500/20" : "bg-slate-800 text-slate-400 border-slate-700"}`}>
+                                                      <span
+                                                        className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${roleVal.toLowerCase() === "tl" || roleVal.toLowerCase() === "team leader" ? "bg-amber-950/30 text-amber-400 border-amber-500/20" : roleVal.toLowerCase() === "qa" ? "bg-purple-950/30 text-purple-400 border-purple-500/20" : "bg-slate-800 text-slate-400 border-slate-700"}`}
+                                                      >
                                                         {roleVal}
                                                       </span>
                                                     )}
@@ -27057,8 +28448,28 @@ ${ttNotes}`
                                                     {isEditing ? (
                                                       <input
                                                         type="text"
-                                                        value={editAgentFields[tlHeader || "Team Leader"] !== undefined ? editAgentFields[tlHeader || "Team Leader"] : (row.data[tlHeader || "Team Leader"] || "")}
-                                                        onChange={e => setEditAgentFields({ ...editAgentFields, [tlHeader || "Team Leader"]: e.target.value })}
+                                                        value={
+                                                          editAgentFields[
+                                                            tlHeader ||
+                                                              "Team Leader"
+                                                          ] !== undefined
+                                                            ? editAgentFields[
+                                                                tlHeader ||
+                                                                  "Team Leader"
+                                                              ]
+                                                            : row.data[
+                                                                tlHeader ||
+                                                                  "Team Leader"
+                                                              ] || ""
+                                                        }
+                                                        onChange={(e) =>
+                                                          setEditAgentFields({
+                                                            ...editAgentFields,
+                                                            [tlHeader ||
+                                                            "Team Leader"]:
+                                                              e.target.value,
+                                                          })
+                                                        }
                                                         className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
                                                       />
                                                     ) : (
@@ -27072,13 +28483,22 @@ ${ttNotes}`
                                                   {isEditing ? (
                                                     <div className="flex gap-1.5 justify-center">
                                                       <button
-                                                        onClick={() => handleSaveInlineEdit(row.id, true)}
+                                                        onClick={() =>
+                                                          handleSaveInlineEdit(
+                                                            row.id,
+                                                            true,
+                                                          )
+                                                        }
                                                         className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[11px] font-bold cursor-pointer"
                                                       >
                                                         Save
                                                       </button>
                                                       <button
-                                                        onClick={() => setEditingAgentId(null)}
+                                                        onClick={() =>
+                                                          setEditingAgentId(
+                                                            null,
+                                                          )
+                                                        }
                                                         className="px-2 py-1 bg-white/10 hover:bg-white/15 text-slate-300 rounded text-[11px] font-bold cursor-pointer"
                                                       >
                                                         Cancel
@@ -27088,28 +28508,93 @@ ${ttNotes}`
                                                     <div className="flex gap-2 justify-center">
                                                       <button
                                                         onClick={() => {
-                                                          setEditingAgentId(row.id);
-                                                          const initialFields: Record<string, string> = { agentName: row.agentName };
-                                                          directoryHeadersArray.forEach(h => {
-                                                            initialFields[h] = row.data[h] || "";
-                                                          });
-                                                          if (directoryHeadersArray.length === 0) {
-                                                            initialFields[emailHeader || "Email"] = row.data[emailHeader || "Email"] || "";
-                                                            initialFields[phoneHeader || "Phone"] = row.data[phoneHeader || "Phone"] || "";
-                                                            initialFields[lobHeader || "LOB"] = row.data[lobHeader || "LOB"] || "";
-                                                            initialFields[lobTeamHeader || "LOB Team"] = row.data[lobTeamHeader || "LOB Team"] || "";
-                                                            initialFields[roleHeader || "Role"] = row.data[roleHeader || "Role"] || "";
-                                                            initialFields[tlHeader || "Team Leader"] = row.data[tlHeader || "Team Leader"] || "";
+                                                          setEditingAgentId(
+                                                            row.id,
+                                                          );
+                                                          const initialFields: Record<
+                                                            string,
+                                                            string
+                                                          > = {
+                                                            agentName:
+                                                              row.agentName,
+                                                          };
+                                                          directoryHeadersArray.forEach(
+                                                            (h) => {
+                                                              initialFields[h] =
+                                                                row.data[h] ||
+                                                                "";
+                                                            },
+                                                          );
+                                                          if (
+                                                            directoryHeadersArray.length ===
+                                                            0
+                                                          ) {
+                                                            initialFields[
+                                                              emailHeader ||
+                                                                "Email"
+                                                            ] =
+                                                              row.data[
+                                                                emailHeader ||
+                                                                  "Email"
+                                                              ] || "";
+                                                            initialFields[
+                                                              phoneHeader ||
+                                                                "Phone"
+                                                            ] =
+                                                              row.data[
+                                                                phoneHeader ||
+                                                                  "Phone"
+                                                              ] || "";
+                                                            initialFields[
+                                                              lobHeader || "LOB"
+                                                            ] =
+                                                              row.data[
+                                                                lobHeader ||
+                                                                  "LOB"
+                                                              ] || "";
+                                                            initialFields[
+                                                              lobTeamHeader ||
+                                                                "LOB Team"
+                                                            ] =
+                                                              row.data[
+                                                                lobTeamHeader ||
+                                                                  "LOB Team"
+                                                              ] || "";
+                                                            initialFields[
+                                                              roleHeader ||
+                                                                "Role"
+                                                            ] =
+                                                              row.data[
+                                                                roleHeader ||
+                                                                  "Role"
+                                                              ] || "";
+                                                            initialFields[
+                                                              tlHeader ||
+                                                                "Team Leader"
+                                                            ] =
+                                                              row.data[
+                                                                tlHeader ||
+                                                                  "Team Leader"
+                                                              ] || "";
                                                           }
-                                                          setEditAgentFields(initialFields);
+                                                          setEditAgentFields(
+                                                            initialFields,
+                                                          );
                                                         }}
                                                         className="text-cyan-400 hover:text-cyan-300 font-bold hover:underline cursor-pointer"
                                                       >
                                                         Edit
                                                       </button>
-                                                      <span className="text-white/10">|</span>
+                                                      <span className="text-white/10">
+                                                        |
+                                                      </span>
                                                       <button
-                                                        onClick={() => handleDeleteHeadcountRow(row.id, row.agentName)}
+                                                        onClick={() =>
+                                                          handleDeleteHeadcountRow(
+                                                            row.id,
+                                                            row.agentName,
+                                                          )
+                                                        }
                                                         className="text-rose-500 hover:text-rose-400 font-bold hover:underline cursor-pointer"
                                                       >
                                                         Delete
@@ -27122,20 +28607,44 @@ ${ttNotes}`
                                           );
                                         } else {
                                           const meta = item;
-                                          const tlName = meta.teamLeader || AGENT_TL_MAP[meta.name] || agentMeta[meta.name]?.tlName || "";
+                                          const tlName =
+                                            meta.teamLeader ||
+                                            AGENT_TL_MAP[meta.name] ||
+                                            agentMeta[meta.name]?.tlName ||
+                                            "";
                                           const isNotTL = meta.role !== "tl";
                                           return (
-                                            <tr key={meta.id} className="hover:bg-white/5 transition-all">
+                                            <tr
+                                              key={meta.id}
+                                              className="hover:bg-white/5 transition-all"
+                                            >
                                               {isSuperAdmin && (
                                                 <td className="p-4 w-10">
                                                   <input
                                                     type="checkbox"
-                                                    checked={selectedAgentIds.includes(meta.id)}
+                                                    checked={selectedAgentIds.includes(
+                                                      meta.id,
+                                                    )}
                                                     onChange={() => {
-                                                      if (selectedAgentIds.includes(meta.id)) {
-                                                        setSelectedAgentIds(prev => prev.filter(id => id !== meta.id));
+                                                      if (
+                                                        selectedAgentIds.includes(
+                                                          meta.id,
+                                                        )
+                                                      ) {
+                                                        setSelectedAgentIds(
+                                                          (prev) =>
+                                                            prev.filter(
+                                                              (id) =>
+                                                                id !== meta.id,
+                                                            ),
+                                                        );
                                                       } else {
-                                                        setSelectedAgentIds(prev => [...prev, meta.id]);
+                                                        setSelectedAgentIds(
+                                                          (prev) => [
+                                                            ...prev,
+                                                            meta.id,
+                                                          ],
+                                                        );
                                                       }
                                                     }}
                                                     className="rounded border-white/20 bg-black/40 text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4"
@@ -27149,8 +28658,15 @@ ${ttNotes}`
                                                 {isEditing ? (
                                                   <input
                                                     type="text"
-                                                    value={editAgentFields.name || ""}
-                                                    onChange={e => setEditAgentFields({ ...editAgentFields, name: e.target.value })}
+                                                    value={
+                                                      editAgentFields.name || ""
+                                                    }
+                                                    onChange={(e) =>
+                                                      setEditAgentFields({
+                                                        ...editAgentFields,
+                                                        name: e.target.value,
+                                                      })
+                                                    }
                                                     className="bg-black/60 border border-white/25 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-44"
                                                   />
                                                 ) : (
@@ -27165,14 +28681,26 @@ ${ttNotes}`
                                                 )}
                                               </td>
                                               <td className="p-4 text-cyan-400 font-black font-mono">
-                                                {getUsernameFromFullName(meta.name)}
+                                                {getUsernameFromFullName(
+                                                  meta.name,
+                                                )}
                                               </td>
                                               <td className="p-4">
                                                 {isEditing ? (
                                                   <input
                                                     type="text"
-                                                    value={editAgentFields.email !== undefined ? editAgentFields.email : (meta.email || "")}
-                                                    onChange={e => setEditAgentFields({ ...editAgentFields, email: e.target.value })}
+                                                    value={
+                                                      editAgentFields.email !==
+                                                      undefined
+                                                        ? editAgentFields.email
+                                                        : meta.email || ""
+                                                    }
+                                                    onChange={(e) =>
+                                                      setEditAgentFields({
+                                                        ...editAgentFields,
+                                                        email: e.target.value,
+                                                      })
+                                                    }
                                                     className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
                                                   />
                                                 ) : (
@@ -27183,40 +28711,97 @@ ${ttNotes}`
                                                 {isEditing ? (
                                                   <input
                                                     type="text"
-                                                    value={editAgentFields.phone !== undefined ? editAgentFields.phone : (meta.phone || "")}
-                                                    onChange={e => setEditAgentFields({ ...editAgentFields, phone: e.target.value })}
+                                                    value={
+                                                      editAgentFields.phone !==
+                                                      undefined
+                                                        ? editAgentFields.phone
+                                                        : meta.phone || ""
+                                                    }
+                                                    onChange={(e) =>
+                                                      setEditAgentFields({
+                                                        ...editAgentFields,
+                                                        phone: e.target.value,
+                                                      })
+                                                    }
                                                     className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-28"
                                                   />
                                                 ) : meta.phone ? (
                                                   <span className="text-emerald-400">
-                                                    {meta.phone.replace(/\s+/g, "")}
+                                                    {meta.phone.replace(
+                                                      /\s+/g,
+                                                      "",
+                                                    )}
                                                   </span>
                                                 ) : (
-                                                  <span className="text-slate-600">-</span>
+                                                  <span className="text-slate-600">
+                                                    -
+                                                  </span>
                                                 )}
                                               </td>
                                               <td className="p-4">
                                                 {isEditing ? (
                                                   <input
                                                     type="text"
-                                                    value={editAgentFields.lob !== undefined ? editAgentFields.lob : (meta.lob || "")}
-                                                    onChange={e => setEditAgentFields({ ...editAgentFields, lob: e.target.value })}
+                                                    value={
+                                                      editAgentFields.lob !==
+                                                      undefined
+                                                        ? editAgentFields.lob
+                                                        : meta.lob || ""
+                                                    }
+                                                    onChange={(e) =>
+                                                      setEditAgentFields({
+                                                        ...editAgentFields,
+                                                        lob: e.target.value,
+                                                      })
+                                                    }
                                                     className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-24"
                                                   />
-                                                ) : normalizeAgentLob(meta.lob || AGENT_LOBS[meta.name], meta.role) ? (
-                                                  <span className={`px-2 py-1 rounded-lg text-[11px] font-bold ${normalizeAgentLob(meta.lob || AGENT_LOBS[meta.name], meta.role).toLowerCase().includes("call") ? "bg-blue-500/15 text-blue-300 border border-blue-500/20" : "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"}`}>
-                                                    {normalizeAgentLob(meta.lob || AGENT_LOBS[meta.name], meta.role)}
+                                                ) : normalizeAgentLob(
+                                                    meta.lob ||
+                                                      AGENT_LOBS[meta.name],
+                                                    meta.role,
+                                                  ) ? (
+                                                  <span
+                                                    className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
+                                                      normalizeAgentLob(
+                                                        meta.lob ||
+                                                          AGENT_LOBS[meta.name],
+                                                        meta.role,
+                                                      )
+                                                        .toLowerCase()
+                                                        .includes("call")
+                                                        ? "bg-blue-500/15 text-blue-300 border border-blue-500/20"
+                                                        : "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"
+                                                    }`}
+                                                  >
+                                                    {normalizeAgentLob(
+                                                      meta.lob ||
+                                                        AGENT_LOBS[meta.name],
+                                                      meta.role,
+                                                    )}
                                                   </span>
                                                 ) : (
-                                                  <span className="text-slate-600">-</span>
+                                                  <span className="text-slate-600">
+                                                    -
+                                                  </span>
                                                 )}
                                               </td>
                                               <td className="p-4">
                                                 {isEditing ? (
                                                   <input
                                                     type="text"
-                                                    value={editAgentFields.lobTeam !== undefined ? editAgentFields.lobTeam : (meta.lobTeam || "")}
-                                                    onChange={e => setEditAgentFields({ ...editAgentFields, lobTeam: e.target.value })}
+                                                    value={
+                                                      editAgentFields.lobTeam !==
+                                                      undefined
+                                                        ? editAgentFields.lobTeam
+                                                        : meta.lobTeam || ""
+                                                    }
+                                                    onChange={(e) =>
+                                                      setEditAgentFields({
+                                                        ...editAgentFields,
+                                                        lobTeam: e.target.value,
+                                                      })
+                                                    }
                                                     className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-28"
                                                   />
                                                 ) : (
@@ -27226,18 +28811,45 @@ ${ttNotes}`
                                               <td className="p-4">
                                                 {isEditing ? (
                                                   <select
-                                                    value={editAgentFields.role !== undefined ? editAgentFields.role : (meta.role || "agent")}
-                                                    onChange={e => setEditAgentFields({ ...editAgentFields, role: e.target.value })}
+                                                    value={
+                                                      editAgentFields.role !==
+                                                      undefined
+                                                        ? editAgentFields.role
+                                                        : meta.role || "agent"
+                                                    }
+                                                    onChange={(e) =>
+                                                      setEditAgentFields({
+                                                        ...editAgentFields,
+                                                        role: e.target.value,
+                                                      })
+                                                    }
                                                     className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-24 cursor-pointer"
                                                   >
-                                                    <option value="agent">Agent</option>
-                                                    <option value="tl">Team Leader</option>
-                                                    <option value="qa">QA</option>
-                                                    <option value="director">Director</option>
+                                                    <option value="agent">
+                                                      Agent
+                                                    </option>
+                                                    <option value="tl">
+                                                      Team Leader
+                                                    </option>
+                                                    <option value="qa">
+                                                      QA
+                                                    </option>
+                                                    <option value="director">
+                                                      Director
+                                                    </option>
                                                   </select>
                                                 ) : (
-                                                  <span className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${meta.role === "tl" ? "bg-amber-950/30 text-amber-400 border-amber-500/20" : meta.role === "qa" ? "bg-purple-950/30 text-purple-400 border-purple-500/20" : "bg-slate-800 text-slate-400 border-slate-700"}`}>
-                                                    {meta.role === "tl" ? "Team Leader" : meta.role === "qa" ? "QA" : meta.role === "director" ? "Director" : "Agent"}
+                                                  <span
+                                                    className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${meta.role === "tl" ? "bg-amber-950/30 text-amber-400 border-amber-500/20" : meta.role === "qa" ? "bg-purple-950/30 text-purple-400 border-purple-500/20" : "bg-slate-800 text-slate-400 border-slate-700"}`}
+                                                  >
+                                                    {meta.role === "tl"
+                                                      ? "Team Leader"
+                                                      : meta.role === "qa"
+                                                        ? "QA"
+                                                        : meta.role ===
+                                                            "director"
+                                                          ? "Director"
+                                                          : "Agent"}
                                                   </span>
                                                 )}
                                               </td>
@@ -27245,8 +28857,19 @@ ${ttNotes}`
                                                 {isEditing ? (
                                                   <input
                                                     type="text"
-                                                    value={editAgentFields.teamLeader !== undefined ? editAgentFields.teamLeader : (meta.teamLeader || "")}
-                                                    onChange={e => setEditAgentFields({ ...editAgentFields, teamLeader: e.target.value })}
+                                                    value={
+                                                      editAgentFields.teamLeader !==
+                                                      undefined
+                                                        ? editAgentFields.teamLeader
+                                                        : meta.teamLeader || ""
+                                                    }
+                                                    onChange={(e) =>
+                                                      setEditAgentFields({
+                                                        ...editAgentFields,
+                                                        teamLeader:
+                                                          e.target.value,
+                                                      })
+                                                    }
                                                     className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
                                                   />
                                                 ) : (
@@ -27258,13 +28881,22 @@ ${ttNotes}`
                                                   {isEditing ? (
                                                     <div className="flex gap-1.5 justify-center">
                                                       <button
-                                                        onClick={() => handleSaveInlineEdit(meta.id, false)}
+                                                        onClick={() =>
+                                                          handleSaveInlineEdit(
+                                                            meta.id,
+                                                            false,
+                                                          )
+                                                        }
                                                         className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[11px] font-bold cursor-pointer"
                                                       >
                                                         Save
                                                       </button>
                                                       <button
-                                                        onClick={() => setEditingAgentId(null)}
+                                                        onClick={() =>
+                                                          setEditingAgentId(
+                                                            null,
+                                                          )
+                                                        }
                                                         className="px-2 py-1 bg-white/10 hover:bg-white/15 text-slate-300 rounded text-[11px] font-bold cursor-pointer"
                                                       >
                                                         Cancel
@@ -27274,24 +28906,41 @@ ${ttNotes}`
                                                     <div className="flex gap-2 justify-center">
                                                       <button
                                                         onClick={() => {
-                                                          setEditingAgentId(meta.id);
+                                                          setEditingAgentId(
+                                                            meta.id,
+                                                          );
                                                           setEditAgentFields({
                                                             name: meta.name,
-                                                            email: meta.email || "",
-                                                            phone: meta.phone || "",
+                                                            email:
+                                                              meta.email || "",
+                                                            phone:
+                                                              meta.phone || "",
                                                             lob: meta.lob || "",
-                                                            lobTeam: meta.lobTeam || "",
-                                                            role: meta.role || "agent",
-                                                            teamLeader: meta.teamLeader || ""
+                                                            lobTeam:
+                                                              meta.lobTeam ||
+                                                              "",
+                                                            role:
+                                                              meta.role ||
+                                                              "agent",
+                                                            teamLeader:
+                                                              meta.teamLeader ||
+                                                              "",
                                                           });
                                                         }}
                                                         className="text-cyan-400 hover:text-cyan-300 font-bold hover:underline cursor-pointer"
                                                       >
                                                         Edit
                                                       </button>
-                                                      <span className="text-white/10">|</span>
+                                                      <span className="text-white/10">
+                                                        |
+                                                      </span>
                                                       <button
-                                                        onClick={() => handleDeleteHeadcountRow(meta.id, meta.name)}
+                                                        onClick={() =>
+                                                          handleDeleteHeadcountRow(
+                                                            meta.id,
+                                                            meta.name,
+                                                          )
+                                                        }
                                                         className="text-rose-500 hover:text-rose-400 font-bold hover:underline cursor-pointer"
                                                       >
                                                         Delete
@@ -27311,12 +28960,12 @@ ${ttNotes}`
                                 <div className="text-center p-8 text-slate-500 font-medium font-sans">
                                   No headcount data matches your filters/search.
                                 </div>
-                              )}        {(!pagedDir || pagedDir.length === 0) && (
+                              )}{" "}
+                              {(!pagedDir || pagedDir.length === 0) && (
                                 <div className="text-center p-8 text-slate-500 font-medium font-sans">
                                   No headcount data matches your filters/search.
                                 </div>
                               )}
-
                               {totalPages > 1 && (
                                 <div className="flex items-center justify-between mt-4 border-t border-white/5 pt-4">
                                   <button
@@ -27999,7 +29648,10 @@ ${ttNotes}`
               <div className="flex flex-col items-center gap-3">
                 <div className="w-16 h-16 bg-gradient-to-br from-cyan-400/20 to-indigo-500/20 rounded-2xl flex items-center justify-center border border-cyan-500/30 relative">
                   <div className="absolute inset-0 bg-cyan-400/5 blur animate-pulse rounded-2xl" />
-                  <CoolLogo className="w-12 h-12 text-cyan-400" showText={false} />
+                  <CoolLogo
+                    className="w-12 h-12 text-cyan-400"
+                    showText={false}
+                  />
                 </div>
                 <h2 className="text-xl font-black bg-gradient-to-r from-cyan-400 to-indigo-300 bg-clip-text text-transparent font-display tracking-tight mt-2">
                   Synq Build v2.4.1
@@ -28012,10 +29664,28 @@ ${ttNotes}`
               <div className="py-5 px-6 bg-black/50 border border-cyan-500/20 rounded-3xl relative overflow-hidden shadow-inner flex flex-col items-center">
                 {/* Sonar ambient waves radiating in the background underneath the text */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
-                  <div className="absolute w-24 h-24 rounded-full border border-cyan-500/30" style={{ animation: 'sonar-ring 4s cubic-bezier(0.1, 0.8, 0.3, 1) infinite' }} />
-                  <div className="absolute w-24 h-24 rounded-full border border-cyan-500/15" style={{ animation: 'sonar-ring 4s cubic-bezier(0.1, 0.8, 0.3, 1) infinite', animationDelay: '2s' }} />
+                  <div
+                    className="absolute w-24 h-24 rounded-full border border-cyan-500/30"
+                    style={{
+                      animation:
+                        "sonar-ring 4s cubic-bezier(0.1, 0.8, 0.3, 1) infinite",
+                    }}
+                  />
+                  <div
+                    className="absolute w-24 h-24 rounded-full border border-cyan-500/15"
+                    style={{
+                      animation:
+                        "sonar-ring 4s cubic-bezier(0.1, 0.8, 0.3, 1) infinite",
+                      animationDelay: "2s",
+                    }}
+                  />
                 </div>
-                <p className="text-sm font-black text-slate-100 relative z-10 tracking-wide select-none" style={{ animation: 'sonar-text-pulse 3.5s ease-in-out infinite' }}>
+                <p
+                  className="text-sm font-black text-slate-100 relative z-10 tracking-wide select-none"
+                  style={{
+                    animation: "sonar-text-pulse 3.5s ease-in-out infinite",
+                  }}
+                >
                   "App made by Hesham Sobhy"
                 </p>
                 <p className="text-[9px] text-cyan-400 font-mono tracking-[0.2em] mt-2 uppercase relative z-10 font-bold">

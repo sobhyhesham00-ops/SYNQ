@@ -65,6 +65,14 @@ export interface ClientCommCardProps {
   handleMarkClientCommDone?: (id: string) => void;
   addSystemNotification?: any;
   getElapsedTimerString?: (confirmedAtISO: string, contactedAtISO?: string) => string;
+  agentsList?: string[];
+  handleAssignRecord?: (
+    recordId: string,
+    collectionName: string,
+    toAgent: string,
+    recordType: string,
+    fromAgent: string,
+  ) => void;
 }
 
 export const ClientCommCard: React.FC<ClientCommCardProps> = ({
@@ -88,14 +96,16 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
   handleTakeClientComm = () => {},
   handleMarkClientCommDone = () => {},
   addSystemNotification = () => {},
-  getElapsedTimerString = () => ""
+  getElapsedTimerString = () => "",
+  agentsList = [],
+  handleAssignRecord
 }) => {
   const isPending = comm.status === "pending";
   const isInProgress = comm.status === "in_progress";
   const isClosed = comm.status === "contacted";
 
-  const canTakeRequest = isPending && comm.callCenterAgentName !== currentUser?.name;
-  const canProcessRequest = isInProgress && (!comm.openedBy || comm.openedBy === currentUser?.name);
+  const canTakeRequest = isPending && comm.callCenterAgentName !== currentUser?.name && comm.assignedTo?.toLowerCase() !== currentUser?.name?.toLowerCase();
+  const canProcessRequest = isInProgress && (!comm.openedBy || comm.openedBy === currentUser?.name || comm.assignedTo?.toLowerCase() === currentUser?.name?.toLowerCase());
 
   const commAgeHours = (Date.now() - new Date(comm.createdAt).getTime()) / 3600000;
   
@@ -191,6 +201,12 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
                <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border border-white/10 shrink-0 ml-2 ${comm.language === "Arabic" ? "bg-emerald-500/10 text-emerald-300" : "bg-blue-500/10 text-blue-300"}`}>
                  {comm.language}
                </span>
+            )}
+
+            {comm.assignedTo && (
+              <span className="text-[10px] text-indigo-300 bg-indigo-500/10 border border-indigo-500/25 px-2 py-0.5 rounded font-bold font-sans flex items-center gap-1 shrink-0 ml-2 animate-pulse">
+                📌 Assigned to: {comm.assignedTo}
+              </span>
             )}
           </div>
         </div>
@@ -425,15 +441,48 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
       )}
 
       {/* Actions */}
-      <div className="flex gap-2 justify-end pt-1 border-t border-white/5">
+      <div className="flex gap-2 justify-end pt-1 border-t border-white/5 items-center flex-wrap">
         {isSuperAdmin && (
           <button
             onClick={() => handleDeleteClientComms(comm.id)}
-            className="mr-auto px-2 py-1.5 hover:bg-rose-500/15 border border-transparent hover:border-rose-500/10 rounded-lg text-rose-400 text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer"
+            className="px-2 py-1.5 hover:bg-rose-500/15 border border-transparent hover:border-rose-500/10 rounded-lg text-rose-400 text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer"
             title="Delete Request"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
+        )}
+
+        {isTLOreSupport && handleAssignRecord && agentsList.length > 0 && (
+          <div className="flex items-center gap-1.5 mr-auto">
+            <span className="text-[10px] text-slate-400 font-semibold">Assign To:</span>
+            <select
+              value={comm.assignedTo || ""}
+              onChange={(e) => {
+                const selectedAgent = e.target.value;
+                if (selectedAgent) {
+                  handleAssignRecord(
+                    comm.id,
+                    "client_comms",
+                    selectedAgent,
+                    "Client Comm",
+                    comm.assignedTo || comm.callCenterAgentName || "unassigned"
+                  );
+                }
+              }}
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-2 py-1 text-[10px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
+            >
+              <option value="" className="bg-[#1c1c1f] text-slate-400">-- Assign Agent --</option>
+              {agentsList.map((aName) => (
+                <option
+                  key={aName}
+                  value={aName}
+                  className="bg-[#1c1c1f] text-slate-100 font-sans"
+                >
+                  {aName}
+                </option>
+              ))}
+            </select>
+          </div>
         )}
 
         {canEditItem(comm.createdAt) && (

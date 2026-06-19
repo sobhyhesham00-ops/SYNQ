@@ -500,7 +500,8 @@ export const AgentRequestsLogs = ({
     } else {
       clientComms.filter(r =>
         (r.callCenterAgentName || '').toLowerCase() === myName.toLowerCase() ||
-        (r.agentName || '').toLowerCase() === myName.toLowerCase()
+        (r.agentName || '').toLowerCase() === myName.toLowerCase() ||
+        (r.assignedTo || '').toLowerCase() === myName.toLowerCase()
       ).forEach(r => res.push({...r, _cType: 'comm'}));
     }
     
