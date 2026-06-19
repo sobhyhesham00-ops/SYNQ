@@ -6,7 +6,10 @@ import {
   Trash2, 
   Copy, 
   CheckCircle2, 
-  MessageSquare 
+  MessageSquare,
+  User as UserIcon,
+  X,
+  Search
 } from "lucide-react";
 import { ClientCommunicationRequest, User } from "../types";
 import { AttachmentsDisplay } from "./AttachmentsDisplay";
@@ -103,6 +106,58 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
   const isPending = comm.status === "pending";
   const isInProgress = comm.status === "in_progress";
   const isClosed = comm.status === "contacted";
+
+  // Reassign / Assign State
+  const [showAssignDropdown, setShowAssignDropdown] = React.useState(false);
+  const [assignSearchQuery, setAssignSearchQuery] = React.useState("");
+  const [isAssigning, setIsAssigning] = React.useState(false);
+  const assignDropdownRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        assignDropdownRef.current &&
+        !assignDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowAssignDropdown(false);
+      }
+    }
+    if (showAssignDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showAssignDropdown]);
+
+  React.useEffect(() => {
+    if (!showAssignDropdown) {
+      setAssignSearchQuery("");
+    }
+  }, [showAssignDropdown]);
+
+  const filteredAgents = (agentsList || []).filter((agentName) =>
+    agentName.toLowerCase().includes(assignSearchQuery.toLowerCase()),
+  );
+
+  const handleAssignAgent = async (agentName: string) => {
+    if (!handleAssignRecord) return;
+    try {
+      setIsAssigning(true);
+      await handleAssignRecord(
+        comm.id,
+        "client_comms",
+        agentName,
+        "Client Comm",
+        comm.assignedTo || comm.callCenterAgentName || "unassigned"
+      );
+      setShowAssignDropdown(false);
+    } catch (err: any) {
+      toast.error("Failed to assign agent: " + err.message);
+    } finally {
+      setIsAssigning(false);
+    }
+  };
 
   const canTakeRequest = isPending && comm.callCenterAgentName !== currentUser?.name && comm.assignedTo?.toLowerCase() !== currentUser?.name?.toLowerCase();
   const canProcessRequest = isInProgress && (!comm.openedBy || comm.openedBy === currentUser?.name || comm.assignedTo?.toLowerCase() === currentUser?.name?.toLowerCase());
@@ -453,35 +508,93 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
         )}
 
         {isTLOreSupport && handleAssignRecord && agentsList.length > 0 && (
-          <div className="flex items-center gap-1.5 mr-auto">
-            <span className="text-[10px] text-slate-400 font-semibold">Assign To:</span>
-            <select
-              value={comm.assignedTo || ""}
-              onChange={(e) => {
-                const selectedAgent = e.target.value;
-                if (selectedAgent) {
-                  handleAssignRecord(
-                    comm.id,
-                    "client_comms",
-                    selectedAgent,
-                    "Client Comm",
-                    comm.assignedTo || comm.callCenterAgentName || "unassigned"
-                  );
-                }
-              }}
-              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-2 py-1 text-[10px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
+          <div className="relative mr-auto" ref={assignDropdownRef}>
+            <button
+              onClick={() => setShowAssignDropdown(!showAssignDropdown)}
+              className="px-3 py-1.5 text-indigo-400 hover:text-indigo-300 bg-indigo-500/15 hover:bg-indigo-500/25 rounded-lg flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-wider border border-indigo-500/20 cursor-pointer"
             >
-              <option value="" className="bg-[#1c1c1f] text-slate-400">-- Assign Agent --</option>
-              {agentsList.map((aName) => (
-                <option
-                  key={aName}
-                  value={aName}
-                  className="bg-[#1c1c1f] text-slate-100 font-sans"
-                >
-                  {aName}
-                </option>
-              ))}
-            </select>
+              <UserIcon className="w-3.5 h-3.5" />{" "}
+              {comm.assignedTo ? "Reassign" : "Assign Agent"}
+            </button>
+            {showAssignDropdown && (
+              <div className="absolute bottom-full left-0 mb-2 z-50 bg-[#141419] border border-slate-700/60 rounded-xl w-72 shadow-2xl flex flex-col overflow-hidden">
+                {/* Header */}
+                <div className="p-2.5 border-b border-slate-700/40 bg-[#18181f] flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Assign Agent
+                  </span>
+                  <button
+                    onClick={() => setShowAssignDropdown(false)}
+                    className="text-slate-500 hover:text-slate-350 p-0.5 rounded-md hover:bg-white/5 transition-colors cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Search Input */}
+                <div className="p-2 border-b border-slate-700/20 bg-[#16161b]">
+                  <div className="relative flex items-center">
+                    <Search className="absolute left-2.5 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
+                    <input
+                      type="text"
+                      placeholder="Search agent name..."
+                      value={assignSearchQuery}
+                      onChange={(e) => setAssignSearchQuery(e.target.value)}
+                      className="w-full bg-[#1e1e24] border border-slate-700/40 rounded-lg text-xs py-1.5 pl-8 pr-7 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/85 transition-colors font-sans"
+                      autoFocus
+                    />
+                    {assignSearchQuery && (
+                      <button
+                        onClick={() => setAssignSearchQuery("")}
+                        className="absolute right-2 px-1 text-slate-500 hover:text-slate-350 cursor-pointer"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Scrollable list of agents */}
+                <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5 bg-[#15151a] scrollbar-thin">
+                  {filteredAgents.length === 0 ? (
+                    <p className="text-center py-6 text-xs text-slate-500 font-sans">
+                      No agents found
+                    </p>
+                  ) : (
+                    filteredAgents.map((agentName) => {
+                      const lob = getAgentLOB(agentName);
+                      const isSelected = comm.assignedTo === agentName;
+                      const isChat = lob === "Chat";
+                      return (
+                        <button
+                          key={agentName}
+                          onClick={() => handleAssignAgent(agentName)}
+                          disabled={isAssigning}
+                          className={`w-full text-left px-2.5 py-1.5 text-xs rounded-lg transition-all flex items-center justify-between font-medium cursor-pointer ${
+                            isSelected
+                              ? "bg-indigo-500/15 text-indigo-300 font-bold border border-indigo-500/20"
+                              : "text-slate-300 hover:bg-white/[0.04] hover:text-white"
+                          }`}
+                        >
+                          <span className="truncate pr-2">{agentName}</span>
+                          {lob && (
+                            <span
+                              className={`shrink-0 text-[8px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                                isChat
+                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  : "bg-blue-500/10 text-blue-450 border border-blue-500/20"
+                              }`}
+                            >
+                              {lob === "Chat" ? "Chat" : "Call"}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
