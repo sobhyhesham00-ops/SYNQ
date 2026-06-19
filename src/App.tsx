@@ -4897,12 +4897,20 @@ ${pageText}
     const userDocId = correspondingFullName
       .replace(/[^a-zA-Z0-9]/g, "")
       .toLowerCase();
-    setDoc(doc(db, "users", userDocId), authenticatedUser).catch(console.error);
+
+    const saveUsernameDoc = () => {
+      setDoc(doc(db, "users", userDocId), authenticatedUser).catch(console.error);
+    };
 
     if (auth.currentUser?.uid) {
-      setDoc(doc(db, "users", auth.currentUser.uid), authenticatedUser).catch(
-        console.error,
-      );
+      setDoc(doc(db, "users", auth.currentUser.uid), authenticatedUser)
+        .then(saveUsernameDoc)
+        .catch((err) => {
+          console.error("Error writing UID user document:", err);
+          saveUsernameDoc();
+        });
+    } else {
+      saveUsernameDoc();
     }
 
     // If agent is new or not in the cached list, add using corresponding fullName or username
