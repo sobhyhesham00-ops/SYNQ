@@ -2437,9 +2437,8 @@ export default function App() {
     currentUser?.name?.toLowerCase() === "sobhyhesham00@gmail.com";
   // Super Admin Control is restricted to h.sobhy specifically, even though other users may hold the 'director' role for other permissions.
   const isSuperAdmin =
-    currentUser?.role === "director" &&
-    (currentUser?.name === "Hesham Sobhy" ||
-      getUsernameFromFullName(currentUser?.name || "") === "h.sobhy");
+    currentUser?.name === "Hesham Sobhy" ||
+    getUsernameFromFullName(currentUser?.name || "") === "h.sobhy";
 
   const isTLOreSupport = currentUser
     ? currentUser.role === "tl" ||
