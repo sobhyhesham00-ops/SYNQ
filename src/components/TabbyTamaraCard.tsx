@@ -838,6 +838,12 @@ export const TabbyTamaraCard = ({
               💰 {pricing.finalPriceFormatted}{" "}
               {req.paymentLength ? `(${req.paymentLength}mo)` : ""}
             </span>
+
+            {req.isFollowUp && (
+              <span className="text-[10px] bg-pink-500/10 text-pink-400 border border-pink-500/30 px-2 py-0.5 rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-1 animate-pulse">
+                📅 Scheduled: {req.followUpDate}
+              </span>
+            )}
           </div>
         </div>
 

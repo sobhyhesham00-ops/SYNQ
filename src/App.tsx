@@ -3687,6 +3687,8 @@ ${pageText}
   const [ttNotes, setTtNotes] = useState("");
   const [ttPlatform, setTtPlatform] = useState<"tabby" | "tamara">("tabby");
   const [ttClinicName, setTtClinicName] = useState("");
+  const [ttIsFollowUp, setTtIsFollowUp] = useState(false);
+  const [ttFollowUpDate, setTtFollowUpDate] = useState("");
 
   // Tabby/Tamara Complaint form inputs
   const [tcPatientName, setTcPatientName] = useState("");
@@ -4067,6 +4069,7 @@ ${pageText}
   const [clientCommStatusFilter, setClientCommStatusFilter] = useState("all");
   const [tabbyTamaraSearch, setTabbyTamaraSearch] = useState("");
   const [tabbyTamaraStatusFilter, setTabbyTamaraStatusFilter] = useState("all");
+  const [ttViewTab, setTtViewTab] = useState<"installment" | "followup">("installment");
   const [complaintStatusFilter, setComplaintStatusFilter] = useState("all");
   const [showLegacyCases, setShowLegacyCases] = useState(false);
   const [logAgentFilter, setLogAgentFilter] = useState("all");
@@ -7851,6 +7854,13 @@ ${result.errors.slice(0, 5).join("\n")}${
       return;
     }
 
+    if (ttIsFollowUp && !ttFollowUpDate) {
+      toast.error(
+        "Please select a follow-up date for this scheduled request.",
+      );
+      return;
+    }
+
     setIsFormSubmitting(true);
     try {
       const pricing = calculateTabbyTamaraPrice(ttPriceWithoutTax);
@@ -7908,6 +7918,9 @@ ${ttNotes}`
         photos: activePhotos,
         links: activeLinks,
 
+        isFollowUp: ttIsFollowUp,
+        followUpDate: ttIsFollowUp ? ttFollowUpDate : "",
+
         // New workflow fields
         workflowStatus: "submitted",
         sourceChannel: channelLabel,
@@ -7941,6 +7954,8 @@ ${ttNotes}`
       setTtPriceWithoutTax("");
       setTtPhoneNumber("");
       setTtNotes("");
+      setTtIsFollowUp(false);
+      setTtFollowUpDate("");
       setActiveScreenshot(null);
       setActivePhotos([]);
       setActiveLinks([]);
@@ -26060,6 +26075,45 @@ ${ttNotes}`
                                           </select>
                                         </div>
 
+                                        {/* Scheduled for Later / Follow-up */}
+                                        <div className="space-y-3.5 p-3.5 bg-white/5 border border-white/5 rounded-2xl text-left">
+                                          <div className="flex items-center justify-between">
+                                            <span className="text-[12px] font-bold text-slate-300">
+                                              Schedule for Later Date / Follow-up?
+                                            </span>
+                                            <label className="relative inline-flex items-center cursor-pointer">
+                                              <input
+                                                type="checkbox"
+                                                checked={ttIsFollowUp}
+                                                onChange={(e) =>
+                                                  setTtIsFollowUp(
+                                                    e.target.checked,
+                                                  )
+                                                }
+                                                className="sr-only peer"
+                                              />
+                                              <div className="w-11 h-6 bg-[#1e1e1e]/40 backdrop-blur-md peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                            </label>
+                                          </div>
+
+                                          {ttIsFollowUp && (
+                                            <div className="space-y-1.5 animate-fade-in pt-1 text-left">
+                                              <label className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider block">
+                                                Follow-up Date *
+                                              </label>
+                                              <input
+                                                type="date"
+                                                value={ttFollowUpDate}
+                                                onChange={(e) =>
+                                                  setTtFollowUpDate(e.target.value)
+                                                }
+                                                className="w-full bg-black/45 border border-indigo-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans cursor-pointer"
+                                                required={ttIsFollowUp}
+                                              />
+                                            </div>
+                                          )}
+                                        </div>
+
                                         {/* Notes */}
                                         <div className="space-y-1.5 text-left">
                                           <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
@@ -26796,6 +26850,7 @@ ${ttNotes}`
                                         );
 
                                     const filteredTT = baseTTList
+                                      .filter((r) => !!r.isFollowUp === (ttViewTab === "followup"))
                                       .filter((r) => {
                                         if (
                                           tabbyTamaraStatusFilter !== "all" &&
@@ -26843,7 +26898,40 @@ ${ttNotes}`
                                       );
 
                                     return (
-                                      <div className="space-y-4 h-full flex flex-col">
+                                       <div className="space-y-4 h-full flex flex-col">
+                                         {/* Sub Tab Switcher under Tabby & Tamara Desk */}
+                                         <div className="flex border-b border-white/10 mb-2">
+                                           <button
+                                             type="button"
+                                             onClick={() => {
+                                               setTtViewTab("installment");
+                                               setSelectedTTId(null);
+                                             }}
+                                             className={`px-5 py-2.5 text-xs font-bold transition-all border-b-2 flex items-center gap-2 cursor-pointer ${
+                                               ttViewTab === "installment"
+                                                 ? "border-indigo-500 text-indigo-400"
+                                                 : "border-transparent text-slate-400 hover:text-slate-200"
+                                             }`}
+                                           >
+                                             <CreditCard className="w-4 h-4" />
+                                             Installment Requests (${baseTTList.filter(r => !r.isFollowUp).length})
+                                           </button>
+                                           <button
+                                             type="button"
+                                             onClick={() => {
+                                               setTtViewTab("followup");
+                                               setSelectedTTId(null);
+                                             }}
+                                             className={`px-5 py-2.5 text-xs font-bold transition-all border-b-2 flex items-center gap-2 cursor-pointer ${
+                                               ttViewTab === "followup"
+                                                 ? "border-pink-500 text-pink-400"
+                                                 : "border-transparent text-slate-400 hover:text-slate-200"
+                                             }`}
+                                           >
+                                             <Calendar className="w-4 h-4" />
+                                             Follow-up Requests (${baseTTList.filter(r => r.isFollowUp).length})
+                                           </button>
+                                         </div>
                                         {/* Filter and Search Bar */}
                                         <div className="flex flex-col sm:flex-row gap-3 bg-white/5 border border-white/10 p-4 rounded-2xl">
                                           {/* Search */}
@@ -26907,10 +26995,14 @@ ${ttNotes}`
                                         <PaginatedCaseList
                                           items={filteredTT}
                                           icon={
-                                            <CreditCard className="w-5 h-5 text-indigo-400" />
+                                            ttViewTab === "followup" ? (
+                                              <Calendar className="w-5 h-5 text-pink-400" />
+                                            ) : (
+                                              <CreditCard className="w-5 h-5 text-indigo-400" />
+                                            )
                                           }
-                                          title="Installment Requests"
-                                          emptyMessage="No installment requests found."
+                                          title={ttViewTab === "followup" ? "Follow-up Requests" : "Installment Requests"}
+                                          emptyMessage={ttViewTab === "followup" ? "No follow-up requests scheduled for later date." : "No installment requests found."}
                                           itemToPhone={(req) => req.phoneNumber}
                                           itemToClinic={(req) => req.clinicName}
                                           availableClinics={CLINIC_OPTIONS.map(

@@ -227,6 +227,8 @@ export interface TabbyTamaraRequest {
   replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string; photos?: string[]; attachments?: string[]; imageUrl?: string; authorId?: string; authorRole?: string; attachmentsObjects?: FileAttachment[]; links?: string[] }[];
   
   // New workflow fields
+  isFollowUp?: boolean;
+  followUpDate?: string;
   workflowStatus?: TTWorkflowStatus;
   sourceChannel?: "chat" | "call_center";
   submittedById?: string;
