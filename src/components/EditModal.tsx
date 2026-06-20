@@ -63,7 +63,8 @@ const EditModalContent = ({
   const [tlPhotos, setTlPhotos] = React.useState<string[]>(() => [...(data.tlPhotos || [])]);
   const [tlLinks, setTlLinks] = React.useState<string[]>(() => [...(data.tlLinks || [])]);
 
-  const [isUploading, setIsUploading] = React.useState(false);
+  const [isAgentUploading, setIsAgentUploading] = React.useState(false);
+  const [isTlUploading, setIsTlUploading] = React.useState(false);
 
   // Sync back to editingItem when photos/links change
   React.useEffect(() => {
@@ -521,7 +522,7 @@ const EditModalContent = ({
                   links={editLinks}
                   onAttachmentsChange={setEditAttachments}
                   onLinksChange={setEditLinks}
-                  onUploadStateChange={setIsUploading}
+                  onUploadStateChange={setIsAgentUploading}
                 />
               ) : (
                 <MultiAttachmentUpload
@@ -530,7 +531,7 @@ const EditModalContent = ({
                   onPhotosChange={setEditPhotos}
                   onLinksChange={setEditLinks}
                   photosLabel="Add / Remove Agent Screenshots"
-                  onUploadStateChange={setIsUploading}
+                  onUploadStateChange={setIsAgentUploading}
                 />
               )}
             </div>
@@ -544,7 +545,7 @@ const EditModalContent = ({
                 onPhotosChange={setTlPhotos}
                 onLinksChange={setTlLinks}
                 photosLabel="Add / Remove TL Screenshots"
-                onUploadStateChange={setIsUploading}
+                onUploadStateChange={setIsTlUploading}
               />
             </div>
           </div>
@@ -559,10 +560,10 @@ const EditModalContent = ({
             </button>
             <button
               type="submit"
-              disabled={isUploading}
-              className={`px-6 py-2 ${isUploading ? 'bg-emerald-500/50 cursor-not-allowed text-slate-500' : 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 text-slate-900 cursor-pointer'} rounded-xl text-sm font-black transition-all flex items-center gap-2`}
+              disabled={isAgentUploading || isTlUploading}
+              className={`px-6 py-2 ${isAgentUploading || isTlUploading ? 'bg-emerald-500/50 cursor-not-allowed text-slate-500' : 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 text-slate-900 cursor-pointer'} rounded-xl text-sm font-black transition-all flex items-center gap-2`}
             >
-              {isUploading ? 'Uploading...' : 'Save Changes'}
+              {isAgentUploading ? 'Uploading Agent files...' : isTlUploading ? 'Uploading TL files...' : 'Save Changes'}
             </button>
           </div>
         </form>

@@ -1931,10 +1931,11 @@ export const TabbyTamaraCard = ({
                           req.id,
                           "contacted",
                           crmContactNotes,
-                          "ready_for_partner",
-                          [], // original legacy screenshots empty
+                          undefined,        // screenshot (legacy field, not used here)
+                          [],                // attachments (legacy screenshots array)
                           clientIds,
                           paymentProofs,
+                          "ready_for_partner", // newWorkflowStatus - now in the correct position
                         );
                         setIsCrmMaterialsMode(false);
                         setCrmContactNotes("");

@@ -104,7 +104,8 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
           }
         } catch (err: any) {
           console.error("Paste upload failed", err);
-          toast.error(`Failed to upload pasted image: ${err.message}`);
+          const code = err?.code ? ` (${err.code})` : '';
+          toast.error(`Failed to upload pasted image: ${err.message}${code}`);
         } finally {
           setIsUploading(false);
           setUploadProgress(null);
@@ -200,7 +201,8 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
             }
         } catch (e: any) {
             console.error('File upload error', e);
-            toast.error(`Failed to upload ${file.name}: ${e.message}`);
+            const code = e?.code ? ` (${e.code})` : '';
+            toast.error(`Failed to upload ${file.name}: ${e.message}${code}`);
         }
 
         setUploadProgress({ current: i + 1, total: files.length });

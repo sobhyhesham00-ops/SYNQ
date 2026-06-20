@@ -109,8 +109,10 @@ export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUplo
                 url: previewUrl,
                 file: file
             });
-        } catch (e) {
-            toast.error(`Failed to process ${file.name}`);
+        } catch (e: any) {
+            console.error('File process error', e);
+            const code = e?.code ? ` (${e.code})` : '';
+            toast.error(`Failed to process ${file.name}: ${e.message || e}${code}`);
         }
         setUploadProgress({ current: i + 1, total: fileArray.length });
     }
