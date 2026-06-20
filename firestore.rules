@@ -64,16 +64,12 @@ service cloud.firestore {
     // evaluation loop that happens when a getUserRole() lookup triggers a read of its own users collection.
     match /users/{userId} {
       allow read: if isSignedIn();
-      allow create, update: if isSignedIn() && (
+      allow write: if isSignedIn() && (
         request.auth.uid == userId || 
         getUserRole() == 'director' || 
         !exists(/databases/$(database)/documents/users/$(request.auth.uid)) ||
         (getUserData() != null && getUserData().id == "usr_" + userId) ||
-        (getUserName() != null && request.resource != null && getUserName() == request.resource.data.name)
-      );
-      allow delete: if isSignedIn() && (
-        request.auth.uid == userId || 
-        getUserRole() == 'director'
+        (getUserName() != null && getUserName() == request.resource.data.name)
       );
     }
 
