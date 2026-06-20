@@ -149,7 +149,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
         "client_comms",
         agentName,
         "Client Comm",
-        comm.assignedTo || comm.callCenterAgentName || "unassigned"
+        comm.assignedToName || comm.assignedTo || comm.callCenterAgentName || "unassigned"
       );
       setShowAssignDropdown(false);
     } catch (err: any) {
@@ -159,8 +159,8 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
     }
   };
 
-  const canTakeRequest = isPending && comm.callCenterAgentName !== currentUser?.name && comm.assignedTo?.toLowerCase() !== currentUser?.name?.toLowerCase();
-  const canProcessRequest = isInProgress && (!comm.openedBy || comm.openedBy === currentUser?.name || comm.assignedTo?.toLowerCase() === currentUser?.name?.toLowerCase());
+  const canTakeRequest = isPending && comm.callCenterAgentName !== currentUser?.name && (comm.assignedToName || comm.assignedTo)?.toLowerCase() !== currentUser?.name?.toLowerCase();
+  const canProcessRequest = isInProgress && (!comm.openedBy || comm.openedBy === currentUser?.name || (comm.assignedToName || comm.assignedTo)?.toLowerCase() === currentUser?.name?.toLowerCase());
 
   const commAgeHours = (Date.now() - new Date(comm.createdAt).getTime()) / 3600000;
   
@@ -258,9 +258,9 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
                </span>
             )}
 
-            {comm.assignedTo && (
+            {(comm.assignedToName || comm.assignedTo) && (
               <span className="text-[10px] text-indigo-300 bg-indigo-500/10 border border-indigo-500/25 px-2 py-0.5 rounded font-bold font-sans flex items-center gap-1 shrink-0 ml-2 animate-pulse">
-                📌 Assigned to: {comm.assignedTo}
+                📌 Assigned to: {comm.assignedToName || comm.assignedTo}
               </span>
             )}
           </div>
@@ -514,7 +514,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
               className="px-3 py-1.5 text-indigo-400 hover:text-indigo-300 bg-indigo-500/15 hover:bg-indigo-500/25 rounded-lg flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-wider border border-indigo-500/20 cursor-pointer"
             >
               <UserIcon className="w-3.5 h-3.5" />{" "}
-              {comm.assignedTo ? "Reassign" : "Assign Agent"}
+              {(comm.assignedToName || comm.assignedTo) ? "Reassign" : "Assign Agent"}
             </button>
             {showAssignDropdown && (
               <div className="absolute bottom-full left-0 mb-2 z-50 bg-[#141419] border border-slate-700/60 rounded-xl w-72 shadow-2xl flex flex-col overflow-hidden">
@@ -563,7 +563,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
                   ) : (
                     filteredAgents.map((agentName) => {
                       const lob = getAgentLOB(agentName);
-                      const isSelected = comm.assignedTo === agentName;
+                      const isSelected = (comm.assignedToName || comm.assignedTo) === agentName;
                       const isChat = lob === "Chat";
                       return (
                         <button

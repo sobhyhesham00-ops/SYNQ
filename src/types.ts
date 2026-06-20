@@ -152,6 +152,7 @@ export interface Inquiry {
   seenByAgent?: boolean; // Tracking if agent acknowledged the notification
   customerContacted?: 'not_contacted' | 'contacted' | 'attempted'; // Dropdown menu status for customer contact status
   assignedTo?: string;
+  assignedToName?: string;
   viewingStatus?: 'none' | 'tl_viewing';
   viewingBy?: string;
   viewingAt?: string;
@@ -305,6 +306,8 @@ export interface ClientCommunicationRequest {
   replies?: { id: string; senderName: string; text: string; createdAt: string; screenshot?: string }[];
   patientName?: string;
   assignedTo?: string;
+  assignedToId?: string;
+  assignedToName?: string;
   channel?: string;
   sourceChannel?: string;
   tlPhotos?: string[];

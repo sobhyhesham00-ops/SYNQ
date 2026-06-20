@@ -8,6 +8,9 @@ import {
   CheckCircle2,
   MessageSquare,
   Pencil,
+  X,
+  Search,
+  User as UserIcon,
 } from "lucide-react";
 import { Inquiry, User } from "../types";
 import {
@@ -72,6 +75,13 @@ interface InquiryCardProps {
   handleMarkSentToClinic?: (id: string) => void;
   handleCloseInquiry?: (id: string) => void;
   handleReassignInquiry?: (id: string, agentName: string) => void;
+  handleAssignRecord?: (
+    recordId: string,
+    collectionName: string,
+    toAgent: string,
+    recordType: string,
+    fromAgent: string,
+  ) => void | Promise<void>;
   agentsList?: string[];
   inquiries?: Inquiry[];
   setInquiries?: (inquiries: Inquiry[]) => void;
@@ -109,6 +119,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
   handleMarkSentToClinic,
   handleCloseInquiry,
   handleReassignInquiry,
+  handleAssignRecord,
   agentsList = [],
   inquiries = [],
   setInquiries,
@@ -162,6 +173,58 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
 
   const isSubmitting =
     isSubmittingAnswer !== undefined ? isSubmittingAnswer : false;
+
+  // Reassign / Assign State
+  const [showAssignDropdown, setShowAssignDropdown] = useState(false);
+  const [assignSearchQuery, setAssignSearchQuery] = useState("");
+  const [isAssigning, setIsAssigning] = useState(false);
+  const assignDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        assignDropdownRef.current &&
+        !assignDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowAssignDropdown(false);
+      }
+    }
+    if (showAssignDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showAssignDropdown]);
+
+  useEffect(() => {
+    if (!showAssignDropdown) {
+      setAssignSearchQuery("");
+    }
+  }, [showAssignDropdown]);
+
+  const filteredAgents = (agentsList || []).filter((agentName) =>
+    agentName.toLowerCase().includes(assignSearchQuery.toLowerCase()),
+  );
+
+  const handleAssignAgent = async (agentName: string) => {
+    if (!handleAssignRecord) return;
+    try {
+      setIsAssigning(true);
+      await handleAssignRecord(
+        inq.id,
+        "inquiries",
+        agentName,
+        "Inquiry",
+        inq.agentName || "Unknown"
+      );
+      setShowAssignDropdown(false);
+    } catch (err: any) {
+      toast.error("Failed to assign agent: " + err.message);
+    } finally {
+      setIsAssigning(false);
+    }
+  };
 
   const STATUS_CONFIG: Record<
     string,
@@ -370,6 +433,11 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
           >
             <Copy className="w-3 h-3" /> Copy
           </button>
+          {inq.assignedToName && (
+            <span className="text-[9px] font-bold text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20 max-w-[120px] truncate leading-none">
+              📌 {inq.assignedToName}
+            </span>
+          )}
           <span
             className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg uppercase tracking-wider shrink-0 ${statusColor}`}
           >
@@ -577,6 +645,97 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                   🔒 Closed by {inq.closedBy} on{" "}
                   {new Date(inq.closedAt || "").toLocaleString()}
                 </span>
+              )}
+
+              {isTLOreSupport && handleAssignRecord && agentsList.length > 0 && (
+                <div className="relative" ref={assignDropdownRef}>
+                  <button
+                    onClick={() => setShowAssignDropdown(!showAssignDropdown)}
+                    className="px-3.5 py-1.5 text-indigo-400 hover:text-indigo-300 bg-indigo-500/15 hover:bg-indigo-500/25 rounded-lg flex items-center gap-1.5 transition-all font-bold text-[11px] uppercase tracking-wider border border-indigo-500/20 cursor-pointer active:scale-95"
+                  >
+                    <UserIcon className="w-3.5 h-3.5" />{" "}
+                    {inq.assignedToName ? `Reassign (${inq.assignedToName})` : "Assign Agent"}
+                  </button>
+                  {showAssignDropdown && (
+                    <div className="absolute bottom-full left-0 mb-2 z-50 bg-[#141419] border border-slate-700/60 rounded-xl w-72 shadow-2xl flex flex-col overflow-hidden">
+                      {/* Header */}
+                      <div className="p-2.5 border-b border-slate-700/40 bg-[#18181f] flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          Assign Agent
+                        </span>
+                        <button
+                          onClick={() => setShowAssignDropdown(false)}
+                          className="text-slate-500 hover:text-slate-350 p-0.5 rounded-md hover:bg-white/5 transition-colors cursor-pointer"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      {/* Search Input */}
+                      <div className="p-2 border-b border-slate-700/20 bg-[#16161b]">
+                        <div className="relative flex items-center">
+                          <Search className="absolute left-2.5 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
+                          <input
+                            type="text"
+                            placeholder="Search agent name..."
+                            value={assignSearchQuery}
+                            onChange={(e) => setAssignSearchQuery(e.target.value)}
+                            className="w-full bg-[#1e1e24] border border-slate-700/40 rounded-lg text-xs py-1.5 pl-8 pr-7 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/85 transition-colors font-sans"
+                            autoFocus
+                          />
+                          {assignSearchQuery && (
+                            <button
+                              onClick={() => setAssignSearchQuery("")}
+                              className="absolute right-2 px-1 text-slate-500 hover:text-slate-350 cursor-pointer"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Scrollable list of agents */}
+                      <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5 bg-[#15151a] scrollbar-thin">
+                        {filteredAgents.length === 0 ? (
+                          <p className="text-center py-6 text-xs text-slate-500 font-sans">
+                            No agents found
+                          </p>
+                        ) : (
+                          filteredAgents.map((agentName) => {
+                            const lob = getAgentLOB(agentName);
+                            const isSelected = inq.assignedToName === agentName;
+                            const isChat = lob === "Chat";
+                            return (
+                              <button
+                                key={agentName}
+                                onClick={() => handleAssignAgent(agentName)}
+                                disabled={isAssigning}
+                                className={`w-full text-left px-2.5 py-1.5 text-xs rounded-lg transition-all flex items-center justify-between font-medium cursor-pointer ${
+                                  isSelected
+                                    ? "bg-indigo-500/15 text-indigo-300 font-bold border border-indigo-500/20"
+                                    : "text-slate-300 hover:bg-white/[0.04] hover:text-white"
+                                }`}
+                              >
+                                <span className="truncate pr-2">{agentName}</span>
+                                {lob && (
+                                  <span
+                                    className={`shrink-0 text-[8px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                                      isChat
+                                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                        : "bg-blue-500/10 text-blue-450 border border-blue-500/20"
+                                    }`}
+                                  >
+                                    {lob === "Chat" ? "Chat" : "Call"}
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 

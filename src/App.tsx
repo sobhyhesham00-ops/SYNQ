@@ -8118,41 +8118,41 @@ ${ttNotes}`
       else if (collectionName === "inquiries") entityType = "inquiry";
 
       // Central assignment service call
-      await assignCase(
+      const success = await assignCase(
         entityType,
         recordId,
         { id: assigneeId, name: toAgent },
         currentUser,
       );
 
-      const { updateDoc, doc } = await import("firebase/firestore");
-      await updateDoc(doc(db, collectionName, recordId), {
-        assignedTo: toAgent,
-      });
+      if (!success) {
+        toast.error("Failed to assign — please try again.");
+        return;
+      }
 
       // Update local state based on collectionName
       if (collectionName === "inquiries") {
         setInquiries((prev) =>
           prev.map((i) =>
-            i.id === recordId ? { ...i, assignedTo: toAgent } : i,
+            i.id === recordId ? { ...i, assignedToName: toAgent, assignedToId: assigneeId } : i,
           ),
         );
       } else if (collectionName === "tt_requests") {
         setTabbyTamaraRequests((prev) =>
           prev.map((r) =>
-            r.id === recordId ? { ...r, assignedTo: toAgent } : r,
+            r.id === recordId ? { ...r, assignedToName: toAgent, assignedToId: assigneeId } : r,
           ),
         );
       } else if (collectionName === "tt_complaints") {
         setTabbyTamaraComplaints((prev) =>
           prev.map((c) =>
-            c.id === recordId ? { ...c, assignedTo: toAgent } : c,
+            c.id === recordId ? { ...c, assignedToName: toAgent, assignedToId: assigneeId } : c,
           ),
         );
       } else if (collectionName === "client_comms") {
         setClientComms((prev) =>
           prev.map((c) =>
-            c.id === recordId ? { ...c, assignedTo: toAgent } : c,
+            c.id === recordId ? { ...c, assignedToName: toAgent, assignedToId: assigneeId } : c,
           ),
         );
       }
@@ -19957,6 +19957,9 @@ ${ttNotes}`
                                       handleReassignInquiry={
                                         handleReassignInquiry
                                       }
+                                      handleAssignRecord={
+                                        handleAssignRecord
+                                      }
                                       agentsList={agentsList}
                                       inquiries={inquiries}
                                       setInquiries={setInquiries}
@@ -19990,6 +19993,8 @@ ${ttNotes}`
                                   inq.answeredBy === currentUser.name ||
                                   inq.viewingBy === currentUser.name ||
                                   inq.closedBy === currentUser.name ||
+                                  inq.assignedToName === currentUser.name ||
+                                  inq.assignedToName === currentUser.id ||
                                   inq.assignedTo === currentUser.id ||
                                   inq.assignedTo === currentUser.name
                                 );
@@ -20050,6 +20055,8 @@ ${ttNotes}`
                               } else {
                                 return (
                                   comp.tlHandledBy === currentUser.name ||
+                                  comp.assignedToName === currentUser.id ||
+                                  comp.assignedToName === currentUser.name ||
                                   comp.assignedTo === currentUser.id ||
                                   comp.assignedTo === currentUser.name ||
                                   comp.tlName === currentUser.name
@@ -20078,6 +20085,8 @@ ${ttNotes}`
                               } else {
                                 return (
                                   comm.handledBy === currentUser.name ||
+                                  comm.assignedToName === currentUser.id ||
+                                  comm.assignedToName === currentUser.name ||
                                   comm.assignedTo === currentUser.id ||
                                   comm.assignedTo === currentUser.name ||
                                   comm.openedBy === currentUser.name
@@ -20806,6 +20815,9 @@ ${ttNotes}`
                                           }
                                           handleReassignInquiry={
                                             handleReassignInquiry
+                                          }
+                                          handleAssignRecord={
+                                            handleAssignRecord
                                           }
                                           agentsList={agentsList}
                                           inquiries={inquiries}
@@ -25605,6 +25617,8 @@ ${ttNotes}`
                                                 currentUser?.name?.toLowerCase() ||
                                               c.handledBy?.toLowerCase() ===
                                                 currentUser?.name?.toLowerCase() ||
+                                              c.assignedToName?.toLowerCase() ===
+                                                currentUser?.name?.toLowerCase() ||
                                               c.assignedTo?.toLowerCase() ===
                                                 currentUser?.name?.toLowerCase() ||
                                               c.openedBy?.toLowerCase() ===
@@ -25653,6 +25667,8 @@ ${ttNotes}`
                                               c.callCenterAgentName?.toLowerCase() ===
                                                 currentUser?.name?.toLowerCase() ||
                                               c.handledBy?.toLowerCase() ===
+                                                currentUser?.name?.toLowerCase() ||
+                                              c.assignedToName?.toLowerCase() ===
                                                 currentUser?.name?.toLowerCase() ||
                                               c.assignedTo?.toLowerCase() ===
                                                 currentUser?.name?.toLowerCase() ||
@@ -26548,6 +26564,8 @@ ${ttNotes}`
                                               currentUser?.name?.toLowerCase() ||
                                             c.handledBy?.toLowerCase() ===
                                               currentUser?.name?.toLowerCase() ||
+                                            c.assignedToName?.toLowerCase() ===
+                                              currentUser?.name?.toLowerCase() ||
                                             c.assignedTo?.toLowerCase() ===
                                               currentUser?.name?.toLowerCase() ||
                                             c.openedBy?.toLowerCase() ===
@@ -26995,7 +27013,7 @@ ${ttNotes}`
                                             (c.agentName || "")
                                               .toLowerCase()
                                               .includes(q) ||
-                                            (c.assignedTo || "")
+                                            (c.assignedToName || c.assignedTo || "")
                                               .toLowerCase()
                                               .includes(q) ||
                                             (c.clinicName || "")

@@ -169,9 +169,9 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
           >
             <Copy className="w-3 h-3" /> Copy
           </button>
-          {comp.assignedTo && (
+          {(comp.assignedToName || comp.assignedTo) && (
             <span className="text-[9px] font-bold text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20 max-w-[100px] truncate leading-none">
-              📌 {comp.assignedTo}
+              📌 {comp.assignedToName || comp.assignedTo}
             </span>
           )}
           <span className={`text-[9px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-md font-sans leading-none ${
@@ -383,7 +383,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
                 ASSIGNED WORKER
               </span>
               <span className="text-xs text-slate-200 font-bold flex items-center gap-1">
-                📌 {comp.assignedTo ? `Assigned to ${comp.assignedTo}` : "Unassigned Case"}
+                📌 {(comp.assignedToName || comp.assignedTo) ? `Assigned to ${comp.assignedToName || comp.assignedTo}` : "Unassigned Case"}
               </span>
             </div>
             <div className="flex items-center gap-2">

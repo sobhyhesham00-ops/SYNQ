@@ -401,12 +401,17 @@ export const TabbyTamaraCard = ({
         "usr_" + agentName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
 
       // Central assignment service call
-      await assignCase(
+      const success = await assignCase(
         "tt_request",
         req.id,
         { id: assigneeId, name: agentName },
         currentUser,
       );
+
+      if (!success) {
+        toast.error("Failed to assign — please try again.");
+        return;
+      }
 
       if (addSystemNotification) {
         addSystemNotification(
