@@ -794,8 +794,12 @@ export default function App() {
         snapshot.docs.forEach((doc) => {
           const u = doc.data();
           if (u.role) {
-            if (u.name) rolesMap[u.name.toLowerCase()] = u.role;
+            if (u.name) {
+              rolesMap[u.name.toLowerCase()] = u.role;
+              rolesMap[getUsernameFromFullName(u.name)] = u.role; // normalized "f.lastname" key
+            }
             if (u.id) rolesMap[u.id.toLowerCase()] = u.role;
+            if (u.username) rolesMap[u.username.toLowerCase()] = u.role;
             rolesMap[doc.id.toLowerCase()] = u.role;
           }
         });
@@ -1893,14 +1897,11 @@ export default function App() {
           // Optionally update currentUser if their document was updated
           setCurrentUser((prevUser) => {
             if (!prevUser) return null;
-            const liveUserInfo = dbUsers.find(
-              (u) =>
-                u &&
-                u.name &&
-                prevUser &&
-                prevUser.name &&
-                u?.name?.toLowerCase() === prevUser.name.toLowerCase(),
+            const matchingDocs = dbUsers.filter(
+              (u) => u && u.name && prevUser && prevUser.name && u.name.toLowerCase() === prevUser.name.toLowerCase(),
             );
+            const liveUserInfo =
+              matchingDocs.find((u) => u.role === "director") || matchingDocs[0];
             if (liveUserInfo) {
               // Use Firestore doc ID as the canonical user ID
               return {
@@ -4921,7 +4922,8 @@ ${pageText}
 
     const persistedRole =
       userRoles[formattedUsername] ||
-      userRoles[correspondingFullName.toLowerCase().replace(/\s+/g, ".")];
+      userRoles[getUsernameFromFullName(correspondingFullName)] ||
+      userRoles[correspondingFullName.toLowerCase()];
     const userRole =
       persistedRole ||
       (isQAName(correspondingFullName)
@@ -4989,15 +4991,32 @@ ${pageText}
       .replace(/[^a-zA-Z0-9]/g, "")
       .toLowerCase();
 
-    const saveUsernameDoc = () => {
-      setDoc(doc(db, "users", userDocId), authenticatedUser).catch(console.error);
+    const saveUsernameDoc = async () => {
+      const existingSnap = await getDoc(doc(db, "users", userDocId)).catch(() => null);
+      const existingRole = existingSnap?.exists() ? (existingSnap.data() as any)?.role : null;
+      const payload = existingRole
+        ? { ...authenticatedUser, role: existingRole }
+        : authenticatedUser;
+      setDoc(doc(db, "users", userDocId), payload, { merge: true }).catch(console.error);
     };
 
     if (auth.currentUser?.uid) {
-      setDoc(doc(db, "users", auth.currentUser.uid), authenticatedUser)
+      const uidRef = doc(db, "users", auth.currentUser.uid);
+      getDoc(uidRef)
+        .then((existingSnap) => {
+          const existingRole = existingSnap.exists() ? (existingSnap.data() as any)?.role : null;
+          const payload = existingRole
+            ? { ...authenticatedUser, role: existingRole }
+            : authenticatedUser;
+          return setDoc(uidRef, payload, { merge: true });
+        })
+        .catch((err) => {
+          console.error("Error writing UID user document, trying default write:", err);
+          return setDoc(uidRef, authenticatedUser, { merge: true });
+        })
         .then(saveUsernameDoc)
         .catch((err) => {
-          console.error("Error writing UID user document:", err);
+          console.error("Error in UID write flow or saveUsernameDoc trigger:", err);
           saveUsernameDoc();
         });
     } else {
