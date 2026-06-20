@@ -353,8 +353,17 @@ function getReferencePath(ref: any): string | null {
   if (!ref) return null;
   if (typeof ref.path === "string") return ref.path;
   if (ref.query && typeof ref.query.path === "string") return ref.query.path;
-  if (typeof ref.toString === "function") return ref.toString();
-  return null;
+  if (ref._query && ref._query.path && typeof ref._query.path.toString === "function") {
+    return ref._query.path.toString();
+  }
+  if (ref.collection && typeof ref.collection.path === "string") {
+    return ref.collection.path;
+  }
+  if (typeof ref.toString === "function") {
+    const s = ref.toString();
+    if (s !== "[object Object]") return s;
+  }
+  return "query_or_ref";
 }
 
 export function wrappedOnSnapshot(ref: any, ...args: any[]) {

@@ -2147,6 +2147,43 @@ export default function App() {
     return () => window.removeEventListener("beforeunload", markOffline);
   }, [currentUser]);
 
+  // Synchronize the current logged-in user profile with Firebase Auth (anonymous or Google) UID doc
+  useEffect(() => {
+    if (!authReady) return;
+    const firebaseUser = auth.currentUser;
+    if (!firebaseUser) return;
+
+    if (currentUser) {
+      console.log(
+        `[Firebase Sync] Publishing active user profile for "${currentUser.name}" to database reference: ${firebaseUser.uid}`,
+      );
+      const userDocId = currentUser.name
+        .replace(/[^a-zA-Z0-9]/g, "")
+        .toLowerCase();
+
+      const userPayload = {
+        id: currentUser.id || `usr_${userDocId}`,
+        name: currentUser.name,
+        role: currentUser.role,
+        lastLoginAt: currentUser.lastLoginAt || new Date().toISOString(),
+        username: getUsernameFromFullName(currentUser.name),
+      };
+
+      setDoc(doc(db, "users", firebaseUser.uid), userPayload).catch((e) =>
+        console.error("[Firebase Sync] Error writing UID role document:", e),
+      );
+      setDoc(doc(db, "users", userDocId), userPayload).catch((e) =>
+        console.error("[Firebase Sync] Error writing username role document:", e),
+      );
+    } else {
+      // Clear current anonymous user permission mapping on signout/timeout
+      console.log(
+        `[Firebase Sync] Active session cleared. Removing UID permission mapping for: ${firebaseUser.uid}`,
+      );
+      deleteDoc(doc(db, "users", firebaseUser.uid)).catch(() => {});
+    }
+  }, [authReady, currentUser]);
+
   // Real-time Firestore Sync with [currentUser] dependency for Schedules, Notifications, Orders, and Todos as requested
   useEffect(() => {
     if (!authReady || !currentUser || !currentUser.id) return;
