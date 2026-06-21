@@ -8186,6 +8186,71 @@ ${ttNotes}`
     }
   };
 
+  const handleBulkAssignRecords = async (
+    recordIds: string[],
+    collectionName: string,
+    toAgent: string,
+  ) => {
+    if (!currentUser || recordIds.length === 0) return;
+    try {
+      const assigneeId =
+        "usr_" + toAgent.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+      let entityType = collectionName;
+      if (collectionName === "tt_complaints") entityType = "tt_complaint";
+      else if (collectionName === "tt_requests") entityType = "tt_request";
+      else if (collectionName === "client_comms") entityType = "client_comm";
+      else if (collectionName === "inquiries") entityType = "inquiry";
+
+      const results = await Promise.all(
+        recordIds.map((id) =>
+          assignCase(entityType, id, { id: assigneeId, name: toAgent }, currentUser)
+        )
+      );
+      const successCount = results.filter(Boolean).length;
+
+      if (collectionName === "inquiries") {
+        setInquiries((prev) =>
+          prev.map((i) =>
+            recordIds.includes(i.id) ? { ...i, assignedToName: toAgent, assignedToId: assigneeId } : i,
+          ),
+        );
+      } else if (collectionName === "tt_requests") {
+        setTabbyTamaraRequests((prev) =>
+          prev.map((r) =>
+            recordIds.includes(r.id) ? { ...r, assignedToName: toAgent, assignedToId: assigneeId } : r,
+          ),
+        );
+      } else if (collectionName === "tt_complaints") {
+        setTabbyTamaraComplaints((prev) =>
+          prev.map((c) =>
+            recordIds.includes(c.id) ? { ...c, assignedToName: toAgent, assignedToId: assigneeId } : c,
+          ),
+        );
+      } else if (collectionName === "client_comms") {
+        setClientComms((prev) =>
+          prev.map((c) =>
+            recordIds.includes(c.id) ? { ...c, assignedToName: toAgent, assignedToId: assigneeId } : c,
+          ),
+        );
+      }
+
+      if (successCount > 0) {
+        addSystemNotification(
+          `📌 ${successCount} ${successCount === 1 ? "Case" : "Cases"} Assigned to You`,
+          `TL ${currentUser.name} bulk-assigned ${successCount} case(s) to you. Please review and action.`,
+          "general",
+          toAgent,
+        );
+        toast.success(`Assigned ${successCount} item(s) to ${toAgent}!`);
+      }
+      if (successCount < recordIds.length) {
+        toast.error(`${recordIds.length - successCount} item(s) failed to assign.`);
+      }
+    } catch (err: any) {
+      toast.error("Bulk assignment failed: " + err.message);
+    }
+  };
+
   const handleContactTabbyTamara = async (
     requestId: string,
     status: "not_contacted" | "contacted",
@@ -19905,6 +19970,10 @@ ${ttNotes}`
                                   availableClinics={CLINIC_OPTIONS.map(
                                     (c) => c.value,
                                   )}
+                                  itemId={(inq) => inq.id}
+                                  enableBulkAssign={isTLOreSupport}
+                                  agentsList={agentsList}
+                                  onBulkAssign={(ids, toAgent) => handleBulkAssignRecords(ids, "inquiries", toAgent)}
                                   renderItem={(inq) => (
                                     <InquiryCard
                                       key={inq.id}
@@ -26725,7 +26794,11 @@ ${ttNotes}`
                                           availableClinics={CLINIC_OPTIONS.map(
                                             (c) => c.value,
                                           )}
-                                          renderItem={(comm) => {
+                                          itemId={(comm) => comm.id}
+                                           enableBulkAssign={isTLOreSupport}
+                                           agentsList={agentsList}
+                                           onBulkAssign={(ids, toAgent) => handleBulkAssignRecords(ids, "client_comms", toAgent)}
+                                           renderItem={(comm) => {
                                             const isExpanded =
                                               selectedClientCommId === comm.id;
                                             const onToggle = () =>
@@ -26971,7 +27044,11 @@ ${ttNotes}`
                                           availableClinics={CLINIC_OPTIONS.map(
                                             (c) => c.value,
                                           )}
-                                          renderItem={(req) => {
+                                          itemId={(req) => req.id}
+                                           enableBulkAssign={isTLOreSupport}
+                                           agentsList={agentsList}
+                                           onBulkAssign={(ids, toAgent) => handleBulkAssignRecords(ids, "tt_requests", toAgent)}
+                                           renderItem={(req) => {
                                             const isExpanded =
                                               selectedTTId === req.id;
                                             const onToggle = () =>
@@ -27180,7 +27257,11 @@ ${ttNotes}`
                                           availableClinics={CLINIC_OPTIONS.map(
                                             (c) => c.value,
                                           )}
-                                          renderItem={(comp) => {
+                                          itemId={(comp) => comp.id}
+                                           enableBulkAssign={isTLOreSupport}
+                                           agentsList={agentsList}
+                                           onBulkAssign={(ids, toAgent) => handleBulkAssignRecords(ids, "tt_complaints", toAgent)}
+                                           renderItem={(comp) => {
                                             const isExpanded =
                                               selectedComplaintId === comp.id;
                                             const onToggle = () =>

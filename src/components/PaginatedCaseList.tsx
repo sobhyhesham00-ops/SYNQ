@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ClipboardList, Filter } from 'lucide-react';
+import { ClipboardList, Filter, X } from 'lucide-react';
 import { PaginationControls } from './PaginationControls';
 
 interface FilterState {
@@ -16,6 +16,11 @@ interface PaginatedCaseListProps<T> {
   itemToPhone?: (item: T) => string | undefined;
   itemToClinic?: (item: T) => string | undefined;
   availableClinics?: string[];
+  // Bulk assign (all optional — omitting them keeps old behavior)
+  itemId?: (item: T) => string;
+  enableBulkAssign?: boolean;
+  agentsList?: string[];
+  onBulkAssign?: (ids: string[], toAgent: string) => Promise<void> | void;
 }
 
 export function PaginatedCaseList<T>({
@@ -26,21 +31,30 @@ export function PaginatedCaseList<T>({
   emptyMessage = "No items matched the criteria or the queue is empty.",
   itemToPhone,
   itemToClinic,
-  availableClinics
+  availableClinics,
+  itemId,
+  enableBulkAssign,
+  agentsList,
+  onBulkAssign
 }: PaginatedCaseListProps<T>) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
-  
+
   const [phoneFilter, setPhoneFilter] = useState('');
   const [clinicsFilter, setClinicsFilter] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkTargetAgent, setBulkTargetAgent] = useState('');
+  const [isBulkSubmitting, setIsBulkSubmitting] = useState(false);
+
+  const showBulk = !!(enableBulkAssign && itemId && onBulkAssign);
 
   const filteredItems = useMemo(() => {
     return items.filter(item => {
       let matchesPhone = true;
       let matchesClinic = true;
 
-      // Filter by phone
       if (phoneFilter && itemToPhone) {
         const phone = itemToPhone(item) || '';
         if (!phone.includes(phoneFilter)) {
@@ -48,7 +62,6 @@ export function PaginatedCaseList<T>({
         }
       }
 
-      // Filter by clinic
       if (clinicsFilter.length > 0 && itemToClinic) {
         const clinic = itemToClinic(item) || '';
         if (!clinicsFilter.includes(clinic)) {
@@ -63,7 +76,6 @@ export function PaginatedCaseList<T>({
   const totalItems = filteredItems.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  // Auto adjust current page if total pages shrinks
   if (currentPage > totalPages && totalPages > 0) {
     setCurrentPage(totalPages);
   }
@@ -74,10 +86,45 @@ export function PaginatedCaseList<T>({
   }, [filteredItems, currentPage, itemsPerPage]);
 
   const toggleClinic = (c: string) => {
-    setClinicsFilter(prev => 
+    setClinicsFilter(prev =>
       prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c]
     );
     setCurrentPage(1);
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const pageIds = itemId ? paginatedItems.map(itemId) : [];
+  const allPageSelected = pageIds.length > 0 && pageIds.every(id => selectedIds.has(id));
+
+  const toggleSelectAllOnPage = () => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (allPageSelected) {
+        pageIds.forEach(id => next.delete(id));
+      } else {
+        pageIds.forEach(id => next.add(id));
+      }
+      return next;
+    });
+  };
+
+  const handleBulkAssignSubmit = async () => {
+    if (!bulkTargetAgent || selectedIds.size === 0 || !onBulkAssign) return;
+    setIsBulkSubmitting(true);
+    try {
+      await onBulkAssign(Array.from(selectedIds), bulkTargetAgent);
+      setSelectedIds(new Set());
+      setBulkTargetAgent('');
+    } finally {
+      setIsBulkSubmitting(false);
+    }
   };
 
   return (
@@ -91,9 +138,9 @@ export function PaginatedCaseList<T>({
             Total items matching criteria: <strong className="text-indigo-400">{totalItems}</strong>
           </p>
         </div>
-        
+
         {(itemToPhone || itemToClinic) && (
-          <button 
+          <button
             onClick={() => setShowFilters(!showFilters)}
             className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${showFilters || phoneFilter || clinicsFilter.length > 0 ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" : "bg-white/5 text-slate-300 border border-white/10 hover:bg-white/10"}`}
           >
@@ -109,8 +156,8 @@ export function PaginatedCaseList<T>({
             {itemToPhone && (
               <div>
                 <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Phone Number Search</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={phoneFilter}
                   onChange={(e) => {
                     setPhoneFilter(e.target.value);
@@ -121,7 +168,7 @@ export function PaginatedCaseList<T>({
                 />
               </div>
             )}
-            
+
             {itemToClinic && availableClinics && (
               <div>
                 <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Filter by Clinics</label>
@@ -131,8 +178,8 @@ export function PaginatedCaseList<T>({
                       key={c}
                       onClick={() => toggleClinic(c)}
                       className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all ${
-                        clinicsFilter.includes(c) 
-                          ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300' 
+                        clinicsFilter.includes(c)
+                          ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300'
                           : 'bg-white/5 border-white/10 text-slate-400 hover:text-slate-200 hover:bg-white/10'
                       }`}
                     >
@@ -154,6 +201,52 @@ export function PaginatedCaseList<T>({
         </div>
       )}
 
+      {showBulk && (
+        <div className="bg-[#161620] p-3.5 border-b border-slate-700/60 flex flex-wrap items-center gap-3">
+          <label className="flex items-center gap-2 text-xs font-bold text-slate-300 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={allPageSelected}
+              onChange={toggleSelectAllOnPage}
+              className="w-4 h-4 accent-indigo-500 cursor-pointer"
+            />
+            Select all on this page
+          </label>
+
+          {selectedIds.size > 0 && (
+            <div className="flex items-center gap-2 ml-auto flex-wrap">
+              <span className="text-xs font-bold text-indigo-300">
+                {selectedIds.size} selected
+              </span>
+              <select
+                value={bulkTargetAgent}
+                onChange={(e) => setBulkTargetAgent(e.target.value)}
+                className="bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-200 outline-none focus:border-indigo-500"
+              >
+                <option value="">Assign selected to...</option>
+                {(agentsList || []).map(a => (
+                  <option key={a} value={a}>{a}</option>
+                ))}
+              </select>
+              <button
+                onClick={handleBulkAssignSubmit}
+                disabled={!bulkTargetAgent || isBulkSubmitting}
+                className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:pointer-events-none text-white text-xs font-bold rounded-lg transition-all"
+              >
+                {isBulkSubmitting ? "Assigning..." : "Assign"}
+              </button>
+              <button
+                onClick={() => setSelectedIds(new Set())}
+                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10"
+                title="Clear selection"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="flex flex-col w-full min-h-[300px]">
         {paginatedItems.length === 0 ? (
           <div className="p-16 text-center space-y-2 animate-fade-in bg-[#0d0d11] h-full flex-1 flex flex-col items-center justify-center">
@@ -169,7 +262,25 @@ export function PaginatedCaseList<T>({
           </div>
         ) : (
           <div className="divide-y divide-slate-700/60 flex flex-col w-full flex-1">
-            {paginatedItems.map(item => renderItem(item))}
+            {paginatedItems.map(item => {
+              const id = itemId ? itemId(item) : undefined;
+              if (showBulk && id) {
+                return (
+                  <div key={id} className="flex items-stretch">
+                    <div className="flex items-start pt-5 pl-4 pr-1 shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(id)}
+                        onChange={() => toggleSelect(id)}
+                        className="w-4 h-4 accent-indigo-500 cursor-pointer"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">{renderItem(item)}</div>
+                  </div>
+                );
+              }
+              return renderItem(item);
+            })}
           </div>
         )}
       </div>
