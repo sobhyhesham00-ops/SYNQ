@@ -352,9 +352,17 @@ export function handleFirestoreError(
 function getReferencePath(ref: any): string | null {
   if (!ref) return null;
   if (typeof ref.path === "string") return ref.path;
+  if (ref._query && ref._query.path && typeof ref._query.path.toString === "function") {
+    return ref._query.path.toString();
+  }
+  if (ref.query && ref.query._query && ref.query._query.path && typeof ref.query._query.path.toString === "function") {
+    return ref.query._query.path.toString();
+  }
   if (ref.query && typeof ref.query.path === "string") return ref.query.path;
-  if (typeof ref.toString === "function") return ref.toString();
-  return null;
+  if (typeof ref.toString === "function" && ref.toString() !== "[object Object]") {
+    return ref.toString();
+  }
+  return "unknown_query";
 }
 
 export function wrappedOnSnapshot(ref: any, ...args: any[]) {

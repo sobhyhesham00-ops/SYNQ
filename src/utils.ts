@@ -458,7 +458,6 @@ export const isSMEName = (name: string): boolean => {
   const fullName = findAgentByUsername(name) || name;
   const normalized = capitalizeName(fullName);
   
-  // TODO: Add SME agent names here (e.g., ['John Doe', 'Jane Smith'])
   const SME_AGENTS: string[] = [];
   if (SME_AGENTS.some(sme => sme?.toLowerCase() === normalized?.toLowerCase())) return true;
   

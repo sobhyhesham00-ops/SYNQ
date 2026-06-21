@@ -74,7 +74,6 @@ interface InquiryCardProps {
   handleMarkInquiryRead?: (id: string) => void;
   handleMarkSentToClinic?: (id: string) => void;
   handleCloseInquiry?: (id: string) => void;
-  handleReassignInquiry?: (id: string, agentName: string) => void;
   handleAssignRecord?: (
     recordId: string,
     collectionName: string,
@@ -118,7 +117,6 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
   handleMarkInquiryRead,
   handleMarkSentToClinic,
   handleCloseInquiry,
-  handleReassignInquiry,
   handleAssignRecord,
   agentsList = [],
   inquiries = [],
@@ -753,32 +751,6 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                 </button>
               )}
             </div>
-
-            {/* Reassign Agent Option */}
-            {handleReassignInquiry && agentsList.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/5">
-                <span className="text-[11px] text-slate-400 font-semibold flex items-center gap-1">
-                  Reassign Agent:
-                </span>
-                <select
-                  value={inq.agentName}
-                  onChange={(e) =>
-                    handleReassignInquiry(inq.id, e.target.value)
-                  }
-                  className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-2.5 py-1 text-[11px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
-                >
-                  {agentsList.map((aName) => (
-                    <option
-                      key={aName}
-                      value={aName}
-                      className="bg-[#1c1c1f] text-slate-100 font-sans"
-                    >
-                      {aName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
 
             {/* Dialog for answering inside pipeline cards */}
             {activeAnsweringId === inq.id && (

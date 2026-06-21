@@ -7,7 +7,6 @@ import { AgentFollowUpsTab } from "./components/AgentFollowUpsTab";
 import { AgentSubmissionsDashboard } from "./components/AgentSubmissionsDashboard";
 import { GlobalDashboard } from "./components/GlobalDashboard";
 import { AttendanceTracker } from "./components/AttendanceTracker";
-import { UserManagement } from "./components/UserManagement";
 import { AllAgentSubmissionsLog } from "./components/AllAgentSubmissionsLog";
 import { NotificationDrawer } from "./components/NotificationDrawer";
 import { TabbyTamaraCard } from "./components/TabbyTamaraCard";
@@ -7750,30 +7749,6 @@ ${result.errors.slice(0, 5).join("\n")}${
     }
   };
 
-  const handleReassignInquiry = (inquiryId: string, newAgentName: string) => {
-    if (!currentUser || currentUser.role !== "tl") return;
-    if (!newAgentName) return;
-
-    const updated = inquiries.map((inq) => {
-      if (inq.id === inquiryId) {
-        const updatedInq = {
-          ...inq,
-          agentName: newAgentName,
-          seenByAgent: false,
-        };
-        // Sync to Firestore
-        setDoc(doc(db, "inquiries", inq.id), updatedInq).catch((e) =>
-          console.error("Inquiry Reassign Error:", e),
-        );
-        return updatedInq;
-      }
-      return inq;
-    });
-
-    setInquiries(updated);
-    setStorageItem("sched_inquiries", updated);
-  };
-
   const handleUpdateContactedStatus = (
     inquiryId: string,
     status: "not_contacted" | "contacted" | "attempted",
@@ -8167,9 +8142,16 @@ ${ttNotes}`
       if (collectionName === "inquiries") {
         setInquiries((prev) =>
           prev.map((i) =>
-            i.id === recordId ? { ...i, assignedToName: toAgent, assignedToId: assigneeId } : i,
+            i.id === recordId
+              ? { ...i, agentName: toAgent, assignedToName: toAgent, assignedToId: assigneeId, seenByAgent: false }
+              : i,
           ),
         );
+        await setDoc(
+          doc(db, "inquiries", recordId),
+          { agentName: toAgent, assignedToName: toAgent, assignedToId: assigneeId, seenByAgent: false },
+          { merge: true }
+        ).catch((e) => console.error("Inquiry agentName sync error:", e));
       } else if (collectionName === "tt_requests") {
         setTabbyTamaraRequests((prev) =>
           prev.map((r) =>
@@ -11401,13 +11383,6 @@ ${ttNotes}`
                             "Daily Attendance",
                             "bg-indigo-500/20 border-indigo-500/30 text-indigo-100",
                           )}
-                          {currentUser.role === "director" &&
-                            buildBtn(
-                              "user-management",
-                              <Shield className="w-4 h-4 text-rose-400" />,
-                              "User Management",
-                              "bg-rose-500/20 border-rose-500/30 text-rose-100",
-                            )}
                           {buildBtn(
                             "tl-announcements",
                             <Bell className="w-4 h-4 text-yellow-400" />,
@@ -19987,9 +19962,6 @@ ${ttNotes}`
                                         handleMarkSentToClinic
                                       }
                                       handleCloseInquiry={handleCloseInquiry}
-                                      handleReassignInquiry={
-                                        handleReassignInquiry
-                                      }
                                       handleAssignRecord={
                                         handleAssignRecord
                                       }
@@ -20846,9 +20818,6 @@ ${ttNotes}`
                                           handleCloseInquiry={
                                             handleCloseInquiry
                                           }
-                                          handleReassignInquiry={
-                                            handleReassignInquiry
-                                          }
                                           handleAssignRecord={
                                             handleAssignRecord
                                           }
@@ -21158,7 +21127,6 @@ ${ttNotes}`
                           handleMarkInquiryRead={handleMarkInquiryRead}
                           handleMarkSentToClinic={handleMarkSentToClinic}
                           handleCloseInquiry={handleCloseInquiry}
-                          handleReassignInquiry={handleReassignInquiry}
                           agentsList={agentsList}
                           setInquiries={setInquiries}
                           clientComms={clientComms}
@@ -21183,11 +21151,6 @@ ${ttNotes}`
                         registeredUsers={registeredUsers}
                       />
                     )}
-
-                    {activeTab === "user-management" &&
-                      currentUser?.role === "director" && (
-                        <UserManagement currentUser={currentUser} />
-                      )}
 
                     {activeTab === "agent-submissions" &&
                       currentUser.role === "tl" && (

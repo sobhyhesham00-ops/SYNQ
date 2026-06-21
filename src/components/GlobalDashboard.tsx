@@ -102,7 +102,6 @@ interface GlobalDashboardProps {
   handleMarkInquiryRead?: any;
   handleMarkSentToClinic?: any;
   handleCloseInquiry?: any;
-  handleReassignInquiry?: any;
   agentsList?: any;
   setInquiries?: any;
 
@@ -178,7 +177,6 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
   handleMarkInquiryRead,
   handleMarkSentToClinic,
   handleCloseInquiry,
-  handleReassignInquiry,
   agentsList,
   setInquiries,
   clientComms = [],
@@ -849,7 +847,6 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
                     handleMarkInquiryRead={handleMarkInquiryRead}
                     handleMarkSentToClinic={handleMarkSentToClinic}
                     handleCloseInquiry={handleCloseInquiry}
-                    handleReassignInquiry={handleReassignInquiry}
                     agentsList={agentsList}
                     inquiries={inquiries}
                     setInquiries={setInquiries}
