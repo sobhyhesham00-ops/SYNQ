@@ -172,14 +172,14 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
     const normalizedNewUsername = getUsernameFromFullName(trimmedName).toLowerCase();
 
-    // Check this normalized username against ALL existing users — both registeredUsers AND syntheticUsers
-    const existingUser = allUsers.find(u => {
+    // Check if user is already physically registered in Firestore database
+    const isAlreadyRegistered = registeredUsers.some(u => {
       const uName = u.name || '';
       return getUsernameFromFullName(uName).toLowerCase() === normalizedNewUsername;
     });
 
-    if (existingUser) {
-      toast.error(`A user with this name already exists: ${existingUser.name}. Edit their existing profile instead of creating a duplicate.`);
+    if (isAlreadyRegistered) {
+      toast.error(`A registered user with this name already exists: ${trimmedName}. Please edit their existing profile.`);
       return;
     }
 
