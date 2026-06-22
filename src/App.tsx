@@ -3,7 +3,6 @@ import { purgeAllTimeLogs } from "./services/timelogService";
 import { EditModal } from "./components/EditModal";
 import { ResetPasswordModal } from "./components/ResetPasswordModal";
 import { AgentRequestsLogs } from "./components/AgentRequestsLogs";
-import { AgentFollowUpsTab } from "./components/AgentFollowUpsTab";
 import { AgentSubmissionsDashboard } from "./components/AgentSubmissionsDashboard";
 import { GlobalDashboard } from "./components/GlobalDashboard";
 import { AttendanceTracker } from "./components/AttendanceTracker";
@@ -146,10 +145,13 @@ import { ErrorBoundary } from "./ErrorBoundary";
 import { MessagingSystem } from "./components/MessagingSystem";
 import { PaginatedCaseList } from "./components/PaginatedCaseList";
 import { assignCase } from "./services/assignmentService";
+import { logActivity } from "./services/activityService";
 import { DataVault } from "./components/DataVault";
 import { IntegrationsManager } from "./components/IntegrationsManager";
 import { SuperAdminControl } from "./components/SuperAdminControl";
 import { ScreenshotUpload } from "./components/ScreenshotUpload";
+import { FilterPresetBar } from "./components/FilterPresetBar";
+import { PatientHistoryModal } from "./components/PatientHistoryModal";
 import { MultiAttachmentUpload } from "./components/MultiAttachmentUpload";
 import { ProfessionalAttachmentUploader } from "./components/ProfessionalAttachmentUploader";
 import { AttachmentsDisplay } from "./components/AttachmentsDisplay";
@@ -3689,6 +3691,13 @@ ${pageText}
   const [ttIsFollowUp, setTtIsFollowUp] = useState(false);
   const [ttFollowUpDate, setTtFollowUpDate] = useState("");
 
+  const [inqIsFollowUp, setInqIsFollowUp] = useState(false);
+  const [inqFollowUpDate, setInqFollowUpDate] = useState("");
+  const [tcIsFollowUp, setTcIsFollowUp] = useState(false);
+  const [tcFollowUpDate, setTcFollowUpDate] = useState("");
+  const [ccIsFollowUp, setCcIsFollowUp] = useState(false);
+  const [ccFollowUpDate, setCcFollowUpDate] = useState("");
+
   // Tabby/Tamara Complaint form inputs
   const [tcPatientName, setTcPatientName] = useState("");
   const [tcFileNumber, setTcFileNumber] = useState("");
@@ -4048,6 +4057,7 @@ ${pageText}
     null,
   );
   const [showClinicTemplateModal, setShowClinicTemplateModal] = useState(false);
+  const [isPatientHistoryOpen, setIsPatientHistoryOpen] = useState(false);
   const [templateInquiryId, setTemplateInquiryId] = useState<string | null>(
     null,
   );
@@ -4071,6 +4081,11 @@ ${pageText}
   const [ttViewTab, setTtViewTab] = useState<"installment" | "followup">("installment");
   const [complaintStatusFilter, setComplaintStatusFilter] = useState("all");
   const [showLegacyCases, setShowLegacyCases] = useState(false);
+
+  // Saved filter presets
+  const [savedFilterPresets, setSavedFilterPresets] = useState<
+    Array<{ id: string; name: string; tab: string; filters: Record<string, any> }>
+  >(() => getStorageItem('sched_filter_presets', []));
   const [logAgentFilter, setLogAgentFilter] = useState("all");
   const [logTypeFilter, setLogTypeFilter] = useState("all");
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -4188,6 +4203,64 @@ ${pageText}
     return () => clearInterval(interval);
   }, [currentUser, inquiries, tabbyTamaraRequests, tabbyTamaraComplaints]);
 
+  // Follow-up due-date reminder engine (all 4 case types)
+  const checkAndNotifyFollowUpDueDates = () => {
+    if (!currentUser) return;
+    const todayStr = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+
+    const allCases = [
+      ...inquiries.map(i => ({ id: i.id, type: "Inquiry", date: i.followUpDate, agent: i.agentName, clinic: i.clinicName, ref: i.caseRef || i.id })),
+      ...tabbyTamaraRequests.map(r => ({ id: r.id, type: "TT Request", date: r.followUpDate, agent: r.agentName, clinic: r.clinicName, ref: r.caseRef || r.id })),
+      ...tabbyTamaraComplaints.map(c => ({ id: c.id, type: "Complaint", date: c.followUpDate, agent: c.agentName, clinic: c.clinicName, ref: c.caseRef || c.id })),
+      ...clientComms.map(c => ({ id: c.id, type: "Client Comm", date: c.followUpDate, agent: c.callCenterAgentName, clinic: c.clinicName, ref: c.caseRef || c.id })),
+    ];
+
+    const due = allCases.filter(c => c.date && c.date <= todayStr && c.agent === currentUser.name);
+
+    due.forEach(c => {
+      const stableId = `followup_due_${c.id}`;
+      addSystemNotification(
+        `📅 Follow-up Due — ${c.type}`,
+        `Your follow-up for ${c.clinic} (${c.ref}) is due today. Please action it now.`,
+        "reminder",
+        currentUser.name,
+        stableId,
+      );
+    });
+
+    if (["tl", "director"].includes(currentUser.role as string)) {
+      const tlDue = allCases.filter(c => c.date && c.date <= todayStr && c.agent !== currentUser.name);
+      tlDue.forEach(c => {
+        const stableId = `followup_due_tl_${c.id}`;
+        addSystemNotification(
+          `📅 Team Follow-up Due — ${c.type}`,
+          `${c.agent}'s follow-up for ${c.clinic} (${c.ref}) is due today.`,
+          "reminder",
+          currentUser.name,
+          stableId,
+        );
+      });
+    }
+  };
+
+  const checkFollowUpDueDatesRef = useRef(checkAndNotifyFollowUpDueDates);
+  useEffect(() => {
+    checkFollowUpDueDatesRef.current = checkAndNotifyFollowUpDueDates;
+  }, [checkAndNotifyFollowUpDueDates]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    checkAndNotifyFollowUpDueDates();
+  }, [currentUser, inquiries, tabbyTamaraRequests, tabbyTamaraComplaints, clientComms]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    const id = setInterval(() => {
+      checkFollowUpDueDatesRef.current();
+    }, 60000);
+    return () => clearInterval(id);
+  }, [currentUser]);
+
   // Personal Reminders Background Check Engine
   const checkAndNotifyTodosReminders = () => {
     if (!currentUser) return;
@@ -4258,6 +4331,20 @@ ${pageText}
     return () => clearInterval(intervalId);
   }, [currentUser]);
 
+  useEffect(() => {
+    if (!currentUser) return;
+    const presetsRef = collection(db, 'filter_presets');
+    getDocs(query(presetsRef,
+      where('userId', '==', currentUser.id || currentUser.name)
+    )).then(snap => {
+      const loaded = snap.docs.map(d => d.data()) as any[];
+      if (loaded.length > 0) {
+        setSavedFilterPresets(loaded);
+        setStorageItem('sched_filter_presets', loaded);
+      }
+    }).catch(console.error);
+  }, [currentUser?.id]);
+
   const [logSearchQuery, setLogSearchQuery] = useState("");
 
   const filteredInquiries = useMemo(
@@ -4283,6 +4370,59 @@ ${pageText}
       }),
     [inquiries, inquirySearchQuery, inquiryStatusFilter, inquiryClinicsFilter],
   );
+
+  const handleSaveFilterPreset = async (
+    name: string,
+    tab: string,
+    filters: Record<string, any>
+  ) => {
+    if (!name.trim() || !currentUser) return;
+    const preset = {
+      id: `preset_${Date.now()}`,
+      name: name.trim(),
+      tab,
+      filters,
+      createdAt: new Date().toISOString(),
+      userId: currentUser.id || currentUser.name,
+    };
+    const updated = [...savedFilterPresets, preset];
+    setSavedFilterPresets(updated);
+    setStorageItem('sched_filter_presets', updated);
+    await setDoc(
+      doc(db, 'filter_presets', `${currentUser.id || currentUser.name}_${preset.id}`),
+      preset
+    ).catch(console.error);
+    toast.success(`Filter preset "${name}" saved!`);
+  };
+
+  const handleDeleteFilterPreset = async (presetId: string) => {
+    if (!currentUser) return;
+    const updated = savedFilterPresets.filter(p => p.id !== presetId);
+    setSavedFilterPresets(updated);
+    setStorageItem('sched_filter_presets', updated);
+    await deleteDoc(
+      doc(db, 'filter_presets', `${currentUser.id || currentUser.name}_${presetId}`)
+    ).catch(console.error);
+    toast.success('Preset deleted.');
+  };
+
+  const handleLoadFilterPreset = (preset: { tab: string; filters: Record<string, any> }) => {
+    // Inquiry filters
+    if (preset.filters.inquiryStatusFilter !== undefined)
+      setInquiryStatusFilter(preset.filters.inquiryStatusFilter);
+    if (preset.filters.inquiryClinicsFilter !== undefined)
+      setInquiryClinicsFilter(preset.filters.inquiryClinicsFilter);
+    // TT Request filters
+    if (preset.filters.tabbyTamaraStatusFilter !== undefined)
+      setTabbyTamaraStatusFilter(preset.filters.tabbyTamaraStatusFilter);
+    // Complaint filters
+    if (preset.filters.complaintStatusFilter !== undefined)
+      setComplaintStatusFilter(preset.filters.complaintStatusFilter);
+    // Client Comm filters
+    if (preset.filters.clientCommStatusFilter !== undefined)
+      setClientCommStatusFilter(preset.filters.clientCommStatusFilter);
+    toast.success(`Preset "${preset.filters.name || 'filter'}" applied!`);
+  };
 
   // Unified Screenshot Upload State
   const [activeScreenshot, setActiveScreenshot] = useState<string | null>(null);
@@ -7295,6 +7435,8 @@ ${result.errors.slice(0, 5).join("\n")}${
         createdAt,
         status: "submitted",
         seenByAgent: false,
+        isFollowUp: inqIsFollowUp,
+        followUpDate: inqIsFollowUp ? inqFollowUpDate : "",
       };
 
       setInquiries((prev) => {
@@ -7305,6 +7447,10 @@ ${result.errors.slice(0, 5).join("\n")}${
 
       // Sync to Firestore
       await setDoc(doc(db, "inquiries", newInquiry.id), newInquiry);
+
+      await logActivity('inquiry', newInquiry.id, 'created',
+        currentUser.id || '', currentUser.name, currentUser.role as string,
+        `${currentUser.name} submitted new inquiry`).catch(console.error);
 
       // Reset fields
       setInquiryText("");
@@ -7320,6 +7466,8 @@ ${result.errors.slice(0, 5).join("\n")}${
       setInquiryLinks([]);
       setTempLinkInput("");
       setTempPhotoUrlInput("");
+      setInqIsFollowUp(false);
+      setInqFollowUpDate("");
 
       handleMentionsInText(
         String(inquiryText || "").trim(),
@@ -7550,6 +7698,10 @@ ${result.errors.slice(0, 5).join("\n")}${
       sentToClinicCount: newCount,
     }).catch((e) => console.error("Mark sent error:", e));
 
+    await logActivity('inquiry', inquiryId, 'status_changed',
+      currentUser.id || '', currentUser.name, currentUser.role as string,
+      `${currentUser.name} sent inquiry to clinic`).catch(console.error);
+
     addSystemNotification(
       "Inquiry Sent to Clinic",
       `${currentUser.name} sent your inquiry to ${getClinicLabel(inq.clinicName)} — awaiting their response.`,
@@ -7584,6 +7736,10 @@ ${result.errors.slice(0, 5).join("\n")}${
       closedBy: currentUser.name,
       closedAt: now,
     }).catch((e) => console.error("Close inquiry error:", e));
+
+    await logActivity('inquiry', inquiryId, 'status_changed',
+      currentUser.id || '', currentUser.name, currentUser.role as string,
+      `${currentUser.name} closed the inquiry`).catch(console.error);
 
     let timerMessage = "";
     if (inq.answeredAt) {
@@ -7703,6 +7859,10 @@ ${result.errors.slice(0, 5).join("\n")}${
       }
 
       await setDoc(doc(db, "inquiries", inquiryId), updatedInqObject);
+
+      await logActivity('inquiry', inquiryId, 'status_changed',
+        currentUser.id || '', currentUser.name, currentUser.role as string,
+        `${currentUser.name} marked inquiry as answered`).catch(console.error);
 
       setInquiries(updated);
       setStorageItem("sched_inquiries", updated);
@@ -7920,6 +8080,10 @@ ${ttNotes}`
       // Sync to Firestore
       await setDoc(doc(db, "tt_requests", newRequest.id), newRequest);
 
+      await logActivity('tt_request', newRequest.id, 'created',
+        currentUser.id || '', currentUser.name, currentUser.role as string,
+        `${currentUser.name} submitted TT request`).catch(console.error);
+
       // Clear form
       setTtPatientName("");
       setTtClinicName("");
@@ -8045,9 +8209,15 @@ ${ttNotes}`
           updatedAt: new Date().toISOString(),
         };
         // Sync to Firestore
-        setDoc(doc(db, "tt_requests", r.id), updatedReq).catch((e) =>
-          console.error("TT Confirm Error:", e),
-        );
+        setDoc(doc(db, "tt_requests", r.id), updatedReq)
+          .then(async () => {
+            await logActivity('tt_request', requestId, 'status_changed',
+              currentUser.id || '', currentUser.name, currentUser.role as string,
+              `${currentUser.name} confirmed TT request`).catch(console.error);
+          })
+          .catch((e) =>
+            console.error("TT Confirm Error:", e),
+          );
 
         const notifyTarget = r.assignedToName || r.agentName;
 
@@ -8439,6 +8609,8 @@ ${ttNotes}`
         status: "pending_tl",
         customerContacted: "not_contacted",
         clinicName: tcClinicName,
+        isFollowUp: tcIsFollowUp,
+        followUpDate: tcIsFollowUp ? tcFollowUpDate : "",
       };
       Object.keys(newComplaint).forEach(
         (k) => newComplaint[k] === undefined && delete newComplaint[k],
@@ -8453,6 +8625,10 @@ ${ttNotes}`
       // Sync to Firestore
       await setDoc(doc(db, "tt_complaints", newComplaint.id), newComplaint);
 
+      await logActivity('tt_complaint', newComplaint.id, 'created',
+        currentUser.id || '', currentUser.name, currentUser.role as string,
+        `${currentUser.name} submitted complaint`).catch(console.error);
+
       // Clear form
       setTcPatientName("");
       setTcClinicName("");
@@ -8465,6 +8641,8 @@ ${ttNotes}`
       setActiveScreenshot(null);
       setActivePhotos([]);
       setActiveLinks([]);
+      setTcIsFollowUp(false);
+      setTcFollowUpDate("");
 
       addSystemNotification(
         `New Complaint`,
@@ -8535,6 +8713,8 @@ ${ttNotes}`
         links: activeLinks,
         channel: ccChannel,
         sourceChannel: ccChannel,
+        isFollowUp: ccIsFollowUp,
+        followUpDate: ccIsFollowUp ? ccFollowUpDate : "",
       };
       Object.keys(newComm).forEach(
         (k) => newComm[k] === undefined && delete newComm[k],
@@ -8549,6 +8729,10 @@ ${ttNotes}`
       // Sync to Firestore
       await setDoc(doc(db, "client_comms", newComm.id), newComm);
 
+      await logActivity('client_comm', newComm.id, 'created',
+        currentUser.id || '', currentUser.name, currentUser.role as string,
+        `${currentUser.name} submitted client comm`).catch(console.error);
+
       // Clear form
       setCcPatientName("");
       setCcClinicName("");
@@ -8556,6 +8740,8 @@ ${ttNotes}`
       setCcLanguage("Arabic");
       setCcNotes("");
       setCcChannel("call_center");
+      setCcIsFollowUp(false);
+      setCcFollowUpDate("");
       setActiveScreenshot(null);
       setActivePhotos([]);
       setActiveLinks([]);
@@ -8636,9 +8822,15 @@ ${ttNotes}`
           handlingPhotos: photos || [],
         };
         // Sync to Firestore
-        setDoc(doc(db, "client_comms", c.id), updatedComm).catch((e) =>
-          console.error("Client Comm Update Error:", e),
-        );
+        setDoc(doc(db, "client_comms", c.id), updatedComm)
+          .then(async () => {
+            await logActivity('client_comm', commId, 'status_changed',
+              currentUser.id || '', currentUser.name, currentUser.role as string,
+              `${currentUser.name} processed client comm`).catch(console.error);
+          })
+          .catch((e) =>
+            console.error("Client Comm Update Error:", e),
+          );
         return updatedComm;
       }
       return c;
@@ -8678,9 +8870,15 @@ ${ttNotes}`
           handledAt: new Date().toISOString(),
         };
         // Sync to Firestore
-        setDoc(doc(db, "client_comms", c.id), updatedComm).catch((e) =>
-          console.error("Client Comm Close Error:", e),
-        );
+        setDoc(doc(db, "client_comms", c.id), updatedComm)
+          .then(async () => {
+            await logActivity('client_comm', commId, 'status_changed',
+              currentUser.id || '', currentUser.name, currentUser.role as string,
+              `${currentUser.name} marked client comm as done`).catch(console.error);
+          })
+          .catch((e) =>
+            console.error("Client Comm Close Error:", e),
+          );
         return updatedComm;
       }
       return c;
@@ -9694,9 +9892,15 @@ ${ttNotes}`
           commentedAt: now,
           status: "need_contact" as const,
         };
-        setDoc(doc(db, "tt_complaints", c.id), updatedComp).catch((e) =>
-          console.error("TT Complaint Comment Error:", e),
-        );
+        setDoc(doc(db, "tt_complaints", c.id), updatedComp)
+          .then(async () => {
+            await logActivity('tt_complaint', complaintId, 'status_changed',
+              currentUser.id || '', currentUser.name, currentUser.role as string,
+              `${currentUser.name} actioned complaint: ${resolutionType || ""}`).catch(console.error);
+          })
+          .catch((e) =>
+            console.error("TT Complaint Comment Error:", e),
+          );
         return updatedComp;
       }
       return c;
@@ -10949,6 +11153,19 @@ ${ttNotes}`
 
               {/* Connected User Badge */}
               <div className="flex items-center justify-end gap-3 text-right">
+                {(currentUser?.role === "tl" ||
+                  currentUser?.role === "qa" ||
+                  currentUser?.role === "director") && (
+                  <button
+                    onClick={() => setIsPatientHistoryOpen(true)}
+                    title="Patient History Lookup"
+                    id="patient-lookup-trigger-btn"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-300 hover:text-indigo-200 text-xs font-bold transition-all cursor-pointer mr-2"
+                  >
+                    <Phone className="w-4 h-4 text-indigo-400" />
+                    <span className="hidden sm:inline">Patient Lookup</span>
+                  </button>
+                )}
                 <div className="hidden sm:block">
                   <p className="text-xs font-bold text-slate-200">
                     {currentUser.name}
@@ -11624,12 +11841,6 @@ ${ttNotes}`
                             <History className="w-4 h-4 text-orange-500" />,
                             "My Cases",
                             "bg-orange-500/20 border-orange-500/30 text-orange-100",
-                          )}
-                          {buildBtn(
-                            "follow-up",
-                            <Clock className="w-4 h-4 text-emerald-400" />,
-                            "Follow-up Reminders",
-                            "bg-[#10b981]/25 border-emerald-500/30 text-emerald-100",
                           )}
                           {buildBtn(
                             "my-submissions",
@@ -17907,17 +18118,7 @@ ${ttNotes}`
                         />
                       )}
 
-                    {["agent", "sme"].includes(currentUser.role as string) &&
-                      activeTab === "follow-up" && (
-                        <AgentFollowUpsTab
-                          todos={todos}
-                          currentUser={currentUser}
-                          db={db}
-                          addSystemNotification={addSystemNotification}
-                        />
-                      )}
-
-                    {/* TL Announcements */}
+                     {/* TL Announcements */}
                     {activeTab === "tl-announcements" && currentUser && (
                       <div className="w-full">
                         <AnnouncementsTab
@@ -18269,6 +18470,38 @@ ${ttNotes}`
                                   ) && (
                                     <div className="text-right text-[10px] text-slate-400 mt-1 font-mono">
                                       {inquiryText.length}/500 characters
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Follow-up / Schedule for Later */}
+                                <div className="space-y-3 p-3.5 bg-white/5 border border-white/5 rounded-2xl text-left">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[12px] font-bold text-slate-300">
+                                      Schedule for Later Date / Follow-up?
+                                    </span>
+                                    <label className="relative inline-flex items-center cursor-pointer">
+                                      <input
+                                        type="checkbox"
+                                        checked={inqIsFollowUp}
+                                        onChange={(e) => setInqIsFollowUp(e.target.checked)}
+                                        className="sr-only peer"
+                                      />
+                                      <div className="w-11 h-6 bg-[#1e1e1e]/40 backdrop-blur-md peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                    </label>
+                                  </div>
+                                  {inqIsFollowUp && (
+                                    <div className="space-y-1.5 animate-fade-in pt-1 text-left">
+                                      <label className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider block">
+                                        Follow-up Date *
+                                      </label>
+                                      <input
+                                        type="date"
+                                        value={inqFollowUpDate}
+                                        onChange={(e) => setInqFollowUpDate(e.target.value)}
+                                        className="w-full bg-black/45 border border-indigo-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans cursor-pointer"
+                                        required={inqIsFollowUp}
+                                      />
                                     </div>
                                   )}
                                 </div>
@@ -19958,8 +20191,20 @@ ${ttNotes}`
                             {/* Inquiries Records display */}
                             {(() => {
                               return (
-                                <PaginatedCaseList
-                                  items={filteredInquiries}
+                                <div className="space-y-4">
+                                  <FilterPresetBar
+                                    currentTab="inquiries"
+                                    currentFilters={{
+                                      inquiryStatusFilter,
+                                      inquiryClinicsFilter,
+                                    }}
+                                    presets={savedFilterPresets}
+                                    onSave={handleSaveFilterPreset}
+                                    onLoad={handleLoadFilterPreset}
+                                    onDelete={handleDeleteFilterPreset}
+                                  />
+                                  <PaginatedCaseList
+                                    items={filteredInquiries}
                                   icon={
                                     <MessageSquare className="w-5 h-5 text-indigo-400" />
                                   }
@@ -20040,6 +20285,7 @@ ${ttNotes}`
                                     />
                                   )}
                                 />
+                              </div>
                               );
                             })()}
                           </>
@@ -26387,6 +26633,38 @@ ${ttNotes}`
                                           />
                                         </div>
 
+                                        {/* Follow-up / Schedule for Later */}
+                                        <div className="space-y-3 p-3.5 bg-white/5 border border-white/5 rounded-2xl text-left">
+                                          <div className="flex items-center justify-between">
+                                            <span className="text-[12px] font-bold text-slate-300">
+                                              Schedule for Later Date / Follow-up?
+                                            </span>
+                                            <label className="relative inline-flex items-center cursor-pointer">
+                                              <input
+                                                type="checkbox"
+                                                checked={tcIsFollowUp}
+                                                onChange={(e) => setTcIsFollowUp(e.target.checked)}
+                                                className="sr-only peer"
+                                              />
+                                              <div className="w-11 h-6 bg-[#1e1e1e]/40 backdrop-blur-md peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                            </label>
+                                          </div>
+                                          {tcIsFollowUp && (
+                                            <div className="space-y-1.5 animate-fade-in pt-1 text-left">
+                                              <label className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider block">
+                                                Follow-up Date *
+                                              </label>
+                                              <input
+                                                type="date"
+                                                value={tcFollowUpDate}
+                                                onChange={(e) => setTcFollowUpDate(e.target.value)}
+                                                className="w-full bg-black/45 border border-indigo-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans cursor-pointer"
+                                                required={tcIsFollowUp}
+                                              />
+                                            </div>
+                                          )}
+                                        </div>
+
                                         <button
                                           type="submit"
                                           disabled={
@@ -26625,6 +26903,38 @@ ${ttNotes}`
                                           onUploadStateChange={setIsCcUploading}
                                         />
 
+                                        {/* Follow-up / Schedule for Later */}
+                                        <div className="space-y-3 p-3.5 bg-white/5 border border-white/5 rounded-2xl text-left">
+                                          <div className="flex items-center justify-between">
+                                            <span className="text-[12px] font-bold text-slate-300">
+                                              Schedule for Later Date / Follow-up?
+                                            </span>
+                                            <label className="relative inline-flex items-center cursor-pointer">
+                                              <input
+                                                type="checkbox"
+                                                checked={ccIsFollowUp}
+                                                onChange={(e) => setCcIsFollowUp(e.target.checked)}
+                                                className="sr-only peer"
+                                              />
+                                              <div className="w-11 h-6 bg-[#1e1e1e]/40 backdrop-blur-md peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                            </label>
+                                          </div>
+                                          {ccIsFollowUp && (
+                                            <div className="space-y-1.5 animate-fade-in pt-1 text-left">
+                                              <label className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider block">
+                                                Follow-up Date *
+                                              </label>
+                                              <input
+                                                type="date"
+                                                value={ccFollowUpDate}
+                                                onChange={(e) => setCcFollowUpDate(e.target.value)}
+                                                className="w-full bg-black/45 border border-indigo-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans cursor-pointer"
+                                                required={ccIsFollowUp}
+                                              />
+                                            </div>
+                                          )}
+                                        </div>
+
                                         <button
                                           type="submit"
                                           disabled={
@@ -26778,8 +27088,17 @@ ${ttNotes}`
                                         </div>
 
                                         {/* Cards list */}
-                                        <PaginatedCaseList
-                                          items={filteredCc}
+                                        <div className="space-y-4">
+                                          <FilterPresetBar
+                                            currentTab="client-comms"
+                                            currentFilters={{ clientCommStatusFilter }}
+                                            presets={savedFilterPresets}
+                                            onSave={handleSaveFilterPreset}
+                                            onLoad={handleLoadFilterPreset}
+                                            onDelete={handleDeleteFilterPreset}
+                                          />
+                                          <PaginatedCaseList
+                                            items={filteredCc}
                                           icon={
                                             <MessageSquare className="w-5 h-5 text-indigo-400" />
                                           }
@@ -26860,16 +27179,17 @@ ${ttNotes}`
                                                   handleMarkClientCommDone
                                                 }
                                                 addSystemNotification={
-                                                  addSystemNotification
-                                                }
-                                                getElapsedTimerString={
-                                                  getElapsedTimerString
-                                                }
-                                              />
-                                            );
-                                          }}
-                                        />
-                                      </div>
+                                                 addSystemNotification
+                                               }
+                                               getElapsedTimerString={
+                                                 getElapsedTimerString
+                                               }
+                                             />
+                                           );
+                                         }}
+                                       />
+                                     </div>
+                                   </div>
                                     );
                                   })()}
 
@@ -27028,8 +27348,17 @@ ${ttNotes}`
                                         </div>
 
                                         {/* Cards list */}
-                                        <PaginatedCaseList
-                                          items={filteredTT}
+                                        <div className="space-y-4">
+                                          <FilterPresetBar
+                                            currentTab="tabby-tamara"
+                                            currentFilters={{ tabbyTamaraStatusFilter }}
+                                            presets={savedFilterPresets}
+                                            onSave={handleSaveFilterPreset}
+                                            onLoad={handleLoadFilterPreset}
+                                            onDelete={handleDeleteFilterPreset}
+                                          />
+                                          <PaginatedCaseList
+                                            items={filteredTT}
                                           icon={
                                             ttViewTab === "followup" ? (
                                               <Calendar className="w-5 h-5 text-pink-400" />
@@ -27112,12 +27441,13 @@ ${ttNotes}`
                                                   addSystemNotification
                                                 }
                                                 isExpanded={isExpanded}
-                                                onToggle={onToggle}
-                                              />
-                                            );
-                                          }}
-                                        />
-                                      </div>
+                                               onToggle={onToggle}
+                                             />
+                                           );
+                                         }}
+                                       />
+                                     </div>
+                                   </div>
                                     );
                                   })()}
 
@@ -27241,8 +27571,17 @@ ${ttNotes}`
                                         </div>
 
                                         {/* Cards list */}
-                                        <PaginatedCaseList
-                                          items={filteredComplaints}
+                                        <div className="space-y-4">
+                                          <FilterPresetBar
+                                            currentTab="complaints"
+                                            currentFilters={{ complaintStatusFilter }}
+                                            presets={savedFilterPresets}
+                                            onSave={handleSaveFilterPreset}
+                                            onLoad={handleLoadFilterPreset}
+                                            onDelete={handleDeleteFilterPreset}
+                                          />
+                                          <PaginatedCaseList
+                                            items={filteredComplaints}
                                           icon={
                                             <AlertTriangle className="w-5 h-5 text-indigo-400" />
                                           }
@@ -27318,19 +27657,20 @@ ${ttNotes}`
                                                   editingItem: any,
                                                 ) => {
                                                   setEditingItem({
-                                                    type: "tt_complaint",
-                                                    id: editingItem.data.id,
-                                                    data: editingItem.data,
-                                                  });
-                                                }}
-                                                getElapsedTimerString={
-                                                  getElapsedTimerString
-                                                }
-                                              />
-                                            );
-                                          }}
-                                        />
-                                      </div>
+                                                   type: "tt_complaint",
+                                                   id: editingItem.data.id,
+                                                   data: editingItem.data,
+                                                 });
+                                               }}
+                                               getElapsedTimerString={
+                                                 getElapsedTimerString
+                                               }
+                                             />
+                                           );
+                                         }}
+                                       />
+                                     </div>
+                                   </div>
                                     );
                                   })()}
                               </div>
@@ -29314,6 +29654,20 @@ ${ttNotes}`
         setNewPasswordInput={setNewPasswordInput}
         handleResetUserPassword={handleResetUserPassword}
       />
+      {isPatientHistoryOpen && (
+        <PatientHistoryModal
+          isOpen={isPatientHistoryOpen}
+          onClose={() => setIsPatientHistoryOpen(false)}
+          inquiries={inquiries}
+          tabbyTamaraRequests={tabbyTamaraRequests}
+          tabbyTamaraComplaints={tabbyTamaraComplaints}
+          clientComms={clientComms}
+          onNavigate={(tab) => {
+            setActiveTab(tab);
+            setIsPatientHistoryOpen(false);
+          }}
+        />
+      )}
       {/* Clinic Template Confirmation Modal */}
       {showClinicTemplateModal &&
         templateInquiryId &&
@@ -29407,6 +29761,7 @@ ${ttNotes}`
         handleClearAllNotifs={handleClearAllNotifs}
         isMarkingAll={isMarkingAll}
         setActiveTab={setActiveTab}
+        activeTab={activeTab}
         getRecordByEntity={(entityType, entityId) => {
           switch (entityType) {
             case "client_comm":

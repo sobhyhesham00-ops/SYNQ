@@ -153,6 +153,14 @@ service cloud.firestore {
 
     // Others (Basic fallback for existing functionality)
     match /todos/{todoId} { allow read, write: if isSignedIn(); }
+    match /filter_presets/{presetId} {
+      allow read, write: if isSignedIn() && (
+        resource == null ||
+        resource.data.userId == getUserName() ||
+        isSuperAdmin()
+      );
+      allow create: if isSignedIn();
+    }
     match /qa_scores/{scoreId} { allow read, write: if isSignedIn(); }
     match /system/{docId} { allow read, write: if isSignedIn(); }
     match /system/sched_agent_directory {

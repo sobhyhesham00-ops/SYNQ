@@ -153,6 +153,9 @@ export interface Inquiry {
   customerContacted?: 'not_contacted' | 'contacted' | 'attempted'; // Dropdown menu status for customer contact status
   assignedTo?: string;
   assignedToName?: string;
+  assignedToId?: string;
+  isFollowUp?: boolean;
+  followUpDate?: string;
   viewingStatus?: 'none' | 'tl_viewing';
   viewingBy?: string;
   viewingAt?: string;
@@ -284,6 +287,8 @@ export interface TabbyTamaraComplaint {
   assignedByName?: string;
   tlPhotos?: string[];
   tlLinks?: string[];
+  isFollowUp?: boolean;
+  followUpDate?: string;
 }
 
 export interface ClientCommunicationRequest {
@@ -314,6 +319,8 @@ export interface ClientCommunicationRequest {
   sourceChannel?: string;
   tlPhotos?: string[];
   tlLinks?: string[];
+  isFollowUp?: boolean;
+  followUpDate?: string;
 }
 
 export interface CaseRecord {

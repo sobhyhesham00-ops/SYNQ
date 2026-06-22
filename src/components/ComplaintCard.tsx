@@ -12,6 +12,7 @@ import {
 import { CopyWrap } from "./CopyWrap";
 import { AttachmentsDisplay } from "./AttachmentsDisplay";
 import { RequestReplyThread } from "./RequestReplyThread";
+import { CaseTimeline } from "./CaseTimeline";
 import { SlideToConfirm } from "./SlideToConfirm";
 import { TabbyTamaraComplaint, User as UserType, INITIAL_AGENTS } from "../types";
 import { 
@@ -606,6 +607,14 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
               requestType="Complaint"
               requestAgentName={comp.agentName}
             />
+          </div>
+
+          {/* Case Activity Audit Trail */}
+          <div className="w-full mt-4 pt-4 border-t border-white/5 space-y-2 text-left" onClick={(e) => e.stopPropagation()}>
+            <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-display">
+              Case Activity Timeline
+            </h4>
+            <CaseTimeline entityType="tt_complaint" entityId={comp.id} />
           </div>
         </div>
       )}

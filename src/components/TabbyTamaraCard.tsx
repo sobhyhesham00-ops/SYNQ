@@ -33,6 +33,7 @@ import { toast } from "sonner";
 import { doc, arrayUnion } from "firebase/firestore";
 import { db, wrappedUpdateDoc as updateDoc } from "../firebase";
 import { AttachmentsDisplay } from "./AttachmentsDisplay";
+import { CaseTimeline } from "./CaseTimeline";
 import { RequestReplyThread } from "./RequestReplyThread";
 import { MultiAttachmentUpload } from "./MultiAttachmentUpload";
 import { SlideToConfirm } from "./SlideToConfirm";
@@ -2043,6 +2044,14 @@ export const TabbyTamaraCard = ({
               requestType="FinTech"
               requestAgentName={req.agentName}
             />
+          </div>
+
+          {/* Case Activity Audit Trail */}
+          <div className="bg-slate-900/40 p-5 border-t border-slate-700/40 space-y-2 text-left">
+            <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-display">
+              Case Activity Timeline
+            </h4>
+            <CaseTimeline entityType="tt_request" entityId={req.id} />
           </div>
         </div>
       )}

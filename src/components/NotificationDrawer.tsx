@@ -13,6 +13,7 @@ export const NotificationDrawer = ({
   handleMarkSingleNotifAsRead,
   isMarkingAll,
   setActiveTab,
+  activeTab,
   getRecordByEntity,
   setViewingRecord,
   handleClearAllNotifs,
@@ -178,30 +179,35 @@ export const NotificationDrawer = ({
                           onClick={() => {
                             if (isUnread && handleMarkSingleNotifAsRead) handleMarkSingleNotifAsRead(notif.id);
                             const tab = getNavTab(notif);
-                            if (tab && setActiveTab) {
+                            const alreadyOnTab = !tab || tab === activeTab;
+
+                            if (tab && setActiveTab && !alreadyOnTab) {
                               setActiveTab(tab);
-                              onClose();
                             }
-                            
+                            onClose();
+
                             // Scroll to entity
                             if (notif.entityId) {
-                                if (getRecordByEntity && setViewingRecord && notif.entityType) {
-                                    const record = getRecordByEntity(notif.entityType, notif.entityId);
-                                    if (record && record.data) {
-                                      setViewingRecord(record);
-                                    }
-                                } else {
-                                  setTimeout(() => {
-                                      const element = document.getElementById(`request-${notif.entityId}`) || document.getElementById(`inquiry-${notif.entityId}`);
-                                      if (element) {
-                                          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                          element.classList.add('ring-2', 'ring-indigo-500', 'ring-offset-2', 'ring-offset-[#0f0f13]', 'transition-all', 'duration-500');
-                                          setTimeout(() => {
-                                              element.classList.remove('ring-2', 'ring-indigo-500', 'ring-offset-2', 'ring-offset-[#0f0f13]');
-                                          }, 3000);
-                                      }
-                                  }, 300); // Wait for tab change
+                              if (getRecordByEntity && setViewingRecord && notif.entityType) {
+                                const record = getRecordByEntity(notif.entityType, notif.entityId);
+                                if (record && record.data) {
+                                  setViewingRecord(record);
                                 }
+                              } else {
+                                const delay = alreadyOnTab ? 50 : 350;
+                                setTimeout(() => {
+                                  const element =
+                                    document.getElementById(`request-${notif.entityId}`) ||
+                                    document.getElementById(`inquiry-${notif.entityId}`);
+                                  if (element) {
+                                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    element.classList.add('ring-2', 'ring-indigo-500', 'ring-offset-2', 'ring-offset-[#0f0f13]', 'transition-all', 'duration-500');
+                                    setTimeout(() => {
+                                      element.classList.remove('ring-2', 'ring-indigo-500', 'ring-offset-2', 'ring-offset-[#0f0f13]');
+                                    }, 3000);
+                                  }
+                                }, delay);
+                              }
                             }
                           }}
                           className={`relative p-4 rounded-2xl border transition-all cursor-pointer hover:border-white/10 select-none ${getBgClass()}`}

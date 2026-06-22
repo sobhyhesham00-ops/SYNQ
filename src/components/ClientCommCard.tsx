@@ -15,6 +15,7 @@ import { ClientCommunicationRequest, User } from "../types";
 import { AttachmentsDisplay } from "./AttachmentsDisplay";
 import { MultiAttachmentUpload } from "./MultiAttachmentUpload";
 import { RequestReplyThread } from "./RequestReplyThread";
+import { CaseTimeline } from "./CaseTimeline";
 import { CopyWrap } from "./CopyWrap";
 import { 
   getClinicLabel, 
@@ -698,6 +699,14 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
           requestType="Client Comm"
           requestAgentName={comm.callCenterAgentName || comm.openedBy}
         />
+      </div>
+
+      {/* Case Activity Audit Trail */}
+      <div className="w-full mt-3 pt-3 border-t border-white/5 mx-[2px] space-y-1.5 text-left">
+        <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-display">
+          Case Activity Timeline
+        </h4>
+        <CaseTimeline entityType="client_comm" entityId={comm.id} />
       </div>
         </div>
       )}

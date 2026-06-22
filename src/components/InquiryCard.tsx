@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { CopyWrap } from "./CopyWrap";
 import { AttachmentsDisplay } from "./AttachmentsDisplay";
 import { InquiryRepliesViewer } from "./InquiryRepliesViewer";
+import { CaseTimeline } from "./CaseTimeline";
 import { SlideToConfirm } from "./SlideToConfirm";
 import { ProfessionalAttachmentUploader } from "./ProfessionalAttachmentUploader";
 import {
@@ -841,6 +842,14 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
               </button>
             </div>
           )}
+
+          {/* Case Activity Audit Trail */}
+          <div className="pt-3 border-t border-white/5 space-y-1.5 text-left">
+            <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-display">
+              Case Activity Timeline
+            </h4>
+            <CaseTimeline entityType="inquiry" entityId={inq.id} />
+          </div>
         </div>
       )}
     </div>

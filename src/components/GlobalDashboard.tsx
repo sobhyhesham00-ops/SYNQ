@@ -493,6 +493,98 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
         </div>
       </div>
 
+      {/* Agent Workload View */}
+      {isTLOreSupport && (() => {
+        // Compute open-case counts per agent across all 4 types
+        const workloadMap: Record<string, { inq: number; tt: number; comp: number; cc: number }> = {};
+
+        const bump = (name: string, key: 'inq' | 'tt' | 'comp' | 'cc') => {
+          if (!name) return;
+          if (!workloadMap[name]) workloadMap[name] = { inq: 0, tt: 0, comp: 0, cc: 0 };
+          workloadMap[name][key]++;
+        };
+
+        inquiries.forEach(i => {
+          if (!['answered', 'closed'].includes(i.status)) {
+            bump(i.assignedToName || i.agentName, 'inq');
+          }
+        });
+        tabbyTamaraRequests.forEach(r => {
+          if (!['confirmed', 'rejected'].includes(r.status) && !['completed', 'rejected'].includes(r.workflowStatus || '')) {
+            bump(r.assignedToName || r.agentName, 'tt');
+          }
+        });
+        tabbyTamaraComplaints.forEach(c => {
+          if (c.status !== 'closed') bump(c.assignedToName || c.agentName, 'comp');
+        });
+        clientComms.forEach(c => {
+          if (c.status !== 'contacted') bump(c.assignedToName || c.callCenterAgentName || '', 'cc');
+        });
+
+        const rows = Object.entries(workloadMap)
+          .map(([name, counts]) => ({
+            name,
+            total: counts.inq + counts.tt + counts.comp + counts.cc,
+            ...counts,
+          }))
+          .filter(r => r.total > 0)
+          .sort((a, b) => b.total - a.total);
+
+        if (rows.length === 0) return null;
+
+        return (
+          <div className="bg-[#181a20] rounded-[24px] p-5 shadow-sm space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-full bg-amber-500/10 text-amber-400">
+                <User className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-white">Agent Workload</h4>
+                <p className="text-xs text-slate-400 mt-0.5">Open cases per agent right now — use this before assigning</p>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-[10px] uppercase tracking-widest text-slate-500 border-b border-white/5">
+                    <th className="text-left pb-2 font-bold">Agent</th>
+                    <th className="text-center pb-2 font-bold text-amber-400">Inq</th>
+                    <th className="text-center pb-2 font-bold text-cyan-400">TT</th>
+                    <th className="text-center pb-2 font-bold text-pink-400">Comp</th>
+                    <th className="text-center pb-2 font-bold text-indigo-400">CC</th>
+                    <th className="text-center pb-2 font-bold text-white">Total</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {rows.map(r => {
+                    const heat =
+                      r.total >= 10
+                        ? 'text-rose-400 font-extrabold'
+                        : r.total >= 5
+                        ? 'text-amber-400 font-bold'
+                        : 'text-emerald-400 font-bold';
+                    return (
+                      <tr key={r.name} className="hover:bg-white/5 transition-colors">
+                        <td className="py-2 pr-4 text-slate-200 font-semibold">{r.name}</td>
+                        <td className="text-center py-2 text-amber-300">{r.inq || '–'}</td>
+                        <td className="text-center py-2 text-cyan-300">{r.tt || '–'}</td>
+                        <td className="text-center py-2 text-pink-300">{r.comp || '–'}</td>
+                        <td className="text-center py-2 text-indigo-300">{r.cc || '–'}</td>
+                        <td className={`text-center py-2 ${heat}`}>{r.total}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <p className="text-[10px] text-slate-600 font-mono">
+              🔴 10+ cases  🟡 5–9 cases  🟢 under 5 cases
+            </p>
+          </div>
+        );
+      })()}
+
       <div className="space-y-3 relative z-10">
         <h3 className="text-sm font-bold text-slate-300 uppercase tracking-widest px-1">Today at a Glance</h3>
         {/* Summary Clickable Counter Cards */}
