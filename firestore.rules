@@ -66,7 +66,7 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow write: if isSignedIn() && (
         request.auth.uid == userId || 
-        getUserRole() == 'director' || 
+        isSuperAdmin() ||
         !exists(/databases/$(database)/documents/users/$(request.auth.uid)) ||
         (getUserData() != null && getUserData().get('id', '') == "usr_" + userId) ||
         (getUserName() != null && getUserName() == request.resource.data.get('name', ''))
