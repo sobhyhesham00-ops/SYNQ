@@ -459,6 +459,7 @@ export async function wrappedGetDocs(ref: any) {
     return await firestoreGetDocs(ref);
   } catch (error) {
     handleFirestoreError(error, OperationType.LIST, path);
+    throw error;
   }
 }
 
@@ -468,5 +469,6 @@ export async function wrappedGetDoc(ref: any) {
     return await firestoreGetDoc(ref);
   } catch (error) {
     handleFirestoreError(error, OperationType.GET, path);
+    throw error;
   }
 }

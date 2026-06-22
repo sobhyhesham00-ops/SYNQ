@@ -156,7 +156,9 @@ service cloud.firestore {
     match /filter_presets/{presetId} {
       allow read, write: if isSignedIn() && (
         resource == null ||
+        resource.data.userId == request.auth.uid ||
         resource.data.userId == getUserName() ||
+        (getUserData() != null && resource.data.userId == getUserData().get('id', '')) ||
         isSuperAdmin()
       );
       allow create: if isSignedIn();
