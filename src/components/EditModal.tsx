@@ -1,5 +1,6 @@
 import React from "react";
 import { X, Save } from "lucide-react";
+import { toast } from "sonner";
 import { MultiAttachmentUpload } from "./MultiAttachmentUpload";
 import { ProfessionalAttachmentUploader } from "./ProfessionalAttachmentUploader";
 import { calculateTabbyTamaraPrice } from "../utils";
@@ -93,14 +94,14 @@ const EditModalContent = ({
   const handleValidatedSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (type === "inquiry" && !data.text?.trim()) {
-      alert("Inquiry text cannot be empty");
+      toast.error("Inquiry text cannot be empty");
       return;
     }
     if (
       (type === "tt_request" || type === "tt_complaint") &&
       !data.patientName?.trim()
     ) {
-      alert("Patient name required");
+      toast.error("Patient name required");
       return;
     }
     handleEditSave(e);

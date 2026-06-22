@@ -2122,24 +2122,53 @@ export const generateInquiryCopyText = (inq: any): string => {
 
 export const generateTabbyTamaraCopyText = (req: any): string => {
   const resolvedRef = formatCaseRef(req.id, "tt_request", req.createdAt, req.caseRef);
-  const atts = normalizeAttachments(req.attachments);
-  const screenshotLabel = req.screenshotUpload ? "Yes" : "No";
+  const rawAttachments = [
+    ...(req.photos || []),
+    ...(req.attachments || []),
+    ...(req.clientIdAttachments || []),
+    ...(req.paymentProofAttachments || []),
+    ...(req.partnerAttachments || [])
+  ];
+  const atts = normalizeAttachments(rawAttachments);
+  const screenshotLabel = (req.screenshotUpload || req.paymentScreenshot || req.screenshot) ? "Yes" : "No";
   
+  const platformLabel = req.platform
+    ? req.platform === 'tabby'
+      ? 'Tabby'
+      : req.platform === 'tamara'
+        ? 'Tamara'
+        : 'One Time Payment'
+    : req.requestType === 'tabby'
+      ? 'Tabby'
+      : 'Tamara';
+
+  const amountText = req.priceWithoutTax || req.amount || 'N/A';
+  const finalAmountText = req.finalPriceWithFee ? `${req.finalPriceWithFee} AED` : 'N/A';
+
   const infoArray = [
-    req.requestType === 'tabby' ? `💳 Tabby Request` : `💳 Tamara Request`,
+    `💳 ${platformLabel} Request`,
     `Ref: ${resolvedRef}`,
     `Patient: ${req.patientName || 'N/A'}`,
     `File/ID: ${req.idNumber || req.fileNumber || 'N/A'}`,
     `Phone: ${normalizePhone(req.phoneNumber)}`,
-    `Amount: ${req.amount}`,
+    `Price Input: ${amountText} AED`,
+    `Final Price with Fee: ${finalAmountText}`,
     `Clinic: ${getClinicLabel(req.clinicName)}`,
   ];
-  if (req.serviceDetails) infoArray.push(`Details: ${req.serviceDetails}`);
+  if (req.notes || req.serviceDetails) {
+    infoArray.push(`Details/Notes: ${req.notes || req.serviceDetails}`);
+  }
   infoArray.push(`Status: ${req.status}`);
-  if (req.tlComment) infoArray.push(`Supervisor Note: ${req.tlComment}`);
+  if (req.tlNotes || req.tlComment) {
+    infoArray.push(`Supervisor Note: ${req.tlNotes || req.tlComment}`);
+  }
+  if (req.paymentLink) {
+    infoArray.push(`Payment Link: ${req.paymentLink}`);
+  }
   
-  infoArray.push(`Attachments: ${atts.length} photos, Screenshot: ${screenshotLabel}`);
-  const links = extractLinks(req.links);
+  infoArray.push(`Attachments: ${atts.length} files, Payment Screenshot: ${screenshotLabel}`);
+  
+  const links = extractLinks(req.links || req.tlLinks);
   if (links.length > 0) infoArray.push(`Links: ${links.join(', ')}`);
 
   return infoArray.join('\n');
@@ -2147,16 +2176,19 @@ export const generateTabbyTamaraCopyText = (req: any): string => {
 
 export const generateComplaintCopyText = (comp: any): string => {
   const resolvedRef = formatCaseRef(comp.id, "tt_complaint", comp.createdAt, comp.caseRef);
-  const atts = normalizeAttachments(comp.attachments);
-  const screenshotLabel = comp.screenshotUpload ? "Yes" : "No";
+  const rawAttachments = [
+    ...(comp.photos || []),
+    ...(comp.attachments || [])
+  ];
+  const atts = normalizeAttachments(rawAttachments);
+  const screenshotLabel = (comp.screenshotUpload || comp.screenshot || comp.imageUrl) ? "Yes" : "No";
   
   const infoArray = [
     `🚨 Complaint`,
     `Ref: ${resolvedRef}`,
-    `Patient: ${comp.patientName} (${comp.fileNumber})`,
+    `Patient: ${comp.patientName} (${comp.fileNumber || 'N/A'})`,
     `Phone: ${normalizePhone(comp.phoneNumber)}`,
-    `ID (${comp.idType}): ${comp.idNumber}`,
-    `Customer Type: ${comp.customerType || 'N/A'}`,
+    `ID / Customer Type: ${comp.idNumber || (comp.isOldCustomer ? 'Existing Customer' : 'New Customer')}`,
     `Clinic: ${getClinicLabel(comp.clinicName)}`,
     `Status: ${comp.status}`,
     `Details: ${comp.complaintDetails}`,
@@ -2165,7 +2197,7 @@ export const generateComplaintCopyText = (comp: any): string => {
   if (comp.tlComment) infoArray.push(`Supervisor Note: ${comp.tlComment}`);
   
   infoArray.push(`Attachments: ${atts.length} photos, Screenshot: ${screenshotLabel}`);
-  const links = extractLinks(comp.links);
+  const links = extractLinks(comp.links || comp.tlLinks);
   if (links.length > 0) infoArray.push(`Links: ${links.join(', ')}`);
 
   return infoArray.join('\n');

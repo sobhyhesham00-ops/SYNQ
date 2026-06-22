@@ -635,7 +635,11 @@ export const TabbyTamaraCard = ({
   const handleCopyTextOnly = async (e: React.MouseEvent) => {
     e.stopPropagation();
     const text =
-      req.requestType === "tabby" || req.requestType === "tamara"
+      req.platform === "tabby" ||
+      req.platform === "tamara" ||
+      req.platform === "one_time_payment" ||
+      req.requestType === "tabby" ||
+      req.requestType === "tamara"
         ? generateTabbyTamaraCopyText(req)
         : generateComplaintCopyText(req);
     const success = await copyToClipboard(
