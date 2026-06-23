@@ -1896,6 +1896,7 @@ export default function App() {
             (d) => ({ ...d.data(), id: d.id }) as any,
           );
           setRegisteredUsers(dbUsers);
+          setCredentialsReady(true);
 
           // Optionally update currentUser if their document was updated
           setCurrentUser((prevUser) => {
@@ -10791,8 +10792,8 @@ ${ttNotes}`
                   </button>
 
                   {!credentialsReady && (
-                    <p className="text-[10px] text-indigo-400/60 text-center font-mono animate-pulse mt-2">
-                      Syncing user directory...
+                    <p className="text-[10px] text-indigo-400/70 text-center font-mono animate-pulse mt-2 tracking-wider">
+                      ⏳ Syncing user directory...
                     </p>
                   )}
 
