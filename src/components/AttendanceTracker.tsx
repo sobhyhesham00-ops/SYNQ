@@ -336,7 +336,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
         "Agent Name": item.name,
         "LOB": item.lob,
         "Date": selectedDate,
-        "Status": item.status === "not_marked" ? "Not Marked" : item.status.toUpperCase(),
+        "Status": (() => { const s = getEffectiveStatus(item); return s === "not_marked" ? "Not Marked" : s.toUpperCase(); })(),
         "Late Time": rec?.lateTime || "",
         "Marked By": rec?.markedBy || "",
         "Marked At": rec?.markedAt ? new Date(rec.markedAt).toLocaleString() : "",
@@ -455,6 +455,15 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
       return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
     return (name[0] || "A").toUpperCase();
+  };
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const isViewingToday = selectedDate === todayStr;
+
+  // For today's view: treat "not_marked" as "absent" visually and in exports
+  const getEffectiveStatus = (item: { status: string; name: string }): AttendanceRecord["status"] => {
+    if (isViewingToday && item.status === "not_marked") return "absent";
+    return item.status as AttendanceRecord["status"];
   };
 
   const getLOBGradient = (lob: string) => {
@@ -811,7 +820,8 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                     </thead>
                     <tbody className="divide-y divide-white/5">
                       {paginatedRoster.map((item) => {
-                        const badgeColor = getStatusBadgeColor(item.status);
+                        const effectiveStatus = getEffectiveStatus(item);
+                        const badgeColor = getStatusBadgeColor(effectiveStatus);
 
                         return (
                           <tr
@@ -863,11 +873,13 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                             <td className="p-2.5">
                               <div className="flex flex-col items-center justify-center gap-1.5 min-w-0">
                                 <span className={`px-2.5 py-1 text-[9px] uppercase font-bold border rounded-full font-mono truncate max-w-full ${badgeColor}`}>
-                                  {item.status === "not_marked"
+                                  {effectiveStatus === "not_marked"
                                     ? "NOT MARKED"
-                                    : item.status === "nsnc"
+                                    : effectiveStatus === "nsnc"
                                       ? "NSNC 🚫"
-                                      : item.status.replace("_", " ")}
+                                      : effectiveStatus === "absent" && isViewingToday && item.status === "not_marked"
+                                        ? "ABSENT (AUTO)"
+                                        : effectiveStatus.replace("_", " ")}
                                   {item.status === "late" && (item.record?.lateTime || lateTimes[item.name]) ? (
                                     <span className="ml-1 text-slate-100 font-bold font-mono">
                                       ({item.record?.lateTime || lateTimes[item.name]})
@@ -952,7 +964,8 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                   {/* Mobile Responsive Cards View */}
                   <div className="block md:hidden divide-y divide-white/5">
                     {paginatedRoster.map((item) => {
-                      const badgeColor = getStatusBadgeColor(item.status);
+                      const effectiveStatus = getEffectiveStatus(item);
+                      const badgeColor = getStatusBadgeColor(effectiveStatus);
 
                       return (
                         <div key={item.name} className="p-5 space-y-4 hover:bg-slate-800/10 transition-colors">
@@ -980,11 +993,13 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
 
                             <div className="flex flex-col items-end gap-1.5">
                               <span className={`px-2 py-0.5 rounded-full text-[9px] uppercase font-bold border ${badgeColor}`}>
-                                {item.status === "not_marked"
+                                {effectiveStatus === "not_marked"
                                   ? "NOT MARKED"
-                                  : item.status === "nsnc"
+                                  : effectiveStatus === "nsnc"
                                     ? "NSNC 🚫"
-                                    : item.status.replace("_", " ")}
+                                    : effectiveStatus === "absent" && isViewingToday && item.status === "not_marked"
+                                      ? "ABSENT (AUTO)"
+                                      : effectiveStatus.replace("_", " ")}
                                 {item.status === "late" && (item.record?.lateTime || lateTimes[item.name]) ? (
                                   <span className="ml-1 font-mono">({item.record?.lateTime || lateTimes[item.name]})</span>
                                 ) : null}
@@ -1166,9 +1181,9 @@ const StatusSelectorButton = ({
   return (
     <button
       onClick={onClick}
-      title={iconOnly ? label : undefined}
-      className={`rounded-xl border text-[11px] font-bold transition-all flex items-center justify-center cursor-pointer active:scale-95 shrink-0 select-none ${
-        iconOnly ? "w-7 h-7 p-0" : "px-2.5 py-1.5 gap-1"
+      title={label}
+      className={`rounded-xl border font-bold transition-all flex flex-col items-center justify-center cursor-pointer active:scale-95 shrink-0 select-none ${
+        iconOnly ? "w-11 h-11 p-1 gap-0.5" : "px-2.5 py-1.5 gap-1 flex-row"
       } ${
         isActive
           ? activeStyle
@@ -1176,7 +1191,11 @@ const StatusSelectorButton = ({
       }`}
     >
       <span className="flex items-center justify-center shrink-0">{icon}</span>
-      {!iconOnly && <span>{label}</span>}
+      {iconOnly ? (
+        <span className="text-[8px] font-bold uppercase tracking-tight leading-none">{label}</span>
+      ) : (
+        <span className="text-[11px]">{label}</span>
+      )}
     </button>
   );
 };
