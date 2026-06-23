@@ -138,6 +138,8 @@ import {
   ChevronUp,
   ChevronDown,
   CreditCard,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { AIChatWidget } from "./AIChatWidget";
@@ -11326,6 +11328,36 @@ ${ttNotes}`
                     </div>
 
                     <div className="flex items-center gap-1.5">
+                      {/* Mute/Unmute Notifications Button */}
+                      <button
+                        onClick={() => {
+                          const nextState = !soundEnabled;
+                          setSoundEnabled(nextState);
+                          toast.success(
+                            nextState
+                              ? "Notification sounds active! 🔊"
+                              : "Notification sounds muted! 🔇",
+                          );
+                          if (nextState) triggerNotificationAlert();
+                        }}
+                        className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-center w-10 h-10 shadow-md shadow-black/20 ${
+                          soundEnabled
+                            ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-500/30"
+                            : "bg-rose-500/10 border-rose-500/20 text-rose-400 hover:bg-rose-500/20 hover:border-rose-500/30"
+                        }`}
+                        title={
+                          soundEnabled
+                            ? "Mute Notification Sounds"
+                            : "Unmute Notification Sounds"
+                        }
+                      >
+                        {soundEnabled ? (
+                          <Volume2 className="w-4 h-4" />
+                        ) : (
+                          <VolumeX className="w-4 h-4 animate-pulse text-rose-400" />
+                        )}
+                      </button>
+
                       {/* Notification Center Trigger */}
                       <button
                         onClick={() => setIsNotifDrawerOpen(true)}
