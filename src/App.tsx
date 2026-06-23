@@ -2098,6 +2098,29 @@ export default function App() {
             lastSeenAt: new Date().toISOString(),
           }).catch(() => {});
         }
+        // Also write clockOut to Firestore for agents so the RTM timer resets
+        const isAgentRole =
+          currentUser?.role === "agent" || (!isTLName(currentUser?.name || "") && currentUser?.role !== "tl");
+        if (isAgentRole) {
+          const todayStr = new Date().toISOString().split("T")[0];
+          const endTimeStr = new Date().toISOString();
+          getDocs(
+            query(
+              collection(db, "timelogs"),
+              where("agentName", "==", currentUser?.name),
+              where("date", "==", todayStr)
+            )
+          ).then((snap: any) => {
+            snap.forEach((d: any) => {
+              if (!d.data().clockOut) {
+                updateDoc(doc(db, "timelogs", d.id), {
+                  clockOut: endTimeStr,
+                  status: "clocked_out",
+                }).catch(() => {});
+              }
+            });
+          }).catch(() => {});
+        }
         setCurrentUser(null);
         localStorage.removeItem("sched_current_user");
         toast.info(
@@ -6835,12 +6858,12 @@ ${result.errors.slice(0, 5).join("\n")}${
 
   // Agent Time Clock & Activity Helpers
   const getActiveTimeLog = (agentName: string): TimeLog | undefined => {
+    const todayStr = new Date().toISOString().split("T")[0];
     return timeLogs.find(
       (log) =>
         log.agentName?.toLowerCase() === agentName?.toLowerCase() &&
-        !["clocked_out", "day_off", "casual", "annual", "no_show"].includes(
-          log.status,
-        ),
+        !log.clockOut &&
+        (log.date === todayStr || (log.clockIn && log.clockIn.startsWith(todayStr))),
     );
   };
 
