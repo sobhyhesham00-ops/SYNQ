@@ -782,6 +782,7 @@ export default function App() {
 
   // Firebase Auth Readiness state to coordinate listener initialization and prevent race conditions
   const [authReady, setAuthReady] = useState<boolean>(false);
+  const [credentialsReady, setCredentialsReady] = useState<boolean>(false);
 
   // User Roles reference map mapping username -> Role
   const [userRoles, setUserRoles] = useState<Record<string, Role>>({});
@@ -1738,6 +1739,7 @@ export default function App() {
             setStorageItem("sched_credentials", data, false);
             setMustChangePassword(snap.data().mustChangePassword || {});
           }
+          setCredentialsReady(true);
         },
         (error) => {
           console.error(
@@ -10781,11 +10783,18 @@ ${ttNotes}`
                   <button
                     id="login-submit-btn"
                     type="submit"
-                    className="w-full relative overflow-hidden py-3.5 bg-gradient-to-r from-indigo-600 to-fuchsia-600 hover:from-indigo-500 hover:to-fuchsia-500 text-white rounded-xl font-bold text-sm tracking-[0.2em] uppercase transition-all mt-6 group shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_30px_rgba(79,70,229,0.6)]"
+                    disabled={isFormSubmitting || !credentialsReady}
+                    className={`w-full relative overflow-hidden py-3.5 text-white rounded-xl font-bold text-sm tracking-[0.2em] uppercase transition-all mt-6 group shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_30px_rgba(79,70,229,0.6)] ${isFormSubmitting || !credentialsReady ? "bg-indigo-800 opacity-60 pointer-events-none" : "bg-gradient-to-r from-indigo-600 to-fuchsia-600 hover:from-indigo-500 hover:to-fuchsia-500"}`}
                   >
                     <span className="relative z-10">Engage Connection</span>
                     <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                   </button>
+
+                  {!credentialsReady && (
+                    <p className="text-[10px] text-indigo-400/60 text-center font-mono animate-pulse mt-2">
+                      Syncing user directory...
+                    </p>
+                  )}
 
                   <div className="flex justify-center mt-6 pt-4 border-t border-white/5">
                     <button
