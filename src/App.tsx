@@ -20152,8 +20152,8 @@ ${ttNotes}`
                         {true && (
                           <>
                             {/* Search & Filters */}
-                            <div className="bg-white/5 border border-white/10 p-4 rounded-3xl flex flex-col md:flex-row gap-4 items-center">
-                              <div className="relative flex-1 w-full">
+                            <div className="w-full bg-white/5 border border-white/10 p-4 rounded-3xl flex flex-col md:flex-row gap-4 items-center">
+                              <div className="relative flex-1 min-w-[280px] md:min-w-[420px] w-full">
                                 <Search className="w-4.5 h-4.5 text-indigo-400 absolute left-3.5 top-1/2 -translate-y-1/2 overflow-visible" />
                                 <input
                                   type="text"
