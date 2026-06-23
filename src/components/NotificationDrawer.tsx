@@ -95,6 +95,7 @@ export const NotificationDrawer = ({
                 { value: 'inquiry', label: 'Inquiries' },
                 { value: 'absence', label: 'Absences' },
                 { value: 'feedback', label: 'Feedback' },
+                { value: 'reminder', label: 'Reminders' },
               ].map((item) => (
                 <button
                   key={item.value}
@@ -161,6 +162,7 @@ export const NotificationDrawer = ({
                         if (notif.type === 'schedule') return <Info className="w-4 h-4 text-blue-400" />;
                         if (notif.type === 'inquiry') return <Info className="w-4 h-4 text-amber-400" />;
                         if (notif.type === 'absence') return <Info className="w-4 h-4 text-orange-400" />;
+                        if (notif.type === 'reminder') return <Info className="w-4 h-4 text-yellow-400" />;
                         return <CheckCircle2 className="w-4 h-4 text-emerald-400" />;
                       };
 
@@ -170,6 +172,7 @@ export const NotificationDrawer = ({
                         if (notif.type === 'schedule') return 'bg-blue-500/10 border-blue-500/20';
                         if (notif.type === 'inquiry') return 'bg-amber-500/10 border-amber-500/20';
                         if (notif.type === 'absence') return 'bg-orange-500/10 border-orange-500/20';
+                        if (notif.type === 'reminder') return 'bg-yellow-500/10 border-yellow-500/20';
                         return 'bg-emerald-500/10 border-emerald-500/20';
                       };
 

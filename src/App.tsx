@@ -2058,6 +2058,7 @@ export default function App() {
   const tabbyTamaraRequestsRef = React.useRef(tabbyTamaraRequests);
   const tabbyTamaraComplaintsRef = React.useRef(tabbyTamaraComplaints);
   const clientCommsRef = React.useRef(clientComms);
+  const isTLOreSupportRef = React.useRef(false);
 
   useEffect(() => {
     inquiriesRef.current = inquiries;
@@ -2217,7 +2218,7 @@ export default function App() {
               tabbyTamaraRequestsRef.current,
               tabbyTamaraComplaintsRef.current,
               clientCommsRef.current,
-              isTLOreSupport,
+              isTLOreSupportRef.current,
             );
             if (isUnreadByMe && isLatestForMe) {
               const isAnnouncementNotification =
@@ -2259,7 +2260,7 @@ export default function App() {
             tabbyTamaraRequestsRef.current,
             tabbyTamaraComplaintsRef.current,
             clientCommsRef.current,
-            isTLOreSupport,
+            isTLOreSupportRef.current,
           );
           if (isUnreadByMe && isLatestForMe) {
             localStorage.setItem("sched_last_notified_notif_id", latest.id);
@@ -2450,6 +2451,7 @@ export default function App() {
       !!supportAssignments[currentUser.name] ||
       isTLName(currentUser.name)
     : false;
+  isTLOreSupportRef.current = isTLOreSupport;
 
   // Monitor active activity to automatically pop up when they start a new active break or lunch or when it exceeds
   useEffect(() => {
@@ -2760,6 +2762,15 @@ export default function App() {
       targetGroups = ["tl"];
     } else if (targetAgent === "qa") {
       targetGroups = ["qa"];
+    } else if (targetAgent === "personal") {
+      // Self-only: resolved at call time using currentUser
+      const selfName = currentUser?.name?.trim().toLowerCase() || "";
+      const selfCleaned = selfName.replace(/[^a-zA-Z0-9]/g, "");
+      targetGroups = Array.from(new Set([
+        currentUser?.id || "",
+        `usr_${selfCleaned}`,
+        `usr_${selfName}`,
+      ].filter(Boolean)));
     } else {
       const normalizedAgent = targetAgent.trim().toLowerCase();
       const cleanedAgent = normalizedAgent.replace(/[^a-zA-Z0-9]/g, "");
