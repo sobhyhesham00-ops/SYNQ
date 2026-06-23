@@ -20209,29 +20209,27 @@ ${ttNotes}`
                                 )}
                               </div>
                               <div className="flex gap-1.5 w-full md:w-auto overflow-x-auto select-none py-1 md:py-0">
-                                {["all", "submitted", "sent", "answered"].map(
-                                  (st) => (
+                                {[
+                                  { id: "", label: "All" },
+                                  { id: "submitted", label: "🆕 New" },
+                                  { id: "tl_reviewing", label: "👀 TL Reviewing" },
+                                  { id: "sent_to_clinic", label: "📤 Sent to Clinic" },
+                                  { id: "sent", label: "📨 Sent" },
+                                  { id: "answered", label: "✅ Answered" },
+                                  { id: "closed", label: "🔒 Closed" },
+                                ].map((pill) => (
                                     <button
-                                      key={st}
-                                      onClick={() =>
-                                        setInquiryStatusFilter(
-                                          st === "all" ? "" : st,
-                                        )
-                                      }
+                                      key={pill.id || "all"}
+                                      onClick={() => setInquiryStatusFilter(pill.id)}
                                       className={`px-3.5 py-1.5 rounded-xl border text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-all shrink-0 ${
-                                        (st === "all" &&
-                                          inquiryStatusFilter === "") ||
-                                        inquiryStatusFilter === st
+                                        inquiryStatusFilter === pill.id
                                           ? "bg-indigo-600/20 border-indigo-500/30 text-white shadow shadow-indigo-500/5 font-extrabold"
                                           : "border-white/5 text-slate-400 bg-black/20 hover:text-slate-100"
                                       }`}
                                     >
-                                      {st === "submitted"
-                                        ? "Submitted (Unresolved)"
-                                        : st}
+                                      {pill.label}
                                     </button>
-                                  ),
-                                )}
+                                  ))}
                               </div>
                             </div>
 
@@ -27104,15 +27102,9 @@ ${ttNotes}`
                                             </span>
                                             {[
                                               { id: "all", label: "All" },
-                                              {
-                                                id: "pending",
-                                                label: "👥 Pending",
-                                              },
-                                              {
-                                                id: "taken",
-                                                label: "⚡ Under Action",
-                                              },
-                                              { id: "done", label: "✅ Done" },
+                                              { id: "pending", label: "⏳ Pending" },
+                                              { id: "in_progress", label: "⚡ In Progress" },
+                                              { id: "contacted", label: "✅ Contacted" },
                                             ].map((pill) => (
                                               <button
                                                 key={pill.id}
@@ -27361,18 +27353,15 @@ ${ttNotes}`
                                             </span>
                                             {[
                                               { id: "all", label: "All" },
-                                              {
-                                                id: "not_confirmed",
-                                                label: "⏳ Unconfirmed",
-                                              },
-                                              {
-                                                id: "confirmed",
-                                                label: "✅ Confirmed",
-                                              },
-                                              {
-                                                id: "cancelled",
-                                                label: "❌ Cancelled",
-                                              },
+                                              { id: "not_confirmed", label: "⏳ Unconfirmed" },
+                                              { id: "confirmed", label: "✅ Confirmed" },
+                                              { id: "rejected", label: "🚫 Rejected" },
+                                              { id: "submitted", label: "🆕 Submitted" },
+                                              { id: "tl_link_ready", label: "🔗 Link Ready" },
+                                              { id: "awaiting_client_contact", label: "📞 Awaiting Contact" },
+                                              { id: "ready_for_partner", label: "🤝 Ready for Partner" },
+                                              { id: "sent_to_partner", label: "📤 Sent to Partner" },
+                                              { id: "completed", label: "🏁 Completed" },
                                             ].map((pill) => (
                                               <button
                                                 key={pill.id}
@@ -27584,18 +27573,10 @@ ${ttNotes}`
                                             </span>
                                             {[
                                               { id: "all", label: "All" },
-                                              {
-                                                id: "pending_tl",
-                                                label: "⏳ Awaiting TL",
-                                              },
-                                              {
-                                                id: "need_contact",
-                                                label: "📞 Need Contact",
-                                              },
-                                              {
-                                                id: "closed",
-                                                label: "✅ Closed",
-                                              },
+                                              { id: "pending_tl", label: "⏳ Awaiting TL" },
+                                              { id: "need_contact", label: "📞 Need Contact" },
+                                              { id: "in_progress", label: "⚡ In Progress" },
+                                              { id: "closed", label: "✅ Closed" },
                                             ].map((pill) => (
                                               <button
                                                 key={pill.id}
