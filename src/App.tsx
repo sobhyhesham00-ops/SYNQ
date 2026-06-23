@@ -21502,6 +21502,7 @@ ${ttNotes}`
                         currentUser={currentUser}
                         agentDirectory={agentDirectory}
                         registeredUsers={registeredUsers}
+                        schedules={schedules}
                       />
                     )}
 

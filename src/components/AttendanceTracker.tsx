@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { doc, setDoc, query, collection, where, getDocs, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
-import { AttendanceRecord, User, AgentDirectoryRow, INITIAL_AGENTS } from "../types";
+import { AttendanceRecord, User, AgentDirectoryRow, INITIAL_AGENTS, ScheduledShift } from "../types";
 import {
   UserCheck,
   ChevronLeft,
@@ -33,6 +33,7 @@ interface AttendanceTrackerProps {
   currentUser: User | null;
   agentDirectory?: AgentDirectoryRow[];
   registeredUsers?: User[];
+  schedules?: { agentName: string; date: string; shiftLabel: string }[];
 }
 
 export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
@@ -40,6 +41,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
   currentUser,
   agentDirectory = [],
   registeredUsers = [],
+  schedules = [],
 }) => {
   const [selectedDate, setSelectedDate] = useState<string>(() => {
     return new Date().toISOString().slice(0, 10);
@@ -432,6 +434,21 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
     return filteredRoster.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredRoster, currentPage, itemsPerPage]);
 
+  const getAgentShiftLabel = (agentName: string): string | null => {
+    const sched = schedules.find(
+      (s) =>
+        s.date === selectedDate &&
+        s.agentName?.toLowerCase() === agentName.toLowerCase()
+    );
+    if (!sched?.shiftLabel) return null;
+    const shiftMap: Record<string, string> = {
+      "07:00 - 16:00": "Morning  07:00–16:00",
+      "13:00 - 22:00": "Midday  13:00–22:00",
+      "22:00 - 07:00": "Night  22:00–07:00",
+    };
+    return shiftMap[sched.shiftLabel] || sched.shiftLabel;
+  };
+
   const getInitials = (name: string) => {
     const parts = name.trim().split(/\s+/);
     if (parts.length >= 2) {
@@ -820,6 +837,17 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                                       Awaiting Decision
                                     </div>
                                   )}
+                                  {(() => {
+                                    const shift = getAgentShiftLabel(item.name);
+                                    if (!shift) return null;
+                                    const isNight = shift.includes("Night");
+                                    const isMid = shift.includes("Midday");
+                                    return (
+                                      <div className={`text-[9px] font-bold font-mono mt-0.5 truncate max-w-full ${isNight ? "text-purple-400/80" : isMid ? "text-amber-400/80" : "text-emerald-400/80"}`}>
+                                        {shift}
+                                      </div>
+                                    );
+                                  })()}
                                 </div>
                               </div>
                             </td>
@@ -936,6 +964,17 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                               <div>
                                 <h4 className="font-bold text-slate-100 text-xs">{item.name}</h4>
                                 <p className="text-[10px] text-slate-500 mt-0.5">Section LOB: {item.lob}</p>
+                                {(() => {
+                                  const shift = getAgentShiftLabel(item.name);
+                                  if (!shift) return null;
+                                  const isNight = shift.includes("Night");
+                                  const isMid = shift.includes("Midday");
+                                  return (
+                                    <p className={`text-[9px] font-bold font-mono mt-0.5 ${isNight ? "text-purple-400/80" : isMid ? "text-amber-400/80" : "text-emerald-400/80"}`}>
+                                      {shift}
+                                    </p>
+                                  );
+                                })()}
                               </div>
                             </div>
 
