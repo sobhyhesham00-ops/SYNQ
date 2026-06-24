@@ -10580,8 +10580,9 @@ ${ttNotes}`
         className="min-h-screen bg-[#080d1a] text-slate-100 flex flex-col items-center justify-center font-sans antialiased relative overflow-hidden"
       >
         {/* Background aesthetic blobs */}
-        <div className="fixed top-[-10%] -left-32 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none"></div>
-        <div className="fixed bottom-[-10%] -right-32 w-[600px] h-[600px] bg-pink-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="fixed top-[-10%] -left-32 w-[600px] h-[600px] bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="fixed bottom-[-10%] -right-32 w-[600px] h-[600px] bg-pink-500/20 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-blue-500/10 rounded-full blur-[150px] pointer-events-none mix-blend-screen"></div>
         <div className="flex flex-col items-center gap-6 z-10">
           <div className="relative flex items-center justify-center">
             <div className="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
@@ -10626,7 +10627,7 @@ ${ttNotes}`
         {/* Check Installation */}
         {!currentUser ? (
           <div className="flex-1 flex flex-col items-center justify-center my-12 animate-fade-in relative">
-            <div className="w-full max-w-md bg-black/40 backdrop-blur-3xl border border-indigo-500/20 p-8 rounded-2xl shadow-[0_0_80px_-20px_rgba(79,70,229,0.3)] relative overflow-hidden group">
+            <div className="w-full max-w-md bg-black/60 border border-indigo-500/20 p-8 rounded-2xl relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500 group-hover:h-1.5 transition-all duration-500"></div>
 
               <div className="absolute -inset-20 bg-indigo-500/10 blur-[100px] pointer-events-none group-hover:bg-indigo-500/20 transition-all duration-1000"></div>
@@ -10753,7 +10754,7 @@ ${ttNotes}`
                       completeLogin(uname, correspondingFullName);
                       toast.success("Password updated! You are now signed in.");
                     }}
-                    className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white rounded-xl font-bold text-sm border-none shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all"
+                    className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white rounded-xl font-bold text-sm border-none transition-all"
                   >
                     Set New Password & Sign In
                   </button>
@@ -10789,7 +10790,7 @@ ${ttNotes}`
 
                   <button
                     onClick={handleRegisterConfirm}
-                    className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-slate-100 rounded-xl font-bold text-sm tracking-wide shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all flex items-center justify-center gap-2"
+                    className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-slate-100 rounded-xl font-bold text-sm tracking-wide transition-all flex items-center justify-center gap-2"
                   >
                     <UserPlus className="w-4 h-4" />
                     Create Account
@@ -10871,7 +10872,7 @@ ${ttNotes}`
                     id="login-submit-btn"
                     type="submit"
                     disabled={isFormSubmitting || !credentialsReady || !directoryReady}
-                    className={`w-full relative overflow-hidden py-3.5 text-white rounded-xl font-bold text-sm tracking-[0.2em] uppercase transition-all mt-6 group shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_30px_rgba(79,70,229,0.6)] ${isFormSubmitting || !credentialsReady || !directoryReady ? "bg-indigo-800 opacity-60 pointer-events-none" : "bg-gradient-to-r from-indigo-600 to-fuchsia-600 hover:from-indigo-500 hover:to-fuchsia-500"}`}
+                    className={`w-full relative overflow-hidden py-3.5 text-white rounded-xl font-bold text-sm tracking-[0.2em] uppercase transition-all mt-6 group ${isFormSubmitting || !credentialsReady || !directoryReady ? "bg-indigo-800 opacity-60 pointer-events-none" : "bg-gradient-to-r from-indigo-600 to-fuchsia-600 hover:from-indigo-500 hover:to-fuchsia-500"}`}
                   >
                     <span className="relative z-10">Sign In</span>
                     <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
@@ -11332,9 +11333,9 @@ ${ttNotes}`
             {/* Split Content structure */}
             <div className="flex-1 flex flex-col md:flex-row gap-6 md:gap-8">
               {/* Navigation / Sidebar Menu */}
-              <aside className="w-full md:w-64 border border-white/10 bg-white/5 backdrop-blur-xl flex flex-col p-5 rounded-2xl sm:rounded-2xl shadow-xl space-y-6">
+              <aside className="w-full md:w-64 border border-white/10 bg-white/5 flex flex-col p-5 rounded-xl space-y-6">
                 {/* Egypt Local Time & 10th of Ramadan Weather */}
-                <div className="p-4 rounded-xl bg-black/40 border border-cyan-500/15 shadow-[0_4px_20px_rgba(0,0,0,0.3)] space-y-3 relative overflow-hidden group">
+                <div className="p-4 rounded-xl bg-black/40 border border-cyan-500/15 space-y-3 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-indigo-500/5 opacity-40 pointer-events-none" />
                   <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-400 to-indigo-500" />
 
@@ -11357,7 +11358,7 @@ ${ttNotes}`
                   </div>
 
                   <div className="flex items-baseline justify-between py-1 border-y border-white/5">
-                    <p className="text-2xl font-black bg-gradient-to-r from-white via-slate-100 to-cyan-300 bg-clip-text text-transparent font-mono tracking-tight">
+                    <p className="text-2xl font-black text-slate-100 font-mono tracking-tight">
                       {currentTime.toLocaleTimeString("en-US", {
                         timeZone: "Africa/Cairo",
                         hour: "2-digit",
@@ -11470,7 +11471,7 @@ ${ttNotes}`
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-black/45 border border-cyan-500/15 shadow-[0_4px_25px_rgba(0,0,0,0.35)] space-y-4 relative overflow-hidden group">
+                  <div className="p-4 rounded-xl bg-black/45 border border-cyan-500/15 space-y-4 relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-pink-500/5 opacity-40 pointer-events-none" />
                     <div className="absolute bottom-0 right-0 w-24 h-24 bg-cyan-400/5 rounded-full blur-2xl pointer-events-none" />
 
@@ -30441,7 +30442,7 @@ ${ttNotes}`
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.9, y: 20, opacity: 0 }}
               transition={{ type: "spring", duration: 0.5 }}
-              className="bg-[#121217] border border-cyan-500/30 rounded-2xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(6,182,212,0.15)] space-y-6 mx-4 relative overflow-hidden text-center"
+              className="bg-[#121217] border border-cyan-500/30 rounded-2xl p-8 max-w-sm w-full space-y-6 mx-4 relative overflow-hidden text-center"
             >
               <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500"></div>
 
@@ -30456,7 +30457,7 @@ ${ttNotes}`
                     showText={false}
                   />
                 </div>
-                <h2 className="text-xl font-black bg-gradient-to-r from-cyan-400 to-indigo-300 bg-clip-text text-transparent font-display tracking-tight mt-2">
+                <h2 className="text-xl font-black text-cyan-300 font-display tracking-tight mt-2">
                   Synq Build v2.4.1
                 </h2>
                 <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[9px] font-mono tracking-widest text-slate-400 uppercase">
