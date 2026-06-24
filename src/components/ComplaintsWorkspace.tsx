@@ -130,7 +130,7 @@ export const ComplaintsWorkspace: React.FC<ComplaintsWorkspaceProps> = ({
 
   if (filteredComps.length === 0) {
     return (
-      <div className="p-12 text-center rounded-3xl border border-dashed border-white/10 bg-white/10 backdrop-blur-md/[0.02] space-y-2 animate-fade-in">
+      <div className="p-12 text-center rounded-2xl border border-dashed border-white/10 bg-white/10 backdrop-blur-md/[0.02] space-y-2 animate-fade-in">
         <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mx-auto text-slate-500">
           <AlertTriangle className="w-6 h-6 text-pink-500" />
         </div>

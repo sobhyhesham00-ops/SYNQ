@@ -155,7 +155,7 @@ export function AnnouncementsTab({
       </div>
 
       {isTL && (
-        <form onSubmit={handlePost} className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl shadow-2xl space-y-4">
+        <form onSubmit={handlePost} className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-2xl space-y-4">
           <h3 className="text-lg font-bold text-slate-200">Post New Update</h3>
           <textarea
             value={message}
@@ -222,7 +222,7 @@ export function AnnouncementsTab({
         </form>
       )}
 
-      <div className="bg-white/[0.02] border border-white/10 rounded-3xl p-6 backdrop-blur-xl min-h-[400px]">
+      <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-6 backdrop-blur-xl min-h-[400px]">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-bold text-slate-200">Updates History</h3>
           <div className="relative">

@@ -71,7 +71,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
           <motion.div 
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="p-5 border border-amber-500/30 rounded-3xl bg-gradient-to-r from-amber-500/15 via-yellow-500/5 to-transparent backdrop-blur-xl relative overflow-hidden group shadow-lg shadow-yellow-500/5"
+            className="p-5 border border-amber-500/30 rounded-2xl bg-gradient-to-r from-amber-500/15 via-yellow-500/5 to-transparent backdrop-blur-xl relative overflow-hidden group shadow-lg shadow-yellow-500/5"
           >
             {/* Pulsing glow layer */}
             <div className="absolute top-0 right-0 w-48 h-12 bg-yellow-500/10 blur-xl rounded-full pointer-events-none" />
@@ -123,7 +123,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="lg:col-span-2 p-6 rounded-3xl bg-indigo-600 shadow-xl shadow-indigo-600/20 flex flex-col justify-between relative overflow-hidden group"
+          className="lg:col-span-2 p-6 rounded-2xl bg-indigo-600 shadow-xl shadow-indigo-600/20 flex flex-col justify-between relative overflow-hidden group"
         >
           <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform duration-700">
             <TrendingUp className="w-48 h-48 text-white" />

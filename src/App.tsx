@@ -2602,11 +2602,19 @@ export default function App() {
         const qUsers = query(collection(db, "users"), where("name", "==", "Shaymaa Hassan"));
         const snapshotUsers = await getDocs(qUsers);
         for (const userDoc of snapshotUsers.docs) {
-          console.log(`[MIGRATION] Correcting user doc: ${userDoc.id}`);
+          console.log(`[MIGRATION] Correcting user doc name: ${userDoc.id}`);
           await updateDoc(doc(db, "users", userDoc.id), { name: "Shymaa Hassan" }).catch(console.error);
         }
 
-        // 2. Correct if a user document with ID "shaymaahassan" exists (copy to "shymaahassan" and delete old)
+        // 2. Correct user documents with teamLeader == "Shaymaa Hassan"
+        const qUsersTL = query(collection(db, "users"), where("teamLeader", "==", "Shaymaa Hassan"));
+        const snapshotUsersTL = await getDocs(qUsersTL);
+        for (const userDoc of snapshotUsersTL.docs) {
+          console.log(`[MIGRATION] Correcting agent teamLeader: ${userDoc.id}`);
+          await updateDoc(doc(db, "users", userDoc.id), { teamLeader: "Shymaa Hassan" }).catch(console.error);
+        }
+
+        // 3. Correct if a user document with ID "shaymaahassan" exists (copy to "shymaahassan" and delete old)
         const oldUserRef = doc(db, "users", "shaymaahassan");
         const oldUserSnap = await getDoc(oldUserRef);
         if (oldUserSnap.exists()) {
@@ -2619,7 +2627,7 @@ export default function App() {
           await deleteDoc(oldUserRef).catch(console.error);
         }
 
-        // 3. Correct in "tl_login_logs" collection
+        // 4. Correct in "tl_login_logs" collection
         const qLogs = query(collection(db, "tl_login_logs"), where("tlName", "==", "Shaymaa Hassan"));
         const snapshotLogs = await getDocs(qLogs);
         if (!snapshotLogs.empty) {
@@ -2629,6 +2637,62 @@ export default function App() {
             batch.update(doc(db, "tl_login_logs", ldoc.id), { tlName: "Shymaa Hassan" });
           });
           await batch.commit().catch(console.error);
+        }
+
+        // 5. Correct in "tl_feedbacks" collection
+        const qFeedbacks = query(collection(db, "tl_feedbacks"), where("tlName", "==", "Shaymaa Hassan"));
+        const snapshotFeedbacks = await getDocs(qFeedbacks);
+        for (const fDoc of snapshotFeedbacks.docs) {
+          console.log(`[MIGRATION] Correcting tl_feedback: ${fDoc.id}`);
+          await updateDoc(doc(db, "tl_feedbacks", fDoc.id), { tlName: "Shymaa Hassan" }).catch(console.error);
+        }
+
+        // 6. Correct in "qa_scores" collection
+        const qQAScores = query(collection(db, "qa_scores"), where("tlName", "==", "Shaymaa Hassan"));
+        const snapshotQAScores = await getDocs(qQAScores);
+        for (const qaDoc of snapshotQAScores.docs) {
+          console.log(`[MIGRATION] Correcting qa_score: ${qaDoc.id}`);
+          await updateDoc(doc(db, "qa_scores", qaDoc.id), { tlName: "Shymaa Hassan" }).catch(console.error);
+        }
+
+        // 7. Correct in "scheduling_requests" collection
+        const qSchedReqs = query(collection(db, "scheduling_requests"), where("actionBy", "==", "Shaymaa Hassan"));
+        const snapshotSchedReqs = await getDocs(qSchedReqs);
+        for (const sDoc of snapshotSchedReqs.docs) {
+          console.log(`[MIGRATION] Correcting scheduling_request: ${sDoc.id}`);
+          await updateDoc(doc(db, "scheduling_requests", sDoc.id), { actionBy: "Shymaa Hassan" }).catch(console.error);
+        }
+
+        // 8. Correct in "attendance_records" collection
+        const qAttendance = query(collection(db, "attendance_records"), where("markedBy", "==", "Shaymaa Hassan"));
+        const snapshotAttendance = await getDocs(qAttendance);
+        for (const aDoc of snapshotAttendance.docs) {
+          console.log(`[MIGRATION] Correcting attendance_record: ${aDoc.id}`);
+          await updateDoc(doc(db, "attendance_records", aDoc.id), { markedBy: "Shymaa Hassan" }).catch(console.error);
+        }
+
+        // 9. Correct in "inquiries" collection
+        const qInquiries = query(collection(db, "inquiries"), where("assignedToName", "==", "Shaymaa Hassan"));
+        const snapshotInquiries = await getDocs(qInquiries);
+        for (const iDoc of snapshotInquiries.docs) {
+          console.log(`[MIGRATION] Correcting inquiry: ${iDoc.id}`);
+          await updateDoc(doc(db, "inquiries", iDoc.id), { assignedToName: "Shymaa Hassan" }).catch(console.error);
+        }
+
+        // 10. Correct in "tt_requests" collection
+        const qTTReqs = query(collection(db, "tt_requests"), where("assignedToName", "==", "Shaymaa Hassan"));
+        const snapshotTTReqs = await getDocs(qTTReqs);
+        for (const ttDoc of snapshotTTReqs.docs) {
+          console.log(`[MIGRATION] Correcting tt_request: ${ttDoc.id}`);
+          await updateDoc(doc(db, "tt_requests", ttDoc.id), { assignedToName: "Shymaa Hassan" }).catch(console.error);
+        }
+
+        // 11. Correct in "tt_complaints" collection
+        const qComplaints = query(collection(db, "tt_complaints"), where("tlName", "==", "Shaymaa Hassan"));
+        const snapshotComplaints = await getDocs(qComplaints);
+        for (const cDoc of snapshotComplaints.docs) {
+          console.log(`[MIGRATION] Correcting tt_complaint: ${cDoc.id}`);
+          await updateDoc(doc(db, "tt_complaints", cDoc.id), { tlName: "Shymaa Hassan" }).catch(console.error);
         }
 
         console.log("[MIGRATION] Finished database corrections successfully.");
@@ -10528,7 +10592,7 @@ ${ttNotes}`
             </div>
           </div>
           <div className="flex flex-col items-center gap-1">
-            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-300 to-indigo-200 bg-clip-text text-transparent font-display">
+            <h1 className="text-xl font-bold text-blue-200 font-display">
               Establishing Connection
             </h1>
             <p className="text-xs text-slate-400 font-mono tracking-wider">
@@ -10562,7 +10626,7 @@ ${ttNotes}`
         {/* Check Installation */}
         {!currentUser ? (
           <div className="flex-1 flex flex-col items-center justify-center my-12 animate-fade-in relative">
-            <div className="w-full max-w-md bg-black/40 backdrop-blur-3xl border border-indigo-500/20 p-8 rounded-[2rem] shadow-[0_0_80px_-20px_rgba(79,70,229,0.3)] relative overflow-hidden group">
+            <div className="w-full max-w-md bg-black/40 backdrop-blur-3xl border border-indigo-500/20 p-8 rounded-2xl shadow-[0_0_80px_-20px_rgba(79,70,229,0.3)] relative overflow-hidden group">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500 group-hover:h-1.5 transition-all duration-500"></div>
 
               <div className="absolute -inset-20 bg-indigo-500/10 blur-[100px] pointer-events-none group-hover:bg-indigo-500/20 transition-all duration-1000"></div>
@@ -10588,7 +10652,7 @@ ${ttNotes}`
                   if (matchedName && typeof matchedName === "string") {
                     return (
                       <div className="text-center animate-fade-in">
-                        <h1 className="text-3xl font-black bg-gradient-to-r from-cyan-300 via-indigo-300 to-fuchsia-300 bg-clip-text text-transparent font-display tracking-tight">
+                        <h1 className="text-3xl font-black text-indigo-200 font-display tracking-tight">
                           Welcome, {matchedName.split(" ")[0]}
                         </h1>
                         <p className="text-indigo-400/80 text-[10px] font-mono uppercase tracking-[0.3em] mt-2">
@@ -10902,9 +10966,10 @@ ${ttNotes}`
                     type="button"
                     onClick={() => {
                       setSelectedWeatherLoc("both");
-                      localStorage.setItem(
+                      setStorageItem(
                         "sched_weather_location_pref",
                         "both",
+                        false
                       );
                     }}
                     className={`px-2.5 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer ${
@@ -10919,9 +10984,10 @@ ${ttNotes}`
                     type="button"
                     onClick={() => {
                       setSelectedWeatherLoc("egypt");
-                      localStorage.setItem(
+                      setStorageItem(
                         "sched_weather_location_pref",
                         "egypt",
+                        false
                       );
                     }}
                     className={`px-2.5 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
@@ -10936,9 +11002,10 @@ ${ttNotes}`
                     type="button"
                     onClick={() => {
                       setSelectedWeatherLoc("uae");
-                      localStorage.setItem(
+                      setStorageItem(
                         "sched_weather_location_pref",
                         "uae",
+                        false
                       );
                     }}
                     className={`px-2.5 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
@@ -11265,7 +11332,7 @@ ${ttNotes}`
             {/* Split Content structure */}
             <div className="flex-1 flex flex-col md:flex-row gap-6 md:gap-8">
               {/* Navigation / Sidebar Menu */}
-              <aside className="w-full md:w-64 border border-white/10 bg-white/5 backdrop-blur-xl flex flex-col p-5 rounded-2xl sm:rounded-3xl shadow-xl space-y-6">
+              <aside className="w-full md:w-64 border border-white/10 bg-white/5 backdrop-blur-xl flex flex-col p-5 rounded-2xl sm:rounded-2xl shadow-xl space-y-6">
                 {/* Egypt Local Time & 10th of Ramadan Weather */}
                 <div className="p-4 rounded-xl bg-black/40 border border-cyan-500/15 shadow-[0_4px_20px_rgba(0,0,0,0.3)] space-y-3 relative overflow-hidden group">
                   <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-indigo-500/5 opacity-40 pointer-events-none" />
@@ -12337,7 +12404,7 @@ ${ttNotes}`
                               <div
                                 key={inq.id}
                                 id={`inquiry-${inq.id}`}
-                                className="relative overflow-hidden p-5 rounded-3xl border backdrop-blur-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-2xl bg-gradient-to-r from-indigo-950/40 via-purple-950/20 to-slate-950/80 border-indigo-500/30"
+                                className="relative overflow-hidden p-5 rounded-2xl border backdrop-blur-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-2xl bg-gradient-to-r from-indigo-950/40 via-purple-950/20 to-slate-950/80 border-indigo-500/30"
                               >
                                 {/* Glow indicator line */}
                                 <div className="absolute top-0 bottom-0 left-0 w-1 bg-gradient-to-b from-indigo-400 to-purple-500"></div>
@@ -12430,7 +12497,7 @@ ${ttNotes}`
                             .map((req) => (
                               <div
                                 key={req.id}
-                                className="relative overflow-hidden p-5 rounded-3xl border backdrop-blur-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-2xl bg-gradient-to-r from-amber-950/40 via-yellow-950/25 to-slate-950/80 border-amber-500/30"
+                                className="relative overflow-hidden p-5 rounded-2xl border backdrop-blur-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-2xl bg-gradient-to-r from-amber-950/40 via-yellow-950/25 to-slate-950/80 border-amber-500/30"
                               >
                                 {/* Glow indicator line */}
                                 <div className="absolute top-0 bottom-0 left-0 w-1 bg-gradient-to-b from-amber-400 to-yellow-500"></div>
@@ -12524,7 +12591,7 @@ ${ttNotes}`
                             .map((comp) => (
                               <div
                                 key={comp.id}
-                                className="relative overflow-hidden p-5 rounded-3xl border backdrop-blur-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-2xl bg-gradient-to-r from-rose-950/40 via-red-950/25 to-slate-950/80 border-rose-500/30"
+                                className="relative overflow-hidden p-5 rounded-2xl border backdrop-blur-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-2xl bg-gradient-to-r from-rose-950/40 via-red-950/25 to-slate-950/80 border-rose-500/30"
                               >
                                 {/* Glow indicator line */}
                                 <div className="absolute top-0 bottom-0 left-0 w-1 bg-gradient-to-b from-rose-400 to-red-500"></div>
@@ -12587,7 +12654,7 @@ ${ttNotes}`
                       partnerPendingSwaps.length > 0 && (
                         <div
                           id="swaps-awaiting-agreement-panel"
-                          className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/25 p-5 sm:p-6 rounded-3xl backdrop-blur-xl flex flex-col space-y-4 shadow-xl animate-fade-in relative overflow-hidden"
+                          className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/25 p-5 sm:p-6 rounded-2xl backdrop-blur-xl flex flex-col space-y-4 shadow-xl animate-fade-in relative overflow-hidden"
                         >
                           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500"></div>
                           <div className="flex items-center gap-2.5">
@@ -12678,7 +12745,7 @@ ${ttNotes}`
 
                     {activeTab === "profile" && currentUser && (
                       <div className="space-y-6 max-w-4xl mx-auto w-full animate-fade-in relative z-10 p-4 sm:p-0 text-left">
-                        <div className="bg-white/10 backdrop-blur-md/80 backdrop-blur-xl border border-white/10 p-6 sm:p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+                        <div className="bg-white/10 backdrop-blur-md/80 backdrop-blur-xl border border-white/10 p-6 sm:p-8 rounded-2xl shadow-2xl relative overflow-hidden">
                           <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
                           <div className="flex flex-col sm:flex-row items-center gap-6 mb-8">
                             <div className="relative group">
@@ -13329,7 +13396,7 @@ ${ttNotes}`
                           return (
                             <>
                               {/* NEW LOGIN STYLE REMINDER BANNER */}
-                              <div className="bg-gradient-to-r from-indigo-500/10 to-blue-500/10 border border-indigo-500/20 rounded-3xl p-5 shadow-2xl relative overflow-hidden backdrop-blur-md">
+                              <div className="bg-gradient-to-r from-indigo-500/10 to-blue-500/10 border border-indigo-500/20 rounded-2xl p-5 shadow-2xl relative overflow-hidden backdrop-blur-md">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
                                 <div className="flex flex-col sm:flex-row items-start gap-4">
                                   <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
@@ -13368,7 +13435,7 @@ ${ttNotes}`
                               </div>
 
                               {/* View Mode Switching Tab Toggles */}
-                              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/5 border border-white/10 p-2.5 rounded-3xl select-none">
+                              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/5 border border-white/10 p-2.5 rounded-2xl select-none">
                                 <div className="flex bg-black/30 p-1 rounded-2xl border border-white/5 w-full sm:w-auto">
                                   <button
                                     onClick={() =>
@@ -13501,7 +13568,7 @@ ${ttNotes}`
                                       myComms.length >= 10;
 
                                     return (
-                                      <div className="bg-gradient-to-r from-slate-900 via-[#18182b] to-indigo-950/30 border border-indigo-500/20 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4 text-left font-sans">
+                                      <div className="bg-gradient-to-r from-slate-900 via-[#18182b] to-indigo-950/30 border border-indigo-500/20 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4 text-left font-sans">
                                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                           <div className="space-y-1">
                                             <div className="flex items-center gap-2">
@@ -13853,7 +13920,7 @@ ${ttNotes}`
 
                                       return (
                                         <div className="space-y-6">
-                                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/5 border border-white/10 rounded-3xl p-5 backdrop-blur-xl">
+                                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xl">
                                             <div>
                                               <h2 className="text-xl font-black text-slate-100 font-display">
                                                 My Daily Work Dashboard
@@ -13910,7 +13977,7 @@ ${ttNotes}`
                                           </div>
 
                                           <div className="grid grid-cols-1 md:grid-cols-12 gap-5 animate-fade-in">
-                                            <div className="md:col-span-4 bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-center text-center">
+                                            <div className="md:col-span-4 bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
                                               <span className="text-[10px] font-black uppercase text-indigo-300 tracking-wider mb-4">
                                                 Daily Resolve Ratio
                                               </span>
@@ -14135,7 +14202,7 @@ ${ttNotes}`
                                           {["agent", "sme"].includes(
                                             currentUser.role as string,
                                           ) && (
-                                            <div className="bg-white/5 border border-white/10 rounded-3xl p-5 backdrop-blur-md">
+                                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-md">
                                               <h3 className="text-sm font-extrabold text-slate-100 uppercase tracking-wider flex items-center gap-2 mb-4">
                                                 <AlertTriangle className="w-4 h-4 text-pink-400" />
                                                 Punctuality & Sub-Session
@@ -14427,7 +14494,7 @@ ${ttNotes}`
 
                                       return (
                                         <div className="space-y-6">
-                                          <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+                                          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl">
                                             <h3 className="text-xl font-black text-slate-100 font-display">
                                               Weekly Work Output & Trends
                                             </h3>
@@ -14439,7 +14506,7 @@ ${ttNotes}`
                                           </div>
 
                                           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in">
-                                            <div className="lg:col-span-8 bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col justify-between">
+                                            <div className="lg:col-span-8 bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col justify-between">
                                               <div>
                                                 <h4 className="text-sm font-extrabold text-slate-100 uppercase tracking-wider mb-2">
                                                   Daily Interactions Handled
@@ -14486,7 +14553,7 @@ ${ttNotes}`
                                               </div>
                                             </div>
 
-                                            <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col justify-between">
+                                            <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col justify-between">
                                               <div>
                                                 <h4 className="text-sm font-extrabold text-slate-100 uppercase tracking-wider mb-4">
                                                   Weekly Summary Stats
@@ -14713,7 +14780,7 @@ ${ttNotes}`
 
                                       return (
                                         <div className="space-y-6">
-                                          <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+                                          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl">
                                             <h3 className="text-xl font-black text-slate-100 font-display">
                                               Monthly Performance & Achievement
                                               Desk
@@ -14726,7 +14793,7 @@ ${ttNotes}`
                                           </div>
 
                                           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 animate-fade-in">
-                                            <div className="md:col-span-5 bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-between text-center">
+                                            <div className="md:col-span-5 bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center justify-between text-center">
                                               <div>
                                                 <span className="text-[10px] font-black uppercase text-indigo-300 tracking-wider">
                                                   Motivational Badge Status
@@ -14757,7 +14824,7 @@ ${ttNotes}`
                                             </div>
 
                                             <div className="md:col-span-7 space-y-4">
-                                              <div className="p-6 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-md">
+                                              <div className="p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
                                                 <h4 className="text-sm font-extrabold text-slate-100 uppercase tracking-wider mb-4">
                                                   30-Day Operation Ratios
                                                 </h4>
@@ -14846,7 +14913,7 @@ ${ttNotes}`
                               ) : (
                                 <div className="space-y-6">
                                   {/* Header Controls Banner */}
-                                  <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white/5 border border-white/10 rounded-3xl p-5 backdrop-blur-xl animate-fade-in">
+                                  <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xl animate-fade-in">
                                     <div>
                                       <div className="flex items-center gap-2">
                                         <span className="px-2 py-0.5 text-[9px] font-black uppercase tracking-widest bg-cyan-500/20 text-cyan-300 rounded border border-cyan-500/30">
@@ -14999,7 +15066,7 @@ ${ttNotes}`
                                   </div>
 
                                   {/* Agent Excellence Team Leaderboard */}
-                                  <div className="bg-white/5 border border-white/10 rounded-3xl shadow-sm text-slate-100 p-6 shadow-2xl space-y-4 text-left animate-fade-in font-sans">
+                                  <div className="bg-white/5 border border-white/10 rounded-2xl shadow-sm text-slate-100 p-6 shadow-2xl space-y-4 text-left animate-fade-in font-sans">
                                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-3">
                                       <div>
                                         <h3 className="font-extrabold text-transparent bg-gradient-to-r from-yellow-300 via-indigo-200 to-amber-300 bg-clip-text text-lg font-display flex items-center gap-2">
@@ -15283,7 +15350,7 @@ ${ttNotes}`
                                   {/* Operational Performance Core Ring & KPI Grid */}
                                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                                     {/* Overall composite score circle gauge */}
-                                    <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl flex flex-col items-center justify-center text-center">
+                                    <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl flex flex-col items-center justify-center text-center">
                                       <p className="text-slate-400 text-xs font-black uppercase tracking-wider mb-4">
                                         Day Resolve Efficiency
                                       </p>
@@ -15357,7 +15424,7 @@ ${ttNotes}`
                                     {/* 2x2 metric micro scorecard grid */}
                                     <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                       {/* 1. Inquiries */}
-                                      <div className="p-5 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-md hover:border-white/20 transition-all flex flex-col justify-between">
+                                      <div className="p-5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md hover:border-white/20 transition-all flex flex-col justify-between">
                                         <div>
                                           <div className="flex justify-between items-start">
                                             <span className="p-2 bg-blue-500/15 text-blue-400 rounded-2xl border border-blue-500/20">
@@ -15407,7 +15474,7 @@ ${ttNotes}`
                                       </div>
 
                                       {/* 2. Fintech Integration */}
-                                      <div className="p-5 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-md hover:border-white/20 transition-all flex flex-col justify-between">
+                                      <div className="p-5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md hover:border-white/20 transition-all flex flex-col justify-between">
                                         <div>
                                           <div className="flex justify-between items-start">
                                             <span className="p-2 bg-amber-500/15 text-amber-400 rounded-2xl border border-amber-500/20">
@@ -15465,7 +15532,7 @@ ${ttNotes}`
                                       </div>
 
                                       {/* 3. Complaints & Comm Requests */}
-                                      <div className="p-5 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-md hover:border-white/20 transition-all flex flex-col justify-between">
+                                      <div className="p-5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md hover:border-white/20 transition-all flex flex-col justify-between">
                                         <div>
                                           <div className="flex justify-between items-start">
                                             <span className="p-2 bg-rose-500/15 text-rose-400 rounded-2xl border border-rose-500/20">
@@ -15516,7 +15583,7 @@ ${ttNotes}`
                                       </div>
 
                                       {/* 4. Client Communication requests */}
-                                      <div className="p-5 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-md hover:border-white/20 transition-all flex flex-col justify-between">
+                                      <div className="p-5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md hover:border-white/20 transition-all flex flex-col justify-between">
                                         <div>
                                           <div className="flex justify-between items-start">
                                             <span className="p-2 bg-indigo-500/15 text-indigo-400 rounded-2xl border border-indigo-500/20">
@@ -15567,7 +15634,7 @@ ${ttNotes}`
 
                                       {/* 5. QA Performance */}
                                       <div
-                                        className="p-5 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-md hover:border-green-500/30 transition-all flex flex-col justify-between cursor-pointer"
+                                        className="p-5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md hover:border-green-500/30 transition-all flex flex-col justify-between cursor-pointer"
                                         onClick={() =>
                                           setActiveTab("qa-scorecard")
                                         }
@@ -15647,7 +15714,7 @@ ${ttNotes}`
                                   </div>
 
                                   {/* Hourly Load Distribution SVG Interactive Chart */}
-                                  <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+                                  <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl">
                                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                                       <div>
                                         <h3 className="text-lg font-black text-slate-100 font-display">
@@ -15878,7 +15945,7 @@ ${ttNotes}`
                                   {/* Left Column: LOB speed table, Right Column: Agent shift timeline / roster */}
                                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                                     {/* LOB Performance Card */}
-                                    <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl flex flex-col justify-between">
+                                    <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl flex flex-col justify-between">
                                       <div>
                                         <h3 className="text-base font-black text-slate-100 font-display flex items-center gap-2">
                                           <Activity className="w-4 h-4 text-cyan-400" />
@@ -16197,7 +16264,7 @@ ${ttNotes}`
                                     </div>
 
                                     {/* Agent roster attendance statistics table with elegant slider timelines */}
-                                    <div className="lg:col-span-8 bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+                                    <div className="lg:col-span-8 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl">
                                       <h3 className="text-base font-black text-slate-100 font-display flex items-center gap-2 mb-2">
                                         <Users className="w-4 h-4 text-cyan-400 animate-pulse" />
                                         On-Duty Roster Timeline (
@@ -16470,7 +16537,7 @@ ${ttNotes}`
                         </div>
 
                         {/* Operations Live Wallboard & SLA Gauge */}
-                        <div className="bg-white/5 border border-white/10 rounded-3xl shadow-sm text-slate-100 p-6 shadow-2xl space-y-6">
+                        <div className="bg-white/5 border border-white/10 rounded-2xl shadow-sm text-slate-100 p-6 shadow-2xl space-y-6">
                           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-4">
                             <div>
                               <h3 className="font-extrabold text-transparent bg-gradient-to-r from-blue-300 via-indigo-200 to-cyan-300 bg-clip-text text-lg font-display flex items-center gap-2">
@@ -16806,7 +16873,7 @@ ${ttNotes}`
                         </div>
 
                         {/* Immediate Approval Queue Panel */}
-                        <div className="bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl flex flex-col shadow-2xl overflow-hidden">
+                        <div className="bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl flex flex-col shadow-2xl overflow-hidden">
                           <div className="p-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 gap-3">
                             <div>
                               <h3 className="font-bold text-slate-100 text-lg font-display">
@@ -17501,7 +17568,7 @@ ${ttNotes}`
                         {/* Four-Column Quad Report Actions Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                           {/* Card 1: Custom Audit timeframe summary text download */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-indigo-500/15 border border-indigo-500/20 text-indigo-400 rounded-xl flex items-center justify-center">
                                 <FileText className="w-5 h-5" />
@@ -17546,7 +17613,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 2: Master Roster Shift Swaps & Annual Leaves Export */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-blue-500/15 border border-blue-500/20 text-blue-400 rounded-xl flex items-center justify-center">
                                 <GitPullRequest className="w-5 h-5" />
@@ -17588,7 +17655,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 3: Agent Clock Timesheet Logs Export */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center">
                                 <Clock className="w-5 h-5" />
@@ -17629,7 +17696,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 4: Agent Inquiries & Feed Cases Export */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-purple-500/15 border border-purple-500/20 text-purple-400 rounded-xl flex items-center justify-center">
                                 <HelpCircle className="w-5 h-5" />
@@ -17671,7 +17738,7 @@ ${ttNotes}`
                         {/* New rows of module exports */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                           {/* Card 5: Tabby & Tamara Fintech Requests */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-amber-500/15 border border-amber-500/20 text-amber-400 rounded-xl flex items-center justify-center">
                                 <Wallet className="w-5 h-5" />
@@ -17698,7 +17765,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 6: General Service & Clinical Complaints */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-rose-500/15 border border-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center">
                                 <AlertTriangle className="w-5 h-5" />
@@ -17725,7 +17792,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 7: Client Communications */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-cyan-500/15 border border-cyan-500/20 text-cyan-400 rounded-xl flex items-center justify-center">
                                 <PhoneCall className="w-5 h-5" />
@@ -17752,7 +17819,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 8: Direct Case Leads */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-teal-500/15 border border-teal-500/20 text-teal-400 rounded-xl flex items-center justify-center">
                                 <ClipboardList className="w-5 h-5" />
@@ -17779,7 +17846,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 9: Active Work Schedules */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-pink-500/15 border border-pink-500/20 text-pink-400 rounded-xl flex items-center justify-center">
                                 <Calendar className="w-5 h-5" />
@@ -17806,7 +17873,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 11: RTM Live Attendance Summary Digest */}
-                          <div className="bg-gradient-to-br from-emerald-500/5 to-teal-500/5 border border-emerald-500/15 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-gradient-to-br from-emerald-500/5 to-teal-500/5 border border-emerald-500/15 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center">
                                 <Activity className="w-5 h-5 text-emerald-400 animate-pulse" />
@@ -17850,7 +17917,7 @@ ${ttNotes}`
 
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             {/* Shift Swap Module */}
-                            <div className="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-xl flex flex-col space-y-5 shadow-lg relative overflow-hidden">
+                            <div className="bg-white/5 border border-white/10 p-6 rounded-2xl backdrop-blur-xl flex flex-col space-y-5 shadow-lg relative overflow-hidden">
                               <div className="absolute top-0 left-0 right-0 h-1 bg-blue-500"></div>
                               <div className="flex items-center gap-2.5">
                                 <div className="w-9 h-9 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center justify-center">
@@ -18063,7 +18130,7 @@ ${ttNotes}`
                             </div>
 
                             {/* Annual Leave Module */}
-                            <div className="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-xl flex flex-col space-y-5 shadow-lg relative overflow-hidden">
+                            <div className="bg-white/5 border border-white/10 p-6 rounded-2xl backdrop-blur-xl flex flex-col space-y-5 shadow-lg relative overflow-hidden">
                               <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500"></div>
                               <div className="flex items-center gap-2.5">
                                 <div className="w-9 h-9 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center">
@@ -18254,7 +18321,7 @@ ${ttNotes}`
 
                           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             {/* Submit Inquiry Form (Left Side / Col Span 1) */}
-                            <div className="lg:col-span-1 bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl space-y-5">
+                            <div className="lg:col-span-1 bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl space-y-5">
                               <h3 className="text-base font-bold text-slate-100 font-display flex items-center gap-2 border-b border-white/5 pb-3">
                                 <HelpCircle className="w-5 h-5 text-indigo-400" />
                                 Submit New Inquiry
@@ -18664,7 +18731,7 @@ ${ttNotes}`
                                 </div>
 
                                 {agentInquiryView === "my" && (
-                                  <div className="p-5 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl">
+                                  <div className="p-5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl">
                                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/5 pb-4 mb-4">
                                       <div>
                                         <h3 className="text-base font-bold text-slate-100 font-display">
@@ -19045,7 +19112,7 @@ ${ttNotes}`
                                 )}
 
                                 {agentInquiryView === "global" && (
-                                  <div className="p-5 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl animate-fade-in">
+                                  <div className="p-5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl animate-fade-in">
                                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/5 pb-4 mb-4">
                                       <div>
                                         <h3 className="text-base font-bold text-slate-100 font-display">
@@ -19272,7 +19339,7 @@ ${ttNotes}`
                             {/* Left & Middle Column (Main Control Desk) */}
                             <div className="lg:col-span-2 space-y-6">
                               {/* Live Desk Console Panel */}
-                              <div className="p-6 sm:p-8 bg-white/5 border border-white/10 rounded-3xl shadow-sm text-slate-100 shadow-2xl relative overflow-hidden flex flex-col items-center text-center space-y-6">
+                              <div className="p-6 sm:p-8 bg-white/5 border border-white/10 rounded-2xl shadow-sm text-slate-100 shadow-2xl relative overflow-hidden flex flex-col items-center text-center space-y-6">
                                 {/* Pulse glow background ornament */}
                                 <div className="absolute top-10 w-96 h-96 bg-indigo-500/10 blur-[100px] rounded-full -z-10 animate-pulse"></div>
 
@@ -19667,7 +19734,7 @@ ${ttNotes}`
                             {/* Right Column (My Today's Stats & chronological History Log) */}
                             <div className="space-y-6">
                               {/* Daily aggregates */}
-                              <div className="p-5 bg-white/5 border border-white/10 rounded-3xl space-y-4">
+                              <div className="p-5 bg-white/5 border border-white/10 rounded-2xl space-y-4">
                                 <h3 className="font-bold text-slate-100 text-sm font-display border-b border-white/5 pb-2">
                                   Shift Aggregates (Today)
                                 </h3>
@@ -19792,7 +19859,7 @@ ${ttNotes}`
                               </div>
 
                               {/* Personal historical activities listing */}
-                              <div className="p-5 bg-white/5 border border-white/10 rounded-3xl space-y-4 max-h-[400px] overflow-y-auto">
+                              <div className="p-5 bg-white/5 border border-white/10 rounded-2xl space-y-4 max-h-[400px] overflow-y-auto">
                                 <div className="flex justify-between items-center border-b border-white/5 pb-2">
                                   <h3 className="font-bold text-slate-100 text-sm font-display">
                                     Time Card Sessions
@@ -19955,7 +20022,7 @@ ${ttNotes}`
                         {/* Dynamic Analytics & Charts Row */}
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                           {/* Panel 1: Status Distribution Donut Chart */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
                             <div>
                               <h3 className="text-sm font-bold text-slate-100 font-display mb-1 flex items-center gap-2">
                                 <PieChart className="w-4 h-4 text-indigo-400" />
@@ -20057,7 +20124,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Panel 2: Clinic Volume Breakdown */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl lg:col-span-2 flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl lg:col-span-2 flex flex-col justify-between">
                             <div>
                               <h3 className="text-sm font-bold text-slate-100 font-display mb-1 flex items-center gap-2">
                                 <BarChart2 className="w-4 h-4 text-emerald-400" />
@@ -20178,7 +20245,7 @@ ${ttNotes}`
                         {true && (
                           <>
                             {/* Search & Filters */}
-                            <div className="bg-white/5 border border-white/10 p-4 rounded-3xl flex flex-col md:flex-row gap-4 items-center">
+                            <div className="bg-white/5 border border-white/10 p-4 rounded-2xl flex flex-col md:flex-row gap-4 items-center">
                               <div className="relative flex-1 w-full">
                                 <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                                 <input
@@ -21630,7 +21697,7 @@ ${ttNotes}`
                     {activeTab === "time-logs" && currentUser.role === "tl" && (
                       <div
                         id="tl-timelog-view-root"
-                        className="space-y-6 animate-fade-in col-span-1 border border-white/5 p-2 bg-transparent/20 rounded-3xl"
+                        className="space-y-6 animate-fade-in col-span-1 border border-white/5 p-2 bg-transparent/20 rounded-2xl"
                       >
                         {/* Header */}
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-2">
@@ -21745,7 +21812,7 @@ ${ttNotes}`
 
                           if (tlIsPrintMode) {
                             return (
-                              <div className="p-8 bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl space-y-6 animate-fade-in text-slate-100 print:p-0 print:bg-white/10 backdrop-blur-md print:text-black">
+                              <div className="p-8 bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl space-y-6 animate-fade-in text-slate-100 print:p-0 print:bg-white/10 backdrop-blur-md print:text-black">
                                 <div className="flex justify-between items-center border-b border-white/10 pb-4 print:border-black">
                                   <div>
                                     <h3 className="text-xl font-extrabold font-display uppercase tracking-wider">
@@ -22562,7 +22629,7 @@ ${ttNotes}`
                                   return (
                                     <div
                                       id="compliance-alerts-panel"
-                                      className="p-6 bg-[#180d14]/80 border border-rose-500/20 rounded-3xl space-y-4 shadow-2xl relative overflow-hidden backdrop-blur-xl"
+                                      className="p-6 bg-[#180d14]/80 border border-rose-500/20 rounded-2xl space-y-4 shadow-2xl relative overflow-hidden backdrop-blur-xl"
                                     >
                                       <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -22771,7 +22838,7 @@ ${ttNotes}`
                                 </div>
 
                                 {/* Live station usage & totals board */}
-                                <div className="p-6 bg-white/5 border border-white/10 rounded-3xl space-y-4 shadow-xl">
+                                <div className="p-6 bg-white/5 border border-white/10 rounded-2xl space-y-4 shadow-xl">
                                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                                     <div>
                                       <h3 className="font-bold text-slate-100 text-base font-display">
@@ -23238,7 +23305,7 @@ ${ttNotes}`
                         {(isSuperAdmin ||
                           isTLOreSupport ||
                           currentUser?.role === "tl") && (
-                          <div className="bg-gradient-to-r from-violet-500/15 via-indigo-500/10 to-blue-500/15 border border-indigo-500/30 rounded-3xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 shadow-xl">
+                          <div className="bg-gradient-to-r from-violet-500/15 via-indigo-500/10 to-blue-500/15 border border-indigo-500/30 rounded-2xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 shadow-xl">
                             <div className="space-y-1 text-left">
                               <div className="flex items-center gap-2">
                                 <span
@@ -23296,7 +23363,7 @@ ${ttNotes}`
                         {(isSuperAdmin ||
                           isTLOreSupport ||
                           currentUser?.role === "tl") && (
-                          <div className="bg-white/5 border border-white/10 rounded-3xl shadow-sm text-slate-100 p-6 shadow-2xl space-y-5 text-left">
+                          <div className="bg-white/5 border border-white/10 rounded-2xl shadow-sm text-slate-100 p-6 shadow-2xl space-y-5 text-left">
                             <div>
                               <h3 className="font-extrabold text-slate-100 text-base font-display flex items-center gap-2">
                                 <PlusCircle className="w-5 h-5 text-indigo-400" />
@@ -23490,7 +23557,7 @@ ${ttNotes}`
 
                         {false ? (
                           <div className="space-y-6">
-                            <div className="p-12 text-center rounded-3xl border border-dashed border-indigo-500/30 bg-white/10 backdrop-blur-md/[0.02] space-y-4 shadow-xl text-left">
+                            <div className="p-12 text-center rounded-2xl border border-dashed border-indigo-500/30 bg-white/10 backdrop-blur-md/[0.02] space-y-4 shadow-xl text-left">
                               <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto text-indigo-400 shadow-inner">
                                 <Shield className="w-8 h-8" />
                               </div>
@@ -23515,7 +23582,7 @@ ${ttNotes}`
                             </div>
 
                             {/* Display personalized preview list */}
-                            <div className="bg-white/5 border border-white/10 rounded-3xl p-6 shadow-xl space-y-4 text-left">
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-xl space-y-4 text-left">
                               <div className="border-b border-white/5 pb-3">
                                 <h4 className="text-sm font-black text-indigo-300 uppercase tracking-widest font-mono">
                                   My Shift Coverage Preview
@@ -23594,7 +23661,7 @@ ${ttNotes}`
                         ) : (
                           <>
                             {/* Search, Filter, & Navigation Toolbar */}
-                            <div className="p-4 bg-white/5 border border-white/10 rounded-3xl flex flex-col sm:flex-row justify-between items-center gap-4 shadow-md">
+                            <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4 shadow-md">
                               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                                 {/* Search bar */}
                                 <input
@@ -23724,7 +23791,7 @@ ${ttNotes}`
                             </div>
 
                             {/* Active Schedule visual Matrix grid */}
-                            <div className="bg-white/5 border border-white/10 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
                               <div className="flex justify-between items-center pb-2 border-b border-white/5">
                                 <h3 className="font-bold text-slate-100 text-base font-display">
                                   {" "}
@@ -23832,7 +23899,7 @@ ${ttNotes}`
                                     };
 
                                     return (
-                                      <div className="bg-[#12121e]/85 border border-indigo-500/25 rounded-3xl p-5 space-y-4 mb-6 text-left shadow-2xl relative overflow-hidden backdrop-blur-xl">
+                                      <div className="bg-[#12121e]/85 border border-indigo-500/25 rounded-2xl p-5 space-y-4 mb-6 text-left shadow-2xl relative overflow-hidden backdrop-blur-xl">
                                         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
                                         <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -24760,7 +24827,7 @@ ${ttNotes}`
                               currentUser?.role === "sme" ||
                               isSuperAdmin) &&
                               schedules.length > 0 && (
-                                <div className="bg-white/5 border border-amber-500/20 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-6 mt-6">
+                                <div className="bg-white/5 border border-amber-500/20 rounded-2xl p-5 sm:p-6 shadow-2xl space-y-6 mt-6">
                                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-4">
                                     <div>
                                       <h3 className="font-extrabold text-transparent bg-gradient-to-r from-amber-400 to-orange-300 bg-clip-text text-lg font-display flex items-center gap-2 text-left">
@@ -24941,7 +25008,7 @@ ${ttNotes}`
                               )}
 
                             {/* P2P Shift Swap Trade Market & Trade Hub */}
-                            <div className="bg-white/5 border border-white/10 rounded-3xl shadow-sm text-slate-100 p-5 sm:p-6 shadow-2xl space-y-6 mt-6">
+                            <div className="bg-white/5 border border-white/10 rounded-2xl shadow-sm text-slate-100 p-5 sm:p-6 shadow-2xl space-y-6 mt-6">
                               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-4">
                                 <div>
                                   <h3 className="font-extrabold text-transparent bg-gradient-to-r from-blue-300 via-indigo-200 to-cyan-300 bg-clip-text text-lg font-display flex items-center gap-2">
@@ -25602,7 +25669,7 @@ ${ttNotes}`
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
-                                  <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl h-56 shadow-xl">
+                                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl h-56 shadow-xl">
                                     <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
                                       <Activity className="w-4 h-4 text-amber-400" />
                                       T&T Request Load By Clinic
@@ -25722,7 +25789,7 @@ ${ttNotes}`
                                       );
                                     })()}
                                   </div>
-                                  <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl h-56 shadow-xl">
+                                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl h-56 shadow-xl">
                                     <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
                                       <PieChart className="w-4 h-4 text-emerald-400" />
                                       T&T Approvals vs Rejected
@@ -25895,7 +25962,7 @@ ${ttNotes}`
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-1 mt-6">
-                                  <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl h-56 shadow-xl">
+                                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl h-56 shadow-xl">
                                     <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
                                       <Activity className="w-4 h-4 text-rose-400" />
                                       Complaints Load By Clinic
@@ -26070,7 +26137,7 @@ ${ttNotes}`
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-1 mt-6">
-                                  <div className="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-xl h-56 shadow-xl">
+                                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl h-56 shadow-xl">
                                     <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
                                       <Activity className="w-4 h-4 text-indigo-400" />
                                       Comms By Status
@@ -26177,7 +26244,7 @@ ${ttNotes}`
                               ) && (
                                 <div className="lg:col-span-12 space-y-4">
                                   {localSubTab === "requests" ? (
-                                    <div className="p-6 bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl space-y-4 shadow-2xl">
+                                    <div className="p-6 bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl space-y-4 shadow-2xl">
                                       <h3 className="text-lg font-bold text-slate-100 font-display flex items-center gap-2 text-left">
                                         <PlusCircle className="w-5 h-5 text-indigo-400" />
                                         New Installment Request
@@ -26548,7 +26615,7 @@ ${ttNotes}`
                                       </form>
                                     </div>
                                   ) : localSubTab === "complaints" ? (
-                                    <div className="p-6 bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl space-y-4 shadow-2xl animate-fade-in">
+                                    <div className="p-6 bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl space-y-4 shadow-2xl animate-fade-in">
                                       <h3 className="text-lg font-bold text-slate-100 font-display flex items-center gap-2 text-left">
                                         <AlertTriangle className="w-5 h-5 text-pink-500" />
                                         Log New Complaint
@@ -26797,7 +26864,7 @@ ${ttNotes}`
                                       </form>
                                     </div>
                                   ) : (
-                                    <div className="p-6 bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl space-y-4 shadow-2xl animate-fade-in">
+                                    <div className="p-6 bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl space-y-4 shadow-2xl animate-fade-in">
                                       <h3 className="text-lg font-bold text-slate-100 font-display flex items-center gap-2 text-left">
                                         <MessageSquare className="w-5 h-5 text-indigo-400" />
                                         Submit Communication Request
@@ -27891,7 +27958,7 @@ ${ttNotes}`
 
                             {/* Amira Hassan Submission Console */}
                             {isAmira && (
-                              <div className="bg-white/5 border text-slate-100 border-white/10 rounded-3xl shadow-sm p-6 space-y-4">
+                              <div className="bg-white/5 border text-slate-100 border-white/10 rounded-2xl shadow-sm p-6 space-y-4">
                                 <div className="border-b border-white/5 pb-3">
                                   <h3 className="font-bold text-slate-100 text-base font-display flex items-center gap-2">
                                     <Sparkles className="w-5 h-5 text-amber-400" />
@@ -28015,7 +28082,7 @@ ${ttNotes}`
                             {/* Feedbacks Feed */}
                             <div className="space-y-4">
                               {filteredFeedbacks.length === 0 ? (
-                                <div className="py-12 bg-white/5 border border-white/10 rounded-3xl text-center">
+                                <div className="py-12 bg-white/5 border border-white/10 rounded-2xl text-center">
                                   <MessageSquare className="w-12 h-12 text-slate-500 opacity-40 mx-auto mb-3" />
                                   <h4 className="font-bold text-slate-100 text-base">
                                     No Feedbacks Logged
@@ -28030,7 +28097,7 @@ ${ttNotes}`
                                   return (
                                     <div
                                       key={f.id}
-                                      className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-xl space-y-6 text-left"
+                                      className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl p-6 shadow-xl space-y-6 text-left"
                                     >
                                       {/* Card Header */}
                                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/5 pb-4">
@@ -28471,7 +28538,7 @@ ${ttNotes}`
 
                             {/* Headcount Upload Console directly under directory tab for Hesham & Amira */}
                             {isSuperAdmin && (
-                              <div className="bg-white/5 border text-slate-100 border-white/10 rounded-3xl shadow-sm p-6 space-y-4">
+                              <div className="bg-white/5 border text-slate-100 border-white/10 rounded-2xl shadow-sm p-6 space-y-4">
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-white/5 gap-3">
                                   <div className="text-left">
                                     <h3 className="font-bold text-slate-100 text-base font-display flex items-center gap-2">
@@ -28629,7 +28696,7 @@ ${ttNotes}`
                               </div>
                             )}
 
-                            <div className="bg-white/5 border border-white/10 rounded-3xl p-6 shadow-sm overflow-x-auto">
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-sm overflow-x-auto">
                               <table className="w-full text-left text-xs text-slate-300 whitespace-nowrap">
                                 <thead className="text-slate-400 bg-white/5 text-[10px] uppercase font-bold tracking-wider">
                                   <tr>
@@ -29895,7 +29962,7 @@ ${ttNotes}`
           onClick={() => setViewingRecord(null)}
         >
           <div
-            className="bg-[#0d0d10] border border-white/10 rounded-t-3xl sm:rounded-3xl w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl"
+            className="bg-[#0d0d10] border border-white/10 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -30374,7 +30441,7 @@ ${ttNotes}`
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.9, y: 20, opacity: 0 }}
               transition={{ type: "spring", duration: 0.5 }}
-              className="bg-[#121217] border border-cyan-500/30 rounded-[2rem] p-8 max-w-sm w-full shadow-[0_0_50px_rgba(6,182,212,0.15)] space-y-6 mx-4 relative overflow-hidden text-center"
+              className="bg-[#121217] border border-cyan-500/30 rounded-2xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(6,182,212,0.15)] space-y-6 mx-4 relative overflow-hidden text-center"
             >
               <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500"></div>
 
@@ -30397,7 +30464,7 @@ ${ttNotes}`
                 </div>
               </div>
 
-              <div className="py-5 px-6 bg-black/50 border border-cyan-500/20 rounded-3xl relative overflow-hidden shadow-inner flex flex-col items-center">
+              <div className="py-5 px-6 bg-black/50 border border-cyan-500/20 rounded-2xl relative overflow-hidden shadow-inner flex flex-col items-center">
                 {/* Sonar ambient waves radiating in the background underneath the text */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
                   <div

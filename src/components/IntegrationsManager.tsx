@@ -80,7 +80,7 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/5 border border-white/10 rounded-3xl p-6 relative overflow-hidden group"
+          className="bg-white/5 border border-white/10 rounded-2xl p-6 relative overflow-hidden group"
         >
           <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
             <Cloud className="w-32 h-32 text-indigo-500" />
@@ -177,7 +177,7 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
 
         {/* Security & Access Info Card */}
         <div className="space-y-6">
-          <div className="bg-slate-900/40 border border-white/5 rounded-3xl p-6 space-y-4">
+          <div className="bg-slate-900/40 border border-white/5 rounded-2xl p-6 space-y-4">
             <h4 className="text-xs font-black text-indigo-300 uppercase tracking-widest flex items-center gap-2">
               <ShieldCheck className="w-4 h-4" /> Security Protocol
             </h4>
@@ -203,7 +203,7 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
             </div>
           </div>
 
-          <div className="bg-indigo-600/10 border border-indigo-500/20 rounded-3xl p-6 flex items-center justify-between">
+          <div className="bg-indigo-600/10 border border-indigo-500/20 rounded-2xl p-6 flex items-center justify-between">
             <div className="space-y-1">
               <p className="text-xs font-bold text-slate-100">Ready to sync?</p>
               <p className="text-[10px] text-slate-400">Head over to your schedule to see new Google options.</p>
@@ -212,7 +212,7 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
           </div>
 
           {isGlobalAdmin && (
-            <div className="bg-rose-500/10 border border-rose-500/20 rounded-3xl p-6 space-y-4">
+            <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-6 space-y-4">
               <div className="flex items-center gap-2 text-rose-400">
                 <ShieldCheck className="w-5 h-5" />
                 <h4 className="text-xs font-black uppercase tracking-widest">Dangerous Zone</h4>

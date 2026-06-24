@@ -160,7 +160,7 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
   };
 
   return (
-    <div className="flex h-[calc(100vh-120px)] w-full max-w-[1300px] mx-auto bg-slate-900 border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
+    <div className="flex h-[calc(100vh-120px)] w-full max-w-[1300px] mx-auto bg-slate-900 border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
       {/* Sidebar Tabs */}
       <div className="w-1/4 min-w-[250px] border-r border-white/10 p-4 flex flex-col gap-2 bg-[#1e1e1e]/40 backdrop-blur-md">
         <div className="flex items-center justify-between mb-4">

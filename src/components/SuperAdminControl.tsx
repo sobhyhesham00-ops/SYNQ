@@ -429,7 +429,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left column: Quick metrics or directory snapshot summary */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-white/5 border border-white/10 p-6 rounded-3xl space-y-4">
+          <div className="bg-white/5 border border-white/10 p-6 rounded-2xl space-y-4">
             <h3 className="font-bold text-slate-100 text-base font-display">System State Summary</h3>
             
             <div className="grid grid-cols-2 gap-4 text-center">
@@ -467,7 +467,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
           </div>
 
           {/* Recent Admin Activity Log Card */}
-          <div className="bg-white/5 border border-white/10 p-6 rounded-3xl space-y-4">
+          <div className="bg-white/5 border border-white/10 p-6 rounded-2xl space-y-4">
             <h3 className="font-bold text-slate-100 text-sm font-display uppercase tracking-wider flex items-center gap-2">
               <RefreshCw className="w-4 h-4 text-indigo-400" />
               Recent Admin Activity
@@ -504,7 +504,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
           {/* Close All Cases Card (h.sobhy exclusive) */}
           {isSuperAdmin && onCloseAllCases && (
-            <div className="bg-gradient-to-br from-rose-500/10 to-orange-500/10 border border-rose-500/20 p-6 rounded-3xl space-y-4">
+            <div className="bg-gradient-to-br from-rose-500/10 to-orange-500/10 border border-rose-500/20 p-6 rounded-2xl space-y-4">
               <h3 className="font-bold text-rose-400 text-sm font-display uppercase tracking-wider flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-rose-500" />
                 SLA & CRM Batch Actions
@@ -524,7 +524,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
           )}
 
           {/* Quick manual user addition card toggle */}
-          <div className="bg-white/5 border border-white/10 p-6 rounded-3xl space-y-4">
+          <div className="bg-white/5 border border-white/10 p-6 rounded-2xl space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-slate-100 text-sm font-display uppercase tracking-wider">Add User Profile</h3>
               <button
@@ -624,7 +624,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
         {/* Right Columns: Users controls and actions */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-6 space-y-4">
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <h3 className="font-bold text-slate-100 text-lg font-display">User accounts directory</h3>
               

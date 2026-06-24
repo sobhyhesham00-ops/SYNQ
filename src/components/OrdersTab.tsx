@@ -200,7 +200,7 @@ export function OrdersTab({
        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
          {/* Left col - List and Stats */}
          <div className="lg:col-span-1 space-y-6">
-            <div className="bg-fuchsia-950/20 border border-fuchsia-500/20 rounded-3xl p-5 backdrop-blur-xl shadow-xl">
+            <div className="bg-fuchsia-950/20 border border-fuchsia-500/20 rounded-2xl p-5 backdrop-blur-xl shadow-xl">
                <h3 className="font-bold text-fuchsia-300 text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
                  <Calculator className="w-4 h-4" /> Start New Order
                </h3>
@@ -231,7 +231,7 @@ export function OrdersTab({
                </form>
             </div>
 
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-5 backdrop-blur-xl shadow-xl space-y-3">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xl shadow-xl space-y-3">
               <h3 className="font-bold text-slate-300 text-sm uppercase tracking-wider">Active Orders</h3>
               {getMyActiveOrders().length === 0 ? (
                 <p className="text-slate-500 text-xs italic">No active orders right now.</p>
@@ -254,7 +254,7 @@ export function OrdersTab({
               )}
             </div>
 
-            <div className="bg-gradient-to-br from-indigo-900/50 to-fuchsia-900/50 border border-indigo-500/30 rounded-3xl p-5 shadow-xl relative overflow-hidden">
+            <div className="bg-gradient-to-br from-indigo-900/50 to-fuchsia-900/50 border border-indigo-500/30 rounded-2xl p-5 shadow-xl relative overflow-hidden">
                <div className="absolute top-0 right-0 w-32 h-32 bg-fuchsia-500/20 blur-3xl" />
                <h3 className="font-bold text-indigo-300 text-sm uppercase tracking-wider mb-2">Monthly Top Orders</h3>
                <div className="space-y-2 text-xs">
@@ -273,12 +273,12 @@ export function OrdersTab({
          {/* Right col - Active Order Details */}
          <div className="lg:col-span-2">
             {!activeOrder ? (
-               <div className="h-full min-h-[400px] flex flex-col items-center justify-center bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+               <div className="h-full min-h-[400px] flex flex-col items-center justify-center bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl">
                   <ShoppingBag className="w-16 h-16 text-slate-700 mb-4" />
                   <p className="text-slate-400 font-bold">Select or create an order to manage.</p>
                </div>
             ) : (
-               <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl shadow-2xl relative">
+               <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-2xl relative">
                   {/* Header */}
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/10 pb-4 mb-4">
                      <div>

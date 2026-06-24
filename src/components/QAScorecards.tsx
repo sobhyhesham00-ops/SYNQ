@@ -123,7 +123,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in w-full">
-      <div className="flex items-center justify-between bg-white/5 border border-white/10 p-5 rounded-3xl shrink-0 backdrop-blur-xl">
+      <div className="flex items-center justify-between bg-white/5 border border-white/10 p-5 rounded-2xl shrink-0 backdrop-blur-xl">
         <div>
           <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
             <CheckCircle className="w-5 h-5 text-green-400" />
@@ -160,7 +160,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
       </div>
 
       {isEditingQuestions ? (
-        <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl w-full max-w-4xl mx-auto space-y-6">
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl w-full max-w-4xl mx-auto space-y-6">
           <h3 className="text-lg font-bold text-slate-100 pb-4 border-b border-white/10">Manage QA Criteria</h3>
           <p className="text-sm text-slate-400">Configure the questions and maximum scores that will be used for all new scorecards.</p>
           <div className="space-y-4">
@@ -198,7 +198,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
           </div>
         </div>
       ) : view === 'list' ? (
-        <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl flex flex-col min-h-0">
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl flex flex-col min-h-0">
           <h3 className="text-lg font-bold text-slate-100 mb-4 pb-4 border-b border-white/10">Recent Evaluations</h3>
           {myScores.length === 0 ? (
             <div className="text-slate-400 text-center py-8">No QA scorecards found.</div>
@@ -275,7 +275,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
           )}
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl w-full max-w-4xl mx-auto space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl w-full max-w-4xl mx-auto space-y-6">
           <h3 className="text-lg font-bold text-slate-100 pb-4 border-b border-white/10">Evaluate Interaction</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

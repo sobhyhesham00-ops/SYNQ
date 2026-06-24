@@ -245,7 +245,17 @@ export const handleGlobalImagePaste = async (
 export const getStorageItem = <T>(key: string, defaultValue: T): T => {
   try {
     const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : defaultValue;
+    if (item === null) return defaultValue;
+    try {
+      return JSON.parse(item) as T;
+    } catch {
+      // If parsing fails (e.g. because item is a raw unquoted string),
+      // we check if the defaultValue is a string and return the raw item.
+      if (typeof defaultValue === 'string') {
+        return item as unknown as T;
+      }
+      throw new Error("Invalid JSON");
+    }
   } catch (e) {
     console.error(`Error reading key ${key} from storage`, e);
     return defaultValue;

@@ -457,7 +457,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
   }, [activeSegment, statsEngine, agentsList, searchQuery, isTL, currentUser, userTL]);
 
   return (
-    <div id="ios-live-chat-viewport" className="flex flex-col md:flex-row h-[78vh] min-h-[500px] w-full bg-slate-950/20 md:bg-slate-900/40 rounded-3xl border border-white/5 overflow-hidden backdrop-blur-3xl relative font-sans shadow-2xl">
+    <div id="ios-live-chat-viewport" className="flex flex-col md:flex-row h-[78vh] min-h-[500px] w-full bg-slate-950/20 md:bg-slate-900/40 rounded-2xl border border-white/5 overflow-hidden backdrop-blur-3xl relative font-sans shadow-2xl">
       
       {/* LEFT SIDEBAR: Styled Message Inbox Thread List */}
       <div className={`w-full md:w-80 shrink-0 border-r border-white/5 bg-slate-950/45 flex flex-col h-full ${selectedRecipient !== '' && isRecipientDrawerOpen === false && window.innerWidth < 768 ? 'hidden' : 'flex'}`}>
@@ -726,7 +726,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
         <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar bg-slate-950/25">
           {filteredThreadMessages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-3 opacity-30">
-              <div className="w-16 h-16 rounded-3xl bg-white/5 flex items-center justify-center text-2xl">
+              <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-2xl">
                 💬
               </div>
               <div>
