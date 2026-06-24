@@ -100,13 +100,18 @@ async function startServer() {
   // ─── API: AI General Assistant Chat ──────────────────────────────────────────
   app.post('/api/ai-chat', async (req, res) => {
     try {
-      const { message } = req.body;
+      const { message, knowledgeContext } = req.body;
       const aiObj = getAI();
       if (!aiObj) throw new Error("Gemini API key is not configured.");
 
+      let contents: string = message;
+      if (knowledgeContext && String(knowledgeContext).trim().length > 0) {
+        contents = `You are a helpful assistant for Synq Scheduling and Operations. Use the following context from our knowledge base if relevant to help answer the user's question:\n\n${knowledgeContext}\n\nUser Question: ${message}`;
+      }
+
       const response = await aiObj.ai.models.generateContent({
         model: 'gemini-2.0-flash',
-        contents: message
+        contents: contents
       });
       res.json({ reply: safeText(response) });
     } catch (error: any) {

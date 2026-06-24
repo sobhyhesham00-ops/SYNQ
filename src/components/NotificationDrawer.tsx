@@ -95,7 +95,7 @@ export const NotificationDrawer = ({
                 { value: 'inquiry', label: 'Inquiries' },
                 { value: 'absence', label: 'Absences' },
                 { value: 'feedback', label: 'Feedback' },
-                { value: 'reminder', label: 'Reminders' },
+                { value: 'reminder', label: '🔔 Reminders' },
               ].map((item) => (
                 <button
                   key={item.value}

@@ -785,6 +785,7 @@ export default function App() {
   // Firebase Auth Readiness state to coordinate listener initialization and prevent race conditions
   const [authReady, setAuthReady] = useState<boolean>(false);
   const [credentialsReady, setCredentialsReady] = useState<boolean>(false);
+  const [directoryReady, setDirectoryReady] = useState<boolean>(false);
 
   // User Roles reference map mapping username -> Role
   const [userRoles, setUserRoles] = useState<Record<string, Role>>({});
@@ -1476,8 +1477,11 @@ export default function App() {
           );
         },
       );
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const sevenDaysAgoStr = sevenDaysAgo.toISOString().slice(0, 10);
       const unsubTime = onSnapshot(
-        collection(db, "timelogs"),
+        query(collection(db, "timelogs"), where("date", ">=", sevenDaysAgoStr)),
         (snap) => {
           console.log("Got timelogs snapshot, docs =", snap.size);
           const arr = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as TimeLog);
@@ -1649,7 +1653,19 @@ export default function App() {
       const unsubAgents = onSnapshot(
         doc(db, "system", "sched_agents_list"),
         (snap) => {
-          // Intentionally empty or minimal - we prefer the dynamic list from unsubUsers/directory
+          if (snap.exists()) {
+            const data = snap.data().data as string[];
+            if (data && Array.isArray(data)) {
+              setAgentsList((prev) => {
+                const merged = Array.from(new Set([...prev, ...data])).sort();
+                if (JSON.stringify(prev) !== JSON.stringify(merged)) {
+                  setStorageItem("sched_agents_list", merged, false);
+                  return merged;
+                }
+                return prev;
+              });
+            }
+          }
         },
         (error) => {
           console.error(
@@ -1880,8 +1896,10 @@ export default function App() {
         },
       );
 
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const unsubTLLoginLogs = onSnapshot(
-        query(collection(db, "tl_login_logs")),
+        query(collection(db, "tl_login_logs"), where("clockIn", ">=", thirtyDaysAgo.toISOString())),
         (snap) => {
           const logs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
           setTlLoginLogs(logs);
@@ -1898,7 +1916,7 @@ export default function App() {
             (d) => ({ ...d.data(), id: d.id }) as any,
           );
           setRegisteredUsers(dbUsers);
-          setCredentialsReady(true);
+          setDirectoryReady(true);
 
           // Optionally update currentUser if their document was updated
           setCurrentUser((prevUser) => {
@@ -6863,12 +6881,14 @@ ${result.errors.slice(0, 5).join("\n")}${
 
   // Agent Time Clock & Activity Helpers
   const getActiveTimeLog = (agentName: string): TimeLog | undefined => {
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = new Date().toISOString().slice(0, 10);
     return timeLogs.find(
       (log) =>
         log.agentName?.toLowerCase() === agentName?.toLowerCase() &&
-        !log.clockOut &&
-        (log.date === todayStr || (log.clockIn && log.clockIn.startsWith(todayStr))),
+        (log.date === todayStr || (log.clockIn && log.clockIn.startsWith(todayStr))) &&
+        !["clocked_out", "day_off", "casual", "annual", "no_show"].includes(
+          log.status,
+        ),
     );
   };
 
@@ -10572,7 +10592,7 @@ ${ttNotes}`
                           Welcome, {matchedName.split(" ")[0]}
                         </h1>
                         <p className="text-indigo-400/80 text-[10px] font-mono uppercase tracking-[0.3em] mt-2">
-                          Authentication Node Active
+                          Ready to sign in
                         </p>
                       </div>
                     );
@@ -10581,7 +10601,7 @@ ${ttNotes}`
                   return (
                     <div className="text-center">
                       <p className="text-indigo-400/80 text-[10px] font-mono uppercase tracking-[0.3em] mt-1">
-                        Systems Authorization
+                        Sign in to SYNQ
                       </p>
                     </div>
                   );
@@ -10687,7 +10707,7 @@ ${ttNotes}`
                 <div className="space-y-6 relative z-10">
                   <div className="space-y-1">
                     <span className="text-[10px] uppercase tracking-widest text-indigo-300 font-bold block mb-1">
-                      Confirming Username
+                      Username
                     </span>
                     <div className="px-4 py-3 bg-black/40 border border-indigo-500/20 rounded-xl text-slate-100 font-medium text-sm font-mono tracking-wide text-left shadow-inner shadow-black/50">
                       {loginName.toLowerCase()}
@@ -10696,7 +10716,7 @@ ${ttNotes}`
 
                   <div className="space-y-1">
                     <span className="text-[10px] uppercase tracking-widest text-indigo-300 font-bold block mb-1">
-                      Set Initial Password
+                      Password
                     </span>
                     <div className="px-4 py-3 bg-black/40 border border-indigo-500/20 rounded-xl text-slate-100 font-medium text-sm font-mono tracking-widest text-left shadow-inner shadow-black/50">
                       ••••••••
@@ -10708,7 +10728,7 @@ ${ttNotes}`
                     className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-slate-100 rounded-xl font-bold text-sm tracking-wide shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all flex items-center justify-center gap-2"
                   >
                     <UserPlus className="w-4 h-4" />
-                    Initialize Identity
+                    Create Account
                   </button>
 
                   <button
@@ -10718,7 +10738,7 @@ ${ttNotes}`
                     }}
                     className="w-full py-2.5 text-indigo-400/70 hover:text-indigo-300 text-xs font-mono tracking-widest uppercase transition-colors"
                   >
-                    Abort Setup
+                    Cancel
                   </button>
                 </div>
               ) : (
@@ -10786,14 +10806,20 @@ ${ttNotes}`
                   <button
                     id="login-submit-btn"
                     type="submit"
-                    disabled={isFormSubmitting || !credentialsReady}
-                    className={`w-full relative overflow-hidden py-3.5 text-white rounded-xl font-bold text-sm tracking-[0.2em] uppercase transition-all mt-6 group shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_30px_rgba(79,70,229,0.6)] ${isFormSubmitting || !credentialsReady ? "bg-indigo-800 opacity-60 pointer-events-none" : "bg-gradient-to-r from-indigo-600 to-fuchsia-600 hover:from-indigo-500 hover:to-fuchsia-500"}`}
+                    disabled={isFormSubmitting || !credentialsReady || !directoryReady}
+                    className={`w-full relative overflow-hidden py-3.5 text-white rounded-xl font-bold text-sm tracking-[0.2em] uppercase transition-all mt-6 group shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_30px_rgba(79,70,229,0.6)] ${isFormSubmitting || !credentialsReady || !directoryReady ? "bg-indigo-800 opacity-60 pointer-events-none" : "bg-gradient-to-r from-indigo-600 to-fuchsia-600 hover:from-indigo-500 hover:to-fuchsia-500"}`}
                   >
-                    <span className="relative z-10">Engage Connection</span>
+                    <span className="relative z-10">Sign In</span>
                     <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                   </button>
 
                   {!credentialsReady && (
+                    <p className="text-[10px] text-indigo-400/70 text-center font-mono animate-pulse mt-2 tracking-wider">
+                      ⏳ Syncing secure credentials...
+                    </p>
+                  )}
+
+                  {!directoryReady && (
                     <p className="text-[10px] text-indigo-400/70 text-center font-mono animate-pulse mt-2 tracking-wider">
                       ⏳ Syncing user directory...
                     </p>
@@ -10834,7 +10860,7 @@ ${ttNotes}`
           /* User Logged In Portal */
           <div className="flex-1 flex flex-col gap-6 my-4 lg:my-6">
             {/* Global Workspace Header / Navbar with Global Search */}
-            <header className="w-full bg-[#14141a]/60 backdrop-blur-xl border border-white/10 p-4 rounded-3xl flex flex-col xl:flex-row xl:items-center justify-between gap-4 shadow-xl relative z-40">
+            <header className="w-full bg-[#111116] border border-white/6 p-4 rounded-xl flex flex-col xl:flex-row xl:items-center justify-between gap-4 relative z-40">
               <div className="flex items-center gap-3">
                 <div className="text-left">
                   <motion.div
@@ -10861,7 +10887,7 @@ ${ttNotes}`
                     </h1>
                   </motion.div>
                   <p className="text-[10px] text-slate-500 font-mono font-bold tracking-tight">
-                    Active Portal Access
+                    Customer Service Portal
                   </p>
                 </div>
               </div>
@@ -20152,9 +20178,9 @@ ${ttNotes}`
                         {true && (
                           <>
                             {/* Search & Filters */}
-                            <div className="w-full bg-white/5 border border-white/10 p-4 rounded-3xl flex flex-col md:flex-row gap-4 items-center">
-                              <div className="relative flex-1 min-w-[280px] md:min-w-[420px] w-full">
-                                <Search className="w-4.5 h-4.5 text-indigo-400 absolute left-3.5 top-1/2 -translate-y-1/2 overflow-visible" />
+                            <div className="bg-white/5 border border-white/10 p-4 rounded-3xl flex flex-col md:flex-row gap-4 items-center">
+                              <div className="relative flex-1 w-full">
+                                <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                                 <input
                                   type="text"
                                   placeholder="Search by agent name, LOB, text or answer values..."
@@ -20162,7 +20188,7 @@ ${ttNotes}`
                                   onChange={(e) =>
                                     setInquirySearchQuery(e.target.value)
                                   }
-                                  className="w-full bg-slate-950 border border-white/10 rounded-2xl pl-11 pr-4 py-3.5 text-sm sm:text-base font-semibold text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all font-sans shadow-inner"
+                                  className="w-full pl-10 pr-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                 />
                               </div>
                               <div className="relative flex gap-1.5 w-full md:w-auto shrink-0 border-r border-white/10 pr-4 mr-1">
@@ -22186,7 +22212,7 @@ ${ttNotes}`
                                               setRtmSearch(e.target.value)
                                             }
                                             placeholder="Search agents by name..."
-                                            className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-white/10 rounded-xl text-sm sm:text-base font-semibold focus:border-indigo-500 text-slate-100 outline-none transition-all placeholder:text-slate-500 focus:ring-2 focus:ring-indigo-500/20 shadow-inner font-sans"
+                                            className="w-full pl-9 pr-4 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-sm focus:border-indigo-500 text-slate-200 outline-none transition-all placeholder:text-slate-600 focus:bg-black/70"
                                           />
                                         </div>
                                       </div>
@@ -27111,10 +27137,10 @@ ${ttNotes}`
                                     return (
                                       <div className="space-y-4 h-full flex flex-col">
                                         {/* Filter and Search Bar */}
-                                        <div className="flex flex-col gap-4 bg-white/5 border border-white/10 p-4 rounded-2xl">
+                                        <div className="flex flex-col sm:flex-row gap-3 bg-white/5 border border-white/10 p-4 rounded-2xl">
                                           {/* Search */}
-                                          <div className="relative w-full">
-                                            <Search className="w-4.5 h-4.5 text-indigo-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                                          <div className="relative flex-1">
+                                            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                                             <input
                                               type="text"
                                               placeholder="Search client communication requests..."
@@ -27125,11 +27151,11 @@ ${ttNotes}`
                                                 );
                                                 setSelectedClientCommId(null);
                                               }}
-                                              className="w-full bg-slate-950 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-sm sm:text-base font-semibold text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 font-sans shadow-inner"
+                                              className="w-full bg-black/20 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-sans"
                                             />
                                           </div>
                                           {/* Status Filters */}
-                                          <div className="flex items-center gap-1.5 flex-wrap border-t border-white/5 pt-3">
+                                          <div className="flex items-center gap-1.5 flex-wrap">
                                             <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider">
                                               Status:
                                             </span>
@@ -27362,10 +27388,10 @@ ${ttNotes}`
                                            </button>
                                          </div>
                                         {/* Filter and Search Bar */}
-                                        <div className="flex flex-col gap-4 bg-white/5 border border-white/10 p-4 rounded-2xl">
+                                        <div className="flex flex-col sm:flex-row gap-3 bg-white/5 border border-white/10 p-4 rounded-2xl">
                                           {/* Search */}
-                                          <div className="relative w-full">
-                                            <Search className="w-4.5 h-4.5 text-indigo-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                                          <div className="relative flex-1">
+                                            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                                             <input
                                               type="text"
                                               placeholder="Search tabby/tamara requests..."
@@ -27376,11 +27402,11 @@ ${ttNotes}`
                                                 );
                                                 setSelectedTTId(null);
                                               }}
-                                              className="w-full bg-slate-950 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-sm sm:text-base font-semibold text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 font-sans shadow-inner"
+                                              className="w-full bg-black/20 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-sans"
                                             />
                                           </div>
                                           {/* Status Filters */}
-                                          <div className="flex items-center gap-1.5 flex-wrap border-t border-white/5 pt-3">
+                                          <div className="flex items-center gap-1.5 flex-wrap">
                                             <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider">
                                               Status:
                                             </span>
@@ -27582,10 +27608,10 @@ ${ttNotes}`
                                     return (
                                       <div className="space-y-4 h-full flex flex-col">
                                         {/* Filter and Search Bar */}
-                                        <div className="flex flex-col gap-4 bg-white/5 border border-white/10 p-4 rounded-2xl">
+                                        <div className="flex flex-col sm:flex-row gap-3 bg-white/5 border border-white/10 p-4 rounded-2xl">
                                           {/* Search */}
-                                          <div className="relative w-full">
-                                            <Search className="w-4.5 h-4.5 text-indigo-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                                          <div className="relative flex-1">
+                                            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                                             <input
                                               type="text"
                                               placeholder="Search patient complaints..."
@@ -27596,11 +27622,11 @@ ${ttNotes}`
                                                 );
                                                 setSelectedComplaintId(null);
                                               }}
-                                              className="w-full bg-slate-950 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-sm sm:text-base font-semibold text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 font-sans shadow-inner"
+                                              className="w-full bg-black/20 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-sans"
                                             />
                                           </div>
                                           {/* Status Filters */}
-                                          <div className="flex items-center gap-1.5 flex-wrap border-t border-white/5 pt-3">
+                                          <div className="flex items-center gap-1.5 flex-wrap">
                                             <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider">
                                               Status:
                                             </span>
@@ -28391,7 +28417,7 @@ ${ttNotes}`
                             </div>
 
                             <div className="relative mb-4">
-                              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-indigo-400 pointer-events-none" />
+                              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                               <input
                                 type="text"
                                 placeholder="Search by name, phone, email, username, LOB, team leader..."
@@ -28400,7 +28426,7 @@ ${ttNotes}`
                                   setDirSearch(e.target.value);
                                   setDirPage(0);
                                 }}
-                                className="w-full bg-slate-950 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-sm sm:text-base font-semibold text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 font-sans shadow-inner"
+                                className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
                               />
                             </div>
 
