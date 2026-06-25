@@ -129,6 +129,8 @@ export interface Inquiry {
   fileId?: string;
   patientId?: string;
   phoneNumber?: string;
+  instagramUser?: string;
+  tiktokUser?: string;
   customerType?: 'new' | 'old';
   platform: string;
   text: string;
@@ -205,6 +207,8 @@ export interface TabbyTamaraRequest {
   finalPriceWithFee?: number;
   currency?: "AED";
   phoneNumber: string;
+  instagramUser?: string;
+  tiktokUser?: string;
   notes?: string;
   createdAt: string;
   status: 'not_confirmed' | 'confirmed' | 'rejected';
@@ -261,6 +265,8 @@ export interface TabbyTamaraComplaint {
   idNumber?: string;
   imageUrl?: string;
   phoneNumber: string;
+  instagramUser?: string;
+  tiktokUser?: string;
   complaintDetails: string;
   createdAt: string;
   status: 'pending_tl' | 'need_contact' | 'closed';
@@ -297,6 +303,8 @@ export interface ClientCommunicationRequest {
   callCenterAgentName: string;
   clinicName: string;
   phoneNumber: string;
+  instagramUser?: string;
+  tiktokUser?: string;
   language: 'Arabic' | 'English';
   notes: string;
   createdAt: string;

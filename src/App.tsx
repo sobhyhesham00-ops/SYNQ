@@ -3809,6 +3809,9 @@ ${pageText}
   const [ttIdNumber, setTtIdNumber] = useState("");
   const [ttPriceWithoutTax, setTtPriceWithoutTax] = useState("");
   const [ttPhoneNumber, setTtPhoneNumber] = useState("");
+  const [ttNoPhone, setTtNoPhone] = useState(false);
+  const [ttInstagram, setTtInstagram] = useState("");
+  const [ttTiktok, setTtTiktok] = useState("");
   const [ttNotes, setTtNotes] = useState("");
   const [ttPlatform, setTtPlatform] = useState<"tabby" | "tamara">("tabby");
   const [ttClinicName, setTtClinicName] = useState("");
@@ -3829,6 +3832,9 @@ ${pageText}
   const [tcIdNumber, setTcIdNumber] = useState("");
   const [tcImageUrl, setTcImageUrl] = useState("");
   const [tcPhoneNumber, setTcPhoneNumber] = useState("");
+  const [tcNoPhone, setTcNoPhone] = useState(false);
+  const [tcInstagram, setTcInstagram] = useState("");
+  const [tcTiktok, setTcTiktok] = useState("");
   const [tcComplaintDetails, setTcComplaintDetails] = useState("");
   const [tcClinicName, setTcClinicName] = useState("");
 
@@ -3836,6 +3842,9 @@ ${pageText}
   const [ccPatientName, setCcPatientName] = useState("");
   const [ccClinicName, setCcClinicName] = useState("");
   const [ccPhoneNumber, setCcPhoneNumber] = useState("");
+  const [ccNoPhone, setCcNoPhone] = useState(false);
+  const [ccInstagram, setCcInstagram] = useState("");
+  const [ccTiktok, setCcTiktok] = useState("");
   const [ccLanguage, setCcLanguage] = useState<"Arabic" | "English">("Arabic");
   const [ccNotes, setCcNotes] = useState("");
   const [ccChannel, setCcChannel] = useState<
@@ -3914,6 +3923,9 @@ ${pageText}
   const [tempPhotoUrlInput, setTempPhotoUrlInput] = useState("");
   const [inquiryClinicName, setInquiryClinicName] = useState("");
   const [inquiryPhoneNumber, setInquiryPhoneNumber] = useState("");
+  const [inquiryNoPhone, setInquiryNoPhone] = useState(false);
+  const [inquiryInstagram, setInquiryInstagram] = useState("");
+  const [inquiryTiktok, setInquiryTiktok] = useState("");
   const [inquiryPatientName, setInquiryPatientName] = useState("");
   const [inquiryFileNumber, setInquiryFileNumber] = useState("");
   const [inquiryFileId, setInquiryFileId] = useState("");
@@ -5220,7 +5232,7 @@ ${pageText}
 
     const captureTLLoginTime = async (user: User) => {
       if (!isMountedRef.current) return;
-      const isTL = user.role === "tl" || (user.name && isTLName(user.name));
+      const isTL = user.role === "tl" || user.role === "director" || (user.name && isTLName(user.name));
       if (!isTL) return;
       const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
       const docId = `${getUsernameFromFullName(user.name)}_${today}`;
@@ -7491,11 +7503,20 @@ ${result.errors.slice(0, 5).join("\n")}${
       return;
     }
 
-    if (!String(inquiryPhoneNumber || "").trim()) {
-      toast.error(
-        "Please enter the Patient Phone Number! This is now a mandatory field.",
-      );
-      return;
+    if (!inquiryNoPhone) {
+      if (!String(inquiryPhoneNumber || "").trim()) {
+        toast.error(
+          "Please enter the Patient Phone Number! This is now a mandatory field.",
+        );
+        return;
+      }
+    } else {
+      if (!String(inquiryInstagram || "").trim() && !String(inquiryTiktok || "").trim()) {
+        toast.error(
+          "Client doesn't have a phone number. Please enter either Instagram or TikTok username!",
+        );
+        return;
+      }
     }
 
     if (
@@ -7550,7 +7571,9 @@ ${result.errors.slice(0, 5).join("\n")}${
             ? String(inquiryFileNumber || "").trim()
             : undefined,
         fileId: String(inquiryFileId || "").trim(),
-        phoneNumber: String(inquiryPhoneNumber || "").trim(),
+        phoneNumber: inquiryNoPhone ? "" : String(inquiryPhoneNumber || "").trim(),
+        instagramUser: inquiryNoPhone ? String(inquiryInstagram || "").trim() : undefined,
+        tiktokUser: inquiryNoPhone ? String(inquiryTiktok || "").trim() : undefined,
         customerType: inquiryCustomerType,
         platform: inquiryPlatform,
         text: String(inquiryText || "").trim(),
@@ -7582,6 +7605,9 @@ ${result.errors.slice(0, 5).join("\n")}${
       setInquiryText("");
       setInquiryClinicName("");
       setInquiryPhoneNumber("");
+      setInquiryNoPhone(false);
+      setInquiryInstagram("");
+      setInquiryTiktok("");
       setInquiryPatientName("");
       setInquiryFileNumber("");
       setInquiryFileId("");
@@ -8099,11 +8125,18 @@ ${result.errors.slice(0, 5).join("\n")}${
     if (
       !ttPatientName ||
       !ttPriceWithoutTax ||
-      !ttPhoneNumber ||
+      (!ttNoPhone && !ttPhoneNumber) ||
       !ttClinicName
     ) {
       toast.error(
         "Please fill out all mandatory fields (Patient Name, Price, Phone Number, Clinic Name).",
+      );
+      return;
+    }
+
+    if (ttNoPhone && !ttInstagram && !ttTiktok) {
+      toast.error(
+        "Client doesn't have a phone number. Please enter either Instagram or TikTok username!",
       );
       return;
     }
@@ -8167,7 +8200,9 @@ ${ttNotes}`
         feeAmount: pricing.feeAmount,
         finalPriceWithFee: pricing.finalPrice,
         currency: "AED",
-        phoneNumber: ttPhoneNumber,
+        phoneNumber: ttNoPhone ? "" : ttPhoneNumber,
+        instagramUser: ttNoPhone ? ttInstagram : undefined,
+        tiktokUser: ttNoPhone ? ttTiktok : undefined,
         notes: finalNotes,
         createdAt,
         status: "not_confirmed",
@@ -8218,6 +8253,9 @@ ${ttNotes}`
       setTtIdNumber("");
       setTtPriceWithoutTax("");
       setTtPhoneNumber("");
+      setTtNoPhone(false);
+      setTtInstagram("");
+      setTtTiktok("");
       setTtNotes("");
       setTtIsFollowUp(false);
       setTtFollowUpDate("");
@@ -8687,12 +8725,19 @@ ${ttNotes}`
 
     if (
       !tcPatientName ||
-      !tcPhoneNumber ||
+      (!tcNoPhone && !tcPhoneNumber) ||
       !tcComplaintDetails ||
       !tcClinicName
     ) {
       toast.error(
         "Please fill out all mandatory fields (Patient Name, Phone Number, Complaint Details, and Clinic Name).",
+      );
+      return;
+    }
+
+    if (tcNoPhone && !tcInstagram && !tcTiktok) {
+      toast.error(
+        "Client doesn't have a phone number. Please enter either Instagram or TikTok username!",
       );
       return;
     }
@@ -8729,7 +8774,9 @@ ${ttNotes}`
         imageUrl: activeScreenshot || tcImageUrl,
         photos: activePhotos,
         links: activeLinks,
-        phoneNumber: tcPhoneNumber,
+        phoneNumber: tcNoPhone ? "" : tcPhoneNumber,
+        instagramUser: tcNoPhone ? tcInstagram : undefined,
+        tiktokUser: tcNoPhone ? tcTiktok : undefined,
         complaintDetails: tcComplaintDetails,
         createdAt,
         status: "pending_tl",
@@ -8763,6 +8810,9 @@ ${ttNotes}`
       setTcIdNumber("");
       setTcImageUrl("");
       setTcPhoneNumber("");
+      setTcNoPhone(false);
+      setTcInstagram("");
+      setTcTiktok("");
       setTcComplaintDetails("");
       setActiveScreenshot(null);
       setActivePhotos([]);
@@ -8802,9 +8852,16 @@ ${ttNotes}`
     if (!currentUser) return;
     if (isFormSubmitting) return;
 
-    if (!ccClinicName || !ccPhoneNumber || !ccNotes || !ccPatientName) {
+    if (!ccClinicName || (!ccNoPhone && !ccPhoneNumber) || !ccNotes || !ccPatientName) {
       toast.error(
         "Please fill out all mandatory fields (Patient Name, Clinic Name, Phone Number, Inquiry/Notes).",
+      );
+      return;
+    }
+
+    if (ccNoPhone && !ccInstagram && !ccTiktok) {
+      toast.error(
+        "Client doesn't have a phone number. Please enter either Instagram or TikTok username!",
       );
       return;
     }
@@ -8829,7 +8886,9 @@ ${ttNotes}`
         callCenterAgentName: currentUser.name,
         patientName: ccPatientName,
         clinicName: ccClinicName,
-        phoneNumber: ccPhoneNumber,
+        phoneNumber: ccNoPhone ? "" : ccPhoneNumber,
+        instagramUser: ccNoPhone ? ccInstagram : undefined,
+        tiktokUser: ccNoPhone ? ccTiktok : undefined,
         language: ccLanguage,
         notes: ccNotes,
         createdAt,
@@ -8863,6 +8922,9 @@ ${ttNotes}`
       setCcPatientName("");
       setCcClinicName("");
       setCcPhoneNumber("");
+      setCcNoPhone(false);
+      setCcInstagram("");
+      setCcTiktok("");
       setCcLanguage("Arabic");
       setCcNotes("");
       setCcChannel("call_center");
@@ -10582,7 +10644,7 @@ ${ttNotes}`
         {/* Background aesthetic blobs */}
         <div className="fixed top-[-10%] -left-32 w-[600px] h-[600px] bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none"></div>
         <div className="fixed bottom-[-10%] -right-32 w-[600px] h-[600px] bg-pink-500/20 rounded-full blur-[120px] pointer-events-none"></div>
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-blue-500/10 rounded-full blur-[150px] pointer-events-none mix-blend-screen"></div>
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-blue-500/10 rounded-full blur-[150px] pointer-events-none"></div>
         <div className="flex flex-col items-center gap-6 z-10">
           <div className="relative flex items-center justify-center">
             <div className="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
@@ -10620,7 +10682,7 @@ ${ttNotes}`
       {/* Background aesthetic blobs */}
       <div className="fixed top-[-10%] -left-32 w-[600px] h-[600px] bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="fixed bottom-[-10%] -right-32 w-[600px] h-[600px] bg-pink-500/20 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-blue-500/10 rounded-full blur-[150px] pointer-events-none mix-blend-screen"></div>
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-blue-500/10 rounded-full blur-[150px] pointer-events-none"></div>
 
       {/* Main Container */}
       <div className="flex-1 flex flex-col w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 z-10">
@@ -10925,7 +10987,7 @@ ${ttNotes}`
           /* User Logged In Portal */
           <div className="flex-1 flex flex-col gap-6 my-4 lg:my-6">
             {/* Global Workspace Header / Navbar with Global Search */}
-            <header className="w-full bg-[#111116] border border-white/6 p-4 rounded-xl flex flex-col xl:flex-row xl:items-center justify-between gap-4 relative z-40">
+            <header className="w-full bg-[#111116] border border-white/6 px-4 py-2.5 rounded-xl flex items-center justify-between gap-4 relative z-40">
               <div className="flex items-center gap-3">
                 <div className="text-left">
                   <motion.div
@@ -10945,14 +11007,11 @@ ${ttNotes}`
                       >
                         {currentUser.name.split(" ")[0]}
                       </motion.span>
-                      !{" "}
-                      <span className="text-[9px] uppercase tracking-wider font-extrabold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full font-sans">
-                        CONSOLE
-                      </span>
+                      !
                     </h1>
                   </motion.div>
                   <p className="text-[10px] text-slate-500 font-mono font-bold tracking-tight">
-                    Customer Service Portal
+                    {currentUser.role === "tl" ? "Team Leader" : currentUser.role === "director" ? "Director" : currentUser.role === "qa" ? "Quality Assurance" : "Agent"}
                   </p>
                 </div>
               </div>
@@ -10960,161 +11019,77 @@ ${ttNotes}`
               {/* Timezones & Weather Active Control Selector */}
               <div
                 id="timezone-weather-selector"
-                className="flex flex-col sm:flex-row items-center gap-3 bg-black/40 border border-white/10 rounded-2xl p-1.5 self-start xl:self-auto shadow-inner"
+                className="flex items-center gap-4 bg-black/30 border border-white/8 rounded-xl px-3 py-1.5"
               >
-                <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedWeatherLoc("both");
-                      setStorageItem(
-                        "sched_weather_location_pref",
-                        "both",
-                        false
-                      );
-                    }}
-                    className={`px-2.5 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer ${
-                      selectedWeatherLoc === "both"
-                        ? "bg-gradient-to-r from-indigo-600 to-cyan-500 text-white shadow-md shadow-indigo-500/20"
-                        : "text-slate-400 hover:text-white"
-                    }`}
-                  >
-                    All Zones
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedWeatherLoc("egypt");
-                      setStorageItem(
-                        "sched_weather_location_pref",
-                        "egypt",
-                        false
-                      );
-                    }}
-                    className={`px-2.5 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
-                      selectedWeatherLoc === "egypt"
-                        ? "bg-[#C2185B] text-white shadow-md"
-                        : "text-slate-400 hover:text-white"
-                    }`}
-                  >
-                    🇪🇬 Cairo
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedWeatherLoc("uae");
-                      setStorageItem(
-                        "sched_weather_location_pref",
-                        "uae",
-                        false
-                      );
-                    }}
-                    className={`px-2.5 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
-                      selectedWeatherLoc === "uae"
-                        ? "bg-emerald-600 text-white shadow-md"
-                        : "text-slate-400 hover:text-white"
-                    }`}
-                  >
-                    🇦🇪 UAE
-                  </button>
-                </div>
-
                 <div className="flex items-center gap-4 px-2">
-                  <AnimatePresence>
-                    {/* EGYPT DISPLAY */}
-                    {(selectedWeatherLoc === "both" ||
-                      selectedWeatherLoc === "egypt") && (
-                      <motion.div
-                        key="egypt-disp"
-                        initial={{ opacity: 0, scale: 0.95, y: -4 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 4 }}
-                        transition={{ duration: 0.25 }}
-                        className="flex items-center gap-2"
-                      >
-                        <div className="text-left font-mono">
-                          <div className="text-[8px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.1">
-                            <span>🇪🇬 Cairo</span>
-                            <span className="w-1 h-1 rounded-full bg-[#10B981] animate-pulse" />
-                          </div>
-                          <div className="text-xs font-black text-slate-200">
-                            {currentTime.toLocaleTimeString("en-US", {
-                              timeZone: "Africa/Cairo",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              hour12: true,
-                            })}
-                          </div>
-                        </div>
+                  {/* EGYPT DISPLAY */}
+                  <div className="flex items-center gap-2">
+                    <div className="text-left font-mono">
+                      <div className="text-[8px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.1">
+                        <span>🇪🇬 Cairo</span>
+                        <span className="w-1 h-1 rounded-full bg-[#10B981] animate-pulse" />
+                      </div>
+                      <div className="text-xs font-black text-slate-200">
+                        {currentTime.toLocaleTimeString("en-US", {
+                          timeZone: "Africa/Cairo",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true,
+                        })}
+                      </div>
+                    </div>
 
-                        {ramadanTemp !== null && (
-                          <div className="flex items-center gap-1 text-[11px] font-mono text-[#FCD34D] bg-[#FCD34D]/5 border border-[#FCD34D]/15 px-1.5 py-0.5 rounded-lg select-none">
-                            {ramadanWeatherCode === 0 ? (
-                              <Sun className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                            ) : ramadanWeatherCode < 3 ? (
-                              <Sun className="w-3.5 h-3.5 text-amber-400" />
-                            ) : (
-                              <Cloudy className="w-3.5 h-3.5 text-slate-400" />
-                            )}
-                            <span className="font-bold">
-                              {ramadanTemp.toFixed(1)}°C
-                            </span>
-                          </div>
+                    {ramadanTemp !== null && (
+                      <div className="flex items-center gap-1 text-[11px] font-mono text-[#FCD34D] bg-[#FCD34D]/5 border border-[#FCD34D]/15 px-1.5 py-0.5 rounded-lg select-none">
+                        {ramadanWeatherCode === 0 ? (
+                          <Sun className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                        ) : ramadanWeatherCode < 3 ? (
+                          <Sun className="w-3.5 h-3.5 text-amber-400" />
+                        ) : (
+                          <Cloudy className="w-3.5 h-3.5 text-slate-400" />
                         )}
-                      </motion.div>
+                        <span className="font-bold">
+                          {ramadanTemp.toFixed(1)}°C
+                        </span>
+                      </div>
                     )}
+                  </div>
 
-                    {/* SEPARATOR */}
-                    {selectedWeatherLoc === "both" && (
-                      <div
-                        className="h-5 w-px bg-white/10 shrink-0 self-center"
-                        key="separator-line"
-                      />
-                    )}
+                  {/* SEPARATOR */}
+                  <div className="h-5 w-px bg-white/10 shrink-0 self-center" />
 
-                    {/* UAE DISPLAY */}
-                    {(selectedWeatherLoc === "both" ||
-                      selectedWeatherLoc === "uae") && (
-                      <motion.div
-                        key="uae-disp"
-                        initial={{ opacity: 0, scale: 0.95, y: -4 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 4 }}
-                        transition={{ duration: 0.25 }}
-                        className="flex items-center gap-2"
-                      >
-                        <div className="text-left font-mono">
-                          <div className="text-[8px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.1">
-                            <span>🇦🇪 Dubai</span>
-                            <span className="w-1 h-1 rounded-full bg-cyan-400 animate-pulse" />
-                          </div>
-                          <div className="text-xs font-black text-slate-200">
-                            {currentTime.toLocaleTimeString("en-US", {
-                              timeZone: "Asia/Dubai",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              hour12: true,
-                            })}
-                          </div>
-                        </div>
+                  {/* UAE DISPLAY */}
+                  <div className="flex items-center gap-2">
+                    <div className="text-left font-mono">
+                      <div className="text-[8px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.1">
+                        <span>🇦🇪 Dubai</span>
+                        <span className="w-1 h-1 rounded-full bg-cyan-400 animate-pulse" />
+                      </div>
+                      <div className="text-xs font-black text-slate-200">
+                        {currentTime.toLocaleTimeString("en-US", {
+                          timeZone: "Asia/Dubai",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true,
+                        })}
+                      </div>
+                    </div>
 
-                        {uaeTemp !== null && (
-                          <div className="flex items-center gap-1 text-[11px] font-mono text-[#60A5FA] bg-[#60A5FA]/5 border border-[#60A5FA]/15 px-1.5 py-0.5 rounded-lg select-none">
-                            {uaeWeatherCode === 0 ? (
-                              <Sun className="w-3.5 h-3.5 text-orange-400 animate-pulse" />
-                            ) : uaeWeatherCode < 3 ? (
-                              <Sun className="w-3.5 h-3.5 text-orange-400" />
-                            ) : (
-                              <Cloudy className="w-3.5 h-3.5 text-slate-300" />
-                            )}
-                            <span className="font-bold">
-                              {uaeTemp.toFixed(1)}°C
-                            </span>
-                          </div>
+                    {uaeTemp !== null && (
+                      <div className="flex items-center gap-1 text-[11px] font-mono text-[#60A5FA] bg-[#60A5FA]/5 border border-[#60A5FA]/15 px-1.5 py-0.5 rounded-lg select-none">
+                        {uaeWeatherCode === 0 ? (
+                          <Sun className="w-3.5 h-3.5 text-orange-400 animate-pulse" />
+                        ) : uaeWeatherCode < 3 ? (
+                          <Sun className="w-3.5 h-3.5 text-orange-400" />
+                        ) : (
+                          <Cloudy className="w-3.5 h-3.5 text-slate-300" />
                         )}
-                      </motion.div>
+                        <span className="font-bold">
+                          {uaeTemp.toFixed(1)}°C
+                        </span>
+                      </div>
                     )}
-                  </AnimatePresence>
+                  </div>
                 </div>
               </div>
 
@@ -11333,7 +11308,7 @@ ${ttNotes}`
             {/* Split Content structure */}
             <div className="flex-1 flex flex-col md:flex-row gap-6 md:gap-8">
               {/* Navigation / Sidebar Menu */}
-              <aside className="w-full md:w-64 border border-white/10 bg-white/5 flex flex-col p-5 rounded-xl space-y-6">
+              <aside className="w-full md:w-64 border border-white/5 bg-transparent flex flex-col p-4 rounded-xl space-y-4">
                 {/* Egypt Local Time & 10th of Ramadan Weather */}
                 <div className="p-4 rounded-xl bg-black/40 border border-cyan-500/15 space-y-3 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-indigo-500/5 opacity-40 pointer-events-none" />
@@ -11472,19 +11447,14 @@ ${ttNotes}`
                   </div>
 
                   <div className="p-4 rounded-xl bg-black/45 border border-cyan-500/15 space-y-4 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-pink-500/5 opacity-40 pointer-events-none" />
-                    <div className="absolute bottom-0 right-0 w-24 h-24 bg-cyan-400/5 rounded-full blur-2xl pointer-events-none" />
-
                     <div className="flex items-center gap-3 relative">
                       <div className="relative shrink-0">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-400 via-indigo-500 to-fuchsia-500 flex items-center justify-center font-black text-sm text-slate-100 border border-cyan-500/30 p-0.5 shadow-lg shadow-cyan-500/10">
-                          <div className="w-full h-full rounded-full bg-[#121217] flex items-center justify-center text-[11px] font-bold tracking-widest font-mono text-cyan-400">
-                            {(currentUser?.name || "")
-                              .split(".")
-                              .map((n) => n[0])
-                              .join("")
-                              .toUpperCase()}
-                          </div>
+                        <div className="w-10 h-10 rounded-full bg-[#1c1c2e] border border-cyan-500/20 flex items-center justify-center text-[11px] font-bold tracking-widest font-mono text-cyan-400">
+                          {(currentUser?.name || "")
+                            .split(".")
+                            .map((n) => n[0])
+                            .join("")
+                            .toUpperCase()}
                         </div>
                         {/* Real-time status dot indicator in corner of avatar */}
                         <span className="absolute bottom-0 right-0 flex h-3 w-3">
@@ -11525,92 +11495,6 @@ ${ttNotes}`
                               ? "Support Specialist"
                               : "Productivity Agent"}
                         </p>
-                      </div>
-                    </div>
-
-                    {/* Direct Manager display with automatic system mapping or CTG override */}
-                    <div className="bg-black/30 border border-white/5 py-1.5 px-3 rounded-lg flex items-center justify-between text-[10px] space-y-0.5 font-mono">
-                      <span className="text-slate-400">Direct Manager:</span>
-                      <span className="font-bold text-cyan-400 truncate max-w-[120px] text-right">
-                        {(currentUser.role as string) === "tl" ||
-                        (currentUser.role as string) === "director" ||
-                        (currentUser.role as string) === "admin"
-                          ? "N/A (System CTO)"
-                          : getAgentTL(currentUser.name)}
-                      </span>
-                    </div>
-
-                    {/* Spotlight Profile Window - Bio & Daily Updates with real-time Firebase syncing */}
-                    <div className="mt-3 pt-3 border-t border-white/5 space-y-3 font-sans">
-                      <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-slate-400 font-black">
-                        <span>My Spotlight</span>
-                        <span
-                          className={`px-2 py-0.5 rounded text-[8px] font-black tracking-normal uppercase ${
-                            (currentUser.status || "online") === "online"
-                              ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 animate-pulse"
-                              : (currentUser.status || "online") === "busy"
-                                ? "bg-rose-500/20 text-rose-400 border border-rose-500/20"
-                                : (currentUser.status || "online") === "away"
-                                  ? "bg-amber-500/20 text-amber-400 border border-amber-500/20"
-                                  : "bg-slate-500/20 text-slate-400 border border-slate-500/25"
-                          }`}
-                        >
-                          {currentUser.status || "online"}
-                        </span>
-                      </div>
-
-                      {/* Quick Profile Bio */}
-                      <div className="space-y-1">
-                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">
-                          Short Bio:
-                        </label>
-                        <textarea
-                          value={currentUser.bio || ""}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            const userDocId = currentUser?.name
-                              ?.toLowerCase()
-                              .replace(/[^a-z0-9]/g, "");
-                            setCurrentUser((prev) =>
-                              prev ? { ...prev, bio: val } : null,
-                            );
-                            setDoc(
-                              doc(db, "users", userDocId),
-                              { bio: val },
-                              { merge: true },
-                            ).catch(console.error);
-                          }}
-                          placeholder="Tell others about yourself..."
-                          rows={2}
-                          className="w-full bg-black/40 border border-white/10 hover:border-cyan-500/30 focus:border-cyan-500/60 rounded-lg px-2 py-1 text-[11px] text-slate-200 placeholder:text-slate-500 focus:outline-none transition-all resize-none custom-scrollbar shadow-inner leading-relaxed"
-                        />
-                      </div>
-
-                      {/* Daily Updates small window */}
-                      <div className="space-y-1">
-                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">
-                          Daily Updates / Focus:
-                        </label>
-                        <textarea
-                          value={currentUser.dailyUpdate || ""}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            const userDocId = currentUser?.name
-                              ?.toLowerCase()
-                              .replace(/[^a-z0-9]/g, "");
-                            setCurrentUser((prev) =>
-                              prev ? { ...prev, dailyUpdate: val } : null,
-                            );
-                            setDoc(
-                              doc(db, "users", userDocId),
-                              { dailyUpdate: val },
-                              { merge: true },
-                            ).catch(console.error);
-                          }}
-                          placeholder="E.g. working on social media posts..."
-                          rows={2}
-                          className="w-full bg-black/40 border border-white/10 hover:border-purple-500/30 focus:border-purple-500/60 rounded-lg px-2 py-1 text-[11px] text-indigo-300 placeholder:text-slate-500 focus:outline-none transition-all resize-none custom-scrollbar shadow-inner leading-relaxed"
-                        />
                       </div>
                     </div>
 
@@ -11800,13 +11684,10 @@ ${ttNotes}`
                           onClick={() => setActiveTab(id)}
                           className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-300 text-sm ${baseClass} group`}
                         >
-                          <span className="flex items-center gap-2.5">
-                            {icon}
+                          <span className="flex items-center gap-2">
+                            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isActive ? "opacity-100" : "opacity-40"} ${bgColors.includes("emerald") ? "bg-emerald-400" : bgColors.includes("indigo") ? "bg-indigo-400" : bgColors.includes("amber") ? "bg-amber-400" : bgColors.includes("rose") ? "bg-rose-400" : bgColors.includes("red") ? "bg-red-400" : bgColors.includes("sky") ? "bg-sky-400" : bgColors.includes("orange") ? "bg-orange-400" : bgColors.includes("pink") ? "bg-pink-400" : bgColors.includes("purple") ? "bg-purple-400" : bgColors.includes("yellow") ? "bg-yellow-400" : bgColors.includes("cyan") ? "bg-cyan-400" : "bg-slate-400"}`} />
                             {label}
                           </span>
-                          <ChevronRight
-                            className={`w-4 h-4 transition-all duration-300 ${isActive ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2 group-hover:opacity-50 group-hover:translate-x-0"}`}
-                          />
                         </button>
                       );
                     };
@@ -18526,33 +18407,82 @@ ${ttNotes}`
                                   </div>
                                 )}
 
-                                {/* Phone Number (Required) */}
-                                <div className="space-y-1.5">
-                                  <label className="text-xs font-semibold text-slate-300 block">
-                                    Phone Number{" "}
-                                    <span className="text-rose-400 font-extrabold">
-                                      *
-                                    </span>
-                                  </label>
-                                  <input
-                                    type="tel"
-                                    required
-                                    placeholder="+971 5XXXXXXXX *"
-                                    value={inquiryPhoneNumber}
-                                    onChange={(e) => {
-                                      let val = e.target.value;
-                                      if (val && !val.startsWith("+971")) {
-                                        val = "+971" + normalizePhone(val);
-                                      }
-                                      if (val === "+971") val = "";
-                                      setInquiryPhoneNumber(val);
-                                    }}
-                                    className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-mono"
-                                  />
-                                  <p className="text-[10px] text-slate-400 mt-1">
-                                    * Please enter the number starting from 5
-                                    (e.g., 501234567)
-                                  </p>
+                                {/* No Phone Number Toggle & Social Media Options */}
+                                <div className="space-y-3">
+                                  <div className="flex items-center gap-2">
+                                    <input
+                                      type="checkbox"
+                                      id="inquiryNoPhone"
+                                      checked={inquiryNoPhone}
+                                      onChange={(e) => {
+                                        setInquiryNoPhone(e.target.checked);
+                                        if (e.target.checked) {
+                                          setInquiryPhoneNumber("");
+                                        }
+                                      }}
+                                      className="rounded border-white/10 bg-white/5 text-indigo-500 focus:ring-0"
+                                    />
+                                    <label htmlFor="inquiryNoPhone" className="text-xs font-semibold text-slate-300 cursor-pointer select-none">
+                                      Client doesn't have a phone number (Use Instagram/TikTok)
+                                    </label>
+                                  </div>
+
+                                  {!inquiryNoPhone ? (
+                                    <div className="space-y-1.5">
+                                      <label className="text-xs font-semibold text-slate-300 block">
+                                        Phone Number{" "}
+                                        <span className="text-rose-400 font-extrabold">
+                                          *
+                                        </span>
+                                      </label>
+                                      <input
+                                        type="tel"
+                                        required
+                                        placeholder="+971 5XXXXXXXX *"
+                                        value={inquiryPhoneNumber}
+                                        onChange={(e) => {
+                                          let val = e.target.value;
+                                          if (val && !val.startsWith("+971")) {
+                                            val = "+971" + normalizePhone(val);
+                                          }
+                                          if (val === "+971") val = "";
+                                          setInquiryPhoneNumber(val);
+                                        }}
+                                        className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-mono"
+                                      />
+                                      <p className="text-[10px] text-slate-400 mt-1">
+                                        * Please enter the number starting from 5
+                                        (e.g., 501234567)
+                                      </p>
+                                    </div>
+                                  ) : (
+                                    <div className="grid grid-cols-2 gap-3 animate-fade-in text-left">
+                                      <div className="space-y-1.5">
+                                        <label className="text-xs font-semibold text-slate-300 block">
+                                          Instagram Username
+                                        </label>
+                                        <input
+                                          type="text"
+                                          placeholder="@username"
+                                          value={inquiryInstagram}
+                                          onChange={(e) => setInquiryInstagram(e.target.value)}
+                                          className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+                                        />
+                                      </div>
+                                      <div className="space-y-1.5">
+                                        <label className="text-xs font-semibold text-slate-300 block">
+                                          TikTok Username
+                                        </label>
+                                        <input
+                                          type="text"
+                                          placeholder="@username"
+                                          value={inquiryTiktok}
+                                          onChange={(e) => setInquiryTiktok(e.target.value)}
+                                          className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
 
                                 {/* Optional File ID */}
@@ -26411,35 +26341,83 @@ ${ttNotes}`
                                             )}
                                         </div>
 
-                                        {/* Phone Number */}
-                                        <div className="space-y-1.5 text-left">
-                                          <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-mono">
-                                            Phone Number *
-                                          </label>
-                                          <input
-                                            type="tel"
-                                            placeholder="+971 5XXXXXXXX"
-                                            value={ttPhoneNumber}
-                                            onChange={(e) => {
-                                              let val = e.target.value;
-                                              if (
-                                                val &&
-                                                !val.startsWith("+971")
-                                              ) {
-                                                val =
-                                                  "+971" + normalizePhone(val);
-                                              }
-                                              if (val === "+971") val = "";
-                                              setTtPhoneNumber(val);
-                                            }}
-                                            className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
-                                            required
-                                          />
-                                          <p className="text-[10px] text-slate-400 mt-1">
-                                            * Please enter the number starting
-                                            from 5 (e.g., 501234567)
-                                          </p>
-                                        </div>
+                                                                                 {/* No Phone Number Toggle & Social Media Options */}
+                                         <div className="space-y-3">
+                                           <div className="flex items-center gap-2">
+                                             <input
+                                               type="checkbox"
+                                               id="ttNoPhone"
+                                               checked={ttNoPhone}
+                                               onChange={(e) => {
+                                                 setTtNoPhone(e.target.checked);
+                                                 if (e.target.checked) {
+                                                   setTtPhoneNumber("");
+                                                 }
+                                               }}
+                                               className="rounded border-white/10 bg-white/5 text-indigo-500 focus:ring-0"
+                                             />
+                                             <label htmlFor="ttNoPhone" className="text-xs font-semibold text-slate-300 cursor-pointer select-none">
+                                               Client doesn't have a phone number (Use Instagram/TikTok)
+                                             </label>
+                                           </div>
+
+                                           {!ttNoPhone ? (
+                                             <div className="space-y-1.5 text-left">
+                                               <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-mono">
+                                                 Phone Number *
+                                               </label>
+                                               <input
+                                                 type="tel"
+                                                 placeholder="+971 5XXXXXXXX"
+                                                 value={ttPhoneNumber}
+                                                 onChange={(e) => {
+                                                   let val = e.target.value;
+                                                   if (
+                                                     val &&
+                                                     !val.startsWith("+971")
+                                                   ) {
+                                                     val =
+                                                       "+971" + normalizePhone(val);
+                                                   }
+                                                   if (val === "+971") val = "";
+                                                   setTtPhoneNumber(val);
+                                                 }}
+                                                 className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
+                                                 required
+                                               />
+                                               <p className="text-[10px] text-slate-400 mt-1">
+                                                 * Please enter the number starting from 5 (e.g., 501234567)
+                                               </p>
+                                             </div>
+                                           ) : (
+                                             <div className="grid grid-cols-2 gap-3 animate-fade-in text-left">
+                                               <div className="space-y-1.5">
+                                                 <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
+                                                   Instagram Username
+                                                 </label>
+                                                 <input
+                                                   type="text"
+                                                   placeholder="@username"
+                                                   value={ttInstagram}
+                                                   onChange={(e) => setTtInstagram(e.target.value)}
+                                                   className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                                                 />
+                                               </div>
+                                               <div className="space-y-1.5">
+                                                 <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
+                                                   TikTok Username
+                                                 </label>
+                                                 <input
+                                                   type="text"
+                                                   placeholder="@username"
+                                                   value={ttTiktok}
+                                                   onChange={(e) => setTtTiktok(e.target.value)}
+                                                   className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                                                 />
+                                               </div>
+                                             </div>
+                                           )}
+                                         </div>
 
                                         {/* Platform selector */}
                                         <div className="space-y-1.5 text-left">
@@ -26724,35 +26702,83 @@ ${ttNotes}`
                                           onUploadStateChange={setIsTcUploading}
                                         />
 
-                                        {/* Phone Number */}
-                                        <div className="space-y-1.5 text-left">
-                                          <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-mono">
-                                            Phone Number *
-                                          </label>
-                                          <input
-                                            type="tel"
-                                            placeholder="+971 5XXXXXXXX"
-                                            value={tcPhoneNumber}
-                                            onChange={(e) => {
-                                              let val = e.target.value;
-                                              if (
-                                                val &&
-                                                !val.startsWith("+971")
-                                              ) {
-                                                val =
-                                                  "+971" + normalizePhone(val);
-                                              }
-                                              if (val === "+971") val = "";
-                                              setTcPhoneNumber(val);
-                                            }}
-                                            className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-mono"
-                                            required
-                                          />
-                                          <p className="text-[10px] text-slate-400 mt-1">
-                                            * Please enter the number starting
-                                            from 5 (e.g., 501234567)
-                                          </p>
-                                        </div>
+                                                                                 {/* No Phone Number Toggle & Social Media Options */}
+                                         <div className="space-y-3">
+                                           <div className="flex items-center gap-2">
+                                             <input
+                                               type="checkbox"
+                                               id="tcNoPhone"
+                                               checked={tcNoPhone}
+                                               onChange={(e) => {
+                                                 setTcNoPhone(e.target.checked);
+                                                 if (e.target.checked) {
+                                                   setTcPhoneNumber("");
+                                                 }
+                                               }}
+                                               className="rounded border-white/10 bg-white/5 text-pink-500 focus:ring-0"
+                                             />
+                                             <label htmlFor="tcNoPhone" className="text-xs font-semibold text-slate-300 cursor-pointer select-none">
+                                               Client doesn't have a phone number (Use Instagram/TikTok)
+                                             </label>
+                                           </div>
+
+                                           {!tcNoPhone ? (
+                                             <div className="space-y-1.5 text-left">
+                                               <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-mono">
+                                                 Phone Number *
+                                               </label>
+                                               <input
+                                                 type="tel"
+                                                 placeholder="+971 5XXXXXXXX"
+                                                 value={tcPhoneNumber}
+                                                 onChange={(e) => {
+                                                   let val = e.target.value;
+                                                   if (
+                                                     val &&
+                                                     !val.startsWith("+971")
+                                                   ) {
+                                                     val =
+                                                       "+971" + normalizePhone(val);
+                                                   }
+                                                   if (val === "+971") val = "";
+                                                   setTcPhoneNumber(val);
+                                                 }}
+                                                 className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-mono"
+                                                 required
+                                               />
+                                               <p className="text-[10px] text-slate-400 mt-1">
+                                                 * Please enter the number starting from 5 (e.g., 501234567)
+                                               </p>
+                                             </div>
+                                           ) : (
+                                             <div className="grid grid-cols-2 gap-3 animate-fade-in text-left">
+                                               <div className="space-y-1.5">
+                                                 <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
+                                                   Instagram Username
+                                                 </label>
+                                                 <input
+                                                   type="text"
+                                                   placeholder="@username"
+                                                   value={tcInstagram}
+                                                   onChange={(e) => setTcInstagram(e.target.value)}
+                                                   className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans"
+                                                 />
+                                               </div>
+                                               <div className="space-y-1.5">
+                                                 <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
+                                                   TikTok Username
+                                                 </label>
+                                                 <input
+                                                   type="text"
+                                                   placeholder="@username"
+                                                   value={tcTiktok}
+                                                   onChange={(e) => setTcTiktok(e.target.value)}
+                                                   className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans"
+                                                 />
+                                               </div>
+                                             </div>
+                                           )}
+                                         </div>
 
                                         <div className="space-y-1 sm:col-span-2">
                                           <label
@@ -26935,35 +26961,83 @@ ${ttNotes}`
                                           </select>
                                         </div>
 
-                                        {/* Phone Number */}
-                                        <div className="space-y-1.5 text-left">
-                                          <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-mono">
-                                            Phone Number *
-                                          </label>
-                                          <input
-                                            type="tel"
-                                            placeholder="+971 5XXXXXXXX"
-                                            value={ccPhoneNumber}
-                                            onChange={(e) => {
-                                              let val = e.target.value;
-                                              if (
-                                                val &&
-                                                !val.startsWith("+971")
-                                              ) {
-                                                val =
-                                                  "+971" + normalizePhone(val);
-                                              }
-                                              if (val === "+971") val = "";
-                                              setCcPhoneNumber(val);
-                                            }}
-                                            className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
-                                            required
-                                          />
-                                          <p className="text-[10px] text-slate-400 mt-1">
-                                            * Please enter the number starting
-                                            from 5 (e.g., 501234567)
-                                          </p>
-                                        </div>
+                                                                                 {/* No Phone Number Toggle & Social Media Options */}
+                                         <div className="space-y-3">
+                                           <div className="flex items-center gap-2">
+                                             <input
+                                               type="checkbox"
+                                               id="ccNoPhone"
+                                               checked={ccNoPhone}
+                                               onChange={(e) => {
+                                                 setCcNoPhone(e.target.checked);
+                                                 if (e.target.checked) {
+                                                   setCcPhoneNumber("");
+                                                 }
+                                               }}
+                                               className="rounded border-white/10 bg-white/5 text-indigo-500 focus:ring-0"
+                                             />
+                                             <label htmlFor="ccNoPhone" className="text-xs font-semibold text-slate-300 cursor-pointer select-none">
+                                               Client doesn't have a phone number (Use Instagram/TikTok)
+                                             </label>
+                                           </div>
+
+                                           {!ccNoPhone ? (
+                                             <div className="space-y-1.5 text-left">
+                                               <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-mono">
+                                                 Phone Number *
+                                               </label>
+                                               <input
+                                                 type="tel"
+                                                 placeholder="+971 5XXXXXXXX"
+                                                 value={ccPhoneNumber}
+                                                 onChange={(e) => {
+                                                   let val = e.target.value;
+                                                   if (
+                                                     val &&
+                                                     !val.startsWith("+971")
+                                                   ) {
+                                                     val =
+                                                       "+971" + normalizePhone(val);
+                                                   }
+                                                   if (val === "+971") val = "";
+                                                   setCcPhoneNumber(val);
+                                                 }}
+                                                 className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
+                                                 required
+                                               />
+                                               <p className="text-[10px] text-slate-400 mt-1">
+                                                 * Please enter the number starting from 5 (e.g., 501234567)
+                                               </p>
+                                             </div>
+                                           ) : (
+                                             <div className="grid grid-cols-2 gap-3 animate-fade-in text-left">
+                                               <div className="space-y-1.5">
+                                                 <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
+                                                   Instagram Username
+                                                 </label>
+                                                 <input
+                                                   type="text"
+                                                   placeholder="@username"
+                                                   value={ccInstagram}
+                                                   onChange={(e) => setCcInstagram(e.target.value)}
+                                                   className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                                                 />
+                                               </div>
+                                               <div className="space-y-1.5">
+                                                 <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
+                                                   TikTok Username
+                                                 </label>
+                                                 <input
+                                                   type="text"
+                                                   placeholder="@username"
+                                                   value={ccTiktok}
+                                                   onChange={(e) => setCcTiktok(e.target.value)}
+                                                   className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                                                 />
+                                               </div>
+                                             </div>
+                                           )}
+                                         </div>
 
                                         {/* Language */}
                                         <div className="space-y-1.5 text-left">
