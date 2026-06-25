@@ -141,7 +141,7 @@ service cloud.firestore {
     // TL Login Logs
     match /tl_login_logs/{logId} {
       allow read: if isSignedIn();
-      allow write: if isSignedIn() && (isSuperAdmin() || isTLOrSupport());
+      allow write: if isSignedIn();
     }
 
     // Notifications

@@ -200,7 +200,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
 
   return (
     <div
-      className={`relative p-4 bg-[#121216] border-y border-r border-slate-700/60 border-l-4 ${borderLeftColor} rounded-xl shadow-md overflow-hidden transition-all duration-300 flex flex-col w-full ${isExpanded ? "ring-1 ring-white/5 space-y-4" : "hover:bg-white/[0.04] cursor-pointer"}`}
+      className={`relative p-4 bg-white/5 border-y border-r border-white/[0.08] border-l-4 ${borderLeftColor} rounded-xl overflow-hidden transition-all duration-300 flex flex-col w-full ${isExpanded ? "ring-1 ring-white/[0.08] space-y-4" : "hover:bg-white/[0.08] hover:border-white/[0.12] cursor-pointer"}`}
       onClick={() => {
         if (!isExpanded) {
           onToggle();

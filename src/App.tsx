@@ -5482,6 +5482,7 @@ ${pageText}
   const handleSignOut = () => {
     const isTL =
       currentUser?.role === "tl" ||
+      currentUser?.role === "director" ||
       (currentUser?.name && isTLName(currentUser.name));
     if (isTL) {
       const today = new Date().toISOString().split("T")[0];
@@ -5520,47 +5521,7 @@ ${pageText}
     setNewPasswordInput("");
   };
 
-  // Activity / Inactivity tracking (Auto Sign out after 1 hour of no use)
-  const [lastUserInteraction, setLastUserInteraction] = useState<number>(() =>
-    Date.now(),
-  );
 
-  useEffect(() => {
-    if (!currentUser) return;
-
-    const handleInteraction = () => {
-      setLastUserInteraction(Date.now());
-    };
-
-    window.addEventListener("mousemove", handleInteraction);
-    window.addEventListener("keydown", handleInteraction);
-    window.addEventListener("click", handleInteraction);
-    window.addEventListener("scroll", handleInteraction);
-    window.addEventListener("touchstart", handleInteraction);
-
-    return () => {
-      window.removeEventListener("mousemove", handleInteraction);
-      window.removeEventListener("keydown", handleInteraction);
-      window.removeEventListener("click", handleInteraction);
-      window.removeEventListener("scroll", handleInteraction);
-      window.removeEventListener("touchstart", handleInteraction);
-    };
-  }, [currentUser]);
-
-  useEffect(() => {
-    if (!currentUser) return;
-    const interval = setInterval(() => {
-      const diffMs = Date.now() - lastUserInteraction;
-      if (diffMs >= 3600000) {
-        // 1 hour inactivity
-        handleSignOut();
-        toast.error(
-          "You have been signed out due to 1 hour of inactivity. Please sign in again.",
-        );
-      }
-    }, 10000); // Check every 10 seconds
-    return () => clearInterval(interval);
-  }, [currentUser, lastUserInteraction]);
 
   // Real-time compliance overstay alerts background checks (break, lunch, restroom > 10m) & absent alerts using useRef to prevent re-render loops
   const notifiedOverstaysRef = useRef<Record<string, boolean>>(

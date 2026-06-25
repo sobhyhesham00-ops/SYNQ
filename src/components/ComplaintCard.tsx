@@ -106,8 +106,8 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
           onToggle();
         }
       }}
-      className={`p-5 bg-[#1f222a] border-none rounded-[24px] hover:bg-[#282c35] transition-all duration-300 relative flex flex-col w-full overflow-hidden shadow-sm ${
-        isExpanded ? "shadow-md ring-1 ring-white/5 space-y-4" : "cursor-pointer hover:shadow-md"
+      className={`p-5 bg-white/5 border border-white/[0.08] rounded-[24px] hover:bg-white/[0.08] hover:border-white/[0.12] transition-all duration-300 relative flex flex-col w-full overflow-hidden shadow-sm ${
+        isExpanded ? "shadow-md ring-1 ring-white/10 space-y-4" : "cursor-pointer hover:shadow-md"
       }`}
     >
       <div className={`absolute top-0 bottom-0 left-0 w-[5px] ${borderLeftColor.replace('border-l-', 'bg-')}`} />

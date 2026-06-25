@@ -327,7 +327,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
   return (
     <div
       id={`inquiry-${inq.id}`}
-      className={`p-5 bg-[#1f222a] border-none rounded-[24px] hover:bg-[#282c35] transition-all duration-300 relative flex flex-col w-full overflow-hidden shadow-sm ${
+      className={`p-5 bg-white/5 border border-white/[0.08] rounded-[24px] hover:bg-white/[0.08] hover:border-white/[0.12] transition-all duration-300 relative flex flex-col w-full overflow-hidden shadow-sm ${
         isExpanded
           ? "shadow-md ring-1 ring-emerald-500/10 space-y-4"
           : "cursor-pointer hover:shadow-md"
