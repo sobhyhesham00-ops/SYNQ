@@ -656,9 +656,9 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                     {inq.assignedToName ? `Reassign (${inq.assignedToName})` : "Assign Agent"}
                   </button>
                   {showAssignDropdown && (
-                    <div className="absolute bottom-full left-0 mb-2 z-50 bg-[#141419] border border-slate-700/60 rounded-xl w-72 shadow-2xl flex flex-col overflow-hidden">
+                    <div className="absolute bottom-full left-0 mb-2 z-50 bg-black/40 border border-white/[0.08] rounded-xl w-72 shadow-2xl flex flex-col overflow-hidden">
                       {/* Header */}
-                      <div className="p-2.5 border-b border-slate-700/40 bg-[#18181f] flex items-center justify-between">
+                      <div className="p-2.5 border-b border-white/[0.06] bg-black/30 flex items-center justify-between">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                           Assign Agent
                         </span>
@@ -671,7 +671,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                       </div>
 
                       {/* Search Input */}
-                      <div className="p-2 border-b border-slate-700/20 bg-[#16161b]">
+                      <div className="p-2 border-b border-white/[0.05] bg-black/25">
                         <div className="relative flex items-center">
                           <Search className="absolute left-2.5 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
                           <input
@@ -679,7 +679,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                             placeholder="Search agent name..."
                             value={assignSearchQuery}
                             onChange={(e) => setAssignSearchQuery(e.target.value)}
-                            className="w-full bg-[#1e1e24] border border-slate-700/40 rounded-lg text-xs py-1.5 pl-8 pr-7 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/85 transition-colors font-sans"
+                            className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg text-xs py-1.5 pl-8 pr-7 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/85 transition-colors font-sans"
                             autoFocus
                           />
                           {assignSearchQuery && (
@@ -694,7 +694,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                       </div>
 
                       {/* Scrollable list of agents */}
-                      <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5 bg-[#15151a] scrollbar-thin">
+                      <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5 bg-black/20 scrollbar-thin">
                         {filteredAgents.length === 0 ? (
                           <p className="text-center py-6 text-xs text-slate-500 font-sans">
                             No agents found

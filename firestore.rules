@@ -148,13 +148,9 @@ service cloud.firestore {
     match /notifications/{notifId} {
       allow read, create: if isSignedIn();
       allow update: if isSignedIn() && (
-        isSuperAdmin() || 
-        isTLOrSupport() ||
-        resource.data.get('targetAgent', '') == getUserName() ||
-        resource.data.get('targetAgent', '') == "all" ||
-        resource.data.get('targetAgent', '') == getUserRole() ||
-        (resource.data.get('targetGroups', null) != null && getUserName() in resource.data.get('targetGroups', [])) ||
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seenByUsers', 'clearedByUsers'])
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seenByUsers', 'clearedByUsers']) ||
+        isSuperAdmin() ||
+        isTLOrSupport()
       );
       allow delete: if isSignedIn() && (isSuperAdmin() || isTLOrSupport());
     }

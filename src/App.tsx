@@ -776,6 +776,7 @@ const isNotificationForUser = (
 
 export default function App() {
   const isMountedRef = useRef(true);
+  const notificationsRef = useRef<SystemNotification[]>([]);
   useEffect(() => {
     return () => {
       isMountedRef.current = false;
@@ -2227,6 +2228,9 @@ export default function App() {
           `usr_${normalizedName}`,
           `usr_${currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}`,
           "all",
+          "tl",
+          "director",
+          "qa",
           currentUser.role,
           currentUser.name,
           currentUser.name.toLowerCase(),
@@ -2252,43 +2256,12 @@ export default function App() {
         const latest = arr[0];
         if (!isNotifsInitialized) {
           isNotifsInitialized = true;
+          // On first load, just set state — never alert for pre-existing notifications
+          setNotifications(arr);
+          notificationsRef.current = arr;
           if (latest) {
-            const isUnreadByMe = !latest.seenByUsers?.includes(
-              currentUser?.id || "",
-            );
-            const isLatestForMe = isNotificationForUser(
-              latest,
-              currentUserRef.current,
-              inquiriesRef.current,
-              requestsRef.current,
-              tabbyTamaraRequestsRef.current,
-              tabbyTamaraComplaintsRef.current,
-              clientCommsRef.current,
-              isTLOreSupportRef.current,
-            );
-            if (isUnreadByMe && isLatestForMe) {
-              const isAnnouncementNotification =
-                latest.title.toLowerCase().includes("announcement") ||
-                latest.title.toLowerCase().includes("broadcast");
-
-              if (!isAnnouncementNotification) {
-                triggerNotificationAlert();
-                toast.info(
-                  <div className="flex flex-col gap-1 text-left">
-                    <span className="font-bold text-sm text-indigo-400">
-                      {latest.title}
-                    </span>
-                    <span className="text-xs text-slate-200 line-clamp-2">
-                      {latest.message}
-                    </span>
-                  </div>,
-                  { duration: 8000 },
-                );
-              }
-            }
             localStorage.setItem("sched_last_notified_notif_id", latest.id);
           }
-          setNotifications(arr);
           return;
         }
 
@@ -2296,7 +2269,7 @@ export default function App() {
           localStorage.getItem("sched_last_notified_notif_id") || "";
         if (latest && latest.id !== lastNotifiedNotifId) {
           const isUnreadByMe = !latest.seenByUsers?.includes(
-            currentUser?.id || "",
+            currentUser?.name || "",
           );
           const isLatestForMe = isNotificationForUser(
             latest,
@@ -2333,6 +2306,7 @@ export default function App() {
         }
 
         setNotifications(arr);
+        notificationsRef.current = arr;
       },
       (error) => {
         console.error("Notifications Real-time Sync Error:", error);
@@ -2861,7 +2835,7 @@ export default function App() {
     entityType?: SystemNotification["entityType"],
     entityId?: string,
   ) => {
-    if (stableId && notifications.some((n) => n.id === stableId)) {
+    if (stableId && notificationsRef.current.some((n) => n.id === stableId)) {
       return;
     }
 
@@ -3077,7 +3051,7 @@ export default function App() {
   const visibleNotifs = notifications
     .filter((notif) => {
       if (!currentUser) return false;
-      if (notif.clearedByUsers && notif.clearedByUsers.includes(currentUser.id))
+      if (notif.clearedByUsers && notif.clearedByUsers.includes(currentUser.name))
         return false;
       return isNotificationForUser(
         notif,
@@ -3096,12 +3070,10 @@ export default function App() {
     );
 
   const unreadCount = visibleNotifs.filter((notif) => {
-    const userId = currentUser?.id || "";
     const userName = currentUser?.name || "";
     return (
       !notif.seenByUsers ||
-      (!notif.seenByUsers.includes(userId) &&
-        !notif.seenByUsers.includes(userName))
+      !notif.seenByUsers.includes(userName)
     );
   }).length;
 
@@ -3109,8 +3081,8 @@ export default function App() {
     if (!currentUser || isMarkingAll) return;
     const unread = notifications.filter(
       (n) =>
-        !n.clearedByUsers?.includes(currentUser.id) &&
-        !n.seenByUsers?.includes(currentUser.id),
+        !n.clearedByUsers?.includes(currentUser.name) &&
+        !n.seenByUsers?.includes(currentUser.name),
     );
     if (unread.length === 0) return;
 
@@ -3119,7 +3091,7 @@ export default function App() {
       const batch = writeBatch(db);
       unread.forEach((n) => {
         const seenSet = new Set(n.seenByUsers || []);
-        seenSet.add(currentUser.id);
+        seenSet.add(currentUser.name);
         batch.update(doc(db, "notifications", n.id), {
           seenByUsers: Array.from(seenSet),
         });
@@ -3140,8 +3112,8 @@ export default function App() {
     const n = notifications.find((item) => item.id === id);
     if (n) {
       const seenSet = new Set(n.seenByUsers || []);
-      if (!seenSet.has(currentUser.id)) {
-        seenSet.add(currentUser.id);
+      if (!seenSet.has(currentUser.name)) {
+        seenSet.add(currentUser.name);
         updateDoc(doc(db, "notifications", n.id), {
           seenByUsers: Array.from(seenSet),
         }).catch((e) => console.error("Mark Single Read Error:", e));
@@ -3157,7 +3129,7 @@ export default function App() {
       const batch = writeBatch(db);
       myVisible.forEach((n: any) => {
         const clearedSet = new Set(n.clearedByUsers || []);
-        clearedSet.add(currentUser.id);
+        clearedSet.add(currentUser.name);
         batch.update(doc(db, "notifications", n.id), {
           clearedByUsers: Array.from(clearedSet),
         });
