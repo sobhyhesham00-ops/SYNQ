@@ -713,65 +713,56 @@ const isNotificationForUser = (
   const userLower = (user.name || "").trim().toLowerCase();
   const cleanedUser = userLower.replace(/[^a-zA-Z0-9]/g, "");
 
-  // 1. Is it explicitly targeted to this agent?
+  // If the notification has a case entity associated, only show it to the agent if they are the owner/creator/assignee
+  if (notif.entityType && notif.entityId) {
+    if (notif.entityType === "inquiry") {
+      const item = inqs.find((i) => i.id === notif.entityId);
+      return item
+        ? (item.agentName || "").toLowerCase() === userLower
+        : false;
+    }
+    if (notif.entityType === "scheduling_request") {
+      const item = reqs.find((r) => r.id === notif.entityId);
+      return item
+        ? (item.agentName || "").toLowerCase() === userLower ||
+            (item.openedBy || "").toLowerCase() === userLower
+        : false;
+    }
+    if (notif.entityType === "tt_request") {
+      const item = ttrs.find((r) => r.id === notif.entityId);
+      return item
+        ? (item.agentName || "").toLowerCase() === userLower ||
+            (item.submittedByName || "").toLowerCase() === userLower
+        : false;
+    }
+    if (notif.entityType === "tt_complaint") {
+      const item = comps.find((c) => c.id === notif.entityId);
+      return item
+        ? (item.agentName || "").toLowerCase() === userLower
+        : false;
+    }
+    if (notif.entityType === "client_comm") {
+      const item = comms.find((c) => c.id === notif.entityId);
+      return item
+        ? (item.agentName || "").toLowerCase() === userLower ||
+            (item.callCenterAgentName || "").toLowerCase() === userLower
+        : false;
+    }
+    return false;
+  }
+
+  // If there is no specific case entity (e.g., personal reminders, general announcements),
+  // check if targeted explicitly to this agent or to "all"
   const isTargetedToMe =
     (notif.targetAgent && notif.targetAgent.toLowerCase() === userLower) ||
     (notif.targetGroups &&
       (notif.targetGroups.includes(user.id) ||
         notif.targetGroups.includes(`usr_${cleanedUser}`) ||
-        notif.targetGroups.includes(`usr_${userLower}`)));
+        notif.targetGroups.includes(`usr_${userLower}`) ||
+        notif.targetGroups.includes("all") ||
+        notif.targetAgent === "all"));
 
-  if (isTargetedToMe) {
-    return true;
-  }
-
-  // 2. If it is targeted to "all" (meaning a broadcast):
-  if (notif.targetGroups?.includes("all") || notif.targetAgent === "all") {
-    if (notif.entityType && notif.entityId) {
-      if (notif.entityType === "inquiry") {
-        const item = inqs.find((i) => i.id === notif.entityId);
-        return item
-          ? (item.agentName || "").toLowerCase() === userLower
-          : false;
-      }
-      if (notif.entityType === "scheduling_request") {
-        const item = reqs.find((r) => r.id === notif.entityId);
-        return item
-          ? (item.agentName || "").toLowerCase() === userLower ||
-              (item.openedBy || "").toLowerCase() === userLower
-          : false;
-      }
-      if (notif.entityType === "tt_request") {
-        const item = ttrs.find((r) => r.id === notif.entityId);
-        return item
-          ? (item.agentName || "").toLowerCase() === userLower ||
-              (item.submittedByName || "").toLowerCase() === userLower
-          : false;
-      }
-      if (notif.entityType === "tt_complaint") {
-        const item = comps.find((c) => c.id === notif.entityId);
-        return item
-          ? (item.agentName || "").toLowerCase() === userLower
-          : false;
-      }
-      if (notif.entityType === "client_comm") {
-        const item = comms.find((c) => c.id === notif.entityId);
-        return item
-          ? (item.agentName || "").toLowerCase() === userLower ||
-              (item.callCenterAgentName || "").toLowerCase() === userLower
-          : false;
-      }
-    }
-
-    // If it's a general announcement or broadcast message with no entity, let them see it
-    if (!notif.entityType) {
-      return true;
-    }
-
-    return false;
-  }
-
-  return false;
+  return !!isTargetedToMe;
 };
 
 export default function App() {
