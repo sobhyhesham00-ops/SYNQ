@@ -129,7 +129,7 @@ export function PaginatedCaseList<T>({
 
   return (
     <div className="bg-[#121216]/80 p-0 rounded-2xl shadow-xl overflow-hidden border border-slate-700/60 w-full flex flex-col">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-700/60 p-5 bg-[#121216] gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-700/60 px-5 py-4 bg-[#121216] gap-3 flex-wrap">
         <div>
           <h3 className="text-base font-bold text-slate-100 font-display flex items-center gap-2">
             {icon} {title}
@@ -139,36 +139,46 @@ export function PaginatedCaseList<T>({
           </p>
         </div>
 
-        {(itemToPhone || itemToClinic) && (
+        {itemToPhone && (
+          <div className="flex items-center gap-2 flex-1 max-w-xs">
+            <div className="relative flex-1">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">🔍</span>
+              <input
+                type="text"
+                value={phoneFilter}
+                onChange={(e) => {
+                  setPhoneFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
+                placeholder="Search by phone..."
+                className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm font-mono text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500/60 focus:bg-black/60 transition-all"
+              />
+            </div>
+            {phoneFilter && (
+              <button
+                onClick={() => { setPhoneFilter(""); setCurrentPage(1); }}
+                className="text-xs text-rose-400 hover:text-rose-300 border border-rose-500/20 bg-rose-500/10 rounded-lg px-2.5 py-2.5 transition-all font-bold"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        )}
+
+        {itemToClinic && (
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${showFilters || phoneFilter || clinicsFilter.length > 0 ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" : "bg-white/5 text-slate-300 border border-white/10 hover:bg-white/10"}`}
+            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${showFilters || clinicsFilter.length > 0 ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" : "bg-white/5 text-slate-300 border border-white/10 hover:bg-white/10"}`}
           >
             <Filter className="w-3.5 h-3.5" />
-            Filters {clinicsFilter.length > 0 || phoneFilter ? "(Active)" : ""}
+            Filters {clinicsFilter.length > 0 ? "(Active)" : ""}
           </button>
         )}
       </div>
 
-      {showFilters && (itemToPhone || itemToClinic) && (
+      {showFilters && itemToClinic && (
         <div className="bg-[#18181c] p-4 border-b border-slate-700/60 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {itemToPhone && (
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Phone Number Search</label>
-                <input
-                  type="text"
-                  value={phoneFilter}
-                  onChange={(e) => {
-                    setPhoneFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  placeholder="e.g. 050..."
-                  className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-200 outline-none focus:border-indigo-500 transition-colors"
-                />
-              </div>
-            )}
-
             {itemToClinic && availableClinics && (
               <div>
                 <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Filter by Clinics</label>
@@ -177,7 +187,7 @@ export function PaginatedCaseList<T>({
                     <button
                       key={c}
                       onClick={() => toggleClinic(c)}
-                      className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all ${
+                      className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${
                         clinicsFilter.includes(c)
                           ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300'
                           : 'bg-white/5 border-white/10 text-slate-400 hover:text-slate-200 hover:bg-white/10'
@@ -189,7 +199,7 @@ export function PaginatedCaseList<T>({
                   {clinicsFilter.length > 0 && (
                      <button
                        onClick={() => { setClinicsFilter([]); setCurrentPage(1); }}
-                       className="px-2 py-1 text-[10px] font-bold rounded-md border border-rose-500/20 bg-rose-500/10 text-rose-300 transition-all hover:bg-rose-500/20 tracking-wider"
+                       className="px-3 py-1.5 text-xs font-bold rounded-lg border border-rose-500/20 bg-rose-500/10 text-rose-300 transition-all hover:bg-rose-500/20 tracking-wider"
                      >
                        Clear
                      </button>

@@ -385,7 +385,12 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
               <span className="font-bold">{inq.patientName}</span>
             )}
             {inq.clinicName && (
-              <span>• {getClinicLabelText(inq.clinicName)}</span>
+              <>
+                <span className="text-slate-600">•</span>
+                <span className="text-xs sm:text-[13px] font-black font-sans text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md tracking-wide">
+                  {getClinicLabelText(inq.clinicName)}
+                </span>
+              </>
             )}
             {inq.phoneNumber && <span>• {inq.phoneNumber}</span>}
 

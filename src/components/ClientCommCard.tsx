@@ -250,7 +250,14 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
           {/* Row 2: Patient Name, Clinic, Phone */}
           <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-300 flex-wrap">
             {comm.patientName && <span className="font-bold">{comm.patientName}</span>}
-            {comm.clinicName && <span>• {getClinicLabel(comm.clinicName)}</span>}
+            {comm.clinicName && (
+              <>
+                <span className="text-slate-600">•</span>
+                <span className="text-xs sm:text-[13px] font-black font-sans text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md tracking-wide">
+                  {getClinicLabel(comm.clinicName)}
+                </span>
+              </>
+            )}
             {comm.phoneNumber && <span>• {comm.phoneNumber}</span>}
             
             {comm.language && (

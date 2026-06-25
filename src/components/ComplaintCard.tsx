@@ -148,7 +148,14 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
           {/* Row 2: Patient Name, Clinic, Phone */}
           <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-300 flex-wrap">
             {comp.patientName && <span className="font-bold">{comp.patientName}</span>}
-            {comp.clinicName && <span>• {getClinicLabel(comp.clinicName)}</span>}
+            {comp.clinicName && (
+              <>
+                <span className="text-slate-600">•</span>
+                <span className="text-xs sm:text-[13px] font-black font-sans text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md tracking-wide">
+                  {getClinicLabel(comp.clinicName)}
+                </span>
+              </>
+            )}
             {comp.phoneNumber && <span>• {comp.phoneNumber}</span>}
             
             <span className="text-[10px] bg-white/5 text-slate-300 px-2 py-0.5 border border-white/10 rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-2">

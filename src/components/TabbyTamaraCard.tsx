@@ -818,7 +818,14 @@ export const TabbyTamaraCard = ({
             {req.patientName && (
               <span className="font-bold">{req.patientName}</span>
             )}
-            {req.clinicName && <span>• {getClinicLabel(req.clinicName)}</span>}
+            {req.clinicName && (
+              <>
+                <span className="text-slate-600">•</span>
+                <span className="text-xs sm:text-[13px] font-black font-sans text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md tracking-wide">
+                  {getClinicLabel(req.clinicName)}
+                </span>
+              </>
+            )}
             {req.phoneNumber && <span>• {req.phoneNumber}</span>}
 
             <span
