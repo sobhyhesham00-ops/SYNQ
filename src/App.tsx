@@ -769,6 +769,8 @@ const isNotificationForUser = (
 export default function App() {
   const isMountedRef = useRef(true);
   const notificationsRef = useRef<SystemNotification[]>([]);
+  const triggeredStableIdsRef = useRef<Set<string>>(new Set());
+  const isNotificationsLoadedRef = useRef(false);
   useEffect(() => {
     return () => {
       isMountedRef.current = false;
@@ -2243,6 +2245,9 @@ export default function App() {
       qNotifs,
       (snapshot) => {
         const arr = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }) as SystemNotification);
+        arr.forEach((n) => {
+          if (n.id) triggeredStableIdsRef.current.add(n.id);
+        });
         arr.sort(
           (a, b) =>
             new Date(b.createdAt || 0).getTime() -
@@ -2252,6 +2257,7 @@ export default function App() {
         const latest = arr[0];
         if (!isNotifsInitialized) {
           isNotifsInitialized = true;
+          isNotificationsLoadedRef.current = true;
           // On first load, just set state — never alert for pre-existing notifications
           setNotifications(arr);
           notificationsRef.current = arr;
@@ -2303,6 +2309,7 @@ export default function App() {
 
         setNotifications(arr);
         notificationsRef.current = arr;
+        isNotificationsLoadedRef.current = true;
       },
       (error) => {
         console.error("Notifications Real-time Sync Error:", error);
@@ -2843,8 +2850,11 @@ export default function App() {
     entityType?: SystemNotification["entityType"],
     entityId?: string,
   ) => {
-    if (stableId && notificationsRef.current.some((n) => n.id === stableId)) {
-      return;
+    if (stableId) {
+      if (triggeredStableIdsRef.current.has(stableId) || notificationsRef.current.some((n) => n.id === stableId)) {
+        return;
+      }
+      triggeredStableIdsRef.current.add(stableId);
     }
 
     let targetGroups: string[] = [];
@@ -4333,6 +4343,7 @@ ${pageText}
   // Follow-up due-date reminder engine (all 4 case types)
   const checkAndNotifyFollowUpDueDates = () => {
     if (!currentUser) return;
+    if (!isNotificationsLoadedRef.current) return; // Wait for notifications to load from Firestore first!
     const todayStr = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
 
     const allCases = [
@@ -4378,7 +4389,7 @@ ${pageText}
   useEffect(() => {
     if (!currentUser) return;
     checkAndNotifyFollowUpDueDates();
-  }, [currentUser, inquiries, tabbyTamaraRequests, tabbyTamaraComplaints, clientComms]);
+  }, [currentUser, inquiries, tabbyTamaraRequests, tabbyTamaraComplaints, clientComms, notifications]);
 
   useEffect(() => {
     if (!currentUser) return;
