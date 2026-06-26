@@ -1,22 +1,27 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { 
-  ShieldCheck, 
-  Users, 
-  Lock, 
-  Unlock, 
-  Key, 
-  Trash2, 
-  UserMinus, 
-  RefreshCw, 
-  Search, 
+import { motion, AnimatePresence } from 'motion/react';
+import {
+  ShieldCheck,
+  Lock,
+  Unlock,
+  Key,
+  UserMinus,
+  RefreshCw,
+  Search,
   AlertCircle,
-  ToggleLeft,
-  ToggleRight,
-  Sparkles,
-  Award,
   Shield,
-  UserPlus
+  UserPlus,
+  ChevronDown,
+  CheckCircle2,
+  Clock,
+  Activity,
+  Users,
+  XCircle,
+  Eye,
+  EyeOff,
+  Zap,
+  Terminal,
+  ServerCrash,
 } from 'lucide-react';
 import { doc, collection } from 'firebase/firestore';
 import { db, wrappedSetDoc as setDoc, wrappedDeleteDoc as deleteDoc, wrappedAddDoc as addDoc } from '../firebase';
@@ -59,6 +64,32 @@ interface SuperAdminControlProps {
   auditLog: AuditLogEntry[];
 }
 
+const ROLE_OPTIONS = [
+  { value: 'agent', label: 'Agent', color: 'text-slate-300 bg-slate-700/40 border-slate-600/40' },
+  { value: 'tl', label: 'TL', color: 'text-indigo-300 bg-indigo-500/20 border-indigo-500/30' },
+  { value: 'qa', label: 'QA', color: 'text-amber-300 bg-amber-500/20 border-amber-500/30' },
+  { value: 'director', label: 'Director', color: 'text-fuchsia-300 bg-fuchsia-500/20 border-fuchsia-500/30' },
+];
+
+const getRoleBadge = (role: string) => {
+  const r = ROLE_OPTIONS.find(o => o.value === role) || ROLE_OPTIONS[0];
+  return (
+    <span className={`text-[9px] px-2 py-0.5 rounded-full border font-black uppercase tracking-wider ${r.color}`}>
+      {r.label}
+    </span>
+  );
+};
+
+const AuditActionIcon = ({ action }: { action: string }) => {
+  if (action.includes('lock')) return <Lock className="w-3 h-3 text-rose-400" />;
+  if (action.includes('unlock')) return <Unlock className="w-3 h-3 text-emerald-400" />;
+  if (action.includes('password')) return <Key className="w-3 h-3 text-amber-400" />;
+  if (action.includes('delete')) return <UserMinus className="w-3 h-3 text-rose-400" />;
+  if (action.includes('create')) return <UserPlus className="w-3 h-3 text-cyan-400" />;
+  if (action.includes('edit')) return <CheckCircle2 className="w-3 h-3 text-indigo-400" />;
+  return <Activity className="w-3 h-3 text-slate-400" />;
+};
+
 export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   currentUser,
   registeredUsers,
@@ -71,10 +102,29 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   deletedUsers = [],
   onDeleteSyntheticUser,
   isSuperAdmin,
-  auditLog
+  auditLog,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newUserName, setNewUserName] = useState('');
+  const [newUserRole, setNewUserRole] = useState('agent');
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserPhone, setNewUserPhone] = useState('');
+  const [newUserLob, setNewUserLob] = useState('');
+  const [newUserTeam, setNewUserTeam] = useState('');
+  const [newUserTL, setNewUserTL] = useState('');
+  const [targetPasswordChange, setTargetPasswordChange] = useState<string | null>(null);
+  const [newPasswordValue, setNewPasswordValue] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [editRole, setEditRole] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editLob, setEditLob] = useState('');
+  const [editTeam, setEditTeam] = useState('');
+  const [editTL, setEditTL] = useState('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [roleFilter, setRoleFilter] = useState<string>('all');
 
   const formatRelativeTime = (isoString?: string): string => {
     if (!isoString) return 'Never';
@@ -85,27 +135,24 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
       const diffMin = Math.floor(diffSec / 60);
       const diffHr = Math.floor(diffMin / 60);
       const diffDays = Math.floor(diffHr / 24);
-
       if (diffSec < 10) return 'Just now';
       if (diffSec < 60) return `${diffSec}s ago`;
       if (diffMin < 60) return `${diffMin}m ago`;
       if (diffHr < 24) return `${diffHr}h ago`;
       return `${diffDays}d ago`;
-    } catch (err) {
-      return 'Never';
-    }
+    } catch { return 'Never'; }
   };
 
   const logAdminAction = async (action: string, targetUser: string) => {
     try {
-      await addDoc(collection(db, "admin_audit_log"), {
+      await addDoc(collection(db, 'admin_audit_log'), {
         action,
         targetUser,
-        performedBy: currentUser?.name || "unknown",
-        timestamp: new Date().toISOString()
+        performedBy: currentUser?.name || 'unknown',
+        timestamp: new Date().toISOString(),
       });
     } catch (err) {
-      console.error("[AUDIT LOG ERROR]", err);
+      console.error('[AUDIT LOG ERROR]', err);
     }
   };
 
@@ -114,7 +161,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   );
 
   const syntheticUsers: UserProfile[] = [...INITIAL_AGENTS, ...TEAM_LEADERS]
-    .filter((name, i, arr) => arr.indexOf(name) === i) // dedupe within the static list itself
+    .filter((name, i, arr) => arr.indexOf(name) === i)
     .filter(name => !registeredUsernames.has(getUsernameFromFullName(name)))
     .filter(name => {
       const uname = getUsernameFromFullName(name);
@@ -135,54 +182,20 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
     }
   });
   const allUsers = Array.from(seen.values());
-  
-  // States for new user
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newUserName, setNewUserName] = useState('');
-  const [newUserRole, setNewUserRole] = useState('agent');
-  const [newUserEmail, setNewUserEmail] = useState('');
-  const [newUserPhone, setNewUserPhone] = useState('');
-  const [newUserLob, setNewUserLob] = useState('');
-  const [newUserTeam, setNewUserTeam] = useState('');
-  const [newUserTL, setNewUserTL] = useState('');
-  
-  // Custom password override states
-  const [targetPasswordChange, setTargetPasswordChange] = useState<string | null>(null);
-  const [newPasswordValue, setNewPasswordValue] = useState('');
-
-  // Editing individual user states
-  const [editRole, setEditRole] = useState('');
-  const [editEmail, setEditEmail] = useState('');
-  const [editPhone, setEditPhone] = useState('');
-  const [editLob, setEditLob] = useState('');
-  const [editTeam, setEditTeam] = useState('');
-  const [editTL, setEditTL] = useState('');
-
-  const normalizeUsername = (name: string) => {
-    return String(name || '').trim().toLowerCase().replace(/\s+/g, '');
-  };
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isSuperAdmin) { toast.error('Super admin only.'); return; }
     const trimmedName = String(newUserName || '').trim();
-    if (!trimmedName) {
-      toast.error('Name is required!');
-      return;
-    }
-
+    if (!trimmedName) { toast.error('Name is required!'); return; }
     const normalizedNewUsername = getUsernameFromFullName(trimmedName).toLowerCase();
-
-    // Check if user is already physically registered in Firestore database
-    const isAlreadyRegistered = registeredUsers.some(u => {
-      const uName = u.name || '';
-      return getUsernameFromFullName(uName).toLowerCase() === normalizedNewUsername;
-    });
-
+    const isAlreadyRegistered = registeredUsers.some(u =>
+      getUsernameFromFullName(u.name || '').toLowerCase() === normalizedNewUsername
+    );
     if (isAlreadyRegistered) {
-      toast.error(`A registered user with this name already exists: ${trimmedName}. Please edit their existing profile.`);
+      toast.error(`User already registered: ${trimmedName}`);
       return;
     }
-
     const docId = getUsernameFromFullName(trimmedName);
     const newUser: UserProfile = {
       id: docId,
@@ -192,31 +205,22 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
       phone: String(newUserPhone || '').trim() || undefined,
       lob: normalizeAgentLob(String(newUserLob || '').trim() || undefined, newUserRole) || undefined,
       lobTeam: String(newUserTeam || '').trim() || undefined,
-      teamLeader: String(newUserTL || '').trim() || undefined
+      teamLeader: String(newUserTL || '').trim() || undefined,
     };
-
     try {
-      await setDoc(doc(db, "users", docId), newUser);
-      await logAdminAction("create_user", trimmedName);
-      toast.success(`Successfully registered user profile: ${trimmedName}!`);
-      
-      // Reset form
-      setNewUserName('');
-      setNewUserRole('agent');
-      setNewUserEmail('');
-      setNewUserPhone('');
-      setNewUserLob('');
-      setNewUserTeam('');
-      setNewUserTL('');
+      await setDoc(doc(db, 'users', docId), newUser);
+      await logAdminAction('create_user', trimmedName);
+      toast.success(`Profile created: ${trimmedName}`);
+      setNewUserName(''); setNewUserRole('agent'); setNewUserEmail('');
+      setNewUserPhone(''); setNewUserLob(''); setNewUserTeam(''); setNewUserTL('');
       setShowAddForm(false);
     } catch (err: any) {
-      console.error(err);
-      toast.error(`Failed to register user: ${err.message}`);
+      toast.error(`Failed to create user: ${err.message}`);
     }
   };
 
   const handleStartEdit = (user: UserProfile) => {
-    setEditingUserId(user.id);
+    setExpandedUserId(prev => prev === user.id ? null : user.id);
     setEditRole(user.role || 'agent');
     setEditEmail(user.email || '');
     setEditPhone(user.phone || '');
@@ -226,153 +230,106 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   };
 
   const handleSaveEdit = async (user: UserProfile) => {
+    if (!isSuperAdmin) { toast.error('Super admin only.'); return; }
     const docId = user.id;
     const updatedUser = {
-      ...user,
+      id: docId,
+      name: user.name,
       role: editRole,
       email: String(editEmail || '').trim() || undefined,
       phone: String(editPhone || '').trim() || undefined,
       lob: normalizeAgentLob(String(editLob || '').trim() || undefined, editRole) || undefined,
       lobTeam: String(editTeam || '').trim() || undefined,
-      teamLeader: String(editTL || '').trim() || undefined
+      teamLeader: String(editTL || '').trim() || undefined,
     };
-
     try {
-      await setDoc(doc(db, "users", docId), updatedUser, { merge: true });
-      await logAdminAction("edit_user", user.name);
-      toast.success(`Updated profile for ${user.name}`);
-      setEditingUserId(null);
+      // Use merge:false so synthetic users get fully promoted to Firestore docs
+      await setDoc(doc(db, 'users', docId), updatedUser);
+      await logAdminAction('edit_user', user.name);
+      toast.success(`Profile updated: ${user.name}`);
+      setExpandedUserId(null);
     } catch (err) {
       console.error(err);
-      toast.error('Failed to update user profile.');
+      toast.error('Failed to update profile.');
     }
   };
 
   const handleSetPassword = async (userName: string) => {
-    if (!isSuperAdmin) {
-      toast.error('Only the global super admin (h.sobhy) can reset credentials.');
-      return;
-    }
-    if (!String(newPasswordValue || '').trim()) {
-      toast.error('Password cannot be empty!');
-      return;
-    }
-
+    if (!isSuperAdmin) { toast.error('Super admin only.'); return; }
+    if (!String(newPasswordValue || '').trim()) { toast.error('Password cannot be empty!'); return; }
     const usernameKey = getUsernameFromFullName(userName);
     const cleanPassword = String(newPasswordValue || '').trim();
-
-    const updatedCreds = { 
-      ...credentials, 
-      [usernameKey]: cleanPassword
-    };
-
+    const updatedCreds = { ...credentials, [usernameKey]: cleanPassword };
     try {
-      await setDoc(doc(db, "system", "sched_credentials"), { 
+      await setDoc(doc(db, 'system', 'sched_credentials'), {
         data: updatedCreds,
-        mustChangePassword: { [usernameKey]: true }
+        mustChangePassword: { [usernameKey]: true },
       }, { merge: true });
-      
-      await logAdminAction("reset_password", userName);
-
-      // Also automatically unlock if is locked
+      await logAdminAction('reset_password', userName);
       await handleUnlock(userName);
-
-      toast.success(`Successfully set password for ${userName}!`);
+      toast.success(`Password set for ${userName}`);
       setTargetPasswordChange(null);
       setNewPasswordValue('');
     } catch (err: any) {
-      console.error(err);
       toast.error('Failed to set credentials.');
     }
   };
 
   const handleLock = async (userName: string) => {
     const usernameKey = getUsernameFromFullName(userName);
-
-    let updated = [...lockedAccounts];
-    if (!updated.includes(usernameKey)) {
-      updated.push(usernameKey);
-    }
-
+    const updated = [...lockedAccounts];
+    if (!updated.includes(usernameKey)) updated.push(usernameKey);
     try {
-      await setDoc(doc(db, "system", "sched_locked_accounts"), { data: updated });
-      await logAdminAction("lock_account", userName);
-      toast.success(`Locked login account for "${userName}"`);
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to lock account');
-    }
+      await setDoc(doc(db, 'system', 'sched_locked_accounts'), { data: updated });
+      await logAdminAction('lock_account', userName);
+      toast.success(`Account locked: ${userName}`);
+    } catch { toast.error('Failed to lock account'); }
   };
 
   const handleUnlock = async (userName: string) => {
     const usernameKey = getUsernameFromFullName(userName);
-
-    const updated = lockedAccounts.filter(name => name !== usernameKey);
+    const updated = lockedAccounts.filter(n => n !== usernameKey);
     try {
-      await setDoc(doc(db, "system", "sched_locked_accounts"), { data: updated });
-      
-      // Reset failed attempts as well
+      await setDoc(doc(db, 'system', 'sched_locked_accounts'), { data: updated });
       const updatedAttempts = { ...failedAttempts };
       delete updatedAttempts[usernameKey];
-
-      await setDoc(doc(db, "system", "sched_failed_attempts"), { data: updatedAttempts });
-
-      await logAdminAction("unlock_account", userName);
-
-      toast.success(`Unlocked and clear attempts for "${userName}"!`);
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to unlock account');
-    }
+      await setDoc(doc(db, 'system', 'sched_failed_attempts'), { data: updatedAttempts });
+      await logAdminAction('unlock_account', userName);
+      toast.success(`Account unlocked: ${userName}`);
+    } catch { toast.error('Failed to unlock account'); }
   };
 
   const handleClearAttempts = async (userName: string) => {
     const usernameKey = getUsernameFromFullName(userName);
-
     const updatedAttempts = { ...failedAttempts };
     delete updatedAttempts[usernameKey];
-
     try {
-      await setDoc(doc(db, "system", "sched_failed_attempts"), { data: updatedAttempts });
-      await logAdminAction("clear_attempts", userName);
-      toast.success(`Failed attempts counters reset for "${userName}"`);
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to reset attempts counters');
-    }
+      await setDoc(doc(db, 'system', 'sched_failed_attempts'), { data: updatedAttempts });
+      await logAdminAction('clear_attempts', userName);
+      toast.success(`Failed attempts cleared: ${userName}`);
+    } catch { toast.error('Failed to clear attempts'); }
   };
 
   const handleDeleteUser = async (user: UserProfile) => {
-    const cleanName = user.name;
-    if (!window.confirm(`Are you absolutely sure you want to delete "${cleanName}"'s profile? This will not remove their historical rosters but they will lose access instantly.`)) {
-      return;
-    }
-
+    if (!isSuperAdmin) { toast.error('Super admin only.'); return; }
     try {
-      const docId = user.id;
       const isRegistered = registeredUsers.some(u => u.id === user.id);
       if (isRegistered) {
-        await deleteDoc(doc(db, "users", docId));
+        await deleteDoc(doc(db, 'users', user.id));
       } else if (onDeleteSyntheticUser) {
-        await onDeleteSyntheticUser(cleanName);
+        await onDeleteSyntheticUser(user.name);
       }
-
-      await logAdminAction("delete_user", cleanName);
-
-      const usernameKey = getUsernameFromFullName(cleanName);
-
-      // Remove from credentials
+      await logAdminAction('delete_user', user.name);
+      const usernameKey = getUsernameFromFullName(user.name);
       const updatedCreds = { ...credentials };
       if (updatedCreds[usernameKey]) {
         delete updatedCreds[usernameKey];
-        await setDoc(doc(db, "system", "sched_credentials"), { data: updatedCreds });
+        await setDoc(doc(db, 'system', 'sched_credentials'), { data: updatedCreds });
       }
-
-      // Remove from locked accounts
       const updatedLocked = lockedAccounts.filter(l => l !== usernameKey);
-      await setDoc(doc(db, "system", "sched_locked_accounts"), { data: updatedLocked });
-
-      toast.success(`Fully removed user "${cleanName}"!`);
+      await setDoc(doc(db, 'system', 'sched_locked_accounts'), { data: updatedLocked });
+      toast.success(`User removed: ${user.name}`);
+      setConfirmDeleteId(null);
     } catch (err) {
       console.error(err);
       toast.error('Failed to delete user.');
@@ -382,527 +339,515 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   const handleRemoteReloadForce = async () => {
     try {
       const nextVer = TRIGGER_CURRENT_APP_VERSION + 1;
-      await setDoc(doc(db, "system", "app_version"), { version: nextVer }, { merge: true });
-      toast.success(`System reload broadcast successfully! (Target Version ${nextVer})`);
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to propagate reload broadcast');
+      await setDoc(doc(db, 'system', 'app_version'), { version: nextVer }, { merge: true });
+      toast.success(`Reload broadcast sent (v${nextVer})`);
+    } catch {
+      toast.error('Failed to broadcast reload');
     }
   };
 
-  // Filter users based on search
   const filteredUsers = allUsers.filter(user => {
-    const matchesSearch = !searchQuery || 
+    const matchesSearch = !searchQuery ||
       (user.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       getUsernameFromFullName(user.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (user.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (user.role || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (user.lob || '').toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSearch;
+    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+    return matchesSearch && matchesRole;
   });
+
+  const statCards = [
+    { label: 'Total Users', value: allUsers.length, color: 'text-slate-200', icon: <Users className="w-4 h-4 text-slate-400" /> },
+    { label: 'Agents', value: allUsers.filter(u => u.role === 'agent').length, color: 'text-cyan-300', icon: <Activity className="w-4 h-4 text-cyan-400" /> },
+    { label: 'TLs / QAs', value: allUsers.filter(u => u.role === 'tl' || u.role === 'qa').length, color: 'text-indigo-300', icon: <ShieldCheck className="w-4 h-4 text-indigo-400" /> },
+    { label: 'Locked', value: lockedAccounts.length, color: lockedAccounts.length > 0 ? 'text-rose-400' : 'text-slate-400', icon: <Lock className="w-4 h-4 text-rose-400" /> },
+  ];
+
+  const auditActionLabel: Record<string, string> = {
+    lock_account: 'Locked account',
+    unlock_account: 'Unlocked account',
+    clear_attempts: 'Cleared login attempts',
+    reset_password: 'Reset password',
+    create_user: 'Created profile',
+    edit_user: 'Updated profile',
+    delete_user: 'Deleted profile',
+  };
 
   return (
     <div className="space-y-6 text-left" id="super-admin-root">
-      {/* Tab Header Banner */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-4">
-        <div>
-          <h2 className="text-3xl font-bold text-rose-400 font-display flex items-center gap-3">
-            <Shield className="w-8 h-8 text-rose-500" />
-            Super Admin Control Center
-          </h2>
-          <p className="text-slate-400 text-sm mt-1">
-            Oversee user directory accounts, locking statuses, custom logins, and system version syncing.
-          </p>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-white/5">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
+            <Terminal className="w-5 h-5 text-rose-400" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-slate-100 font-display tracking-tight flex items-center gap-2">
+              Admin Console
+              <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 uppercase tracking-widest">h.sobhy only</span>
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">User directory · Access control · Security · System ops</p>
+          </div>
         </div>
-
         <div className="flex items-center gap-2">
+          {isSuperAdmin && onCloseAllCases && (
+            <button
+              onClick={onCloseAllCases}
+              className="px-3 py-2 text-[11px] font-bold rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/20 flex items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <ServerCrash className="w-3.5 h-3.5" /> Close All Cases
+            </button>
+          )}
           <button
             onClick={handleRemoteReloadForce}
-            className="px-4 py-2 text-xs font-bold transition-all rounded-xl bg-amber-500/10 hover:bg-amber-500/15 text-amber-300 border border-amber-500/20 flex items-center gap-1.5 cursor-pointer"
+            className="px-3 py-2 text-[11px] font-bold rounded-xl bg-amber-500/10 hover:bg-amber-500/15 text-amber-300 border border-amber-500/20 flex items-center gap-1.5 transition-all cursor-pointer"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
-            Force Re-Sync App (v{TRIGGER_CURRENT_APP_VERSION})
+            <Zap className="w-3.5 h-3.5" /> Force Re-Sync (v{TRIGGER_CURRENT_APP_VERSION})
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left column: Quick metrics or directory snapshot summary */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="bg-white/5 border border-white/10 p-6 rounded-2xl space-y-4">
-            <h3 className="font-bold text-slate-100 text-base font-display">System State Summary</h3>
-            
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="p-4 bg-black/20 border border-white/5 rounded-2xl">
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Agents</p>
-                <p className="text-2xl font-black text-slate-200 mt-1">{allUsers.filter(u => u.role !== 'tl').length}</p>
-              </div>
-
-              <div className="p-4 bg-black/20 border border-white/5 rounded-2xl">
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Leaders/TLs</p>
-                <p className="text-2xl font-black text-indigo-400 mt-1">{allUsers.filter(u => u.role === 'tl').length}</p>
-              </div>
-
-              <div className="p-4 bg-black/20 border border-rose-500/20 rounded-2xl">
-                <p className="text-xs text-rose-300 font-bold uppercase tracking-wider">Locked Accounts</p>
-                <p className="text-2xl font-black text-rose-400 mt-1">{lockedAccounts.length}</p>
-              </div>
-
-              <div className="p-4 bg-black/20 border border-orange-500/20 rounded-2xl">
-                <p className="text-xs text-orange-300 font-bold uppercase tracking-wider">Locked Attempts</p>
-                <p className="text-2xl font-black text-orange-400 mt-1">
-                  {Object.values(failedAttempts).filter(v => v > 0).length}
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 space-y-2">
-              <h4 className="text-xs font-bold text-rose-300 flex items-center gap-1.5">
-                <AlertCircle className="w-3.5 h-3.5" /> Security Advisory
-              </h4>
-              <p className="text-[10px] text-rose-200/80 leading-relaxed font-sans font-medium">
-                Changing credentials directly updates the global security schema. Account unlock keys instantly purge invalid password attempt tallies for that user.
-              </p>
+      {/* Stat bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {statCards.map(s => (
+          <div key={s.label} className="bg-white/[0.03] border border-white/5 rounded-xl p-3 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">{s.icon}</div>
+            <div>
+              <p className={`text-xl font-black ${s.color}`}>{s.value}</p>
+              <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold">{s.label}</p>
             </div>
           </div>
+        ))}
+      </div>
 
-          {/* Recent Admin Activity Log Card */}
-          <div className="bg-white/5 border border-white/10 p-6 rounded-2xl space-y-4">
-            <h3 className="font-bold text-slate-100 text-sm font-display uppercase tracking-wider flex items-center gap-2">
-              <RefreshCw className="w-4 h-4 text-indigo-400" />
-              Recent Admin Activity
-            </h3>
-            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
-              {!auditLog || auditLog.length === 0 ? (
-                <p className="text-xs text-slate-500 italic text-center py-4 font-sans font-medium">No recent activity logged.</p>
-              ) : (
-                auditLog.map((log) => {
-                  let displayAction = log.action;
-                  if (log.action === "lock_account") displayAction = "locked account";
-                  else if (log.action === "unlock_account") displayAction = "unlocked account";
-                  else if (log.action === "clear_attempts") displayAction = "cleared attempts";
-                  else if (log.action === "reset_password") displayAction = "reset password";
-                  else if (log.action === "create_user") displayAction = "created profile";
-                  else if (log.action === "edit_user") displayAction = "updated profile";
-                  else if (log.action === "delete_user") displayAction = "deleted profile";
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Sidebar */}
+        <div className="lg:col-span-1 space-y-4">
+          {/* Add user form */}
+          <div className="bg-white/[0.03] border border-white/5 rounded-2xl overflow-hidden">
+            <button
+              onClick={() => setShowAddForm(!showAddForm)}
+              className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-white/5 transition-colors"
+            >
+              <div className="flex items-center gap-2 text-sm font-bold text-slate-200">
+                <UserPlus className="w-4 h-4 text-cyan-400" />
+                Add New User
+              </div>
+              <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${showAddForm ? 'rotate-180' : ''}`} />
+            </button>
 
-                  return (
-                    <div key={log.id} className="text-xs text-slate-300 bg-black/20 p-3 rounded-xl border border-white/5 space-y-1 font-sans font-medium">
-                      <div className="flex items-center justify-between">
-                        <span className="font-semibold text-slate-200">{log.performedBy}</span>
-                        <span className="text-[10px] text-slate-400">{formatRelativeTime(log.timestamp)}</span>
-                      </div>
-                      <div className="text-slate-400">
-                        {displayAction} for <span className="text-indigo-300">{log.targetUser}</span>
+            <AnimatePresence>
+              {showAddForm && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden border-t border-white/5"
+                >
+                  <form onSubmit={handleCreateUser} className="p-5 space-y-3">
+                    <div>
+                      <label className="text-[9px] uppercase font-bold text-slate-500 tracking-wider block mb-1">Full Name *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Aly Ibrahim"
+                        value={newUserName}
+                        onChange={e => setNewUserName(e.target.value)}
+                        className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 placeholder:text-slate-600"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] uppercase font-bold text-slate-500 tracking-wider block mb-1">Role</label>
+                      <div className="grid grid-cols-4 gap-1">
+                        {ROLE_OPTIONS.map(r => (
+                          <button
+                            key={r.value}
+                            type="button"
+                            onClick={() => setNewUserRole(r.value)}
+                            className={`py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider border transition-all ${newUserRole === r.value ? r.color : 'bg-white/5 text-slate-500 border-transparent hover:bg-white/10'}`}
+                          >
+                            {r.label}
+                          </button>
+                        ))}
                       </div>
                     </div>
-                  );
-                })
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[9px] uppercase font-bold text-slate-500 tracking-wider block mb-1">Email</label>
+                        <input type="email" placeholder="email@co.com" value={newUserEmail} onChange={e => setNewUserEmail(e.target.value)}
+                          className="w-full bg-black/30 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 placeholder:text-slate-600" />
+                      </div>
+                      <div>
+                        <label className="text-[9px] uppercase font-bold text-slate-500 tracking-wider block mb-1">LOB</label>
+                        <input type="text" placeholder="Chat / Call" value={newUserLob} onChange={e => setNewUserLob(e.target.value)}
+                          className="w-full bg-black/30 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 placeholder:text-slate-600" />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[9px] uppercase font-bold text-slate-500 tracking-wider block mb-1">LOB Team</label>
+                        <input
+                          type="text"
+                          placeholder="Team name"
+                          value={newUserTeam}
+                          onChange={e => setNewUserTeam(e.target.value)}
+                          className="w-full bg-black/30 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 placeholder:text-slate-600"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[9px] uppercase font-bold text-slate-500 tracking-wider block mb-1">Team Leader</label>
+                        <input type="text" placeholder="TL Full Name" value={newUserTL} onChange={e => setNewUserTL(e.target.value)}
+                          className="w-full bg-black/30 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 placeholder:text-slate-600" />
+                      </div>
+                    </div>
+                    <button type="submit"
+                      className="w-full py-2 bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/25 text-cyan-300 font-black text-[11px] uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-1.5">
+                      <UserPlus className="w-3.5 h-3.5" /> Create Profile
+                    </button>
+                  </form>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Audit log */}
+          <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-4 space-y-3">
+            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+              <Clock className="w-3.5 h-3.5 text-indigo-400" /> Recent Actions
+            </h3>
+            <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+              {!auditLog || auditLog.length === 0 ? (
+                <p className="text-xs text-slate-600 italic text-center py-4">No actions logged yet.</p>
+              ) : (
+                auditLog.slice(0, 30).map(log => (
+                  <div key={log.id} className="flex items-start gap-2 p-2.5 bg-black/20 rounded-xl border border-white/5">
+                    <div className="mt-0.5 shrink-0"><AuditActionIcon action={log.action} /></div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] text-slate-200 font-semibold truncate">
+                        {auditActionLabel[log.action] || log.action}{' '}
+                        <span className="text-indigo-300">· {log.targetUser}</span>
+                      </p>
+                      <p className="text-[9px] text-slate-500 mt-0.5">{formatRelativeTime(log.timestamp)}</p>
+                    </div>
+                  </div>
+                ))
               )}
             </div>
           </div>
 
-          {/* Close All Cases Card (h.sobhy exclusive) */}
-          {isSuperAdmin && onCloseAllCases && (
-            <div className="bg-gradient-to-br from-rose-500/10 to-orange-500/10 border border-rose-500/20 p-6 rounded-2xl space-y-4">
-              <h3 className="font-bold text-rose-400 text-sm font-display uppercase tracking-wider flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-rose-500" />
-                SLA & CRM Batch Actions
-              </h3>
-              <p className="text-xs text-slate-300 leading-relaxed font-sans font-medium">
-                Instantly close all open CRM/SLA tickets across all databases, including Tabby, Tamara, Complaints, General Inquiries, and Client Comm logs. Only visible to creator/CTO (**h.sobhy**).
-              </p>
-              <button
-                type="button"
-                onClick={onCloseAllCases}
-                className="w-full px-4 py-2 bg-rose-600 hover:bg-rose-500 hover:scale-[1.01] active:scale-[0.99] text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-rose-600/10 hover:shadow-rose-600/20"
-              >
-                <ShieldCheck className="w-4 h-4" />
-                Close All Open Cases & SLAs
-              </button>
-            </div>
-          )}
-
-          {/* Quick manual user addition card toggle */}
-          <div className="bg-white/5 border border-white/10 p-6 rounded-2xl space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-slate-100 text-sm font-display uppercase tracking-wider">Add User Profile</h3>
-              <button
-                onClick={() => setShowAddForm(!showAddForm)}
-                className="px-2.5 py-1 text-[10px] font-bold bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 rounded-lg transition-all"
-              >
-                {showAddForm ? 'Hide' : 'Show'}
-              </button>
-            </div>
-
-            {showAddForm && (
-              <form onSubmit={handleCreateUser} className="space-y-3.5">
-                <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Full User Name *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Aly Ibrahim"
-                    value={newUserName}
-                    onChange={(e) => setNewUserName(e.target.value)}
-                    className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-rose-500"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Role</label>
-                    <select
-                      value={newUserRole}
-                      onChange={(e) => setNewUserRole(e.target.value)}
-                      className="w-full bg-black/20 border border-white/10 rounded-xl px-2.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-rose-500"
-                    >
-                      <option value="agent">CSR (Agent)</option>
-                      <option value="tl">Team Leader</option>
-                      <option value="qa">QA Analyst</option>
-                      <option value="director">Director</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">LOB / Channel</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Chat, Social Media"
-                      value={newUserLob}
-                      onChange={(e) => setNewUserLob(e.target.value)}
-                      className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Corporate Email</label>
-                  <input
-                    type="email"
-                    placeholder="agent@company.com"
-                    value={newUserEmail}
-                    onChange={(e) => setNewUserEmail(e.target.value)}
-                    className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">LOB Team</label>
-                    <input
-                      type="text"
-                      placeholder="Team name"
-                      value={newUserTeam}
-                      onChange={(e) => setNewUserTeam(e.target.value)}
-                      className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Team Leader</label>
-                    <input
-                      type="text"
-                      placeholder="TL Full Name"
-                      value={newUserTL}
-                      onChange={(e) => setNewUserTL(e.target.value)}
-                      className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full py-2.5 bg-rose-500 hover:bg-rose-400 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-1"
-                >
-                  <UserPlus className="w-4 h-4" /> Create Profile
-                </button>
-              </form>
-            )}
+          {/* Security note */}
+          <div className="bg-rose-500/5 border border-rose-500/15 rounded-xl p-3 flex gap-2">
+            <AlertCircle className="w-3.5 h-3.5 text-rose-400 mt-0.5 shrink-0" />
+            <p className="text-[9px] text-rose-200/70 leading-relaxed">
+              Credential changes update the global security schema instantly. Unlocking an account also clears all failed login tallies for that user.
+            </p>
           </div>
         </div>
 
-        {/* Right Columns: Users controls and actions */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-              <h3 className="font-bold text-slate-100 text-lg font-display">User accounts directory</h3>
-              
-              <div className="relative w-full sm:w-64">
-                <span className="absolute left-3 top-2.5 text-slate-400">
-                  <Search className="w-4 h-4" />
-                </span>
-                <input
-                  type="text"
-                  placeholder="Filter by name, role, LOB..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-black/20 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-rose-500"
-                />
-              </div>
+        {/* Main user directory */}
+        <div className="lg:col-span-2 space-y-4">
+          {/* Search + filter bar */}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-500" />
+              <input
+                type="text"
+                placeholder="Search by name, username, role, email…"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full bg-black/30 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500/50 placeholder:text-slate-600"
+              />
             </div>
+            <div className="flex gap-1">
+              {[{ v: 'all', l: 'All' }, { v: 'agent', l: 'Agents' }, { v: 'tl', l: 'TLs' }, { v: 'qa', l: 'QA' }].map(f => (
+                <button
+                  key={f.v}
+                  onClick={() => setRoleFilter(f.v)}
+                  className={`px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-all ${
+                    roleFilter === f.v
+                      ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/25'
+                      : 'bg-white/5 text-slate-500 border-transparent hover:bg-white/10 hover:text-slate-300'
+                  }`}
+                >
+                  {f.l}
+                </button>
+              ))}
+            </div>
+          </div>
 
-            <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
-              {filteredUsers.map((user) => {
-                const uname = getUsernameFromFullName(user.name);
-                const hasPassword = !!(credentials[uname]);
-                const isUserLocked = lockedAccounts.includes(uname);
-                const failureCount = failedAttempts[uname] || 0;
+          <div className="space-y-2 max-h-[620px] overflow-y-auto pr-2">
+            {filteredUsers.length === 0 && (
+              <div className="text-center py-12 bg-white/[0.02] rounded-2xl border border-white/5">
+                <XCircle className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                <p className="text-xs text-slate-500">No users match your search.</p>
+              </div>
+            )}
 
-                const isEditing = editingUserId === user.id;
-                
-                return (
-                  <div 
-                    key={user.id} 
-                    className={`p-4 rounded-2xl border transition-all ${
-                      isUserLocked 
-                        ? 'bg-rose-950/20 border-rose-500/20 shadow-lg shadow-rose-950/10' 
-                        : 'bg-black/20 border-white/5 hover:border-white/10'
-                    }`}
-                  >
-                    {isEditing ? (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between pb-2 border-b border-white/5">
-                          <p className="font-black text-slate-100 text-sm">Editing Profile for "{user.name}"</p>
-                          <div className="flex items-center gap-2">
+            {filteredUsers.map(user => {
+              const uname = getUsernameFromFullName(user.name);
+              const hasPassword = !!(credentials[uname]);
+              const isUserLocked = lockedAccounts.includes(uname);
+              const failureCount = failedAttempts[uname] || 0;
+              const isExpanded = expandedUserId === user.id;
+              const isConfirmingDelete = confirmDeleteId === user.id;
+              const isRegistered = registeredUsers.some(u => u.id === user.id);
+
+              return (
+                <div
+                  key={user.id}
+                  className={`rounded-xl border transition-all overflow-hidden ${
+                    isUserLocked
+                      ? 'bg-rose-950/15 border-rose-500/15'
+                      : 'bg-white/[0.02] border-white/5 hover:border-white/10'
+                  }`}
+                >
+                  {/* Card header row */}
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    {/* Avatar */}
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${
+                      user.role === 'tl' ? 'bg-indigo-500/15 text-indigo-300' :
+                      user.role === 'qa' ? 'bg-amber-500/15 text-amber-300' :
+                      user.role === 'director' ? 'bg-fuchsia-500/15 text-fuchsia-300' :
+                      'bg-slate-700/30 text-slate-300'
+                    }`}>
+                      {String(user.name || '').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                    </div>
+
+                    {/* Identity */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-bold text-slate-100 text-sm">{user.name}</span>
+                        <span className="font-mono text-[10px] text-cyan-400/70 font-bold">@{uname}</span>
+                        {getRoleBadge(user.role)}
+                        {!isRegistered && (
+                          <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-slate-700/40 border border-slate-600/30 text-slate-500 font-bold uppercase tracking-wider">legacy</span>
+                        )}
+                        {hasPassword
+                          ? <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-black flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5" /> PW</span>
+                          : <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 font-black flex items-center gap-0.5"><AlertCircle className="w-2.5 h-2.5" /> NO PW</span>
+                        }
+                        {isUserLocked && <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 font-black flex items-center gap-0.5"><Lock className="w-2.5 h-2.5" /> LOCKED</span>}
+                        {failureCount > 0 && <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 font-black">{failureCount} fails</span>}
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-0.5 font-sans">
+                        {user.lob && <span>{normalizeAgentLob(user.lob, user.role)} · </span>}
+                        {user.lobTeam && <span>{user.lobTeam} · </span>}
+                        {user.teamLeader && <span>TL: {user.teamLeader} · </span>}
+                        <span>Last seen: {user.lastLoginAt ? formatRelativeTime(user.lastLoginAt) : 'Never'}</span>
+                      </p>
+                    </div>
+
+                    {/* Quick action buttons */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {isUserLocked ? (
+                        <button onClick={() => handleUnlock(user.name)} title="Unlock account"
+                          className="p-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/15 transition-all cursor-pointer">
+                          <Unlock className="w-3.5 h-3.5" />
+                        </button>
+                      ) : (
+                        <button onClick={() => handleLock(user.name)} title="Lock account"
+                          className="p-1.5 rounded-lg bg-white/5 hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 border border-transparent hover:border-rose-500/15 transition-all cursor-pointer">
+                          <Lock className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+
+                      {failureCount > 0 && (
+                        <button
+                          onClick={() => handleClearAttempts(user.name)}
+                          className="px-2 py-1 bg-orange-500/10 hover:bg-orange-500/15 border border-orange-500/20 rounded-lg text-[9px] text-orange-400 font-bold transition-all flex items-center gap-0.5 cursor-pointer"
+                          title={`Clear ${failureCount} failed attempts`}
+                        >
+                          Clear ({failureCount}x)
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => handleStartEdit(user)}
+                        title="Edit profile"
+                        className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                          isExpanded
+                            ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/20'
+                            : 'bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 border-transparent'
+                        }`}
+                      >
+                        <ChevronDown className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      {isConfirmingDelete ? (
+                        <div className="flex items-center gap-1 bg-rose-500/10 border border-rose-500/20 rounded-lg p-0.5">
+                          <button
+                            onClick={() => handleDeleteUser(user)}
+                            className="px-2 py-1 bg-rose-500 text-white hover:bg-rose-600 rounded-md text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                          >
+                            Confirm
+                          </button>
+                          <button
+                            onClick={() => setConfirmDeleteId(null)}
+                            className="px-2 py-1 bg-white/5 text-slate-300 hover:bg-white/10 rounded-md text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmDeleteId(user.id)}
+                          className="p-1.5 rounded-lg bg-white/5 hover:bg-rose-500/15 text-slate-400 hover:text-rose-400 border border-transparent hover:border-rose-500/15 transition-all cursor-pointer"
+                          title="Remove operator profile"
+                        >
+                          <UserMinus className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Expandable edit panel */}
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.18 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="border-t border-white/5 bg-black/20 px-4 py-4 space-y-4">
+                          <div className="flex items-center justify-between pb-1 border-b border-white/5">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
+                              <Shield className="w-3.5 h-3.5 text-indigo-400 animate-pulse" /> Edit Operator Details
+                            </span>
                             <button
                               onClick={() => handleSaveEdit(user)}
-                              className="px-3 py-1 bg-emerald-500 hover:bg-emerald-400 text-white text-[11px] font-extrabold rounded-lg transition-all"
+                              className="px-3 py-1 bg-cyan-500 hover:bg-cyan-400 text-black text-[10px] font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer"
                             >
                               Save Changes
                             </button>
-                            <button
-                              onClick={() => setEditingUserId(null)}
-                              className="px-3 py-1 bg-white/5 hover:bg-white/10 text-slate-300 text-[11px] font-extrabold border border-white/10 rounded-lg transition-all"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                          <div className="space-y-1">
-                            <label className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Role</label>
-                            <select
-                              value={editRole}
-                              onChange={(e) => setEditRole(e.target.value)}
-                              className="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-200"
-                            >
-                              <option value="agent">CSR (Agent)</option>
-                              <option value="tl">Team Leader</option>
-                              <option value="qa">QA Analyst</option>
-                              <option value="director">Director</option>
-                            </select>
                           </div>
 
-                          <div className="space-y-1">
-                            <label className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Email</label>
-                            <input
-                              type="email"
-                              value={editEmail}
-                              onChange={(e) => setEditEmail(e.target.value)}
-                              className="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-100"
-                            />
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Phone</label>
-                            <input
-                              type="text"
-                              value={editPhone}
-                              onChange={(e) => setEditPhone(e.target.value)}
-                              className="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-100"
-                            />
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">LOB / Channel</label>
-                            <input
-                              type="text"
-                              value={editLob}
-                              onChange={(e) => setEditLob(e.target.value)}
-                              className="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-100"
-                            />
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Team Name</label>
-                            <input
-                              type="text"
-                              value={editTeam}
-                              onChange={(e) => setEditTeam(e.target.value)}
-                              className="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-100"
-                            />
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Team Leader</label>
-                            <input
-                              type="text"
-                              value={editTL}
-                              onChange={(e) => setEditTL(e.target.value)}
-                              className="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-100"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {/* Upper row: Avatar & details & toggle switches */}
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                          <div className="flex items-start gap-3 text-left">
-                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs ${
-                              user.role === 'tl' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-slate-700/20 text-slate-300'
-                            }`}>
-                              {String(user.name || '').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="font-bold text-slate-100 text-sm whitespace-nowrap">{user.name}</span>
-                                <span className="font-mono text-xs text-cyan-300">{getUsernameFromFullName(user.name)}</span>
-                                <span className={`text-[9px] px-2 py-0.5 rounded-full border font-black uppercase tracking-wider ${
-                                  user.role === 'tl' 
-                                    ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-300' 
-                                    : 'bg-white/5 border-white/5 text-slate-400'
-                                }`}>
-                                  {user.role}
-                                </span>
-                                {hasPassword ? (
-                                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-extrabold flex items-center gap-0.5">
-                                    <ShieldCheck className="w-2.5 h-2.5 text-emerald-400" /> PW SET
-                                  </span>
-                                ) : (
-                                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 font-extrabold flex items-center gap-0.5" title="No custom password set. Defining on first login is allowed.">
-                                    <AlertCircle className="w-2.5 h-2.5 text-amber-500" /> NO PW
-                                  </span>
-                                )}
-                                {isUserLocked && (
-                                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 font-extrabold flex items-center gap-0.5">
-                                    <Lock className="w-2.5 h-2.5" /> LOCKED
-                                  </span>
-                                )}
-                              </div>
-                              <div className="text-[10px] text-slate-500 font-sans mt-0.5 animate-none font-medium flex items-center gap-1.5">
-                                <span>Direct Manager:</span>
-                                <span className="text-xs text-slate-300">{user.teamLeader || '—'}</span>
-                              </div>
-                              <p className="text-[10px] text-slate-400 mt-0.5 space-x-2 flex flex-wrap items-center gap-y-1">
-                                <span className="text-rose-400 font-mono font-bold bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.5 rounded mr-1">
-                                  App Username: {getUsernameFromFullName(user.name)}
-                                </span>
-                                <span className="text-indigo-400 font-mono font-bold bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded mr-1">
-                                  Direct Manager: {user.role === 'tl' ? '—' : (user.teamLeader || '—')}
-                                </span>
-                                <span>{user.email || 'No Email'}</span>
-                                {user.phone && <span className="text-emerald-400 font-mono">• {user.phone}</span>}
-                                {normalizeAgentLob(user.lob, user.role) && <span>• <span className="text-indigo-300 font-semibold">{normalizeAgentLob(user.lob, user.role)}</span></span>}
-                                <span className="text-gray-400 font-mono font-bold bg-white/5 border border-white/10 px-1.5 py-0.5 rounded">
-                                  Last seen: {user.lastLoginAt ? formatRelativeTime(user.lastLoginAt) : 'Never'}
-                                </span>
-                              </p>
+                          {/* Role picker */}
+                          <div>
+                            <label className="text-[9px] uppercase font-bold text-slate-500 tracking-wider block mb-1.5">Role</label>
+                            <div className="grid grid-cols-4 gap-1.5">
+                              {ROLE_OPTIONS.map(r => (
+                                <button
+                                  key={r.value}
+                                  type="button"
+                                  onClick={() => setEditRole(r.value)}
+                                  className={`py-2 rounded-lg text-[10px] font-black uppercase tracking-wider border transition-all cursor-pointer ${
+                                    editRole === r.value 
+                                      ? r.color 
+                                      : 'bg-white/5 text-slate-500 border-transparent hover:bg-white/10 hover:text-slate-300'
+                                  }`}
+                                >
+                                  {r.label}
+                                </button>
+                              ))}
                             </div>
                           </div>
 
-                          {/* Quick Actions switch lock state */}
-                          <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                            {isUserLocked ? (
-                              <button
-                                onClick={() => handleUnlock(user.name)}
-                                className="px-2.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 rounded-xl text-[10px] font-black tracking-wider uppercase transition-all flex items-center gap-1 cursor-pointer"
-                              >
-                                <Unlock className="w-3 h-3" /> Unlock Account
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => handleLock(user.name)}
-                                className="px-2.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/10 rounded-xl text-[10px] font-black tracking-wider uppercase transition-all flex items-center gap-1 cursor-pointer"
-                              >
-                                <Lock className="w-3 h-3 text-rose-400" /> Lock Account
-                              </button>
-                            )}
-
-                            {failureCount > 0 && (
-                              <button
-                                onClick={() => handleClearAttempts(user.name)}
-                                className="px-2 py-1.5 bg-orange-500/10 hover:bg-orange-500/15 border border-orange-500/20 rounded-xl text-[9px] text-orange-400 font-bold transition-all flex items-center gap-0.5"
-                                title={`Clear ${failureCount} failed passcode attempts`}
-                              >
-                                Clear {failureCount}x Red Attempts
-                              </button>
-                            )}
+                          {/* Fields grid */}
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {[
+                              { label: 'Email', val: editEmail, set: setEditEmail, type: 'email', ph: 'agent@co.com' },
+                              { label: 'Phone', val: editPhone, set: setEditPhone, type: 'text', ph: '+971…' },
+                              { label: 'LOB', val: editLob, set: setEditLob, type: 'text', ph: 'Chat / Call Center' },
+                              { label: 'Team Name', val: editTeam, set: setEditTeam, type: 'text', ph: 'Team name' },
+                              { label: 'Team Leader', val: editTL, set: setEditTL, type: 'text', ph: 'TL full name' },
+                            ].map(f => (
+                              <div key={f.label}>
+                                <label className="text-[9px] uppercase font-bold text-slate-500 tracking-wider block mb-1">{f.label}</label>
+                                <input
+                                  type={f.type}
+                                  value={f.val}
+                                  placeholder={f.ph}
+                                  onChange={e => f.set(e.target.value)}
+                                  className="w-full bg-black/30 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500/50 placeholder:text-slate-600"
+                                />
+                              </div>
+                            ))}
                           </div>
-                        </div>
 
-                        {/* Lower row: Inline password reset or profile action button triggers */}
-                        <div className="flex items-center justify-between border-t border-white/5 pt-2.5 text-xs text-slate-400">
-                          <div className="flex items-center gap-3">
-                            {isSuperAdmin ? (
-                              targetPasswordChange === user.id ? (
+                          {/* Password reset inline */}
+                          {isSuperAdmin && (
+                            <div className="pt-1">
+                              {targetPasswordChange === user.name ? (
                                 <div className="flex items-center gap-2">
-                                  <input
-                                    type="text"
-                                    placeholder="Enter New Password"
-                                    value={newPasswordValue}
-                                    onChange={(e) => setNewPasswordValue(e.target.value)}
-                                    className="bg-black/40 border border-white/10 rounded-xl p-1 px-2.5 text-slate-200 text-[11px] focus:outline-none focus:border-rose-500 w-36"
-                                  />
-                                  <button
-                                    onClick={() => handleSetPassword(user.name)}
-                                    className="p-1 px-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-[10px] font-extrabold transition-all cursor-pointer"
-                                  >
-                                    Reset Password
+                                  <div className="relative flex-1">
+                                    <input
+                                      type={showPassword ? 'text' : 'password'}
+                                      placeholder="New password"
+                                      value={newPasswordValue}
+                                      onChange={e => setNewPasswordValue(e.target.value)}
+                                      className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 pr-8 text-xs text-slate-100 focus:outline-none focus:border-rose-500/50"
+                                    />
+                                    <button type="button" onClick={() => setShowPassword(p => !p)}
+                                      className="absolute right-2 top-1.5 text-slate-500 hover:text-slate-300">
+                                      {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                    </button>
+                                  </div>
+                                  <button onClick={() => handleSetPassword(user.name)}
+                                    className="px-3 py-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/20 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer">
+                                    Set PW
                                   </button>
-                                  <button
-                                    onClick={() => { setTargetPasswordChange(null); setNewPasswordValue(''); }}
-                                    className="p-1 text-slate-400 hover:text-slate-200 text-[10px] font-medium cursor-pointer"
-                                  >
+                                  <button onClick={() => { setTargetPasswordChange(null); setNewPasswordValue(''); }}
+                                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-slate-400 rounded-lg text-[10px] font-bold transition-all cursor-pointer">
                                     Cancel
                                   </button>
                                 </div>
                               ) : (
-                                <button
-                                  onClick={() => setTargetPasswordChange(user.id)}
-                                  className="flex items-center gap-1 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 hover:border-rose-500/30 transition-all rounded-xl p-1 px-2.5 text-[10.5px] font-bold text-rose-300 cursor-pointer"
-                                >
-                                  <Key className="w-3 h-3 text-rose-400" /> Reset Password
+                                <button onClick={() => setTargetPasswordChange(user.name)}
+                                  className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 hover:text-rose-300 transition-colors cursor-pointer">
+                                  <Key className="w-3 h-3" /> Set Password
                                 </button>
-                              )
-                            ) : (
-                              <div className="text-[10px] text-slate-500 flex items-center gap-1 font-medium font-sans">
-                                <Lock className="w-2.5 h-2.5 text-slate-600" /> Password reset restricted to Global Admin
-                              </div>
-                            )}
-                          </div>
+                              )}
+                            </div>
+                          )}
 
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => handleStartEdit(user)}
-                              className="p-1.5 hover:bg-white/10 text-slate-300 hover:text-white rounded-lg transition-colors"
-                              title="Edit complete profile data"
-                            >
-                              <span className="text-[10px] font-bold">Edit Profile</span>
-                            </button>
-                            <button
-                              onClick={() => handleDeleteUser(user)}
-                              className="p-1.5 hover:bg-rose-500/20 text-rose-400 hover:text-rose-100 rounded-lg transition-colors"
-                              title="Remove user profile entirely"
-                            >
-                              <UserMinus className="w-3.5 h-3.5" />
-                            </button>
+                          {/* Action row */}
+                          <div className="flex items-center justify-between pt-1 border-t border-white/5">
+                            <div className="flex items-center gap-2">
+                              {failureCount > 0 && (
+                                <button onClick={() => handleClearAttempts(user.name)}
+                                  className="flex items-center gap-1 px-2.5 py-1.5 bg-orange-500/10 hover:bg-orange-500/15 border border-orange-500/15 text-orange-400 rounded-lg text-[10px] font-bold transition-all cursor-pointer">
+                                  <XCircle className="w-3 h-3" /> Clear {failureCount} Fails
+                                </button>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {isConfirmingDelete ? (
+                                <>
+                                  <span className="text-[10px] text-rose-300 font-bold">Delete "{user.name}"?</span>
+                                  <button onClick={() => handleDeleteUser(user)}
+                                    className="px-2.5 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/20 rounded-lg text-[10px] font-black transition-all cursor-pointer">
+                                    Confirm
+                                  </button>
+                                  <button onClick={() => setConfirmDeleteId(null)}
+                                    className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 text-slate-400 rounded-lg text-[10px] font-bold transition-all cursor-pointer">
+                                    Cancel
+                                  </button>
+                                </>
+                              ) : (
+                                isSuperAdmin && (
+                                  <button onClick={() => setConfirmDeleteId(user.id)}
+                                    className="flex items-center gap-1 px-2.5 py-1.5 bg-white/5 hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 border border-transparent hover:border-rose-500/15 rounded-lg text-[10px] font-bold transition-all cursor-pointer">
+                                    <UserMinus className="w-3 h-3" /> Remove User
+                                  </button>
+                                )
+                              )}
+                              <button onClick={() => handleSaveEdit(user)}
+                                className="px-3 py-1.5 bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/20 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer">
+                                Save Changes
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </motion.div>
                     )}
-                  </div>
-                );
-              })}
-
-              {filteredUsers.length === 0 && (
-                <div className="text-center p-8 bg-black/10 rounded-2xl border border-white/5 text-slate-500 font-sans font-medium text-xs">
-                  No matching user accounts found. Add users or import files to populate.
+                  </AnimatePresence>
                 </div>
-              )}
-            </div>
+              );
+            })}
           </div>
         </div>
       </div>

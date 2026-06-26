@@ -308,6 +308,75 @@ body.theme-light .text-indigo-200 {
   color: #4f46e5 !important;
 }
 
+/* ─── CLEAN UI OVERRIDES ───────────────────────────────────────────────────
+   Strips heavy drop shadows, noisy backdrop blurs, and loud card gradients
+   globally. Color palette, borders, and accent tints are fully preserved.
+   Shadows on interactive elements (buttons, focused inputs) are kept subtle.
+────────────────────────────────────────────────────────────────────────── */
+/* 1. Kill heavy outer shadows on all containers and cards */
+.shadow-2xl,
+.shadow-xl {
+  box-shadow: none !important;
+}
+/* 2. Reduce medium shadows to a hairline depth hint only */
+.shadow-lg,
+.shadow-md {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18) !important;
+}
+/* 3. Flatten inset shadows — they create a "pressed down" muddy look */
+.shadow-inner,
+.shadow-sm {
+  box-shadow: none !important;
+}
+/* 4. Remove coloured glow shadows on buttons (indigo, emerald, rose, etc.)
+   These are the shadow-indigo-500/, shadow-emerald-500/ etc. classes.
+   Tailwind compiles them to --tw-shadow so we reset that variable. */
+[class="shadow-indigo"],
+[class*="shadow-emerald"],
+[class*="shadow-rose"],
+[class*="shadow-amber"],
+[class*="shadow-cyan"],
+[class*="shadow-purple"],
+[class*="shadow-fuchsia"],
+[class*="shadow-pink"],
+[class*="shadow-violet"],
+[class*="shadow-teal"],
+[class*="shadow-blue"],
+[class*="shadow-yellow"],
+[class*="shadow-red"],
+[class*="shadow-black"],
+[class*="shadow-white"] {
+  --tw-shadow-color: transparent !important;
+  --tw-shadow: 0 0 0 transparent !important;
+  box-shadow: 0 0 0 transparent !important;
+}
+/* 5. Reduce heavy backdrop blurs — keep only a very light frosted hint */
+.backdrop-blur-xl,
+.backdrop-blur-2xl,
+.backdrop-blur-3xl {
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+}
+.backdrop-blur-lg {
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+}
+.backdrop-blur-md {
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+}
+/* 6. Strip the box-shadow from the global select override — border is enough */
+select {
+  box-shadow: none !important;
+}
+select:focus {
+  box-shadow: 0 0 0 1px rgba(10, 132, 255, 0.4) !important;
+}
+/* 7. Drop shadow on drop-shadow filter utilities (used on some text/icons) */
+[class="drop-shadow"] {
+  filter: none !important;
+}
+
 /* Suppress Vite Error Overlay */
 vite-error-overlay {
   display: none !important;
@@ -315,15 +384,19 @@ vite-error-overlay {
   pointer-events: none !important;
 }
 
-@keyframes global-ring-jump {
-  0% { transform: translateY(0); }
-  25% { transform: translateY(-5px) scale(1.1); }
-  50% { transform: translateY(0) scale(1); }
-  75% { transform: translateY(-3px) scale(1.05); }
-  100% { transform: translateY(0) scale(1); }
+@keyframes notif-bell-ring {
+  0%   { transform: rotate(0deg) scale(1); }
+  15%  { transform: rotate(-18deg) scale(1.15); }
+  30%  { transform: rotate(18deg) scale(1.15); }
+  45%  { transform: rotate(-12deg) scale(1.1); }
+  60%  { transform: rotate(12deg) scale(1.1); }
+  75%  { transform: rotate(-6deg) scale(1.05); }
+  90%  { transform: rotate(6deg) scale(1.05); }
+  100% { transform: rotate(0deg) scale(1); }
 }
 
-.global-ring svg {
-  animation: global-ring-jump 0.5s ease-in-out;
-  animation-iteration-count: 3;
+#notif-bell-btn.notif-bell-ring svg {
+  animation: notif-bell-ring 0.6s ease-in-out;
+  animation-iteration-count: 2;
+  transform-origin: top center;
 }

@@ -2424,11 +2424,14 @@ export default function App() {
       }
     }
 
-    // Jump animation for icons globally
-    document.body.classList.add("global-ring");
-    setTimeout(() => {
-      document.body.classList.remove("global-ring");
-    }, 1500);
+    // Ring animation scoped to only the bell button
+    const bellBtn = document.getElementById("notif-bell-btn");
+    if (bellBtn) {
+      bellBtn.classList.add("notif-bell-ring");
+      setTimeout(() => {
+        bellBtn.classList.remove("notif-bell-ring");
+      }, 1400);
+    }
   };
 
   // Support state
@@ -11368,6 +11371,7 @@ ${ttNotes}`
 
                       {/* Notification Center Trigger */}
                       <button
+                        id="notif-bell-btn"
                         onClick={() => setIsNotifDrawerOpen(true)}
                         className="relative p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-slate-300 hover:text-slate-100 cursor-pointer group flex items-center justify-center w-10 h-10 shadow-md shadow-black/20"
                         title="Real-time Alerts Inbox"
