@@ -11236,7 +11236,8 @@ ${ttNotes}`
               <div className="flex items-center justify-end gap-3 text-right">
                 {(currentUser?.role === "tl" ||
                   currentUser?.role === "qa" ||
-                  currentUser?.role === "director") && (
+                  currentUser?.role === "director" ||
+                  currentUser?.role === "agent") && (
                   <button
                     onClick={() => setIsPatientHistoryOpen(true)}
                     title="Patient History Lookup"
