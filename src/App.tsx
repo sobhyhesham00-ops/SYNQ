@@ -1,4 +1,5 @@
 import { ScheduleUpload } from "./components/ScheduleUpload";
+import { BreakSchedulePanel } from "./components/BreakSchedulePanel";
 import { purgeAllTimeLogs } from "./services/timelogService";
 import { EditModal } from "./components/EditModal";
 import { ResetPasswordModal } from "./components/ResetPasswordModal";
@@ -2741,6 +2742,15 @@ export default function App() {
   const [breakLunchEditorShift, setBreakLunchEditorShift] = useState<any>(null);
   const [blBreakTime, setBlBreakTime] = useState("");
   const [blLunchTime, setBlLunchTime] = useState("");
+
+  const handleBreakSchedulesUpdated = (updatedShifts: any[]) => {
+    setSchedules((prev: any) =>
+      prev.map((s: any) => {
+        const updated = updatedShifts.find((u: any) => u.id === s.id);
+        return updated ? updated : s;
+      })
+    );
+  };
 
   const handleUpdateShiftBreakLunch = async (
     shift: any,
@@ -23348,6 +23358,19 @@ ${ttNotes}`
                             </form>
                           </div>
                         )}
+
+                        {/* Break Schedule Panel */}
+                        <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5">
+                          <BreakSchedulePanel
+                            currentUser={currentUser}
+                            schedules={schedules}
+                            isTLOrAdmin={isTLOreSupport || isSuperAdmin || currentUser?.role === 'tl'}
+                            isSuperAdmin={isSuperAdmin}
+                            systemTime={systemTime}
+                            addSystemNotification={addSystemNotification}
+                            onSchedulesUpdated={handleBreakSchedulesUpdated}
+                          />
+                        </div>
 
                         {/* Informative coverage card indicators */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
