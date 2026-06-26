@@ -392,6 +392,10 @@ export const getUsernameFromFullName = (fullName: string): string => {
   if (val.includes('.') && !val.includes(' ')) {
     return val;
   }
+  // Special mapping for Mohamed Alaa to support "m.alaaeldin"
+  if (val === 'mohamed alaa' || val === 'mohamed alaa eldin' || val === 'mohamed alaaeldin') {
+    return 'm.alaaeldin';
+  }
   const parts = val.replace(/\s+/g, ' ').split(' ');
   if (parts.length === 0) return '';
   const firstLetter = parts[0].charAt(0);
@@ -403,6 +407,11 @@ export const getUsernameFromFullName = (fullName: string): string => {
 export const findAgentByUsername = (username: string, referenceList: string[] = []): string | null => {
   if (!username) return null;
   const target = (username || '').trim().toLowerCase();
+  
+  // Direct shortcut mapping for m.alaaeldin / m.alaa to avoid system directory resolution failure
+  if (target === 'm.alaaeldin' || target === 'm.alaa') {
+    return 'Mohamed Alaa';
+  }
   
   const combinedList = Array.from(new Set([
     ...referenceList,
