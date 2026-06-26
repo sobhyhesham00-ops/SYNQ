@@ -407,6 +407,7 @@ export const TEAM_LEADERS = [
 
 export const INITIAL_AGENTS = [
   'AbdelRahman Al Sayed',
+  'Mariam Tantawy',
   'AbduAllah Salah Fahmy',
   'Ahmed Eid Abdelbaset Eid',
   'Alaa Ashraf Farouk Darwish',
@@ -446,6 +447,7 @@ export const INITIAL_AGENTS = [
 
 export const AGENT_LOBS: Record<string, string> = {
   'AbdelRahman Al Sayed': 'Chat',
+  'Mariam Tantawy': 'Chat',
   'Ahmed Eid Abdelbaset Eid': 'Chat',
   'Alaa Ashraf Farouk Darwish': 'Chat',
   'Ammar Ismail Helmy': 'Chat',
@@ -485,6 +487,7 @@ export const AGENT_LOBS: Record<string, string> = {
 export const AGENT_TL_MAP: Record<string, string> = {
   // Hesham Sobhy's team
   'AbdelRahman Al Sayed': 'Hesham Sobhy',
+  'Mariam Tantawy': 'Hesham Sobhy',
   'Alaa Ashraf Farouk Darwish': 'Hesham Sobhy',
   'Anan Ashraf farouk Darwish': 'Hesham Sobhy',
   'Mahmoud Mohamed Gamal Eldin': 'Hesham Sobhy',
