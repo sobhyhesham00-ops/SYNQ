@@ -2211,6 +2211,13 @@ export default function App() {
     // 2. Notifications Real-time Sync
     const normalizedName = currentUser.name.trim().toLowerCase();
     const cleanedName = normalizedName.replace(/[^a-zA-Z0-9]/g, "");
+    const isPrivilegedUser =
+      currentUser.role === "tl" ||
+      currentUser.role === "qa" ||
+      (currentUser.role as string) === "admin" ||
+      (currentUser.role as string) === "super_admin" ||
+      currentUser.role === "director";
+
     const selfTargets = Array.from(
       new Set(
         [
@@ -2219,12 +2226,9 @@ export default function App() {
           `usr_${normalizedName}`,
           `usr_${currentUser.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}`,
           "all",
-          "tl",
-          "director",
-          "qa",
-          currentUser.role,
           currentUser.name,
           currentUser.name.toLowerCase(),
+          ...(isPrivilegedUser ? ["tl", "director", "qa", currentUser.role] : []),
         ].filter(Boolean),
       ),
     );
@@ -2259,9 +2263,9 @@ export default function App() {
         const lastNotifiedNotifId =
           localStorage.getItem("sched_last_notified_notif_id") || "";
         if (latest && latest.id !== lastNotifiedNotifId) {
-          const isUnreadByMe = !latest.seenByUsers?.includes(
-            currentUser?.name || "",
-          );
+          const isUnreadByMe =
+            !latest.seenByUsers?.includes(currentUser?.id || "") &&
+            !latest.seenByUsers?.includes(currentUser?.name || "");
           const isLatestForMe = isNotificationForUser(
             latest,
             currentUserRef.current,
@@ -3042,7 +3046,11 @@ export default function App() {
   const visibleNotifs = notifications
     .filter((notif) => {
       if (!currentUser) return false;
-      if (notif.clearedByUsers && notif.clearedByUsers.includes(currentUser.name))
+      if (
+        notif.clearedByUsers &&
+        (notif.clearedByUsers.includes(currentUser.id) ||
+          notif.clearedByUsers.includes(currentUser.name))
+      )
         return false;
       return isNotificationForUser(
         notif,
@@ -3062,9 +3070,11 @@ export default function App() {
 
   const unreadCount = visibleNotifs.filter((notif) => {
     const userName = currentUser?.name || "";
+    const userId = currentUser?.id || "";
     return (
       !notif.seenByUsers ||
-      !notif.seenByUsers.includes(userName)
+      (!notif.seenByUsers.includes(userName) &&
+        !notif.seenByUsers.includes(userId))
     );
   }).length;
 
@@ -3072,7 +3082,9 @@ export default function App() {
     if (!currentUser || isMarkingAll) return;
     const unread = notifications.filter(
       (n) =>
+        !n.clearedByUsers?.includes(currentUser.id) &&
         !n.clearedByUsers?.includes(currentUser.name) &&
+        !n.seenByUsers?.includes(currentUser.id) &&
         !n.seenByUsers?.includes(currentUser.name),
     );
     if (unread.length === 0) return;
@@ -3082,6 +3094,7 @@ export default function App() {
       const batch = writeBatch(db);
       unread.forEach((n) => {
         const seenSet = new Set(n.seenByUsers || []);
+        seenSet.add(currentUser.id);
         seenSet.add(currentUser.name);
         batch.update(doc(db, "notifications", n.id), {
           seenByUsers: Array.from(seenSet),
@@ -3103,7 +3116,8 @@ export default function App() {
     const n = notifications.find((item) => item.id === id);
     if (n) {
       const seenSet = new Set(n.seenByUsers || []);
-      if (!seenSet.has(currentUser.name)) {
+      if (!seenSet.has(currentUser.id) && !seenSet.has(currentUser.name)) {
+        seenSet.add(currentUser.id);
         seenSet.add(currentUser.name);
         updateDoc(doc(db, "notifications", n.id), {
           seenByUsers: Array.from(seenSet),
@@ -3120,6 +3134,7 @@ export default function App() {
       const batch = writeBatch(db);
       myVisible.forEach((n: any) => {
         const clearedSet = new Set(n.clearedByUsers || []);
+        clearedSet.add(currentUser.id);
         clearedSet.add(currentUser.name);
         batch.update(doc(db, "notifications", n.id), {
           clearedByUsers: Array.from(clearedSet),

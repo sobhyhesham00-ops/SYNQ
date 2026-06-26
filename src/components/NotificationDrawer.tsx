@@ -48,7 +48,11 @@ export const NotificationDrawer = ({
     return null;
   };
 
-  const unreadCount = sortedNotifs.filter(n => !n.seenByUsers?.includes(currentUser?.id)).length;
+  const unreadCount = sortedNotifs.filter(
+    n =>
+      !n.seenByUsers?.includes(currentUser?.id) &&
+      !n.seenByUsers?.includes(currentUser?.name)
+  ).length;
 
   return (
     <AnimatePresence>
