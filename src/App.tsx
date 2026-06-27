@@ -714,42 +714,65 @@ const isNotificationForUser = (
   const userLower = (user.name || "").trim().toLowerCase();
   const cleanedUser = userLower.replace(/[^a-zA-Z0-9]/g, "");
 
-  // If the notification has a case entity associated, only show it to the agent if they are the owner/creator/assignee
   if (notif.entityType && notif.entityId) {
-    if (notif.entityType === "inquiry") {
+    // If the case hasn't loaded into local state yet, fall back to targetAgent/targetGroups match
+    // so notifications aren't silently dropped on race condition or first load
+    const fallbackToTarget = () => {
+      const isTargetedToMe =
+        (notif.targetAgent && notif.targetAgent.toLowerCase() === userLower) ||
+        (notif.targetGroups &&
+          (notif.targetGroups.includes(user.id) ||
+            notif.targetGroups.includes(`usr_${cleanedUser}`) ||
+            notif.targetGroups.includes(`usr_${userLower}`) ||
+            notif.targetGroups.includes('all') ||
+            notif.targetAgent === 'all'));
+      return !!isTargetedToMe;
+    };
+
+    if (notif.entityType === 'inquiry') {
       const item = inqs.find((i) => i.id === notif.entityId);
-      return item
-        ? (item.agentName || "").toLowerCase() === userLower
-        : false;
+      if (!item) return fallbackToTarget();
+      return (
+        (item.agentName || '').toLowerCase() === userLower ||
+        (item.assignedToName || '').toLowerCase() === userLower ||
+        (item.assignedTo || '').toLowerCase() === userLower
+      );
     }
-    if (notif.entityType === "scheduling_request") {
+    if (notif.entityType === 'scheduling_request') {
       const item = reqs.find((r) => r.id === notif.entityId);
-      return item
-        ? (item.agentName || "").toLowerCase() === userLower ||
-            (item.openedBy || "").toLowerCase() === userLower
-        : false;
+      if (!item) return fallbackToTarget();
+      return (
+        (item.agentName || '').toLowerCase() === userLower ||
+        (item.openedBy || '').toLowerCase() === userLower
+      );
     }
-    if (notif.entityType === "tt_request") {
+    if (notif.entityType === 'tt_request') {
       const item = ttrs.find((r) => r.id === notif.entityId);
-      return item
-        ? (item.agentName || "").toLowerCase() === userLower ||
-            (item.submittedByName || "").toLowerCase() === userLower
-        : false;
+      if (!item) return fallbackToTarget();
+      return (
+        (item.agentName || '').toLowerCase() === userLower ||
+        (item.submittedByName || '').toLowerCase() === userLower ||
+        (item.assignedToName || '').toLowerCase() === userLower
+      );
     }
-    if (notif.entityType === "tt_complaint") {
+    if (notif.entityType === 'tt_complaint') {
       const item = comps.find((c) => c.id === notif.entityId);
-      return item
-        ? (item.agentName || "").toLowerCase() === userLower
-        : false;
+      if (!item) return fallbackToTarget();
+      return (
+        (item.agentName || '').toLowerCase() === userLower ||
+        (item.assignedToName || '').toLowerCase() === userLower
+      );
     }
-    if (notif.entityType === "client_comm") {
+    if (notif.entityType === 'client_comm') {
       const item = comms.find((c) => c.id === notif.entityId);
-      return item
-        ? (item.agentName || "").toLowerCase() === userLower ||
-            (item.callCenterAgentName || "").toLowerCase() === userLower
-        : false;
+      if (!item) return fallbackToTarget();
+      return (
+        (item.agentName || '').toLowerCase() === userLower ||
+        (item.callCenterAgentName || '').toLowerCase() === userLower ||
+        (item.assignedToName || '').toLowerCase() === userLower
+      );
     }
-    return false;
+    return fallbackToTarget();
   }
 
   // If there is no specific case entity (e.g., personal reminders, general announcements),
@@ -770,6 +793,7 @@ export default function App() {
   const isMountedRef = useRef(true);
   const notificationsRef = useRef<SystemNotification[]>([]);
   const triggeredStableIdsRef = useRef<Set<string>>(new Set());
+  const isNotifsInitializedRef = useRef(false);
   const isNotificationsLoadedRef = useRef(false);
   useEffect(() => {
     return () => {
@@ -1894,7 +1918,7 @@ export default function App() {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const unsubTLLoginLogs = onSnapshot(
-        query(collection(db, "tl_login_logs"), where("clockIn", ">=", thirtyDaysAgo.toISOString())),
+        query(collection(db, "tl_login_logs"), where("loggedInAt", ">=", thirtyDaysAgo.toISOString())),
         (snap) => {
           const logs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
           setTlLoginLogs(logs);
@@ -2240,7 +2264,6 @@ export default function App() {
       collection(db, "notifications"),
       where("targetGroups", "array-contains-any", selfTargets),
     );
-    let isNotifsInitialized = false;
     const unsubNotifs = onSnapshot(
       qNotifs,
       (snapshot) => {
@@ -2255,8 +2278,8 @@ export default function App() {
         );
 
         const latest = arr[0];
-        if (!isNotifsInitialized) {
-          isNotifsInitialized = true;
+        if (!isNotifsInitializedRef.current) {
+          isNotifsInitializedRef.current = true;
           isNotificationsLoadedRef.current = true;
           // On first load, just set state — never alert for pre-existing notifications
           setNotifications(arr);
@@ -2345,6 +2368,7 @@ export default function App() {
       unsubNotifs();
       unsubOrders();
       unsubTodos();
+      isNotifsInitializedRef.current = false;
     };
   }, [currentUser, authReady]);
 
@@ -3718,6 +3742,7 @@ ${pageText}
     if (!currentUser) return;
     const isTL =
       currentUser.role === "tl" ||
+      currentUser.role === "director" ||
       (currentUser.name && isTLName(currentUser.name));
     if (!isTL) return;
 

@@ -39,12 +39,14 @@ export const NotificationDrawer = ({
   const getNavTab = (notif: any) => {
     if (notif.entityType === 'inquiry' || notif.type === 'inquiry') return 'inquiries';
     if (notif.entityType === 'scheduling_request' || notif.type === 'schedule') return 'my-requests';
-    if (notif.entityType === 'case') return 'cases';
     if (notif.entityType === 'tt_request' || notif.type === 'fintech_request') return 'tabby-tamara';
     if (notif.entityType === 'tt_complaint' || notif.type === 'fintech_complaint') return 'complaints';
     if (notif.entityType === 'client_comm') return 'client-comms';
+    if (notif.entityType === 'case') return 'cases';
     if (notif.type === 'feedback') return 'tl-feedback';
-    if (notif.type === 'absence' || notif.type === 'compliance') return 'dashboard';
+    if (notif.type === 'absence') return 'dashboard';
+    if (notif.type === 'compliance') return 'dashboard';
+    if (notif.type === 'reminder') return 'inquiries';
     return null;
   };
 
@@ -160,7 +162,9 @@ export const NotificationDrawer = ({
                     </div>
                   ) : (
                     displayNotifs.map(notif => {
-                      const isUnread = !notif.seenByUsers?.includes(currentUser?.id);
+                      const isUnread =
+                        !notif.seenByUsers?.includes(currentUser?.id) &&
+                        !notif.seenByUsers?.includes(currentUser?.name);
                       const getIcon = () => {
                         if (notif.type === 'incident' || notif.type === 'compliance') return <AlertTriangle className="w-4 h-4 text-rose-400" />;
                         if (notif.type === 'schedule') return <Info className="w-4 h-4 text-blue-400" />;
@@ -204,8 +208,13 @@ export const NotificationDrawer = ({
                                 const delay = alreadyOnTab ? 50 : 350;
                                 setTimeout(() => {
                                   const element =
+                                    document.getElementById(`inquiry-${notif.entityId}`) ||
                                     document.getElementById(`request-${notif.entityId}`) ||
-                                    document.getElementById(`inquiry-${notif.entityId}`);
+                                    document.getElementById(`tt-${notif.entityId}`) ||
+                                    document.getElementById(`complaint-${notif.entityId}`) ||
+                                    document.getElementById(`clientcomm-${notif.entityId}`) ||
+                                    document.getElementById(`case-${notif.entityId}`) ||
+                                    document.getElementById(notif.entityId);
                                   if (element) {
                                     element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                     element.classList.add('ring-2', 'ring-indigo-500', 'ring-offset-2', 'ring-offset-[#0f0f13]', 'transition-all', 'duration-500');
