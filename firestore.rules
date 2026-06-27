@@ -85,10 +85,16 @@ service cloud.firestore {
     match /inquiries/{docId} {
       allow read: if request.auth != null;
       allow write: if request.auth != null && (
-        isSuperAdmin() || 
-        isTLOrSupport() || 
-        (resource != null && resource.data.get('agentName', '') == getUserName()) || 
-        (request.resource != null && request.resource.data.get('agentName', '') == getUserName())
+        isSuperAdmin() ||
+        isTLOrSupport() ||
+        (resource != null && (
+          resource.data.get('agentName', '') == getUserName() ||
+          resource.data.get('assignedToName', '') == getUserName()
+        )) ||
+        (request.resource != null && (
+          request.resource.data.get('agentName', '') == getUserName() ||
+          request.resource.data.get('assignedToName', '') == getUserName()
+        ))
       );
     }
 

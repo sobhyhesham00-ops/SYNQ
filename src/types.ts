@@ -480,6 +480,7 @@ export const AGENT_LOBS: Record<string, string> = {
   'Kotoz Sami Mohamed': 'Call Center',
   'Mariam Nagy Eraky': 'Call Center',
   'Mariam walaa Gamal Mostafa': 'Call Center',
+  'Basma Rabea': 'Quality',
   'Mohamed Amer Mohy El Din': 'Call Center',
   'Nouran Mohamed Saad Eldin Tawfik': 'Call Center'
 };

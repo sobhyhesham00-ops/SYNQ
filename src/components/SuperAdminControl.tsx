@@ -203,7 +203,9 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
       role: newUserRole,
       email: String(newUserEmail || '').trim() || undefined,
       phone: String(newUserPhone || '').trim() || undefined,
-      lob: normalizeAgentLob(String(newUserLob || '').trim() || undefined, newUserRole) || undefined,
+      lob: (newUserRole === 'qa' || newUserRole === 'tl' || newUserRole === 'director')
+        ? (String(newUserLob || '').trim() || undefined)
+        : (normalizeAgentLob(String(newUserLob || '').trim() || undefined, newUserRole) || undefined),
       lobTeam: String(newUserTeam || '').trim() || undefined,
       teamLeader: String(newUserTL || '').trim() || undefined,
     };
@@ -238,7 +240,9 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
       role: editRole,
       email: String(editEmail || '').trim() || undefined,
       phone: String(editPhone || '').trim() || undefined,
-      lob: normalizeAgentLob(String(editLob || '').trim() || undefined, editRole) || undefined,
+      lob: (editRole === 'qa' || editRole === 'tl' || editRole === 'director')
+        ? (String(editLob || '').trim() || undefined)
+        : (normalizeAgentLob(String(editLob || '').trim() || undefined, editRole) || undefined),
       lobTeam: String(editTeam || '').trim() || undefined,
       teamLeader: String(editTL || '').trim() || undefined,
     };
@@ -259,7 +263,13 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
     if (!String(newPasswordValue || '').trim()) { toast.error('Password cannot be empty!'); return; }
     const usernameKey = getUsernameFromFullName(userName);
     const cleanPassword = String(newPasswordValue || '').trim();
-    const updatedCreds = { ...credentials, [usernameKey]: cleanPassword };
+    // Write under BOTH keys to cover legacy full-name credentials and new username-key credentials
+    const updatedCreds = {
+      ...credentials,
+      [usernameKey]: cleanPassword,
+      [userName]: cleanPassword,
+      [userName.toLowerCase()]: cleanPassword,
+    };
     try {
       await setDoc(doc(db, 'system', 'sched_credentials'), {
         data: updatedCreds,
@@ -267,7 +277,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
       }, { merge: true });
       await logAdminAction('reset_password', userName);
       await handleUnlock(userName);
-      toast.success(`Password set for ${userName}`);
+      toast.success(`Password set for ${userName}. They must change it on next login.`);
       setTargetPasswordChange(null);
       setNewPasswordValue('');
     } catch (err: any) {
@@ -277,8 +287,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
   const handleLock = async (userName: string) => {
     const usernameKey = getUsernameFromFullName(userName);
-    const updated = [...lockedAccounts];
-    if (!updated.includes(usernameKey)) updated.push(usernameKey);
+    const updated = Array.from(new Set([...lockedAccounts, usernameKey, userName, userName.toLowerCase()]));
     try {
       await setDoc(doc(db, 'system', 'sched_locked_accounts'), { data: updated });
       await logAdminAction('lock_account', userName);
@@ -288,11 +297,18 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
   const handleUnlock = async (userName: string) => {
     const usernameKey = getUsernameFromFullName(userName);
-    const updated = lockedAccounts.filter(n => n !== usernameKey);
+    // Remove ALL possible formats this name could have been stored as
+    const updated = lockedAccounts.filter(n =>
+      n !== usernameKey &&
+      n !== userName &&
+      n !== userName.toLowerCase()
+    );
     try {
       await setDoc(doc(db, 'system', 'sched_locked_accounts'), { data: updated });
       const updatedAttempts = { ...failedAttempts };
       delete updatedAttempts[usernameKey];
+      delete updatedAttempts[userName];
+      delete updatedAttempts[userName.toLowerCase()];
       await setDoc(doc(db, 'system', 'sched_failed_attempts'), { data: updatedAttempts });
       await logAdminAction('unlock_account', userName);
       toast.success(`Account unlocked: ${userName}`);
@@ -328,6 +344,14 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
       }
       const updatedLocked = lockedAccounts.filter(l => l !== usernameKey);
       await setDoc(doc(db, 'system', 'sched_locked_accounts'), { data: updatedLocked });
+
+      // Also clean up failed attempts for the deleted user
+      const updatedAttempts = { ...failedAttempts };
+      delete updatedAttempts[usernameKey];
+      delete updatedAttempts[user.name];
+      delete updatedAttempts[user.name.toLowerCase()];
+      await setDoc(doc(db, 'system', 'sched_failed_attempts'), { data: updatedAttempts });
+
       toast.success(`User removed: ${user.name}`);
       setConfirmDeleteId(null);
     } catch (err) {
@@ -338,9 +362,13 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
   const handleRemoteReloadForce = async () => {
     try {
-      const nextVer = TRIGGER_CURRENT_APP_VERSION + 1;
+      // Read current Firestore version first so we always increment above whatever is live
+      const { getDoc, doc: fsDoc } = await import('firebase/firestore');
+      const snap = await getDoc(fsDoc(db, 'system', 'app_version')).catch(() => null);
+      const currentRemoteVersion = snap?.exists() ? (snap.data().version || 0) : 0;
+      const nextVer = Math.max(TRIGGER_CURRENT_APP_VERSION, currentRemoteVersion) + 1;
       await setDoc(doc(db, 'system', 'app_version'), { version: nextVer }, { merge: true });
-      toast.success(`Reload broadcast sent (v${nextVer})`);
+      toast.success(`Force re-sync broadcast sent — all clients will reload (v${nextVer})`);
     } catch {
       toast.error('Failed to broadcast reload');
     }
