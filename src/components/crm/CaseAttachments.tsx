@@ -49,7 +49,7 @@ export const CaseAttachments: React.FC<CaseAttachmentsProps> = ({ caseData }) =>
         </div>
 
         {allAttachedObjects.length === 0 ? (
-          <div className="bg-[#121216] border border-dashed border-white/5 rounded-xl p-6 text-center">
+          <div className="bg-transparent border border-dashed border-white/5 rounded-xl p-6 text-center">
             <Paperclip className="w-8 h-8 text-slate-600 mx-auto mb-2" />
             <p className="text-slate-400 text-xs italic">No uploaded media or files.</p>
           </div>
@@ -60,10 +60,10 @@ export const CaseAttachments: React.FC<CaseAttachmentsProps> = ({ caseData }) =>
               return (
                 <div 
                   key={file.id || idx} 
-                  className="bg-white/[0.02] border border-white/5 rounded-xl p-2.5 flex flex-col justify-between hover:bg-white/[0.04] transition-all group"
+                  className="bg-transparent border border-white/5 rounded-xl p-2.5 flex flex-col justify-between hover:bg-white/[0.06] transition-all group"
                 >
                   {isImg ? (
-                    <div className="relative aspect-video bg-black/40 rounded-lg overflow-hidden mb-2.5 border border-white/5">
+                    <div className="relative aspect-video bg-white/[0.03] rounded-lg overflow-hidden mb-2.5 border border-white/5">
                       <img 
                         src={file.url} 
                         alt={file.name} 
@@ -72,7 +72,7 @@ export const CaseAttachments: React.FC<CaseAttachmentsProps> = ({ caseData }) =>
                       />
                     </div>
                   ) : (
-                    <div className="aspect-video bg-black/40 rounded-lg flex items-center justify-center mb-2.5 border border-white/5">
+                    <div className="aspect-video bg-white/[0.03] rounded-lg flex items-center justify-center mb-2.5 border border-white/5">
                       <File className="w-8 h-8 text-slate-500" />
                     </div>
                   )}
@@ -121,7 +121,7 @@ export const CaseAttachments: React.FC<CaseAttachmentsProps> = ({ caseData }) =>
                 href={link.startsWith('http') ? link : `https://${link}`}
                 target="_blank"
                 rel="noreferrer"
-                className="block bg-white/[0.02] border border-white/5 hover:border-indigo-500/30 rounded-xl p-2.5 text-xs text-indigo-400 hover:text-indigo-300 transition-all font-mono truncate"
+                className="block bg-transparent border border-white/5 hover:border-indigo-500/30 rounded-xl p-2.5 text-xs text-indigo-400 hover:text-indigo-300 transition-all font-mono truncate"
               >
                 🔗 {link}
               </a>

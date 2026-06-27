@@ -165,7 +165,7 @@ const EditModalContent = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-slate-900 border border-white/10 p-6 rounded-2xl w-full max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <div className="bg-white/[0.04] border border-white/10 p-6 rounded-2xl w-full max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto">
         <button
           onClick={() => setEditingItem(null)}
           className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors cursor-pointer"
@@ -193,7 +193,7 @@ const EditModalContent = ({
                 name="clinicName"
                 value={data.clinicName || ""}
                 onChange={handleChange}
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans cursor-pointer"
+                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans cursor-pointer"
               >
                 <option value="">Select a Clinic</option>
                 {CLINICS.map((c) => (
@@ -217,7 +217,7 @@ const EditModalContent = ({
                   name="patientName"
                   value={data.patientName || ""}
                   onChange={handleChange}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
               <div>
@@ -229,7 +229,7 @@ const EditModalContent = ({
                   name="fileNumber"
                   value={data.fileNumber || ""}
                   onChange={handleChange}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
               <div>
@@ -241,7 +241,7 @@ const EditModalContent = ({
                   name="phoneNumber"
                   value={data.phoneNumber || ""}
                   onChange={handleChange}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
             </>
@@ -257,7 +257,7 @@ const EditModalContent = ({
                 name="priceWithoutTax"
                 value={data.priceWithoutTax || ""}
                 onChange={handleChange}
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
               />
               {data.priceWithoutTax && calculateTabbyTamaraPrice(data.priceWithoutTax).valid && (
                 <div className="mt-2 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-xs space-y-1 font-mono">
@@ -291,7 +291,7 @@ const EditModalContent = ({
                 value={data.complaintDetails || ""}
                 onChange={handleChange}
                 rows={3}
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
               />
             </div>
           )}
@@ -307,7 +307,7 @@ const EditModalContent = ({
                   name="phoneNumber"
                   value={data.phoneNumber || ""}
                   onChange={handleChange}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
               <div>
@@ -319,7 +319,7 @@ const EditModalContent = ({
                   value={data.text || ""}
                   onChange={handleChange}
                   rows={4}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
             </>
@@ -336,7 +336,7 @@ const EditModalContent = ({
                   name="patientName"
                   value={data.patientName || ""}
                   onChange={handleChange}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
               <div>
@@ -348,7 +348,7 @@ const EditModalContent = ({
                   name="phoneNumber"
                   value={data.phoneNumber || ""}
                   onChange={handleChange}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
               <div>
@@ -360,7 +360,7 @@ const EditModalContent = ({
                   value={data.notes || ""}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
             </>
@@ -377,7 +377,7 @@ const EditModalContent = ({
                   name="patientName"
                   value={data.patientName || ""}
                   onChange={handleChange}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
               <div>
@@ -389,7 +389,7 @@ const EditModalContent = ({
                   name="phoneNumber"
                   value={data.phoneNumber || ""}
                   onChange={handleChange}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
               <div>
@@ -401,7 +401,7 @@ const EditModalContent = ({
                   value={data.notes || ""}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
             </>
@@ -426,7 +426,7 @@ const EditModalContent = ({
                       name="date"
                       value={data.date || ""}
                       onChange={handleChange}
-                      className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans [color-scheme:dark]"
+                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans [color-scheme:dark]"
                     />
                   </div>
                   <div>
@@ -438,7 +438,7 @@ const EditModalContent = ({
                       name="shift"
                       value={data.shift || ""}
                       onChange={handleChange}
-                      className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                     />
                   </div>
                   <div>
@@ -450,7 +450,7 @@ const EditModalContent = ({
                       name="swapWithAgent"
                       value={data.swapWithAgent || ""}
                       onChange={handleChange}
-                      className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                     />
                   </div>
                   <div>
@@ -462,7 +462,7 @@ const EditModalContent = ({
                       name="swapWithShift"
                       value={data.swapWithShift || ""}
                       onChange={handleChange}
-                      className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                     />
                   </div>
                 </>
@@ -479,7 +479,7 @@ const EditModalContent = ({
                       name="startDate"
                       value={data.startDate || ""}
                       onChange={handleChange}
-                      className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans [color-scheme:dark]"
+                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans [color-scheme:dark]"
                     />
                   </div>
                   <div>
@@ -491,7 +491,7 @@ const EditModalContent = ({
                       name="endDate"
                       value={data.endDate || ""}
                       onChange={handleChange}
-                      className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans [color-scheme:dark]"
+                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans [color-scheme:dark]"
                     />
                   </div>
                 </>
@@ -506,7 +506,7 @@ const EditModalContent = ({
                   value={data.notes || ""}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
             </>

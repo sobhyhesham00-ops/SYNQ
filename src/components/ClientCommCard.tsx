@@ -200,7 +200,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
 
   return (
     <div
-      className={`relative p-4 bg-white/5 border-y border-r border-white/[0.08] border-l-4 ${borderLeftColor} rounded-xl overflow-hidden transition-all duration-300 flex flex-col w-full ${isExpanded ? "ring-1 ring-white/[0.08] space-y-4" : "hover:bg-white/[0.08] hover:border-white/[0.12] cursor-pointer"}`}
+      className={`relative p-4 bg-white/[0.04] border-y border-r border-white/[0.08] border-l-4 ${borderLeftColor} rounded-xl overflow-hidden transition-all duration-300 flex flex-col w-full ${isExpanded ? "ring-1 ring-white/[0.08] space-y-4" : "hover:bg-white/[0.05] hover:border-white/[0.12] cursor-pointer"}`}
       onClick={() => {
         if (!isExpanded) {
           onToggle();
@@ -239,7 +239,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
             <span className="text-[10px] text-slate-400 lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded font-sans shrink-0">
               {getAgentLOB(comm.callCenterAgentName)}
             </span>
-            <span className="font-mono text-[10px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded shrink-0">
+            <span className="font-mono text-[10px] text-slate-500 bg-transparent px-1.5 py-0.5 rounded shrink-0">
               {formatCaseRef(comm.id, "client_comm", comm.createdAt, comm.caseRef)}
             </span>
             <span className="text-[9px] text-slate-500 font-mono shrink-0">
@@ -355,7 +355,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
           <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5 font-bold">
             Notes / Inquiry:
           </p>
-          <div className="bg-black/25 p-2 rounded-lg border border-white/[0.03] text-slate-300 leading-normal font-sans italic">
+          <div className="bg-transparent p-2 rounded-lg border border-white/[0.03] text-slate-300 leading-normal font-sans italic">
             <CopyWrap
               text={comm.notes || ""}
               label="Notes"
@@ -414,7 +414,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
       </div>
 
       {/* Timers */}
-      <div className="p-3 bg-black/15 rounded-xl border border-white/[0.02] flex items-center justify-between text-xs font-sans">
+      <div className="p-3 bg-transparent rounded-xl border border-white/[0.02] flex items-center justify-between text-xs font-sans">
         <div className="space-y-0.5 text-left">
           <p className="text-[9px] text-slate-400 uppercase">
             {isClosed ? "Closed By" : "Submitted"}:
@@ -581,7 +581,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
                           className={`w-full text-left px-2.5 py-1.5 text-xs rounded-lg transition-all flex items-center justify-between font-medium cursor-pointer ${
                             isSelected
                               ? "bg-indigo-500/15 text-indigo-300 font-bold border border-indigo-500/20"
-                              : "text-slate-300 hover:bg-white/[0.04] hover:text-white"
+                              : "text-slate-300 hover:bg-white/[0.06] hover:text-white"
                           }`}
                         >
                           <span className="truncate pr-2">{agentName}</span>

@@ -142,7 +142,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
         </div>
         <div>
           <p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">💬 Inquiry Description</p>
-          <p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words bg-black/10 p-2.5 rounded-lg border border-white/5">{req.text}</p>
+          <p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words bg-transparent p-2.5 rounded-lg border border-white/5">{req.text}</p>
         </div>
         {req.answer && (
           <div className="bg-emerald-500/5 p-3 rounded-lg border border-emerald-500/10">
@@ -260,10 +260,10 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
   const handlerLabel = req.tlName || req.actionBy || req.handledBy;
 
   return (
-    <div id={`request-${req.id}`} className="flex flex-col bg-[#1a1f2e] border border-white/10 rounded-xl overflow-hidden shadow-sm transition-all hover:border-white/20">
+    <div id={`request-${req.id}`} className="flex flex-col bg-white/[0.03] border border-white/10 rounded-xl overflow-hidden shadow-sm transition-all hover:border-white/20">
       
       {/* Header */}
-      <div className="p-4 border-b border-white/5 bg-white/[0.02] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div className="p-4 border-b border-white/5 bg-transparent flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div className="flex items-center gap-3 flex-wrap">
           <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded border text-[11px] font-semibold uppercase tracking-wider ${statusClass}`}>
             {statusIcon}
@@ -271,7 +271,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
           </div>
           <div className="text-[15px] font-semibold text-slate-100 flex items-center gap-2">
             {title}
-            <span className="text-[12px] text-slate-500 font-mono px-2 py-0.5 bg-black/20 rounded">
+            <span className="text-[12px] text-slate-500 font-mono px-2 py-0.5 bg-transparent rounded">
               {formatCaseRef(req.id, req._cType, req.createdAt, req.caseRef)}
             </span>
           </div>
@@ -324,7 +324,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-3 py-2 bg-black/20 border-t border-white/10 gap-2 flex-wrap">
+      <div className="flex items-center justify-between px-3 py-2 bg-transparent border-t border-white/10 gap-2 flex-wrap">
         <div className="flex items-center gap-1">
           <CopyButton text={copyData} tooltip="Copy Full Request" icon={ClipboardList} />
           {req.phoneNumber && (
@@ -430,7 +430,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
 
       {/* Reply Thread Area */}
       {showReply && collectionMap[req._cType] && (
-        <div className="bg-black/30 border-t border-white/5 px-4 pb-4 pt-2">
+        <div className="bg-white/[0.02] border-t border-white/5 px-4 pb-4 pt-2">
           <RequestReplyThread 
             request={req} 
             currentUser={currentUser} 
@@ -560,21 +560,21 @@ export const AgentRequestsLogs = ({
 
       {/* 4-Stat Summary Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col items-center justify-center shadow-lg">
+        <div className="bg-white/[0.04] border border-slate-800 p-4 rounded-xl flex flex-col items-center justify-center shadow-lg">
           <span className="text-2xl font-black text-slate-100">{allRequests.length}</span>
           <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-1">Total Lifetime</span>
         </div>
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col items-center justify-center shadow-lg">
+        <div className="bg-white/[0.04] border border-slate-800 p-4 rounded-xl flex flex-col items-center justify-center shadow-lg">
           <span className="text-2xl font-black text-indigo-400">{filtered.length}</span>
           <span className="text-[10px] text-indigo-500/70 uppercase tracking-widest font-bold mt-1">Matched</span>
         </div>
-        <div className="bg-slate-900 border border-amber-900/40 p-4 rounded-xl flex flex-col items-center justify-center shadow-lg">
+        <div className="bg-white/[0.04] border border-amber-900/40 p-4 rounded-xl flex flex-col items-center justify-center shadow-lg">
           <span className="text-2xl font-black text-amber-400">
             {filtered.filter(r => ['pending','pending_partner','submitted','not_confirmed','pending_tl'].includes(r.status)).length}
           </span>
           <span className="text-[10px] text-amber-500/70 uppercase tracking-widest font-bold mt-1">Pending Filtered</span>
         </div>
-        <div className="bg-slate-900 border border-emerald-900/40 p-4 rounded-xl flex flex-col items-center justify-center shadow-lg">
+        <div className="bg-white/[0.04] border border-emerald-900/40 p-4 rounded-xl flex flex-col items-center justify-center shadow-lg">
           <span className="text-2xl font-black text-emerald-400">
             {filtered.filter(r => ['approved','answered','confirmed','closed','contacted'].includes(r.status)).length}
           </span>
@@ -621,7 +621,7 @@ export const AgentRequestsLogs = ({
             type="date" 
             value={filterDate} 
             onChange={(e) => setFilterDate(e.target.value)} 
-            className="w-full bg-slate-900/60 border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 [color-scheme:dark]" 
+            className="w-full bg-white/[0.03] border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 [color-scheme:dark]" 
           />
           <div className="relative">
             <select 
@@ -632,7 +632,7 @@ export const AgentRequestsLogs = ({
                   setFilterClinics([...filterClinics, val]);
                 }
               }} 
-              className="w-full bg-slate-900/60 border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-white/[0.03] border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500"
             >
               <option value="">➕ Add Clinic to Filter...</option>
               {CLINIC_OPTIONS.filter(c => !filterClinics.includes(c.value)).map(c => (
@@ -662,23 +662,23 @@ export const AgentRequestsLogs = ({
             placeholder="Search by phone..." 
             value={filterPhone} 
             onChange={(e) => setFilterPhone(e.target.value)} 
-            className="w-full bg-slate-900/60 border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 placeholder-slate-500" 
+            className="w-full bg-white/[0.03] border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 placeholder-slate-500" 
           />
           {/* New Filters End */}
 
           <div className="flex gap-2 w-full xl:col-span-2 items-center flex-wrap lg:justify-end">
             <select value={filterType} onChange={e => setFilterType(e.target.value)} className="bg-slate-900/60 border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer">
-              <option value="all" className="bg-slate-900">All Types</option>
-              <option value="sched" className="bg-slate-900">Leaves/Swaps</option>
-              <option value="inq" className="bg-slate-900">Inquiries</option>
-              <option value="tt_request" className="bg-slate-900">Tabby/Tamara</option>
-              <option value="tt_complaint" className="bg-slate-900">Complaints</option>
-              <option value="comm" className="bg-slate-900">Client Comms</option>
+              <option value="all" className="bg-white/[0.04]">All Types</option>
+              <option value="sched" className="bg-white/[0.04]">Leaves/Swaps</option>
+              <option value="inq" className="bg-white/[0.04]">Inquiries</option>
+              <option value="tt_request" className="bg-white/[0.04]">Tabby/Tamara</option>
+              <option value="tt_complaint" className="bg-white/[0.04]">Complaints</option>
+              <option value="comm" className="bg-white/[0.04]">Client Comms</option>
             </select>
             <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="bg-slate-900/60 border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer">
-              <option value="date_desc" className="bg-slate-900">Newest First</option>
-              <option value="date_asc" className="bg-slate-900">Oldest First</option>
-              <option value="status" className="bg-slate-900">By Status</option>
+              <option value="date_desc" className="bg-white/[0.04]">Newest First</option>
+              <option value="date_asc" className="bg-white/[0.04]">Oldest First</option>
+              <option value="status" className="bg-white/[0.04]">By Status</option>
             </select>
             {(!isNoFiltersActive) && (
               <button 

@@ -133,7 +133,7 @@ export const CaseActivityTimeline: React.FC<CaseActivityTimelineProps> = ({ case
                 {getIcon(evt.type)}
               </span>
 
-              <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3 hover:bg-white/[0.04] transition-all">
+              <div className="bg-transparent border border-white/5 rounded-xl p-3 hover:bg-white/[0.06] transition-all">
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h4 className="text-xs font-bold text-slate-200">
@@ -149,7 +149,7 @@ export const CaseActivityTimeline: React.FC<CaseActivityTimelineProps> = ({ case
                 </div>
 
                 {evt.details && (
-                  <div className="mt-2 bg-black/40 border border-white/5 p-2 rounded-lg text-xs font-mono text-slate-400 select-all max-h-32 overflow-y-auto">
+                  <div className="mt-2 bg-white/[0.03] border border-white/5 p-2 rounded-lg text-xs font-mono text-slate-400 select-all max-h-32 overflow-y-auto">
                     {evt.details}
                   </div>
                 )}

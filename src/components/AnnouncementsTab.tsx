@@ -161,7 +161,7 @@ export function AnnouncementsTab({
             value={message}
             onChange={e => setMessage(e.target.value)}
             placeholder="Type your announcement here..."
-            className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-yellow-500 min-h-[100px]"
+            className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-yellow-500 min-h-[100px]"
             required
           />
           
@@ -185,7 +185,7 @@ export function AnnouncementsTab({
                 value={imageUrl.startsWith('data:') ? '' : imageUrl} 
                 onChange={e => setImageUrl(e.target.value)} 
                 placeholder="Or paste an Image URL..." 
-                className="w-full bg-slate-900/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-yellow-500 mt-1" 
+                className="w-full bg-white/[0.02] border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-yellow-500 mt-1" 
                 disabled={imageUrl.startsWith('data:')}
               />
             </div>
@@ -205,7 +205,7 @@ export function AnnouncementsTab({
           </div>
 
           {imageUrl && (
-            <div className="p-3 bg-slate-900/40 border border-white/5 rounded-xl flex items-center gap-4">
+            <div className="p-3 bg-white/[0.02] border border-white/5 rounded-xl flex items-center gap-4">
               <img src={imageUrl} alt="Upload preview" className="w-20 h-16 object-cover rounded-lg border border-white/10 shadow-lg shrink-0" />
               <div className="space-y-1 text-left">
                 <p className="text-[11px] font-bold text-slate-300">Attached Photo Attachment</p>
@@ -234,7 +234,7 @@ export function AnnouncementsTab({
                   setFilterClinics([...filterClinics, val]);
                 }
               }} 
-              className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 outline-none cursor-pointer"
+              className="bg-white/[0.04] border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 outline-none cursor-pointer"
             >
                <option value="" className="font-sans">➕ Add Clinic to Filter...</option>
                {CLINIC_OPTIONS.filter(c => !filterClinics.includes(c.value)).map(c => (
@@ -290,7 +290,7 @@ export function AnnouncementsTab({
                 </p>
                 
                 {a.imageUrl && (
-                  <div className="p-2.5 bg-black/40 rounded-xl max-w-lg border border-white/5 space-y-2">
+                  <div className="p-2.5 bg-white/[0.03] rounded-xl max-w-lg border border-white/5 space-y-2">
                     <img src={a.imageUrl} alt="Attached Announcement File" className="w-full max-h-72 object-contain rounded-lg shadow-xl" />
                     <div className="flex items-center justify-between">
                       <p className="text-[10px] text-slate-500 font-mono">Image attached by Management</p>
@@ -316,7 +316,7 @@ export function AnnouncementsTab({
 
                 {/* Emojis Section: Cannot post text reply, can only leave emoji */}
                 <div className="pt-3 border-t border-white/5 flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-1.5 bg-slate-900/40 p-1.5 rounded-xl border border-white/5">
+                  <div className="flex items-center gap-1.5 bg-white/[0.02] p-1.5 rounded-xl border border-white/5">
                     <span className="text-[10px] text-slate-400 uppercase font-black tracking-wider px-2 border-r border-white/10 select-none">Reactions Only:</span>
                     <div className="flex items-center gap-1">
                       {EMOJI_OPTIONS.map(emoji => {

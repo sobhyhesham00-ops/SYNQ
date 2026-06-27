@@ -478,7 +478,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
   return (
     <div className="space-y-6 animate-fade-in text-left font-sans">
       {/* Salesforce style Top Command Bar */}
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-slate-900/60 border border-white/10 p-6 rounded-2xl backdrop-blur-md">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-white/[0.03] border border-white/10 p-6 rounded-2xl backdrop-blur-md">
         <div className="space-y-1">
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl text-indigo-400">
@@ -536,7 +536,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
       </div>
 
       {/* Date Range Export Console */}
-      <div className="bg-slate-900/30 border border-white/5 p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-5 shadow-sm">
+      <div className="bg-transparent border border-white/5 p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-5 shadow-sm">
         <div className="space-y-1">
           <h4 className="text-xs font-bold uppercase text-slate-300 tracking-wider flex items-center gap-1.5">
             <RefreshCw className="w-3.5 h-3.5 text-slate-500 animate-spin-slow" />
@@ -576,7 +576,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
         {/* Metric Cards Ribbon */}
         <div className="xl:col-span-3 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-          <div className="p-4 bg-slate-900/40 border border-white/5 rounded-2xl text-center flex flex-col justify-center shadow-lg relative overflow-hidden group">
+          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl text-center flex flex-col justify-center shadow-lg relative overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-[3px] bg-slate-500" />
             <p className="text-[10px] uppercase font-extrabold text-slate-500 tracking-widest">Global Roster</p>
             <p className="text-3xl font-black text-slate-100 mt-1">{stats.total}</p>
@@ -634,7 +634,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
         </div>
 
         {/* Bounded Pie Chart container to prevent Recharts -1 dimensions warnings */}
-        <div className="bg-slate-900/40 border border-white/10 p-5 rounded-2xl flex flex-col shadow-lg">
+        <div className="bg-white/[0.02] border border-white/10 p-5 rounded-2xl flex flex-col shadow-lg">
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-[11px] font-bold uppercase text-slate-300 tracking-wider">Attendance Breakdown</h4>
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -684,7 +684,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
       </div>
 
       {/* Roster Marking Path Tracker (Salesforce visual style) */}
-      <div className="bg-slate-900/30 border border-white/5 p-5 rounded-2xl space-y-3 shadow-inner">
+      <div className="bg-transparent border border-white/5 p-5 rounded-2xl space-y-3 shadow-inner">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div className="flex items-center gap-2">
             <span className={`w-2.5 h-2.5 rounded-full ${markingProgress.percent === 100 ? "bg-emerald-500" : "bg-indigo-500 animate-pulse"}`} />
@@ -707,7 +707,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
       {/* Main Console Split View: Left LOB Sidebar / Right Table Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
         {/* Salesforce Lightning Left Side Department Filter Navigation */}
-        <div className="bg-slate-900/40 border border-white/10 rounded-2xl p-4 space-y-2 lg:sticky lg:top-4 shadow-xl">
+        <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-4 space-y-2 lg:sticky lg:top-4 shadow-xl">
           <h3 className="text-[10px] font-black uppercase text-slate-500 tracking-widest px-3 mb-2.5 flex items-center gap-2">
             <Filter className="w-3 h-3" />
             LOB Departments
@@ -751,7 +751,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
         {/* Right CRM Records Table Workspace */}
         <div className="lg:col-span-3 space-y-4">
           {/* Controls Belt */}
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-900/60 border border-white/10 p-4 rounded-2xl">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white/[0.03] border border-white/10 p-4 rounded-2xl">
             {/* Search Input */}
             <div className="relative w-full md:w-80">
               <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -780,7 +780,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
           </div>
 
           {/* Roster Ledger Cards/Table Container */}
-          <div className="bg-slate-900/40 border border-white/10 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
+          <div className="bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm">
             {filteredRoster.length === 0 ? (
               <div className="p-12 text-center text-slate-500 space-y-2">
                 <AlertOctagon className="w-8 h-8 text-slate-600 mx-auto" />
@@ -826,7 +826,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                         return (
                           <tr
                             key={item.name}
-                            className="hover:bg-white/[0.02] transition-colors group"
+                            className="hover:bg-transparent transition-colors group"
                           >
                             {/* Name & Initials Avatar */}
                             <td className="p-2.5 pl-4">
@@ -1081,14 +1081,14 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                   <button
                     onClick={() => setCurrentPage(1)}
                     disabled={currentPage === 1}
-                    className="h-8 px-2.5 bg-slate-900/60 border border-white/5 hover:border-white/10 text-slate-400 hover:text-slate-200 disabled:opacity-35 rounded-xl text-xs font-bold transition-all disabled:cursor-not-allowed select-none"
+                    className="h-8 px-2.5 bg-white/[0.03] border border-white/5 hover:border-white/10 text-slate-400 hover:text-slate-200 disabled:opacity-35 rounded-xl text-xs font-bold transition-all disabled:cursor-not-allowed select-none"
                   >
                     &laquo;
                   </button>
                   <button
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
-                    className="h-8 px-3 bg-slate-900/60 border border-white/5 hover:border-white/10 text-slate-400 hover:text-slate-200 disabled:opacity-35 rounded-xl text-xs font-bold transition-all disabled:cursor-not-allowed flex items-center gap-1 select-none"
+                    className="h-8 px-3 bg-white/[0.03] border border-white/5 hover:border-white/10 text-slate-400 hover:text-slate-200 disabled:opacity-35 rounded-xl text-xs font-bold transition-all disabled:cursor-not-allowed flex items-center gap-1 select-none"
                   >
                     <ChevronLeft className="w-3.5 h-3.5" /> Prev
                   </button>
@@ -1107,7 +1107,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                               className={`w-8 h-8 rounded-xl text-xs font-bold flex items-center justify-center transition-all ${
                                 currentPage === p
                                   ? "bg-indigo-500 border border-indigo-500/30 text-white shadow"
-                                  : "bg-slate-950/30 border border-white/5 text-slate-400 hover:text-slate-100 hover:bg-slate-900"
+                                  : "bg-slate-950/30 border border-white/5 text-slate-400 hover:text-slate-100 hover:bg-white/[0.05]"
                               }`}
                             >
                               {p}
@@ -1120,14 +1120,14 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                   <button
                     onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
-                    className="h-8 px-3 bg-slate-900/60 border border-white/5 hover:border-white/10 text-slate-400 hover:text-slate-200 disabled:opacity-35 rounded-xl text-xs font-bold transition-all disabled:cursor-not-allowed flex items-center gap-1 select-none"
+                    className="h-8 px-3 bg-white/[0.03] border border-white/5 hover:border-white/10 text-slate-400 hover:text-slate-200 disabled:opacity-35 rounded-xl text-xs font-bold transition-all disabled:cursor-not-allowed flex items-center gap-1 select-none"
                   >
                     Next <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => setCurrentPage(totalPages)}
                     disabled={currentPage === totalPages}
-                    className="h-8 px-2.5 bg-slate-900/60 border border-white/5 hover:border-white/10 text-slate-400 hover:text-slate-200 disabled:opacity-35 rounded-xl text-xs font-bold transition-all disabled:cursor-not-allowed select-none"
+                    className="h-8 px-2.5 bg-white/[0.03] border border-white/5 hover:border-white/10 text-slate-400 hover:text-slate-200 disabled:opacity-35 rounded-xl text-xs font-bold transition-all disabled:cursor-not-allowed select-none"
                   >
                     &raquo;
                   </button>
@@ -1187,7 +1187,7 @@ const StatusSelectorButton = ({
       } ${
         isActive
           ? activeStyle
-          : "bg-slate-950/40 border-white/5 text-slate-400 hover:text-slate-100 hover:bg-slate-900 hover:border-slate-700/50"
+          : "bg-slate-950/40 border-white/5 text-slate-400 hover:text-slate-100 hover:bg-white/[0.05] hover:border-slate-700/50"
       }`}
     >
       <span className="flex items-center justify-center shrink-0">{icon}</span>

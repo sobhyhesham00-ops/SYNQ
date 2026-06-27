@@ -324,7 +324,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-black/20 border border-amber-500/15 rounded-xl p-3 flex flex-col gap-1">
+                <div className="bg-transparent border border-amber-500/15 rounded-xl p-3 flex flex-col gap-1">
                   <div className="flex items-center gap-1.5 text-amber-400">
                     <Coffee className="w-3.5 h-3.5" />
                     <span className="text-[9px] font-black uppercase tracking-wider">Break</span>
@@ -336,7 +336,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                   )}
                 </div>
 
-                <div className="bg-black/20 border border-orange-500/15 rounded-xl p-3 flex flex-col gap-1">
+                <div className="bg-transparent border border-orange-500/15 rounded-xl p-3 flex flex-col gap-1">
                   <div className="flex items-center gap-1.5 text-orange-400">
                     <Utensils className="w-3.5 h-3.5" />
                     <span className="text-[9px] font-black uppercase tracking-wider">Lunch</span>
@@ -392,7 +392,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
               )}
             </div>
           ) : (
-            <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 text-center">
+            <div className="bg-transparent border border-white/5 rounded-2xl p-5 text-center">
               <Coffee className="w-6 h-6 text-slate-600 mx-auto mb-2" />
               <p className="text-xs text-slate-500">No break schedule set for today.</p>
               <p className="text-[10px] text-slate-600 mt-0.5">Your TL will publish your break times here.</p>
@@ -420,7 +420,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
               {myUpcomingBreaks
                 .filter(s => s.date !== todayStr)
                 .map(shift => (
-                  <div key={shift.id} className="flex items-center gap-3 p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:border-white/10 transition-all">
+                  <div key={shift.id} className="flex items-center gap-3 p-3 bg-transparent border border-white/5 rounded-xl hover:border-white/10 transition-all">
                     <div className="text-center shrink-0 w-10">
                       <p className="text-[8px] text-slate-500 uppercase font-bold">
                         {new Date(shift.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' })}
@@ -455,7 +455,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
       {isTLOrAdmin && (
         <div className="space-y-5">
           {/* ── Upload tabs ─────────────────────────────── */}
-          <div className="bg-white/[0.02] border border-white/5 rounded-2xl overflow-hidden">
+          <div className="bg-transparent border border-white/5 rounded-2xl overflow-hidden">
             {/* Tab switcher */}
             <div className="flex border-b border-white/5">
               {[
@@ -492,7 +492,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                     onChange={e => setCsvInput(e.target.value)}
                     placeholder={`date,agent_name,break_time,lunch_time\n2025-07-01,Sara Ahmed,10:30,13:00\n2025-07-01,Ahmed Ali,11:00,13:30`}
                     rows={6}
-                    className="w-full bg-black/30 border border-white/10 rounded-xl p-3 text-xs text-slate-200 font-mono placeholder:text-slate-600 focus:outline-none focus:border-amber-500/50 resize-none"
+                    className="w-full bg-white/[0.02] border border-white/10 rounded-xl p-3 text-xs text-slate-200 font-mono placeholder:text-slate-600 focus:outline-none focus:border-amber-500/50 resize-none"
                   />
 
                   <div className="flex gap-2">
@@ -586,7 +586,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                         type="date"
                         value={manualDate}
                         onChange={e => { setManualDate(e.target.value); setManualAgent(''); }}
-                        className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500/50"
+                        className="w-full bg-white/[0.02] border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500/50"
                       />
                     </div>
 
@@ -597,7 +597,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                       <select
                         value={manualAgent}
                         onChange={e => setManualAgent(e.target.value)}
-                        className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500/50"
+                        className="w-full bg-white/[0.02] border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500/50"
                       >
                         <option value="">-- Select agent --</option>
                         {agentsOnDate.map(name => (
@@ -615,7 +615,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                       <select
                         value={manualBreak}
                         onChange={e => setManualBreak(e.target.value)}
-                        className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500/50"
+                        className="w-full bg-white/[0.02] border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500/50"
                       >
                         <option value="">Not set</option>
                         {TIME_PRESETS.map(t => (
@@ -631,7 +631,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                       <select
                         value={manualLunch}
                         onChange={e => setManualLunch(e.target.value)}
-                        className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-orange-500/50"
+                        className="w-full bg-white/[0.02] border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-orange-500/50"
                       >
                         <option value="">Not set</option>
                         {TIME_PRESETS.map(t => (
@@ -666,7 +666,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                 const isToday = date === todayStr;
 
                 return (
-                  <div key={date} className={`border rounded-xl overflow-hidden transition-all ${isToday ? 'border-amber-500/20 bg-amber-500/5' : 'border-white/5 bg-white/[0.02]'}`}>
+                  <div key={date} className={`border rounded-xl overflow-hidden transition-all ${isToday ? 'border-amber-500/20 bg-amber-500/5' : 'border-white/5 bg-transparent'}`}>
                     <button
                       onClick={() => setExpandedDate(isExpanded ? null : date)}
                       className="w-full flex items-center justify-between px-4 py-2.5 text-left cursor-pointer hover:bg-white/5 transition-colors"
@@ -697,7 +697,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                         >
                           <div className="p-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {dayShifts.map(shift => (
-                              <div key={shift.id} className="flex items-center gap-2 p-2 bg-black/20 rounded-lg">
+                              <div key={shift.id} className="flex items-center gap-2 p-2 bg-transparent rounded-lg">
                                 <div className="w-6 h-6 rounded-md bg-white/5 flex items-center justify-center text-[8px] font-black text-slate-400 shrink-0">
                                   {shift.agentName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
                                 </div>

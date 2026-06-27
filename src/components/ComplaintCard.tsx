@@ -106,7 +106,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
           onToggle();
         }
       }}
-      className={`p-5 bg-white/5 border border-white/[0.08] rounded-[24px] hover:bg-white/[0.08] hover:border-white/[0.12] transition-all duration-300 relative flex flex-col w-full overflow-hidden shadow-sm ${
+      className={`p-5 bg-white/[0.04] border border-white/[0.08] rounded-[24px] hover:bg-white/[0.05] hover:border-white/[0.12] transition-all duration-300 relative flex flex-col w-full overflow-hidden shadow-sm ${
         isExpanded ? "shadow-md ring-1 ring-white/10 space-y-4" : "cursor-pointer hover:shadow-md"
       }`}
     >
@@ -137,7 +137,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
             <span className="text-[10px] text-slate-400 lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded font-sans shrink-0">
               {getAgentLOB(comp.agentName)}
             </span>
-            <span className="font-mono text-[10px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded shrink-0">
+            <span className="font-mono text-[10px] text-slate-500 bg-transparent px-1.5 py-0.5 rounded shrink-0">
               {formatCaseRef(comp.id, "tt_complaint", comp.createdAt, comp.caseRef)}
             </span>
             <span className="text-[9px] text-slate-500 font-mono shrink-0">
@@ -206,7 +206,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
       {isExpanded && (
         <div className="w-full overflow-hidden transition-all duration-300 flex flex-col text-left space-y-4">
           {/* Patient Info Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-white/[0.02] border border-white/5 p-4 rounded-xl text-xs">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-transparent border border-white/5 p-4 rounded-xl text-xs">
             <div>
               <span className="text-[9px] text-slate-400 uppercase tracking-wider font-bold block mb-1">
                 SUBMITTING AGENT
@@ -272,7 +272,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
             <span className="text-[10px] text-slate-400 uppercase tracking-widest font-black block">
               🚨 Patient Complaint Details
             </span>
-            <div className="bg-black/30 border border-white/5 p-4 rounded-xl text-xs text-slate-200 leading-relaxed italic">
+            <div className="bg-transparent border border-white/5 p-4 rounded-xl text-xs text-slate-200 leading-relaxed italic">
               <p className="whitespace-pre-line">
                 "{comp.complaintDetails}"
               </p>
@@ -332,7 +332,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
 
           {/* CASE TIMERS AND SLA ACCENTS */}
           {isNeedContact && (
-            <div className="p-4 bg-black/20 rounded-xl border border-white/5 flex items-center justify-between text-xs font-sans">
+            <div className="p-4 bg-transparent rounded-xl border border-white/5 flex items-center justify-between text-xs font-sans">
               <div className="space-y-0.5 text-left">
                 <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">
                   Reviewed on:
@@ -358,7 +358,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
           )}
 
           {isClosed && (
-            <div className="p-4 bg-black/20 rounded-xl border border-white/5 flex items-center justify-between text-xs font-sans">
+            <div className="p-4 bg-transparent rounded-xl border border-white/5 flex items-center justify-between text-xs font-sans">
               <div className="space-y-0.5 text-left">
                 <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">
                   Closed at:
@@ -451,7 +451,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
                       className={`px-3 py-2 rounded-lg text-xs font-bold border transition-all text-left cursor-pointer ${
                         tlComplaintResolutionType === opt.value
                           ? "bg-rose-500/20 border-rose-500/40 text-rose-300"
-                          : "bg-white/[0.02] border-white/10 text-slate-400 hover:border-white/20"
+                          : "bg-transparent border-white/10 text-slate-400 hover:border-white/20"
                       }`}
                     >
                       {opt.label}

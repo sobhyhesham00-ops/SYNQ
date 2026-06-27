@@ -21,7 +21,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
   if (totalItems === 0) return null;
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-5 py-4 border-t border-slate-700/60 bg-[#121216] w-full rounded-b-2xl">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-5 py-4 border-t border-slate-700/60 bg-transparent w-full rounded-b-2xl">
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-xs text-slate-400">Rows per page:</span>
         <select
@@ -30,7 +30,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
             onItemsPerPageChange(Number(e.target.value));
             onPageChange(1);
           }}
-          className="bg-black/30 border border-white/10 rounded-md text-xs text-slate-200 outline-none px-2 py-1"
+          className="bg-white/[0.02] border border-white/10 rounded-md text-xs text-slate-200 outline-none px-2 py-1"
         >
           <option value={25}>25</option>
           <option value={50}>50</option>

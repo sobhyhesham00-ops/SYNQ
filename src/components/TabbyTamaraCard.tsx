@@ -166,7 +166,7 @@ const CRMField = ({
 
   return (
     <div
-      className="flex flex-col gap-1.5 p-3 rounded-xl hover:bg-white/[0.03] transition-colors cursor-pointer group text-left border border-transparent hover:border-slate-700/40"
+      className="flex flex-col gap-1.5 p-3 rounded-xl hover:bg-white/[0.04] transition-colors cursor-pointer group text-left border border-transparent hover:border-slate-700/40"
       onClick={handleCopy}
     >
       <div className="flex items-center justify-between text-[11px] text-slate-500 font-bold tracking-widest uppercase">
@@ -202,7 +202,7 @@ const TimelineStep = ({
     className={`flex flex-col items-center shrink-0 w-24 sm:w-32 z-10 ${completed || active ? "opacity-100" : "opacity-70"}`}
   >
     <div
-      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center bg-black/30 transition-colors ${completed ? "border-indigo-500 bg-indigo-500/10" : active ? "border-slate-500" : "border-slate-800"}`}
+      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center bg-transparent transition-colors ${completed ? "border-indigo-500 bg-indigo-500/10" : active ? "border-slate-500" : "border-slate-800"}`}
     >
       {completed && <Check className="w-3.5 h-3.5 text-indigo-400" />}
     </div>
@@ -740,7 +740,7 @@ export const TabbyTamaraCard = ({
   return (
     <div
       id={`request-${req.id}`}
-      className={`p-5 bg-white/5 border border-white/[0.08] rounded-[24px] hover:bg-white/[0.08] hover:border-white/[0.12] transition-all duration-300 relative flex flex-col w-full overflow-hidden shadow-sm ${
+      className={`p-5 bg-white/[0.04] border border-white/[0.08] rounded-[24px] hover:bg-white/[0.05] hover:border-white/[0.12] transition-all duration-300 relative flex flex-col w-full overflow-hidden shadow-sm ${
         isExpanded
           ? "shadow-md ring-1 ring-white/10 space-y-4"
           : "cursor-pointer hover:shadow-md"
@@ -791,7 +791,7 @@ export const TabbyTamaraCard = ({
             <span className="text-[10px] text-slate-400 lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded font-sans shrink-0">
               {getAgentLOB(req.submittedByName || req.agentName || "")}
             </span>
-            <span className="font-mono text-[10px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded shrink-0">
+            <span className="font-mono text-[10px] text-slate-500 bg-transparent px-1.5 py-0.5 rounded shrink-0">
               {formatCaseRef(req.id, "tt_request", req.createdAt, req.caseRef)}
             </span>
             <span className="text-[9px] text-slate-500 font-mono shrink-0">
@@ -1010,7 +1010,7 @@ export const TabbyTamaraCard = ({
           <div className="border-b border-slate-700/40 bg-slate-800/20">
             <button
               onClick={() => setExpandedNotes(!expandedNotes)}
-              className="w-full px-5 py-3 flex items-center justify-between text-left hover:bg-white/[0.02] transition-colors group"
+              className="w-full px-5 py-3 flex items-center justify-between text-left hover:bg-transparent transition-colors group"
             >
               <div className="flex items-center gap-3">
                 <span className="text-[10px] font-bold text-slate-400 group-hover:text-slate-300 uppercase tracking-widest flex items-center gap-2">
@@ -1032,7 +1032,7 @@ export const TabbyTamaraCard = ({
             {expandedNotes && (
               <div className="px-5 pb-5 space-y-5">
                 {req.notes && (
-                  <div className="p-4 bg-slate-900/60 border border-slate-700/40 rounded-xl text-xs text-slate-300 font-medium leading-relaxed">
+                  <div className="p-4 bg-white/[0.03] border border-slate-700/40 rounded-xl text-xs text-slate-300 font-medium leading-relaxed">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">
                       Agent Notes
                     </span>
@@ -1160,7 +1160,7 @@ export const TabbyTamaraCard = ({
                         {paymentLinks.map((pLink, index) => (
                           <div
                             key={index}
-                            className="flex flex-col gap-1.5 w-full bg-slate-900/40 p-3 rounded-xl border border-white/5"
+                            className="flex flex-col gap-1.5 w-full bg-white/[0.02] p-3 rounded-xl border border-white/5"
                           >
                             <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider flex items-center gap-1.5 pl-1">
                               <span>🔗 Link #{index + 1}</span>
@@ -1242,7 +1242,7 @@ export const TabbyTamaraCard = ({
                             href={normalizeUrl(link)}
                             target="_blank"
                             rel="noreferrer"
-                            className="flex gap-3 text-sm bg-black/40 border border-emerald-500/10 p-4 rounded-xl items-start text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/30 transition-colors"
+                            className="flex gap-3 text-sm bg-white/[0.04] border border-emerald-500/10 p-4 rounded-xl items-start text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/30 transition-colors"
                           >
                             <LinkIcon className="w-4 h-4 shrink-0 text-emerald-500/50 mt-0.5" />
                             <span className="break-all leading-relaxed">
@@ -1337,7 +1337,7 @@ export const TabbyTamaraCard = ({
                     value={followUpText}
                     onChange={(e) => setFollowUpText(e.target.value)}
                     placeholder="Add a note, update, or question about this confirmed request..."
-                    className="w-full bg-black/40 border border-slate-600/50 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 resize-none h-20 font-sans"
+                    className="w-full bg-white/[0.06] border border-slate-600/50 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 resize-none h-20 font-sans"
                   />
                   <MultiAttachmentUpload
                     photos={followUpPhotos}
@@ -1432,7 +1432,7 @@ export const TabbyTamaraCard = ({
           {activeFintechHandlingId === req.id &&
             isTLOreSupport &&
             (req.status === "not_confirmed" || req.status === "confirmed") && (
-              <div className="bg-slate-900/80 border-y border-indigo-500/30 p-5 space-y-4">
+              <div className="bg-white/[0.04] border-y border-indigo-500/30 p-5 space-y-4">
                 <h4 className="text-xs font-black text-indigo-400 flex items-center gap-2 mb-3 uppercase tracking-widest">
                   <CornerDownRight className="w-4 h-4" /> Processing Panel
                 </h4>
@@ -1480,7 +1480,7 @@ export const TabbyTamaraCard = ({
                       value={tlFintechPaymentLink}
                       onChange={(e) => setTlFintechPaymentLink(e.target.value)}
                       placeholder="https://payment..."
-                      className="w-full bg-slate-900 border border-slate-600/60 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-all"
+                      className="w-full bg-white/[0.04] border border-slate-600/60 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-all"
                     />
                   </div>
                   <div>
@@ -1491,7 +1491,7 @@ export const TabbyTamaraCard = ({
                       value={tlFintechNotes}
                       onChange={(e) => setTlFintechNotes(e.target.value)}
                       placeholder="Add remarks..."
-                      className="w-full bg-slate-900 border border-slate-600/60 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none min-h-[80px] resize-none transition-all"
+                      className="w-full bg-white/[0.04] border border-slate-600/60 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none min-h-[80px] resize-none transition-all"
                     />
                   </div>
                   <div>
@@ -1508,7 +1508,7 @@ export const TabbyTamaraCard = ({
                       value={tlFintechLinks}
                       onChange={(e) => setTlFintechLinks(e.target.value)}
                       placeholder="https://link1.com, https://link2.com"
-                      className="w-full bg-slate-900 border border-slate-600/60 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-all"
+                      className="w-full bg-white/[0.04] border border-slate-600/60 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-all"
                     />
                   </div>
                   <div className="border-t border-white/10 pt-3">
@@ -1665,7 +1665,7 @@ export const TabbyTamaraCard = ({
                 {showAssignDropdown && (
                   <div className="absolute bottom-full right-0 mb-2 z-50 bg-black/40 border border-white/[0.08] rounded-xl w-72 shadow-2xl flex flex-col overflow-hidden">
                     {/* Header */}
-                    <div className="p-2.5 border-b border-white/[0.06] bg-black/30 flex items-center justify-between">
+                    <div className="p-2.5 border-b border-white/[0.06] bg-white/[0.04] flex items-center justify-between">
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                         Assign Agent
                       </span>
@@ -1678,7 +1678,7 @@ export const TabbyTamaraCard = ({
                     </div>
 
                     {/* Search Input */}
-                    <div className="p-2 border-b border-white/[0.05] bg-black/25">
+                    <div className="p-2 border-b border-white/[0.05] bg-white/[0.04]">
                       <div className="relative flex items-center">
                         <Search className="absolute left-2.5 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
                         <input
@@ -1701,7 +1701,7 @@ export const TabbyTamaraCard = ({
                     </div>
 
                     {/* Scrollable list of agents */}
-                    <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5 bg-black/20 scrollbar-thin">
+                    <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5 bg-transparent scrollbar-thin">
                       {filteredAgents.length === 0 ? (
                         <p className="text-center py-6 text-xs text-slate-500 font-sans">
                           No agents found
@@ -1719,7 +1719,7 @@ export const TabbyTamaraCard = ({
                               className={`w-full text-left px-2.5 py-1.5 text-xs rounded-lg transition-all flex items-center justify-between font-medium cursor-pointer ${
                                 isSelected
                                   ? "bg-indigo-500/15 text-indigo-300 font-bold border border-indigo-500/20"
-                                  : "text-slate-300 hover:bg-white/[0.04] hover:text-white"
+                                  : "text-slate-300 hover:bg-white/[0.06] hover:text-white"
                               }`}
                             >
                               <span className="truncate pr-2">{agentName}</span>
@@ -1903,12 +1903,12 @@ export const TabbyTamaraCard = ({
                     value={crmContactNotes}
                     onChange={(e) => setCrmContactNotes(e.target.value)}
                     placeholder="Record calling details, conversations, or reference comments..."
-                    className="w-full bg-black/40 border border-emerald-500/20 rounded-xl p-3 text-sm text-white placeholder-emerald-500/30 focus:outline-none focus:border-emerald-500/50 resize-none h-20"
+                    className="w-full bg-white/[0.06] border border-emerald-500/20 rounded-xl p-3 text-sm text-white placeholder-emerald-500/30 focus:outline-none focus:border-emerald-500/50 resize-none h-20"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-slate-900/50 p-4 border border-slate-700/40 rounded-xl">
+                  <div className="bg-white/[0.02] p-4 border border-slate-700/40 rounded-xl">
                     <MultiAttachmentUpload
                       photos={clientIdPhotos}
                       links={[]}
@@ -1918,7 +1918,7 @@ export const TabbyTamaraCard = ({
                       onUploadStateChange={setIsClientIdUploading}
                     />
                   </div>
-                  <div className="bg-slate-900/50 p-4 border border-slate-700/40 rounded-xl">
+                  <div className="bg-white/[0.02] p-4 border border-slate-700/40 rounded-xl">
                     <MultiAttachmentUpload
                       photos={paymentProofPhotos}
                       links={[]}
@@ -2006,11 +2006,11 @@ export const TabbyTamaraCard = ({
                     value={partnerNotes}
                     onChange={(e) => setPartnerNotes(e.target.value)}
                     placeholder="E.g., Submitted via Partner API, confirmation reference code..."
-                    className="w-full bg-black/40 border border-indigo-500/20 rounded-xl p-3 text-sm text-white placeholder-indigo-500/30 focus:outline-none focus:border-indigo-500/50 resize-none h-20"
+                    className="w-full bg-white/[0.06] border border-indigo-500/20 rounded-xl p-3 text-sm text-white placeholder-indigo-500/30 focus:outline-none focus:border-indigo-500/50 resize-none h-20"
                   />
                 </div>
 
-                <div className="bg-slate-900/50 p-4 border border-slate-700/40 rounded-xl">
+                <div className="bg-white/[0.02] p-4 border border-slate-700/40 rounded-xl">
                   <MultiAttachmentUpload
                     photos={partnerPhotos}
                     links={[]}
@@ -2058,7 +2058,7 @@ export const TabbyTamaraCard = ({
           </div>
 
           {/* Case Activity Audit Trail */}
-          <div className="bg-slate-900/40 p-5 border-t border-slate-700/40 space-y-2 text-left">
+          <div className="bg-white/[0.02] p-5 border-t border-slate-700/40 space-y-2 text-left">
             <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-display">
               Case Activity Timeline
             </h4>

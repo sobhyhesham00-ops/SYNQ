@@ -327,7 +327,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
   return (
     <div
       id={`inquiry-${inq.id}`}
-      className={`p-5 bg-white/5 border border-white/[0.08] rounded-[24px] hover:bg-white/[0.08] hover:border-white/[0.12] transition-all duration-300 relative flex flex-col w-full overflow-hidden shadow-sm ${
+      className={`p-5 bg-white/[0.04] border border-white/[0.08] rounded-[24px] hover:bg-white/[0.05] hover:border-white/[0.12] transition-all duration-300 relative flex flex-col w-full overflow-hidden shadow-sm ${
         isExpanded
           ? "shadow-md ring-1 ring-emerald-500/10 space-y-4"
           : "cursor-pointer hover:shadow-md"
@@ -371,7 +371,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
             <span className="text-[10px] text-slate-400 lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded font-sans shrink-0">
               {getAgentLOB(inq.agentName)}
             </span>
-            <span className="font-mono text-[10px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded shrink-0">
+            <span className="font-mono text-[10px] text-slate-500 bg-transparent px-1.5 py-0.5 rounded shrink-0">
               {formatCaseRef(inq.id, "inquiry", inq.createdAt, inq.caseRef)}
             </span>
             <span className="text-[9px] text-slate-500 font-mono shrink-0">
@@ -500,7 +500,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
 
             {/* TL customerContacted quick update buttons */}
             {handleUpdateContactedStatus && (
-              <div className="flex flex-wrap bg-slate-900/50 p-1 rounded-lg gap-1 border border-white/5 mt-3 w-max">
+              <div className="flex flex-wrap bg-white/[0.04] p-1 rounded-lg gap-1 border border-white/5 mt-3 w-max">
                 <button
                   onClick={() =>
                     handleUpdateContactedStatus(inq.id, "not_contacted")
@@ -663,7 +663,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                   {showAssignDropdown && (
                     <div className="absolute bottom-full left-0 mb-2 z-50 bg-black/40 border border-white/[0.08] rounded-xl w-72 shadow-2xl flex flex-col overflow-hidden">
                       {/* Header */}
-                      <div className="p-2.5 border-b border-white/[0.06] bg-black/30 flex items-center justify-between">
+                      <div className="p-2.5 border-b border-white/[0.06] bg-white/[0.04] flex items-center justify-between">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                           Assign Agent
                         </span>
@@ -676,7 +676,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                       </div>
 
                       {/* Search Input */}
-                      <div className="p-2 border-b border-white/[0.05] bg-black/25">
+                      <div className="p-2 border-b border-white/[0.05] bg-white/[0.04]">
                         <div className="relative flex items-center">
                           <Search className="absolute left-2.5 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
                           <input
@@ -699,7 +699,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                       </div>
 
                       {/* Scrollable list of agents */}
-                      <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5 bg-black/20 scrollbar-thin">
+                      <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5 bg-transparent scrollbar-thin">
                         {filteredAgents.length === 0 ? (
                           <p className="text-center py-6 text-xs text-slate-500 font-sans">
                             No agents found
@@ -717,7 +717,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                                 className={`w-full text-left px-2.5 py-1.5 text-xs rounded-lg transition-all flex items-center justify-between font-medium cursor-pointer ${
                                   isSelected
                                     ? "bg-indigo-500/15 text-indigo-300 font-bold border border-indigo-500/20"
-                                    : "text-slate-300 hover:bg-white/[0.04] hover:text-white"
+                                    : "text-slate-300 hover:bg-white/[0.06] hover:text-white"
                                 }`}
                               >
                                 <span className="truncate pr-2">{agentName}</span>

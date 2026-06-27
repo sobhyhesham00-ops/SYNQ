@@ -505,7 +505,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
               placeholder="Search conversations..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-900/80 border border-white/5 rounded-xl py-2 pl-9 pr-3 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/40 transition-all font-sans"
+              className="w-full bg-white/[0.04] border border-white/5 rounded-xl py-2 pl-9 pr-3 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/40 transition-all font-sans"
             />
           </div>
         </div>
@@ -615,7 +615,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
                   console.error("Failed to update status in DB:", err);
                 }
               }}
-              className="bg-slate-900 border border-white/10 rounded-lg px-2 py-1 text-[11px] font-bold text-slate-300 focus:outline-none focus:border-indigo-500 cursor-pointer"
+              className="bg-white/[0.04] border border-white/10 rounded-lg px-2 py-1 text-[11px] font-bold text-slate-300 focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
               <option value="online">🟢 Online</option>
               <option value="busy">🔴 Busy</option>
@@ -642,7 +642,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
                   console.error("Failed to update statusNote in DB:", err);
                 }
               }}
-              className="w-full bg-slate-900/55 border border-white/5 rounded-lg py-1 px-2.5 text-[10px] text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/40 transition-all font-sans italic"
+              className="w-full bg-white/[0.03] border border-white/5 rounded-lg py-1 px-2.5 text-[10px] text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/40 transition-all font-sans italic"
             />
           </div>
         </div>
@@ -791,7 +791,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
                           
                           {/* Attachments rendering */}
                           {msg.attachment && (
-                            <div className={`mt-2 p-2 rounded-xl bg-black/35 border border-white/5 flex items-center gap-3 ${isAr ? 'flex-row-reverse' : ''}`}>
+                            <div className={`mt-2 p-2 rounded-xl bg-white/[0.03] border border-white/5 flex items-center gap-3 ${isAr ? 'flex-row-reverse' : ''}`}>
                               {msg.attachment.startsWith('data:image') ? (
                                 <img src={msg.attachment} alt="attachment" className="w-14 h-14 rounded-lg object-cover border border-white/10 shrink-0" />
                               ) : (
@@ -813,7 +813,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
                           )}
 
                           {/* Action Trash trigger button inside speech buble (visible on hover) */}
-                          <div className="absolute top-1/2 -translate-y-1/2 right-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-slate-900 border border-white/10 p-1.5 rounded-lg">
+                          <div className="absolute top-1/2 -translate-y-1/2 right-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-white/[0.04] border border-white/10 p-1.5 rounded-lg">
                             {(isMine || currentUser.role === 'tl') && (
                               <button 
                                 onClick={() => handleDeleteMessage(msg.id)}

@@ -235,7 +235,7 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
             {photos.map((photo, index) => {
               const isImage = photo.startsWith('data:image/') || photo.startsWith('http');
               return (
-              <div key={index} className="relative group w-24 h-24 rounded-xl border border-white/10 overflow-hidden bg-slate-900 shadow-lg">
+              <div key={index} className="relative group w-24 h-24 rounded-xl border border-white/10 overflow-hidden bg-white/[0.04] shadow-lg">
                 {isImage ? (
                   <img referrerPolicy="no-referrer" src={photo} alt="screenshot" className="w-full h-full object-cover" />
                 ) : (

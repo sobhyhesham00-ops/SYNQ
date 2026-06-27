@@ -98,7 +98,7 @@ const RepliesThread = ({ replies }: { replies: any[] }) => {
         {replies.map((r, i) => {
           const isAgent = r.authorRole === 'agent' || (!r.authorRole && !['tl','qa','admin','superadmin','director'].includes(r.authorRole));
           return (
-            <div key={r.id || i} className={`rounded-xl p-3 border text-[11px] ${isAgent ? 'bg-white/[0.03] border-white/5' : 'bg-indigo-500/5 border-indigo-500/10'}`}>
+            <div key={r.id || i} className={`rounded-xl p-3 border text-[11px] ${isAgent ? 'bg-white/[0.04] border-white/5' : 'bg-indigo-500/5 border-indigo-500/10'}`}>
               <div className="flex items-center justify-between gap-2 mb-1.5">
                 <span className={`font-bold ${isAgent ? 'text-slate-300' : 'text-indigo-300'}`}>{r.senderName}</span>
                 <span className="text-slate-600 font-mono text-[10px]">{new Date(r.createdAt).toLocaleString()}</span>
@@ -240,7 +240,7 @@ const FullRecordDetail = ({ item }: { item: any }) => {
             <div key={i} className="space-y-0.5 col-span-1 md:col-span-2 last:col-span-1 md:last:col-span-2">
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{f.label}</p>
               <div className="flex items-start gap-1">
-                <p className="text-[11px] text-slate-200 leading-relaxed flex-1 bg-white/[0.03] rounded-lg p-2 border border-white/5 whitespace-pre-wrap">{f.value}</p>
+                <p className="text-[11px] text-slate-200 leading-relaxed flex-1 bg-white/[0.04] rounded-lg p-2 border border-white/5 whitespace-pre-wrap">{f.value}</p>
                 <CopyBtn value={f.value} label={f.label} />
               </div>
             </div>
@@ -278,7 +278,7 @@ const FullRecordDetail = ({ item }: { item: any }) => {
                 href={att.url}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 p-2 bg-black/30 border border-white/10 rounded-lg hover:border-white/20 transition-all"
+                className="flex items-center gap-2 p-2 bg-white/[0.02] border border-white/10 rounded-lg hover:border-white/20 transition-all"
               >
                 <div className="w-10 h-10 rounded bg-indigo-500/10 text-indigo-400 shrink-0 flex items-center justify-center border border-indigo-500/10">
                   <FileText className="w-5 h-5" />
@@ -484,7 +484,7 @@ export const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({
               autoFocus type="text" value={search}
               onChange={e => { setSearch(e.target.value); setExpandedId(null); }}
               placeholder="Enter phone number e.g. 0501234567"
-              className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-100 outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-600"
+              className="w-full bg-white/[0.03] border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-100 outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-600"
             />
           </div>
           {search && (

@@ -18,7 +18,7 @@ const LinkItem = ({ link }: { link: string }) => {
   const normalized = normalizeUrl(link) || link;
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm bg-slate-900/50 p-4 rounded-xl border border-white/10">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm bg-white/[0.02] p-4 rounded-xl border border-white/10">
       <div className="flex-1 break-all flex items-start gap-2.5 font-mono text-slate-200 leading-relaxed">
         <LinkIcon className="w-5 h-5 shrink-0 mt-0.5 text-indigo-400" />
         <span className="whitespace-pre-wrap text-sm">{normalized}</span>
@@ -215,7 +215,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
               const isImage = att.type?.startsWith('image/') || att.url.startsWith('data:image/') || (!att.type?.includes('pdf') && att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i));
               
               return (
-              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[380px] bg-slate-900 border border-white/10 hover:border-indigo-500/50 transition-all rounded-xl overflow-hidden flex flex-col shadow-lg">
+              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[380px] bg-white/[0.04] border border-white/10 hover:border-indigo-500/50 transition-all rounded-xl overflow-hidden flex flex-col shadow-lg">
                 {isImage ? (
                   <>
                     {/* Image Preview Window */}
@@ -337,7 +337,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
               const isImage = att.type?.startsWith('image/') || att.url.startsWith('data:image/') || (!att.type?.includes('pdf') && att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i));
               
               return (
-              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[380px] bg-slate-900 border border-amber-500/20 hover:border-amber-400/50 transition-all rounded-xl overflow-hidden flex flex-col shadow-lg">
+              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[380px] bg-white/[0.04] border border-amber-500/20 hover:border-amber-400/50 transition-all rounded-xl overflow-hidden flex flex-col shadow-lg">
                 {showSideBadges && (
                   <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-amber-500 text-slate-950 font-black text-[9px] rounded uppercase shadow-md z-10 select-none">
                     TL

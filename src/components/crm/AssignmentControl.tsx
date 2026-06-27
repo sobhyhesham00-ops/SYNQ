@@ -88,7 +88,7 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
   const isAssignedToMe = currentUser && currentAssigneeName?.toLowerCase() === currentUser.name?.toLowerCase();
 
   return (
-    <div id="assignment-control" className="bg-[#121216] border border-white/5 p-4 rounded-xl flex flex-col gap-3">
+    <div id="assignment-control" className="bg-transparent border border-white/5 p-4 rounded-xl flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Ownership & Assignment</span>
         {isAssigned ? (
@@ -196,7 +196,7 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
                           className={`w-full text-left px-2.5 py-1.5 text-xs rounded-lg transition-all flex items-center justify-between font-medium cursor-pointer ${
                             isSelected
                               ? "bg-indigo-500/15 text-indigo-300 font-bold border border-indigo-500/20"
-                              : "text-slate-300 hover:bg-white/[0.04] hover:text-white"
+                              : "text-slate-300 hover:bg-white/[0.06] hover:text-white"
                           }`}
                         >
                           <span className="truncate pr-2">{agent}</span>

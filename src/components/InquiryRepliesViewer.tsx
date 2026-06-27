@@ -13,7 +13,7 @@ export const InquiryRepliesViewer: React.FC<InquiryRepliesViewerProps> = ({ inqu
   if (!hasLegacyAnswer && !hasReplies) return null;
 
   return (
-    <div className="mt-4 p-4 bg-slate-900/40 border border-emerald-500/15 rounded-xl space-y-4 text-left shadow-lg">
+    <div className="mt-4 p-4 bg-transparent border border-emerald-500/15 rounded-xl space-y-4 text-left shadow-lg">
       <div className="flex items-center gap-2 pb-2.5 border-b border-emerald-500/10">
         <div className="p-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg">
           <CheckCircle2 className="w-4 h-4" />
@@ -35,7 +35,7 @@ export const InquiryRepliesViewer: React.FC<InquiryRepliesViewerProps> = ({ inqu
                   {isTL ? <Shield className="w-3 h-3" /> : <MessageSquare className="w-3 h-3" />}
                 </div>
 
-                <div className="p-3 bg-slate-900/80 border border-slate-800/40 rounded-xl space-y-2 hover:bg-slate-900 duration-150">
+                <div className="p-3 bg-white/[0.04] border border-slate-800/40 rounded-xl space-y-2 hover:bg-white/[0.05] duration-150">
                   <div className="flex justify-between items-center gap-2 flex-wrap">
                     <div className="flex items-center gap-1.5">
                       <span className="text-xs font-bold text-slate-200">{reply.senderName}</span>
@@ -73,7 +73,7 @@ export const InquiryRepliesViewer: React.FC<InquiryRepliesViewerProps> = ({ inqu
               <Shield className="w-3 h-3" />
             </div>
 
-            <div className="p-3 bg-slate-900/80 border border-slate-800/40 rounded-xl space-y-2 hover:bg-slate-900 duration-150">
+            <div className="p-3 bg-white/[0.04] border border-slate-800/40 rounded-xl space-y-2 hover:bg-white/[0.05] duration-150">
               <div className="flex justify-between items-center gap-2">
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-bold text-slate-200">{inquiry.answeredBy || "Leader"}</span>

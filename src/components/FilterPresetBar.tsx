@@ -84,7 +84,7 @@ export const FilterPresetBar: React.FC<FilterPresetBarProps> = ({
           onChange={e => setNewName(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSave()}
           placeholder="Name this filter..."
-          className="bg-black/30 border border-white/10 rounded-lg px-2.5 py-1.5 text-[11px] text-slate-200 outline-none focus:border-indigo-500 w-36 placeholder:text-slate-600"
+          className="bg-white/[0.02] border border-white/10 rounded-lg px-2.5 py-1.5 text-[11px] text-slate-200 outline-none focus:border-indigo-500 w-36 placeholder:text-slate-600"
         />
         <button
           onClick={handleSave}

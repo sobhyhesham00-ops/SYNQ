@@ -498,7 +498,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                   }}
                 >
                   <div className="flex items-center gap-3 text-left">
-                    <div className="p-2.5 bg-black/35 rounded-full flex items-center justify-center shrink-0">
+                    <div className="p-2.5 bg-white/[0.03] rounded-full flex items-center justify-center shrink-0">
                       {typeIcon}
                     </div>
 
@@ -533,7 +533,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                       </div>
 
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="font-mono text-[9px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded">
+                        <span className="font-mono text-[9px] text-slate-500 bg-transparent px-1.5 py-0.5 rounded">
                           {resolvedRef}
                         </span>
                         <span className="text-[9px] text-slate-500 font-mono">
@@ -567,7 +567,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                     {/* INQUIRY ELEMENT PANEL */}
                     {item.type === "inquiry" && (
                       <div className="space-y-4">
-                        <div className="bg-black/35 border border-white/5 p-4 rounded-xl text-xs space-y-2 text-slate-200">
+                        <div className="bg-white/[0.03] border border-white/5 p-4 rounded-xl text-xs space-y-2 text-slate-200">
                           <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
                             📝 Submitted Inquiry Details
                           </p>
@@ -657,7 +657,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                     {/* COMPLAINTS DETAILS AND SOLUTION PANEL */}
                     {item.type === "complaint" && (
                       <div className="space-y-5">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-white/[0.02] border border-white/5 p-4 rounded-xl text-xs">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-transparent border border-white/5 p-4 rounded-xl text-xs">
                           <div>
                             <span className="text-[9px] text-slate-400 uppercase tracking-wider font-bold block mb-1">
                               SUBMITTING AGENT
@@ -717,7 +717,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                           <span className="text-[10px] text-slate-400 uppercase tracking-widest font-black block">
                             🚨 Patient Complaint Details
                           </span>
-                          <div className="bg-black/35 border border-white/5 p-4 rounded-xl text-xs text-slate-200 leading-relaxed italic">
+                          <div className="bg-white/[0.03] border border-white/5 p-4 rounded-xl text-xs text-slate-200 leading-relaxed italic">
                             <p className="whitespace-pre-line">
                               "{item.data.complaintDetails}"
                             </p>
@@ -792,7 +792,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                                     className={`px-3 py-2 rounded-lg text-xs font-bold border transition-all text-left cursor-pointer ${
                                       tlComplaintResolutionType === opt.value
                                         ? "bg-rose-500/20 border-rose-500/40 text-rose-300 animate-fade-in"
-                                        : "bg-white/[0.02] border-white/10 text-slate-400 hover:border-white/20"
+                                        : "bg-transparent border-white/10 text-slate-400 hover:border-white/20"
                                     }`}
                                   >
                                     {opt.label}

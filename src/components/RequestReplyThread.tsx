@@ -366,7 +366,7 @@ export function RequestReplyThread({
       <div className="relative border-l border-slate-700/60 ml-5 pl-8 pr-1 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar py-2 text-left">
          {(sortedReplies.length === 0) ? (
             <div className="relative group text-left py-4">
-              <div className="absolute -left-[45px] top-4.5 bg-slate-900 border border-dashed border-slate-600 rounded-full w-8 h-8 flex items-center justify-center text-slate-500">
+              <div className="absolute -left-[45px] top-4.5 bg-white/[0.04] border border-dashed border-slate-600 rounded-full w-8 h-8 flex items-center justify-center text-slate-500">
                 <Clock className="w-4 h-4 animate-pulse" />
               </div>
               <div className="p-4 rounded-xl border border-dashed border-white/5 bg-white/2 text-center text-xs text-slate-500">
@@ -385,7 +385,7 @@ export function RequestReplyThread({
 
                   {eventInfo.isSystem ? (
                     /* Timeline Activity Log */
-                    <div className="bg-slate-900/40 border border-slate-800/80 rounded-xl p-3.5 flex items-center justify-between text-left hover:bg-slate-900/60 transition-colors shadow-sm">
+                    <div className="bg-white/[0.02] border border-white/[0.05] rounded-xl p-3.5 flex items-center justify-between text-left hover:bg-white/[0.05] transition-colors shadow-sm">
                       <div className="space-y-1">
                         <span className="text-[11px] font-bold text-slate-400 font-mono tracking-wider uppercase block">{eventInfo.title}</span>
                         <p className="text-sm text-slate-200 leading-relaxed font-sans">{r.text}</p>
@@ -394,7 +394,7 @@ export function RequestReplyThread({
                     </div>
                   ) : (
                     /* User correspondency bubble / note */
-                    <div className={`p-4 rounded-xl border transition-all hover:bg-slate-900/40 duration-200 hover:shadow-md ${r.senderName === currentUser.name ? 'bg-indigo-950/20 border-indigo-500/20' : 'bg-slate-900/50 border-slate-700/35'}`}>
+                    <div className={`p-4 rounded-xl border transition-all hover:bg-white/[0.05] duration-200 hover:shadow-md ${r.senderName === currentUser.name ? 'bg-indigo-500/[0.06] border-indigo-500/20' : 'bg-white/[0.03] border-white/[0.06]'}`}>
                        <div className="flex items-center justify-between gap-3 border-b border-white/5 pb-2.5 mb-2.5 flex-wrap">
                          <div className="flex items-center gap-2">
                            <span className={`font-bold text-sm ${r.senderName === currentUser.name ? 'text-indigo-300' : 'text-slate-200'}`}>{r.senderName}</span>
@@ -430,7 +430,7 @@ export function RequestReplyThread({
 
       <form onSubmit={handleReply} className="pt-4 border-t border-white/10 flex flex-col gap-3 relative text-left">
           {/* MultiAttachmentUpload for reply screenshots */}
-          <div className="bg-slate-900/55 p-4 border border-slate-700/35 rounded-xl">
+          <div className="bg-white/[0.03] p-4 border border-white/[0.06] rounded-xl">
             <MultiAttachmentUpload
               photos={replyPhotos}
               links={[]}
@@ -442,11 +442,11 @@ export function RequestReplyThread({
 
           {/* Active file attachments queue */}
           {attachments.length > 0 && (
-            <div className="flex flex-wrap gap-2.5 p-2 bg-slate-900/40 rounded-xl border border-white/5">
+            <div className="flex flex-wrap gap-2.5 p-2 bg-white/[0.03] rounded-xl border border-white/5">
               {attachments.map((att, idx) => {
                 const isImage = att.type?.startsWith('image/');
                 return (
-                  <div key={att.id} className="relative group w-16 h-16 rounded-xl border border-white/20 overflow-hidden bg-slate-900 shadow-md">
+                  <div key={att.id} className="relative group w-16 h-16 rounded-xl border border-white/20 overflow-hidden bg-white/[0.04] shadow-md">
                     {isImage ? (
                       <img referrerPolicy="no-referrer" src={att.url} alt="Screenshot queue" className="w-full h-full object-cover" />
                     ) : (
@@ -497,7 +497,7 @@ export function RequestReplyThread({
           )}
           
           {/* CRM Compound Action Composer */}
-          <div className="bg-slate-900/50 border border-white/10 rounded-xl p-3 flex flex-col gap-3 shadow-inner">
+          <div className="bg-white/[0.02] border border-white/10 rounded-xl p-3 flex flex-col gap-3 shadow-inner">
             <textarea 
               id={`reply-input-${request.id}`}
               value={text}

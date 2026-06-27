@@ -212,7 +212,7 @@ export function OrdersTab({
                       value={restaurantName}
                       onChange={e => setRestaurantName(e.target.value)}
                       placeholder="e.g. Starbucks, KFC..."
-                      className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-fuchsia-500"
+                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-fuchsia-500"
                     />
                   </div>
                   <div>
@@ -222,7 +222,7 @@ export function OrdersTab({
                       required min={5}
                       value={timerMinutes}
                       onChange={e => setTimerMinutes(Number(e.target.value))}
-                      className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-fuchsia-500"
+                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-fuchsia-500"
                     />
                   </div>
                   <button type="submit" className="w-full bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold py-2 rounded-xl text-sm transition-all flex items-center justify-center gap-2">
@@ -241,7 +241,7 @@ export function OrdersTab({
                     <button 
                       key={o.id}
                       onClick={() => setActiveOrderId(o.id)}
-                      className={`w-full text-left p-3 rounded-xl border transition-all ${activeOrderId === o.id ? 'bg-fuchsia-500/20 border-fuchsia-500/50' : 'bg-black/30 border-white/5 hover:border-white/20'}`}
+                      className={`w-full text-left p-3 rounded-xl border transition-all ${activeOrderId === o.id ? 'bg-fuchsia-500/20 border-fuchsia-500/50' : 'bg-white/[0.02] border-white/5 hover:border-white/20'}`}
                     >
                       <div className="flex justify-between items-start">
                         <span className="font-bold text-slate-200 text-sm">{o.restaurantName}</span>
@@ -258,11 +258,11 @@ export function OrdersTab({
                <div className="absolute top-0 right-0 w-32 h-32 bg-fuchsia-500/20 blur-3xl" />
                <h3 className="font-bold text-indigo-300 text-sm uppercase tracking-wider mb-2">Monthly Top Orders</h3>
                <div className="space-y-2 text-xs">
-                 <div className="flex justify-between items-center bg-black/30 p-2 rounded-lg border border-white/5">
+                 <div className="flex justify-between items-center bg-white/[0.02] p-2 rounded-lg border border-white/5">
                    <span className="text-slate-400">Most Orders Made:</span>
                    <span className="font-bold text-fuchsia-400">{stats.topMaker || 'N/A'} <span className="text-slate-500 text-[10px]">({stats.makerCount})</span></span>
                  </div>
-                 <div className="flex justify-between items-center bg-black/30 p-2 rounded-lg border border-white/5">
+                 <div className="flex justify-between items-center bg-white/[0.02] p-2 rounded-lg border border-white/5">
                    <span className="text-slate-400">Top Spender:</span>
                    <span className="font-bold text-emerald-400">{stats.topSpender || 'N/A'} <span className="text-slate-500 text-[10px]">({!isNaN(stats.spenderAmount) ? stats.spenderAmount.toFixed(0) : 0} AED)</span></span>
                  </div>
@@ -298,7 +298,7 @@ export function OrdersTab({
                              <BellRing className="w-4 h-4" /> Mark Arrived
                            </button>
                         )}
-                        <span className="px-3 py-1 font-bold text-[10px] uppercase tracking-widest rounded-lg border bg-black/40 text-slate-300 border-white/10">
+                        <span className="px-3 py-1 font-bold text-[10px] uppercase tracking-widest rounded-lg border bg-white/[0.03] text-slate-300 border-white/10">
                           Status: {activeOrder.status}
                         </span>
                      </div>
@@ -306,7 +306,7 @@ export function OrdersTab({
 
                   {/* Calculator & Fees configs - visible to maker mostly, but let's let anyone see it */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-black/40 border border-white/10 p-3 rounded-xl flex items-center justify-between">
+                    <div className="bg-white/[0.03] border border-white/10 p-3 rounded-xl flex items-center justify-between">
                        <span className="text-[10px] text-slate-400 font-bold uppercase">Delivery</span>
                        {activeOrder.status === 'open' && activeOrder.makerName === currentUser.name ? (
                          <input type="number" value={activeOrder.deliveryFee} onChange={e=>handleUpdateFees('deliveryFee', Number(e.target.value))} className="w-16 bg-slate-800 text-right text-sm px-2 py-1 rounded text-slate-200 outline-none" min={0}/>
@@ -314,7 +314,7 @@ export function OrdersTab({
                          <span className="text-sm text-slate-200 font-mono">{activeOrder.deliveryFee}</span>
                        )}
                     </div>
-                    <div className="bg-black/40 border border-white/10 p-3 rounded-xl flex items-center justify-between">
+                    <div className="bg-white/[0.03] border border-white/10 p-3 rounded-xl flex items-center justify-between">
                        <span className="text-[10px] text-slate-400 font-bold uppercase">Tax</span>
                        {activeOrder.status === 'open' && activeOrder.makerName === currentUser.name ? (
                          <input type="number" value={activeOrder.tax} onChange={e=>handleUpdateFees('tax', Number(e.target.value))} className="w-16 bg-slate-800 text-right text-sm px-2 py-1 rounded text-slate-200 outline-none" min={0}/>
@@ -322,7 +322,7 @@ export function OrdersTab({
                          <span className="text-sm text-slate-200 font-mono">{activeOrder.tax}</span>
                        )}
                     </div>
-                    <div className="bg-black/40 border border-white/10 p-3 rounded-xl flex items-center justify-between">
+                    <div className="bg-white/[0.03] border border-white/10 p-3 rounded-xl flex items-center justify-between">
                        <span className="text-[10px] text-fuchsia-400 font-bold uppercase">Discount</span>
                        {activeOrder.status === 'open' && activeOrder.makerName === currentUser.name ? (
                          <input type="number" value={activeOrder.discount} onChange={e=>handleUpdateFees('discount', Number(e.target.value))} className="w-16 bg-slate-800 text-right text-sm px-2 py-1 rounded text-fuchsia-300 outline-none" min={0}/>
@@ -364,7 +364,7 @@ export function OrdersTab({
                        <p className="text-slate-500 text-sm italic">No items added yet.</p>
                      ) : (
                        activeOrder.members.map(m => (
-                         <div key={m.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-black/40 border border-white/5 rounded-xl gap-2 hover:border-white/10 transition-colors">
+                         <div key={m.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-white/[0.03] border border-white/5 rounded-xl gap-2 hover:border-white/10 transition-colors">
                            <div className="flex-1">
                               <p className="font-bold text-slate-200 text-sm">{m.name}</p>
                               <p className="text-xs text-slate-400">{m.itemsName}</p>

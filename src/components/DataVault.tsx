@@ -92,21 +92,21 @@ export const DataVault: React.FC<DataVaultProps> = ({ userName }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="p-4 rounded-xl bg-black/20 border border-white/5 space-y-2">
+          <div className="p-4 rounded-xl bg-transparent border border-white/5 space-y-2">
             <div className="flex items-center gap-2 text-slate-500 mb-1">
               <Clock className="w-3.5 h-3.5" />
               <span className="text-[10px] font-bold uppercase">Last Device Backup</span>
             </div>
             <p className="text-sm font-medium text-slate-200">{lastBackup || 'Never'}</p>
           </div>
-          <div className="p-4 rounded-xl bg-black/20 border border-white/5 space-y-2">
+          <div className="p-4 rounded-xl bg-transparent border border-white/5 space-y-2">
             <div className="flex items-center gap-2 text-slate-500 mb-1">
               <Smartphone className="w-3.5 h-3.5" />
               <span className="text-[10px] font-bold uppercase">Storage Locality</span>
             </div>
             <p className="text-sm font-medium text-slate-200">Local Hardware</p>
           </div>
-          <div className="p-4 rounded-xl bg-black/20 border border-white/5 space-y-2">
+          <div className="p-4 rounded-xl bg-transparent border border-white/5 space-y-2">
             <div className="flex items-center gap-2 text-slate-500 mb-1">
               <HardDrive className="w-3.5 h-3.5" />
               <span className="text-[10px] font-bold uppercase">Archive Size</span>

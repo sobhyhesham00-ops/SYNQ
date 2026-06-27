@@ -61,7 +61,7 @@ export const AIChatWidget = () => {
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
       {isOpen && (
-        <div className="w-80 sm:w-96 h-[400px] bg-slate-900 border border-indigo-500/30 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in font-sans relative">
+        <div className="w-80 sm:w-96 h-[400px] bg-white/[0.04] border border-indigo-500/30 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in font-sans relative">
           <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/5 to-purple-500/5 pointer-events-none" />
           
           <div className="bg-indigo-950/80 border-b border-indigo-500/20 p-4 flex justify-between items-center backdrop-blur-md z-10">
@@ -96,7 +96,7 @@ export const AIChatWidget = () => {
             )}
           </div>
 
-          <form onSubmit={sendMessage} className="p-3 border-t border-white/10 bg-black/40 z-10">
+          <form onSubmit={sendMessage} className="p-3 border-t border-white/10 bg-white/[0.03] z-10">
             <div className="relative">
               <input
                 type="text"

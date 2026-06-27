@@ -128,8 +128,8 @@ export function PaginatedCaseList<T>({
   };
 
   return (
-    <div className="bg-[#121216]/80 p-0 rounded-2xl shadow-xl overflow-hidden border border-slate-700/60 w-full flex flex-col">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-700/60 px-5 py-4 bg-[#121216] gap-3 flex-wrap">
+    <div className="bg-white/[0.04] p-0 rounded-2xl shadow-xl overflow-hidden border border-slate-700/60 w-full flex flex-col">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-700/60 px-5 py-4 bg-transparent gap-3 flex-wrap">
         <div>
           <h3 className="text-base font-bold text-slate-100 font-display flex items-center gap-2">
             {icon} {title}
@@ -151,7 +151,7 @@ export function PaginatedCaseList<T>({
                   setCurrentPage(1);
                 }}
                 placeholder="Search by phone..."
-                className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm font-mono text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500/60 focus:bg-black/60 transition-all"
+                className="w-full bg-white/[0.06] border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm font-mono text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500/60 focus:bg-black/60 transition-all"
               />
             </div>
             {phoneFilter && (
@@ -231,7 +231,7 @@ export function PaginatedCaseList<T>({
               <select
                 value={bulkTargetAgent}
                 onChange={(e) => setBulkTargetAgent(e.target.value)}
-                className="bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-200 outline-none focus:border-indigo-500"
+                className="bg-white/[0.06] border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-200 outline-none focus:border-indigo-500"
               >
                 <option value="">Assign selected to...</option>
                 {(agentsList || []).map(a => (
@@ -259,7 +259,7 @@ export function PaginatedCaseList<T>({
 
       <div className="flex flex-col w-full min-h-[300px]">
         {paginatedItems.length === 0 ? (
-          <div className="p-16 text-center space-y-2 animate-fade-in bg-[#0d0d11] h-full flex-1 flex flex-col items-center justify-center">
+          <div className="p-16 text-center space-y-2 animate-fade-in bg-white/[0.02] h-full flex-1 flex flex-col items-center justify-center">
             <div className="w-12 h-12 rounded-full bg-slate-800/50 flex items-center justify-center mx-auto text-slate-400 mb-2">
               <Filter className="w-6 h-6 text-slate-500" />
             </div>

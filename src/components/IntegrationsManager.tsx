@@ -116,14 +116,14 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
               </p>
 
               <div className="grid grid-cols-1 gap-2">
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-black/20 border border-white/5">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-transparent border border-white/5">
                   <Calendar className="w-4 h-4 text-indigo-400" />
                   <div className="text-xs">
                     <p className="font-bold text-slate-200">Universal Calendar Sync</p>
                     <p className="text-[10px] text-slate-500">Add shifts to Google, Outlook, or Apple Calendar.</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-black/20 border border-white/5">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-transparent border border-white/5">
                   <Cloud className="w-4 h-4 text-sky-400" />
                   <div className="text-xs">
                     <p className="font-bold text-slate-200">Google Drive Export</p>
@@ -177,7 +177,7 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
 
         {/* Security & Access Info Card */}
         <div className="space-y-6">
-          <div className="bg-slate-900/40 border border-white/5 rounded-2xl p-6 space-y-4">
+          <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 space-y-4">
             <h4 className="text-xs font-black text-indigo-300 uppercase tracking-widest flex items-center gap-2">
               <ShieldCheck className="w-4 h-4" /> Security Protocol
             </h4>

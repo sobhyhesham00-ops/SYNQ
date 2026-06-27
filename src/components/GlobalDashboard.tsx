@@ -510,7 +510,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
               <div className={`p-2.5 rounded-full ${selectedTypeFilter === "inquiry" ? "bg-amber-500/20 text-amber-300" : "bg-amber-500/10 text-amber-400"}`}>
                 <HelpCircle className="w-5 h-5" />
               </div>
-              <span className="text-[10px] bg-black/20 text-slate-400 font-mono px-2 py-1 rounded-md">
+              <span className="text-[10px] bg-transparent text-slate-400 font-mono px-2 py-1 rounded-md">
                 {selectedTypeFilter === "inquiry" ? "ACTIVE" : "CLICK"}
               </span>
             </div>
@@ -533,7 +533,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
               <div className={`p-2.5 rounded-full ${selectedTypeFilter === "tabbyTamara" ? "bg-[#2bc9d7]/20 text-[#2bc9d7]" : "bg-[#2bc9d7]/10 text-[#2bc9d7]"}`}>
                 <Wallet className="w-5 h-5" />
               </div>
-              <span className="text-[10px] bg-black/20 text-slate-400 font-mono px-2 py-1 rounded-md">
+              <span className="text-[10px] bg-transparent text-slate-400 font-mono px-2 py-1 rounded-md">
                 {selectedTypeFilter === "tabbyTamara" ? "ACTIVE" : "CLICK"}
               </span>
             </div>
@@ -556,7 +556,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
               <div className={`p-2.5 rounded-full ${selectedTypeFilter === "complaint" ? "bg-rose-500/20 text-rose-300" : "bg-rose-500/10 text-rose-400"}`}>
                 <AlertTriangle className="w-5 h-5" />
               </div>
-              <span className="text-[10px] bg-black/20 text-slate-400 font-mono px-2 py-1 rounded-md">
+              <span className="text-[10px] bg-transparent text-slate-400 font-mono px-2 py-1 rounded-md">
                 {selectedTypeFilter === "complaint" ? "ACTIVE" : "CLICK"}
               </span>
             </div>
@@ -579,7 +579,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
               <div className={`p-2.5 rounded-full ${selectedTypeFilter === "clientComm" ? "bg-indigo-500/20 text-indigo-300" : "bg-indigo-500/10 text-indigo-400"}`}>
                 <MessageCircle className="w-5 h-5" />
               </div>
-              <span className="text-[10px] bg-black/20 text-slate-400 font-mono px-2 py-1 rounded-md">
+              <span className="text-[10px] bg-transparent text-slate-400 font-mono px-2 py-1 rounded-md">
                 {selectedTypeFilter === "clientComm" ? "ACTIVE" : "CLICK"}
               </span>
             </div>

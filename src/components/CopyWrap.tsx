@@ -36,7 +36,7 @@ export const CopyWrap = ({
   return (
     <span 
       onClick={handleCopy} 
-      className="group/cwrap inline-flex items-center gap-1 cursor-pointer transition-colors bg-white/[0.03] hover:bg-white/[0.08] px-1.5 py-0.5 rounded border border-transparent hover:border-white/10 active:scale-95" 
+      className="group/cwrap inline-flex items-center gap-1 cursor-pointer transition-colors bg-white/[0.04] hover:bg-white/[0.06] px-1.5 py-0.5 rounded border border-transparent hover:border-white/10 active:scale-95" 
       title={`Copy ${label}`}
     >
       {children}

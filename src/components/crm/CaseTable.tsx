@@ -154,11 +154,11 @@ export const CaseTable: React.FC<CaseTableProps> = ({
   };
 
   return (
-    <div id="crm-table-container" className="w-full h-full flex flex-col min-h-0 bg-[#0d0d11] rounded-2xl border border-white/5 overflow-hidden">
+    <div id="crm-table-container" className="w-full h-full flex flex-col min-h-0 bg-transparent rounded-2xl border border-white/5 overflow-hidden">
       {/* Table grid for larger screens */}
       <div className="hidden lg:block overflow-x-auto min-h-0 custom-scrollbar">
         <table className="w-full min-w-[900px] text-left text-xs text-slate-300 whitespace-nowrap table-fixed">
-          <thead className="bg-[#121216] text-[10px] font-black uppercase tracking-wider text-slate-500 border-b border-white/5 sticky top-0 z-15">
+          <thead className="bg-transparent text-[10px] font-black uppercase tracking-wider text-slate-500 border-b border-white/5 sticky top-0 z-15">
             <tr>
               <th className="p-2 w-6"></th>
               <th className="p-2 w-32">
@@ -203,7 +203,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                       className={`cursor-pointer transition-all duration-150 ${
                         isSelected
                           ? "bg-indigo-600/10 text-white font-medium border-l-4 border-indigo-500"
-                          : "hover:bg-white/[0.03]"
+                          : "hover:bg-white/[0.04]"
                       }`}
                     >
                       <td className="p-2 text-center">
@@ -305,7 +305,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                 <div
                   onClick={() => onSelectCase(item)}
                   className={`p-4 cursor-pointer transition-all space-y-3 ${
-                    isSelected ? "bg-indigo-600/15 border-l-4 border-indigo-500 text-white" : "hover:bg-white/[0.01]"
+                    isSelected ? "bg-indigo-600/15 border-l-4 border-indigo-500 text-white" : "hover:bg-transparent"
                   }`}
                 >
                   <div className="flex items-center justify-between">

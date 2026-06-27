@@ -384,7 +384,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
   return (
     <div id="case-crm-detail-drawer" className="h-full flex flex-col bg-[#09090c] border border-white/5 rounded-2xl overflow-hidden shadow-2xl relative">
       {/* Drawer Header Toolbar */}
-      <div className="bg-[#121216] border-b border-white/5 p-4 flex items-center justify-between z-10 shrink-0">
+      <div className="bg-transparent border-b border-white/5 p-4 flex items-center justify-between z-10 shrink-0">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <span className="text-[10px] uppercase font-bold tracking-widest text-[#2effc3] bg-[#00e3a5]/5 px-2 py-0.5 rounded-full border border-[#00e3a5]/10 shrink-0">
@@ -470,7 +470,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
           <div className="space-y-5 animate-fade-in" id="drawer-tab-overview">
             
             {/* Patient Info Grid */}
-            <div className="grid grid-cols-2 gap-x-6 gap-y-3 p-4 bg-white/[0.02] rounded-xl border border-white/5">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3 p-4 bg-transparent rounded-xl border border-white/5">
               <InfoField label="Patient Name" value={caseData.patientName} copyable />
               <InfoField label="Phone" value={caseData.phoneNumber} copyable mono />
               <InfoField label="Clinic" value={getClinicLabel(caseData.clinicName)} />
@@ -590,7 +590,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
                         className={`py-1.5 px-2 rounded-lg text-xs font-semibold text-left transition-all flex items-center gap-1.5 ${
                           complaintResType === opt.value
                             ? "bg-rose-500 text-slate-950 font-bold"
-                            : "bg-[#1b1b22] hover:bg-white/[0.04] text-slate-300 border border-white/5"
+                            : "bg-white/[0.03] hover:bg-white/[0.06] text-slate-300 border border-white/5"
                         }`}
                       >
                         {opt.icon}
@@ -624,7 +624,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
 
             {/* Complaint Closure & Reopening for TL / Agent who needs contact */}
             {caseData.crmType === "complaint" && caseData.status === "need_contact" && (
-              <div className="bg-[#121216] border border-white/5 p-4 rounded-xl space-y-2.5">
+              <div className="bg-transparent border border-white/5 p-4 rounded-xl space-y-2.5">
                 <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block">Contact Required Status</span>
                 <p className="text-xs text-slate-300 font-medium leading-relaxed">
                   The Team Leader has registered a resolution: <span className="text-rose-400 font-extrabold uppercase">{caseData.raw.tlResolutionType || 'Follow Up'}</span>. 
@@ -632,7 +632,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
                 </p>
                 
                 {caseData.raw.tlComment && (
-                  <div className="bg-black/30 border border-white/5 p-3 rounded-lg text-xs italic text-slate-400">
+                  <div className="bg-white/[0.02] border border-white/5 p-3 rounded-lg text-xs italic text-slate-400">
                     "{caseData.raw.tlComment}"
                   </div>
                 )}

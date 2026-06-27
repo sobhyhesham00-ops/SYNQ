@@ -165,12 +165,12 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
           <p className="text-sm text-slate-400">Configure the questions and maximum scores that will be used for all new scorecards.</p>
           <div className="space-y-4">
             {localQuestions.map((q, idx) => (
-              <div key={q.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-black/20 p-4 rounded-xl border border-white/5">
+              <div key={q.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-transparent p-4 rounded-xl border border-white/5">
                 <input
                   type="text"
                   value={q.text}
                   onChange={(e) => handleUpdateQuestion(idx, 'text', e.target.value)}
-                  className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 outline-none focus:border-green-500"
+                  className="flex-1 bg-white/[0.04] border border-slate-700 rounded-lg px-3 py-2 text-slate-200 outline-none focus:border-green-500"
                   placeholder="e.g. Greeting & Opening"
                 />
                 <div className="flex items-center gap-2">
@@ -180,7 +180,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                     min={1}
                     value={q.maxScore}
                     onChange={(e) => handleUpdateQuestion(idx, 'maxScore', e.target.value)}
-                    className="w-20 text-center bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-green-400 font-bold outline-none focus:border-green-500"
+                    className="w-20 text-center bg-white/[0.04] border border-slate-700 rounded-lg px-2 py-2 text-green-400 font-bold outline-none focus:border-green-500"
                   />
                   <button onClick={() => handleRemoveQuestion(idx)} className="ml-2 text-red-500 hover:text-red-400 p-2">
                     <XCircle className="w-5 h-5" />
@@ -212,7 +212,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                 const isExpanded = expandedScoreId === score.id;
 
                 return (
-                  <div key={score.id} className="bg-black/20 border border-white/10 rounded-2xl flex flex-col transition-all hover:border-white/20 overflow-hidden">
+                  <div key={score.id} className="bg-transparent border border-white/10 rounded-2xl flex flex-col transition-all hover:border-white/20 overflow-hidden">
                     <div 
                       className="p-4 flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between cursor-pointer"
                       onClick={() => setExpandedScoreId(isExpanded ? null : score.id)}
@@ -234,7 +234,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                       </div>
                       
                       <div className="flex items-center gap-4">
-                        <div className="bg-slate-900 border border-white/10 rounded-xl px-4 py-2 flex flex-col items-center min-w-[100px]">
+                        <div className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-2 flex flex-col items-center min-w-[100px]">
                           <div className={`text-xl font-black ${pctColor}`}>{!isNaN(Number(score.totalScore)) ? Number(score.totalScore) : 0}<span className="text-xs text-slate-500">/{!isNaN(Number(score.maxTotalScore)) ? Number(score.maxTotalScore) : 0}</span></div>
                         </div>
                         <Search className={`w-5 h-5 text-slate-500 transition-transform ${isExpanded ? 'rotate-90 text-slate-300' : ''}`} />
@@ -242,13 +242,13 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                     </div>
                     
                     {isExpanded && (
-                      <div className="p-4 border-t border-white/5 bg-white/[0.02]">
+                      <div className="p-4 border-t border-white/5 bg-transparent">
                         <h4 className="text-sm font-bold text-slate-200 mb-3">Detailed Scorecard</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                           {(score.questionsSnapshot || qaTemplate).map(q => (
-                            <div key={q.id} className="flex justify-between items-center p-3 rounded-xl bg-slate-900 border border-slate-800">
+                            <div key={q.id} className="flex justify-between items-center p-3 rounded-xl bg-white/[0.04] border border-slate-800">
                               <span className="text-xs font-semibold text-slate-300 flex-1 pr-2">{q.text}</span>
-                              <div className="font-mono bg-black/40 px-2 py-1 rounded text-sm whitespace-nowrap">
+                              <div className="font-mono bg-white/[0.03] px-2 py-1 rounded text-sm whitespace-nowrap">
                                 <span className={score.scores[q.id] < q.maxScore ? 'text-amber-400' : 'text-green-400'}>
                                   {score.scores[q.id] ?? 0}
                                 </span>
@@ -261,7 +261,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                         {score.notes && (
                           <div className="mb-2">
                             <h4 className="text-xs uppercase font-bold tracking-widest text-slate-500 mb-2">Coaching & Feedback</h4>
-                            <div className="text-sm text-slate-300 whitespace-pre-wrap bg-slate-900 p-4 rounded-xl border border-slate-800">
+                            <div className="text-sm text-slate-300 whitespace-pre-wrap bg-white/[0.04] p-4 rounded-xl border border-slate-800">
                               {score.notes}
                             </div>
                           </div>
@@ -285,7 +285,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                 value={targetAgent}
                 onChange={(e) => setTargetAgent(e.target.value)}
                 required
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 outline-none focus:border-green-500 transition-colors"
+                className="w-full bg-white/[0.04] border border-slate-700 rounded-xl px-4 py-3 text-slate-200 outline-none focus:border-green-500 transition-colors"
               >
                 <option value="">-- Select Agent --</option>
                 {agentsList.map(a => <option key={a} value={a}>{a}</option>)}
@@ -300,7 +300,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                 onChange={(e) => setClinicName(e.target.value)}
                 required
                 placeholder="e.g. HealthCare Plus"
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 outline-none focus:border-green-500 transition-colors"
+                className="w-full bg-white/[0.04] border border-slate-700 rounded-xl px-4 py-3 text-slate-200 outline-none focus:border-green-500 transition-colors"
                 autoComplete="off"
               />
             </div>
@@ -313,7 +313,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                 onChange={(e) => setChatOrCallId(e.target.value)}
                 required
                 placeholder="Reference ID"
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 outline-none focus:border-green-500 transition-colors"
+                className="w-full bg-white/[0.04] border border-slate-700 rounded-xl px-4 py-3 text-slate-200 outline-none focus:border-green-500 transition-colors"
                 autoComplete="off"
               />
             </div>
@@ -323,7 +323,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
             <h4 className="text-sm font-bold tracking-wide text-slate-200 mb-4">Scorecard Criteria</h4>
             <div className="space-y-4">
               {qaTemplate.map((q) => (
-                <div key={q.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-black/20 p-4 rounded-xl border border-white/5">
+                <div key={q.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-transparent p-4 rounded-xl border border-white/5">
                   <div className="flex-1">
                     <span className="font-semibold text-slate-200">{q.text}</span>
                     <p className="text-xs text-slate-500 mt-1">Max Score: {q.maxScore}</p>
@@ -337,7 +337,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                       onChange={(e) => handleScoreChange(q.id, e.target.value)}
                       required
                       placeholder="0"
-                      className="w-20 text-center bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-green-400 font-bold outline-none focus:border-green-500 transition-colors"
+                      className="w-20 text-center bg-white/[0.04] border border-slate-700 rounded-lg px-2 py-2 text-green-400 font-bold outline-none focus:border-green-500 transition-colors"
                     />
                     <span className="text-slate-500 font-bold">/ {q.maxScore}</span>
                   </div>
@@ -352,7 +352,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Good tone of voice, but missed some account verifications..."
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 outline-none focus:border-green-500 transition-colors min-h-[100px] resize-y"
+              className="w-full bg-white/[0.04] border border-slate-700 rounded-xl px-4 py-3 text-slate-200 outline-none focus:border-green-500 transition-colors min-h-[100px] resize-y"
             />
           </div>
 

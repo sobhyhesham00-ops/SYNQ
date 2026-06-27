@@ -238,7 +238,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl text-left space-y-6">
+    <div className="bg-white/[0.04] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl text-left space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-black text-slate-100 flex items-center gap-2.5 font-display">
@@ -286,7 +286,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
                 ⭐ Any File Supported
               </span>
               {['.XLSX', '.XLS', '.CSV', '.TXT', 'ALL FORMATS'].map(fType => (
-                <span key={fType} className="px-2 py-0.5 bg-slate-900 rounded text-[9px] font-mono text-slate-400 border border-slate-800">
+                <span key={fType} className="px-2 py-0.5 bg-white/[0.04] rounded text-[9px] font-mono text-slate-400 border border-slate-800">
                   {fType}
                 </span>
               ))}
@@ -322,7 +322,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
                 }
               }
             }}
-            className="w-full bg-slate-900 border border-slate-700/60 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all cursor-pointer"
+            className="w-full bg-white/[0.04] border border-slate-700/60 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all cursor-pointer"
           >
             {availableSheets.map(name => (
               <option key={name} value={name}>{name}</option>
@@ -373,7 +373,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
       {/* Preview Section */}
       {tempSchedules.length > 0 && (
         <div className="bg-slate-950/60 rounded-2xl border border-slate-800 overflow-hidden shadow-inner">
-          <div className="p-4 bg-slate-900 border-b border-slate-800 flex flex-wrap justify-between items-center gap-3">
+          <div className="p-4 bg-white/[0.04] border-b border-slate-800 flex flex-wrap justify-between items-center gap-3">
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4 text-indigo-400" />
               <h5 className="font-bold text-xs text-slate-200 uppercase tracking-wider">
@@ -393,7 +393,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
               <button
                 type="button"
                 onClick={handleClear}
-                className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-slate-300 rounded-lg text-xs font-black tracking-wide uppercase transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 active:bg-white/[0.04] text-slate-300 rounded-lg text-xs font-black tracking-wide uppercase transition-colors cursor-pointer"
               >
                 Clear
               </button>
@@ -402,7 +402,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
-              <thead className="bg-slate-905 bg-slate-900 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+              <thead className="bg-slate-905 bg-white/[0.04] text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
                 <tr>
                   <th className="px-4 py-3 font-semibold">Agent Name</th>
                   <th className="px-4 py-3 font-semibold">Date</th>
@@ -411,7 +411,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {paginatedShifts.map((s) => (
-                  <tr key={s.id} className="hover:bg-slate-900/40 transition-colors">
+                  <tr key={s.id} className="hover:bg-white/[0.05] transition-colors">
                     <td className="px-4 py-3 font-medium text-slate-200">{s.agentName}</td>
                     <td className="px-4 py-3 text-slate-400 font-mono text-[11px]">{s.date}</td>
                     <td className="px-4 py-3">{getShiftBadge(s.shiftLabel)}</td>
@@ -423,7 +423,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
 
           {/* Pagination Controls */}
           {totalPages > 1 && (
-            <div className="p-3 bg-slate-900 border-t border-slate-800 flex items-center justify-between gap-4">
+            <div className="p-3 bg-white/[0.04] border-t border-slate-800 flex items-center justify-between gap-4">
               <span className="text-[11px] text-slate-500 font-mono">
                 Showing {startIndex + 1}–{Math.min(startIndex + itemsPerPage, tempSchedules.length)} of {tempSchedules.length} rows
               </span>

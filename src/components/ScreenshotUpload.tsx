@@ -81,7 +81,7 @@ export const ScreenshotUpload: React.FC<ScreenshotUploadProps> = ({
           <img 
             src={screenshot} 
             alt="Upload Preview" 
-            className="w-full h-auto max-h-64 object-contain bg-black/40"
+            className="w-full h-auto max-h-64 object-contain bg-white/[0.03]"
           />
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-sm">
             <button 

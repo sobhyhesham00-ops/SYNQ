@@ -73,7 +73,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
     filters.date;
 
   return (
-    <div id="case-search-filter-command-bar" className="bg-[#121216]/95 backdrop-blur-xl border border-white/5 p-4 rounded-2xl space-y-4 sticky top-0 z-40 shadow-2xl">
+    <div id="case-search-filter-command-bar" className="bg-white/[0.05] backdrop-blur-xl border border-white/5 p-4 rounded-2xl space-y-4 sticky top-0 z-40 shadow-2xl">
       {/* 1. View Segment Filters & Count */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/5 pb-3">
         <div className="flex flex-wrap gap-2.5">
@@ -118,7 +118,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
             placeholder="Search by reference, patient name, phone, assignee, comment text..."
             value={filters.searchQuery}
             onChange={handleSearchChange}
-            className="w-full bg-black/40 border border-white/10 pl-10 pr-4 py-2 rounded-xl text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-sans font-medium"
+            className="w-full bg-white/[0.03] border border-white/10 pl-10 pr-4 py-2 rounded-xl text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-sans font-medium"
           />
         </div>
 
@@ -155,7 +155,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
 
       {/* 3. Dropdown-based Collapsible Filter Sub-panel */}
       {(showAdvanced || hasActiveFilters) && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-white/5 bg-black/20 p-4 rounded-xl">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-white/5 bg-transparent p-4 rounded-xl">
           {/* Filter 1: Case Type */}
           <div>
             <label className="block text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1.5">Case Type</label>

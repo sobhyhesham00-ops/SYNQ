@@ -10717,7 +10717,7 @@ ${ttNotes}`
                       type="password"
                       value={forceNewPassword}
                       onChange={(e) => setForceNewPassword(e.target.value)}
-                      className="w-full px-4 py-3.5 bg-black/40 border border-indigo-500/20 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500/50 text-sm font-mono transition-all"
+                      className="w-full px-4 py-3.5 bg-white/[0.03] border border-indigo-500/20 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500/50 text-sm font-mono transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -10730,7 +10730,7 @@ ${ttNotes}`
                       onChange={(e) =>
                         setForceNewPasswordConfirm(e.target.value)
                       }
-                      className="w-full px-4 py-3.5 bg-black/40 border border-indigo-500/20 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500/50 text-sm font-mono transition-all"
+                      className="w-full px-4 py-3.5 bg-white/[0.03] border border-indigo-500/20 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500/50 text-sm font-mono transition-all"
                     />
                   </div>
                   <button
@@ -10799,7 +10799,7 @@ ${ttNotes}`
                     <span className="text-[10px] uppercase tracking-widest text-indigo-300 font-bold block mb-1">
                       Username
                     </span>
-                    <div className="px-4 py-3 bg-black/40 border border-indigo-500/20 rounded-xl text-slate-100 font-medium text-sm font-mono tracking-wide text-left shadow-inner shadow-black/50">
+                    <div className="px-4 py-3 bg-white/[0.03] border border-indigo-500/20 rounded-xl text-slate-100 font-medium text-sm font-mono tracking-wide text-left shadow-inner shadow-black/50">
                       {loginName.toLowerCase()}
                     </div>
                   </div>
@@ -10808,7 +10808,7 @@ ${ttNotes}`
                     <span className="text-[10px] uppercase tracking-widest text-indigo-300 font-bold block mb-1">
                       Password
                     </span>
-                    <div className="px-4 py-3 bg-black/40 border border-indigo-500/20 rounded-xl text-slate-100 font-medium text-sm font-mono tracking-widest text-left shadow-inner shadow-black/50">
+                    <div className="px-4 py-3 bg-white/[0.03] border border-indigo-500/20 rounded-xl text-slate-100 font-medium text-sm font-mono tracking-widest text-left shadow-inner shadow-black/50">
                       ••••••••
                     </div>
                   </div>
@@ -10846,7 +10846,7 @@ ${ttNotes}`
                     <input
                       id="login-name"
                       type="text"
-                      className="w-full px-4 py-3.5 bg-black/40 border border-indigo-500/20 rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-500/50 transition-all text-sm font-mono shadow-inner shadow-black/50"
+                      className="w-full px-4 py-3.5 bg-white/[0.03] border border-indigo-500/20 rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-500/50 transition-all text-sm font-mono shadow-inner shadow-black/50"
                       placeholder="e.g. h.sobhy"
                       value={loginName}
                       onChange={(e) => setLoginName(e.target.value)}
@@ -10865,7 +10865,7 @@ ${ttNotes}`
                       <input
                         id="login-password"
                         type={showLoginPassword ? "text" : "password"}
-                        className="w-full pl-4 pr-12 py-3.5 bg-black/40 border border-indigo-500/20 rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-500/50 transition-all text-sm font-mono shadow-inner shadow-black/50"
+                        className="w-full pl-4 pr-12 py-3.5 bg-white/[0.03] border border-indigo-500/20 rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-500/50 transition-all text-sm font-mono shadow-inner shadow-black/50"
                         placeholder="Enter credentials"
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
@@ -10919,7 +10919,7 @@ ${ttNotes}`
                     <button
                       type="button"
                       onClick={() => setIsSynqVersionModalOpen(true)}
-                      className="px-4 py-2 bg-black/40 border border-cyan-500/20 hover:border-cyan-500/40 hover:bg-black/60 rounded-full text-[10px] font-bold tracking-widest text-slate-300 hover:text-cyan-400 transition-all flex items-center gap-3 cursor-pointer shadow-xl shadow-black/40 relative group overflow-hidden"
+                      className="px-4 py-2 bg-white/[0.03] border border-cyan-500/20 hover:border-cyan-500/40 hover:bg-black/60 rounded-full text-[10px] font-bold tracking-widest text-slate-300 hover:text-cyan-400 transition-all flex items-center gap-3 cursor-pointer shadow-xl shadow-black/40 relative group overflow-hidden"
                     >
                       <div className="relative w-2.5 h-2.5 flex items-center justify-center shrink-0">
                         <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 z-10 animate-pulse" />
@@ -10982,7 +10982,7 @@ ${ttNotes}`
               {/* Timezones & Weather Active Control Selector */}
               <div
                 id="timezone-weather-selector"
-                className="flex items-center gap-4 bg-black/30 border border-white/8 rounded-xl px-3 py-1.5"
+                className="flex items-center gap-4 bg-transparent border border-white/8 rounded-xl px-3 py-1.5"
               >
                 <div className="flex items-center gap-4 px-2">
                   {/* EGYPT DISPLAY */}
@@ -11096,8 +11096,8 @@ ${ttNotes}`
                       className="fixed inset-0 z-30"
                       onClick={() => setIsGlobalSearchPanelOpen(false)}
                     />
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#121216] border border-white/10 rounded-2xl shadow-2xl z-45 p-1.5 max-h-96 overflow-y-auto flex flex-col divide-y divide-white/5">
-                      <div className="p-3 text-[10px] text-slate-400 font-extrabold uppercase tracking-wider bg-black/20 flex items-center justify-between border-b border-white/5 rounded-t-xl font-mono">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-transparent border border-white/10 rounded-2xl shadow-2xl z-45 p-1.5 max-h-96 overflow-y-auto flex flex-col divide-y divide-white/5">
+                      <div className="p-3 text-[10px] text-slate-400 font-extrabold uppercase tracking-wider bg-transparent flex items-center justify-between border-b border-white/5 rounded-t-xl font-mono">
                         <span>
                           Results for "{globalSearchInput}":{" "}
                           {globalSearchResults.length} records
@@ -11274,7 +11274,7 @@ ${ttNotes}`
               {/* Navigation / Sidebar Menu */}
               <aside className="w-full md:w-64 border border-white/5 bg-transparent flex flex-col p-4 rounded-xl space-y-4">
                 {/* Egypt Local Time & 10th of Ramadan Weather */}
-                <div className="p-4 rounded-xl bg-black/40 border border-cyan-500/15 space-y-3 relative overflow-hidden">
+                <div className="p-4 rounded-xl bg-white/[0.04] border border-cyan-500/15 space-y-3 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-indigo-500/5 opacity-40 pointer-events-none" />
                   <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-400 to-indigo-500" />
 
@@ -11344,7 +11344,7 @@ ${ttNotes}`
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-16 h-12 bg-black/40 rounded-xl flex items-center justify-center shadow-lg shadow-black/40 border border-cyan-500/20 hover:border-cyan-500/40 transition-all shrink-0 relative overflow-hidden">
+                      <div className="w-16 h-12 bg-white/[0.03] rounded-xl flex items-center justify-center shadow-lg shadow-black/40 border border-cyan-500/20 hover:border-cyan-500/40 transition-all shrink-0 relative overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-indigo-500/5 opacity-40 pointer-events-none" />
                         <CoolLogo className="w-14 h-10" showText={false} />
                       </div>
@@ -11411,7 +11411,7 @@ ${ttNotes}`
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-black/45 border border-cyan-500/15 space-y-4 relative overflow-hidden">
+                  <div className="p-4 rounded-xl bg-white/[0.04] border border-cyan-500/15 space-y-4 relative overflow-hidden">
                     <div className="flex items-center gap-3 relative">
                       <div className="relative shrink-0">
                         <div className="w-10 h-10 rounded-full bg-[#1c1c2e] border border-cyan-500/20 flex items-center justify-center text-[11px] font-bold tracking-widest font-mono text-cyan-400">
@@ -12205,7 +12205,7 @@ ${ttNotes}`
                             const secs = Math.floor((diff % 60000) / 1000);
 
                             return (
-                              <div className="text-center sm:text-right px-4 py-2 bg-black/20 rounded-xl border border-white/5 flex-1 sm:flex-initial">
+                              <div className="text-center sm:text-right px-4 py-2 bg-transparent rounded-xl border border-white/5 flex-1 sm:flex-initial">
                                 <p className="text-[8px] text-slate-500 uppercase font-black tracking-tighter">
                                   Queue Time (Oldest)
                                 </p>
@@ -12468,7 +12468,7 @@ ${ttNotes}`
                                       </strong>{" "}
                                       has been processed by the TL!
                                       <br />
-                                      <span className="text-amber-300 font-semibold block mt-1.5 bg-black/30 p-2.5 rounded-xl border border-white/5">
+                                      <span className="text-amber-300 font-semibold block mt-1.5 bg-transparent p-2.5 rounded-xl border border-white/5">
                                         TL Comment: "{comp.tlComment}"
                                       </span>
                                     </p>
@@ -12980,7 +12980,7 @@ ${ttNotes}`
                                 </div>
                               </div>
                               <div className="space-y-4">
-                                <div className="flex items-center justify-between p-3 rounded-lg bg-black/20">
+                                <div className="flex items-center justify-between p-3 rounded-lg bg-transparent">
                                   <span className="text-xs text-slate-400">
                                     Cloud Sync
                                   </span>
@@ -12989,7 +12989,7 @@ ${ttNotes}`
                                     Synced
                                   </span>
                                 </div>
-                                <div className="flex items-center justify-between p-3 rounded-lg bg-black/20">
+                                <div className="flex items-center justify-between p-3 rounded-lg bg-transparent">
                                   <span className="text-xs text-slate-400">
                                     Persistence Engine
                                   </span>
@@ -12997,7 +12997,7 @@ ${ttNotes}`
                                     IndexedDB Offline
                                   </span>
                                 </div>
-                                <div className="flex items-center justify-between p-3 rounded-lg bg-black/20">
+                                <div className="flex items-center justify-between p-3 rounded-lg bg-transparent">
                                   <span className="text-xs text-slate-400">
                                     Local OS
                                   </span>
@@ -13283,7 +13283,7 @@ ${ttNotes}`
 
                               {/* View Mode Switching Tab Toggles */}
                               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/5 border border-white/10 p-2.5 rounded-2xl select-none">
-                                <div className="flex bg-black/30 p-1 rounded-2xl border border-white/5 w-full sm:w-auto">
+                                <div className="flex bg-white/[0.04] p-1 rounded-2xl border border-white/5 w-full sm:w-auto">
                                   <button
                                     onClick={() =>
                                       setDashboardViewMode("personal")
@@ -13318,7 +13318,7 @@ ${ttNotes}`
                                 </div>
 
                                 {dashboardViewMode === "personal" && (
-                                  <div className="flex bg-black/30 p-1 rounded-2xl border border-white/5 w-full sm:w-auto justify-between">
+                                  <div className="flex bg-white/[0.04] p-1 rounded-2xl border border-white/5 w-full sm:w-auto justify-between">
                                     {(
                                       ["daily", "weekly", "monthly"] as const
                                     ).map((tab) => (
@@ -13444,7 +13444,7 @@ ${ttNotes}`
 
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 xl:gap-6 pt-2 font-sans">
                                           {/* Level Tracker */}
-                                          <div className="bg-black/30 p-4 rounded-2xl border border-white/5 space-y-3.5 flex flex-col justify-between">
+                                          <div className="bg-transparent p-4 rounded-2xl border border-white/5 space-y-3.5 flex flex-col justify-between">
                                             <div className="flex justify-between items-center">
                                               <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">
                                                 Level Upgrade Status
@@ -13492,7 +13492,7 @@ ${ttNotes}`
                                           </div>
 
                                           {/* Achievement Badges Room */}
-                                          <div className="bg-black/30 p-4 rounded-2xl border border-white/5 space-y-2.5">
+                                          <div className="bg-transparent p-4 rounded-2xl border border-white/5 space-y-2.5">
                                             <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">
                                               Unlocked Badges
                                             </span>
@@ -13548,7 +13548,7 @@ ${ttNotes}`
                                           </div>
 
                                           {/* Instant Stats overview Card */}
-                                          <div className="bg-black/30 p-4 rounded-2xl border border-white/5 flex items-center justify-between font-sans">
+                                          <div className="bg-transparent p-4 rounded-2xl border border-white/5 flex items-center justify-between font-sans">
                                             <div className="space-y-0.5 text-left">
                                               <span className="text-[10px] text-indigo-300 font-bold uppercase tracking-wider font-mono">
                                                 Operations Badge Rank
@@ -14933,7 +14933,7 @@ ${ttNotes}`
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                       {/* Podium Top 3 */}
-                                      <div className="bg-black/30 p-4 rounded-2xl border border-white/5 space-y-3.5 flex flex-col justify-center">
+                                      <div className="bg-transparent p-4 rounded-2xl border border-white/5 space-y-3.5 flex flex-col justify-center">
                                         <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider font-mono">
                                           Today's Prestige Podium
                                         </p>
@@ -15075,7 +15075,7 @@ ${ttNotes}`
                                       </div>
 
                                       {/* Ranks list view */}
-                                      <div className="bg-black/35 p-4 rounded-2xl border border-white/5 space-y-2.5">
+                                      <div className="bg-white/[0.03] p-4 rounded-2xl border border-white/5 space-y-2.5">
                                         <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider font-mono">
                                           Operations Leaderboard Rankings
                                         </p>
@@ -16465,7 +16465,7 @@ ${ttNotes}`
                                 </div>
                               </div>
 
-                              <div className="flex justify-between items-center text-xs bg-black/20 p-2.5 rounded-xl border border-white/5 font-sans">
+                              <div className="flex justify-between items-center text-xs bg-transparent p-2.5 rounded-xl border border-white/5 font-sans">
                                 <span className="text-slate-400">
                                   Total processed today:
                                 </span>
@@ -16490,7 +16490,7 @@ ${ttNotes}`
                               </div>
 
                               <div className="grid grid-cols-3 gap-2.5">
-                                <div className="bg-black/30 p-2.5 rounded-xl border border-white/5 text-center">
+                                <div className="bg-transparent p-2.5 rounded-xl border border-white/5 text-center">
                                   <p className="text-[9px] text-slate-400 font-bold uppercase font-sans">
                                     Active Calls
                                   </p>
@@ -16498,7 +16498,7 @@ ${ttNotes}`
                                     {queueStats.activeCalls}
                                   </p>
                                 </div>
-                                <div className="bg-black/30 p-2.5 rounded-xl border border-white/5 text-center">
+                                <div className="bg-transparent p-2.5 rounded-xl border border-white/5 text-center">
                                   <p className="text-[9px] text-slate-400 font-bold uppercase font-sans">
                                     Hold Time
                                   </p>
@@ -16506,7 +16506,7 @@ ${ttNotes}`
                                     {queueStats.holdTime}s
                                   </p>
                                 </div>
-                                <div className="bg-black/30 p-2.5 rounded-xl border border-white/5 text-center">
+                                <div className="bg-transparent p-2.5 rounded-xl border border-white/5 text-center">
                                   <p className="text-[9px] text-slate-400 font-bold uppercase font-sans">
                                     Tasks open
                                   </p>
@@ -16598,7 +16598,7 @@ ${ttNotes}`
                                 </p>
                               </div>
 
-                              <div className="bg-black/45 p-3 rounded-xl border border-white/5 text-left font-mono text-[10px] space-y-1.5 h-24 overflow-y-auto leading-snug">
+                              <div className="bg-white/[0.04] p-3 rounded-xl border border-white/5 text-left font-mono text-[10px] space-y-1.5 h-24 overflow-y-auto leading-snug">
                                 {liveOpsLogs.map((logStr, index) => {
                                   const isLive =
                                     logStr.includes("[Operational]");
@@ -17090,7 +17090,7 @@ ${ttNotes}`
 
                           {/* Filter Rail and Search Bar inside Frosted card */}
                           <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col md:flex-row items-center gap-4">
-                            <div className="flex items-center gap-1 bg-black/20 p-1 rounded-xl w-full md:w-auto self-stretch">
+                            <div className="flex items-center gap-1 bg-white/[0.04] p-1 rounded-xl w-full md:w-auto self-stretch">
                               <button
                                 onClick={() => {
                                   setLogFilter("all");
@@ -17431,7 +17431,7 @@ ${ttNotes}`
                             </div>
 
                             <div className="space-y-3 pt-4">
-                              <div className="grid grid-cols-4 gap-1.5 bg-black/35 p-0.5 border border-white/5 rounded-lg select-none">
+                              <div className="grid grid-cols-4 gap-1.5 bg-white/[0.03] p-0.5 border border-white/5 rounded-lg select-none">
                                 {(
                                   ["day", "week", "month", "year"] as const
                                 ).map((p) => (
@@ -18568,7 +18568,7 @@ ${ttNotes}`
                                         type="date"
                                         value={inqFollowUpDate}
                                         onChange={(e) => setInqFollowUpDate(e.target.value)}
-                                        className="w-full bg-black/45 border border-indigo-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans cursor-pointer"
+                                        className="w-full bg-white/[0.03] border border-indigo-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans cursor-pointer"
                                         required={inqIsFollowUp}
                                       />
                                     </div>
@@ -18774,7 +18774,7 @@ ${ttNotes}`
                                                         {inq.phoneNumber}
                                                       </span>
                                                     )}
-                                                    <span className="font-mono text-[10px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded mr-1">
+                                                    <span className="font-mono text-[10px] text-slate-500 bg-transparent px-1.5 py-0.5 rounded mr-1">
                                                       {formatCaseRef(
                                                         inq.id,
                                                         "inquiry",
@@ -19021,7 +19021,7 @@ ${ttNotes}`
                                       </div>
                                     </div>
 
-                                    <div className="mb-4 bg-black/20 p-1.5 rounded-xl border border-white/10 flex items-center">
+                                    <div className="mb-4 bg-transparent p-1.5 rounded-xl border border-white/10 flex items-center">
                                       <Search className="w-4 h-4 text-slate-500 ml-3 mr-2 shrink-0" />
                                       <input
                                         type="text"
@@ -19162,7 +19162,7 @@ ${ttNotes}`
                                                   </span>
                                                 )}
                                               </div>
-                                              <span className="font-mono text-[10px] text-slate-500 bg-black/20 px-1.5 py-0.5 rounded mr-1">
+                                              <span className="font-mono text-[10px] text-slate-500 bg-transparent px-1.5 py-0.5 rounded mr-1">
                                                 {formatCaseRef(
                                                   inq.id,
                                                   "inquiry",
@@ -20246,7 +20246,7 @@ ${ttNotes}`
                                       className={`px-3.5 py-1.5 rounded-xl border text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-all shrink-0 ${
                                         inquiryStatusFilter === pill.id
                                           ? "bg-indigo-600/20 border-indigo-500/30 text-white shadow shadow-indigo-500/5 font-extrabold"
-                                          : "border-white/5 text-slate-400 bg-black/20 hover:text-slate-100"
+                                          : "border-white/5 text-slate-400 bg-transparent hover:text-slate-100"
                                       }`}
                                     >
                                       {pill.label}
@@ -20641,7 +20641,7 @@ ${ttNotes}`
                             const offset = circ - (pct / 100) * circ;
 
                             return (
-                              <div className="flex flex-col items-center p-3 bg-white/[0.02] border border-white/5 rounded-2xl relative overflow-hidden group hover:border-white/10 transition-all">
+                              <div className="flex flex-col items-center p-3 bg-transparent border border-white/5 rounded-2xl relative overflow-hidden group hover:border-white/10 transition-all">
                                 <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
                                   {/* SVG Ring */}
                                   <svg className="w-full h-full transform -rotate-90">
@@ -20724,7 +20724,7 @@ ${ttNotes}`
                                     </p>
                                   </div>
                                   <div className="grid grid-cols-2 gap-3 border-t border-white/5 pt-4 mt-4">
-                                    <div className="bg-white/[0.02] border border-white/5 rounded-xl p-2">
+                                    <div className="bg-transparent border border-white/5 rounded-xl p-2">
                                       <p className="text-[8px] text-slate-500 font-black uppercase tracking-wider">
                                         This Week
                                       </p>
@@ -20732,7 +20732,7 @@ ${ttNotes}`
                                         +{statsThisWeek}
                                       </p>
                                     </div>
-                                    <div className="bg-white/[0.02] border border-white/5 rounded-xl p-2">
+                                    <div className="bg-transparent border border-white/5 rounded-xl p-2">
                                       <p className="text-[8px] text-slate-500 font-black uppercase tracking-wider">
                                         This Month
                                       </p>
@@ -20744,7 +20744,7 @@ ${ttNotes}`
                                 </div>
 
                                 {/* Google Fit Style Circular Activity Rings */}
-                                <div className="lg:col-span-8 bg-white/[0.02] border border-white/5 rounded-2xl p-5 space-y-4">
+                                <div className="lg:col-span-8 bg-transparent border border-white/5 rounded-2xl p-5 space-y-4">
                                   <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest flex items-center gap-1">
                                     <Award className="w-3.5 h-3.5 text-indigo-400" />{" "}
                                     Active Performance Rings
@@ -20787,7 +20787,7 @@ ${ttNotes}`
                               </div>
 
                               {/* Milestone Medals Card */}
-                              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 space-y-4 relative overflow-hidden group">
+                              <div className="bg-transparent border border-white/5 rounded-2xl p-5 space-y-4 relative overflow-hidden group">
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                                   <div>
                                     <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest flex items-center gap-1">
@@ -20822,7 +20822,7 @@ ${ttNotes}`
                                         className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300 ${
                                           isAchieved
                                             ? "bg-indigo-500/5 border-indigo-500/30 text-indigo-200 shadow-md shadow-indigo-500/5 scale-102"
-                                            : "bg-white/[0.01] border-white/5 text-slate-600 grayscale brightness-75 cursor-not-allowed"
+                                            : "bg-transparent border-white/5 text-slate-600 grayscale brightness-75 cursor-not-allowed"
                                         }`}
                                       >
                                         <div className="relative text-3xl mb-1 flex items-center justify-center h-10 select-none">
@@ -20847,7 +20847,7 @@ ${ttNotes}`
                               </div>
 
                               {/* Feed Filters Control Board */}
-                              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 sm:p-5 space-y-4">
+                              <div className="bg-transparent border border-white/5 rounded-2xl p-4 sm:p-5 space-y-4">
                                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                                   <div>
                                     <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
@@ -21277,12 +21277,12 @@ ${ttNotes}`
                               </div>
 
                               {/* Legacy Cases Collapsible Drawer (preserves old Firestore sub-collection database records if any exist) */}
-                              <div className="border border-white/5 rounded-2xl bg-white/[0.01] overflow-hidden mt-8">
+                              <div className="border border-white/5 rounded-2xl bg-transparent overflow-hidden mt-8">
                                 <button
                                   onClick={() =>
                                     setShowLegacyCases(!showLegacyCases)
                                   }
-                                  className="w-full flex items-center justify-between p-4 bg-white/[0.02] hover:bg-white/[0.04] transition-all"
+                                  className="w-full flex items-center justify-between p-4 bg-transparent hover:bg-transparent transition-all"
                                 >
                                   <div className="flex items-center gap-2">
                                     <Archive className="w-4 h-4 text-slate-400" />
@@ -21323,7 +21323,7 @@ ${ttNotes}`
                                           .map((c) => (
                                             <div
                                               key={c.id}
-                                              className="bg-white/[0.01] border border-white/5 rounded-xl p-4 space-y-3 hover:border-white/10 transition-all text-xs"
+                                              className="bg-transparent border border-white/5 rounded-xl p-4 space-y-3 hover:border-white/10 transition-all text-xs"
                                             >
                                               <div className="flex items-start justify-between gap-2">
                                                 <div>
@@ -21347,7 +21347,7 @@ ${ttNotes}`
                                                   </span>
                                                 )}
                                               </div>
-                                              <div className="grid grid-cols-2 gap-2 bg-white/[0.01] p-2 rounded-lg text-slate-400">
+                                              <div className="grid grid-cols-2 gap-2 bg-transparent p-2 rounded-lg text-slate-400">
                                                 <div>
                                                   <p className="text-[8px] text-slate-600 font-bold uppercase">
                                                     Phone
@@ -21366,7 +21366,7 @@ ${ttNotes}`
                                                 </div>
                                               </div>
                                               {c.inquiry && (
-                                                <p className="text-slate-400 leading-relaxed bg-white/[0.01] border border-white/5 p-2 rounded-lg">
+                                                <p className="text-slate-400 leading-relaxed bg-transparent border border-white/5 p-2 rounded-lg">
                                                   {c.inquiry}
                                                 </p>
                                               )}
@@ -22112,7 +22112,7 @@ ${ttNotes}`
                                       badgeColor: "bg-slate-600",
                                       headerText: "text-slate-500",
                                       countText: "text-slate-600",
-                                      cardBg: "bg-black/30",
+                                      cardBg: "bg-white/[0.02]",
                                       cardBorder: "border-white/5",
                                       cardText: "text-slate-500",
                                       cardHover: "",
@@ -22578,7 +22578,7 @@ ${ttNotes}`
                                           {complianceViolations.map((entry) => (
                                             <div
                                               key={entry.agentName}
-                                              className="p-4 bg-black/40 border border-rose-500/15 rounded-2xl flex flex-col justify-between gap-3 text-left relative overflow-hidden group hover:border-rose-500/25 transition-all"
+                                              className="p-4 bg-white/[0.03] border border-rose-500/15 rounded-2xl flex flex-col justify-between gap-3 text-left relative overflow-hidden group hover:border-rose-500/25 transition-all"
                                             >
                                               <div className="space-y-2">
                                                 <div className="flex justify-between items-start">
@@ -22838,7 +22838,7 @@ ${ttNotes}`
                                     }
 
                                     return (
-                                      <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 border border-white/5 rounded-2xl bg-black/45 overflow-visible">
+                                      <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 border border-white/5 rounded-2xl bg-white/[0.04] overflow-visible">
                                         <table className="w-full text-left border-collapse min-w-[750px]">
                                           <thead>
                                             <tr className="bg-white/5 border-b border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-400 font-sans">
@@ -23372,7 +23372,7 @@ ${ttNotes}`
                         )}
 
                         {/* Break Schedule Panel */}
-                        <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5">
+                        <div className="bg-transparent border border-white/5 rounded-2xl p-5">
                           <BreakSchedulePanel
                             currentUser={currentUser}
                             schedules={schedules}
@@ -23584,7 +23584,7 @@ ${ttNotes}`
                                 />
 
                                 {/* View Mode */}
-                                <div className="flex rounded-xl bg-black/45 p-1 border border-white/5">
+                                <div className="flex rounded-xl bg-white/[0.04] p-1 border border-white/5">
                                   <button
                                     onClick={() => {
                                       setScheduleViewMode("week");
@@ -24312,7 +24312,7 @@ ${ttNotes}`
                                   })()}
 
                                   {/* Desktop Matrix Grid View */}
-                                  <div className="hidden lg:block overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 border border-white/5 rounded-2xl bg-black/45">
+                                  <div className="hidden lg:block overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 border border-white/5 rounded-2xl bg-white/[0.04]">
                                     <table className="w-full text-left border-collapse table-fixed min-w-[800px]">
                                       <thead>
                                         <tr className="bg-white/5 border-b border-white/5">
@@ -24497,7 +24497,7 @@ ${ttNotes}`
                                                                     ) => (
                                                                       <div
                                                                         key={i}
-                                                                        className="flex items-center gap-1.5 justify-between bg-black/40 px-1.5 py-0.5 rounded border border-white/5"
+                                                                        className="flex items-center gap-1.5 justify-between bg-white/[0.03] px-1.5 py-0.5 rounded border border-white/5"
                                                                       >
                                                                         <span className="font-mono text-[9px] text-indigo-200">
                                                                           {
@@ -24930,7 +24930,7 @@ ${ttNotes}`
                                     assignments within LOBs
                                   </p>
                                 </div>
-                                <div className="flex bg-black/35 rounded-xl p-1 border border-white/5 text-[9px] font-black uppercase text-indigo-300 tracking-wider">
+                                <div className="flex bg-white/[0.03] rounded-xl p-1 border border-white/5 text-[9px] font-black uppercase text-indigo-300 tracking-wider">
                                   Peer To Peer Market
                                 </div>
                               </div>
@@ -25226,7 +25226,7 @@ ${ttNotes}`
                                 </div>
 
                                 {/* Available Trades Board Listings */}
-                                <div className="xl:col-span-2 bg-[#0d0d14] p-5 border border-white/5 rounded-2xl flex flex-col justify-between space-y-4 font-sans">
+                                <div className="xl:col-span-2 bg-white/[0.02] p-5 border border-white/5 rounded-2xl flex flex-col justify-between space-y-4 font-sans">
                                   <div className="text-left font-sans">
                                     <p className="text-xs font-black text-[#22d3ee] uppercase tracking-widest font-sans">
                                       Available Trades Board Listings
@@ -25237,7 +25237,7 @@ ${ttNotes}`
                                     </p>
                                   </div>
 
-                                  <div className="border border-white/5 rounded-xl bg-black/40 overflow-hidden text-left h-72 overflow-y-auto">
+                                  <div className="border border-white/5 rounded-xl bg-white/[0.04] overflow-hidden text-left h-72 overflow-y-auto">
                                     {(() => {
                                       const swapRequests = requests.filter(
                                         (r) => r.type === "swap",
@@ -26242,7 +26242,7 @@ ${ttNotes}`
                                                 onChange={(e) =>
                                                   setTtIdNumber(e.target.value)
                                                 }
-                                                className="w-full bg-black/45 border border-amber-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 font-mono"
+                                                className="w-full bg-white/[0.03] border border-amber-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 font-mono"
                                                 required={!ttIsOldCustomer}
                                               />
                                             </div>
@@ -26514,7 +26514,7 @@ ${ttNotes}`
                                                 onChange={(e) =>
                                                   setTtFollowUpDate(e.target.value)
                                                 }
-                                                className="w-full bg-black/45 border border-indigo-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans cursor-pointer"
+                                                className="w-full bg-white/[0.03] border border-indigo-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans cursor-pointer"
                                                 required={ttIsFollowUp}
                                               />
                                             </div>
@@ -26663,7 +26663,7 @@ ${ttNotes}`
                                                 onChange={(e) =>
                                                   setTcIdNumber(e.target.value)
                                                 }
-                                                className="w-full bg-black/45 border border-amber-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 font-mono"
+                                                className="w-full bg-white/[0.03] border border-amber-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 font-mono"
                                                 required={!tcIsOldCustomer}
                                               />
                                             </div>
@@ -26835,7 +26835,7 @@ ${ttNotes}`
                                                 type="date"
                                                 value={tcFollowUpDate}
                                                 onChange={(e) => setTcFollowUpDate(e.target.value)}
-                                                className="w-full bg-black/45 border border-indigo-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans cursor-pointer"
+                                                className="w-full bg-white/[0.03] border border-indigo-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans cursor-pointer"
                                                 required={tcIsFollowUp}
                                               />
                                             </div>
@@ -27031,7 +27031,7 @@ ${ttNotes}`
                                               className={`py-2 rounded-xl text-xs font-bold uppercase transition-all flex items-center justify-center border cursor-pointer ${
                                                 ccLanguage === "Arabic"
                                                   ? "bg-indigo-600 border-indigo-500 text-white shadow"
-                                                  : "bg-black/25 border-white/5 text-slate-400"
+                                                  : "bg-white/[0.02] border-white/5 text-slate-400"
                                               }`}
                                             >
                                               Arabic
@@ -27044,7 +27044,7 @@ ${ttNotes}`
                                               className={`py-2 rounded-xl text-xs font-bold uppercase transition-all flex items-center justify-center border cursor-pointer ${
                                                 ccLanguage === "English"
                                                   ? "bg-indigo-600 border-indigo-500 text-white shadow"
-                                                  : "bg-black/25 border-white/5 text-slate-400"
+                                                  : "bg-white/[0.02] border-white/5 text-slate-400"
                                               }`}
                                             >
                                               English
@@ -27067,7 +27067,7 @@ ${ttNotes}`
                                               className={`py-2 px-1 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center border cursor-pointer ${
                                                 ccChannel === "call_center"
                                                   ? "bg-indigo-600 border-indigo-500 text-white shadow"
-                                                  : "bg-black/25 border-white/5 text-slate-400"
+                                                  : "bg-white/[0.02] border-white/5 text-slate-400"
                                               }`}
                                             >
                                               📞 Call Center
@@ -27081,7 +27081,7 @@ ${ttNotes}`
                                               className={`py-2 px-1 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center border cursor-pointer ${
                                                 ccChannel === "chat"
                                                   ? "bg-indigo-600 border-indigo-500 text-white shadow"
-                                                  : "bg-black/25 border-white/5 text-slate-400"
+                                                  : "bg-white/[0.02] border-white/5 text-slate-400"
                                               }`}
                                             >
                                               💬 Chat
@@ -27095,7 +27095,7 @@ ${ttNotes}`
                                               className={`py-2 px-1 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center border cursor-pointer ${
                                                 ccChannel === "social_media"
                                                   ? "bg-indigo-600 border-indigo-500 text-white shadow"
-                                                  : "bg-black/25 border-white/5 text-slate-400"
+                                                  : "bg-white/[0.02] border-white/5 text-slate-400"
                                               }`}
                                             >
                                               📱 Social Media
@@ -27153,7 +27153,7 @@ ${ttNotes}`
                                                 type="date"
                                                 value={ccFollowUpDate}
                                                 onChange={(e) => setCcFollowUpDate(e.target.value)}
-                                                className="w-full bg-black/45 border border-indigo-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans cursor-pointer"
+                                                className="w-full bg-white/[0.03] border border-indigo-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans cursor-pointer"
                                                 required={ccIsFollowUp}
                                               />
                                             </div>
@@ -27271,7 +27271,7 @@ ${ttNotes}`
                                                 );
                                                 setSelectedClientCommId(null);
                                               }}
-                                              className="w-full bg-black/20 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-sans"
+                                              className="w-full bg-transparent border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-sans"
                                             />
                                           </div>
                                           {/* Status Filters */}
@@ -27297,7 +27297,7 @@ ${ttNotes}`
                                                   clientCommStatusFilter ===
                                                   pill.id
                                                     ? "bg-indigo-500 text-white border-indigo-400"
-                                                    : "bg-black/20 hover:bg-white/5 text-slate-400 hover:text-slate-200 border-white/5"
+                                                    : "bg-transparent hover:bg-white/5 text-slate-400 hover:text-slate-200 border-white/5"
                                                 }`}
                                               >
                                                 {pill.label}
@@ -27522,7 +27522,7 @@ ${ttNotes}`
                                                 );
                                                 setSelectedTTId(null);
                                               }}
-                                              className="w-full bg-black/20 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-sans"
+                                              className="w-full bg-transparent border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-sans"
                                             />
                                           </div>
                                           {/* Status Filters */}
@@ -27554,7 +27554,7 @@ ${ttNotes}`
                                                   tabbyTamaraStatusFilter ===
                                                   pill.id
                                                     ? "bg-indigo-500 text-white border-indigo-400"
-                                                    : "bg-black/20 hover:bg-white/5 text-slate-400 hover:text-slate-200 border-white/5"
+                                                    : "bg-transparent hover:bg-white/5 text-slate-400 hover:text-slate-200 border-white/5"
                                                 }`}
                                               >
                                                 {pill.label}
@@ -27742,7 +27742,7 @@ ${ttNotes}`
                                                 );
                                                 setSelectedComplaintId(null);
                                               }}
-                                              className="w-full bg-black/20 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-sans"
+                                              className="w-full bg-transparent border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-sans"
                                             />
                                           </div>
                                           {/* Status Filters */}
@@ -27769,7 +27769,7 @@ ${ttNotes}`
                                                   complaintStatusFilter ===
                                                   pill.id
                                                     ? "bg-indigo-500 text-white border-indigo-400"
-                                                    : "bg-black/20 hover:bg-white/5 text-slate-400 hover:text-slate-200 border-white/5"
+                                                    : "bg-transparent hover:bg-white/5 text-slate-400 hover:text-slate-200 border-white/5"
                                                 }`}
                                               >
                                                 {pill.label}
@@ -28655,7 +28655,7 @@ ${ttNotes}`
                                       );
                                     }
                                   }}
-                                  className="border-2 border-dashed border-white/10 hover:border-cyan-500/50 rounded-2xl p-8 text-center transition-all bg-black/10 flex flex-col items-center justify-center gap-3 cursor-pointer group"
+                                  className="border-2 border-dashed border-white/10 hover:border-cyan-500/50 rounded-2xl p-8 text-center transition-all bg-transparent flex flex-col items-center justify-center gap-3 cursor-pointer group"
                                   onClick={() =>
                                     document
                                       .getElementById("headcount-file-uploader")
@@ -28711,7 +28711,7 @@ ${ttNotes}`
                                     onChange={(e) =>
                                       setBulkEditField(e.target.value)
                                     }
-                                    className="bg-black/40 border border-white/15 text-slate-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none cursor-pointer"
+                                    className="bg-white/[0.03] border border-white/15 text-slate-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none cursor-pointer"
                                   >
                                     <option value="Team Leader">
                                       Team Leader
@@ -28731,7 +28731,7 @@ ${ttNotes}`
                                       setBulkEditVal(e.target.value)
                                     }
                                     placeholder="e.g. Aly Ibrahim"
-                                    className="bg-black/40 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none w-full sm:w-48"
+                                    className="bg-white/[0.03] border border-white/10 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none w-full sm:w-48"
                                   />
                                   <button
                                     onClick={handleBulkEditSelected}
@@ -28789,7 +28789,7 @@ ${ttNotes}`
                                               );
                                             }
                                           }}
-                                          className="rounded border-white/20 bg-black/40 text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4"
+                                          className="rounded border-white/20 bg-white/[0.03] text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4"
                                         />
                                       </th>
                                     )}
@@ -29003,7 +29003,7 @@ ${ttNotes}`
                                                         );
                                                       }
                                                     }}
-                                                    className="rounded border-white/20 bg-black/40 text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4"
+                                                    className="rounded border-white/20 bg-white/[0.03] text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4"
                                                   />
                                                 </td>
                                               )}
@@ -29488,7 +29488,7 @@ ${ttNotes}`
                                                         );
                                                       }
                                                     }}
-                                                    className="rounded border-white/20 bg-black/40 text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4"
+                                                    className="rounded border-white/20 bg-white/[0.03] text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4"
                                                   />
                                                 </td>
                                               )}
@@ -29913,7 +29913,7 @@ ${ttNotes}`
                     Generated Clipboard Output Preview
                   </label>
                   <div className="relative">
-                    <pre className="w-full p-4 bg-slate-900/80 border border-slate-800/40 rounded-xl text-xs font-mono text-slate-300 overflow-y-auto max-h-[300px] whitespace-pre-wrap select-all leading-relaxed text-left">
+                    <pre className="w-full p-4 bg-white/[0.04] border border-slate-800/40 rounded-xl text-xs font-mono text-slate-300 overflow-y-auto max-h-[300px] whitespace-pre-wrap select-all leading-relaxed text-left">
                       {textTemplate}
                     </pre>
                   </div>
@@ -30070,7 +30070,7 @@ ${ttNotes}`
               {/* Patient / Requester info */}
               <div className="grid grid-cols-2 gap-3 text-left">
                 {viewingRecord.data.patientName && (
-                  <div className="col-span-2 bg-white/[0.02] border border-white/5 rounded-xl p-3">
+                  <div className="col-span-2 bg-transparent border border-white/5 rounded-xl p-3">
                     <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1">
                       Patient Name
                     </p>
@@ -30081,7 +30081,7 @@ ${ttNotes}`
                 )}
                 {viewingRecord.data.phoneNumber && (
                   <div
-                    className="bg-white/[0.02] border border-white/5 rounded-xl p-3 cursor-pointer hover:bg-white/[0.04]"
+                    className="bg-transparent border border-white/5 rounded-xl p-3 cursor-pointer hover:bg-transparent"
                     onClick={() => {
                       copyToClipboard(
                         normalizePhone(viewingRecord.data.phoneNumber),
@@ -30099,7 +30099,7 @@ ${ttNotes}`
                   </div>
                 )}
                 {viewingRecord.data.clinicName && (
-                  <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
+                  <div className="bg-transparent border border-white/5 rounded-xl p-3">
                     <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1">
                       {" "}
                       Clinic
@@ -30110,7 +30110,7 @@ ${ttNotes}`
                   </div>
                 )}
                 {viewingRecord.data.agentName && (
-                  <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
+                  <div className="bg-transparent border border-white/5 rounded-xl p-3">
                     <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1">
                       {" "}
                       Agent
@@ -30121,7 +30121,7 @@ ${ttNotes}`
                   </div>
                 )}
                 {viewingRecord.data.status && (
-                  <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
+                  <div className="bg-transparent border border-white/5 rounded-xl p-3">
                     <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1">
                       Status
                     </p>
@@ -30130,7 +30130,7 @@ ${ttNotes}`
                     </p>
                   </div>
                 )}
-                <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
+                <div className="bg-transparent border border-white/5 rounded-xl p-3">
                   <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1">
                     {" "}
                     Submitted
@@ -30146,7 +30146,7 @@ ${ttNotes}`
                 viewingRecord.data.complaintDetails ||
                 viewingRecord.data.notes ||
                 viewingRecord.data.inquiry) && (
-                <div className="bg-white/[0.02] border border-white/5 rounded-xl p-4 text-left">
+                <div className="bg-transparent border border-white/5 rounded-xl p-4 text-left">
                   <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-2">
                     {viewingRecord.type === "inq"
                       ? "Inquiry"
@@ -30234,7 +30234,7 @@ ${ttNotes}`
                     {viewingRecord.data.replies.map((r: any, i: number) => (
                       <div
                         key={i}
-                        className="bg-white/[0.02] border border-white/5 rounded-xl p-3"
+                        className="bg-transparent border border-white/5 rounded-xl p-3"
                       >
                         <div className="flex items-center justify-between mb-1">
                           <p className="text-[10px] font-bold text-slate-300">
@@ -30494,7 +30494,7 @@ ${ttNotes}`
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.9, y: 20, opacity: 0 }}
               transition={{ type: "spring", duration: 0.5 }}
-              className="bg-[#121217] border border-cyan-500/30 rounded-2xl p-8 max-w-sm w-full space-y-6 mx-4 relative overflow-hidden text-center"
+              className="bg-transparent border border-cyan-500/30 rounded-2xl p-8 max-w-sm w-full space-y-6 mx-4 relative overflow-hidden text-center"
             >
               <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500"></div>
 

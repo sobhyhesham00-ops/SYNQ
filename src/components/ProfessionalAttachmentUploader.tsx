@@ -195,7 +195,7 @@ export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUplo
                {attachments.map(att => {
                   const isImage = att.type.startsWith('image/');
                   return (
-                     <div key={att.id} className="relative group flex items-start gap-2 p-2 rounded-lg bg-black/40 border border-white/5 hover:border-indigo-500/30 transition-colors">
+                     <div key={att.id} className="relative group flex items-start gap-2 p-2 rounded-lg bg-white/[0.03] border border-white/5 hover:border-indigo-500/30 transition-colors">
                          <div className="w-10 h-10 shrink-0 rounded overflow-hidden bg-slate-800 flex items-center justify-center border border-white/10">
                             {isImage ? (
                                <img src={att.url} alt={att.name} className="w-full h-full object-cover" />

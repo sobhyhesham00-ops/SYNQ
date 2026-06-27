@@ -160,7 +160,7 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
   };
 
   return (
-    <div className="flex h-[calc(100vh-120px)] w-full max-w-[1300px] mx-auto bg-slate-900 border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
+    <div className="flex h-[calc(100vh-120px)] w-full max-w-[1300px] mx-auto bg-white/[0.04] border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
       {/* Sidebar Tabs */}
       <div className="w-1/4 min-w-[250px] border-r border-white/10 p-4 flex flex-col gap-2 bg-[#1e1e1e]/40 backdrop-blur-md">
         <div className="flex items-center justify-between mb-4">
@@ -206,7 +206,7 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
       <div className="flex-1 w-3/4 p-6 relative bg-[#121212]">
         {isEditing && selectedArticleId === 'new' || (isEditing && selectedArticle) ? (
           /* Editor Mode */
-          <div className="flex flex-col h-full overflow-hidden max-w-[800px] mx-auto bg-slate-900/50 rounded-2xl p-6 border border-white/10">
+          <div className="flex flex-col h-full overflow-hidden max-w-[800px] mx-auto bg-white/[0.02] rounded-2xl p-6 border border-white/10">
             <h3 className="font-bold text-slate-100 text-xl mb-6">{selectedArticleId === 'new' ? 'Create New Entry' : 'Edit Entry'}</h3>
             
             <label className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Title Name</label>
@@ -215,7 +215,7 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
               placeholder="E.g. Travel Policy Q3, New Cash Offer..."
               value={title}
               onChange={e => setTitle(e.target.value)}
-              className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-slate-100 font-bold mb-6 outline-none focus:border-indigo-500 transition-colors"
+              className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-4 py-3 text-slate-100 font-bold mb-6 outline-none focus:border-indigo-500 transition-colors"
             />
             
             <label className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Notes / Description (Optional)</label>
@@ -223,7 +223,7 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
               placeholder="Detailed notes and descriptions..."
               value={content}
               onChange={e => setContent(e.target.value)}
-              className="w-full flex-1 bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-slate-200 text-sm mb-6 outline-none focus:border-indigo-500 transition-colors resize-none min-h-[150px]"
+              className="w-full flex-1 bg-white/[0.03] border border-white/10 rounded-lg px-4 py-3 text-slate-200 text-sm mb-6 outline-none focus:border-indigo-500 transition-colors resize-none min-h-[150px]"
             />
             
             <div className="mb-6">

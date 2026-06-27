@@ -439,7 +439,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
       {/* Stat bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {statCards.map(s => (
-          <div key={s.label} className="bg-white/[0.03] border border-white/5 rounded-xl p-3 flex items-center gap-3">
+          <div key={s.label} className="bg-white/[0.04] border border-white/5 rounded-xl p-3 flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">{s.icon}</div>
             <div>
               <p className={`text-xl font-black ${s.color}`}>{s.value}</p>
@@ -453,7 +453,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
         {/* Sidebar */}
         <div className="lg:col-span-1 space-y-4">
           {/* Add user form */}
-          <div className="bg-white/[0.03] border border-white/5 rounded-2xl overflow-hidden">
+          <div className="bg-white/[0.04] border border-white/5 rounded-2xl overflow-hidden">
             <button
               onClick={() => setShowAddForm(!showAddForm)}
               className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-white/5 transition-colors"
@@ -483,7 +483,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                         placeholder="e.g. Aly Ibrahim"
                         value={newUserName}
                         onChange={e => setNewUserName(e.target.value)}
-                        className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 placeholder:text-slate-600"
+                        className="w-full bg-white/[0.02] border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 placeholder:text-slate-600"
                       />
                     </div>
                     <div>
@@ -505,12 +505,12 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                       <div>
                         <label className="text-[9px] uppercase font-bold text-slate-500 tracking-wider block mb-1">Email</label>
                         <input type="email" placeholder="email@co.com" value={newUserEmail} onChange={e => setNewUserEmail(e.target.value)}
-                          className="w-full bg-black/30 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 placeholder:text-slate-600" />
+                          className="w-full bg-white/[0.02] border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 placeholder:text-slate-600" />
                       </div>
                       <div>
                         <label className="text-[9px] uppercase font-bold text-slate-500 tracking-wider block mb-1">LOB</label>
                         <input type="text" placeholder="Chat / Call" value={newUserLob} onChange={e => setNewUserLob(e.target.value)}
-                          className="w-full bg-black/30 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 placeholder:text-slate-600" />
+                          className="w-full bg-white/[0.02] border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 placeholder:text-slate-600" />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
@@ -521,13 +521,13 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                           placeholder="Team name"
                           value={newUserTeam}
                           onChange={e => setNewUserTeam(e.target.value)}
-                          className="w-full bg-black/30 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 placeholder:text-slate-600"
+                          className="w-full bg-white/[0.02] border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 placeholder:text-slate-600"
                         />
                       </div>
                       <div>
                         <label className="text-[9px] uppercase font-bold text-slate-500 tracking-wider block mb-1">Team Leader</label>
                         <input type="text" placeholder="TL Full Name" value={newUserTL} onChange={e => setNewUserTL(e.target.value)}
-                          className="w-full bg-black/30 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 placeholder:text-slate-600" />
+                          className="w-full bg-white/[0.02] border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-500/50 placeholder:text-slate-600" />
                       </div>
                     </div>
                     <button type="submit"
@@ -541,7 +541,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
           </div>
 
           {/* Audit log */}
-          <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-4 space-y-3">
+          <div className="bg-white/[0.04] border border-white/5 rounded-2xl p-4 space-y-3">
             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
               <Clock className="w-3.5 h-3.5 text-indigo-400" /> Recent Actions
             </h3>
@@ -550,7 +550,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                 <p className="text-xs text-slate-600 italic text-center py-4">No actions logged yet.</p>
               ) : (
                 auditLog.slice(0, 30).map(log => (
-                  <div key={log.id} className="flex items-start gap-2 p-2.5 bg-black/20 rounded-xl border border-white/5">
+                  <div key={log.id} className="flex items-start gap-2 p-2.5 bg-transparent rounded-xl border border-white/5">
                     <div className="mt-0.5 shrink-0"><AuditActionIcon action={log.action} /></div>
                     <div className="min-w-0">
                       <p className="text-[10px] text-slate-200 font-semibold truncate">
@@ -585,7 +585,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                 placeholder="Search by name, username, role, email…"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full bg-black/30 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500/50 placeholder:text-slate-600"
+                className="w-full bg-white/[0.02] border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500/50 placeholder:text-slate-600"
               />
             </div>
             <div className="flex gap-1">
@@ -607,7 +607,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
           <div className="space-y-2 max-h-[620px] overflow-y-auto pr-2">
             {filteredUsers.length === 0 && (
-              <div className="text-center py-12 bg-white/[0.02] rounded-2xl border border-white/5">
+              <div className="text-center py-12 bg-transparent rounded-2xl border border-white/5">
                 <XCircle className="w-8 h-8 text-slate-600 mx-auto mb-2" />
                 <p className="text-xs text-slate-500">No users match your search.</p>
               </div>
@@ -628,7 +628,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                   className={`rounded-xl border transition-all overflow-hidden ${
                     isUserLocked
                       ? 'bg-rose-950/15 border-rose-500/15'
-                      : 'bg-white/[0.02] border-white/5 hover:border-white/10'
+                      : 'bg-transparent border-white/5 hover:border-white/10'
                   }`}
                 >
                   {/* Card header row */}
@@ -740,7 +740,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                         transition={{ duration: 0.18 }}
                         className="overflow-hidden"
                       >
-                        <div className="border-t border-white/5 bg-black/20 px-4 py-4 space-y-4">
+                        <div className="border-t border-white/5 bg-transparent px-4 py-4 space-y-4">
                           <div className="flex items-center justify-between pb-1 border-b border-white/5">
                             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
                               <Shield className="w-3.5 h-3.5 text-indigo-400 animate-pulse" /> Edit Operator Details
@@ -790,7 +790,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                                   value={f.val}
                                   placeholder={f.ph}
                                   onChange={e => f.set(e.target.value)}
-                                  className="w-full bg-black/30 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500/50 placeholder:text-slate-600"
+                                  className="w-full bg-white/[0.02] border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500/50 placeholder:text-slate-600"
                                 />
                               </div>
                             ))}
@@ -807,7 +807,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                                       placeholder="New password"
                                       value={newPasswordValue}
                                       onChange={e => setNewPasswordValue(e.target.value)}
-                                      className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 pr-8 text-xs text-slate-100 focus:outline-none focus:border-rose-500/50"
+                                      className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-3 py-1.5 pr-8 text-xs text-slate-100 focus:outline-none focus:border-rose-500/50"
                                     />
                                     <button type="button" onClick={() => setShowPassword(p => !p)}
                                       className="absolute right-2 top-1.5 text-slate-500 hover:text-slate-300">
