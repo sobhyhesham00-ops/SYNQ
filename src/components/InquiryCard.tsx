@@ -148,6 +148,18 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
     };
   }, []);
 
+  const [currentTime, setCurrentTime] = useState<number>(Date.now());
+
+  useEffect(() => {
+    if (inq.status === "answered" || inq.status === "closed") {
+      return;
+    }
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [inq.status]);
+
   // Resolve active states
   const activeAnsweringId =
     answeringInquiryId !== undefined
@@ -267,20 +279,68 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
   const statusColor = statusConfig.color;
   const statusText = `${statusConfig.emoji} ${statusConfig.label}`;
 
-  const ageMs = Date.now() - new Date(inq.createdAt).getTime();
-  const ageHours = ageMs / 3600000;
-  const ageLabel =
-    ageMs < 3600000
-      ? `${Math.floor(ageMs / 60000)}m open`
-      : `${Math.floor(ageHours)}h ${Math.floor((ageHours % 1) * 60)}m open`;
-  const ageBadgeColor =
-    inq.status !== "answered"
-      ? ageHours > 4
-        ? "bg-red-500/20 text-red-400 border-red-500/30 animate-pulse"
-        : ageHours > 1
-          ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
-          : "bg-slate-700 text-slate-400 border-white/10"
-      : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
+  const getSLATimer = () => {
+    const isResolved = inq.status === "answered" || inq.status === "closed";
+    const createdTime = new Date(inq.createdAt).getTime();
+    const slaLimitMs = 2 * 60 * 60 * 1000; // 2 hours SLA
+    const deadline = createdTime + slaLimitMs;
+    const remainingMs = deadline - currentTime;
+
+    if (isResolved) {
+      const resolvedTimestamp = inq.answeredAt || inq.closedAt || inq.createdAt;
+      const durationMs = new Date(resolvedTimestamp).getTime() - createdTime;
+      const h = Math.floor(durationMs / 3600000);
+      const m = Math.floor((durationMs % 3600000) / 60000);
+      const label = h > 0 ? `${h}h ${m}m` : `${m}m`;
+      return {
+        text: `SLA Met: ${label}`,
+        color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+        isUrgent: false,
+        isOverdue: false,
+        icon: "✅"
+      };
+    }
+
+    if (remainingMs <= 0) {
+      const absoluteOverdueMs = Math.abs(remainingMs);
+      const h = Math.floor(absoluteOverdueMs / 3600000);
+      const m = Math.floor((absoluteOverdueMs % 3600000) / 60000);
+      const s = Math.floor((absoluteOverdueMs % 60000) / 1000);
+      const formatted = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+      return {
+        text: `Overdue: -${formatted}`,
+        color: "bg-red-500/10 text-red-400 border-red-500/30 animate-pulse font-extrabold shadow-[0_0_8px_rgba(239,68,68,0.2)]",
+        isUrgent: true,
+        isOverdue: true,
+        icon: "🚨"
+      };
+    } else {
+      const h = Math.floor(remainingMs / 3600000);
+      const m = Math.floor((remainingMs % 3600000) / 60000);
+      const s = Math.floor((remainingMs % 60000) / 1000);
+      const formatted = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+
+      if (remainingMs <= 30 * 60 * 1000) {
+        return {
+          text: `SLA: ${formatted}`,
+          color: "bg-amber-500/10 text-amber-400 border-amber-500/30 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.2)]",
+          isUrgent: true,
+          isOverdue: false,
+          icon: "⏳"
+        };
+      } else {
+        return {
+          text: `SLA: ${formatted}`,
+          color: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+          isUrgent: false,
+          isOverdue: false,
+          icon: "⏱"
+        };
+      }
+    }
+  };
+
+  const slaTimer = getSLATimer();
 
   const getClinicLabelText = (val?: string) => {
     return val ? getClinicLabel(val) : "N/A";
@@ -447,13 +507,11 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
           >
             {statusText}
           </span>
-          {inq.status !== "answered" && (
-            <span
-              className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 ${ageBadgeColor}`}
-            >
-              ⏱ {ageLabel}
-            </span>
-          )}
+          <span
+            className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 transition-all duration-300 ${slaTimer.color}`}
+          >
+            <span>{slaTimer.icon}</span> {slaTimer.text}
+          </span>
           {isSuperAdmin && handleDeleteInquiry && (
             <button
               onClick={(e) => {

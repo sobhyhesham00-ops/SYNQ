@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { doc, setDoc, query, collection, where, getDocs, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { AttendanceRecord, User, AgentDirectoryRow, INITIAL_AGENTS, ScheduledShift } from "../types";
@@ -579,56 +580,160 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
           <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl text-center flex flex-col justify-center shadow-lg relative overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-[3px] bg-slate-500" />
             <p className="text-[10px] uppercase font-extrabold text-slate-500 tracking-widest">Global Roster</p>
-            <p className="text-3xl font-black text-slate-100 mt-1">{stats.total}</p>
+            <div className="h-9 flex items-center justify-center mt-1 relative">
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span
+                  key={stats.total}
+                  initial={{ opacity: 0, scale: 0.7 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.3 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 20 }}
+                  className="text-3xl font-black text-slate-100 block"
+                >
+                  {stats.total}
+                </motion.span>
+              </AnimatePresence>
+            </div>
             <span className="text-[9px] text-slate-500 mt-0.5">Agents Total</span>
           </div>
 
           <div className="p-4 bg-emerald-500/10 border border-emerald-500/15 rounded-2xl text-center flex flex-col justify-center shadow-lg relative overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-[3px] bg-emerald-500" />
             <p className="text-[10px] uppercase font-extrabold text-emerald-400 tracking-widest">Present</p>
-            <p className="text-3xl font-black text-emerald-400 mt-1">{stats.present}</p>
+            <div className="h-9 flex items-center justify-center mt-1 relative">
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span
+                  key={stats.present}
+                  initial={{ opacity: 0, scale: 0.7 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.3 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 20 }}
+                  className="text-3xl font-black text-emerald-400 block"
+                >
+                  {stats.present}
+                </motion.span>
+              </AnimatePresence>
+            </div>
             <span className="text-[9px] text-emerald-500/80 mt-0.5">On Duty</span>
           </div>
 
           <div className="p-4 bg-amber-500/10 border border-amber-500/15 rounded-2xl text-center flex flex-col justify-center shadow-lg relative overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-[3px] bg-amber-500" />
             <p className="text-[10px] uppercase font-extrabold text-amber-400 tracking-widest">Late</p>
-            <p className="text-3xl font-black text-amber-400 mt-1">{stats.late}</p>
+            <div className="h-9 flex items-center justify-center mt-1 relative">
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span
+                  key={stats.late}
+                  initial={{ opacity: 0, scale: 0.7 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.3 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 20 }}
+                  className="text-3xl font-black text-amber-400 block"
+                >
+                  {stats.late}
+                </motion.span>
+              </AnimatePresence>
+            </div>
             <span className="text-[9px] text-amber-500/80 mt-0.5">Delayed</span>
           </div>
 
           <div className="p-4 bg-rose-500/10 border border-rose-500/15 rounded-2xl text-center flex flex-col justify-center shadow-lg relative overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-[3px] bg-rose-500" />
             <p className="text-[10px] uppercase font-extrabold text-rose-400 tracking-widest">Absent</p>
-            <p className="text-3xl font-black text-rose-400 mt-1">{stats.absent}</p>
+            <div className="h-9 flex items-center justify-center mt-1 relative">
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span
+                  key={stats.absent}
+                  initial={{ opacity: 0, scale: 0.7 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.3 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 20 }}
+                  className="text-3xl font-black text-rose-400 block"
+                >
+                  {stats.absent}
+                </motion.span>
+              </AnimatePresence>
+            </div>
             <span className="text-[9px] text-rose-500/80 mt-0.5">Off Duty</span>
           </div>
 
           <div className="p-4 bg-blue-500/10 border border-blue-500/15 rounded-2xl text-center flex flex-col justify-center shadow-lg relative overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-[3px] bg-blue-500" />
             <p className="text-[10px] uppercase font-extrabold text-blue-400 tracking-widest">On Leave</p>
-            <p className="text-3xl font-black text-blue-400 mt-1">{stats.onLeave}</p>
+            <div className="h-9 flex items-center justify-center mt-1 relative">
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span
+                  key={stats.onLeave}
+                  initial={{ opacity: 0, scale: 0.7 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.3 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 20 }}
+                  className="text-3xl font-black text-blue-400 block"
+                >
+                  {stats.onLeave}
+                </motion.span>
+              </AnimatePresence>
+            </div>
             <span className="text-[9px] text-blue-500/80 mt-0.5">Approved Out</span>
           </div>
 
           <div className="p-4 bg-slate-500/10 border border-slate-500/25 rounded-2xl text-center flex flex-col justify-center shadow-lg relative overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-[3px] bg-slate-500" />
             <p className="text-[10px] uppercase font-extrabold text-slate-300 tracking-widest">OFF</p>
-            <p className="text-3xl font-black text-slate-300 mt-1">{stats.offCount}</p>
+            <div className="h-9 flex items-center justify-center mt-1 relative">
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span
+                  key={stats.offCount}
+                  initial={{ opacity: 0, scale: 0.7 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.3 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 20 }}
+                  className="text-3xl font-black text-slate-300 block"
+                >
+                  {stats.offCount}
+                </motion.span>
+              </AnimatePresence>
+            </div>
             <span className="text-[9px] text-slate-400 mt-0.5">Weekly Rest</span>
           </div>
 
           <div className="p-4 bg-red-500/15 border border-red-500/25 rounded-2xl text-center flex flex-col justify-center shadow-lg relative overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-[3px] bg-red-500" />
             <p className="text-[10px] uppercase font-extrabold text-red-500 tracking-widest">NSNC</p>
-            <p className="text-3xl font-black text-red-500 mt-1">{stats.noShowNoCall}</p>
+            <div className="h-9 flex items-center justify-center mt-1 relative">
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span
+                  key={stats.noShowNoCall}
+                  initial={{ opacity: 0, scale: 0.7 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.3 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 20 }}
+                  className="text-3xl font-black text-red-500 block"
+                >
+                  {stats.noShowNoCall}
+                </motion.span>
+              </AnimatePresence>
+            </div>
             <span className="text-[9px] text-red-500/80 mt-0.5">No Show</span>
           </div>
 
           <div className="p-4 bg-slate-800/20 border border-white/5 rounded-2xl text-center flex flex-col justify-center shadow-lg relative overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-[3px] bg-slate-700" />
             <p className="text-[10px] uppercase font-extrabold text-slate-400 tracking-widest">Unmarked</p>
-            <p className="text-3xl font-black text-slate-400 mt-1">{stats.notMarked}</p>
+            <div className="h-9 flex items-center justify-center mt-1 relative">
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span
+                  key={stats.notMarked}
+                  initial={{ opacity: 0, scale: 0.7 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.3 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 20 }}
+                  className="text-3xl font-black text-slate-400 block"
+                >
+                  {stats.notMarked}
+                </motion.span>
+              </AnimatePresence>
+            </div>
             <span className="text-[9px] text-slate-500 mt-0.5">Pending TL</span>
           </div>
         </div>
