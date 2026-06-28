@@ -5,70 +5,41 @@ service cloud.firestore {
     // Helper functions
     function isSignedIn() { return request.auth != null; }
 
-    function getUserData() {
-      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data : null;
-    }
-
-    function getUserName() {
-      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('name', null) : null;
-    }
-
-    function getUserRole() {
-      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', null) : null;
-    }
-
     // Checking roles handles TL, Admin, and Superadmin roles securely
     function isSuperAdmin() {
-      let u = exists(/databases/$(database)/documents/users/$(request.auth.uid))
-               ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data
-               : null;
-      return u != null && (
-        u.get('name','') == 'Hesham Sobhy' ||
-        u.get('name','').lower() == 'hesham sobhy' ||
-        u.get('username','') == 'h.sobhy' ||
-        u.get('username','').lower() == 'h.sobhy' ||
-        u.get('id','') == 'usr_heshamsobhy'
-      );
+      return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name == 'Hesham Sobhy' ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name == 'hesham sobhy' ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username == 'h.sobhy' ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username == 'H.Sobhy' ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.id == 'usr_heshamsobhy'
+        );
     }
 
     // Directors other than h.sobhy have the same level of access as TLs. 
     function isTLOrSupport() {
-      let u = exists(/databases/$(database)/documents/users/$(request.auth.uid))
-               ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data
-               : null;
-      if (u == null) return false;
-      let role = u.get('role','');
-      let isAdmin = u.get('name','') == 'Hesham Sobhy' || u.get('username','') == 'h.sobhy';
-      return role == 'tl' || (role == 'director' && !isAdmin);
-    }
-
-    function isRecipientOf(notifData) {
-      return notifData.targetAgent == request.auth.uid ||
-             notifData.targetAgent == "all" ||
-             (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && (
-                notifData.targetAgent == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') ||
-                (notifData.targetGroups != null && (
-                   notifData.targetGroups.hasAny([request.auth.uid, "usr_" + request.auth.uid, "all"]) ||
-                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') in notifData.targetGroups ||
-                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('name', '') in notifData.targetGroups
-                ))
-             ));
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'tl' || (
+            get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'director' &&
+            get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name != 'Hesham Sobhy' &&
+            get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username != 'h.sobhy'
+          )
+        );
     }
 
     function canWriteFintech() {
-      if (request.auth == null) return false;
-      let u = exists(/databases/$(database)/documents/users/$(request.auth.uid))
-               ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data
-               : null;
-      if (u == null) return false;
-      let role = u.get('role','');
-      let name = u.get('name','');
-      return role == 'tl' || role == 'director' || role == 'qa' ||
-             (resource != null && resource.data.agentName == name) ||
-             (request.resource != null && request.resource.data.agentName == name);
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'tl' ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'director' ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'qa' ||
+          (resource != null && resource.data.agentName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name) ||
+          (request.resource != null && request.resource.data.agentName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name)
+        );
     }
 
-    // Users
     // Gating read rules behind a simple "request.auth != null" check prevents the circular
     // evaluation loop that happens when a getUserRole() lookup triggers a read of its own users collection.
     match /users/{userId} {
@@ -77,8 +48,8 @@ service cloud.firestore {
         request.auth.uid == userId || 
         isSuperAdmin() ||
         !exists(/databases/$(database)/documents/users/$(request.auth.uid)) ||
-        (getUserData() != null && getUserData().get('id', '') == "usr_" + userId) ||
-        (getUserName() != null && getUserName() == request.resource.data.get('name', ''))
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.id == "usr_" + userId) ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name == request.resource.data.name)
       );
     }
 
@@ -89,12 +60,12 @@ service cloud.firestore {
         isSuperAdmin() ||
         isTLOrSupport() ||
         (resource != null && (
-          resource.data.get('agentName', '') == getUserName() ||
-          resource.data.get('assignedToName', '') == getUserName()
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name == resource.data.agentName ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name == resource.data.assignedToName
         )) ||
         (request.resource != null && (
-          request.resource.data.get('agentName', '') == getUserName() ||
-          request.resource.data.get('assignedToName', '') == getUserName()
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name == request.resource.data.agentName ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name == request.resource.data.assignedToName
         ))
       );
     }
@@ -140,8 +111,8 @@ service cloud.firestore {
     match /tl_shift_logs/{logId} {
       allow read: if request.auth != null;
       allow write: if request.auth != null && (isSuperAdmin() || isTLOrSupport()) && (
-        (resource == null && request.resource.data.get('tlName', '') == getUserName()) ||
-        (resource != null && resource.data.get('tlName', '') == getUserName() && request.resource.data.get('tlName', '') == getUserName())
+        (resource == null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name == request.resource.data.tlName) ||
+        (resource != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name == resource.data.tlName && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name == request.resource.data.tlName)
       );
     }
 
@@ -154,11 +125,7 @@ service cloud.firestore {
     // Notifications
     match /notifications/{notifId} {
       allow read, create: if isSignedIn();
-      allow update: if isSignedIn() && (
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seenByUsers', 'clearedByUsers']) ||
-        isSuperAdmin() ||
-        isTLOrSupport()
-      );
+      allow update: if isSignedIn();
       allow delete: if isSignedIn() && (isSuperAdmin() || isTLOrSupport());
     }
 
@@ -168,8 +135,8 @@ service cloud.firestore {
       allow read, write: if isSignedIn() && (
         resource == null ||
         resource.data.userId == request.auth.uid ||
-        resource.data.userId == getUserName() ||
-        (getUserData() != null && resource.data.userId == getUserData().get('id', '')) ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name == resource.data.userId ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && resource.data.userId == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.id) ||
         isSuperAdmin()
       );
       allow create: if isSignedIn();
@@ -205,7 +172,7 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow create, update, delete: if isSignedIn() && (
         isSuperAdmin() || isTLOrSupport() ||
-        (getUserRole() == 'qa')
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'qa')
       );
     }
 
