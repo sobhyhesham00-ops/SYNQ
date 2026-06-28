@@ -407,6 +407,36 @@ const EditModalContent = ({
             </>
           )}
 
+          {/* Follow-up Date Toggle and Input */}
+          {["inquiry", "tt_request", "tt_complaint", "client_comm"].includes(type) && (
+            <div className="p-3 bg-white/[0.02] border border-white/5 rounded-xl space-y-2">
+              <label className="flex items-center gap-2 text-xs font-bold text-slate-300 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="isFollowUp"
+                  checked={!!data.isFollowUp}
+                  onChange={handleCheckboxChange}
+                  className="rounded border-white/10 bg-white/[0.03] text-emerald-500 focus:ring-emerald-500 cursor-pointer"
+                />
+                Is Follow-up Case?
+              </label>
+              {data.isFollowUp && (
+                <div className="mt-2 animate-fade-in">
+                  <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1">
+                    Follow-up Date
+                  </label>
+                  <input
+                    type="date"
+                    name="followUpDate"
+                    value={data.followUpDate || ""}
+                    onChange={handleChange}
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans [color-scheme:dark]"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
           {type === "scheduling_request" && (
             <>
               <div className="mb-4">

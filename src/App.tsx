@@ -4398,15 +4398,58 @@ ${pageText}
       });
     }
   };
+  
+  // Automated suggestion logic to trigger a small notification to set a follow-up date
+  // if a case remains in 'Submitted' status for more than 4 hours.
+  const checkAndNotifyMissingFollowUpForSubmittedCases = () => {
+    if (!currentUser) return;
+    if (!isNotificationsLoadedRef.current) return;
 
-  const checkFollowUpDueDatesRef = useRef(checkAndNotifyFollowUpDueDates);
+    const allCases = [
+      ...inquiries.map(i => ({ id: i.id, type: "Inquiry", date: i.followUpDate, agent: i.agentName, clinic: i.clinicName, ref: i.caseRef || i.id, status: i.status, createdAt: i.createdAt })),
+      ...tabbyTamaraRequests.map(r => ({ id: r.id, type: "TT Request", date: r.followUpDate, agent: r.agentName, clinic: r.clinicName, ref: r.caseRef || r.id, status: r.workflowStatus || r.status, createdAt: r.createdAt })),
+      ...tabbyTamaraComplaints.map(c => ({ id: c.id, type: "Complaint", date: c.followUpDate, agent: c.agentName, clinic: c.clinicName, ref: c.caseRef || c.id, status: c.status, createdAt: c.createdAt })),
+      ...clientComms.map(c => ({ id: c.id, type: "Client Comm", date: c.followUpDate, agent: c.callCenterAgentName, clinic: c.clinicName, ref: c.caseRef || c.id, status: c.status, createdAt: c.createdAt })),
+    ];
+
+    const fourHoursMs = 4 * 60 * 60 * 1000;
+    const now = Date.now();
+
+    const missingFollowUp = allCases.filter(c => {
+      const isSubmitted = c.status && ["submitted", "pending"].includes(c.status.toLowerCase());
+      const hasNoFollowUp = !c.date || c.date.trim() === "";
+      const isTooOld = c.createdAt && (now - new Date(c.createdAt).getTime()) > fourHoursMs;
+      const isMyCase = c.agent && c.agent.trim().toLowerCase() === currentUser.name?.trim().toLowerCase();
+      return isSubmitted && hasNoFollowUp && isTooOld && isMyCase;
+    });
+
+    missingFollowUp.forEach(c => {
+      const stableId = `missing_followup_suggest_${c.id}`;
+      addSystemNotification(
+        `💡 Follow-up Suggested — ${c.type}`,
+        `Your case ${c.ref} in ${c.clinic} remains in Submitted status for >4 hours. Consider setting a follow-up date to track it.`,
+        "reminder",
+        currentUser.name,
+        stableId,
+      );
+    });
+  };
+
+  const checkFollowUpDueDatesRef = useRef(() => {
+    checkAndNotifyFollowUpDueDates();
+    checkAndNotifyMissingFollowUpForSubmittedCases();
+  });
   useEffect(() => {
-    checkFollowUpDueDatesRef.current = checkAndNotifyFollowUpDueDates;
-  }, [checkAndNotifyFollowUpDueDates]);
+    checkFollowUpDueDatesRef.current = () => {
+      checkAndNotifyFollowUpDueDates();
+      checkAndNotifyMissingFollowUpForSubmittedCases();
+    };
+  }, [checkAndNotifyFollowUpDueDates, checkAndNotifyMissingFollowUpForSubmittedCases]);
 
   useEffect(() => {
     if (!currentUser) return;
     checkAndNotifyFollowUpDueDates();
+    checkAndNotifyMissingFollowUpForSubmittedCases();
   }, [currentUser, inquiries, tabbyTamaraRequests, tabbyTamaraComplaints, clientComms, notifications]);
 
   useEffect(() => {
