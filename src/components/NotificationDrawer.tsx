@@ -20,10 +20,10 @@ export const NotificationDrawer = ({
 }: any) => {
 
   const handleClearNotif = (id: string, currentClearedBy: string[]) => {
-    if (!currentUser?.id) return;
-    const userId = currentUser.id; // capture before async boundary
+    if (!currentUser?.name) return;
+    const userName = currentUser.name; // capture before async boundary
     const seenSet = new Set(currentClearedBy || []);
-    seenSet.add(userId);
+    seenSet.add(userName);
     updateDoc(doc(db, "notifications", id), {
       clearedByUsers: Array.from(seenSet)
     }).catch(e => console.error("Clear Notif Error:", e));
@@ -52,7 +52,6 @@ export const NotificationDrawer = ({
 
   const unreadCount = sortedNotifs.filter(
     n =>
-      !n.seenByUsers?.includes(currentUser?.id) &&
       !n.seenByUsers?.includes(currentUser?.name)
   ).length;
 
@@ -163,7 +162,6 @@ export const NotificationDrawer = ({
                   ) : (
                     displayNotifs.map(notif => {
                       const isUnread =
-                        !notif.seenByUsers?.includes(currentUser?.id) &&
                         !notif.seenByUsers?.includes(currentUser?.name);
                       const getIcon = () => {
                         if (notif.type === 'incident' || notif.type === 'compliance') return <AlertTriangle className="w-4 h-4 text-rose-400" />;

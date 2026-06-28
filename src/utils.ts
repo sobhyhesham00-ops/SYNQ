@@ -399,6 +399,9 @@ export const getUsernameFromFullName = (fullName: string): string => {
   if (val === 'anan ashraf farouk darwish' || val === 'anan darwish' || val === 'an.darwish') {
     return 'an.darwish';
   }
+  if (val === 'alaa ashraf farouk darwish' || val === 'alaa darwish' || val === 'al.darwish') {
+    return 'al.darwish';
+  }
   const parts = val.replace(/\s+/g, ' ').split(' ');
   if (parts.length === 0) return '';
   const firstLetter = parts[0].charAt(0);
@@ -418,6 +421,10 @@ export const findAgentByUsername = (username: string, referenceList: string[] = 
   
   if (target === 'an.darwish' || target === 'anan.darwish') {
     return 'Anan Ashraf farouk Darwish';
+  }
+  
+  if (target === 'al.darwish' || target === 'alaa.darwish') {
+    return 'Alaa Ashraf Farouk Darwish';
   }
   
   const combinedList = Array.from(new Set([

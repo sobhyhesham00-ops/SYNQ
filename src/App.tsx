@@ -2131,6 +2131,7 @@ export default function App() {
         // Log out the user
         const isTL =
           currentUser?.role === "tl" ||
+          currentUser?.role === "director" ||
           (currentUser?.name && isTLName(currentUser.name));
         if (isTL) {
           const today = new Date().toISOString().split("T")[0];
@@ -2199,6 +2200,7 @@ export default function App() {
     if (!currentUser) return;
     const isTL =
       currentUser.role === "tl" ||
+      currentUser.role === "director" ||
       (currentUser.name && isTLName(currentUser.name));
     if (!isTL) return;
     const markOffline = () => {
@@ -2294,7 +2296,6 @@ export default function App() {
           localStorage.getItem("sched_last_notified_notif_id") || "";
         if (latest && latest.id !== lastNotifiedNotifId) {
           const isUnreadByMe =
-            !latest.seenByUsers?.includes(currentUser?.id || "") &&
             !latest.seenByUsers?.includes(currentUser?.name || "");
           const isLatestForMe = isNotificationForUser(
             latest,
@@ -3095,8 +3096,7 @@ export default function App() {
       if (!currentUser) return false;
       if (
         notif.clearedByUsers &&
-        (notif.clearedByUsers.includes(currentUser.id) ||
-          notif.clearedByUsers.includes(currentUser.name))
+        notif.clearedByUsers.includes(currentUser.name)
       )
         return false;
       return isNotificationForUser(
@@ -3117,11 +3117,9 @@ export default function App() {
 
   const unreadCount = visibleNotifs.filter((notif) => {
     const userName = currentUser?.name || "";
-    const userId = currentUser?.id || "";
     return (
       !notif.seenByUsers ||
-      (!notif.seenByUsers.includes(userName) &&
-        !notif.seenByUsers.includes(userId))
+      !notif.seenByUsers.includes(userName)
     );
   }).length;
 
@@ -3129,9 +3127,7 @@ export default function App() {
     if (!currentUser || isMarkingAll) return;
     const unread = notifications.filter(
       (n) =>
-        !n.clearedByUsers?.includes(currentUser.id) &&
         !n.clearedByUsers?.includes(currentUser.name) &&
-        !n.seenByUsers?.includes(currentUser.id) &&
         !n.seenByUsers?.includes(currentUser.name),
     );
     if (unread.length === 0) return;
@@ -3141,7 +3137,6 @@ export default function App() {
       const batch = writeBatch(db);
       unread.forEach((n) => {
         const seenSet = new Set(n.seenByUsers || []);
-        seenSet.add(currentUser.id);
         seenSet.add(currentUser.name);
         batch.update(doc(db, "notifications", n.id), {
           seenByUsers: Array.from(seenSet),
@@ -3163,8 +3158,7 @@ export default function App() {
     const n = notifications.find((item) => item.id === id);
     if (n) {
       const seenSet = new Set(n.seenByUsers || []);
-      if (!seenSet.has(currentUser.id) && !seenSet.has(currentUser.name)) {
-        seenSet.add(currentUser.id);
+      if (!seenSet.has(currentUser.name)) {
         seenSet.add(currentUser.name);
         updateDoc(doc(db, "notifications", n.id), {
           seenByUsers: Array.from(seenSet),
@@ -3181,7 +3175,6 @@ export default function App() {
       const batch = writeBatch(db);
       myVisible.forEach((n: any) => {
         const clearedSet = new Set(n.clearedByUsers || []);
-        clearedSet.add(currentUser.id);
         clearedSet.add(currentUser.name);
         batch.update(doc(db, "notifications", n.id), {
           clearedByUsers: Array.from(clearedSet),
@@ -6945,7 +6938,7 @@ ${result.errors.slice(0, 5).join("\n")}${
 
   // Agent Time Clock & Activity Helpers
   const getActiveTimeLog = (agentName: string): TimeLog | undefined => {
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = getLocalISOString();
     return timeLogs.find(
       (log) =>
         log.agentName?.toLowerCase() === agentName?.toLowerCase() &&
@@ -11537,20 +11530,20 @@ ${ttNotes}`
 
                         if (isTLOreSupport) {
                           try {
-                            const newVer = CURRENT_APP_VERSION + 1;
+                            const { getDoc: _gd, doc: _doc } = await import('firebase/firestore');
+                            const snap = await _gd(_doc(db, 'system', 'app_version')).catch(() => null);
+                            const remoteVer = snap?.exists() ? (snap.data().version || 0) : 0;
+                            const nextVer = Math.max(CURRENT_APP_VERSION, remoteVer) + 1;
                             await setDoc(
                               doc(db, "system", "app_version"),
-                              { version: newVer },
+                              { version: nextVer },
                               { merge: true },
                             );
                             toast.success(
-                              `Broadcasting system update (Version ${newVer})...`,
+                              `Broadcasting system update (Version ${nextVer})...`,
                             );
                           } catch (err) {
-                            console.error(
-                              "Failed to propagate global version",
-                              err,
-                            );
+                            console.error("Failed to propagate global version", err);
                           }
                         }
 
@@ -28492,6 +28485,7 @@ ${ttNotes}`
                         onDeleteSyntheticUser={handleDeleteSyntheticUser}
                         isSuperAdmin={isSuperAdmin}
                         auditLog={auditLog}
+                        mustChangePassword={mustChangePassword}
                       />
                     )}
 

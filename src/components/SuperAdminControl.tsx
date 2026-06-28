@@ -62,6 +62,7 @@ interface SuperAdminControlProps {
   onDeleteSyntheticUser?: (name: string) => Promise<void>;
   isSuperAdmin: boolean;
   auditLog: AuditLogEntry[];
+  mustChangePassword: Record<string, boolean>;
 }
 
 const ROLE_OPTIONS = [
@@ -103,6 +104,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   onDeleteSyntheticUser,
   isSuperAdmin,
   auditLog,
+  mustChangePassword,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
@@ -271,9 +273,10 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
       [userName.toLowerCase()]: cleanPassword,
     };
     try {
+      const updatedMustChange = { ...(mustChangePassword || {}), [usernameKey]: true };
       await setDoc(doc(db, 'system', 'sched_credentials'), {
         data: updatedCreds,
-        mustChangePassword: { [usernameKey]: true },
+        mustChangePassword: updatedMustChange,
       }, { merge: true });
       await logAdminAction('reset_password', userName);
       await handleUnlock(userName);
@@ -319,6 +322,8 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
     const usernameKey = getUsernameFromFullName(userName);
     const updatedAttempts = { ...failedAttempts };
     delete updatedAttempts[usernameKey];
+    delete updatedAttempts[userName];
+    delete updatedAttempts[userName.toLowerCase()];
     try {
       await setDoc(doc(db, 'system', 'sched_failed_attempts'), { data: updatedAttempts });
       await logAdminAction('clear_attempts', userName);
@@ -338,10 +343,10 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
       await logAdminAction('delete_user', user.name);
       const usernameKey = getUsernameFromFullName(user.name);
       const updatedCreds = { ...credentials };
-      if (updatedCreds[usernameKey]) {
-        delete updatedCreds[usernameKey];
-        await setDoc(doc(db, 'system', 'sched_credentials'), { data: updatedCreds });
-      }
+      delete updatedCreds[usernameKey];
+      delete updatedCreds[user.name];
+      delete updatedCreds[user.name.toLowerCase()];
+      await setDoc(doc(db, 'system', 'sched_credentials'), { data: updatedCreds });
       const updatedLocked = lockedAccounts.filter(l => l !== usernameKey);
       await setDoc(doc(db, 'system', 'sched_locked_accounts'), { data: updatedLocked });
 

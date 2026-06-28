@@ -116,25 +116,7 @@ export const useEmulator =
   (import.meta as any).env.VITE_USE_EMULATOR === "true" ||
   ((import.meta as any).env.DEV && window.location.hostname === "localhost");
 
-// Auto sign-in anonymously for Firestore access if not using Google Auth
-if (auth.currentUser === null) {
-  console.log(
-    "[Firebase Auth] Proactive anonymous authentication triggered...",
-  );
-  signInAnonymously(auth)
-    .then((cred) =>
-      console.log(
-        "[Firebase Auth] Proactive anonymous sign-in successful. User ID:",
-        cred.user.uid,
-      ),
-    )
-    .catch((e: any) =>
-      console.warn(
-        "[Firebase Auth] Proactive anonymous sign-in failed (OK for offline):",
-        e,
-      ),
-    );
-}
+
 
 if (useEmulator) {
   console.log(
