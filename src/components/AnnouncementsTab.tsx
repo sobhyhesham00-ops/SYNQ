@@ -279,8 +279,12 @@ export function AnnouncementsTab({
                   </div>
                   <div>
                     <h4 className="text-orange-400 font-bold text-sm tracking-wide">{a.author || "System"}</h4>
-                    <p className="text-[10px] text-slate-400 font-mono">
-                      {new Date(a.createdAt || Date.now()).toLocaleString()} • {a.clinicFilter === 'all' ? 'Global Broadcast' : a.clinicFilter}
+                    <p className="text-[10px] text-slate-400 font-mono flex items-center gap-1.5 flex-wrap">
+                      <span>{new Date(a.createdAt || Date.now()).toLocaleString()}</span>
+                      <span className="text-slate-600">•</span>
+                      <span className="text-xs font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded uppercase tracking-wider">
+                        {a.clinicFilter === 'all' ? 'Global Broadcast' : getClinicLabel(a.clinicFilter)}
+                      </span>
                     </p>
                   </div>
                 </div>
