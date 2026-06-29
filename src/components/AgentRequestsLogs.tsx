@@ -161,6 +161,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
       `📞 Phone: ${formatPhoneForCopy(req.phoneNumber || '')}`,
       `🏥 Clinic: ${getClinicLabel(req.clinicName)}`,
       `💰 Amount: ${pricing.finalPriceFormatted}`,
+      `🧑‍💻 Submitted By: ${req.submittedByName || req.agentName || 'N/A'}`,
     ].filter(Boolean).join('\n');
 
     primaryContent = (

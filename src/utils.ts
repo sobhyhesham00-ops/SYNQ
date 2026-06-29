@@ -2060,6 +2060,7 @@ export const buildCaseClipboardPayload = (request: TabbyTamaraRequest): Clipboar
     `💰 *Final Amount (incl. VAT):* ${pricing.finalPriceFormatted} *(Entered: ${pricing.priceBeforeFeeFormatted} + 5% Fee: ${pricing.feeAmountFormatted})*`,
     `📋 *Status:* ${workflowStatusLabel}`,
     `🔗 *Payment Link:* ${paymentLink}`,
+    `🧑‍💻 *Submitted By:* ${request.submittedByName || request.agentName || 'N/A'}`,
     request.notes ? `💬 *Agent Notes:* ${request.notes}` : '',
     request.tlNotes ? `💬 *TL Notes:* ${request.tlNotes}` : '',
     `--------------------------------------`
@@ -2088,6 +2089,7 @@ export const buildCaseClipboardPayload = (request: TabbyTamaraRequest): Clipboar
   
   html += `<table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 15px;">`;
   html += `<tr><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; color: #64748b; width: 150px;">👤 Patient Name</td><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; font-weight: 600; color: #0f172a;">${patient}</td></tr>`;
+  html += `<tr><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; color: #64748b;">🧑‍💻 Submitted By</td><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; font-weight: 600; color: #0f172a;">${request.submittedByName || request.agentName || 'N/A'}</td></tr>`;
   html += `<tr><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; color: #64748b;">📞 Phone Number</td><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; font-weight: 600; color: #0f172a; font-family: monospace;">${formatPhoneForCopy(phone)}</td></tr>`;
   html += `<tr><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; color: #64748b;">📁 File / ID</td><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; font-weight: 600; color: #0f172a; font-family: monospace;">${fileNum}</td></tr>`;
   html += `<tr><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; color: #64748b;">🏥 Clinic</td><td style="padding: 10px 0; border-bottom: 1px solid #f8fafc; font-weight: 600; color: #0f172a;">${clinic}</td></tr>`;
@@ -2188,6 +2190,7 @@ export const generateTabbyTamaraCopyText = (req: any): string => {
     `Price Input: ${amountText} AED`,
     `Final Price with Fee: ${finalAmountText}`,
     `Clinic: ${getClinicLabel(req.clinicName)}`,
+    `Agent: ${req.submittedByName || req.agentName || 'N/A'}`,
   ];
   if (req.notes || req.serviceDetails) {
     infoArray.push(`Details/Notes: ${req.notes || req.serviceDetails}`);
