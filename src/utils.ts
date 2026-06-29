@@ -1,3 +1,4 @@
+import type React from 'react';
 import { SchedulingRequest, SHIFTS, TEAM_LEADERS, INITIAL_AGENTS, SwapRequest, AnnualRequest, ScheduledShift, AGENT_LOBS, AGENT_TL_MAP, Inquiry, TimeLog, AgentDirectoryRow, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest, CaseRecord, SystemNotification, Order, FileAttachment, TTWorkflowStatus } from './types';
 
 // Simple client-side storage helpers

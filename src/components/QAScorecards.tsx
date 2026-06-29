@@ -62,7 +62,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
   };
 
   const calculateTotal = (): number => {
-    return Object.values(scores).reduce((a: number, b: number) => a + (b || 0), 0) as number;
+    return (Object.values(scores) as number[]).reduce((a: number, b: number) => a + (b || 0), 0);
   };
   const calculateMax = () => qaTemplate.reduce((a, b) => a + b.maxScore, 0);
 

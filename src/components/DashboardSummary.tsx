@@ -14,6 +14,8 @@ import {
   CheckCircle2,
   Bell
 } from 'lucide-react';
+import { WeeklyPerformanceHeatmap } from './WeeklyPerformanceHeatmap';
+import { Inquiry, TabbyTamaraRequest, TabbyTamaraComplaint, ClientCommunicationRequest } from '../types';
 
 interface DashboardSummaryProps {
   currentUser: { name: string; role: string; teamLeader?: string; lob?: string };
@@ -27,6 +29,10 @@ interface DashboardSummaryProps {
   onCardClick?: (cardType: 'queue' | 'qa' | 'inquiry' | 'fintech') => void;
   announcements?: any[];
   agentMeta?: Record<string, { tlName?: string; roleType?: string }>;
+  inquiries?: Inquiry[];
+  tabbyTamaraRequests?: TabbyTamaraRequest[];
+  tabbyTamaraComplaints?: TabbyTamaraComplaint[];
+  clientComms?: ClientCommunicationRequest[];
 }
 
 export const DashboardSummary: React.FC<DashboardSummaryProps> = ({ 
@@ -40,7 +46,11 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
   onNavigate,
   onCardClick,
   announcements = [],
-  agentMeta = {}
+  agentMeta = {},
+  inquiries = [],
+  tabbyTamaraRequests = [],
+  tabbyTamaraComplaints = [],
+  clientComms = []
 }) => {
   const isAgent = ['agent', 'sme'].includes(currentUser.role as string);
   const isTL = currentUser.role === 'tl';
@@ -316,6 +326,18 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
           </div>
         </motion.div>
       </div>
+
+      {/* Weekly Performance Heatmap (Visible to TLs and Admins) */}
+      {(currentUser?.role === 'tl' || currentUser?.role === 'admin' || currentUser?.role === 'superadmin') && (
+        <div className="mt-4">
+          <WeeklyPerformanceHeatmap
+            inquiries={inquiries}
+            tabbyTamaraRequests={tabbyTamaraRequests}
+            tabbyTamaraComplaints={tabbyTamaraComplaints}
+            clientComms={clientComms}
+          />
+        </div>
+      )}
     </div>
   );
 };

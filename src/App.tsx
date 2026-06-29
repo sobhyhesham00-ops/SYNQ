@@ -11157,8 +11157,8 @@ ${ttNotes}`
                       className="fixed inset-0 z-30"
                       onClick={() => setIsGlobalSearchPanelOpen(false)}
                     />
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-transparent border border-white/10 rounded-2xl shadow-2xl z-45 p-1.5 max-h-96 overflow-y-auto flex flex-col divide-y divide-white/5">
-                      <div className="p-3 text-[10px] text-slate-400 font-extrabold uppercase tracking-wider bg-transparent flex items-center justify-between border-b border-white/5 rounded-t-xl font-mono">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#1a1b23] border border-white/10 rounded-2xl shadow-2xl z-45 p-1.5 max-h-96 overflow-y-auto flex flex-col divide-y divide-white/5">
+                      <div className="p-3 text-[10px] text-slate-400 font-extrabold uppercase tracking-wider bg-[#1a1b23] flex items-center justify-between border-b border-white/5 rounded-t-xl font-mono">
                         <span>
                           Results for "{globalSearchInput}":{" "}
                           {globalSearchResults.length} records
@@ -12195,6 +12195,10 @@ ${ttNotes}`
                             setActiveTab(tab === "roster" ? "schedules" : tab)
                           }
                           announcements={announcements}
+                          inquiries={inquiries}
+                          tabbyTamaraRequests={tabbyTamaraRequests}
+                          tabbyTamaraComplaints={tabbyTamaraComplaints}
+                          clientComms={clientComms}
                         />
                       </div>
                     )}

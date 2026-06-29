@@ -179,7 +179,7 @@ export function PaginatedCaseList<T>({
       {showFilters && itemToClinic && (
         <div className="bg-[#18181c] p-4 border-b border-slate-700/60 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {itemToClinic && availableClinics && (
+            {availableClinics && (
               <div>
                 <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Filter by Clinics</label>
                 <div className="flex flex-wrap gap-1.5 max-h-[120px] overflow-y-auto pr-1">

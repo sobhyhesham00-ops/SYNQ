@@ -100,7 +100,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
   onResetAllData,
   onCloseAllCases,
   TRIGGER_CURRENT_APP_VERSION,
-  deletedUsers = [],
+  deletedUsers = [] as string[],
   onDeleteSyntheticUser,
   isSuperAdmin,
   auditLog,
