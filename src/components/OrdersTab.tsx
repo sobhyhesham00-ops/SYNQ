@@ -190,7 +190,7 @@ export function OrdersTab({
   return (
     <div className="space-y-6">
        <div>
-         <h2 className="text-3xl font-bold text-slate-100 font-display flex items-center gap-2">
+         <h2 className="text-3xl font-bold text-slate-100 font-sans flex items-center gap-2">
            <ShoppingBag className="w-8 h-8 text-fuchsia-500" />
            Team Orders Mini-App
          </h2>
@@ -200,7 +200,7 @@ export function OrdersTab({
        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
          {/* Left col - List and Stats */}
          <div className="lg:col-span-1 space-y-6">
-            <div className="bg-fuchsia-950/20 border border-fuchsia-500/20 rounded-2xl p-5 shadow">
+            <div className="bg-fuchsia-950/20 border border-fuchsia-500/20 rounded-2xl p-5">
                <h3 className="font-bold text-fuchsia-300 text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
                  <Calculator className="w-4 h-4" /> Start New Order
                </h3>
@@ -231,7 +231,7 @@ export function OrdersTab({
                </form>
             </div>
 
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow space-y-3">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3">
               <h3 className="font-bold text-slate-300 text-sm uppercase tracking-wider">Active Orders</h3>
               {getMyActiveOrders().length === 0 ? (
                 <p className="text-slate-500 text-xs italic">No active orders right now.</p>
@@ -254,7 +254,7 @@ export function OrdersTab({
               )}
             </div>
 
-            <div className="bg-gradient-to-br from-indigo-900/50 to-fuchsia-900/50 border border-indigo-500/30 rounded-2xl p-5 shadow relative overflow-hidden">
+            <div className="bg-gradient-to-br from-indigo-900/50 to-fuchsia-900/50 border border-indigo-500/30 rounded-2xl p-5 relative overflow-hidden">
                <div className="absolute top-0 right-0 w-32 h-32 bg-fuchsia-500/20 blur-3xl" />
                <h3 className="font-bold text-indigo-300 text-sm uppercase tracking-wider mb-2">Monthly Top Orders</h3>
                <div className="space-y-2 text-xs">
@@ -278,11 +278,11 @@ export function OrdersTab({
                   <p className="text-slate-400 font-bold">Select or create an order to manage.</p>
                </div>
             ) : (
-               <div className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow relative">
+               <div className="bg-white/5 border border-white/10 rounded-2xl p-6 relative">
                   {/* Header */}
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/10 pb-4 mb-4">
                      <div>
-                       <h3 className="text-2xl font-black text-slate-100 flex items-center gap-2">
+                       <h3 className="text-2xl font-bold text-slate-100 flex items-center gap-2">
                          {activeOrder.restaurantName}
                        </h3>
                        <p className="text-xs text-slate-400 mt-1">Created by {activeOrder.makerName} • Timer: {activeOrder.timerMinutes} mins</p>
@@ -371,7 +371,7 @@ export function OrdersTab({
                            </div>
                            <div className="text-right sm:text-left min-w-[100px]">
                               <p className="text-xs text-slate-500 line-through">Base: {m.baseAmount.toFixed(2)}</p>
-                              <p className="text-sm font-black text-emerald-400 font-mono">{m.finalAmount.toFixed(2)} AED</p>
+                              <p className="text-sm font-bold text-emerald-400 font-mono">{m.finalAmount.toFixed(2)} AED</p>
                            </div>
                            <div className="flex items-center gap-2">
                              <button

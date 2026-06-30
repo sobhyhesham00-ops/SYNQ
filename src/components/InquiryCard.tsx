@@ -309,7 +309,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
       const formatted = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
       return {
         text: `Overdue: -${formatted}`,
-        color: "bg-red-500/10 text-red-400 border-red-500/30 animate-pulse font-extrabold shadow-[0_0_8px_rgba(239,68,68,0.2)]",
+        color: "bg-red-500/10 text-red-400 border-red-500/30 animate-pulse font-bold ",
         isUrgent: true,
         isOverdue: true,
         icon: "🚨"
@@ -323,7 +323,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
       if (remainingMs <= 30 * 60 * 1000) {
         return {
           text: `SLA: ${formatted}`,
-          color: "bg-amber-500/10 text-amber-400 border-amber-500/30 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.2)]",
+          color: "bg-amber-500/10 text-amber-400 border-amber-500/30 animate-pulse ",
           isUrgent: true,
           isOverdue: false,
           icon: "⏳"
@@ -387,11 +387,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
   return (
     <div
       id={`inquiry-${inq.id}`}
-      className={`p-5 bg-white/[0.04] border border-white/[0.08] rounded-[24px] hover:bg-white/[0.05] hover:border-white/[0.12] transition-all duration-300 relative flex flex-col w-full overflow-hidden shadow-sm ${
-        isExpanded
-          ? "shadow-md ring-1 ring-emerald-500/10 space-y-4"
-          : "cursor-pointer hover:shadow-md"
-      }`}
+      className={`p-5 bg-white/[0.04] border border-white/[0.08] rounded-[24px] hover:bg-white/[0.05] hover:border-white/[0.12] transition-all duration-300 relative flex flex-col w-full overflow-hidden -sm ${ isExpanded ? " ring-1 ring-emerald-500/10 space-y-4" : "cursor-pointer hover:" }`}
       onClick={() => {
         if (!isExpanded) {
           onToggle();
@@ -431,10 +427,10 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
             <span className="text-xs text-slate-400 lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded font-sans shrink-0">
               {getAgentLOB(inq.agentName)}
             </span>
-            <span className="font-mono text-xs text-slate-500 bg-transparent px-1.5 py-0.5 rounded shrink-0">
+            <span className="font-sans text-xs text-slate-500 bg-transparent px-1.5 py-0.5 rounded shrink-0">
               {formatCaseRef(inq.id, "inquiry", inq.createdAt, inq.caseRef)}
             </span>
-            <span className="text-xs text-slate-500 font-mono shrink-0">
+            <span className="text-xs text-slate-500 font-sans shrink-0">
               {new Date(inq.createdAt).toLocaleString()}
             </span>
           </div>
@@ -447,7 +443,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
             {inq.clinicName && (
               <>
                 <span className="text-slate-600">•</span>
-                <span className="text-xs sm:text-sm font-black font-sans text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-xl tracking-wide">
+                <span className="text-xs sm:text-sm font-bold font-sans text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-xl tracking-wide">
                   {getClinicLabelText(inq.clinicName)}
                 </span>
               </>
@@ -461,11 +457,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
             )}
             {inq.customerType && (
               <span
-                className={`text-xs px-2 py-0.5 border rounded font-sans font-bold flex items-center gap-1 shrink-0 ${
-                  inq.customerType === "new"
-                    ? "bg-teal-500/10 text-teal-300 border-teal-500/20"
-                    : "bg-purple-500/10 text-purple-300 border-purple-500/20"
-                }`}
+                className={`text-xs px-2 py-0.5 border rounded font-sans font-bold flex items-center gap-1 shrink-0 ${ inq.customerType === "new" ? "bg-teal-500/10 text-teal-300 border-teal-500/20" : "bg-purple-500/10 text-purple-300 border-purple-500/20" }`}
               >
                 {inq.customerType === "new" ? "🆕 New" : "📂 Old"}
               </span>
@@ -612,7 +604,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
 
               {(inq.status === "sent_to_clinic" || inq.status === "sent") && (
                 <>
-                  <div className="flex items-center gap-2 text-xs font-mono font-bold text-orange-400 uppercase">
+                  <div className="flex items-center gap-2 text-xs font-sans font-bold text-orange-400 uppercase">
                     <Send className="w-3.5 h-3.5 animate-pulse" />
                     <span>
                       Sent by {inq.sentBy || "Unknown"} on{" "}
@@ -703,7 +695,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
               )}
 
               {inq.status === "closed" && (
-                <span className="text-xs text-slate-500 font-mono">
+                <span className="text-xs text-slate-500 font-sans">
                   🔒 Closed by {inq.closedBy} on{" "}
                   {new Date(inq.closedAt || "").toLocaleString()}
                 </span>
@@ -719,7 +711,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                     {inq.assignedToName ? `Reassign (${inq.assignedToName})` : "Assign Agent"}
                   </button>
                   {showAssignDropdown && (
-                    <div className="absolute bottom-full left-0 mb-2 z-50 bg-black/40 border border-white/[0.08] rounded-xl w-72 shadow flex flex-col overflow-hidden">
+                    <div className="absolute bottom-full left-0 mb-2 z-50 bg-black/40 border border-white/[0.08] rounded-xl w-72 shadow-sm flex flex-col overflow-hidden">
                       {/* Header */}
                       <div className="p-2.5 border-b border-white/[0.06] bg-white/[0.04] flex items-center justify-between">
                         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
@@ -772,20 +764,12 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                                 key={agentName}
                                 onClick={() => handleAssignAgent(agentName)}
                                 disabled={isAssigning}
-                                className={`w-full text-left px-2.5 py-1.5 text-xs rounded-xl transition-all flex items-center justify-between font-medium cursor-pointer ${
-                                  isSelected
-                                    ? "bg-indigo-500/15 text-indigo-300 font-bold border border-indigo-500/20"
-                                    : "text-slate-300 hover:bg-white/[0.06] hover:text-white"
-                                }`}
+                                className={`w-full text-left px-2.5 py-1.5 text-xs rounded-xl transition-all flex items-center justify-between font-medium cursor-pointer ${ isSelected ? "bg-indigo-500/15 text-indigo-300 font-bold border border-indigo-500/20" : "text-slate-300 hover:bg-white/[0.06] hover:text-white" }`}
                               >
                                 <span className="truncate pr-2">{agentName}</span>
                                 {lob && (
                                   <span
-                                    className={`shrink-0 text-xs font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider ${
-                                      isChat
-                                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                        : "bg-blue-500/10 text-blue-450 border border-blue-500/20"
-                                    }`}
+                                    className={`shrink-0 text-xs font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${ isChat ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-blue-500/10 text-blue-450 border border-blue-500/20" }`}
                                   >
                                     {lob === "Chat" ? "Chat" : "Call"}
                                   </span>
@@ -820,7 +804,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
             {activeAnsweringId === inq.id && (
               <div className="p-4 bg-white/5 border border-white/20 rounded-xl space-y-3 animate-fade-in text-left">
                 <div className="flex justify-between items-center pb-1">
-                  <h4 className="text-xs font-bold text-slate-100 font-display">
+                  <h4 className="text-xs font-bold text-slate-100 font-sans">
                     Feed Back / System Answer Details
                   </h4>
                   <button
@@ -844,7 +828,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
                     rows={3}
                     className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-emerald-500 transition-all font-sans resize-none"
                   />
-                  <div className="flex justify-end pr-1 text-xs text-slate-400 font-mono">
+                  <div className="flex justify-end pr-1 text-xs text-slate-400 font-sans">
                     {answerText.length} / 500 characters
                   </div>
                 </div>
@@ -908,7 +892,7 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
 
           {/* Case Activity Audit Trail */}
           <div className="pt-3 border-t border-white/5 space-y-1.5 text-left">
-            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-display">
+            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-sans">
               Case Activity Timeline
             </h4>
             <CaseTimeline entityType="inquiry" entityId={inq.id} />

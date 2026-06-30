@@ -158,7 +158,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
       {/* Table grid for larger screens */}
       <div className="hidden lg:block overflow-x-auto min-h-0 custom-scrollbar">
         <table className="w-full min-w-[900px] text-left text-xs text-slate-300 whitespace-nowrap table-fixed">
-          <thead className="bg-transparent text-xs font-black uppercase tracking-wider text-slate-500 border-b border-white/5 sticky top-0 z-15">
+          <thead className="bg-transparent text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-white/5 sticky top-0 z-15">
             <tr>
               <th className="p-2 w-6"></th>
               <th className="p-2 w-32">
@@ -200,18 +200,14 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                   <React.Fragment key={item.id}>
                     <tr
                       onClick={() => onSelectCase(item)}
-                      className={`cursor-pointer transition-all duration-150 ${
-                        isSelected
-                          ? "bg-indigo-600/10 text-white font-medium border-l-4 border-indigo-500"
-                          : "hover:bg-white/[0.04]"
-                      }`}
+                      className={`cursor-pointer transition-all duration-150 ${ isSelected ? "bg-indigo-600/10 text-white font-medium border-l-4 border-indigo-500" : "hover:bg-white/[0.04]" }`}
                     >
                       <td className="p-2 text-center">
                         {item.unread && (
                           <div className="w-2 h-2 rounded-full bg-blue-500 mx-auto" title="Unread activity" />
                         )}
                       </td>
-                      <td className="p-2 font-mono text-xs text-slate-100 font-bold truncate">
+                      <td className="p-2 font-sans text-xs text-slate-100 font-bold truncate">
                         {item.referenceId}
                       </td>
                       <td className="p-2">
@@ -221,7 +217,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                         <span className="font-bold text-slate-100 block truncate">
                           {item.patientName || "—"}
                         </span>
-                        <span className="text-xs text-slate-400 truncate block mt-0.5 font-mono">
+                        <span className="text-xs text-slate-400 truncate block mt-0.5 font-sans">
                           {item.phoneNumber || "—"}
                         </span>
                       </td>
@@ -260,7 +256,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                     {isSelected && item.crmType === "inquiry" && (
                       <tr key={`${item.id}-details`} className="bg-[#050508]/65">
                         <td colSpan={9} className="p-5 border-t border-b border-indigo-500/25">
-                          <div className="max-w-4xl mx-auto rounded-2xl overflow-hidden shadow border border-white/5 bg-[#09090c] text-left">
+                          <div className="max-w-4xl mx-auto rounded-2xl overflow-hidden border border-white/5 bg-[#09090c] text-left">
                             <CaseDetailDrawer
                               caseData={item}
                               onClose={() => onSelectCase(item)}
@@ -304,12 +300,10 @@ export const CaseTable: React.FC<CaseTableProps> = ({
               <React.Fragment key={item.id}>
                 <div
                   onClick={() => onSelectCase(item)}
-                  className={`p-4 cursor-pointer transition-all space-y-3 ${
-                    isSelected ? "bg-indigo-600/15 border-l-4 border-indigo-500 text-white" : "hover:bg-transparent"
-                  }`}
+                  className={`p-4 cursor-pointer transition-all space-y-3 ${ isSelected ? "bg-indigo-600/15 border-l-4 border-indigo-500 text-white" : "hover:bg-transparent" }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs text-slate-100 font-black">
+                    <span className="font-sans text-xs text-slate-100 font-bold">
                       {item.referenceId}
                     </span>
                     <div className="flex items-center gap-1.5">
@@ -322,7 +316,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                     <h4 className="text-sm font-bold text-slate-200">
                       {item.patientName || "Subject Log"}
                     </h4>
-                    <p className="text-xs text-slate-400 font-mono">
+                    <p className="text-xs text-slate-400 font-sans">
                       {item.phoneNumber || "—"}
                     </p>
                     <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
@@ -336,7 +330,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                       <Clock className="w-2.5 h-2.5" />
                       {sla.label}
                     </span>
-                    <span className="text-xs text-slate-500 font-mono ml-auto">
+                    <span className="text-xs text-slate-500 font-sans ml-auto">
                       {CLINIC_LABELS[item.clinicName] || item.clinicName}
                     </span>
                   </div>

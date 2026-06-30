@@ -413,7 +413,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
   return (
     <div className="space-y-6 animate-fade-in p-1 text-left font-sans">
       {/* Title block */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/[0.04] p-6 rounded-[32px] border-none shadow-sm relative overflow-hidden">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/[0.04] p-6 rounded-[32px] border-none relative overflow-hidden">
         <div className="absolute top-0 right-0 p-32 bg-indigo-500/5 blur-[80px] rounded-full pointer-events-none" />
         <div className="relative z-10">
           <h2 className="text-2xl font-bold text-white flex items-center gap-3">
@@ -464,7 +464,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
       </div>
 
       {/* Online Team Leaders Today */}
-      <div className="bg-white/[0.04] rounded-[24px] p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+      <div className="bg-white/[0.04] rounded-[24px] p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-full bg-indigo-500/10 text-indigo-400">
             <User className="w-5 h-5" />
@@ -485,7 +485,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
                 {log ? (
                   <span className="text-xs text-slate-400 font-mono pl-1 border-l border-white/10 ml-1">First login: {new Date(log.loggedInAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 ) : (
-                  <span className="text-xs text-slate-500 font-mono pl-1 border-l border-white/10 ml-1">Not logged in today</span>
+                  <span className="text-xs text-slate-500 font-sans pl-1 border-l border-white/10 ml-1">Not logged in today</span>
                 )}
               </div>
             );
@@ -500,115 +500,95 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
           {/* Click to filter Inquiries */}
           <button
             onClick={() => setSelectedTypeFilter(selectedTypeFilter === "inquiry" ? "all" : "inquiry")}
-            className={`p-5 rounded-[24px] transition-transform hover:scale-[1.02] text-left flex flex-col gap-3 cursor-pointer relative overflow-hidden ${
-              selectedTypeFilter === "inquiry"
-                ? "bg-amber-500/15 shadow-sm ring-1 ring-amber-500/30 border-none"
-                : "bg-white/[0.05] border border-white/[0.07]"
-            }`}
+            className={`p-5 rounded-[24px] transition-transform hover:scale-[1.02] text-left flex flex-col gap-3 cursor-pointer relative overflow-hidden ${ selectedTypeFilter === "inquiry" ? "bg-amber-500/15 -sm ring-1 ring-amber-500/30 border-none" : "bg-white/[0.05] border border-white/[0.07]" }`}
           >
             <div className="flex items-center justify-between w-full">
               <div className={`p-2.5 rounded-full ${selectedTypeFilter === "inquiry" ? "bg-amber-500/20 text-amber-300" : "bg-amber-500/10 text-amber-400"}`}>
                 <HelpCircle className="w-5 h-5" />
               </div>
-              <span className="text-xs bg-white/[0.06] text-slate-400 font-mono px-2 py-1 rounded-xl border border-white/10">
+              <span className="text-xs bg-white/[0.06] text-slate-400 font-sans px-2 py-1 rounded-xl border border-white/10">
                 {selectedTypeFilter === "inquiry" ? "ACTIVE" : "CLICK"}
               </span>
             </div>
             <div>
               <p className="text-xs text-amber-400 uppercase tracking-widest font-bold">Inquiries</p>
-              <p className="text-3xl font-black text-white tracking-tight mt-1">{displayInquiriesCount}</p>
+              <p className="text-3xl font-bold text-white tracking-tight mt-1">{displayInquiriesCount}</p>
             </div>
           </button>
 
           {/* Click to filter Tabby/Tamara */}
           <button
             onClick={() => setSelectedTypeFilter(selectedTypeFilter === "tabbyTamara" ? "all" : "tabbyTamara")}
-            className={`p-5 rounded-[24px] transition-transform hover:scale-[1.02] text-left flex flex-col gap-3 cursor-pointer relative overflow-hidden ${
-              selectedTypeFilter === "tabbyTamara"
-                ? "bg-cyan-500/15 shadow-sm ring-1 ring-[#2bc9d7]/30 border-none"
-                : "bg-white/[0.05] border border-white/[0.07]"
-            }`}
+            className={`p-5 rounded-[24px] transition-transform hover:scale-[1.02] text-left flex flex-col gap-3 cursor-pointer relative overflow-hidden ${ selectedTypeFilter === "tabbyTamara" ? "bg-cyan-500/15 -sm ring-1 ring-[#2bc9d7]/30 border-none" : "bg-white/[0.05] border border-white/[0.07]" }`}
           >
             <div className="flex items-center justify-between w-full">
               <div className={`p-2.5 rounded-full ${selectedTypeFilter === "tabbyTamara" ? "bg-cyan-500/20 text-cyan-500" : "bg-cyan-500/10 text-cyan-500"}`}>
                 <Wallet className="w-5 h-5" />
               </div>
-              <span className="text-xs bg-white/[0.06] text-slate-400 font-mono px-2 py-1 rounded-xl border border-white/10">
+              <span className="text-xs bg-white/[0.06] text-slate-400 font-sans px-2 py-1 rounded-xl border border-white/10">
                 {selectedTypeFilter === "tabbyTamara" ? "ACTIVE" : "CLICK"}
               </span>
             </div>
             <div>
               <p className="text-xs text-cyan-500 uppercase tracking-widest font-bold">Alternative Pay</p>
-              <p className="text-3xl font-black text-white tracking-tight mt-1">{displayTTRequestsCount}</p>
+              <p className="text-3xl font-bold text-white tracking-tight mt-1">{displayTTRequestsCount}</p>
             </div>
           </button>
 
           {/* Click to filter Complaints */}
           <button
             onClick={() => setSelectedTypeFilter(selectedTypeFilter === "complaint" ? "all" : "complaint")}
-            className={`p-5 rounded-[24px] transition-transform hover:scale-[1.02] text-left flex flex-col gap-3 cursor-pointer relative overflow-hidden ${
-              selectedTypeFilter === "complaint"
-                ? "bg-rose-500/15 shadow-sm ring-1 ring-rose-500/30 border-none"
-                : "bg-white/[0.05] border border-white/[0.07]"
-            }`}
+            className={`p-5 rounded-[24px] transition-transform hover:scale-[1.02] text-left flex flex-col gap-3 cursor-pointer relative overflow-hidden ${ selectedTypeFilter === "complaint" ? "bg-rose-500/15 -sm ring-1 ring-rose-500/30 border-none" : "bg-white/[0.05] border border-white/[0.07]" }`}
           >
             <div className="flex items-center justify-between w-full">
               <div className={`p-2.5 rounded-full ${selectedTypeFilter === "complaint" ? "bg-rose-500/20 text-rose-300" : "bg-rose-500/10 text-rose-400"}`}>
                 <AlertTriangle className="w-5 h-5" />
               </div>
-              <span className="text-xs bg-white/[0.06] text-slate-400 font-mono px-2 py-1 rounded-xl border border-white/10">
+              <span className="text-xs bg-white/[0.06] text-slate-400 font-sans px-2 py-1 rounded-xl border border-white/10">
                 {selectedTypeFilter === "complaint" ? "ACTIVE" : "CLICK"}
               </span>
             </div>
             <div>
               <p className="text-xs text-rose-400 uppercase tracking-widest font-bold">Complaints</p>
-              <p className="text-3xl font-black text-white tracking-tight mt-1">{displayComplaintsCount}</p>
+              <p className="text-3xl font-bold text-white tracking-tight mt-1">{displayComplaintsCount}</p>
             </div>
           </button>
 
           {/* Click to filter Client Communications */}
           <button
             onClick={() => setSelectedTypeFilter(selectedTypeFilter === "clientComm" ? "all" : "clientComm")}
-            className={`p-5 rounded-[24px] transition-transform hover:scale-[1.02] text-left flex flex-col gap-3 cursor-pointer relative overflow-hidden ${
-              selectedTypeFilter === "clientComm"
-                ? "bg-indigo-500/15 shadow-sm ring-1 ring-indigo-500/30 border-none"
-                : "bg-white/[0.05] border border-white/[0.07]"
-            }`}
+            className={`p-5 rounded-[24px] transition-transform hover:scale-[1.02] text-left flex flex-col gap-3 cursor-pointer relative overflow-hidden ${ selectedTypeFilter === "clientComm" ? "bg-indigo-500/15 shadow-sm-sm ring-1 ring-indigo-500/30 border-none" : "bg-white/[0.05] border border-white/[0.07]" }`}
           >
             <div className="flex items-center justify-between w-full">
               <div className={`p-2.5 rounded-full ${selectedTypeFilter === "clientComm" ? "bg-indigo-500/20 text-indigo-300" : "bg-indigo-500/10 text-indigo-400"}`}>
                 <MessageCircle className="w-5 h-5" />
               </div>
-              <span className="text-xs bg-white/[0.06] text-slate-400 font-mono px-2 py-1 rounded-xl border border-white/10">
+              <span className="text-xs bg-white/[0.06] text-slate-400 font-sans px-2 py-1 rounded-xl border border-white/10">
                 {selectedTypeFilter === "clientComm" ? "ACTIVE" : "CLICK"}
               </span>
             </div>
             <div>
               <p className="text-xs text-indigo-400 uppercase tracking-widest font-bold">Client Comm</p>
-              <p className="text-3xl font-black text-white tracking-tight mt-1">{displayClientCommsCount}</p>
+              <p className="text-3xl font-bold text-white tracking-tight mt-1">{displayClientCommsCount}</p>
             </div>
           </button>
 
           {/* Combined total */}
           <button
             onClick={() => setSelectedTypeFilter("all")}
-            className={`p-5 rounded-[24px] transition-transform hover:scale-[1.02] text-left flex flex-col gap-3 cursor-pointer relative overflow-hidden ${
-              selectedTypeFilter === "all"
-                ? "bg-white/10 shadow-sm ring-1 ring-white/20 border-none"
-                : "bg-white/[0.05] border border-white/[0.07]"
-            }`}
+            className={`p-5 rounded-[24px] transition-transform hover:scale-[1.02] text-left flex flex-col gap-3 cursor-pointer relative overflow-hidden ${ selectedTypeFilter === "all" ? "bg-white/10 -sm ring-1 ring-white/20 border-none" : "bg-white/[0.05] border border-white/[0.07]" }`}
           >
             <div className="flex items-center justify-between w-full">
               <div className="p-2.5 rounded-full bg-white/10 text-slate-300">
                 <ClipboardList className="w-5 h-5" />
               </div>
-              <span className="text-xs bg-emerald-500/20 text-emerald-400 font-mono px-2 py-0.5 rounded-xl border border-emerald-500/20 font-black">
+              <span className="text-xs bg-emerald-500/20 text-emerald-400 font-sans px-2 py-0.5 rounded-xl border border-emerald-500/20 font-bold">
                 {isAnyFilterActive ? "FILTERED" : "TODAY"}
               </span>
             </div>
             <div>
               <p className="text-xs text-slate-400 uppercase tracking-widest font-bold">Combined Queue</p>
-              <p className="text-2xl font-black text-slate-100 tracking-tight">{displayTotalCount}</p>
+              <p className="text-2xl font-bold text-slate-100 tracking-tight">{displayTotalCount}</p>
             </div>
           </button>
         </div>
@@ -699,7 +679,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
                 setFilterPhone(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full bg-white/[0.08] border-none rounded-2xl pl-11 pr-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 font-mono"
+              className="w-full bg-white/[0.08] border-none rounded-2xl pl-11 pr-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 font-sans"
             />
             <Search className="w-4 h-4 text-slate-400 absolute left-4 top-4" />
           </div>
@@ -710,11 +690,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
           <button
             type="button"
             onClick={() => setSortOldestFirst(!sortOldestFirst)}
-            className={`w-full h-12 rounded-2xl text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer border-none ${
-              sortOldestFirst
-                ? "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
-                : "bg-white/[0.05] text-slate-300 hover:bg-white/[0.08]"
-            }`}
+            className={`w-full h-12 rounded-2xl text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer border-none ${ sortOldestFirst ? "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30" : "bg-white/[0.05] text-slate-300 hover:bg-white/[0.08]" }`}
           >
             <ArrowUpDown className="w-4 h-4 shrink-0" />
             {sortOldestFirst ? "⚠️ Oldest First" : "🗓️ Latest First"}
@@ -723,9 +699,9 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
       </div>
 
       {/* Dispatch queue combined list */}
-      <div className="bg-white/[0.04] p-1 rounded-[32px] shadow-sm border-none overflow-hidden mt-6">
+      <div className="bg-white/[0.04] p-1 rounded-[32px] border-none overflow-hidden mt-6">
         <div className="p-6">
-          <h3 className="text-lg font-bold text-white font-display flex items-center gap-2">
+          <h3 className="text-lg font-bold text-white font-sans flex items-center gap-2">
             <ClipboardList className="w-5 h-5 text-indigo-400" /> Unified Case Pipeline
           </h3>
           <p className="text-sm text-slate-400 mt-1 font-medium">

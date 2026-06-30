@@ -207,7 +207,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
     const norm = label.toLowerCase();
     if (norm.includes('07:00') || norm.includes('morning')) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono text-xs font-semibold">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-sans text-xs font-semibold">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           {label}
         </span>
@@ -223,14 +223,14 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
     }
     if (norm.includes('22:00') || norm.includes('night')) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-mono text-xs font-semibold">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-sans text-xs font-semibold">
           <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
           {label}
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-500/15 text-slate-400 border border-slate-500/20 font-mono text-xs">
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-500/15 text-slate-400 border border-slate-500/20 font-sans text-xs">
         <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
         {label}
       </span>
@@ -238,10 +238,10 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
   };
 
   return (
-    <div className="bg-white/[0.04] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow text-left space-y-6">
+    <div className="bg-white/[0.04] border border-slate-800 rounded-2xl p-6 sm:p-8 text-left space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-black text-slate-100 flex items-center gap-2.5 font-display">
+          <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2.5 font-sans">
             <CalendarIcon className="w-6 h-6 text-indigo-400" />
             Import Schedule Roster
           </h2>
@@ -257,11 +257,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
-        className={`relative border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center transition-all ${
-          dragActive 
-            ? 'border-indigo-400 bg-indigo-500/5' 
-            : 'border-slate-800 hover:border-slate-700 bg-slate-950/40'
-        }`}
+        className={`relative border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center transition-all ${ dragActive ? 'border-indigo-400 bg-indigo-500/5' : 'border-slate-800 hover:border-slate-700 bg-slate-950/40' }`}
       >
         <input
           type="file"
@@ -282,7 +278,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
             <h4 className="text-slate-200 font-bold text-sm mb-0.5">Drag & drop your roster or any schedule file here</h4>
             <p className="text-slate-500 text-xs mb-3">or click to browse from your device</p>
             <div className="flex flex-wrap justify-center gap-1.5">
-              <span className="px-2.5 py-1 bg-indigo-500/10 rounded-xl text-xs font-extrabold font-sans text-indigo-300 border border-indigo-500/20 uppercase tracking-wide">
+              <span className="px-2.5 py-1 bg-indigo-500/10 rounded-xl text-xs font-bold font-sans text-indigo-300 border border-indigo-500/20 uppercase tracking-wide">
                 ⭐ Any File Supported
               </span>
               {['.XLSX', '.XLS', '.CSV', '.TXT', 'ALL FORMATS'].map(fType => (
@@ -372,7 +368,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
 
       {/* Preview Section */}
       {tempSchedules.length > 0 && (
-        <div className="bg-slate-950/60 rounded-2xl border border-slate-800 overflow-hidden shadow-inner">
+        <div className="bg-slate-950/60 rounded-2xl border border-slate-800 overflow-hidden">
           <div className="p-4 bg-white/[0.04] border-b border-slate-800 flex flex-wrap justify-between items-center gap-3">
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4 text-indigo-400" />
@@ -386,14 +382,14 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
               <button
                 type="button"
                 onClick={handleConfirm}
-                className="px-3.5 py-1.5 bg-indigo-500 hover:bg-indigo-400 active:bg-indigo-600 text-white rounded-xl text-xs font-black tracking-wide uppercase transition-colors shadow-sm shadow-indigo-500/15 cursor-pointer"
+                className="px-3.5 py-1.5 bg-indigo-500 hover:bg-indigo-400 active:bg-indigo-600 text-white rounded-xl text-xs font-bold tracking-wide uppercase transition-colors shadow-sm cursor-pointer"
               >
                 Confirm & Use These Shifts
               </button>
               <button
                 type="button"
                 onClick={handleClear}
-                className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 active:bg-white/[0.04] text-slate-300 rounded-xl text-xs font-black tracking-wide uppercase transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 active:bg-white/[0.04] text-slate-300 rounded-xl text-xs font-bold tracking-wide uppercase transition-colors cursor-pointer"
               >
                 Clear
               </button>
@@ -424,7 +420,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
           {/* Pagination Controls */}
           {totalPages > 1 && (
             <div className="p-3 bg-white/[0.04] border-t border-slate-800 flex items-center justify-between gap-4">
-              <span className="text-xs text-slate-500 font-mono">
+              <span className="text-xs text-slate-500 font-sans">
                 Showing {startIndex + 1}–{Math.min(startIndex + itemsPerPage, tempSchedules.length)} of {tempSchedules.length} rows
               </span>
               <div className="flex items-center gap-2">
@@ -437,7 +433,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
                   <ChevronLeft className="w-3.5 h-3.5" />
                   Prev
                 </button>
-                <span className="text-xs font-mono text-slate-400 px-1">
+                <span className="text-xs font-sans text-slate-400 px-1">
                   Page {currentPage} of {totalPages}
                 </span>
                 <button

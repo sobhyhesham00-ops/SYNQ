@@ -49,7 +49,7 @@ const STATUS_COLOR: Record<string, string> = {
 const CopyBtn = ({ value, label }: { value: string; label?: string }) => (
   <button
     onClick={e => { e.stopPropagation(); copyToClipboard(value, `${label || 'Copied'}!`); }}
-    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 transition-colors text-xs font-mono ml-1 shrink-0"
+    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 transition-colors text-xs font-sans ml-1 shrink-0"
     title={`Copy ${label || value}`}
   >
     <Copy className="w-2.5 h-2.5" />
@@ -214,13 +214,13 @@ const FullRecordDetail = ({ item }: { item: any }) => {
         )}
         <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(item.createdAt).toLocaleString()}</span>
         {raw.phoneNumber && (
-          <span className="flex items-center gap-1 font-mono">
+          <span className="flex items-center gap-1 font-sans">
             <Phone className="w-3 h-3" /> {raw.phoneNumber}
             <CopyBtn value={raw.phoneNumber} label="phone" />
           </span>
         )}
         {raw.fileNumber && (
-          <span className="flex items-center gap-1 font-mono">
+          <span className="flex items-center gap-1 font-sans">
             <FileText className="w-3 h-3" /> {raw.fileNumber}
             <CopyBtn value={raw.fileNumber} label="file #" />
           </span>
@@ -458,7 +458,7 @@ export const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[990] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm font-sans" id="patient-history-modal-overlay">
-      <div className="w-full max-w-2xl bg-slate-950 border border-white/10 rounded-2xl shadow flex flex-col max-h-[90vh]">
+      <div className="w-full max-w-2xl bg-slate-950 border border-white/10 rounded-2xl flex flex-col max-h-[90vh]">
 
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-white/10 shrink-0">
@@ -567,7 +567,7 @@ export const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({
                               <p className="text-xs text-slate-400 font-mono mt-0.5">{item.caseRef}</p>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
-                              <p className="text-xs text-slate-500 font-mono text-right">
+                              <p className="text-xs text-slate-500 font-sans text-right">
                                 {new Date(item.createdAt).toLocaleDateString()}
                               </p>
                               {isExpanded
@@ -601,7 +601,7 @@ export const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({
 
         {/* Footer */}
         <div className="p-4 border-t border-white/5 shrink-0">
-          <p className="text-xs text-slate-600 text-center font-mono">
+          <p className="text-xs text-slate-600 text-center font-sans">
             Searching live data · {results.length} record{results.length !== 1 ? 's' : ''} found
           </p>
         </div>

@@ -226,7 +226,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
       };
     }
     return {
-      bg: "bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 border border-rose-500/30 font-black animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.15)]",
+      bg: "bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 border border-rose-500/30 font-bold animate-pulse ",
       label: `${avgHours.toFixed(1)}h`,
       desc: "Critical SLA Overdue (>8h)"
     };
@@ -255,7 +255,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <TrendingUp className="w-5 h-5 text-emerald-400" />
-            <h3 className="text-lg font-black text-white tracking-tight">Weekly Performance Heatmap</h3>
+            <h3 className="text-lg font-bold text-white tracking-tight">Weekly Performance Heatmap</h3>
           </div>
           <p className="text-slate-400 text-xs leading-relaxed max-w-xl">
             Visualizes average ticket resolution speeds (hours) over the last 30 days grouped weekly. Helps TLs pinpoint stars and coach team members who need mentorship.
@@ -375,7 +375,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
                       className="border-b border-white/5 hover:bg-white/[0.01] transition-colors"
                     >
                       {/* Name */}
-                      <td className="p-3 text-xs font-black text-slate-200">
+                      <td className="p-3 text-xs font-bold text-slate-200">
                         {agent.agentName}
                       </td>
 
@@ -395,7 +395,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
                               className={`w-full max-w-[100px] mx-auto py-2.5 rounded-xl flex flex-col justify-center items-center cursor-pointer transition-all ${meta.bg}`}
                             >
                               <span className="text-xs leading-none mb-0.5">{meta.label}</span>
-                              <span className="text-xs font-mono opacity-50 font-normal">
+                              <span className="text-xs font-sans opacity-50 font-normal">
                                 {wData.count > 0 ? `${wData.count} tkt` : ""}
                               </span>
                             </button>
@@ -404,18 +404,18 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
                       })}
 
                       {/* Total Count */}
-                      <td className="p-3 text-center text-xs font-bold font-mono text-slate-300">
+                      <td className="p-3 text-center text-xs font-bold font-sans text-slate-300">
                         {agent.overallCount}
                       </td>
 
                       {/* Average speed */}
-                      <td className="p-3 text-center text-xs font-black">
+                      <td className="p-3 text-center text-xs font-bold">
                         {agent.overallAvg !== null ? (
                           <span className={agent.overallAvg <= 2.0 ? "text-emerald-400" : agent.overallAvg <= 6.0 ? "text-teal-400" : "text-rose-400"}>
                             {agent.overallAvg.toFixed(1)}h
                           </span>
                         ) : (
-                          <span className="text-slate-600 font-normal font-mono">N/A</span>
+                          <span className="text-slate-600 font-normal font-sans">N/A</span>
                         )}
                       </td>
                     </motion.tr>
@@ -434,7 +434,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
-            className="mt-4 p-3.5 bg-slate-900 border border-white/10 rounded-xl text-xs text-slate-300 flex items-center justify-between gap-4 shadow"
+            className="mt-4 p-3.5 bg-slate-900 border border-white/10 rounded-xl text-xs text-slate-300 flex items-center justify-between gap-4"
           >
             <div className="flex items-center gap-2">
               <span className="text-emerald-400 font-bold">●</span>
@@ -452,7 +452,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
             </div>
             <button
               onClick={() => setSelectedCell(null)}
-              className="text-slate-500 hover:text-slate-300 font-black cursor-pointer px-2 py-1 bg-white/5 rounded-xl hover:bg-white/10"
+              className="text-slate-500 hover:text-slate-300 font-bold cursor-pointer px-2 py-1 bg-white/5 rounded-xl hover:bg-white/10"
             >
               Close
             </button>
@@ -467,7 +467,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
           <div>
             <div className="flex items-center gap-1.5 mb-2">
               <AlertTriangle className="w-4 h-4 text-rose-400" />
-              <h4 className="text-xs font-black uppercase text-rose-300 tracking-wider">Mentorship Alerts (&gt;6h average)</h4>
+              <h4 className="text-xs font-bold uppercase text-rose-300 tracking-wider">Mentorship Alerts (&gt;6h average)</h4>
             </div>
             {mentorshipCandidates.length > 0 ? (
               <div className="space-y-3">
@@ -486,7 +486,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-slate-500 font-mono italic">
+              <p className="text-xs text-slate-500 font-sans italic">
                 Awesome! No active agents have resolution times exceeding the 6h threshold in the last 30 days.
               </p>
             )}
@@ -504,7 +504,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
           <div>
             <div className="flex items-center gap-1.5 mb-2">
               <Award className="w-4 h-4 text-emerald-400" />
-              <h4 className="text-xs font-black uppercase text-emerald-300 tracking-wider">Top Performers (&le;2h average)</h4>
+              <h4 className="text-xs font-bold uppercase text-emerald-300 tracking-wider">Top Performers (&le;2h average)</h4>
             </div>
             {starPerformers.length > 0 ? (
               <div className="space-y-3">
@@ -523,7 +523,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-slate-500 font-mono italic">
+              <p className="text-xs text-slate-500 font-sans italic">
                 Keep driving speed! No agents have averages &le;2.0 hours with &ge;5 tickets yet.
               </p>
             )}

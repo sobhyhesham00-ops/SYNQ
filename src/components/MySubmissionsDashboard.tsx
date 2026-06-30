@@ -239,11 +239,11 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
   return (
     <div className="space-y-6 animate-fade-in font-sans p-1">
       {/* Header */}
-      <div className="bg-[#181a20] p-6 rounded-[32px] border-none shadow-sm space-y-4 relative overflow-hidden">
+      <div className="bg-[#181a20] p-6 rounded-[32px] border-none space-y-4 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-32 bg-indigo-500/5 blur-[80px] rounded-full pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-white font-display text-left flex items-center gap-3">
+            <h2 className="text-2xl font-bold tracking-tight text-white font-sans text-left flex items-center gap-3">
               <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-full">
                 <ClipboardList className="w-6 h-6" />
               </div>
@@ -335,7 +335,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
               placeholder="Search by phone..."
               value={subPhone}
               onChange={(e) => setSubPhone(e.target.value)}
-              className="w-full bg-[#1f222a] border-none rounded-2xl pl-11 pr-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 font-mono"
+              className="w-full bg-[#1f222a] border-none rounded-2xl pl-11 pr-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 font-sans"
             />
             <Search className="w-4 h-4 text-slate-400 absolute left-4 top-4" />
           </div>
@@ -361,7 +361,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
       {/* Unified Case List Grid */}
       <div className="space-y-3">
         {filteredList.length === 0 ? (
-          <div className="p-16 text-center rounded-[32px] bg-[#181a20] border-none shadow-sm space-y-2 animate-fade-in text-left">
+          <div className="p-16 text-center rounded-[32px] bg-[#181a20] border-none space-y-2 animate-fade-in text-left">
             <div className="w-12 h-12 rounded-full bg-[#1f222a] flex items-center justify-center mx-auto text-slate-400 mb-2">
               <ClipboardList className="w-6 h-6 text-indigo-400" />
             </div>
@@ -417,9 +417,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
             return (
               <div
                 key={item.id}
-                className={`group p-5 bg-[#1f222a] border-none rounded-[24px] hover:bg-[#282c35] transition-all duration-300 relative flex flex-col w-full overflow-hidden shadow-sm ${
-                   isExpanded ? "shadow-md ring-1 ring-indigo-500/15" : "cursor-pointer hover:shadow-md"
-                }`}
+                className={`group p-5 bg-[#1f222a] border-none rounded-[24px] hover:bg-[#282c35] transition-all duration-300 relative flex flex-col w-full overflow-hidden -sm ${ isExpanded ? " ring-1 ring-indigo-500/15" : "cursor-pointer hover:" }`}
                 onClick={() => {
                   if (!isExpanded) {
                     setExpandedId(item.id);
@@ -431,9 +429,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
 
                 {/* Submissions Header Row */}
                 <div
-                  className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full pl-2.5 ${
-                    isExpanded ? "border-b border-white/5 pb-3.5 cursor-pointer hover:opacity-85" : ""
-                  }`}
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full pl-2.5 ${ isExpanded ? "border-b border-white/5 pb-3.5 cursor-pointer hover:opacity-85" : "" }`}
                   onClick={(e) => {
                     if (isExpanded) {
                       e.stopPropagation();
@@ -450,7 +446,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                     <div>
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {/* Type Badge */}
-                        <span className={`text-xs uppercase tracking-wider font-extrabold px-2 py-0.5 rounded border ${typeBadgeClass}`}>
+                        <span className={`text-xs uppercase tracking-wider font-bold px-2 py-0.5 rounded border ${typeBadgeClass}`}>
                           {typeName}
                         </span>
 
@@ -461,7 +457,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
 
                         {/* Phone Number summary */}
                         {item.phoneNumber && (
-                          <span className="text-xs bg-sky-500/10 text-sky-300 px-2 py-0.5 border border-sky-500/20 rounded font-mono font-bold">
+                          <span className="text-xs bg-sky-500/10 text-sky-300 px-2 py-0.5 border border-sky-500/20 rounded font-sans font-bold">
                             📞 {item.phoneNumber}
                           </span>
                         )}
@@ -475,10 +471,10 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                       </div>
 
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="font-mono text-xs text-slate-500 bg-transparent px-1.5 py-0.5 rounded">
+                        <span className="font-sans text-xs text-slate-500 bg-transparent px-1.5 py-0.5 rounded">
                           {resolvedRef}
                         </span>
-                        <span className="text-xs text-slate-500 font-mono">
+                        <span className="text-xs text-slate-500 font-sans">
                           {itemDateLabel}
                         </span>
                       </div>
@@ -488,11 +484,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                   {/* Status & expand toggle controls */}
                   <div className="flex items-center gap-2 sm:self-center self-end">
                     {/* Status Label */}
-                    <span className={`text-xs uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-xl font-sans leading-none ${
-                      item.status === "completed" || item.status === "closed" || item.status === "answered"
-                        ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
-                        : "bg-amber-500/10 border border-amber-500/30 text-amber-300"
-                    }`}>
+                    <span className={`text-xs uppercase tracking-wider font-bold px-2 py-0.5 rounded-xl font-sans leading-none ${ item.status === "completed" || item.status === "closed" || item.status === "answered" ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400" : "bg-amber-500/10 border border-amber-500/30 text-amber-300" }`}>
                       {item.status === "tl_link_ready" ? "🔗 Link Ready" :
                        item.status === "awaiting_client_contact" ? "📞 Awaiting Contact" :
                        item.status === "ready_for_partner" ? "🤝 Ready for Partner" :
@@ -527,7 +519,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                         {/* Inquiry Photo & Link Attachments */}
                         {((item.data.photos && item.data.photos.length > 0) || item.data.screenshot || item.data.links?.length > 0) && (
                           <div className="space-y-3 bg-slate-900/20 border border-white/5 p-4 rounded-xl">
-                            <span className="text-xs text-slate-400 uppercase tracking-widest font-black block">
+                            <span className="text-xs text-slate-400 uppercase tracking-widest font-bold block">
                               📎 Uploaded Attachments & Proofs
                             </span>
                             <AttachmentsDisplay
@@ -631,7 +623,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                             <span className="text-xs text-slate-400 uppercase tracking-wider font-bold block mb-1">
                               CONTACT MOBILE
                             </span>
-                            <span className="text-slate-200 font-bold font-mono">
+                            <span className="text-slate-200 font-bold font-sans">
                               📞 {item.data.phoneNumber}
                             </span>
                           </div>
@@ -640,7 +632,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                             <span className="text-xs text-slate-400 uppercase tracking-wider font-bold block mb-1">
                               FILE NUMBER
                             </span>
-                            <span className="text-slate-200 font-bold font-mono">
+                            <span className="text-slate-200 font-bold font-sans">
                               📁 {item.data.fileNumber || "N/A"}
                             </span>
                           </div>
@@ -653,7 +645,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                               <span className="text-xs text-slate-400 uppercase tracking-wider font-bold block mb-0.5">
                                 ID NUMBER (NEW CUSTOMER REQUIREMENT)
                               </span>
-                              <span className="text-slate-200 font-mono font-bold text-sm">
+                              <span className="text-slate-200 font-sans font-bold text-sm">
                                 {item.data.idNumber}
                               </span>
                             </div>
@@ -667,7 +659,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
 
                         {/* Complaint detailed content */}
                         <div className="space-y-2">
-                          <span className="text-xs text-slate-400 uppercase tracking-widest font-black block">
+                          <span className="text-xs text-slate-400 uppercase tracking-widest font-bold block">
                             🚨 Patient Complaint Details
                           </span>
                           <div className="bg-white/[0.02] border border-white/5 p-4 rounded-xl text-xs text-slate-200 leading-relaxed italic">
@@ -680,7 +672,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                         {/* Complaint Attachments */}
                         {((item.data.photos && item.data.photos.length > 0) || item.data.imageUrl || item.data.screenshot || (item.data.links && item.data.links.length > 0)) && (
                           <div className="space-y-3 bg-slate-900/20 border border-white/5 p-4 rounded-xl">
-                            <span className="text-xs text-slate-400 uppercase tracking-widest font-black block">
+                            <span className="text-xs text-slate-400 uppercase tracking-widest font-bold block">
                               📎 Uploaded Attachments & Proofs
                             </span>
                             <AttachmentsDisplay
@@ -700,12 +692,12 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-rose-500/10 pb-2">
                               <div className="flex items-center gap-2">
                                 <span className="text-rose-400 text-sm font-bold">📋</span>
-                                <p className="text-xs text-rose-400 uppercase tracking-wider font-extrabold">
+                                <p className="text-xs text-rose-400 uppercase tracking-wider font-bold">
                                   Team Leader Answer ({item.data.tlName || "TL"})
                                 </p>
                               </div>
                               {item.data.tlResolutionType && (
-                                <span className="inline-flex items-center px-2 py-0.5 bg-rose-500/15 border border-rose-500/30 rounded-xl text-xs font-black uppercase text-rose-300 tracking-wider">
+                                <span className="inline-flex items-center px-2 py-0.5 bg-rose-500/15 border border-rose-500/30 rounded-xl text-xs font-bold uppercase text-rose-300 tracking-wider">
                                   {item.data.tlResolutionType === "refund" ? "💳 Refund" :
                                    item.data.tlResolutionType === "replacement" ? "🔄 Replacement" :
                                    item.data.tlResolutionType === "apology" ? "✉ Apology" :
@@ -723,8 +715,8 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
 
                         {/* Dynamic TL Resolution form rendering if current user is TL or operations */}
                         {activeComplaintHandlingId === item.data.id && isTLOreSupport && (
-                          <div className="p-5 bg-rose-500/[0.02] border border-rose-500/20 rounded-xl space-y-4 shadow text-left w-full mt-1">
-                            <p className="text-xs font-black text-rose-400 uppercase tracking-widest flex items-center gap-1.5">
+                          <div className="p-5 bg-rose-500/[0.02] border border-rose-500/20 rounded-xl space-y-4 text-left w-full mt-1">
+                            <p className="text-xs font-bold text-rose-400 uppercase tracking-widest flex items-center gap-1.5">
                               <PenTool className="w-3.5 h-3.5" /> TL Resolution Panel
                             </p>
 
@@ -745,11 +737,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                                     key={opt.value}
                                     type="button"
                                     onClick={() => setTlComplaintResolutionType(opt.value)}
-                                    className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all text-left cursor-pointer ${
-                                      tlComplaintResolutionType === opt.value
-                                        ? "bg-rose-500/20 border-rose-500/40 text-rose-300 animate-fade-in"
-                                        : "bg-transparent border-white/10 text-slate-400 hover:border-white/20"
-                                    }`}
+                                    className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all text-left cursor-pointer ${ tlComplaintResolutionType === opt.value ? "bg-rose-500/20 border-rose-500/40 text-rose-300 animate-fade-in" : "bg-transparent border-white/10 text-slate-400 hover:border-white/20" }`}
                                   >
                                     {opt.label}
                                   </button>
@@ -832,7 +820,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                                 setActiveComplaintHandlingId(item.data.id);
                                 setTlComplaintComment("");
                               }}
-                              className="px-4 py-2 bg-amber-600 hover:brightness-110 text-slate-950 font-black text-xs rounded-xl shadow-sm cursor-pointer"
+                              className="px-4 py-2 bg-amber-600 hover:brightness-110 text-slate-950 font-bold text-xs rounded-xl cursor-pointer"
                             >
                               Reply & Review
                             </button>

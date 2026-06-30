@@ -13,7 +13,7 @@ export const InquiryRepliesViewer: React.FC<InquiryRepliesViewerProps> = ({ inqu
   if (!hasLegacyAnswer && !hasReplies) return null;
 
   return (
-    <div className="mt-4 p-4 bg-transparent border border-emerald-500/15 rounded-xl space-y-4 text-left shadow-sm">
+    <div className="mt-4 p-4 bg-transparent border border-emerald-500/15 rounded-xl space-y-4 text-left">
       <div className="flex items-center gap-2 pb-2.5 border-b border-emerald-500/10">
         <div className="p-1.5 bg-emerald-500/10 text-emerald-400 rounded-xl">
           <CheckCircle2 className="w-4 h-4" />
@@ -31,7 +31,7 @@ export const InquiryRepliesViewer: React.FC<InquiryRepliesViewerProps> = ({ inqu
             return (
               <div key={reply.id || idx} className="relative group text-left animate-fade-in font-sans">
                 {/* Timeline Dot */}
-                <div className={`absolute -left-[33px] top-1 rounded-full w-6 h-6 flex items-center justify-center border shadow-sm ${isTL ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'}`}>
+                <div className={`absolute -left-[33px] top-1 rounded-full w-6 h-6 flex items-center justify-center border shadow-sm-sm ${isTL ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'}`}>
                   {isTL ? <Shield className="w-3 h-3" /> : <MessageSquare className="w-3 h-3" />}
                 </div>
 
@@ -39,11 +39,11 @@ export const InquiryRepliesViewer: React.FC<InquiryRepliesViewerProps> = ({ inqu
                   <div className="flex justify-between items-center gap-2 flex-wrap">
                     <div className="flex items-center gap-1.5">
                       <span className="text-xs font-bold text-slate-200">{reply.senderName}</span>
-                      <span className={`text-xs font-extrabold uppercase tracking-widest px-1.5 py-0.2 rounded border ${isTL ? 'text-amber-400 bg-amber-500/5 border-amber-500/20' : 'text-emerald-400 bg-emerald-500/5 border-emerald-500/20'}`}>
+                      <span className={`text-xs font-bold uppercase tracking-widest px-1.5 py-0.2 rounded border ${isTL ? 'text-amber-400 bg-amber-500/5 border-amber-500/20' : 'text-emerald-400 bg-emerald-500/5 border-emerald-500/20'}`}>
                         {reply.authorRole || "Leader"}
                       </span>
                     </div>
-                    <span className="text-xs text-slate-500 font-mono flex items-center gap-1">
+                    <span className="text-xs text-slate-500 font-sans flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       {new Date(reply.createdAt).toLocaleString()}
                     </span>
@@ -69,7 +69,7 @@ export const InquiryRepliesViewer: React.FC<InquiryRepliesViewerProps> = ({ inqu
           /* Legacy single answer fallback styled beautifully */
           <div className="relative group text-left animate-fade-in font-sans">
             {/* Timeline Dot */}
-            <div className="absolute -left-[33px] top-1 rounded-full w-6 h-6 flex items-center justify-center border shadow-sm bg-emerald-500/10 border-emerald-500/30 text-emerald-400">
+            <div className="absolute -left-[33px] top-1 rounded-full w-6 h-6 flex items-center justify-center border bg-emerald-500/10 border-emerald-500/30 text-emerald-400">
               <Shield className="w-3 h-3" />
             </div>
 
@@ -77,12 +77,12 @@ export const InquiryRepliesViewer: React.FC<InquiryRepliesViewerProps> = ({ inqu
               <div className="flex justify-between items-center gap-2">
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-bold text-slate-200">{inquiry.answeredBy || "Leader"}</span>
-                  <span className="text-xs font-extrabold uppercase tracking-widest px-1.5 py-0.2 rounded border text-emerald-400 bg-emerald-500/5 border-emerald-500/20">
+                  <span className="text-xs font-bold uppercase tracking-widest px-1.5 py-0.2 rounded border text-emerald-400 bg-emerald-500/5 border-emerald-500/20">
                     TEAM LEADER
                   </span>
                 </div>
                 {inquiry.answeredAt && (
-                  <span className="text-xs text-slate-500 font-mono flex items-center gap-1">
+                  <span className="text-xs text-slate-500 font-sans flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     {new Date(inquiry.answeredAt).toLocaleString()}
                   </span>

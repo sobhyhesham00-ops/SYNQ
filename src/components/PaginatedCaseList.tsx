@@ -128,10 +128,10 @@ export function PaginatedCaseList<T>({
   };
 
   return (
-    <div className="bg-white/[0.04] p-0 rounded-2xl shadow overflow-hidden border border-slate-700/60 w-full flex flex-col">
+    <div className="bg-white/[0.04] p-0 rounded-2xl overflow-hidden border border-slate-700/60 w-full flex flex-col">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-700/60 px-5 py-4 bg-transparent gap-3 flex-wrap">
         <div>
-          <h3 className="text-base font-bold text-slate-100 font-display flex items-center gap-2">
+          <h3 className="text-base font-bold text-slate-100 font-sans flex items-center gap-2">
             {icon} {title}
           </h3>
           <p className="text-xs text-slate-400 mt-1">
@@ -151,7 +151,7 @@ export function PaginatedCaseList<T>({
                   setCurrentPage(1);
                 }}
                 placeholder="Search by phone..."
-                className="w-full bg-white/[0.06] border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm font-mono text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500/60 focus:bg-black/60 transition-all"
+                className="w-full bg-white/[0.06] border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm font-sans text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500/60 focus:bg-black/60 transition-all"
               />
             </div>
             {phoneFilter && (
@@ -187,11 +187,7 @@ export function PaginatedCaseList<T>({
                     <button
                       key={c}
                       onClick={() => toggleClinic(c)}
-                      className={`px-3 py-1.5 text-xs font-bold rounded-xl border transition-all ${
-                        clinicsFilter.includes(c)
-                          ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300'
-                          : 'bg-white/5 border-white/10 text-slate-400 hover:text-slate-200 hover:bg-white/10'
-                      }`}
+                      className={`px-3 py-1.5 text-xs font-bold rounded-xl border transition-all ${ clinicsFilter.includes(c) ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300' : 'bg-white/5 border-white/10 text-slate-400 hover:text-slate-200 hover:bg-white/10' }`}
                     >
                       {c.replace('_', ' ')}
                     </button>

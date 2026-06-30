@@ -51,7 +51,7 @@ export const FilterPresetBar: React.FC<FilterPresetBarProps> = ({
             <ChevronDown className="w-3 h-3" />
           </button>
           {open && (
-            <div className="absolute top-full mt-1 left-0 z-50 bg-[#1a1a22] border border-white/10 rounded-xl shadow min-w-[200px] overflow-hidden">
+            <div className="absolute top-full mt-1 left-0 z-50 bg-[#1a1a22] border border-white/10 rounded-xl shadow-sm min-w-[200px] overflow-hidden">
               {tabPresets.map(p => (
                 <div
                   key={p.id}

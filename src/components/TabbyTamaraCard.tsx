@@ -128,7 +128,7 @@ const ProviderGlowBadge = ({ platform, className = "" }: any) => {
 
   return (
     <span
-      className={`px-3 py-1.5 rounded-xl text-xs font-black tracking-widest uppercase border bg-gradient-to-r flex items-center gap-1 ${colorClass} ${className}`}
+      className={`px-3 py-1.5 rounded-xl text-xs font-bold tracking-widest uppercase border bg-gradient-to-r flex items-center gap-1 ${colorClass} ${className}`}
     >
       {label}
     </span>
@@ -724,27 +724,23 @@ export const TabbyTamaraCard = ({
   const isContacted = req.customerContacted === "contacted";
 
   let borderColor =
-    "border-t-slate-500/80 shadow-[0_4px_24px_rgba(15,15,25,0.4)]";
+    "border-t-slate-500/80 ";
   if (req.platform === "tabby")
     borderColor =
-      "border-t-amber-500/80 shadow-[0_4px_24px_rgba(245,158,11,0.03)]";
+      "border-t-amber-500/80 ";
   else if (req.platform === "tamara")
     borderColor =
-      "border-t-rose-500/80 shadow-[0_4px_24px_rgba(244,63,94,0.03)]";
+      "border-t-rose-500/80 ";
   else if (req.platform === "one_time_payment")
     borderColor =
-      "border-t-blue-500/80 shadow-[0_4px_24px_rgba(59,130,246,0.03)]";
+      "border-t-blue-500/80 ";
 
   const pricing = calculateTabbyTamaraPrice(req.priceWithoutTax || 0);
 
   return (
     <div
       id={`request-${req.id}`}
-      className={`p-5 bg-white/[0.04] border border-white/[0.08] rounded-[24px] hover:bg-white/[0.05] hover:border-white/[0.12] transition-all duration-300 relative flex flex-col w-full overflow-hidden shadow-sm ${
-        isExpanded
-          ? "shadow-md ring-1 ring-white/10 space-y-4"
-          : "cursor-pointer hover:shadow-md"
-      }`}
+      className={`p-5 bg-white/[0.04] border border-white/[0.08] rounded-[24px] hover:bg-white/[0.05] hover:border-white/[0.12] transition-all duration-300 relative flex flex-col w-full overflow-hidden -sm ${ isExpanded ? " ring-1 ring-white/10 space-y-4" : "cursor-pointer hover:" }`}
       onClick={() => {
         if (!isExpanded && onToggle) {
           onToggle();
@@ -752,15 +748,7 @@ export const TabbyTamaraCard = ({
       }}
     >
       <div
-        className={`absolute top-0 bottom-0 left-0 w-[5px] ${
-          req.platform === "tabby"
-            ? "bg-amber-500"
-            : req.platform === "tamara"
-              ? "bg-rose-500"
-              : req.platform === "one_time_payment"
-                ? "bg-blue-500"
-                : "bg-slate-700"
-        }`}
+        className={`absolute top-0 bottom-0 left-0 w-[5px] ${ req.platform === "tabby" ? "bg-amber-500" : req.platform === "tamara" ? "bg-rose-500" : req.platform === "one_time_payment" ? "bg-blue-500" : "bg-slate-700" }`}
       />
 
       {/* Unexpanded / Header State */}
@@ -791,18 +779,14 @@ export const TabbyTamaraCard = ({
             <span className="text-xs text-slate-400 lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded font-sans shrink-0">
               {getAgentLOB(req.submittedByName || req.agentName || "")}
             </span>
-            <span className="font-mono text-xs text-slate-500 bg-transparent px-1.5 py-0.5 rounded shrink-0">
+            <span className="font-sans text-xs text-slate-500 bg-transparent px-1.5 py-0.5 rounded shrink-0">
               {formatCaseRef(req.id, "tt_request", req.createdAt, req.caseRef)}
             </span>
-            <span className="text-xs text-slate-500 font-mono shrink-0">
+            <span className="text-xs text-slate-500 font-sans shrink-0">
               {new Date(req.createdAt).toLocaleString()}
             </span>
             <span
-              className={`text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-xl border shrink-0 ${
-                sourceChannel === "call_center"
-                  ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
-                  : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-              }`}
+              className={`text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-xl border shrink-0 ${ sourceChannel === "call_center" ? "bg-blue-500/10 text-blue-400 border-blue-500/20" : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" }`}
             >
               {sourceChannel === "call_center" ? "Call Center" : "Social Media"}
             </span>
@@ -821,7 +805,7 @@ export const TabbyTamaraCard = ({
             {req.clinicName && (
               <>
                 <span className="text-slate-600">•</span>
-                <span className="text-xs sm:text-sm font-black font-sans text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-xl tracking-wide">
+                <span className="text-xs sm:text-sm font-bold font-sans text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-xl tracking-wide">
                   {getClinicLabel(req.clinicName)}
                 </span>
               </>
@@ -829,15 +813,7 @@ export const TabbyTamaraCard = ({
             {req.phoneNumber && <span>• {req.phoneNumber}</span>}
 
             <span
-              className={`text-xs px-2 py-0.5 border rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-2 ${
-                req.platform === "tabby"
-                  ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                  : req.platform === "tamara"
-                    ? "bg-rose-500/10 text-rose-500 border-rose-500/20"
-                    : req.platform === "one_time_payment"
-                      ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
-                      : "bg-slate-500/10 text-slate-400 border-slate-500/20"
-              }`}
+              className={`text-xs px-2 py-0.5 border rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-2 ${ req.platform === "tabby" ? "bg-amber-500/10 text-amber-500 border-amber-500/20" : req.platform === "tamara" ? "bg-rose-500/10 text-rose-500 border-rose-500/20" : req.platform === "one_time_payment" ? "bg-blue-500/10 text-blue-500 border-blue-500/20" : "bg-slate-500/10 text-slate-400 border-slate-500/20" }`}
             >
               💳 {req.platform?.toUpperCase() || "N/A"}
             </span>
@@ -961,13 +937,7 @@ export const TabbyTamaraCard = ({
                   <React.Fragment key={step.label}>
                     <div className="flex flex-col items-center gap-1 w-20 shrink-0">
                       <div
-                        className={`w-6 h-6 rounded-full flex items-center justify-center border transition-all ${
-                          req.status === "rejected" && i === 1
-                            ? "bg-red-500/20 border-red-500 text-red-500"
-                            : step.done
-                              ? "bg-indigo-500 border-indigo-300 shadow-sm shadow-indigo-500/50 text-white"
-                              : "bg-transparent border-slate-800 text-slate-500"
-                        }`}
+                        className={`w-6 h-6 rounded-full flex items-center justify-center border transition-all ${ req.status === "rejected" && i === 1 ? "bg-red-500/20 border-red-500 text-red-500" : step.done ? "bg-indigo-500 border-indigo-300 shadow-sm-sm text-white" : "bg-transparent border-slate-800 text-slate-500" }`}
                       >
                         {req.status === "rejected" && i === 1 ? (
                           <span className="text-xs font-bold">X</span>
@@ -978,26 +948,14 @@ export const TabbyTamaraCard = ({
                         )}
                       </div>
                       <span
-                        className={`text-xs font-bold uppercase tracking-wide whitespace-nowrap text-center ${
-                          req.status === "rejected" && i === 1
-                            ? "text-red-400"
-                            : step.done
-                              ? "text-indigo-400"
-                              : "text-slate-500"
-                        }`}
+                        className={`text-xs font-bold uppercase tracking-wide whitespace-nowrap text-center ${ req.status === "rejected" && i === 1 ? "text-red-400" : step.done ? "text-indigo-400" : "text-slate-500" }`}
                       >
                         {step.label}
                       </span>
                     </div>
                     {i < arr.length - 1 && (
                       <div
-                        className={`flex-1 h-0.5 rounded-full mb-3.5 mx-1 transition-all ${
-                          req.status === "rejected" && i === 1
-                            ? "bg-red-500/20"
-                            : arr[i + 1].done
-                              ? "bg-indigo-500"
-                              : "bg-slate-800"
-                        }`}
+                        className={`flex-1 h-0.5 rounded-full mb-3.5 mx-1 transition-all ${ req.status === "rejected" && i === 1 ? "bg-red-500/20" : arr[i + 1].done ? "bg-indigo-500" : "bg-slate-800" }`}
                       />
                     )}
                   </React.Fragment>
@@ -1162,7 +1120,7 @@ export const TabbyTamaraCard = ({
                             key={index}
                             className="flex flex-col gap-1.5 w-full bg-white/[0.02] p-3 rounded-xl border border-white/5"
                           >
-                            <span className="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-1.5 pl-1">
+                            <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5 pl-1">
                               <span>🔗 Link #{index + 1}</span>
                               <span className="text-slate-500 font-medium normal-case text-xs">
                                 {index === 0
@@ -1212,7 +1170,7 @@ export const TabbyTamaraCard = ({
                       <span className="uppercase tracking-widest">
                         TL Notes ({req.confirmedBy || "System"})
                       </span>
-                      <span className="text-emerald-500/40 font-mono">
+                      <span className="text-emerald-500/40 font-sans">
                         {new Date(
                           req.confirmedAt || req.createdAt,
                         ).toLocaleString(undefined, {
@@ -1299,7 +1257,7 @@ export const TabbyTamaraCard = ({
                         >
                           {fu.senderRole === "tl" ? "" : ""} {fu.senderName}
                         </span>
-                        <span className="text-xs text-slate-500 font-mono">
+                        <span className="text-xs text-slate-500 font-sans">
                           {new Date(fu.createdAt).toLocaleString()}
                         </span>
                       </div>
@@ -1409,7 +1367,7 @@ export const TabbyTamaraCard = ({
                     <span className="uppercase tracking-widest">
                       Rejection Reason ({req.confirmedBy || "System"})
                     </span>
-                    <span className="text-red-500/40 font-mono">
+                    <span className="text-red-500/40 font-sans">
                       {new Date(
                         req.confirmedAt || req.createdAt,
                       ).toLocaleString(undefined, {
@@ -1433,7 +1391,7 @@ export const TabbyTamaraCard = ({
             isTLOreSupport &&
             (req.status === "not_confirmed" || req.status === "confirmed") && (
               <div className="bg-white/[0.04] border-y border-indigo-500/30 p-5 space-y-4">
-                <h4 className="text-xs font-black text-indigo-400 flex items-center gap-2 mb-3 uppercase tracking-widest">
+                <h4 className="text-xs font-bold text-indigo-400 flex items-center gap-2 mb-3 uppercase tracking-widest">
                   <CornerDownRight className="w-4 h-4" /> Processing Panel
                 </h4>
                 <div className="bg-indigo-950/20 border border-indigo-500/20 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 overflow-hidden mb-4">
@@ -1441,7 +1399,7 @@ export const TabbyTamaraCard = ({
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
                       Generate Link For
                     </span>
-                    <span className="text-lg font-black text-white font-mono tracking-tight mt-0.5">
+                    <span className="text-lg font-bold text-white font-sans tracking-tight mt-0.5">
                       {
                         calculateTabbyTamaraPrice(req.priceWithoutTax || 0)
                           .finalPriceFormatted
@@ -1452,7 +1410,7 @@ export const TabbyTamaraCard = ({
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
                       Base Target
                     </span>
-                    <span className="text-sm font-semibold text-slate-300 font-mono mt-0.5">
+                    <span className="text-sm font-semibold text-slate-300 font-sans mt-0.5">
                       {
                         calculateTabbyTamaraPrice(req.priceWithoutTax || 0)
                           .priceBeforeFeeFormatted
@@ -1525,9 +1483,7 @@ export const TabbyTamaraCard = ({
                     />
                   </div>
                   <div
-                    className={`grid grid-cols-1 gap-3 pt-3 border-t border-slate-700/40 ${
-                      req.status === "confirmed" ? "" : "xl:grid-cols-2"
-                    }`}
+                    className={`grid grid-cols-1 gap-3 pt-3 border-t border-slate-700/40 ${ req.status === "confirmed" ? "" : "xl:grid-cols-2" }`}
                   >
                     {req.status !== "confirmed" && (
                       <SlideToConfirm
@@ -1646,7 +1602,7 @@ export const TabbyTamaraCard = ({
             {canClaim && (
               <button
                 onClick={handleClaimRequest}
-                className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl flex items-center gap-1.5 transition-colors font-bold text-xs uppercase tracking-widest shadow-sm shadow-indigo-500/30 ring-1 ring-indigo-500/30"
+                className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl flex items-center gap-1.5 transition-colors font-bold text-xs uppercase tracking-widest shadow-sm ring-1 ring-indigo-500/30"
               >
                 <CheckIcon className="w-3.5 h-3.5" /> Claim Case
               </button>
@@ -1663,7 +1619,7 @@ export const TabbyTamaraCard = ({
                   {req.assignedToName ? "Reassign" : "Assign Agent"}
                 </button>
                 {showAssignDropdown && (
-                  <div className="absolute bottom-full right-0 mb-2 z-50 bg-black/40 border border-white/[0.08] rounded-xl w-72 shadow flex flex-col overflow-hidden">
+                  <div className="absolute bottom-full right-0 mb-2 z-50 bg-black/40 border border-white/[0.08] rounded-xl w-72 shadow-sm flex flex-col overflow-hidden">
                     {/* Header */}
                     <div className="p-2.5 border-b border-white/[0.06] bg-white/[0.04] flex items-center justify-between">
                       <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
@@ -1716,20 +1672,12 @@ export const TabbyTamaraCard = ({
                               key={agentName}
                               onClick={() => handleAssignAgent(agentName)}
                               disabled={isAssigning}
-                              className={`w-full text-left px-2.5 py-1.5 text-xs rounded-xl transition-all flex items-center justify-between font-medium cursor-pointer ${
-                                isSelected
-                                  ? "bg-indigo-500/15 text-indigo-300 font-bold border border-indigo-500/20"
-                                  : "text-slate-300 hover:bg-white/[0.06] hover:text-white"
-                              }`}
+                              className={`w-full text-left px-2.5 py-1.5 text-xs rounded-xl transition-all flex items-center justify-between font-medium cursor-pointer ${ isSelected ? "bg-indigo-500/15 text-indigo-300 font-bold border border-indigo-500/20" : "text-slate-300 hover:bg-white/[0.06] hover:text-white" }`}
                             >
                               <span className="truncate pr-2">{agentName}</span>
                               {lob && (
                                 <span
-                                  className={`shrink-0 text-xs font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider ${
-                                    isChat
-                                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                      : "bg-blue-500/10 text-blue-450 border border-blue-500/20"
-                                  }`}
+                                  className={`shrink-0 text-xs font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${ isChat ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-blue-500/10 text-blue-450 border border-blue-500/20" }`}
                                 >
                                   {lob === "Chat" ? "Chat" : "Call"}
                                 </span>
@@ -1787,7 +1735,7 @@ export const TabbyTamaraCard = ({
                       setTlFintechLinks(req.tlLinks || "");
                     }
                   }}
-                  className={`px-4 py-1.5 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center gap-1.5 transition-all ${activeFintechHandlingId === req.id ? "bg-slate-700 text-white shadow-inner" : "bg-indigo-600 text-white hover:bg-indigo-500 shadow-sm shadow-indigo-500/30 ring-1 ring-indigo-500/30"}`}
+                  className={`px-4 py-1.5 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center gap-1.5 transition-all ${activeFintechHandlingId === req.id ? "bg-slate-700 text-white " : "bg-indigo-600 text-white hover:bg-indigo-500 shadow-sm-sm ring-1 ring-indigo-500/30"}`}
                 >
                   <PenTool className="w-3.5 h-3.5" />{" "}
                   {activeFintechHandlingId === req.id
@@ -1810,7 +1758,7 @@ export const TabbyTamaraCard = ({
               workflowStatus !== "sent_to_partner" && (
                 <button
                   onClick={() => setIsCrmMaterialsMode(!isCrmMaterialsMode)}
-                  className={`px-4 py-1.5 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center gap-1.5 transition-all ${isCrmMaterialsMode ? "bg-slate-700 text-white shadow-inner" : "bg-emerald-600 text-white hover:bg-emerald-500 shadow-sm shadow-emerald-500/30 ring-1 ring-emerald-505/30"}`}
+                  className={`px-4 py-1.5 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center gap-1.5 transition-all ${isCrmMaterialsMode ? "bg-slate-700 text-white " : "bg-emerald-600 text-white hover:bg-emerald-500 shadow-sm-sm ring-1 ring-emerald-505/30"}`}
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />{" "}
                   <span className="hidden sm:inline">
@@ -1825,7 +1773,7 @@ export const TabbyTamaraCard = ({
               workflowStatus !== "sent_to_partner" && (
                 <button
                   onClick={() => setShowPartnerPanel(!showPartnerPanel)}
-                  className={`px-4 py-1.5 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center gap-1.5 transition-all ${showPartnerPanel ? "bg-slate-700 text-white shadow-inner" : "bg-gradient-to-r from-indigo-600 to-indigo-700 text-white hover:from-indigo-500 hover:to-indigo-600 shadow-sm shadow-indigo-500/30"}`}
+                  className={`px-4 py-1.5 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center gap-1.5 transition-all ${showPartnerPanel ? "bg-slate-700 text-white " : "bg-gradient-to-r from-indigo-600 to-indigo-700 text-white hover:from-indigo-500 hover:to-indigo-600 -sm "}`}
                 >
                   <ExternalLink className="w-3.5 h-3.5" />{" "}
                   <span className="hidden sm:inline">
@@ -1973,7 +1921,7 @@ export const TabbyTamaraCard = ({
                         );
                       }
                     }}
-                    className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-emerald-500/20 uppercase tracking-widest flex items-center gap-2"
+                    className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold transition-all shadow-sm uppercase tracking-widest flex items-center gap-2"
                   >
                     {isClientIdUploading || isPaymentProofUploading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -2031,7 +1979,7 @@ export const TabbyTamaraCard = ({
                   <button
                     disabled={isPartnerUploading || isPartnerSubmitting}
                     onClick={handleSendToPartner}
-                    className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-indigo-500/20 uppercase tracking-widest flex items-center gap-2"
+                    className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold transition-all shadow-sm uppercase tracking-widest flex items-center gap-2"
                   >
                     {isPartnerUploading || isPartnerSubmitting ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -2059,7 +2007,7 @@ export const TabbyTamaraCard = ({
 
           {/* Case Activity Audit Trail */}
           <div className="bg-white/[0.02] p-5 border-t border-slate-700/40 space-y-2 text-left">
-            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-display">
+            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-sans">
               Case Activity Timeline
             </h4>
             <CaseTimeline entityType="tt_request" entityId={req.id} />

@@ -128,7 +128,7 @@ export const DataVault: React.FC<DataVaultProps> = ({ userName }) => {
         <button
           onClick={handleBackup}
           disabled={isExporting}
-          className="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm flex items-center justify-center gap-3 shadow shadow-indigo-500/20 transition-all active:scale-[0.98] disabled:opacity-50"
+          className="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm flex items-center justify-center gap-3 shadow-sm transition-all active:scale-[0.98] disabled:opacity-50"
         >
           {isExporting ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
           {isExporting ? 'Generating Local Archive...' : 'Download Full Local Backup'}

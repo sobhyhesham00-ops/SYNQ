@@ -54,7 +54,7 @@ export const CaseTimeline: React.FC<CaseTimelineProps> = ({ entityType, entityId
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs text-slate-200 leading-snug">{ev.summary}</p>
-              <p className="text-xs text-slate-500 font-mono mt-0.5">
+              <p className="text-xs text-slate-500 font-sans mt-0.5">
                 {new Date(ev.createdAt).toLocaleString()} · {ev.actorRole}
               </p>
             </div>

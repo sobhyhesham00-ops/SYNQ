@@ -58,7 +58,7 @@ export const CaseConversation: React.FC<CaseConversationProps> = ({
         <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Conversation History</h3>
       </div>
 
-      <div className="bg-transparent border border-white/5 rounded-xl p-1 shadow-inner md:p-2">
+      <div className="bg-transparent border border-white/5 rounded-xl p-1 md:p-2">
         <RequestReplyThread 
           request={caseData.raw}
           currentUser={currentUser}

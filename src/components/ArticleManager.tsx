@@ -160,7 +160,7 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
   };
 
   return (
-    <div className="flex h-[calc(100vh-120px)] w-full max-w-[1300px] mx-auto bg-white/[0.04] border border-white/5 rounded-2xl overflow-hidden shadow">
+    <div className="flex h-[calc(100vh-120px)] w-full max-w-[1300px] mx-auto bg-white/[0.04] border border-white/5 rounded-2xl overflow-hidden">
       {/* Sidebar Tabs */}
       <div className="w-1/4 min-w-[250px] border-r border-white/10 p-4 flex flex-col gap-2 bg-slate-900/40">
         <div className="flex items-center justify-between mb-4">
@@ -180,11 +180,7 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
             <button
               key={article.id}
               onClick={() => { setSelectedArticleId(article.id); setIsEditing(false); }}
-              className={`text-left px-4 py-3 rounded-xl transition-all font-medium text-sm border ${
-                selectedArticleId === article.id && !isEditing
-                  ? 'bg-indigo-500/20 text-indigo-100 border-indigo-500/30 shadow-sm'
-                  : 'bg-white/5 text-slate-400 border-transparent hover:bg-white/10 hover:text-slate-200'
-              }`}
+              className={`text-left px-4 py-3 rounded-xl transition-all font-medium text-sm border ${ selectedArticleId === article.id && !isEditing ? 'bg-indigo-500/20 text-indigo-100 border-indigo-500/30 shadow-sm-sm' : 'bg-white/5 text-slate-400 border-transparent hover:bg-white/10 hover:text-slate-200' }`}
             >
               <div className="line-clamp-2">{article.title}</div>
             </button>
@@ -240,7 +236,7 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
                   </div>
                 ))}
                 
-                <label className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 rounded-xl px-4 py-2 text-xs font-bold cursor-pointer transition-colors shadow">
+                <label className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 rounded-xl px-4 py-2 text-xs font-bold cursor-pointer transition-colors">
                   <Paperclip className="w-3 h-3" /> Upload File
                   <input type="file" className="hidden" onChange={handleFileUpload} />
                 </label>
@@ -253,13 +249,13 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
                   setIsEditing(false);
                   if (selectedArticleId === 'new') setSelectedArticleId(articles[0]?.id || null);
                 }}
-                className="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-slate-700 hover:bg-slate-600 shadow transition-colors"
+                className="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-slate-700 hover:bg-slate-600 transition-colors"
               >
                 Cancel
               </button>
               <button 
                 onClick={handleSave}
-                className="px-5 py-2.5 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors"
+                className="px-5 py-2.5 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-colors"
               >
                 Save
               </button>
@@ -270,21 +266,21 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
           <div className="h-full overflow-y-auto max-w-[800px] mx-auto p-2 scrollbar-thin">
             <div className="flex justify-between items-start mb-8 pt-4">
               <div>
-                <h1 className="text-3xl font-display font-bold text-slate-100 mb-2 leading-tight">{selectedArticle.title}</h1>
+                <h1 className="text-3xl font-sans font-bold text-slate-100 mb-2 leading-tight">{selectedArticle.title}</h1>
                 <p className="text-xs text-slate-400 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                   Published by <span className="font-bold text-slate-200">{selectedArticle.createdBy}</span> on {new Date(selectedArticle.createdAt).toLocaleDateString()}
                 </p>
               </div>
               {isTL && (
                 <div className="flex gap-2">
                   <button onClick={startEdit} className="text-xs font-bold bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 border border-indigo-500/30 px-4 py-2 rounded-xl transition-colors shadow-sm">Edit</button>
-                  <button onClick={() => handleDelete(selectedArticle.id)} className="text-xs font-bold bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 border border-rose-500/30 px-4 py-2 rounded-xl transition-colors shadow-sm">Delete</button>
+                  <button onClick={() => handleDelete(selectedArticle.id)} className="text-xs font-bold bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 border border-rose-500/30 px-4 py-2 rounded-xl transition-colors">Delete</button>
                 </div>
               )}
             </div>
             
-            <div className="bg-slate-900/60 border border-white/5 rounded-2xl p-6 mb-8 shadow-inner">
+            <div className="bg-slate-900/60 border border-white/5 rounded-2xl p-6 mb-8">
               <div className="prose prose-invert max-w-none text-slate-300 text-[15px] whitespace-pre-wrap leading-relaxed font-sans">
                 {selectedArticle.content || <span className="text-slate-500 italic">No notes provided for this entry.</span>}
               </div>
@@ -299,7 +295,7 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
                   {selectedArticle.attachments.map((att, i) => (
                     <div key={i} className="bg-slate-800/40 border border-white/10 rounded-xl p-4 flex justify-between items-center group hover:bg-slate-800/80 transition-colors">
                       <div className="flex items-center gap-4 overflow-hidden">
-                        <div className="bg-indigo-500/20 p-2.5 rounded-xl text-indigo-400 shadow-sm shrink-0">
+                        <div className="bg-indigo-500/20 p-2.5 rounded-xl text-indigo-400 shrink-0">
                           <File className="w-5 h-5" />
                         </div>
                         <div className="truncate">

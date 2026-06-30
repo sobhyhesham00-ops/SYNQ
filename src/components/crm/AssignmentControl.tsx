@@ -112,7 +112,7 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
             {currentAssigneeName || "Unassigned Queue"}
           </p>
           {currentAssigneeName && getAgentLOB(currentAssigneeName) && (
-            <p className="text-xs text-slate-500 font-mono mt-0.5">
+            <p className="text-xs text-slate-500 font-sans mt-0.5">
               LOB: {getAgentLOB(currentAssigneeName)}
             </p>
           )}
@@ -138,14 +138,14 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
               disabled={loading}
-              className="w-full bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 font-sans font-black text-xs uppercase tracking-wider py-1.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 font-sans font-bold text-xs uppercase tracking-wider py-1.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <User className="w-3 h-3" />
               {currentAssigneeName ? "Reassign" : "Assign"}
             </button>
 
             {dropdownOpen && (
-              <div className="absolute top-full mt-1.5 right-0 z-50 bg-slate-950 border border-slate-700/60 rounded-xl w-64 shadow flex flex-col overflow-hidden">
+              <div className="absolute top-full mt-1.5 right-0 z-50 bg-slate-950 border border-slate-700/60 rounded-xl w-64 shadow-sm flex flex-col overflow-hidden">
                 {/* Header */}
                 <div className="p-2.5 border-b border-slate-700/40 bg-[#18181f] flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Assign Agent</span>
@@ -193,19 +193,11 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
                         <button
                           key={agent}
                           onClick={() => handleAssignSelect(agent)}
-                          className={`w-full text-left px-2.5 py-1.5 text-xs rounded-xl transition-all flex items-center justify-between font-medium cursor-pointer ${
-                            isSelected
-                              ? "bg-indigo-500/15 text-indigo-300 font-bold border border-indigo-500/20"
-                              : "text-slate-300 hover:bg-white/[0.06] hover:text-white"
-                          }`}
+                          className={`w-full text-left px-2.5 py-1.5 text-xs rounded-xl transition-all flex items-center justify-between font-medium cursor-pointer ${ isSelected ? "bg-indigo-500/15 text-indigo-300 font-bold border border-indigo-500/20" : "text-slate-300 hover:bg-white/[0.06] hover:text-white" }`}
                         >
                           <span className="truncate pr-2">{agent}</span>
                           {lob && (
-                            <span className={`shrink-0 text-xs font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider ${
-                              isChat 
-                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
-                                : "bg-blue-500/10 text-blue-450 border border-blue-500/20"
-                            }`}>
+                            <span className={`shrink-0 text-xs font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${ isChat ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-blue-500/10 text-blue-450 border border-blue-500/20" }`}>
                               {lob === 'Chat' ? 'Chat' : 'Call'}
                             </span>
                           )}

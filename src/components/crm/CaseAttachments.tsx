@@ -91,7 +91,7 @@ export const CaseAttachments: React.FC<CaseAttachmentsProps> = ({ caseData }) =>
                     download={file.name}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-3 w-full bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-wider py-1 rounded-xl text-center flex items-center justify-center gap-1.5 transition-all"
+                    className="mt-3 w-full bg-white/5 hover:bg-white/10 text-slate-300 font-bold text-xs uppercase tracking-wider py-1 rounded-xl text-center flex items-center justify-center gap-1.5 transition-all"
                   >
                     <Download className="w-3 h-3" /> View / Download
                   </a>
@@ -121,7 +121,7 @@ export const CaseAttachments: React.FC<CaseAttachmentsProps> = ({ caseData }) =>
                 href={link.startsWith('http') ? link : `https://${link}`}
                 target="_blank"
                 rel="noreferrer"
-                className="block bg-transparent border border-white/5 hover:border-indigo-500/30 rounded-xl p-2.5 text-xs text-indigo-400 hover:text-indigo-300 transition-all font-mono truncate"
+                className="block bg-transparent border border-white/5 hover:border-indigo-500/30 rounded-xl p-2.5 text-xs text-indigo-400 hover:text-indigo-300 transition-all font-sans truncate"
               >
                 🔗 {link}
               </a>

@@ -165,7 +165,7 @@ const EditModalContent = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white/[0.04] border border-white/10 p-6 rounded-2xl w-full max-w-md shadow relative max-h-[90vh] overflow-y-auto">
+      <div className="bg-white/[0.04] border border-white/10 p-6 rounded-2xl w-full max-w-md relative max-h-[90vh] overflow-y-auto">
         <button
           onClick={() => setEditingItem(null)}
           className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors cursor-pointer"
@@ -260,7 +260,7 @@ const EditModalContent = ({
                 className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
               />
               {data.priceWithoutTax && calculateTabbyTamaraPrice(data.priceWithoutTax).valid && (
-                <div className="mt-2 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-xs space-y-1 font-mono">
+                <div className="mt-2 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-xs space-y-1 font-sans">
                   <p className="text-indigo-300 font-bold mb-1.5 pb-1.5 border-b border-indigo-500/20">
                     5% will be added. Final amount: {calculateTabbyTamaraPrice(data.priceWithoutTax).finalPriceFormatted}
                   </p>
@@ -592,7 +592,7 @@ const EditModalContent = ({
             <button
               type="submit"
               disabled={isAgentUploading || isTlUploading}
-              className={`px-6 py-2 ${isAgentUploading || isTlUploading ? 'bg-emerald-500/50 cursor-not-allowed text-slate-500' : 'bg-emerald-600 hover:brightness-110 text-slate-900 cursor-pointer'} rounded-xl text-sm font-black transition-all flex items-center gap-2`}
+              className={`px-6 py-2 ${isAgentUploading || isTlUploading ? 'bg-emerald-500/50 cursor-not-allowed text-slate-500' : 'bg-emerald-600 hover:brightness-110 text-slate-900 cursor-pointer'} rounded-xl text-sm font-bold transition-all flex items-center gap-2`}
             >
               {isAgentUploading ? 'Uploading Agent files...' : isTlUploading ? 'Uploading TL files...' : 'Save Changes'}
             </button>

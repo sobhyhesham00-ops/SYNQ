@@ -225,7 +225,7 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
   const handlerLabel = req.tlName || req.actionBy || req.handledBy;
 
   return (
-    <div id={`request-${req.id}`} className="flex flex-col bg-white/[0.03] border border-white/10 rounded-xl overflow-hidden shadow-sm transition-all hover:border-white/20">
+    <div id={`request-${req.id}`} className="flex flex-col bg-white/[0.03] border border-white/10 rounded-xl overflow-hidden transition-all hover:border-white/20">
       
       {/* Header */}
       <div className="p-4 border-b border-white/5 bg-transparent flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -236,7 +236,7 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
           </div>
           <div className="text-[15px] font-semibold text-slate-100 flex items-center gap-2">
             {title}
-            <span className="text-sm text-slate-500 font-mono px-2 py-0.5 bg-transparent rounded">
+            <span className="text-sm text-slate-500 font-sans px-2 py-0.5 bg-transparent rounded">
               {formatCaseRef(req.id, req._cType, req.createdAt, req.caseRef)}
             </span>
           </div>
@@ -459,7 +459,7 @@ export const AllAgentSubmissionsLog = ({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold text-slate-100 font-display text-left">
+        <h2 className="text-3xl font-bold text-slate-100 font-sans text-left">
           Agent Submissions Log (Management)
         </h2>
         <p className="text-slate-400 text-sm text-left mt-1">
@@ -469,29 +469,29 @@ export const AllAgentSubmissionsLog = ({
 
       {/* 4-Stat Summary Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white/[0.04] border border-slate-800 p-4 rounded-xl flex flex-col items-center justify-center shadow-sm">
-          <span className="text-2xl font-black text-slate-100">{allRequests.length}</span>
+        <div className="bg-white/[0.04] border border-slate-800 p-4 rounded-xl flex flex-col items-center justify-center">
+          <span className="text-2xl font-bold text-slate-100">{allRequests.length}</span>
           <span className="text-xs text-slate-500 uppercase tracking-widest font-bold mt-1">Total Lifetime</span>
         </div>
-        <div className="bg-white/[0.04] border border-indigo-800 p-4 rounded-xl flex flex-col items-center justify-center shadow-sm">
-          <span className="text-2xl font-black text-indigo-400">{filtered.length}</span>
+        <div className="bg-white/[0.04] border border-indigo-800 p-4 rounded-xl flex flex-col items-center justify-center">
+          <span className="text-2xl font-bold text-indigo-400">{filtered.length}</span>
           <span className="text-xs text-indigo-500/70 uppercase tracking-widest font-bold mt-1">Matched Filtered</span>
         </div>
-        <div className="bg-white/[0.04] border border-amber-900/40 p-4 rounded-xl flex flex-col items-center justify-center shadow-sm">
-          <span className="text-2xl font-black text-amber-400">
+        <div className="bg-white/[0.04] border border-amber-900/40 p-4 rounded-xl flex flex-col items-center justify-center">
+          <span className="text-2xl font-bold text-amber-400">
             {filtered.filter(r => ['pending','pending_partner','submitted','not_confirmed','pending_tl'].includes(r.status)).length}
           </span>
           <span className="text-xs text-amber-500/70 uppercase tracking-widest font-bold mt-1">Pending Filtered</span>
         </div>
-        <div className="bg-white/[0.04] border border-emerald-900/40 p-4 rounded-xl flex flex-col items-center justify-center shadow-sm">
-          <span className="text-2xl font-black text-emerald-400">
+        <div className="bg-white/[0.04] border border-emerald-900/40 p-4 rounded-xl flex flex-col items-center justify-center">
+          <span className="text-2xl font-bold text-emerald-400">
             {filtered.filter(r => ['approved','answered','confirmed','closed','contacted'].includes(r.status)).length}
           </span>
           <span className="text-xs text-emerald-500/70 uppercase tracking-widest font-bold mt-1">Resolved Filtered</span>
         </div>
       </div>
 
-      <div className="bg-slate-950 border border-white/5 rounded-2xl shadow p-5 space-y-4">
+      <div className="bg-slate-950 border border-white/5 rounded-2xl p-5 space-y-4">
         <div className='flex justify-between items-center flex-wrap gap-2 mb-4 pb-4 border-b border-white/5'>
           <div className="flex gap-2 flex-wrap">
             <div className='flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-xl text-xs uppercase tracking-wider font-bold text-slate-300'>
@@ -549,7 +549,7 @@ export const AllAgentSubmissionsLog = ({
               ))}
             </select>
             {filterClinics.length > 0 && (
-              <div className="absolute top-full left-0 z-50 mt-1 flex flex-wrap gap-1 bg-slate-800 p-2 rounded-xl border border-slate-700 shadow w-64">
+              <div className="absolute top-full left-0 z-50 mt-1 flex flex-wrap gap-1 bg-slate-800 p-2 rounded-xl border border-slate-700 shadow-sm w-64">
                 <span className="w-full text-xs text-slate-400 font-bold mb-1 flex justify-between">
                   Selected Clinics:
                   <button onClick={() => setFilterClinics([])} className="text-rose-400 hover:text-rose-300">Clear</button>

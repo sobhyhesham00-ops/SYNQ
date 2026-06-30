@@ -71,7 +71,7 @@ export const NotificationDrawer = ({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-slate-950 border-l border-white/10 shadow z-[1000] flex flex-col"
+            className="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-slate-950 border-l border-white/10 z-[1000] flex flex-col"
           >
             <div className="flex items-center justify-between p-6 border-b border-white/10 bg-slate-900">
               <div className="flex items-center gap-3">
@@ -79,7 +79,7 @@ export const NotificationDrawer = ({
                   <Bell className="w-5 h-5 text-indigo-400" />
                 </div>
                 <div>
-                  <h3 className="font-display font-bold text-slate-100 uppercase tracking-widest text-sm">Notifications</h3>
+                  <h3 className="font-sans font-bold text-slate-100 uppercase tracking-widest text-sm">Notifications</h3>
                   <p className="text-xs text-slate-400">{unreadCount} unread message{unreadCount !== 1 ? 's' : ''}</p>
                 </div>
               </div>
@@ -105,11 +105,7 @@ export const NotificationDrawer = ({
                 <button
                   key={item.value}
                   onClick={() => setTypeFilter(item.value)}
-                  className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border transition-all shrink-0 cursor-pointer ${
-                    typeFilter === item.value
-                      ? 'bg-indigo-950 text-indigo-300 border-indigo-500/30'
-                      : 'bg-white/5 text-slate-400 border-transparent hover:bg-white/10 hover:text-slate-200'
-                  }`}
+                  className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border transition-all shrink-0 cursor-pointer ${ typeFilter === item.value ? 'bg-indigo-950 text-indigo-300 border-indigo-500/30' : 'bg-white/5 text-slate-400 border-transparent hover:bg-white/10 hover:text-slate-200' }`}
                 >
                   {item.label}
                 </button>
@@ -132,11 +128,7 @@ export const NotificationDrawer = ({
                       <button 
                         onClick={handleMarkAllNotifsAsRead}
                         disabled={isMarkingAll || unreadCount === 0}
-                        className={`text-xs uppercase tracking-wider font-bold transition-colors ${
-                          isMarkingAll || unreadCount === 0
-                            ? 'text-slate-500 cursor-not-allowed opacity-50'
-                            : 'text-indigo-400 hover:text-indigo-300 cursor-pointer'
-                        }`}
+                        className={`text-xs uppercase tracking-wider font-bold transition-colors ${ isMarkingAll || unreadCount === 0 ? 'text-slate-500 cursor-not-allowed opacity-50' : 'text-indigo-400 hover:text-indigo-300 cursor-pointer' }`}
                       >
                         {isMarkingAll ? "Marking..." : "Mark all as read"}
                       </button>
@@ -246,11 +238,11 @@ export const NotificationDrawer = ({
                           <p className="text-xs text-slate-300 font-sans leading-relaxed">
                             {notif.message}
                           </p>
-                          <p className="text-xs text-slate-500 font-mono mt-3">
+                          <p className="text-xs text-slate-500 font-sans mt-3">
                             {new Date(notif.createdAt).toLocaleString()}
                           </p>
                           {isUnread && (
-                            <div className="absolute right-4 bottom-4 w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
+                            <div className="absolute right-4 bottom-4 w-2 h-2 rounded-full bg-indigo-500" />
                           )}
                         </div>
                       );

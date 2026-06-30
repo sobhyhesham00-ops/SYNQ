@@ -75,7 +75,7 @@ const ROLE_OPTIONS = [
 const getRoleBadge = (role: string) => {
   const r = ROLE_OPTIONS.find(o => o.value === role) || ROLE_OPTIONS[0];
   return (
-    <span className={`text-xs px-2 py-0.5 rounded-full border font-black uppercase tracking-wider ${r.color}`}>
+    <span className={`text-xs px-2 py-0.5 rounded-full border font-bold uppercase tracking-wider ${r.color}`}>
       {r.label}
     </span>
   );
@@ -416,9 +416,9 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
             <Terminal className="w-5 h-5 text-rose-400" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-slate-100 font-display tracking-tight flex items-center gap-2">
+            <h2 className="text-xl font-bold text-slate-100 font-sans tracking-tight flex items-center gap-2">
               Admin Console
-              <span className="text-xs font-black px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 uppercase tracking-widest">h.sobhy only</span>
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 uppercase tracking-widest">h.sobhy only</span>
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">User directory · Access control · Security · System ops</p>
           </div>
@@ -447,7 +447,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
           <div key={s.label} className="bg-white/[0.04] border border-white/5 rounded-xl p-3 flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center shrink-0">{s.icon}</div>
             <div>
-              <p className={`text-xl font-black ${s.color}`}>{s.value}</p>
+              <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
               <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">{s.label}</p>
             </div>
           </div>
@@ -499,7 +499,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                             key={r.value}
                             type="button"
                             onClick={() => setNewUserRole(r.value)}
-                            className={`py-1.5 rounded-xl text-xs font-black uppercase tracking-wider border transition-all ${newUserRole === r.value ? r.color : 'bg-white/5 text-slate-500 border-transparent hover:bg-white/10'}`}
+                            className={`py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all ${newUserRole === r.value ? r.color : 'bg-white/5 text-slate-500 border-transparent hover:bg-white/10'}`}
                           >
                             {r.label}
                           </button>
@@ -536,7 +536,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                       </div>
                     </div>
                     <button type="submit"
-                      className="w-full py-2 bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/25 text-cyan-300 font-black text-xs uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-1.5">
+                      className="w-full py-2 bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/25 text-cyan-300 font-bold text-xs uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-1.5">
                       <UserPlus className="w-3.5 h-3.5" /> Create Profile
                     </button>
                   </form>
@@ -547,7 +547,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
           {/* Audit log */}
           <div className="bg-white/[0.04] border border-white/5 rounded-2xl p-4 space-y-3">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
               <Clock className="w-3.5 h-3.5 text-indigo-400" /> Recent Actions
             </h3>
             <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
@@ -598,11 +598,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                 <button
                   key={f.v}
                   onClick={() => setRoleFilter(f.v)}
-                  className={`px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all ${
-                    roleFilter === f.v
-                      ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/25'
-                      : 'bg-white/5 text-slate-500 border-transparent hover:bg-white/10 hover:text-slate-300'
-                  }`}
+                  className={`px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all ${ roleFilter === f.v ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/25' : 'bg-white/5 text-slate-500 border-transparent hover:bg-white/10 hover:text-slate-300' }`}
                 >
                   {f.l}
                 </button>
@@ -630,21 +626,12 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
               return (
                 <div
                   key={user.id}
-                  className={`rounded-xl border transition-all overflow-hidden ${
-                    isUserLocked
-                      ? 'bg-rose-950/15 border-rose-500/15'
-                      : 'bg-transparent border-white/5 hover:border-white/10'
-                  }`}
+                  className={`rounded-xl border transition-all overflow-hidden ${ isUserLocked ? 'bg-rose-950/15 border-rose-500/15' : 'bg-transparent border-white/5 hover:border-white/10' }`}
                 >
                   {/* Card header row */}
                   <div className="flex items-center gap-3 px-4 py-3">
                     {/* Avatar */}
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${
-                      user.role === 'tl' ? 'bg-indigo-500/15 text-indigo-300' :
-                      user.role === 'qa' ? 'bg-amber-500/15 text-amber-300' :
-                      user.role === 'director' ? 'bg-fuchsia-500/15 text-fuchsia-300' :
-                      'bg-slate-700/30 text-slate-300'
-                    }`}>
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${ user.role === 'tl' ? 'bg-indigo-500/15 text-indigo-300' : user.role === 'qa' ? 'bg-amber-500/15 text-amber-300' : user.role === 'director' ? 'bg-fuchsia-500/15 text-fuchsia-300' : 'bg-slate-700/30 text-slate-300' }`}>
                       {String(user.name || '').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
                     </div>
 
@@ -658,11 +645,11 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                           <span className="text-xs px-1.5 py-0.5 rounded-full bg-slate-700/40 border border-slate-600/30 text-slate-500 font-bold uppercase tracking-wider">legacy</span>
                         )}
                         {hasPassword
-                          ? <span className="text-xs px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-black flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5" /> PW</span>
-                          : <span className="text-xs px-1.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 font-black flex items-center gap-0.5"><AlertCircle className="w-2.5 h-2.5" /> NO PW</span>
+                          ? <span className="text-xs px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5" /> PW</span>
+                          : <span className="text-xs px-1.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 font-bold flex items-center gap-0.5"><AlertCircle className="w-2.5 h-2.5" /> NO PW</span>
                         }
-                        {isUserLocked && <span className="text-xs px-1.5 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 font-black flex items-center gap-0.5"><Lock className="w-2.5 h-2.5" /> LOCKED</span>}
-                        {failureCount > 0 && <span className="text-xs px-1.5 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 font-black">{failureCount} fails</span>}
+                        {isUserLocked && <span className="text-xs px-1.5 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 font-bold flex items-center gap-0.5"><Lock className="w-2.5 h-2.5" /> LOCKED</span>}
+                        {failureCount > 0 && <span className="text-xs px-1.5 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 font-bold">{failureCount} fails</span>}
                       </div>
                       <p className="text-xs text-slate-500 mt-0.5 font-sans">
                         {user.lob && <span>{normalizeAgentLob(user.lob, user.role)} · </span>}
@@ -699,11 +686,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                       <button
                         onClick={() => handleStartEdit(user)}
                         title="Edit profile"
-                        className={`p-1.5 rounded-xl border transition-all cursor-pointer ${
-                          isExpanded
-                            ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/20'
-                            : 'bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 border-transparent'
-                        }`}
+                        className={`p-1.5 rounded-xl border transition-all cursor-pointer ${ isExpanded ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/20' : 'bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 border-transparent' }`}
                       >
                         <ChevronDown className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                       </button>
@@ -712,13 +695,13 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                         <div className="flex items-center gap-1 bg-rose-500/10 border border-rose-500/20 rounded-xl p-0.5">
                           <button
                             onClick={() => handleDeleteUser(user)}
-                            className="px-2 py-1 bg-rose-500 text-white hover:bg-rose-600 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer"
+                            className="px-2 py-1 bg-rose-500 text-white hover:bg-rose-600 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
                           >
                             Confirm
                           </button>
                           <button
                             onClick={() => setConfirmDeleteId(null)}
-                            className="px-2 py-1 bg-white/5 text-slate-300 hover:bg-white/10 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer"
+                            className="px-2 py-1 bg-white/5 text-slate-300 hover:bg-white/10 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
                           >
                             Cancel
                           </button>
@@ -752,7 +735,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                             </span>
                             <button
                               onClick={() => handleSaveEdit(user)}
-                              className="px-3 py-1 bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                              className="px-3 py-1 bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer"
                             >
                               Save Changes
                             </button>
@@ -767,11 +750,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                                   key={r.value}
                                   type="button"
                                   onClick={() => setEditRole(r.value)}
-                                  className={`py-2 rounded-xl text-xs font-black uppercase tracking-wider border transition-all cursor-pointer ${
-                                    editRole === r.value 
-                                      ? r.color 
-                                      : 'bg-white/5 text-slate-500 border-transparent hover:bg-white/10 hover:text-slate-300'
-                                  }`}
+                                  className={`py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all cursor-pointer ${ editRole === r.value ? r.color : 'bg-white/5 text-slate-500 border-transparent hover:bg-white/10 hover:text-slate-300' }`}
                                 >
                                   {r.label}
                                 </button>
@@ -820,7 +799,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                                     </button>
                                   </div>
                                   <button onClick={() => handleSetPassword(user.name)}
-                                    className="px-3 py-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/20 rounded-xl text-xs font-black uppercase transition-all cursor-pointer">
+                                    className="px-3 py-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/20 rounded-xl text-xs font-bold uppercase transition-all cursor-pointer">
                                     Set PW
                                   </button>
                                   <button onClick={() => { setTargetPasswordChange(null); setNewPasswordValue(''); }}
@@ -852,7 +831,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                                 <>
                                   <span className="text-xs text-rose-300 font-bold">Delete "{user.name}"?</span>
                                   <button onClick={() => handleDeleteUser(user)}
-                                    className="px-2.5 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/20 rounded-xl text-xs font-black transition-all cursor-pointer">
+                                    className="px-2.5 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/20 rounded-xl text-xs font-bold transition-all cursor-pointer">
                                     Confirm
                                   </button>
                                   <button onClick={() => setConfirmDeleteId(null)}
@@ -869,7 +848,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                                 )
                               )}
                               <button onClick={() => handleSaveEdit(user)}
-                                className="px-3 py-1.5 bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/20 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer">
+                                className="px-3 py-1.5 bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/20 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer">
                                 Save Changes
                               </button>
                             </div>

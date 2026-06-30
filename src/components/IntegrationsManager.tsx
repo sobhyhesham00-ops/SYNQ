@@ -71,7 +71,7 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-black text-slate-100 tracking-tight">Connected Integrations</h2>
+        <h2 className="text-2xl font-bold text-slate-100 tracking-tight">Connected Integrations</h2>
         <p className="text-sm text-slate-400">Manage external service connections for enhanced productivity.</p>
       </div>
 
@@ -97,11 +97,11 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-slate-400 font-mono tracking-widest uppercase">Drive & Calendar</span>
                     {token ? (
-                      <span className="flex items-center gap-1 text-xs font-black text-emerald-400 uppercase bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                      <span className="flex items-center gap-1 text-xs font-bold text-emerald-400 uppercase bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                         <CheckCircle2 className="w-2.5 h-2.5" /> Linked
                       </span>
                     ) : (
-                      <span className="flex items-center gap-1 text-xs font-black text-amber-400 uppercase bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                      <span className="flex items-center gap-1 text-xs font-bold text-amber-400 uppercase bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
                         <AlertCircle className="w-2.5 h-2.5" /> Not Connected
                       </span>
                     )}
@@ -138,7 +138,7 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
                 <div className="flex flex-col gap-3">
                   <div className="p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-black">
+                      <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-bold">
                         G
                       </div>
                       <div className="text-xs">
@@ -159,7 +159,7 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
                 <button
                   onClick={handleLinkGoogle}
                   disabled={isLinking}
-                  className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow shadow-indigo-600/20 flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-2xl font-bold text-sm uppercase tracking-widest transition-all shadow-sm flex items-center justify-center gap-2"
                 >
                   {isLinking ? (
                     <RefreshCw className="w-5 h-5 animate-spin" />
@@ -178,7 +178,7 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
         {/* Security & Access Info Card */}
         <div className="space-y-6">
           <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 space-y-4">
-            <h4 className="text-xs font-black text-indigo-300 uppercase tracking-widest flex items-center gap-2">
+            <h4 className="text-xs font-bold text-indigo-300 uppercase tracking-widest flex items-center gap-2">
               <ShieldCheck className="w-4 h-4" /> Security Protocol
             </h4>
             <div className="space-y-3">
@@ -215,14 +215,14 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
             <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-6 space-y-4">
               <div className="flex items-center gap-2 text-rose-400">
                 <ShieldCheck className="w-5 h-5" />
-                <h4 className="text-xs font-black uppercase tracking-widest">Dangerous Zone</h4>
+                <h4 className="text-xs font-bold uppercase tracking-widest">Dangerous Zone</h4>
               </div>
               <p className="text-xs text-slate-400">
                 Admin tool for complete data management. Use with extreme caution.
               </p>
               <button
                 onClick={onReset}
-                className="w-full py-3 bg-rose-500 hover:bg-rose-400 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-sm shadow-rose-500/20 flex items-center justify-center gap-2"
+                className="w-full py-3 bg-rose-500 hover:bg-rose-400 text-white rounded-xl font-bold text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 Reset Full System Data

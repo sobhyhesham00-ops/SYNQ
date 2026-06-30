@@ -112,7 +112,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
     return (
       <div id="case-drawer-empty-placeholder" className="h-full flex flex-col items-center justify-center p-8 bg-[#09090c] rounded-2xl border border-white/5 text-center min-h-[500px]">
         <Layers className="w-12 h-12 text-slate-700 mb-4 animate-pulse" />
-        <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-2">No Case Selected</h3>
+        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">No Case Selected</h3>
         <p className="text-slate-500 text-xs leading-relaxed max-w-xs">
           Select a case from the workspace table to open live tracking details, conversations thread, file attachments, and assignment routing parameters.
         </p>
@@ -382,7 +382,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
   );
 
   return (
-    <div id="case-crm-detail-drawer" className="h-full flex flex-col bg-[#09090c] border border-white/5 rounded-2xl overflow-hidden shadow relative">
+    <div id="case-crm-detail-drawer" className="h-full flex flex-col bg-[#09090c] border border-white/5 rounded-2xl overflow-hidden relative">
       {/* Drawer Header Toolbar */}
       <div className="bg-transparent border-b border-white/5 p-4 flex items-center justify-between z-10 shrink-0">
         <div className="flex flex-col gap-1">
@@ -390,22 +390,13 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
             <span className="text-xs uppercase font-bold tracking-widest text-[#2effc3] bg-[#00e3a5]/5 px-2 py-0.5 rounded-full border border-[#00e3a5]/10 shrink-0">
               {caseData.crmType === 'inquiry' ? 'Inquiry' : caseData.crmType === 'complaint' ? 'Complaint' : caseData.crmType === 'client_comm' ? 'Client Comm' : 'Tabby/Tamara'}
             </span>
-            <h2 className="text-sm font-bold text-slate-100 font-mono">
+            <h2 className="text-sm font-bold text-slate-100 font-sans">
               {caseData.referenceId}
             </h2>
           </div>
           <div className="flex items-center gap-2 mt-1">
             {caseData.status && (
-              <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide inline-block max-w-full truncate
-                ${['submitted', 'not_confirmed', 'awaiting_client_contact'].includes(caseData.status) ? 'bg-amber-500/10 text-amber-500' :
-                  caseData.status === 'tl_reviewing' ? 'bg-blue-500/10 text-blue-400' :
-                  ['sent_to_clinic', 'sent'].includes(caseData.status) ? 'bg-orange-500/10 text-orange-400' :
-                  ['in_progress', 'need_contact'].includes(caseData.status) ? 'bg-purple-500/10 text-purple-400' :
-                  ['answered', 'resolved', 'contacted'].includes(caseData.status) ? 'bg-emerald-500/10 text-emerald-400' :
-                  caseData.status === 'pending_tl' ? 'bg-yellow-500/10 text-yellow-400' :
-                  'bg-slate-500/10 text-slate-400'
-                }
-              `}>
+              <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide inline-block max-w-full truncate ${['submitted', 'not_confirmed', 'awaiting_client_contact'].includes(caseData.status) ? 'bg-amber-500/10 text-amber-500' : caseData.status === 'tl_reviewing' ? 'bg-blue-500/10 text-blue-400' : ['sent_to_clinic', 'sent'].includes(caseData.status) ? 'bg-orange-500/10 text-orange-400' : ['in_progress', 'need_contact'].includes(caseData.status) ? 'bg-purple-500/10 text-purple-400' : ['answered', 'resolved', 'contacted'].includes(caseData.status) ? 'bg-emerald-500/10 text-emerald-400' : caseData.status === 'pending_tl' ? 'bg-yellow-500/10 text-yellow-400' : 'bg-slate-500/10 text-slate-400' }`}>
                 {['submitted', 'not_confirmed', 'awaiting_client_contact'].includes(caseData.status) ? 'New / Pending' :
                   caseData.status === 'tl_reviewing' ? 'TL Review' :
                   ['sent_to_clinic', 'sent'].includes(caseData.status) ? 'Sent to Clinic' :
@@ -450,11 +441,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id as any)}
-              className={`py-3 flex items-center gap-1.5 transition-all cursor-pointer text-sm ${
-                isActive
-                  ? "border-b-2 border-indigo-500 text-white font-bold"
-                  : "text-slate-500 hover:text-slate-300"
-              }`}
+              className={`py-3 flex items-center gap-1.5 transition-all cursor-pointer text-sm ${ isActive ? "border-b-2 border-indigo-500 text-white font-bold" : "text-slate-500 hover:text-slate-300" }`}
             >
               {t.icon}
               <span className="hidden sm:inline">{t.label}</span>
@@ -505,7 +492,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
                 </p>
                 <button
                   onClick={handleInquiryForward}
-                  className="w-full bg-orange-500 hover:bg-orange-400 text-slate-950 font-black text-xs uppercase tracking-wider py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full bg-orange-500 hover:bg-orange-400 text-slate-950 font-bold text-xs uppercase tracking-wider py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5" /> Mark Sent to Partner
                 </button>
@@ -516,7 +503,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
             {caseData.crmType === "tabby_tamara" && isTLOreSupport && caseData.status === "not_confirmed" && !showPartnerPanel && (
               <button
                 onClick={() => setShowPartnerPanel(true)}
-                className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-emerald-500/10 border border-emerald-500/20"
+                className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm border border-emerald-500/20"
               >
                 <ChevronsRight className="w-4 h-4 animate-pulse" /> Confirm & Send to Fintech Partner
               </button>
@@ -526,7 +513,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
             {showPartnerPanel && (
               <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl space-y-3.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-emerald-400 uppercase tracking-widest">Fintech Forward Config</span>
+                  <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Fintech Forward Config</span>
                   <button onClick={() => setShowPartnerPanel(false)} className="text-slate-400 hover:text-white">
                     <X className="w-4 h-4" />
                   </button>
@@ -544,7 +531,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
                 <button
                   onClick={handlePartnerSubmit}
                   disabled={isSubmittingPartner}
-                  className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:bg-emerald-500/50 text-slate-950 font-black text-xs uppercase tracking-wider py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:bg-emerald-500/50 text-slate-950 font-bold text-xs uppercase tracking-wider py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   {isSubmittingPartner ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                   Submit Case & Mark Confirmed
@@ -556,7 +543,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
             {caseData.crmType === "complaint" && isTLOreSupport && caseData.status === "submitted" && !showResPanel && (
               <button
                 onClick={() => setShowResPanel(true)}
-                className="w-full bg-rose-500 hover:bg-rose-400 text-slate-950 font-black text-xs uppercase tracking-wider py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-rose-500/10 border border-rose-500/20"
+                className="w-full bg-rose-500 hover:bg-rose-400 text-slate-950 font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer border border-rose-500/20"
               >
                 <CheckCircle className="w-4 h-4" /> Formulate Complaint Resolution
               </button>
@@ -566,7 +553,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
             {showResPanel && (
               <div className="bg-rose-500/10 border border-rose-500/20 p-4 rounded-xl space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-rose-400 uppercase tracking-widest">Complaint Solution Broker</span>
+                  <span className="text-xs font-bold text-rose-400 uppercase tracking-widest">Complaint Solution Broker</span>
                   <button onClick={() => setShowResPanel(false)} className="text-slate-400 hover:text-white">
                     <X className="w-4 h-4" />
                   </button>
@@ -587,11 +574,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
                         key={opt.value}
                         type="button"
                         onClick={() => setComplaintResType(opt.value)}
-                        className={`py-1.5 px-2 rounded-xl text-xs font-semibold text-left transition-all flex items-center gap-1.5 ${
-                          complaintResType === opt.value
-                            ? "bg-rose-500 text-slate-950 font-bold"
-                            : "bg-white/[0.03] hover:bg-white/[0.06] text-slate-300 border border-white/5"
-                        }`}
+                        className={`py-1.5 px-2 rounded-xl text-xs font-semibold text-left transition-all flex items-center gap-1.5 ${ complaintResType === opt.value ? "bg-rose-500 text-slate-950 font-bold" : "bg-white/[0.03] hover:bg-white/[0.06] text-slate-300 border border-white/5" }`}
                       >
                         {opt.icon}
                         {opt.label}
@@ -614,7 +597,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
                 <button
                   onClick={handleResSubmit}
                   disabled={isSubmittingRes}
-                  className="w-full bg-rose-500 hover:bg-rose-400 disabled:bg-rose-500/50 text-slate-950 font-black text-xs uppercase tracking-wider py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full bg-rose-500 hover:bg-rose-400 disabled:bg-rose-500/50 text-slate-950 font-bold text-xs uppercase tracking-wider py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   {isSubmittingRes ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                   Save Resolution (Status: Need Contact)
@@ -627,7 +610,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
               <div className="bg-transparent border border-white/5 p-4 rounded-xl space-y-2.5">
                 <span className="text-xs uppercase tracking-wider text-slate-400 font-bold block">Contact Required Status</span>
                 <p className="text-xs text-slate-300 font-medium leading-relaxed">
-                  The Team Leader has registered a resolution: <span className="text-rose-400 font-extrabold uppercase">{caseData.raw.tlResolutionType || 'Follow Up'}</span>. 
+                  The Team Leader has registered a resolution: <span className="text-rose-400 font-bold uppercase">{caseData.raw.tlResolutionType || 'Follow Up'}</span>. 
                   Please contact the client and log the dial/contact state:
                 </p>
                 
@@ -640,13 +623,13 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
                 <div className="grid grid-cols-2 gap-2.5 pt-1">
                   <button
                     onClick={() => handleMarkContacted('contacted')}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider py-1.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider py-1.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Check className="w-3.5 h-3.5" /> Got Contact
                   </button>
                   <button
                     onClick={() => handleMarkContacted('attempted')}
-                    className="bg-amber-600 hover:bg-amber-500 text-white font-black text-xs uppercase tracking-wider py-1.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs uppercase tracking-wider py-1.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Clock className="w-3.5 h-3.5" /> Attempted Dial
                   </button>

@@ -270,7 +270,7 @@ export function RequestReplyThread({
         </div>
         <div className="flex items-center gap-2.5">
           {newReplies > 0 && (
-            <span className="bg-indigo-500 text-white rounded-full text-xs font-bold px-2.2 py-0.5 animate-pulse shadow-md shadow-indigo-500/20">
+            <span className="bg-indigo-500 text-white rounded-full text-xs font-bold px-2.2 py-0.5 animate-pulse">
               {newReplies} new
             </span>
           )}
@@ -342,7 +342,7 @@ export function RequestReplyThread({
   };
 
   return (
-    <div className="mt-4 bg-slate-950/40 border border-white/10 rounded-2xl p-5 space-y-5 text-left shadow">
+    <div className="mt-4 bg-slate-950/40 border border-white/10 rounded-2xl p-5 space-y-5 text-left">
       <div className="flex justify-between items-center pb-3 border-b border-white/5">
          <div className="flex items-center gap-2.5">
            <div className="p-2 bg-indigo-500/15 text-indigo-400 rounded-xl">
@@ -379,27 +379,27 @@ export function RequestReplyThread({
               return (
                 <div key={r.id} className="relative group text-left animate-fade-in">
                   {/* Connected Timeline Dot/Icon */}
-                  <div className={`absolute -left-[49px] top-1.5 rounded-full w-8 h-8 flex items-center justify-center border shadow-md transition-transform duration-200 group-hover:scale-105 z-10 ${eventInfo.colorClass}`}>
+                  <div className={`absolute -left-[49px] top-1.5 rounded-full w-8 h-8 flex items-center justify-center border shadow-sm transition-transform duration-200 group-hover:scale-105 z-10 ${eventInfo.colorClass}`}>
                      {eventInfo.icon}
                   </div>
 
                   {eventInfo.isSystem ? (
                     /* Timeline Activity Log */
-                    <div className="bg-white/[0.02] border border-white/[0.05] rounded-xl p-3.5 flex items-center justify-between text-left hover:bg-white/[0.05] transition-colors shadow-sm">
+                    <div className="bg-white/[0.02] border border-white/[0.05] rounded-xl p-3.5 flex items-center justify-between text-left hover:bg-white/[0.05] transition-colors">
                       <div className="space-y-1">
-                        <span className="text-xs font-bold text-slate-400 font-mono tracking-wider uppercase block">{eventInfo.title}</span>
+                        <span className="text-xs font-bold text-slate-400 font-sans tracking-wider uppercase block">{eventInfo.title}</span>
                         <p className="text-sm text-slate-200 leading-relaxed font-sans">{r.text}</p>
                       </div>
                       <span className="text-xs text-slate-400 font-mono self-start mt-0.5 shrink-0 ml-4 bg-slate-950/40 px-2.5 py-1 rounded-xl border border-white/5">{new Date(r.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                     </div>
                   ) : (
                     /* User correspondency bubble / note */
-                    <div className={`p-4 rounded-xl border transition-all hover:bg-white/[0.05] duration-200 hover:shadow-md ${r.senderName === currentUser.name ? 'bg-indigo-500/[0.06] border-indigo-500/20' : 'bg-white/[0.03] border-white/[0.06]'}`}>
+                    <div className={`p-4 rounded-xl border transition-all hover:bg-white/[0.05] duration-200 hover:shadow-sm ${r.senderName === currentUser.name ? 'bg-indigo-500/[0.06] border-indigo-500/20' : 'bg-white/[0.03] border-white/[0.06]'}`}>
                        <div className="flex items-center justify-between gap-3 border-b border-white/5 pb-2.5 mb-2.5 flex-wrap">
                          <div className="flex items-center gap-2">
                            <span className={`font-bold text-sm ${r.senderName === currentUser.name ? 'text-indigo-300' : 'text-slate-200'}`}>{r.senderName}</span>
                            {r.authorRole && (
-                             <span className={`text-xs font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-xl border ${r.authorRole === 'tl' ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' : 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20'}`}>
+                             <span className={`text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-xl border ${r.authorRole === 'tl' ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' : 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20'}`}>
                                {r.authorRole === 'tl' ? 'TEAM LEADER' : r.authorRole.toUpperCase()}
                              </span>
                            )}
@@ -446,13 +446,13 @@ export function RequestReplyThread({
               {attachments.map((att, idx) => {
                 const isImage = att.type?.startsWith('image/');
                 return (
-                  <div key={att.id} className="relative group w-16 h-16 rounded-xl border border-white/20 overflow-hidden bg-white/[0.04] shadow-md">
+                  <div key={att.id} className="relative group w-16 h-16 rounded-xl border border-white/20 overflow-hidden bg-white/[0.04]">
                     {isImage ? (
                       <img referrerPolicy="no-referrer" src={att.url} alt="Screenshot queue" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center bg-slate-800">
                         <File className="w-5 h-5 text-slate-400" />
-                        <span className="text-xs text-slate-400 font-extrabold truncate max-w-[50px] uppercase mt-0.5">{att.name}</span>
+                        <span className="text-xs text-slate-400 font-bold truncate max-w-[50px] uppercase mt-0.5">{att.name}</span>
                       </div>
                     )}
                     <button 
@@ -497,7 +497,7 @@ export function RequestReplyThread({
           )}
           
           {/* CRM Compound Action Composer */}
-          <div className="bg-white/[0.02] border border-white/10 rounded-xl p-3 flex flex-col gap-3 shadow-inner">
+          <div className="bg-white/[0.02] border border-white/10 rounded-xl p-3 flex flex-col gap-3">
             <textarea 
               id={`reply-input-${request.id}`}
               value={text}
@@ -516,7 +516,7 @@ export function RequestReplyThread({
             />
             
             {collectionName === "inquiries" && (
-              <div className="text-right text-xs text-slate-400 font-mono pr-1 -mt-1">
+              <div className="text-right text-xs text-slate-400 font-sans pr-1 -mt-1">
                 {text.length} / 500 characters
               </div>
             )}
@@ -547,7 +547,7 @@ export function RequestReplyThread({
               <button 
                 type="submit" 
                 disabled={isUploading || (!String(text || '').trim() && attachments.length === 0 && links.length === 0 && replyPhotos.length === 0)} 
-                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs uppercase font-bold tracking-widest flex items-center gap-1.5 transition-all cursor-pointer hover:shadow-sm hover:shadow-indigo-500/15"
+                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs uppercase font-bold tracking-widest flex items-center gap-1.5 transition-all cursor-pointer hover:shadow-sm hover:"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>Publish Update</span>

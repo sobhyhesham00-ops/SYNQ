@@ -235,7 +235,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                       
                       <div className="flex items-center gap-4">
                         <div className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-2 flex flex-col items-center min-w-[100px]">
-                          <div className={`text-xl font-black ${pctColor}`}>{!isNaN(Number(score.totalScore)) ? Number(score.totalScore) : 0}<span className="text-xs text-slate-500">/{!isNaN(Number(score.maxTotalScore)) ? Number(score.maxTotalScore) : 0}</span></div>
+                          <div className={`text-xl font-bold ${pctColor}`}>{!isNaN(Number(score.totalScore)) ? Number(score.totalScore) : 0}<span className="text-xs text-slate-500">/{!isNaN(Number(score.maxTotalScore)) ? Number(score.maxTotalScore) : 0}</span></div>
                         </div>
                         <Search className={`w-5 h-5 text-slate-500 transition-transform ${isExpanded ? 'rotate-90 text-slate-300' : ''}`} />
                       </div>
@@ -248,7 +248,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                           {(score.questionsSnapshot || qaTemplate).map(q => (
                             <div key={q.id} className="flex justify-between items-center p-3 rounded-xl bg-white/[0.04] border border-slate-800">
                               <span className="text-xs font-semibold text-slate-300 flex-1 pr-2">{q.text}</span>
-                              <div className="font-mono bg-white/[0.03] px-2 py-1 rounded text-sm whitespace-nowrap">
+                              <div className="font-sans bg-white/[0.03] px-2 py-1 rounded text-sm whitespace-nowrap">
                                 <span className={score.scores[q.id] < q.maxScore ? 'text-amber-400' : 'text-green-400'}>
                                   {score.scores[q.id] ?? 0}
                                 </span>
@@ -359,14 +359,14 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
           <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-white/10">
             <div className="mb-4 sm:mb-0">
               <span className="text-sm text-slate-400">Calculated Final Score: </span>
-              <span className="text-xl font-black text-green-400 ml-2">
+              <span className="text-xl font-bold text-green-400 ml-2">
                 {!isNaN(Number(calculateTotal())) ? Number(calculateTotal()) : 0} <span className="text-sm text-slate-500">/ {!isNaN(Number(calculateMax())) ? Number(calculateMax()) : 0}</span>
               </span>
             </div>
             
             <button
               type="submit"
-              className="w-full sm:w-auto px-8 py-3 bg-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-sm shadow-green-500/20 text-white rounded-xl font-bold tracking-wide transition-all"
+              className="w-full sm:w-auto px-8 py-3 bg-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-sm text-white rounded-xl font-bold tracking-wide transition-all"
             >
               Submit Evaluation
             </button>

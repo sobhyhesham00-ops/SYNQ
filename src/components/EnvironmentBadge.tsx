@@ -72,7 +72,7 @@ export function EnvironmentBadge({ currentUser, setCurrentUser }: EnvironmentBad
       <button
         id="env-badge-button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-slate-400 hover:text-slate-200 text-xs font-mono font-semibold backdrop-blur-md shadow transition-all duration-200"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-slate-400 hover:text-slate-200 text-xs font-mono font-semibold backdrop-blur-md transition-all duration-200"
       >
         <Zap className="w-3 h-3 text-indigo-400" />
         <span>SYNQ v{APP_VERSION}</span>
@@ -83,7 +83,7 @@ export function EnvironmentBadge({ currentUser, setCurrentUser }: EnvironmentBad
       {isOpen && (
         <div
           id="env-badge-dropdown"
-          className="absolute bottom-11 left-0 w-80 bg-slate-950/95 border border-white/10 rounded-2xl shadow backdrop-blur-xl p-4 text-left animate-fade-in"
+          className="absolute bottom-11 left-0 w-80 bg-slate-950/95 border border-white/10 rounded-2xl backdrop-blur-xl p-4 text-left animate-fade-in"
         >
           {/* Header */}
           <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-white/5">
@@ -133,11 +133,7 @@ export function EnvironmentBadge({ currentUser, setCurrentUser }: EnvironmentBad
               {CHANGELOG.map((entry, i) => (
                 <div
                   key={entry.version}
-                  className={`flex items-start gap-2.5 px-2.5 py-2 rounded-xl border ${
-                    i === 0
-                      ? "bg-indigo-500/10 border-indigo-500/20"
-                      : "bg-transparent border-white/[0.04]"
-                  }`}
+                  className={`flex items-start gap-2.5 px-2.5 py-2 rounded-xl border ${ i === 0 ? "bg-indigo-500/10 border-indigo-500/20" : "bg-transparent border-white/[0.04]" }`}
                 >
                   <span className={`font-mono text-xs font-bold shrink-0 mt-0.5 ${i === 0 ? "text-indigo-400" : "text-slate-600"}`}>
                     v{entry.version}

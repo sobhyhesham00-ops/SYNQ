@@ -163,9 +163,7 @@ export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUplo
         </label>
         
         <div className="flex flex-col gap-2 relative">
-            <label className={`w-full py-5 border-2 border-dashed rounded-xl transition-all flex flex-col items-center justify-center cursor-pointer 
-               ${isDragging ? 'border-indigo-400 bg-indigo-500/20' : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-indigo-500/50'}
-               ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+            <label className={`w-full py-5 border-2 border-dashed rounded-xl transition-all flex flex-col items-center justify-center cursor-pointer ${isDragging ? 'border-indigo-400 bg-indigo-500/20' : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-indigo-500/50'} ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
             >
                 <input 
                     type="file" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" className="hidden"
@@ -247,7 +245,7 @@ export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUplo
           <div className="space-y-1.5 pt-1">
             {links.map((linkStr, index) => (
               <div key={index} className="flex justify-between items-center p-2 bg-white/5 border border-white/10 rounded-xl text-xs">
-                <span className="text-indigo-300 underline font-mono truncate mr-2" title={linkStr}>{linkStr}</span>
+                <span className="text-indigo-300 underline font-sans truncate mr-2" title={linkStr}>{linkStr}</span>
                 <button type="button" onClick={() => onLinksChange(links.filter((_, i) => i !== index))} className="text-red-400 hover:text-red-300 text-xs font-bold uppercase px-2 py-1 bg-red-400/10 rounded border border-red-400/20 relative z-10 cursor-pointer">
                   Remove
                 </button>

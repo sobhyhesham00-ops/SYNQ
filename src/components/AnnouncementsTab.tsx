@@ -146,7 +146,7 @@ export function AnnouncementsTab({
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-slate-100 font-display flex items-center gap-2">
+          <h2 className="text-3xl font-bold text-slate-100 font-sans flex items-center gap-2">
             <Bell className="w-8 h-8 text-yellow-500" />
             {isTL ? 'TL Announcements' : 'Updates & Announcements'}
           </h2>
@@ -242,7 +242,7 @@ export function AnnouncementsTab({
                ))}
             </select>
             {filterClinics.length > 0 && (
-              <div className="absolute top-full right-0 z-50 mt-1 flex flex-wrap gap-1 bg-slate-800 p-2 rounded-xl border border-slate-700 shadow w-64">
+              <div className="absolute top-full right-0 z-50 mt-1 flex flex-wrap gap-1 bg-slate-800 p-2 rounded-xl border border-slate-700 shadow-sm w-64">
                 <span className="w-full text-xs text-slate-400 font-bold mb-1 flex justify-between">
                   Selected Clinics:
                   <button onClick={() => setFilterClinics([])} className="text-rose-400 hover:text-rose-300">Clear</button>
@@ -263,7 +263,7 @@ export function AnnouncementsTab({
 
         <div className="space-y-4 text-left">
           {filtered.length === 0 ? (
-            <p className="text-slate-400 text-center py-10 font-mono text-sm">No updates found.</p>
+            <p className="text-slate-400 text-center py-10 font-sans text-sm">No updates found.</p>
           ) : (
             filtered.map(a => (
               <div key={a.id} className="p-5 border border-white/10 rounded-2xl bg-white/5 relative group space-y-3">
@@ -279,7 +279,7 @@ export function AnnouncementsTab({
                   </div>
                   <div>
                     <h4 className="text-orange-400 font-bold text-sm tracking-wide">{a.author || "System"}</h4>
-                    <p className="text-xs text-slate-400 font-mono flex items-center gap-1.5 flex-wrap">
+                    <p className="text-xs text-slate-400 font-sans flex items-center gap-1.5 flex-wrap">
                       <span>{new Date(a.createdAt || Date.now()).toLocaleString()}</span>
                       <span className="text-slate-600">•</span>
                       <span className="text-xs font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded uppercase tracking-wider">
@@ -297,11 +297,11 @@ export function AnnouncementsTab({
                   <div className="p-2.5 bg-white/[0.03] rounded-xl max-w-lg border border-white/5 space-y-2">
                     <img src={a.imageUrl} alt="Attached Announcement File" className="w-full max-h-72 object-contain rounded-xl" />
                     <div className="flex items-center justify-between">
-                      <p className="text-xs text-slate-500 font-mono">Image attached by Management</p>
+                      <p className="text-xs text-slate-500 font-sans">Image attached by Management</p>
                       <button 
                         type="button" 
                         onClick={() => triggerDownload(a.imageUrl || '', `announcement_file_${a.id}.png`)}
-                        className="px-2.5 py-1 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/25 text-yellow-300 rounded-xl text-xs font-black uppercase tracking-wider transition-colors flex items-center gap-1.5 cursor-pointer"
+                        className="px-2.5 py-1 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/25 text-yellow-300 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-1.5 cursor-pointer"
                       >
                         <Download className="w-3.5 h-3.5" /> Download Image
                       </button>
@@ -321,7 +321,7 @@ export function AnnouncementsTab({
                 {/* Emojis Section: Cannot post text reply, can only leave emoji */}
                 <div className="pt-3 border-t border-white/5 flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-1.5 bg-white/[0.02] p-1.5 rounded-xl border border-white/5">
-                    <span className="text-xs text-slate-400 uppercase font-black tracking-wider px-2 border-r border-white/10 select-none">Reactions Only:</span>
+                    <span className="text-xs text-slate-400 uppercase font-bold tracking-wider px-2 border-r border-white/10 select-none">Reactions Only:</span>
                     <div className="flex items-center gap-1">
                       {EMOJI_OPTIONS.map(emoji => {
                         const reactors = (a.reactions || {})[emoji] || [];
@@ -330,11 +330,7 @@ export function AnnouncementsTab({
                           <button
                             key={emoji}
                             onClick={() => handleReactionToggle(a.id, emoji)}
-                            className={`px-2 py-1 rounded-xl text-xs transition-all relative group flex items-center gap-1 cursor-pointer select-none border ${
-                              hasReacted 
-                                ? 'bg-amber-500/15 border-amber-500/35 text-amber-300 scale-105 shadow-inner' 
-                                : 'bg-white/5 border-transparent hover:bg-white/10 text-slate-400'
-                            }`}
+                            className={`px-2 py-1 rounded-xl text-xs transition-all relative group flex items-center gap-1 cursor-pointer select-none border ${ hasReacted ? 'bg-amber-500/15 border-amber-500/35 text-amber-300 scale-105 ' : 'bg-white/5 border-transparent hover:bg-white/10 text-slate-400' }`}
                             title={reactors.length > 0 ? `Reacted: ${reactors.join(', ')}` : "Click to react"}
                           >
                             <span>{emoji}</span>
@@ -344,7 +340,7 @@ export function AnnouncementsTab({
 
                             {/* Tooltip containing reactor names */}
                             {reactors.length > 0 && (
-                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2 py-1 bg-slate-950 text-xs font-mono text-slate-200 rounded border border-white/10 whitespace-nowrap z-30 shadow">
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2 py-1 bg-slate-950 text-xs font-mono text-slate-200 rounded border border-white/10 whitespace-nowrap z-30">
                                 {reactors.map(name => name.split(' ')[0]).join(', ')}
                               </div>
                             )}

@@ -19,7 +19,7 @@ const LinkItem = ({ link }: { link: string }) => {
 
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm bg-white/[0.02] p-4 rounded-xl border border-white/10">
-      <div className="flex-1 break-all flex items-start gap-2.5 font-mono text-slate-200 leading-relaxed">
+      <div className="flex-1 break-all flex items-start gap-2.5 font-sans text-slate-200 leading-relaxed">
         <LinkIcon className="w-5 h-5 shrink-0 mt-0.5 text-indigo-400" />
         <span className="whitespace-pre-wrap text-sm">{normalized}</span>
       </div>
@@ -215,7 +215,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
               const isImage = att.type?.startsWith('image/') || att.url.startsWith('data:image/') || (!att.type?.includes('pdf') && att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i));
               
               return (
-              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[380px] bg-white/[0.04] border border-white/10 hover:border-indigo-500/50 transition-all rounded-xl overflow-hidden flex flex-col shadow-sm">
+              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[380px] bg-white/[0.04] border border-white/10 hover:border-indigo-500/50 transition-all rounded-xl overflow-hidden flex flex-col">
                 {isImage ? (
                   <>
                     {/* Image Preview Window */}
@@ -327,7 +327,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
       {hasTlAttachments && (
         <div className="space-y-2 border-t border-amber-500/15 pt-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-amber-500 font-mono font-black block uppercase tracking-wider">
+            <span className="text-xs text-amber-500 font-mono font-bold block uppercase tracking-wider">
               ⚠️ TL / Supervisor Files ({normalizedTlAttachments.length}):
             </span>
           </div>
@@ -337,9 +337,9 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
               const isImage = att.type?.startsWith('image/') || att.url.startsWith('data:image/') || (!att.type?.includes('pdf') && att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i));
               
               return (
-              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[380px] bg-white/[0.04] border border-amber-500/20 hover:border-amber-400/50 transition-all rounded-xl overflow-hidden flex flex-col shadow-sm">
+              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[380px] bg-white/[0.04] border border-amber-500/20 hover:border-amber-400/50 transition-all rounded-xl overflow-hidden flex flex-col">
                 {showSideBadges && (
-                  <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-amber-500 text-slate-950 font-black text-xs rounded uppercase shadow-md z-10 select-none">
+                  <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-amber-500 text-slate-950 font-bold text-xs rounded uppercase z-10 select-none">
                     TL
                   </div>
                 )}
@@ -439,14 +439,14 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
       {/* Display TL Links */}
       {hasTlLinks && (
         <div className="space-y-1 border-t border-amber-500/15 pt-3">
-          <span className="text-xs text-amber-500 font-mono font-black block uppercase tracking-wider">
+          <span className="text-xs text-amber-500 font-mono font-bold block uppercase tracking-wider">
             ⚠️ TL / Supervisor References & Links:
           </span>
           <div className="flex flex-col gap-2">
             {extractedTlLinks.map((link, lIdx) => (
               <div key={lIdx} className="relative">
                 {showSideBadges && (
-                  <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-amber-500 text-slate-950 font-black text-xs rounded uppercase shadow-md z-10 select-none">
+                  <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-amber-500 text-slate-950 font-bold text-xs rounded uppercase z-10 select-none">
                     TL
                   </span>
                 )}
