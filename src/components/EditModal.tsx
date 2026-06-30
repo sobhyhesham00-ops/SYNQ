@@ -173,7 +173,7 @@ const EditModalContent = ({
           <X className="w-5 h-5" />
         </button>
 
-        <h3 className="text-xl font-bold text-emerald-400 mb-6 flex items-center gap-2">
+        <h3 className="text-base font-bold text-emerald-400 mb-6 flex items-center gap-2">
           <Save className="w-5 h-5" />
           Edit Request
         </h3>
@@ -186,14 +186,14 @@ const EditModalContent = ({
             type === "client_comm" ||
             type === "case") && (
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1">
+              <label className="block text-[11px] font-bold text-slate-300 mb-1">
                 Clinic Name
               </label>
               <select
                 name="clinicName"
                 value={data.clinicName || ""}
                 onChange={handleChange}
-                className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans cursor-pointer"
+                className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans cursor-pointer"
               >
                 <option value="">Select a Clinic</option>
                 {CLINICS.map((c) => (
@@ -209,7 +209,7 @@ const EditModalContent = ({
           {(type === "tt_request" || type === "tt_complaint") && (
             <>
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
+                <label className="block text-[11px] font-bold text-slate-300 mb-1">
                   Patient Name
                 </label>
                 <input
@@ -217,11 +217,11 @@ const EditModalContent = ({
                   name="patientName"
                   value={data.patientName || ""}
                   onChange={handleChange}
-                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
+                <label className="block text-[11px] font-bold text-slate-300 mb-1">
                   File Number
                 </label>
                 <input
@@ -229,11 +229,11 @@ const EditModalContent = ({
                   name="fileNumber"
                   value={data.fileNumber || ""}
                   onChange={handleChange}
-                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
+                <label className="block text-[11px] font-bold text-slate-300 mb-1">
                   Phone Number
                 </label>
                 <input
@@ -241,7 +241,7 @@ const EditModalContent = ({
                   name="phoneNumber"
                   value={data.phoneNumber || ""}
                   onChange={handleChange}
-                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
             </>
@@ -249,7 +249,7 @@ const EditModalContent = ({
 
           {type === "tt_request" && (
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1">
+              <label className="block text-[11px] font-bold text-slate-300 mb-1">
                 Amount
               </label>
               <input
@@ -257,10 +257,10 @@ const EditModalContent = ({
                 name="priceWithoutTax"
                 value={data.priceWithoutTax || ""}
                 onChange={handleChange}
-                className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
               />
               {data.priceWithoutTax && calculateTabbyTamaraPrice(data.priceWithoutTax).valid && (
-                <div className="mt-2 p-3 bg-indigo-500/10 border border-transparent rounded-xl text-xs space-y-1 font-sans">
+                <div className="mt-2 p-3 bg-indigo-500/10 border border-transparent rounded-xl text-[11px] space-y-1 font-sans">
                   <p className="text-indigo-300 font-bold mb-1.5 pb-1.5 border-b border-transparent">
                     5% will be added. Final amount: {calculateTabbyTamaraPrice(data.priceWithoutTax).finalPriceFormatted}
                   </p>
@@ -283,7 +283,7 @@ const EditModalContent = ({
 
           {type === "tt_complaint" && (
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1">
+              <label className="block text-[11px] font-bold text-slate-300 mb-1">
                 Complaint Details
               </label>
               <textarea
@@ -291,7 +291,7 @@ const EditModalContent = ({
                 value={data.complaintDetails || ""}
                 onChange={handleChange}
                 rows={3}
-                className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
               />
             </div>
           )}
@@ -299,7 +299,7 @@ const EditModalContent = ({
           {type === "inquiry" && (
             <>
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
+                <label className="block text-[11px] font-bold text-slate-300 mb-1">
                   Phone Number
                 </label>
                 <input
@@ -307,11 +307,11 @@ const EditModalContent = ({
                   name="phoneNumber"
                   value={data.phoneNumber || ""}
                   onChange={handleChange}
-                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
+                <label className="block text-[11px] font-bold text-slate-300 mb-1">
                   Inquiry Text
                 </label>
                 <textarea
@@ -319,7 +319,7 @@ const EditModalContent = ({
                   value={data.text || ""}
                   onChange={handleChange}
                   rows={4}
-                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
             </>
@@ -328,7 +328,7 @@ const EditModalContent = ({
           {type === "client_comm" && (
             <>
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
+                <label className="block text-[11px] font-bold text-slate-300 mb-1">
                   Patient Name
                 </label>
                 <input
@@ -336,11 +336,11 @@ const EditModalContent = ({
                   name="patientName"
                   value={data.patientName || ""}
                   onChange={handleChange}
-                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
+                <label className="block text-[11px] font-bold text-slate-300 mb-1">
                   Phone Number
                 </label>
                 <input
@@ -348,11 +348,11 @@ const EditModalContent = ({
                   name="phoneNumber"
                   value={data.phoneNumber || ""}
                   onChange={handleChange}
-                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
+                <label className="block text-[11px] font-bold text-slate-300 mb-1">
                   Notes
                 </label>
                 <textarea
@@ -360,7 +360,7 @@ const EditModalContent = ({
                   value={data.notes || ""}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
             </>
@@ -369,7 +369,7 @@ const EditModalContent = ({
           {type === "case" && (
             <>
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
+                <label className="block text-[11px] font-bold text-slate-300 mb-1">
                   Patient Name
                 </label>
                 <input
@@ -377,11 +377,11 @@ const EditModalContent = ({
                   name="patientName"
                   value={data.patientName || ""}
                   onChange={handleChange}
-                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
+                <label className="block text-[11px] font-bold text-slate-300 mb-1">
                   Phone Number
                 </label>
                 <input
@@ -389,11 +389,11 @@ const EditModalContent = ({
                   name="phoneNumber"
                   value={data.phoneNumber || ""}
                   onChange={handleChange}
-                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
+                <label className="block text-[11px] font-bold text-slate-300 mb-1">
                   Notes
                 </label>
                 <textarea
@@ -401,7 +401,7 @@ const EditModalContent = ({
                   value={data.notes || ""}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
             </>
@@ -410,7 +410,7 @@ const EditModalContent = ({
           {/* Follow-up Date Toggle and Input */}
           {["inquiry", "tt_request", "tt_complaint", "client_comm"].includes(type) && (
             <div className="p-3 bg-white/[0.02] border border-white/8 rounded-xl space-y-2">
-              <label className="flex items-center gap-2 text-xs font-bold text-slate-300 cursor-pointer">
+              <label className="flex items-center gap-2 text-[11px] font-bold text-slate-300 cursor-pointer">
                 <input
                   type="checkbox"
                   name="isFollowUp"
@@ -422,7 +422,7 @@ const EditModalContent = ({
               </label>
               {data.isFollowUp && (
                 <div className="mt-2 animate-fade-in">
-                  <label className="block text-xs uppercase font-bold text-slate-400 mb-1">
+                  <label className="block text-[11px] uppercase font-bold text-slate-400 mb-1">
                     Follow-up Date
                   </label>
                   <input
@@ -430,7 +430,7 @@ const EditModalContent = ({
                     name="followUpDate"
                     value={data.followUpDate || ""}
                     onChange={handleChange}
-                    className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans [color-scheme:dark]"
+                    className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans [color-scheme:dark]"
                   />
                 </div>
               )}
@@ -440,7 +440,7 @@ const EditModalContent = ({
           {type === "scheduling_request" && (
             <>
               <div className="mb-4">
-                <span className="inline-block px-3 py-1 bg-slate-800 text-slate-300 font-bold text-xs uppercase tracking-wider rounded-xl border border-white/8">
+                <span className="inline-block px-3 py-1 bg-slate-800 text-slate-300 font-bold text-[11px] uppercase tracking-wider rounded-xl border border-white/8">
                   {data.type === "swap" ? "Shift Swap" : "Annual Leave"}
                 </span>
               </div>
@@ -448,7 +448,7 @@ const EditModalContent = ({
               {data.type === "swap" && (
                 <>
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1">
+                    <label className="block text-[11px] font-bold text-slate-300 mb-1">
                       Shift Date
                     </label>
                     <input
@@ -456,11 +456,11 @@ const EditModalContent = ({
                       name="date"
                       value={data.date || ""}
                       onChange={handleChange}
-                      className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans [color-scheme:dark]"
+                      className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans [color-scheme:dark]"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1">
+                    <label className="block text-[11px] font-bold text-slate-300 mb-1">
                       Your Shift
                     </label>
                     <input
@@ -468,11 +468,11 @@ const EditModalContent = ({
                       name="shift"
                       value={data.shift || ""}
                       onChange={handleChange}
-                      className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                      className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1">
+                    <label className="block text-[11px] font-bold text-slate-300 mb-1">
                       Swap With Agent
                     </label>
                     <input
@@ -480,11 +480,11 @@ const EditModalContent = ({
                       name="swapWithAgent"
                       value={data.swapWithAgent || ""}
                       onChange={handleChange}
-                      className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                      className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1">
+                    <label className="block text-[11px] font-bold text-slate-300 mb-1">
                       Swap With Shift
                     </label>
                     <input
@@ -492,7 +492,7 @@ const EditModalContent = ({
                       name="swapWithShift"
                       value={data.swapWithShift || ""}
                       onChange={handleChange}
-                      className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                      className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                     />
                   </div>
                 </>
@@ -501,7 +501,7 @@ const EditModalContent = ({
               {data.type === "annual" && (
                 <>
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1">
+                    <label className="block text-[11px] font-bold text-slate-300 mb-1">
                       Start Date
                     </label>
                     <input
@@ -509,11 +509,11 @@ const EditModalContent = ({
                       name="startDate"
                       value={data.startDate || ""}
                       onChange={handleChange}
-                      className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans [color-scheme:dark]"
+                      className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans [color-scheme:dark]"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1">
+                    <label className="block text-[11px] font-bold text-slate-300 mb-1">
                       End Date
                     </label>
                     <input
@@ -521,14 +521,14 @@ const EditModalContent = ({
                       name="endDate"
                       value={data.endDate || ""}
                       onChange={handleChange}
-                      className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans [color-scheme:dark]"
+                      className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans [color-scheme:dark]"
                     />
                   </div>
                 </>
               )}
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
+                <label className="block text-[11px] font-bold text-slate-300 mb-1">
                   Notes
                 </label>
                 <textarea
@@ -536,7 +536,7 @@ const EditModalContent = ({
                   value={data.notes || ""}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                  className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-all font-sans"
                 />
               </div>
             </>
@@ -546,7 +546,7 @@ const EditModalContent = ({
           <div className="pt-4 border-t border-white/8 space-y-4">
             {/* Agent Attachments */}
             <div>
-              <p className="text-xs font-bold text-slate-300 uppercase mb-2 block">Agent Attachments</p>
+              <p className="text-[11px] font-bold text-slate-300 uppercase mb-2 block">Agent Attachments</p>
               {type === "inquiry" ? (
                 <ProfessionalAttachmentUploader
                   attachments={editAttachments}
@@ -569,7 +569,7 @@ const EditModalContent = ({
 
             {/* TL Attachments */}
             <div className="border-t border-white/8 pt-4">
-              <p className="text-xs font-bold text-amber-400 uppercase mb-2 block">TL / Supervisor Attachments</p>
+              <p className="text-[11px] font-bold text-amber-400 uppercase mb-2 block">TL / Supervisor Attachments</p>
               <MultiAttachmentUpload
                 photos={tlPhotos}
                 links={tlLinks}
@@ -585,14 +585,14 @@ const EditModalContent = ({
             <button
               type="button"
               onClick={() => setEditingItem(null)}
-              className="px-4 py-2 border border-white/8 hover:bg-white/5 rounded-xl text-sm font-semibold text-slate-300 transition-all cursor-pointer"
+              className="px-4 py-2 border border-white/8 hover:bg-white/5 rounded-xl text-xs font-semibold text-slate-300 transition-all cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isAgentUploading || isTlUploading}
-              className={`px-6 py-2 ${isAgentUploading || isTlUploading ? 'bg-emerald-500/50 cursor-not-allowed text-slate-500' : 'bg-emerald-600 hover:brightness-110 text-slate-900 cursor-pointer'} rounded-xl text-sm font-bold transition-all flex items-center gap-2`}
+              className={`px-6 py-2 ${isAgentUploading || isTlUploading ? 'bg-emerald-500/50 cursor-not-allowed text-slate-500' : 'bg-emerald-600 hover:brightness-110 text-slate-900 cursor-pointer'} rounded-xl text-xs font-bold transition-all flex items-center gap-2`}
             >
               {isAgentUploading ? 'Uploading Agent files...' : isTlUploading ? 'Uploading TL files...' : 'Save Changes'}
             </button>

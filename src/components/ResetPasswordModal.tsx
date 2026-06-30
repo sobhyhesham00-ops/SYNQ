@@ -20,28 +20,28 @@ export const ResetPasswordModal = ({
           <X className="w-5 h-5" />
         </button>
 
-        <h3 className="text-lg font-bold text-blue-400 mb-6 flex items-center gap-2">
+        <h3 className="text-sm font-bold text-blue-400 mb-6 flex items-center gap-2">
           <Key className="w-5 h-5" />
           Change Password
         </h3>
 
         <form onSubmit={handleResetUserPassword} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-300 mb-1">New Password</label>
+            <label className="block text-[11px] font-bold text-slate-300 mb-1">New Password</label>
             <input
               type="password"
               required
               value={newPasswordInput}
               onChange={(e) => setNewPasswordInput(e.target.value)}
               placeholder="Enter new password..."
-              className="w-full pl-3 pr-3 py-2.5 bg-white/[0.03] border border-white/8 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-all font-sans"
+              className="w-full pl-3 pr-3 py-2.5 bg-white/[0.03] border border-white/8 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-all font-sans"
             />
           </div>
 
           <div className="pt-4">
              <button
                type="submit"
-               className="w-full px-6 py-2.5 bg-transparent border border-white/12 text-white hover:brightness-110 text-white rounded-xl text-sm font-bold transition-all cursor-pointer"
+               className="w-full px-6 py-2.5 bg-transparent border border-white/12 text-white hover:brightness-110 text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
              >
                Confirm Change
              </button>

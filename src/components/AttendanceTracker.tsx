@@ -486,13 +486,13 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
               <UserCheck className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+              <h2 className="text-base font-bold text-slate-100 flex items-center gap-2">
                 Daily Attendance Log
-                <span className="text-xs font-semibold bg-transparent border border-white/12 text-white border border-transparent text-indigo-400 px-2 py-0.5 rounded-lg">
+                <span className="text-[11px] font-semibold bg-transparent border border-white/12 text-white border border-transparent text-indigo-400 px-2 py-0.5 rounded-lg">
                   CRM Live Workspace
                 </span>
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-[11px] text-slate-400">
                 LOB compliance ledger. Realtime manually-controlled logs stored in secure cloud databases.
               </p>
             </div>
@@ -515,7 +515,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="bg-transparent text-slate-100 text-xs font-bold font-sans focus:outline-none border-none cursor-pointer w-28 text-center"
+              className="bg-transparent text-slate-100 text-[11px] font-bold font-sans focus:outline-none border-none cursor-pointer w-28 text-center"
             />
           </div>
 
@@ -529,7 +529,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
 
           <button
             onClick={handleJumpToToday}
-            className="h-9 px-3.5 text-xs font-bold bg-transparent border border-white/12 text-white hover:bg-white/5 text-indigo-300 border border-transparent rounded-xl transition-all cursor-pointer ml-1 active:scale-95"
+            className="h-9 px-3.5 text-[11px] font-bold bg-transparent border border-white/12 text-white hover:bg-white/5 text-indigo-300 border border-transparent rounded-xl transition-all cursor-pointer ml-1 active:scale-95"
           >
             Go Today
           </button>
@@ -539,34 +539,34 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
       {/* Date Range Export Console */}
       <div className="bg-transparent border border-white/8 p-5 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-5">
         <div className="space-y-1">
-          <h4 className="text-xs font-bold uppercase text-slate-300 tracking-wider flex items-center gap-1.5">
+          <h4 className="text-[11px] font-bold uppercase text-slate-300 tracking-wider flex items-center gap-1.5">
             <RefreshCw className="w-3.5 h-3.5 text-slate-500 animate-spin-slow" />
             Roster Ledger Excel Exporter
           </h4>
-          <p className="text-xs text-slate-400">Select an analytics window to compile complete historical CSV/Excel sheets.</p>
+          <p className="text-[11px] text-slate-400">Select an analytics window to compile complete historical CSV/Excel sheets.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-1.5">
-            <span className="text-xs uppercase font-bold text-slate-500">From</span>
+            <span className="text-[11px] uppercase font-bold text-slate-500">From</span>
             <input
               type="date"
               value={rangeFrom}
               onChange={(e) => setRangeFrom(e.target.value)}
-              className="bg-slate-950/60 border border-white/8 rounded-xl px-3 py-1.5 text-xs font-sans text-slate-200 focus:border-transparent focus:outline-none"
+              className="bg-slate-950/60 border border-white/8 rounded-xl px-3 py-1.5 text-[11px] font-sans text-slate-200 focus:border-transparent focus:outline-none"
             />
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-xs uppercase font-bold text-slate-500">To</span>
+            <span className="text-[11px] uppercase font-bold text-slate-500">To</span>
             <input
               type="date"
               value={rangeTo}
               onChange={(e) => setRangeTo(e.target.value)}
-              className="bg-slate-950/60 border border-white/8 rounded-xl px-3 py-1.5 text-xs font-sans text-slate-200 focus:border-transparent focus:outline-none"
+              className="bg-slate-950/60 border border-white/8 rounded-xl px-3 py-1.5 text-[11px] font-sans text-slate-200 focus:border-transparent focus:outline-none"
             />
           </div>
           <button
             onClick={handleExportRange}
-            className="h-9 px-4 bg-transparent border border-white/12 text-white hover:bg-white/5 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 border border-indigo-500/10"
+            className="h-9 px-4 bg-transparent border border-white/12 text-white hover:bg-white/5 text-white rounded-xl text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 border border-indigo-500/10"
           >
             <Download className="w-3.5 h-3.5" /> Range Export
           </button>
@@ -579,7 +579,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
         <div className="xl:col-span-3 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
           <div className="p-4 bg-white/[0.02] border border-white/8 rounded-xl text-center flex flex-col justify-center relative overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-[3px] bg-slate-500" />
-            <p className="text-xs uppercase font-bold text-slate-500 tracking-widest">Global Roster</p>
+            <p className="text-[11px] uppercase font-bold text-slate-500 tracking-widest">Global Roster</p>
             <div className="h-9 flex items-center justify-center mt-1 relative">
               <AnimatePresence mode="popLayout" initial={false}>
                 <motion.span
@@ -588,18 +588,18 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 1.3 }}
                   transition={{ type: "spring", stiffness: 350, damping: 20 }}
-                  className="text-3xl font-bold text-slate-100 block"
+                  className="text-xl font-bold text-slate-100 block"
                 >
                   {stats.total}
                 </motion.span>
               </AnimatePresence>
             </div>
-            <span className="text-xs text-slate-500 mt-0.5">Agents Total</span>
+            <span className="text-[11px] text-slate-500 mt-0.5">Agents Total</span>
           </div>
 
           <div className="p-4 bg-emerald-500/10 border border-emerald-500/15 rounded-xl text-center flex flex-col justify-center relative overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-[3px] bg-emerald-500" />
-            <p className="text-xs uppercase font-bold text-emerald-400 tracking-widest">Present</p>
+            <p className="text-[11px] uppercase font-bold text-emerald-400 tracking-widest">Present</p>
             <div className="h-9 flex items-center justify-center mt-1 relative">
               <AnimatePresence mode="popLayout" initial={false}>
                 <motion.span
@@ -608,18 +608,18 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 1.3 }}
                   transition={{ type: "spring", stiffness: 350, damping: 20 }}
-                  className="text-3xl font-bold text-emerald-400 block"
+                  className="text-xl font-bold text-emerald-400 block"
                 >
                   {stats.present}
                 </motion.span>
               </AnimatePresence>
             </div>
-            <span className="text-xs text-emerald-500/80 mt-0.5">On Duty</span>
+            <span className="text-[11px] text-emerald-500/80 mt-0.5">On Duty</span>
           </div>
 
           <div className="p-4 bg-amber-500/10 border border-amber-500/15 rounded-xl text-center flex flex-col justify-center relative overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-[3px] bg-amber-500" />
-            <p className="text-xs uppercase font-bold text-amber-400 tracking-widest">Late</p>
+            <p className="text-[11px] uppercase font-bold text-amber-400 tracking-widest">Late</p>
             <div className="h-9 flex items-center justify-center mt-1 relative">
               <AnimatePresence mode="popLayout" initial={false}>
                 <motion.span
@@ -628,18 +628,18 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 1.3 }}
                   transition={{ type: "spring", stiffness: 350, damping: 20 }}
-                  className="text-3xl font-bold text-amber-400 block"
+                  className="text-xl font-bold text-amber-400 block"
                 >
                   {stats.late}
                 </motion.span>
               </AnimatePresence>
             </div>
-            <span className="text-xs text-amber-500/80 mt-0.5">Delayed</span>
+            <span className="text-[11px] text-amber-500/80 mt-0.5">Delayed</span>
           </div>
 
           <div className="p-4 bg-rose-500/10 border border-rose-500/15 rounded-xl text-center flex flex-col justify-center relative overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-[3px] bg-rose-500" />
-            <p className="text-xs uppercase font-bold text-rose-400 tracking-widest">Absent</p>
+            <p className="text-[11px] uppercase font-bold text-rose-400 tracking-widest">Absent</p>
             <div className="h-9 flex items-center justify-center mt-1 relative">
               <AnimatePresence mode="popLayout" initial={false}>
                 <motion.span
@@ -648,18 +648,18 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 1.3 }}
                   transition={{ type: "spring", stiffness: 350, damping: 20 }}
-                  className="text-3xl font-bold text-rose-400 block"
+                  className="text-xl font-bold text-rose-400 block"
                 >
                   {stats.absent}
                 </motion.span>
               </AnimatePresence>
             </div>
-            <span className="text-xs text-rose-500/80 mt-0.5">Off Duty</span>
+            <span className="text-[11px] text-rose-500/80 mt-0.5">Off Duty</span>
           </div>
 
           <div className="p-4 bg-blue-500/10 border border-blue-500/15 rounded-xl text-center flex flex-col justify-center relative overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-[3px] bg-blue-500" />
-            <p className="text-xs uppercase font-bold text-blue-400 tracking-widest">On Leave</p>
+            <p className="text-[11px] uppercase font-bold text-blue-400 tracking-widest">On Leave</p>
             <div className="h-9 flex items-center justify-center mt-1 relative">
               <AnimatePresence mode="popLayout" initial={false}>
                 <motion.span
@@ -668,18 +668,18 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 1.3 }}
                   transition={{ type: "spring", stiffness: 350, damping: 20 }}
-                  className="text-3xl font-bold text-blue-400 block"
+                  className="text-xl font-bold text-blue-400 block"
                 >
                   {stats.onLeave}
                 </motion.span>
               </AnimatePresence>
             </div>
-            <span className="text-xs text-blue-500/80 mt-0.5">Approved Out</span>
+            <span className="text-[11px] text-blue-500/80 mt-0.5">Approved Out</span>
           </div>
 
           <div className="p-4 bg-slate-500/10 border border-transparent rounded-xl text-center flex flex-col justify-center relative overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-[3px] bg-slate-500" />
-            <p className="text-xs uppercase font-bold text-slate-300 tracking-widest">OFF</p>
+            <p className="text-[11px] uppercase font-bold text-slate-300 tracking-widest">OFF</p>
             <div className="h-9 flex items-center justify-center mt-1 relative">
               <AnimatePresence mode="popLayout" initial={false}>
                 <motion.span
@@ -688,18 +688,18 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 1.3 }}
                   transition={{ type: "spring", stiffness: 350, damping: 20 }}
-                  className="text-3xl font-bold text-slate-300 block"
+                  className="text-xl font-bold text-slate-300 block"
                 >
                   {stats.offCount}
                 </motion.span>
               </AnimatePresence>
             </div>
-            <span className="text-xs text-slate-400 mt-0.5">Weekly Rest</span>
+            <span className="text-[11px] text-slate-400 mt-0.5">Weekly Rest</span>
           </div>
 
           <div className="p-4 bg-red-500/10 border border-transparent rounded-xl text-center flex flex-col justify-center relative overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-[3px] bg-red-500" />
-            <p className="text-xs uppercase font-bold text-red-500 tracking-widest">NSNC</p>
+            <p className="text-[11px] uppercase font-bold text-red-500 tracking-widest">NSNC</p>
             <div className="h-9 flex items-center justify-center mt-1 relative">
               <AnimatePresence mode="popLayout" initial={false}>
                 <motion.span
@@ -708,18 +708,18 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 1.3 }}
                   transition={{ type: "spring", stiffness: 350, damping: 20 }}
-                  className="text-3xl font-bold text-red-500 block"
+                  className="text-xl font-bold text-red-500 block"
                 >
                   {stats.noShowNoCall}
                 </motion.span>
               </AnimatePresence>
             </div>
-            <span className="text-xs text-red-500/80 mt-0.5">No Show</span>
+            <span className="text-[11px] text-red-500/80 mt-0.5">No Show</span>
           </div>
 
           <div className="p-4 bg-slate-800/20 border border-white/8 rounded-xl text-center flex flex-col justify-center relative overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-[3px] bg-slate-700" />
-            <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">Unmarked</p>
+            <p className="text-[11px] uppercase font-bold text-slate-400 tracking-widest">Unmarked</p>
             <div className="h-9 flex items-center justify-center mt-1 relative">
               <AnimatePresence mode="popLayout" initial={false}>
                 <motion.span
@@ -728,20 +728,20 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 1.3 }}
                   transition={{ type: "spring", stiffness: 350, damping: 20 }}
-                  className="text-3xl font-bold text-slate-400 block"
+                  className="text-xl font-bold text-slate-400 block"
                 >
                   {stats.notMarked}
                 </motion.span>
               </AnimatePresence>
             </div>
-            <span className="text-xs text-slate-500 mt-0.5">Pending TL</span>
+            <span className="text-[11px] text-slate-500 mt-0.5">Pending TL</span>
           </div>
         </div>
 
         {/* Bounded Pie Chart container to prevent Recharts -1 dimensions warnings */}
         <div className="bg-white/[0.02] border border-white/8 p-5 rounded-xl flex flex-col">
           <div className="flex items-center justify-between mb-3">
-            <h4 className="text-xs font-bold uppercase text-slate-300 tracking-wider">Attendance Breakdown</h4>
+            <h4 className="text-[11px] font-bold uppercase text-slate-300 tracking-wider">Attendance Breakdown</h4>
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
           </div>
 
@@ -793,11 +793,11 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div className="flex items-center gap-2">
             <span className={`w-2.5 h-2.5 rounded-full ${markingProgress.percent === 100 ? "bg-emerald-500" : "bg-indigo-500 animate-pulse"}`} />
-            <h4 className="text-xs font-bold uppercase text-slate-300 tracking-wider">
+            <h4 className="text-[11px] font-bold uppercase text-slate-300 tracking-wider">
               Marking Progress Level
             </h4>
           </div>
-          <span className="text-xs font-bold font-sans text-indigo-400 bg-transparent border border-white/12 text-white border border-transparent px-2.5 py-1 rounded-xl">
+          <span className="text-[11px] font-bold font-sans text-indigo-400 bg-transparent border border-white/12 text-white border border-transparent px-2.5 py-1 rounded-xl">
             {markingProgress.percent}% Complete ({markingProgress.marked}/{markingProgress.total} Roster Assigned)
           </span>
         </div>
@@ -813,7 +813,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
         {/* Salesforce Lightning Left Side Department Filter Navigation */}
         <div className="bg-white/[0.02] border border-white/8 rounded-xl p-4 space-y-2 lg:sticky lg:top-4">
-          <h3 className="text-xs font-bold uppercase text-slate-500 tracking-widest px-3 mb-2.5 flex items-center gap-2">
+          <h3 className="text-[11px] font-bold uppercase text-slate-500 tracking-widest px-3 mb-2.5 flex items-center gap-2">
             <Filter className="w-3 h-3" />
             LOB Departments
           </h3>
@@ -826,13 +826,13 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                 <button
                   key={lob}
                   onClick={() => setSelectedLOB(lob)}
-                  className={`flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl w-full text-left font-semibold text-xs transition-all border shrink-0 lg:shrink-1 ${ isActive ? "bg-white/10 border-white/15 text-slate-100" : "bg-transparent border-transparent text-slate-400 hover:text-slate-200 hover:bg-white/5" }`}
+                  className={`flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl w-full text-left font-semibold text-[11px] transition-all border shrink-0 lg:shrink-1 ${ isActive ? "bg-white/10 border-white/15 text-slate-100" : "bg-transparent border-transparent text-slate-400 hover:text-slate-200 hover:bg-white/5" }`}
                 >
                   <span className="flex items-center gap-2 truncate">
                     <span className={`w-2 h-2 rounded-full ${ lob === "ALL" ? "bg-slate-400" : lob.toLowerCase().includes("chat") ? "bg-indigo-400" : lob.toLowerCase().includes("voice") ? "bg-sky-400" : "bg-emerald-400" }`} />
                     {lob === "ALL" ? "All Departments" : `${lob} Desk`}
                   </span>
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-xl border font-mono ${isActive ? "bg-indigo-500/10 border-transparent text-indigo-300" : "bg-slate-950/40 border-white/8 text-slate-500"}`}>
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-xl border font-mono ${isActive ? "bg-indigo-500/10 border-transparent text-indigo-300" : "bg-slate-950/40 border-white/8 text-slate-500"}`}>
                     {count}
                   </span>
                 </button>
@@ -853,19 +853,19 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                 placeholder="Search staff, LOB or marked status..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-slate-950/50 border border-white/8 focus:border-transparent hover:border-white/8 rounded-xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none transition-all font-medium"
+                className="w-full pl-10 pr-4 py-2 bg-slate-950/50 border border-white/8 focus:border-transparent hover:border-white/8 rounded-xl text-[11px] text-slate-200 placeholder-slate-500 focus:outline-none transition-all font-medium"
               />
             </div>
 
             <div className="flex items-center justify-between w-full md:w-auto gap-4">
-              <span className="text-xs text-slate-500 font-bold font-sans">
+              <span className="text-[11px] text-slate-500 font-bold font-sans">
                 Showing {filteredRoster.length} of {processedRoster.length} matches
               </span>
 
               <button
                 onClick={handleExportSingleDate}
                 disabled={processedRoster.length === 0}
-                className="h-9 px-4 bg-white/5 hover:bg-white/10 border border-white/8 text-slate-300 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+                className="h-9 px-4 bg-white/5 hover:bg-white/10 border border-white/8 text-slate-300 rounded-xl text-[11px] font-bold transition-all flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
               >
                 <Download className="w-3.5 h-3.5" /> Export {selectedDate}
               </button>
@@ -878,7 +878,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
               <div className="p-12 text-center text-slate-500 space-y-2">
                 <AlertOctagon className="w-8 h-8 text-slate-600 mx-auto" />
                 <p className="font-semibold text-slate-400">No agent records matches active filter</p>
-                <p className="text-xs text-slate-600">Clear search input or change selected desk filter to view all roster lists.</p>
+                <p className="text-[11px] text-slate-600">Clear search input or change selected desk filter to view all roster lists.</p>
               </div>
             ) : (
               <div className="relative">
@@ -904,7 +904,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                       <col className="w-[22%]" />
                     </colgroup>
                     <thead>
-                      <tr className="border-b border-white/8 bg-slate-950/20 text-slate-400 text-xs font-bold uppercase tracking-widest">
+                      <tr className="border-b border-white/8 bg-slate-950/20 text-slate-400 text-[11px] font-bold uppercase tracking-widest">
                         <th className="p-2.5 pl-4">Personnel Agent Roster</th>
                         <th className="p-2.5">Desk LOB</th>
                         <th className="p-2.5 text-center">Attendance Status</th>
@@ -924,19 +924,19 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                             {/* Name & Initials Avatar */}
                             <td className="p-2.5 pl-4">
                               <div className="flex items-center gap-3 min-w-0">
-                                <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${getLOBGradient(item.lob)} flex items-center justify-center text-white text-xs font-bold tracking-wider -sm shrink-0`}>
+                                <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${getLOBGradient(item.lob)} flex items-center justify-center text-white text-[11px] font-bold tracking-wider -sm shrink-0`}>
                                   {getInitials(item.name)}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <div className="font-bold text-slate-200 text-xs truncate max-w-full" title={item.name}>
+                                  <div className="font-bold text-slate-200 text-[11px] truncate max-w-full" title={item.name}>
                                     {item.name}
                                   </div>
                                   {item.record?.markedBy ? (
-                                    <div className="text-xs text-slate-500 mt-0.5 font-sans truncate max-w-full" title={`Marked by ${item.record.markedBy}`}>
+                                    <div className="text-[11px] text-slate-500 mt-0.5 font-sans truncate max-w-full" title={`Marked by ${item.record.markedBy}`}>
                                       Marked by {item.record.markedBy} at {new Date(item.record.markedAt || "").toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </div>
                                   ) : (
-                                    <div className="text-xs text-indigo-400/60 mt-0.5 tracking-wider uppercase font-bold text-xs truncate max-w-full">
+                                    <div className="text-[11px] text-indigo-400/60 mt-0.5 tracking-wider uppercase font-bold text-[11px] truncate max-w-full">
                                       Awaiting Decision
                                     </div>
                                   )}
@@ -946,7 +946,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                                     const isNight = shift.includes("Night");
                                     const isMid = shift.includes("Midday");
                                     return (
-                                      <div className={`text-xs font-bold font-mono mt-0.5 truncate max-w-full ${isNight ? "text-purple-400/80" : isMid ? "text-amber-400/80" : "text-emerald-400/80"}`}>
+                                      <div className={`text-[11px] font-bold font-mono mt-0.5 truncate max-w-full ${isNight ? "text-purple-400/80" : isMid ? "text-amber-400/80" : "text-emerald-400/80"}`}>
                                         {shift}
                                       </div>
                                     );
@@ -957,7 +957,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
 
                             {/* LOB Desk Badge */}
                             <td className="p-2.5">
-                              <span className="text-xs font-bold bg-slate-950/40 border border-white/8 px-2.5 py-1 rounded-xl text-slate-300 uppercase tracking-wider truncate inline-block max-w-full">
+                              <span className="text-[11px] font-bold bg-slate-950/40 border border-white/8 px-2.5 py-1 rounded-xl text-slate-300 uppercase tracking-wider truncate inline-block max-w-full">
                                 {item.lob}
                               </span>
                             </td>
@@ -965,7 +965,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                             {/* Interactive Status Indicator with dynamic fields */}
                             <td className="p-2.5">
                               <div className="flex flex-col items-center justify-center gap-1.5 min-w-0">
-                                <span className={`px-2.5 py-1 text-xs uppercase font-bold border rounded-lg font-mono truncate max-w-full ${badgeColor}`}>
+                                <span className={`px-2.5 py-1 text-[11px] uppercase font-bold border rounded-lg font-mono truncate max-w-full ${badgeColor}`}>
                                   {effectiveStatus === "not_marked"
                                     ? "NOT MARKED"
                                     : effectiveStatus === "nsnc"
@@ -983,12 +983,12 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                                 {/* Inline Late Entry Time Dial */}
                                 {item.status === "late" && (
                                   <div className="flex items-center gap-1 mt-1 shrink-0">
-                                    <span className="text-xs text-slate-500 uppercase font-bold mr-1">Time:</span>
+                                    <span className="text-[11px] text-slate-500 uppercase font-bold mr-1">Time:</span>
                                     <input
                                       type="time"
                                       value={lateTimes[item.name] || "09:00"}
                                       onChange={(e) => handleLateTimeChange(item.name, e.target.value)}
-                                      className="bg-slate-950 border border-white/8 text-slate-100 rounded px-1.5 py-0.5 text-xs font-sans font-bold focus:outline-none focus:border-transparent"
+                                      className="bg-slate-950 border border-white/8 text-slate-100 rounded px-1.5 py-0.5 text-[11px] font-sans font-bold focus:outline-none focus:border-transparent"
                                     />
                                   </div>
                                 )}
@@ -1064,19 +1064,19 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                         <div key={item.name} className="p-5 space-y-4 hover:bg-slate-800/10 transition-colors">
                           <div className="flex justify-between items-start">
                             <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${getLOBGradient(item.lob)} flex items-center justify-center text-white text-xs font-bold`}>
+                              <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${getLOBGradient(item.lob)} flex items-center justify-center text-white text-[11px] font-bold`}>
                                 {getInitials(item.name)}
                               </div>
                               <div>
-                                <h4 className="font-bold text-slate-100 text-xs">{item.name}</h4>
-                                <p className="text-xs text-slate-500 mt-0.5">Section LOB: {item.lob}</p>
+                                <h4 className="font-bold text-slate-100 text-[11px]">{item.name}</h4>
+                                <p className="text-[11px] text-slate-500 mt-0.5">Section LOB: {item.lob}</p>
                                 {(() => {
                                   const shift = getAgentShiftLabel(item.name);
                                   if (!shift) return null;
                                   const isNight = shift.includes("Night");
                                   const isMid = shift.includes("Midday");
                                   return (
-                                    <p className={`text-xs font-bold font-mono mt-0.5 ${isNight ? "text-purple-400/80" : isMid ? "text-amber-400/80" : "text-emerald-400/80"}`}>
+                                    <p className={`text-[11px] font-bold font-mono mt-0.5 ${isNight ? "text-purple-400/80" : isMid ? "text-amber-400/80" : "text-emerald-400/80"}`}>
                                       {shift}
                                     </p>
                                   );
@@ -1085,7 +1085,7 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                             </div>
 
                             <div className="flex flex-col items-end gap-1.5">
-                              <span className={`px-2 py-0.5 rounded-lg text-xs uppercase font-bold border ${badgeColor}`}>
+                              <span className={`px-2 py-0.5 rounded-lg text-[11px] uppercase font-bold border ${badgeColor}`}>
                                 {effectiveStatus === "not_marked"
                                   ? "NOT MARKED"
                                   : effectiveStatus === "nsnc"
@@ -1100,12 +1100,12 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
 
                               {item.status === "late" && (
                                 <div className="flex items-center gap-1.5">
-                                  <span className="text-xs text-slate-500 font-bold uppercase">Time:</span>
+                                  <span className="text-[11px] text-slate-500 font-bold uppercase">Time:</span>
                                   <input
                                     type="time"
                                     value={lateTimes[item.name] || "09:00"}
                                     onChange={(e) => handleLateTimeChange(item.name, e.target.value)}
-                                    className="bg-slate-950 border border-white/8 text-slate-100 rounded px-1.5 py-0.5 text-xs font-sans font-bold focus:outline-none focus:border-transparent"
+                                    className="bg-slate-950 border border-white/8 text-slate-100 rounded px-1.5 py-0.5 text-[11px] font-sans font-bold focus:outline-none focus:border-transparent"
                                   />
                                 </div>
                               )}
@@ -1167,21 +1167,21 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
             {/* Unified Pagination Controls Bar */}
             {totalPages > 1 && (
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-950/40 border-t border-white/8 p-4">
-                <div className="text-xs text-slate-400 font-semibold font-sans">
+                <div className="text-[11px] text-slate-400 font-semibold font-sans">
                   Showing {Math.min(filteredRoster.length, (currentPage - 1) * itemsPerPage + 1)}-{Math.min(filteredRoster.length, currentPage * itemsPerPage)} of {filteredRoster.length} matches
                 </div>
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <button
                     onClick={() => setCurrentPage(1)}
                     disabled={currentPage === 1}
-                    className="h-8 px-2.5 bg-white/[0.03] border border-white/8 hover:border-white/8 text-slate-400 hover:text-slate-200 disabled:opacity-35 rounded-xl text-xs font-bold transition-all disabled:cursor-not-allowed select-none"
+                    className="h-8 px-2.5 bg-white/[0.03] border border-white/8 hover:border-white/8 text-slate-400 hover:text-slate-200 disabled:opacity-35 rounded-xl text-[11px] font-bold transition-all disabled:cursor-not-allowed select-none"
                   >
                     &laquo;
                   </button>
                   <button
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
-                    className="h-8 px-3 bg-white/[0.03] border border-white/8 hover:border-white/8 text-slate-400 hover:text-slate-200 disabled:opacity-35 rounded-xl text-xs font-bold transition-all disabled:cursor-not-allowed flex items-center gap-1 select-none"
+                    className="h-8 px-3 bg-white/[0.03] border border-white/8 hover:border-white/8 text-slate-400 hover:text-slate-200 disabled:opacity-35 rounded-xl text-[11px] font-bold transition-all disabled:cursor-not-allowed flex items-center gap-1 select-none"
                   >
                     <ChevronLeft className="w-3.5 h-3.5" /> Prev
                   </button>
@@ -1194,10 +1194,10 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                         const showEllipsis = prevVal && p - prevVal > 1;
                         return (
                           <React.Fragment key={p}>
-                            {showEllipsis && <span className="text-slate-600 px-1 text-xs font-bold">...</span>}
+                            {showEllipsis && <span className="text-slate-600 px-1 text-[11px] font-bold">...</span>}
                             <button
                               onClick={() => setCurrentPage(p)}
-                              className={`w-8 h-8 rounded-xl text-xs font-bold flex items-center justify-center transition-all ${ currentPage === p ? "bg-white/10 border border-white/15 text-white" : "bg-slate-950/30 border border-white/8 text-slate-400 hover:text-slate-100 hover:bg-white/[0.05]" }`}
+                              className={`w-8 h-8 rounded-xl text-[11px] font-bold flex items-center justify-center transition-all ${ currentPage === p ? "bg-white/10 border border-white/15 text-white" : "bg-slate-950/30 border border-white/8 text-slate-400 hover:text-slate-100 hover:bg-white/[0.05]" }`}
                             >
                               {p}
                             </button>
@@ -1209,14 +1209,14 @@ export const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                   <button
                     onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
-                    className="h-8 px-3 bg-white/[0.03] border border-white/8 hover:border-white/8 text-slate-400 hover:text-slate-200 disabled:opacity-35 rounded-xl text-xs font-bold transition-all disabled:cursor-not-allowed flex items-center gap-1 select-none"
+                    className="h-8 px-3 bg-white/[0.03] border border-white/8 hover:border-white/8 text-slate-400 hover:text-slate-200 disabled:opacity-35 rounded-xl text-[11px] font-bold transition-all disabled:cursor-not-allowed flex items-center gap-1 select-none"
                   >
                     Next <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => setCurrentPage(totalPages)}
                     disabled={currentPage === totalPages}
-                    className="h-8 px-2.5 bg-white/[0.03] border border-white/8 hover:border-white/8 text-slate-400 hover:text-slate-200 disabled:opacity-35 rounded-xl text-xs font-bold transition-all disabled:cursor-not-allowed select-none"
+                    className="h-8 px-2.5 bg-white/[0.03] border border-white/8 hover:border-white/8 text-slate-400 hover:text-slate-200 disabled:opacity-35 rounded-xl text-[11px] font-bold transition-all disabled:cursor-not-allowed select-none"
                   >
                     &raquo;
                   </button>
@@ -1275,9 +1275,9 @@ const StatusSelectorButton = ({
     >
       <span className="flex items-center justify-center shrink-0">{icon}</span>
       {iconOnly ? (
-        <span className="text-xs font-bold uppercase tracking-tight leading-none">{label}</span>
+        <span className="text-[11px] font-bold uppercase tracking-tight leading-none">{label}</span>
       ) : (
-        <span className="text-xs">{label}</span>
+        <span className="text-[11px]">{label}</span>
       )}
     </button>
   );

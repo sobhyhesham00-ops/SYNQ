@@ -71,8 +71,8 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold text-slate-100 tracking-tight">Connected Integrations</h2>
-        <p className="text-sm text-slate-400">Manage external service connections for enhanced productivity.</p>
+        <h2 className="text-lg font-bold text-slate-100 tracking-tight">Connected Integrations</h2>
+        <p className="text-xs text-slate-400">Manage external service connections for enhanced productivity.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -93,15 +93,15 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
                   <Calendar className="w-7 h-7 text-indigo-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-100">Google Workspace</h3>
+                  <h3 className="text-sm font-bold text-slate-100">Google Workspace</h3>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-400 font-mono tracking-widest uppercase">Drive & Calendar</span>
+                    <span className="text-[11px] text-slate-400 font-mono tracking-widest uppercase">Drive & Calendar</span>
                     {token ? (
-                      <span className="flex items-center gap-1 text-xs font-bold text-emerald-400 uppercase bg-transparent border border-white/12 text-white px-2 py-0.5 rounded border border-transparent">
+                      <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-400 uppercase bg-transparent border border-white/12 text-white px-2 py-0.5 rounded border border-transparent">
                         <CheckCircle2 className="w-2.5 h-2.5" /> Linked
                       </span>
                     ) : (
-                      <span className="flex items-center gap-1 text-xs font-bold text-amber-400 uppercase bg-amber-500/10 px-2 py-0.5 rounded border border-transparent">
+                      <span className="flex items-center gap-1 text-[11px] font-bold text-amber-400 uppercase bg-amber-500/10 px-2 py-0.5 rounded border border-transparent">
                         <AlertCircle className="w-2.5 h-2.5" /> Not Connected
                       </span>
                     )}
@@ -111,23 +111,23 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
             </div>
 
             <div className="space-y-4">
-              <p className="text-sm text-slate-300 leading-relaxed">
+              <p className="text-xs text-slate-300 leading-relaxed">
                 Sync your rosters to Google Calendar or export universal .ics files for Outlook and Apple Calendar. Save reports directly to your Google Drive.
               </p>
 
               <div className="grid grid-cols-1 gap-2">
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-transparent border border-white/8">
                   <Calendar className="w-4 h-4 text-indigo-400" />
-                  <div className="text-xs">
+                  <div className="text-[11px]">
                     <p className="font-bold text-slate-200">Universal Calendar Sync</p>
-                    <p className="text-xs text-slate-500">Add shifts to Google, Outlook, or Apple Calendar.</p>
+                    <p className="text-[11px] text-slate-500">Add shifts to Google, Outlook, or Apple Calendar.</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-transparent border border-white/8">
                   <Cloud className="w-4 h-4 text-sky-400" />
-                  <div className="text-xs">
+                  <div className="text-[11px]">
                     <p className="font-bold text-slate-200">Google Drive Export</p>
-                    <p className="text-xs text-slate-500">Save CSV and PDF reports directly to your cloud storage.</p>
+                    <p className="text-[11px] text-slate-500">Save CSV and PDF reports directly to your cloud storage.</p>
                   </div>
                 </div>
               </div>
@@ -138,10 +138,10 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
                 <div className="flex flex-col gap-3">
                   <div className="p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-bold">
+                      <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-[11px] font-bold">
                         G
                       </div>
-                      <div className="text-xs">
+                      <div className="text-[11px]">
                         <p className="text-indigo-200 font-bold">Authorized Session</p>
                         <p className="text-slate-500 truncate max-w-[150px]">{currentUser.name}</p>
                       </div>
@@ -159,7 +159,7 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
                 <button
                   onClick={handleLinkGoogle}
                   disabled={isLinking}
-                  className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl font-bold text-sm uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl font-bold text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2"
                 >
                   {isLinking ? (
                     <RefreshCw className="w-5 h-5 animate-spin" />
@@ -178,25 +178,25 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
         {/* Security & Access Info Card */}
         <div className="space-y-6">
           <div className="bg-white/[0.02] border border-white/8 rounded-xl p-6 space-y-4">
-            <h4 className="text-xs font-bold text-indigo-300 uppercase tracking-widest flex items-center gap-2">
+            <h4 className="text-[11px] font-bold text-indigo-300 uppercase tracking-widest flex items-center gap-2">
               <ShieldCheck className="w-4 h-4" /> Security Protocol
             </h4>
             <div className="space-y-3">
               <div className="flex gap-3">
                 <Lock className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <p className="text-[11px] text-slate-400 leading-relaxed">
                   Authentication tokens are stored strictly in volatile memory. No credentials or session keys are persisted to your browser's local storage.
                 </p>
               </div>
               <div className="flex gap-3">
                 <FileText className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <p className="text-[11px] text-slate-400 leading-relaxed">
                   Permissions are restricted to app-created files and calendar events. We do not access your full personal Drive or private Calendar history.
                 </p>
               </div>
               <div className="flex gap-3">
                 <Clock className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <p className="text-[11px] text-slate-400 leading-relaxed">
                   Sessions automatically expire upon logging out or closing the browser tab to ensure maximum security of your Workspace data.
                 </p>
               </div>
@@ -205,8 +205,8 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
 
           <div className="bg-indigo-600/10 border border-transparent rounded-xl p-6 flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-xs font-bold text-slate-100">Ready to sync?</p>
-              <p className="text-xs text-slate-400">Head over to your schedule to see new Google options.</p>
+              <p className="text-[11px] font-bold text-slate-100">Ready to sync?</p>
+              <p className="text-[11px] text-slate-400">Head over to your schedule to see new Google options.</p>
             </div>
             <ExternalLink className="w-5 h-5 text-indigo-400" />
           </div>
@@ -215,14 +215,14 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
             <div className="bg-rose-500/10 border border-transparent rounded-xl p-6 space-y-4">
               <div className="flex items-center gap-2 text-rose-400">
                 <ShieldCheck className="w-5 h-5" />
-                <h4 className="text-xs font-bold uppercase tracking-widest">Dangerous Zone</h4>
+                <h4 className="text-[11px] font-bold uppercase tracking-widest">Dangerous Zone</h4>
               </div>
-              <p className="text-xs text-slate-400">
+              <p className="text-[11px] text-slate-400">
                 Admin tool for complete data management. Use with extreme caution.
               </p>
               <button
                 onClick={onReset}
-                className="w-full py-3 bg-rose-500 hover:bg-rose-400 text-white rounded-xl font-bold text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                className="w-full py-3 bg-rose-500 hover:bg-rose-400 text-white rounded-xl font-bold text-[11px] uppercase tracking-widest transition-all flex items-center justify-center gap-2"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 Reset Full System Data

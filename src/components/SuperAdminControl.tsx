@@ -75,7 +75,7 @@ const ROLE_OPTIONS = [
 const getRoleBadge = (role: string) => {
   const r = ROLE_OPTIONS.find(o => o.value === role) || ROLE_OPTIONS[0];
   return (
-    <span className={`text-xs px-2 py-0.5 rounded-lg border font-bold uppercase tracking-wider ${r.color}`}>
+    <span className={`text-[11px] px-2 py-0.5 rounded-lg border font-bold uppercase tracking-wider ${r.color}`}>
       {r.label}
     </span>
   );
@@ -416,25 +416,25 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
             <Terminal className="w-5 h-5 text-rose-400" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-slate-100 font-sans tracking-tight flex items-center gap-2">
+            <h2 className="text-base font-bold text-slate-100 font-sans tracking-tight flex items-center gap-2">
               Admin Console
-              <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-rose-500/10 border border-transparent text-rose-400 uppercase tracking-widest">h.sobhy only</span>
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-rose-500/10 border border-transparent text-rose-400 uppercase tracking-widest">h.sobhy only</span>
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">User directory · Access control · Security · System ops</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">User directory · Access control · Security · System ops</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           {isSuperAdmin && onCloseAllCases && (
             <button
               onClick={onCloseAllCases}
-              className="px-3 py-2 text-xs font-bold rounded-xl bg-rose-500/10 hover:bg-rose-500/10 text-rose-300 border border-transparent flex items-center gap-1.5 transition-all cursor-pointer"
+              className="px-3 py-2 text-[11px] font-bold rounded-xl bg-rose-500/10 hover:bg-rose-500/10 text-rose-300 border border-transparent flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <ServerCrash className="w-3.5 h-3.5" /> Close All Cases
             </button>
           )}
           <button
             onClick={handleRemoteReloadForce}
-            className="px-3 py-2 text-xs font-bold rounded-xl bg-amber-500/10 hover:bg-amber-500/10 text-amber-300 border border-transparent flex items-center gap-1.5 transition-all cursor-pointer"
+            className="px-3 py-2 text-[11px] font-bold rounded-xl bg-amber-500/10 hover:bg-amber-500/10 text-amber-300 border border-transparent flex items-center gap-1.5 transition-all cursor-pointer"
           >
             <Zap className="w-3.5 h-3.5" /> Force Re-Sync (v{TRIGGER_CURRENT_APP_VERSION})
           </button>
@@ -447,8 +447,8 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
           <div key={s.label} className="bg-white/[0.04] border border-white/8 rounded-xl p-3 flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center shrink-0">{s.icon}</div>
             <div>
-              <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
-              <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">{s.label}</p>
+              <p className={`text-base font-bold ${s.color}`}>{s.value}</p>
+              <p className="text-[11px] text-slate-500 uppercase tracking-wider font-bold">{s.label}</p>
             </div>
           </div>
         ))}
@@ -463,7 +463,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
               onClick={() => setShowAddForm(!showAddForm)}
               className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-white/5 transition-colors"
             >
-              <div className="flex items-center gap-2 text-sm font-bold text-slate-200">
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-200">
                 <UserPlus className="w-4 h-4 text-cyan-400" />
                 Add New User
               </div>
@@ -481,25 +481,25 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                 >
                   <form onSubmit={handleCreateUser} className="p-5 space-y-3">
                     <div>
-                      <label className="text-xs uppercase font-bold text-slate-500 tracking-wider block mb-1">Full Name *</label>
+                      <label className="text-[11px] uppercase font-bold text-slate-500 tracking-wider block mb-1">Full Name *</label>
                       <input
                         type="text"
                         required
                         placeholder="e.g. Aly Ibrahim"
                         value={newUserName}
                         onChange={e => setNewUserName(e.target.value)}
-                        className="w-full bg-white/[0.02] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-transparent placeholder:text-slate-600"
+                        className="w-full bg-white/[0.02] border border-white/8 rounded-xl px-3 py-2 text-[11px] text-slate-100 focus:outline-none focus:border-transparent placeholder:text-slate-600"
                       />
                     </div>
                     <div>
-                      <label className="text-xs uppercase font-bold text-slate-500 tracking-wider block mb-1">Role</label>
+                      <label className="text-[11px] uppercase font-bold text-slate-500 tracking-wider block mb-1">Role</label>
                       <div className="grid grid-cols-4 gap-1">
                         {ROLE_OPTIONS.map(r => (
                           <button
                             key={r.value}
                             type="button"
                             onClick={() => setNewUserRole(r.value)}
-                            className={`py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all ${newUserRole === r.value ? r.color : 'bg-white/5 text-slate-500 border-transparent hover:bg-white/10'}`}
+                            className={`py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider border transition-all ${newUserRole === r.value ? r.color : 'bg-white/5 text-slate-500 border-transparent hover:bg-white/10'}`}
                           >
                             {r.label}
                           </button>
@@ -508,35 +508,35 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="text-xs uppercase font-bold text-slate-500 tracking-wider block mb-1">Email</label>
+                        <label className="text-[11px] uppercase font-bold text-slate-500 tracking-wider block mb-1">Email</label>
                         <input type="email" placeholder="email@co.com" value={newUserEmail} onChange={e => setNewUserEmail(e.target.value)}
-                          className="w-full bg-white/[0.02] border border-white/8 rounded-xl px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-transparent placeholder:text-slate-600" />
+                          className="w-full bg-white/[0.02] border border-white/8 rounded-xl px-2 py-1.5 text-[11px] text-slate-100 focus:outline-none focus:border-transparent placeholder:text-slate-600" />
                       </div>
                       <div>
-                        <label className="text-xs uppercase font-bold text-slate-500 tracking-wider block mb-1">LOB</label>
+                        <label className="text-[11px] uppercase font-bold text-slate-500 tracking-wider block mb-1">LOB</label>
                         <input type="text" placeholder="Chat / Call" value={newUserLob} onChange={e => setNewUserLob(e.target.value)}
-                          className="w-full bg-white/[0.02] border border-white/8 rounded-xl px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-transparent placeholder:text-slate-600" />
+                          className="w-full bg-white/[0.02] border border-white/8 rounded-xl px-2 py-1.5 text-[11px] text-slate-100 focus:outline-none focus:border-transparent placeholder:text-slate-600" />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="text-xs uppercase font-bold text-slate-500 tracking-wider block mb-1">LOB Team</label>
+                        <label className="text-[11px] uppercase font-bold text-slate-500 tracking-wider block mb-1">LOB Team</label>
                         <input
                           type="text"
                           placeholder="Team name"
                           value={newUserTeam}
                           onChange={e => setNewUserTeam(e.target.value)}
-                          className="w-full bg-white/[0.02] border border-white/8 rounded-xl px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-transparent placeholder:text-slate-600"
+                          className="w-full bg-white/[0.02] border border-white/8 rounded-xl px-2 py-1.5 text-[11px] text-slate-100 focus:outline-none focus:border-transparent placeholder:text-slate-600"
                         />
                       </div>
                       <div>
-                        <label className="text-xs uppercase font-bold text-slate-500 tracking-wider block mb-1">Team Leader</label>
+                        <label className="text-[11px] uppercase font-bold text-slate-500 tracking-wider block mb-1">Team Leader</label>
                         <input type="text" placeholder="TL Full Name" value={newUserTL} onChange={e => setNewUserTL(e.target.value)}
-                          className="w-full bg-white/[0.02] border border-white/8 rounded-xl px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-transparent placeholder:text-slate-600" />
+                          className="w-full bg-white/[0.02] border border-white/8 rounded-xl px-2 py-1.5 text-[11px] text-slate-100 focus:outline-none focus:border-transparent placeholder:text-slate-600" />
                       </div>
                     </div>
                     <button type="submit"
-                      className="w-full py-2 bg-cyan-500/10 hover:bg-cyan-500/10 border border-transparent text-cyan-300 font-bold text-xs uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-1.5">
+                      className="w-full py-2 bg-cyan-500/10 hover:bg-cyan-500/10 border border-transparent text-cyan-300 font-bold text-[11px] uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-1.5">
                       <UserPlus className="w-3.5 h-3.5" /> Create Profile
                     </button>
                   </form>
@@ -547,22 +547,22 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
           {/* Audit log */}
           <div className="bg-white/[0.04] border border-white/8 rounded-xl p-4 space-y-3">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+            <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
               <Clock className="w-3.5 h-3.5 text-indigo-400" /> Recent Actions
             </h3>
             <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
               {!auditLog || auditLog.length === 0 ? (
-                <p className="text-xs text-slate-600 italic text-center py-4">No actions logged yet.</p>
+                <p className="text-[11px] text-slate-600 italic text-center py-4">No actions logged yet.</p>
               ) : (
                 auditLog.slice(0, 30).map(log => (
                   <div key={log.id} className="flex items-start gap-2 p-2.5 bg-transparent rounded-xl border border-white/8">
                     <div className="mt-0.5 shrink-0"><AuditActionIcon action={log.action} /></div>
                     <div className="min-w-0">
-                      <p className="text-xs text-slate-200 font-semibold truncate">
+                      <p className="text-[11px] text-slate-200 font-semibold truncate">
                         {auditActionLabel[log.action] || log.action}{' '}
                         <span className="text-indigo-300">· {log.targetUser}</span>
                       </p>
-                      <p className="text-xs text-slate-500 mt-0.5">{formatRelativeTime(log.timestamp)}</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5">{formatRelativeTime(log.timestamp)}</p>
                     </div>
                   </div>
                 ))
@@ -573,7 +573,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
           {/* Security note */}
           <div className="bg-rose-500/5 border border-rose-500/15 rounded-xl p-3 flex gap-2">
             <AlertCircle className="w-3.5 h-3.5 text-rose-400 mt-0.5 shrink-0" />
-            <p className="text-xs text-rose-200/70 leading-relaxed">
+            <p className="text-[11px] text-rose-200/70 leading-relaxed">
               Credential changes update the global security schema instantly. Unlocking an account also clears all failed login tallies for that user.
             </p>
           </div>
@@ -590,7 +590,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                 placeholder="Search by name, username, role, email…"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full bg-white/[0.02] border border-white/8 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-transparent placeholder:text-slate-600"
+                className="w-full bg-white/[0.02] border border-white/8 rounded-xl pl-9 pr-4 py-2 text-[11px] text-slate-200 focus:outline-none focus:border-transparent placeholder:text-slate-600"
               />
             </div>
             <div className="flex gap-1">
@@ -598,7 +598,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                 <button
                   key={f.v}
                   onClick={() => setRoleFilter(f.v)}
-                  className={`px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all ${ roleFilter === f.v ? 'bg-indigo-500/10 text-indigo-300 border-transparent' : 'bg-white/5 text-slate-500 border-transparent hover:bg-white/10 hover:text-slate-300' }`}
+                  className={`px-3 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider border transition-all ${ roleFilter === f.v ? 'bg-indigo-500/10 text-indigo-300 border-transparent' : 'bg-white/5 text-slate-500 border-transparent hover:bg-white/10 hover:text-slate-300' }`}
                 >
                   {f.l}
                 </button>
@@ -610,7 +610,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
             {filteredUsers.length === 0 && (
               <div className="text-center py-12 bg-transparent rounded-xl border border-white/8">
                 <XCircle className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                <p className="text-xs text-slate-500">No users match your search.</p>
+                <p className="text-[11px] text-slate-500">No users match your search.</p>
               </div>
             )}
 
@@ -631,27 +631,27 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                   {/* Card header row */}
                   <div className="flex items-center gap-3 px-4 py-3">
                     {/* Avatar */}
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${ user.role === 'tl' ? 'bg-indigo-500/10 text-indigo-300' : user.role === 'qa' ? 'bg-amber-500/10 text-amber-300' : user.role === 'director' ? 'bg-fuchsia-500/10 text-fuchsia-300' : 'bg-slate-700/30 text-slate-300' }`}>
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-[11px] shrink-0 ${ user.role === 'tl' ? 'bg-indigo-500/10 text-indigo-300' : user.role === 'qa' ? 'bg-amber-500/10 text-amber-300' : user.role === 'director' ? 'bg-fuchsia-500/10 text-fuchsia-300' : 'bg-slate-700/30 text-slate-300' }`}>
                       {String(user.name || '').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
                     </div>
 
                     {/* Identity */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="font-bold text-slate-100 text-sm">{user.name}</span>
-                        <span className="font-mono text-xs text-cyan-400/70 font-bold">@{uname}</span>
+                        <span className="font-bold text-slate-100 text-xs">{user.name}</span>
+                        <span className="font-mono text-[11px] text-cyan-400/70 font-bold">@{uname}</span>
                         {getRoleBadge(user.role)}
                         {!isRegistered && (
-                          <span className="text-xs px-1.5 py-0.5 rounded-lg bg-slate-700/40 border border-slate-600/30 text-slate-500 font-bold uppercase tracking-wider">legacy</span>
+                          <span className="text-[11px] px-1.5 py-0.5 rounded-lg bg-slate-700/40 border border-slate-600/30 text-slate-500 font-bold uppercase tracking-wider">legacy</span>
                         )}
                         {hasPassword
-                          ? <span className="text-xs px-1.5 py-0.5 rounded-lg bg-transparent border border-white/12 text-white border border-transparent text-emerald-400 font-bold flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5" /> PW</span>
-                          : <span className="text-xs px-1.5 py-0.5 rounded-lg bg-amber-500/10 border border-transparent text-amber-400 font-bold flex items-center gap-0.5"><AlertCircle className="w-2.5 h-2.5" /> NO PW</span>
+                          ? <span className="text-[11px] px-1.5 py-0.5 rounded-lg bg-transparent border border-white/12 text-white border border-transparent text-emerald-400 font-bold flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5" /> PW</span>
+                          : <span className="text-[11px] px-1.5 py-0.5 rounded-lg bg-amber-500/10 border border-transparent text-amber-400 font-bold flex items-center gap-0.5"><AlertCircle className="w-2.5 h-2.5" /> NO PW</span>
                         }
-                        {isUserLocked && <span className="text-xs px-1.5 py-0.5 rounded-lg bg-rose-500/10 border border-transparent text-rose-400 font-bold flex items-center gap-0.5"><Lock className="w-2.5 h-2.5" /> LOCKED</span>}
-                        {failureCount > 0 && <span className="text-xs px-1.5 py-0.5 rounded-lg bg-orange-500/10 border border-transparent text-orange-400 font-bold">{failureCount} fails</span>}
+                        {isUserLocked && <span className="text-[11px] px-1.5 py-0.5 rounded-lg bg-rose-500/10 border border-transparent text-rose-400 font-bold flex items-center gap-0.5"><Lock className="w-2.5 h-2.5" /> LOCKED</span>}
+                        {failureCount > 0 && <span className="text-[11px] px-1.5 py-0.5 rounded-lg bg-orange-500/10 border border-transparent text-orange-400 font-bold">{failureCount} fails</span>}
                       </div>
-                      <p className="text-xs text-slate-500 mt-0.5 font-sans">
+                      <p className="text-[11px] text-slate-500 mt-0.5 font-sans">
                         {user.lob && <span>{normalizeAgentLob(user.lob, user.role)} · </span>}
                         {user.lobTeam && <span>{user.lobTeam} · </span>}
                         {user.teamLeader && <span>TL: {user.teamLeader} · </span>}
@@ -676,7 +676,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                       {failureCount > 0 && (
                         <button
                           onClick={() => handleClearAttempts(user.name)}
-                          className="px-2 py-1 bg-orange-500/10 hover:bg-orange-500/10 border border-transparent rounded-xl text-xs text-orange-400 font-bold transition-all flex items-center gap-0.5 cursor-pointer"
+                          className="px-2 py-1 bg-orange-500/10 hover:bg-orange-500/10 border border-transparent rounded-xl text-[11px] text-orange-400 font-bold transition-all flex items-center gap-0.5 cursor-pointer"
                           title={`Clear ${failureCount} failed attempts`}
                         >
                           Clear ({failureCount}x)
@@ -695,13 +695,13 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                         <div className="flex items-center gap-1 bg-rose-500/10 border border-transparent rounded-xl p-0.5">
                           <button
                             onClick={() => handleDeleteUser(user)}
-                            className="px-2 py-1 bg-rose-500 text-white hover:bg-rose-600 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+                            className="px-2 py-1 bg-rose-500 text-white hover:bg-rose-600 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer"
                           >
                             Confirm
                           </button>
                           <button
                             onClick={() => setConfirmDeleteId(null)}
-                            className="px-2 py-1 bg-white/5 text-slate-300 hover:bg-white/10 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+                            className="px-2 py-1 bg-white/5 text-slate-300 hover:bg-white/10 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer"
                           >
                             Cancel
                           </button>
@@ -730,12 +730,12 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                       >
                         <div className="border-t border-white/8 bg-transparent px-4 py-4 space-y-4">
                           <div className="flex items-center justify-between pb-1 border-b border-white/8">
-                            <span className="text-xs uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
+                            <span className="text-[11px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
                               <Shield className="w-3.5 h-3.5 text-indigo-400 animate-pulse" /> Edit Operator Details
                             </span>
                             <button
                               onClick={() => handleSaveEdit(user)}
-                              className="px-3 py-1 bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                              className="px-3 py-1 bg-cyan-500 hover:bg-cyan-400 text-black text-[11px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer"
                             >
                               Save Changes
                             </button>
@@ -743,14 +743,14 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
 
                           {/* Role picker */}
                           <div>
-                            <label className="text-xs uppercase font-bold text-slate-500 tracking-wider block mb-1.5">Role</label>
+                            <label className="text-[11px] uppercase font-bold text-slate-500 tracking-wider block mb-1.5">Role</label>
                             <div className="grid grid-cols-4 gap-1.5">
                               {ROLE_OPTIONS.map(r => (
                                 <button
                                   key={r.value}
                                   type="button"
                                   onClick={() => setEditRole(r.value)}
-                                  className={`py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all cursor-pointer ${ editRole === r.value ? r.color : 'bg-white/5 text-slate-500 border-transparent hover:bg-white/10 hover:text-slate-300' }`}
+                                  className={`py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider border transition-all cursor-pointer ${ editRole === r.value ? r.color : 'bg-white/5 text-slate-500 border-transparent hover:bg-white/10 hover:text-slate-300' }`}
                                 >
                                   {r.label}
                                 </button>
@@ -768,13 +768,13 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                               { label: 'Team Leader', val: editTL, set: setEditTL, type: 'text', ph: 'TL full name' },
                             ].map(f => (
                               <div key={f.label}>
-                                <label className="text-xs uppercase font-bold text-slate-500 tracking-wider block mb-1">{f.label}</label>
+                                <label className="text-[11px] uppercase font-bold text-slate-500 tracking-wider block mb-1">{f.label}</label>
                                 <input
                                   type={f.type}
                                   value={f.val}
                                   placeholder={f.ph}
                                   onChange={e => f.set(e.target.value)}
-                                  className="w-full bg-white/[0.02] border border-white/8 rounded-xl px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-transparent placeholder:text-slate-600"
+                                  className="w-full bg-white/[0.02] border border-white/8 rounded-xl px-2.5 py-1.5 text-[11px] text-slate-100 focus:outline-none focus:border-transparent placeholder:text-slate-600"
                                 />
                               </div>
                             ))}
@@ -791,7 +791,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                                       placeholder="New password"
                                       value={newPasswordValue}
                                       onChange={e => setNewPasswordValue(e.target.value)}
-                                      className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-1.5 pr-8 text-xs text-slate-100 focus:outline-none focus:border-transparent"
+                                      className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-3 py-1.5 pr-8 text-[11px] text-slate-100 focus:outline-none focus:border-transparent"
                                     />
                                     <button type="button" onClick={() => setShowPassword(p => !p)}
                                       className="absolute right-2 top-1.5 text-slate-500 hover:text-slate-300">
@@ -799,17 +799,17 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                                     </button>
                                   </div>
                                   <button onClick={() => handleSetPassword(user.name)}
-                                    className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/10 text-rose-300 border border-transparent rounded-xl text-xs font-bold uppercase transition-all cursor-pointer">
+                                    className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/10 text-rose-300 border border-transparent rounded-xl text-[11px] font-bold uppercase transition-all cursor-pointer">
                                     Set PW
                                   </button>
                                   <button onClick={() => { setTargetPasswordChange(null); setNewPasswordValue(''); }}
-                                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-slate-400 rounded-xl text-xs font-bold transition-all cursor-pointer">
+                                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-slate-400 rounded-xl text-[11px] font-bold transition-all cursor-pointer">
                                     Cancel
                                   </button>
                                 </div>
                               ) : (
                                 <button onClick={() => setTargetPasswordChange(user.name)}
-                                  className="flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-rose-300 transition-colors cursor-pointer">
+                                  className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 hover:text-rose-300 transition-colors cursor-pointer">
                                   <Key className="w-3 h-3" /> Set Password
                                 </button>
                               )}
@@ -821,7 +821,7 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                             <div className="flex items-center gap-2">
                               {failureCount > 0 && (
                                 <button onClick={() => handleClearAttempts(user.name)}
-                                  className="flex items-center gap-1 px-2.5 py-1.5 bg-orange-500/10 hover:bg-orange-500/10 border border-orange-500/15 text-orange-400 rounded-xl text-xs font-bold transition-all cursor-pointer">
+                                  className="flex items-center gap-1 px-2.5 py-1.5 bg-orange-500/10 hover:bg-orange-500/10 border border-orange-500/15 text-orange-400 rounded-xl text-[11px] font-bold transition-all cursor-pointer">
                                   <XCircle className="w-3 h-3" /> Clear {failureCount} Fails
                                 </button>
                               )}
@@ -829,26 +829,26 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                             <div className="flex items-center gap-2">
                               {isConfirmingDelete ? (
                                 <>
-                                  <span className="text-xs text-rose-300 font-bold">Delete "{user.name}"?</span>
+                                  <span className="text-[11px] text-rose-300 font-bold">Delete "{user.name}"?</span>
                                   <button onClick={() => handleDeleteUser(user)}
-                                    className="px-2.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/10 text-rose-300 border border-transparent rounded-xl text-xs font-bold transition-all cursor-pointer">
+                                    className="px-2.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/10 text-rose-300 border border-transparent rounded-xl text-[11px] font-bold transition-all cursor-pointer">
                                     Confirm
                                   </button>
                                   <button onClick={() => setConfirmDeleteId(null)}
-                                    className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 text-slate-400 rounded-xl text-xs font-bold transition-all cursor-pointer">
+                                    className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 text-slate-400 rounded-xl text-[11px] font-bold transition-all cursor-pointer">
                                     Cancel
                                   </button>
                                 </>
                               ) : (
                                 isSuperAdmin && (
                                   <button onClick={() => setConfirmDeleteId(user.id)}
-                                    className="flex items-center gap-1 px-2.5 py-1.5 bg-white/5 hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 border border-transparent hover:border-rose-500/15 rounded-xl text-xs font-bold transition-all cursor-pointer">
+                                    className="flex items-center gap-1 px-2.5 py-1.5 bg-white/5 hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 border border-transparent hover:border-rose-500/15 rounded-xl text-[11px] font-bold transition-all cursor-pointer">
                                     <UserMinus className="w-3 h-3" /> Remove User
                                   </button>
                                 )
                               )}
                               <button onClick={() => handleSaveEdit(user)}
-                                className="px-3 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 text-indigo-300 border border-transparent rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer">
+                                className="px-3 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 text-indigo-300 border border-transparent rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer">
                                 Save Changes
                               </button>
                             </div>

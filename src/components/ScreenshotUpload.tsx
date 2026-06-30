@@ -47,7 +47,7 @@ export const ScreenshotUpload: React.FC<ScreenshotUploadProps> = ({
 
   return (
     <div className="space-y-2">
-      <label className="text-xs font-bold uppercase tracking-widest block text-slate-400">
+      <label className="text-[11px] font-bold uppercase tracking-widest block text-slate-400">
         {label}
       </label>
       
@@ -71,8 +71,8 @@ export const ScreenshotUpload: React.FC<ScreenshotUploadProps> = ({
               <Camera className="w-6 h-6" />
             </div>
             <div className="text-center">
-              <p className="text-xs font-bold text-slate-300">Click to upload or <span className="text-indigo-400">paste screenshot</span></p>
-              <p className="text-xs text-slate-500 mt-1">Supports PNG, JPG (Max 5MB)</p>
+              <p className="text-[11px] font-bold text-slate-300">Click to upload or <span className="text-indigo-400">paste screenshot</span></p>
+              <p className="text-[11px] text-slate-500 mt-1">Supports PNG, JPG (Max 5MB)</p>
             </div>
           </label>
         </div>

@@ -76,19 +76,19 @@ export const AIChatWidget = () => {
 
           <div className="flex-1 overflow-y-auto p-4 space-y-3 flex flex-col relative z-0 relative z-10 scrollbar-hide">
             {history.length === 0 ? (
-              <div className="text-center text-slate-400 text-sm mt-10">
+              <div className="text-center text-slate-400 text-xs mt-10">
                 <MessageCircle className="w-8 h-8 opacity-20 mx-auto mb-2" />
                 Hello! How can I assist you with scheduling or ops today?
               </div>
             ) : (
               history.map((msg, i) => (
-                <div key={i} className={`max-w-[85%] rounded-xl p-3 text-sm ${msg.role === 'user' ? 'bg-indigo-600 text-white self-end rounded-br-none' : 'bg-slate-800 border border-white/8 text-slate-200 self-start rounded-bl-none'}`}>
+                <div key={i} className={`max-w-[85%] rounded-xl p-3 text-xs ${msg.role === 'user' ? 'bg-indigo-600 text-white self-end rounded-br-none' : 'bg-slate-800 border border-white/8 text-slate-200 self-start rounded-bl-none'}`}>
                   {msg.text}
                 </div>
               ))
             )}
             {isTyping && (
-              <div className="max-w-[85%] rounded-xl p-3 text-sm bg-slate-800 border border-white/8 text-slate-400 self-start rounded-bl-none flex gap-1">
+              <div className="max-w-[85%] rounded-xl p-3 text-xs bg-slate-800 border border-white/8 text-slate-400 self-start rounded-bl-none flex gap-1">
                 <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
                 <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-100" />
                 <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-200" />
@@ -103,7 +103,7 @@ export const AIChatWidget = () => {
                 value={message}
                 onChange={e => setMessage(e.target.value)}
                 placeholder="Ask AI..."
-                className="w-full bg-slate-800 border border-white/8 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-800 border border-white/8 rounded-lg py-2.5 pl-4 pr-10 text-xs text-white focus:outline-none focus:border-indigo-500"
               />
               <button 
                 type="submit" 

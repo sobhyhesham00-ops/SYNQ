@@ -72,7 +72,7 @@ export function EnvironmentBadge({ currentUser, setCurrentUser }: EnvironmentBad
       <button
         id="env-badge-button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/8 bg-white/[0.04] hover:bg-white/[0.08] text-slate-400 hover:text-slate-200 text-xs font-mono font-semibold backdrop-blur-md transition-all duration-200"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/8 bg-white/[0.04] hover:bg-white/[0.08] text-slate-400 hover:text-slate-200 text-[11px] font-mono font-semibold backdrop-blur-md transition-all duration-200"
       >
         <Zap className="w-3 h-3 text-indigo-400" />
         <span>SYNQ v{APP_VERSION}</span>
@@ -89,7 +89,7 @@ export function EnvironmentBadge({ currentUser, setCurrentUser }: EnvironmentBad
           <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-white/8">
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-indigo-400" />
-              <span className="text-xs font-bold text-slate-200 tracking-wide">SYNQ Operations</span>
+              <span className="text-[11px] font-bold text-slate-200 tracking-wide">SYNQ Operations</span>
             </div>
             <button
               onClick={() => setIsOpen(false)}
@@ -102,23 +102,23 @@ export function EnvironmentBadge({ currentUser, setCurrentUser }: EnvironmentBad
           {/* Version + build info */}
           <div className="space-y-2 mb-4">
             <div className="flex justify-between items-center bg-white/[0.04] px-3 py-2 rounded-xl border border-white/8">
-              <span className="text-xs text-slate-500">Version</span>
-              <span className="font-mono text-xs text-indigo-300 font-bold">v{APP_VERSION} — {BUILD_DATE}</span>
+              <span className="text-[11px] text-slate-500">Version</span>
+              <span className="font-mono text-[11px] text-indigo-300 font-bold">v{APP_VERSION} — {BUILD_DATE}</span>
             </div>
             <div className="flex justify-between items-center bg-white/[0.04] px-3 py-2 rounded-xl border border-white/8">
-              <span className="text-xs text-slate-500 flex items-center gap-1.5">
+              <span className="text-[11px] text-slate-500 flex items-center gap-1.5">
                 <CalendarDays className="w-3 h-3 text-emerald-400" />
                 First operation day
               </span>
-              <span className="font-mono text-xs text-emerald-400 font-bold">{FIRST_OP_DAY}</span>
+              <span className="font-mono text-[11px] text-emerald-400 font-bold">{FIRST_OP_DAY}</span>
             </div>
             <div className="flex justify-between items-center bg-white/[0.04] px-3 py-2 rounded-xl border border-white/8">
-              <span className="text-xs text-slate-500">Days since launch</span>
-              <span className="font-mono text-xs text-amber-400 font-bold">{FIRST_OP_DAYS_AGO} days live</span>
+              <span className="text-[11px] text-slate-500">Days since launch</span>
+              <span className="font-mono text-[11px] text-amber-400 font-bold">{FIRST_OP_DAYS_AGO} days live</span>
             </div>
             <div className="flex justify-between items-center bg-white/[0.04] px-3 py-2 rounded-xl border border-white/8">
-              <span className="text-xs text-slate-500">Firebase</span>
-              <span className={`text-xs font-semibold ${useEmulator ? "text-amber-400" : "text-slate-400"}`}>
+              <span className="text-[11px] text-slate-500">Firebase</span>
+              <span className={`text-[11px] font-semibold ${useEmulator ? "text-amber-400" : "text-slate-400"}`}>
                 {useEmulator ? "Emulator (local)" : "Cloud (live)"}
               </span>
             </div>
@@ -126,7 +126,7 @@ export function EnvironmentBadge({ currentUser, setCurrentUser }: EnvironmentBad
 
           {/* Changelog */}
           <div className="mb-3">
-            <p className="text-xs uppercase tracking-widest text-slate-600 font-bold mb-2 flex items-center gap-1.5">
+            <p className="text-[11px] uppercase tracking-widest text-slate-600 font-bold mb-2 flex items-center gap-1.5">
               <Info className="w-3 h-3" /> Release history
             </p>
             <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1">
@@ -135,15 +135,15 @@ export function EnvironmentBadge({ currentUser, setCurrentUser }: EnvironmentBad
                   key={entry.version}
                   className={`flex items-start gap-2.5 px-2.5 py-2 rounded-xl border ${ i === 0 ? "bg-indigo-500/10 border-transparent" : "bg-transparent border-white/[0.04]" }`}
                 >
-                  <span className={`font-mono text-xs font-bold shrink-0 mt-0.5 ${i === 0 ? "text-indigo-400" : "text-slate-600"}`}>
+                  <span className={`font-mono text-[11px] font-bold shrink-0 mt-0.5 ${i === 0 ? "text-indigo-400" : "text-slate-600"}`}>
                     v{entry.version}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-slate-300 leading-snug">{entry.note}</p>
-                    <p className="text-xs text-slate-600 mt-0.5">{entry.date}</p>
+                    <p className="text-[11px] text-slate-300 leading-snug">{entry.note}</p>
+                    <p className="text-[11px] text-slate-600 mt-0.5">{entry.date}</p>
                   </div>
                   {i === 0 && (
-                    <span className="text-xs bg-transparent border border-white/12 text-white text-indigo-400 border border-transparent px-1.5 py-0.5 rounded-lg font-bold shrink-0">
+                    <span className="text-[11px] bg-transparent border border-white/12 text-white text-indigo-400 border border-transparent px-1.5 py-0.5 rounded-lg font-bold shrink-0">
                       LATEST
                     </span>
                   )}
@@ -156,7 +156,7 @@ export function EnvironmentBadge({ currentUser, setCurrentUser }: EnvironmentBad
           {isDevMode && (
             <div className="border-t border-white/8 pt-3">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                   <Database className="w-3 h-3" /> Dev Login Assist
                 </span>
                 <button
@@ -171,11 +171,11 @@ export function EnvironmentBadge({ currentUser, setCurrentUser }: EnvironmentBad
                 {seedAccounts.map((acc) => (
                   <div
                     key={acc.username}
-                    className="flex items-center justify-between p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.07] transition group text-xs border border-white/[0.04]"
+                    className="flex items-center justify-between p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.07] transition group text-[11px] border border-white/[0.04]"
                   >
                     <button onClick={() => handleQuickLogin(acc)} className="flex-1 text-left">
-                      <div className="font-semibold text-slate-200 text-xs truncate">{acc.name}</div>
-                      <div className="text-xs text-slate-500 flex items-center gap-1">
+                      <div className="font-semibold text-slate-200 text-[11px] truncate">{acc.name}</div>
+                      <div className="text-[11px] text-slate-500 flex items-center gap-1">
                         <span className="font-mono">{acc.username}</span>
                         <span>·</span>
                         <span className="text-indigo-400">{acc.role}</span>

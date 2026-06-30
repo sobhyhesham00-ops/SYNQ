@@ -255,9 +255,9 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <TrendingUp className="w-5 h-5 text-emerald-400" />
-            <h3 className="text-lg font-bold text-white tracking-tight">Weekly Performance Heatmap</h3>
+            <h3 className="text-sm font-bold text-white tracking-tight">Weekly Performance Heatmap</h3>
           </div>
-          <p className="text-slate-400 text-xs leading-relaxed max-w-xl">
+          <p className="text-slate-400 text-[11px] leading-relaxed max-w-xl">
             Visualizes average ticket resolution speeds (hours) over the last 30 days grouped weekly. Helps TLs pinpoint stars and coach team members who need mentorship.
           </p>
         </div>
@@ -271,12 +271,12 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
               placeholder="Filter by agent..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-white/[0.03] hover:bg-white/[0.05] border border-white/8 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-emerald-500 focus:bg-slate-900/60 transition-all font-sans"
+              className="w-full pl-10 pr-4 py-2 bg-white/[0.03] hover:bg-white/[0.05] border border-white/8 rounded-xl text-[11px] text-slate-200 focus:outline-none focus:border-emerald-500 focus:bg-slate-900/60 transition-all font-sans"
             />
           </div>
           <button
             onClick={() => setSearchTerm("")}
-            className="px-3 py-2 bg-white/[0.03] hover:bg-white/[0.08] border border-white/8 text-slate-400 hover:text-white rounded-xl text-xs font-bold transition-all uppercase tracking-wider"
+            className="px-3 py-2 bg-white/[0.03] hover:bg-white/[0.08] border border-white/8 text-slate-400 hover:text-white rounded-xl text-[11px] font-bold transition-all uppercase tracking-wider"
           >
             Clear
           </button>
@@ -284,7 +284,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap items-center gap-3 py-2 px-3.5 bg-white/[0.01] border border-white/8 rounded-xl text-xs text-slate-400 mb-6 font-mono">
+      <div className="flex flex-wrap items-center gap-3 py-2 px-3.5 bg-white/[0.01] border border-white/8 rounded-xl text-[11px] text-slate-400 mb-6 font-mono">
         <span className="font-bold text-slate-300 mr-1 flex items-center gap-1">
           <Clock className="w-3 h-3 text-slate-400" /> Resolution SLA:
         </span>
@@ -315,7 +315,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
         <table className="w-full text-left border-collapse min-w-[640px]">
           <thead>
             <tr className="border-b border-white/8 bg-white/[0.01]">
-              <th className="p-3 text-xs font-bold uppercase tracking-wider text-slate-400 min-w-[150px]">
+              <th className="p-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 min-w-[150px]">
                 <button 
                   onClick={() => toggleSort("name")}
                   className="flex items-center gap-1 hover:text-white transition-colors"
@@ -324,19 +324,19 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
                   {sortBy === "name" && (sortOrder === "desc" ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />)}
                 </button>
               </th>
-              <th className="p-3 text-xs font-bold uppercase tracking-wider text-slate-400 text-center">
+              <th className="p-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 text-center">
                 Wk 1 (Oldest)
               </th>
-              <th className="p-3 text-xs font-bold uppercase tracking-wider text-slate-400 text-center">
+              <th className="p-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 text-center">
                 Wk 2
               </th>
-              <th className="p-3 text-xs font-bold uppercase tracking-wider text-slate-400 text-center">
+              <th className="p-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 text-center">
                 Wk 3
               </th>
-              <th className="p-3 text-xs font-bold uppercase tracking-wider text-slate-400 text-center">
+              <th className="p-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 text-center">
                 Wk 4 (Latest)
               </th>
-              <th className="p-3 text-xs font-bold uppercase tracking-wider text-slate-400 text-center">
+              <th className="p-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 text-center">
                 <button 
                   onClick={() => toggleSort("count")}
                   className="flex items-center gap-1 mx-auto hover:text-white transition-colors"
@@ -345,7 +345,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
                   {sortBy === "count" && (sortOrder === "desc" ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />)}
                 </button>
               </th>
-              <th className="p-3 text-xs font-bold uppercase tracking-wider text-slate-400 text-center">
+              <th className="p-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 text-center">
                 <button 
                   onClick={() => toggleSort("speed")}
                   className="flex items-center gap-1 mx-auto hover:text-white transition-colors"
@@ -360,7 +360,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
             <AnimatePresence>
               {filteredAndSortedStats.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-500 text-xs font-mono">
+                  <td colSpan={7} className="p-8 text-center text-slate-500 text-[11px] font-mono">
                     No matching agent resolution data found in the last 30 days.
                   </td>
                 </tr>
@@ -375,7 +375,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
                       className="border-b border-white/8 hover:bg-white/[0.01] transition-colors"
                     >
                       {/* Name */}
-                      <td className="p-3 text-xs font-bold text-slate-200">
+                      <td className="p-3 text-[11px] font-bold text-slate-200">
                         {agent.agentName}
                       </td>
 
@@ -394,8 +394,8 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
                               })}
                               className={`w-full max-w-[100px] mx-auto py-2.5 rounded-xl flex flex-col justify-center items-center cursor-pointer transition-all ${meta.bg}`}
                             >
-                              <span className="text-xs leading-none mb-0.5">{meta.label}</span>
-                              <span className="text-xs font-sans opacity-50 font-normal">
+                              <span className="text-[11px] leading-none mb-0.5">{meta.label}</span>
+                              <span className="text-[11px] font-sans opacity-50 font-normal">
                                 {wData.count > 0 ? `${wData.count} tkt` : ""}
                               </span>
                             </button>
@@ -404,12 +404,12 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
                       })}
 
                       {/* Total Count */}
-                      <td className="p-3 text-center text-xs font-bold font-sans text-slate-300">
+                      <td className="p-3 text-center text-[11px] font-bold font-sans text-slate-300">
                         {agent.overallCount}
                       </td>
 
                       {/* Average speed */}
-                      <td className="p-3 text-center text-xs font-bold">
+                      <td className="p-3 text-center text-[11px] font-bold">
                         {agent.overallAvg !== null ? (
                           <span className={agent.overallAvg <= 2.0 ? "text-emerald-400" : agent.overallAvg <= 6.0 ? "text-teal-400" : "text-rose-400"}>
                             {agent.overallAvg.toFixed(1)}h
@@ -434,7 +434,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
-            className="mt-4 p-3.5 bg-slate-900 border border-white/8 rounded-xl text-xs text-slate-300 flex items-center justify-between gap-4"
+            className="mt-4 p-3.5 bg-slate-900 border border-white/8 rounded-xl text-[11px] text-slate-300 flex items-center justify-between gap-4"
           >
             <div className="flex items-center gap-2">
               <span className="text-emerald-400 font-bold">●</span>
@@ -467,32 +467,32 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
           <div>
             <div className="flex items-center gap-1.5 mb-2">
               <AlertTriangle className="w-4 h-4 text-rose-400" />
-              <h4 className="text-xs font-bold uppercase text-rose-300 tracking-wider">Mentorship Alerts (&gt;6h average)</h4>
+              <h4 className="text-[11px] font-bold uppercase text-rose-300 tracking-wider">Mentorship Alerts (&gt;6h average)</h4>
             </div>
             {mentorshipCandidates.length > 0 ? (
               <div className="space-y-3">
                 {mentorshipCandidates.map((cand) => (
                   <div key={cand.agentName} className="flex items-start justify-between gap-2 border-b border-white/8 pb-2 last:border-b-0 last:pb-0">
                     <div>
-                      <p className="text-xs font-bold text-slate-200">{cand.agentName}</p>
-                      <p className="text-xs text-slate-400 mt-0.5">
+                      <p className="text-[11px] font-bold text-slate-200">{cand.agentName}</p>
+                      <p className="text-[11px] text-slate-400 mt-0.5">
                         Avg speed: <span className="text-rose-400 font-bold">{cand.overallAvg?.toFixed(1)}h</span> ({cand.overallCount} resolved)
                       </p>
                     </div>
-                    <span className="px-2 py-0.5 rounded-xl bg-rose-500/10 border border-transparent text-xs text-rose-300 font-bold tracking-wider uppercase">
+                    <span className="px-2 py-0.5 rounded-xl bg-rose-500/10 border border-transparent text-[11px] text-rose-300 font-bold tracking-wider uppercase">
                       Needs coaching
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-slate-500 font-sans italic">
+              <p className="text-[11px] text-slate-500 font-sans italic">
                 Awesome! No active agents have resolution times exceeding the 6h threshold in the last 30 days.
               </p>
             )}
           </div>
           {mentorshipCandidates.length > 0 && (
-            <div className="mt-4 pt-3 border-t border-white/8 flex items-center gap-2 text-xs text-rose-400/80">
+            <div className="mt-4 pt-3 border-t border-white/8 flex items-center gap-2 text-[11px] text-rose-400/80">
               <BookOpen className="w-3.5 h-3.5" />
               <span>SLA coaching recommended. Pair them with star performers to review workflows.</span>
             </div>
@@ -504,32 +504,32 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
           <div>
             <div className="flex items-center gap-1.5 mb-2">
               <Award className="w-4 h-4 text-emerald-400" />
-              <h4 className="text-xs font-bold uppercase text-emerald-300 tracking-wider">Top Performers (&le;2h average)</h4>
+              <h4 className="text-[11px] font-bold uppercase text-emerald-300 tracking-wider">Top Performers (&le;2h average)</h4>
             </div>
             {starPerformers.length > 0 ? (
               <div className="space-y-3">
                 {starPerformers.map((star) => (
                   <div key={star.agentName} className="flex items-start justify-between gap-2 border-b border-white/8 pb-2 last:border-b-0 last:pb-0">
                     <div>
-                      <p className="text-xs font-bold text-slate-200">{star.agentName}</p>
-                      <p className="text-xs text-slate-400 mt-0.5">
+                      <p className="text-[11px] font-bold text-slate-200">{star.agentName}</p>
+                      <p className="text-[11px] text-slate-400 mt-0.5">
                         Avg speed: <span className="text-emerald-400 font-bold">{star.overallAvg?.toFixed(1)}h</span> ({star.overallCount} resolved)
                       </p>
                     </div>
-                    <span className="px-2 py-0.5 rounded-xl bg-transparent border border-white/12 text-white border border-transparent text-xs text-emerald-300 font-bold tracking-wider uppercase">
+                    <span className="px-2 py-0.5 rounded-xl bg-transparent border border-white/12 text-white border border-transparent text-[11px] text-emerald-300 font-bold tracking-wider uppercase">
                       Fast responder
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-slate-500 font-sans italic">
+              <p className="text-[11px] text-slate-500 font-sans italic">
                 Keep driving speed! No agents have averages &le;2.0 hours with &ge;5 tickets yet.
               </p>
             )}
           </div>
           {starPerformers.length > 0 && (
-            <div className="mt-4 pt-3 border-t border-white/8 flex items-center gap-2 text-xs text-emerald-400/80">
+            <div className="mt-4 pt-3 border-t border-white/8 flex items-center gap-2 text-[11px] text-emerald-400/80">
               <Zap className="w-3.5 h-3.5" />
               <span>Recognize star performers during the next huddle to boost team spirit!</span>
             </div>

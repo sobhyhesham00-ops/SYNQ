@@ -79,8 +79,8 @@ export const NotificationDrawer = ({
                   <Bell className="w-5 h-5 text-indigo-400" />
                 </div>
                 <div>
-                  <h3 className="font-sans font-bold text-slate-100 uppercase tracking-widest text-sm">Notifications</h3>
-                  <p className="text-xs text-slate-400">{unreadCount} unread message{unreadCount !== 1 ? 's' : ''}</p>
+                  <h3 className="font-sans font-bold text-slate-100 uppercase tracking-widest text-xs">Notifications</h3>
+                  <p className="text-[11px] text-slate-400">{unreadCount} unread message{unreadCount !== 1 ? 's' : ''}</p>
                 </div>
               </div>
               <button 
@@ -105,7 +105,7 @@ export const NotificationDrawer = ({
                 <button
                   key={item.value}
                   onClick={() => setTypeFilter(item.value)}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border transition-all shrink-0 cursor-pointer ${ typeFilter === item.value ? 'bg-indigo-950 text-indigo-300 border-transparent' : 'bg-white/5 text-slate-400 border-transparent hover:bg-white/10 hover:text-slate-200' }`}
+                  className={`px-3 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider border transition-all shrink-0 cursor-pointer ${ typeFilter === item.value ? 'bg-indigo-950 text-indigo-300 border-transparent' : 'bg-white/5 text-slate-400 border-transparent hover:bg-white/10 hover:text-slate-200' }`}
                 >
                   {item.label}
                 </button>
@@ -116,19 +116,19 @@ export const NotificationDrawer = ({
               {sortedNotifs.length === 0 ? (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 space-y-3">
                   <Bell className="w-12 h-12 opacity-20" />
-                  <p className="font-sans text-sm">You're all caught up!</p>
+                  <p className="font-sans text-xs">You're all caught up!</p>
                 </div>
               ) : (
                 <>
                   <div className="flex justify-between items-center pb-2">
-                    <span className="text-xs uppercase font-bold text-slate-500 tracking-wider">
+                    <span className="text-[11px] uppercase font-bold text-slate-500 tracking-wider">
                       Showing {displayNotifs.length} items
                     </span>
                     <div className="flex items-center gap-3">
                       <button 
                         onClick={handleMarkAllNotifsAsRead}
                         disabled={isMarkingAll || unreadCount === 0}
-                        className={`text-xs uppercase tracking-wider font-bold transition-colors ${ isMarkingAll || unreadCount === 0 ? 'text-slate-500 cursor-not-allowed opacity-50' : 'text-indigo-400 hover:text-indigo-300 cursor-pointer' }`}
+                        className={`text-[11px] uppercase tracking-wider font-bold transition-colors ${ isMarkingAll || unreadCount === 0 ? 'text-slate-500 cursor-not-allowed opacity-50' : 'text-indigo-400 hover:text-indigo-300 cursor-pointer' }`}
                       >
                         {isMarkingAll ? "Marking..." : "Mark all as read"}
                       </button>
@@ -137,7 +137,7 @@ export const NotificationDrawer = ({
                           <span className="h-2 w-[1px] bg-white/10" />
                           <button
                             onClick={handleClearAllNotifs}
-                            className="text-xs uppercase tracking-wider font-bold text-rose-400 hover:text-rose-300 transition-colors cursor-pointer flex items-center gap-1"
+                            className="text-[11px] uppercase tracking-wider font-bold text-rose-400 hover:text-rose-300 transition-colors cursor-pointer flex items-center gap-1"
                           >
                             <Trash2 className="w-3 h-3" /> Delete All
                           </button>
@@ -149,7 +149,7 @@ export const NotificationDrawer = ({
                   {displayNotifs.length === 0 ? (
                     <div className="pt-10 flex flex-col items-center justify-center text-slate-500 space-y-2 text-center px-4">
                       <Bell className="w-8 h-8 opacity-10" />
-                      <p className="font-sans text-xs">No notifications for this filter</p>
+                      <p className="font-sans text-[11px]">No notifications for this filter</p>
                     </div>
                   ) : (
                     displayNotifs.map(notif => {
@@ -221,7 +221,7 @@ export const NotificationDrawer = ({
                           <div className="flex justify-between items-start mb-2 gap-3">
                             <div className="flex items-center gap-2">
                               {getIcon()}
-                              <span className="font-bold text-xs text-slate-200">
+                              <span className="font-bold text-[11px] text-slate-200">
                                 {notif.title}
                               </span>
                             </div>
@@ -235,10 +235,10 @@ export const NotificationDrawer = ({
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
-                          <p className="text-xs text-slate-300 font-sans leading-relaxed">
+                          <p className="text-[11px] text-slate-300 font-sans leading-relaxed">
                             {notif.message}
                           </p>
-                          <p className="text-xs text-slate-500 font-sans mt-3">
+                          <p className="text-[11px] text-slate-500 font-sans mt-3">
                             {new Date(notif.createdAt).toLocaleString()}
                           </p>
                           {isUnread && (

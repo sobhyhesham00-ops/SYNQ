@@ -465,9 +465,9 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
         {/* Inbox Header */}
         <div className="p-4 pb-2 space-y-3">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+            <h1 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
               Live Messages
-              <span className="text-xs font-mono leading-none tracking-widest uppercase bg-transparent border border-white/12 text-white text-indigo-300 px-2 py-0.5 rounded-lg border border-indigo-500/15">
+              <span className="text-[11px] font-mono leading-none tracking-widest uppercase bg-transparent border border-white/12 text-white text-indigo-300 px-2 py-0.5 rounded-lg border border-indigo-500/15">
                 Active State
               </span>
             </h1>
@@ -490,7 +490,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
               <button
                 key={seg}
                 onClick={() => setActiveSegment(seg)}
-                className={`flex-1 text-center py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all relative cursor-pointer ${activeSegment === seg ? 'bg-indigo-600 text-white ' : 'text-slate-400 hover:text-slate-200'}`}
+                className={`flex-1 text-center py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all relative cursor-pointer ${activeSegment === seg ? 'bg-indigo-600 text-white ' : 'text-slate-400 hover:text-slate-200'}`}
               >
                 {seg}
               </button>
@@ -505,7 +505,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
               placeholder="Search conversations..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white/[0.04] border border-white/8 rounded-xl py-2 pl-9 pr-3 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-transparent transition-all font-sans"
+              className="w-full bg-white/[0.04] border border-white/8 rounded-xl py-2 pl-9 pr-3 text-[11px] text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-transparent transition-all font-sans"
             />
           </div>
         </div>
@@ -513,7 +513,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
         {/* Thread Rows Container */}
         <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
           {listItems.length === 0 ? (
-            <div className="p-8 text-center text-slate-500 text-xs">
+            <div className="p-8 text-center text-slate-500 text-[11px]">
               No matching conversations found.
             </div>
           ) : (
@@ -537,10 +537,10 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
                   className={`w-full p-3 rounded-xl transition-all flex items-start gap-3 text-left relative group ${isSelected ? 'bg-white/10 text-white' : 'hover:bg-white/5 text-slate-300'}`}
                 >
                   {/* Avatar bubble */}
-                  <div className={`w-10 h-10 rounded-full shrink-0 bg-gradient-to-tr ${item.color} border border-white/8 flex items-center justify-center text-xs font-bold text-white relative`}>
+                  <div className={`w-10 h-10 rounded-full shrink-0 bg-gradient-to-tr ${item.color} border border-white/8 flex items-center justify-center text-[11px] font-bold text-white relative`}>
                     {item.icon}
                     {unread > 0 && (
-                      <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center bg-rose-500 text-white font-bold text-xs rounded-lg border border-slate-950 px-1 animate-pulse">
+                      <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center bg-rose-500 text-white font-bold text-[11px] rounded-lg border border-slate-950 px-1 animate-pulse">
                         {unread}
                       </span>
                     )}
@@ -554,17 +554,17 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
                   {/* Text details */}
                   <div className="flex-1 min-w-0 space-y-0.5">
                     <div className="flex items-center justify-between">
-                      <p className={`text-xs font-bold truncate ${isSelected ? 'text-white' : 'text-slate-200'}`}>
+                      <p className={`text-[11px] font-bold truncate ${isSelected ? 'text-white' : 'text-slate-200'}`}>
                         {item.label}
                       </p>
                       {displayTime && (
-                        <span className={`text-xs font-mono leading-none ${isSelected ? 'text-indigo-200' : 'text-slate-500'}`}>
+                        <span className={`text-[11px] font-mono leading-none ${isSelected ? 'text-indigo-200' : 'text-slate-500'}`}>
                           {displayTime}
                         </span>
                       )}
                     </div>
 
-                    <p className={`text-xs leading-relaxed truncate max-w-[200px] ${isSelected ? 'text-indigo-100 font-medium' : unread > 0 ? 'text-white font-bold' : 'text-slate-400'}`}>
+                    <p className={`text-[11px] leading-relaxed truncate max-w-[200px] ${isSelected ? 'text-indigo-100 font-medium' : unread > 0 ? 'text-white font-bold' : 'text-slate-400'}`}>
                       {lastText}
                     </p>
                   </div>
@@ -585,12 +585,12 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
         <div className="p-3 bg-slate-950/70 border-t border-white/8 flex flex-col gap-2 px-4 rounded-b-3xl shrink-0">
           <div className="flex items-center gap-2 justify-between">
             <div className="flex items-center gap-2 min-w-0">
-              <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0">
+              <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[11px] font-bold shrink-0">
                 {currentUser.name[0]}
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-bold text-slate-100 truncate leading-none">{currentUser.name}</p>
-                <span className="text-xs font-bold uppercase tracking-widest text-slate-400 leading-none">Status Panel</span>
+                <p className="text-[11px] font-bold text-slate-100 truncate leading-none">{currentUser.name}</p>
+                <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400 leading-none">Status Panel</span>
               </div>
             </div>
 
@@ -610,7 +610,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
                   console.error("Failed to update status in DB:", err);
                 }
               }}
-              className="bg-white/[0.04] border border-white/8 rounded-xl px-2 py-1 text-xs font-bold text-slate-300 focus:outline-none focus:border-indigo-500 cursor-pointer"
+              className="bg-white/[0.04] border border-white/8 rounded-xl px-2 py-1 text-[11px] font-bold text-slate-300 focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
               <option value="online">🟢 Online</option>
               <option value="busy">🔴 Busy</option>
@@ -637,7 +637,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
                   console.error("Failed to update statusNote in DB:", err);
                 }
               }}
-              className="w-full bg-white/[0.03] border border-white/8 rounded-xl py-1 px-2.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-transparent transition-all font-sans italic"
+              className="w-full bg-white/[0.03] border border-white/8 rounded-xl py-1 px-2.5 text-[11px] text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-transparent transition-all font-sans italic"
             />
           </div>
         </div>
@@ -654,18 +654,18 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
               onClick={() => setIsRecipientDrawerOpen(true)}
               className="md:hidden p-2 rounded-xl bg-white/5 text-slate-300 hover:text-white transition-colors active:scale-95 cursor-pointer flex items-center gap-1"
             >
-              ← <span className="text-xs font-bold">Inbox</span>
+              ← <span className="text-[11px] font-bold">Inbox</span>
             </button>
 
-            <div className="w-9 h-9 rounded-full bg-indigo-500/10 border border-transparent flex items-center justify-center text-sm shrink-0">
+            <div className="w-9 h-9 rounded-full bg-indigo-500/10 border border-transparent flex items-center justify-center text-xs shrink-0">
               {selectedRecipient === 'all' ? '🌐' : selectedRecipient === 'tl' ? '🛡️' : selectedRecipient.startsWith('team:') ? '👥' : '💬'}
             </div>
 
             <div>
-              <h2 className="text-sm font-bold text-slate-100 flex items-center gap-2">
+              <h2 className="text-xs font-bold text-slate-100 flex items-center gap-2">
                 {getRecipientLabel()}
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-[11px] text-slate-400">
                 {getRecipientSubtitle()}
               </p>
             </div>
@@ -682,7 +682,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
             </button>
 
             {/* Language indicator pill */}
-            <span className="px-2 py-1 bg-white/5 border border-white/8 rounded-xl text-xs font-bold text-slate-300 uppercase select-none">
+            <span className="px-2 py-1 bg-white/5 border border-white/8 rounded-xl text-[11px] font-bold text-slate-300 uppercase select-none">
               {language} Board
             </span>
           </div>
@@ -703,7 +703,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
                 placeholder="Type keyword to filter messages in this view..." 
                 value={msgSearchQuery}
                 onChange={(e) => setMsgSearchQuery(e.target.value)}
-                className="w-full bg-white/5 border border-white/8 rounded-xl py-1.5 px-3 text-xs text-slate-200 focus:outline-none focus:border-transparent transition-all font-sans"
+                className="w-full bg-white/5 border border-white/8 rounded-xl py-1.5 px-3 text-[11px] text-slate-200 focus:outline-none focus:border-transparent transition-all font-sans"
               />
               {msgSearchQuery && (
                 <button 
@@ -721,12 +721,12 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
         <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar bg-slate-950/25">
           {filteredThreadMessages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-3 opacity-30">
-              <div className="w-16 h-16 rounded-xl bg-white/5 flex items-center justify-center text-2xl">
+              <div className="w-16 h-16 rounded-xl bg-white/5 flex items-center justify-center text-lg">
                 💬
               </div>
               <div>
-                <p className="text-sm font-bold text-slate-200">No messages found</p>
-                <p className="text-xs text-slate-400 mt-0.5">Send a message to kickstart the sync thread</p>
+                <p className="text-xs font-bold text-slate-200">No messages found</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Send a message to kickstart the sync thread</p>
               </div>
             </div>
           ) : (
@@ -749,7 +749,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
                   {/* High contrast center date element if first message of new date */}
                   {isFirstInSequence && prevMsg && new Date(prevMsg.createdAt).toDateString() !== new Date(msg.createdAt).toDateString() && (
                     <div className="w-full flex justify-center my-4">
-                      <span className="px-3 py-1 bg-white/5 text-xs font-bold uppercase tracking-widest text-slate-500 rounded-lg border border-white/8">
+                      <span className="px-3 py-1 bg-white/5 text-[11px] font-bold uppercase tracking-widest text-slate-500 rounded-lg border border-white/8">
                         {dateDisplay}
                       </span>
                     </div>
@@ -764,7 +764,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
                       
                       {/* Avatar shown for first message in sender sequence for clean UI */}
                       {isFirstInSequence ? (
-                        <div className="w-7 h-7 rounded-full bg-indigo-500/10 border border-white/8 flex items-center justify-center text-xs font-bold text-slate-300 shrink-0 select-none">
+                        <div className="w-7 h-7 rounded-full bg-indigo-500/10 border border-white/8 flex items-center justify-center text-[11px] font-bold text-slate-300 shrink-0 select-none">
                           {(msg.senderName || '?')[0]}
                         </div>
                       ) : (
@@ -774,14 +774,14 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
                       <div className="space-y-0.5">
                         {isFirstInSequence && !isMine && (
                           <div className="flex items-center gap-1.5 ml-1">
-                             <p className="text-xs font-bold text-slate-400">{msg.senderName}</p>
-                             {isTeamMsg && <span className="text-xs font-bold uppercase bg-emerald-500/10 text-emerald-300 px-1 border border-emerald-500/10 rounded leading-none">TEAM</span>}
-                             {isTLMsg && <span className="text-xs font-bold uppercase bg-amber-500/10 text-amber-300 px-1 border border-amber-500/10 rounded leading-none">TL ONLY</span>}
+                             <p className="text-[11px] font-bold text-slate-400">{msg.senderName}</p>
+                             {isTeamMsg && <span className="text-[11px] font-bold uppercase bg-emerald-500/10 text-emerald-300 px-1 border border-emerald-500/10 rounded leading-none">TEAM</span>}
+                             {isTLMsg && <span className="text-[11px] font-bold uppercase bg-amber-500/10 text-amber-300 px-1 border border-amber-500/10 rounded leading-none">TL ONLY</span>}
                           </div>
                         )}
 
                         {/* Speech Bubble: Pure iOS Blue vs Glossy Slate */}
-                        <div className={`px-4 py-2.5 rounded-[20px] text-sm font-sans group relative ${isMine ? 'bg-blue-600 text-white rounded-br-[4px]' : 'bg-[#1C1C1E] text-slate-100 rounded-bl-[4px]'} ${isAr ? 'text-right dir-rtl font-sans font-medium leading-relaxed' : 'text-left leading-relaxed'}`}>
+                        <div className={`px-4 py-2.5 rounded-[20px] text-xs font-sans group relative ${isMine ? 'bg-blue-600 text-white rounded-br-[4px]' : 'bg-[#1C1C1E] text-slate-100 rounded-bl-[4px]'} ${isAr ? 'text-right dir-rtl font-sans font-medium leading-relaxed' : 'text-left leading-relaxed'}`}>
                           {msg.text && <p className="whitespace-pre-wrap">{msg.text}</p>}
                           
                           {/* Attachments rendering */}
@@ -795,11 +795,11 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
                                 </div>
                               )}
                               <div className="flex-1 min-w-0">
-                                <p className="truncate font-bold text-xs text-slate-300">{msg.attachmentName}</p>
+                                <p className="truncate font-bold text-[11px] text-slate-300">{msg.attachmentName}</p>
                                 <a 
                                   href={msg.attachment} 
                                   download={msg.attachmentName}
-                                  className="text-[#0084FF] hover:underline text-xs font-bold uppercase tracking-wider flex items-center gap-1 mt-1"
+                                  className="text-[#0084FF] hover:underline text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 mt-1"
                                 >
                                   <Download className="w-3 h-3" /> Download
                                 </a>
@@ -823,7 +823,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
 
                         {/* Seen/Timing Indicators */}
                         <div className={`flex items-center gap-1 px-1 justify-end ${isMine ? 'flex-row' : 'flex-row-reverse'}`}>
-                          <p className="text-xs text-slate-600 font-sans">
+                          <p className="text-[11px] text-slate-600 font-sans">
                             {timeDisplay}
                           </p>
                           {isMine && (
@@ -843,12 +843,12 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
         {/* Quick phrases bar */}
         <div className="px-3 py-2 bg-slate-950/40 border-t border-white/8 shrink-0 flex items-center gap-1.5 overflow-x-auto select-none max-w-full custom-scrollbar">
           <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-500 shrink-0 mr-1">Tap phrase:</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 shrink-0 mr-1">Tap phrase:</span>
           {quickPhrases.map((phrase) => (
             <button
               key={phrase}
               onClick={() => handleQuickPhraseClick(phrase)}
-              className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-xs text-slate-300 hover:text-white transition-all border border-white/8 whitespace-nowrap active:scale-95 shrink-0 cursor-pointer"
+              className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-[11px] text-slate-300 hover:text-white transition-all border border-white/8 whitespace-nowrap active:scale-95 shrink-0 cursor-pointer"
             >
               {phrase}
             </button>
@@ -874,7 +874,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
                 >
                   <div className="flex items-center gap-2">
                      {attachment.data.startsWith('data:image') ? <ImageIcon className="w-4 h-4 text-indigo-400" /> : <FileText className="w-4 h-4 text-indigo-400" />}
-                     <span className="text-xs text-indigo-200 truncate max-w-[200px]">{attachment.name}</span>
+                     <span className="text-[11px] text-indigo-200 truncate max-w-[200px]">{attachment.name}</span>
                   </div>
                   <button onClick={() => setAttachment(null)} className="p-1 hover:bg-indigo-500/10 rounded-xl transition-all">
                     <X className="w-3.5 h-3.5 text-indigo-300" />
@@ -906,12 +906,12 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({ currentUser, a
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   placeholder={language === 'ar' ? 'اكتب رسالة على لوحة الإتصال...' : 'Message on live panel...'}
-                  className={`w-full bg-[#1C1C1E] border border-white/8 rounded-lg px-5 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-transparent transition-all ${language === 'ar' ? 'dir-rtl text-right font-sans' : 'text-left font-sans'}`}
+                  className={`w-full bg-[#1C1C1E] border border-white/8 rounded-lg px-5 py-3 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-transparent transition-all ${language === 'ar' ? 'dir-rtl text-right font-sans' : 'text-left font-sans'}`}
                 />
                 
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 select-none pointer-events-none">
                   {inputText && isArabic(inputText) && language === 'en' && (
-                    <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest bg-transparent border border-white/12 text-white px-1.5 py-0.5 rounded border border-transparent">
+                    <span className="text-[11px] font-bold text-indigo-400 uppercase tracking-widest bg-transparent border border-white/12 text-white px-1.5 py-0.5 rounded border border-transparent">
                       Arabic Max
                     </span>
                   )}

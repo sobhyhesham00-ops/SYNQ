@@ -117,7 +117,7 @@ export const SlideToConfirm: React.FC<SlideToConfirmProps> = ({
 
       {/* Label */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-12">
-        <span className="text-xs font-bold uppercase tracking-wider text-slate-200 truncate">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-200 truncate">
           {isConfirmed ? confirmedLabel : isLoading ? "Processing..." : label}
         </span>
       </div>

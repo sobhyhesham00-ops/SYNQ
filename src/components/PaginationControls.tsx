@@ -23,20 +23,20 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-5 py-4 border-t border-white/8 bg-transparent w-full rounded-b-2xl">
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-xs text-slate-400">Rows per page:</span>
+        <span className="text-[11px] text-slate-400">Rows per page:</span>
         <select
           value={itemsPerPage}
           onChange={(e) => {
             onItemsPerPageChange(Number(e.target.value));
             onPageChange(1);
           }}
-          className="bg-white/[0.02] border border-white/8 rounded-xl text-xs text-slate-200 outline-none px-2 py-1"
+          className="bg-white/[0.02] border border-white/8 rounded-xl text-[11px] text-slate-200 outline-none px-2 py-1"
         >
           <option value={25}>25</option>
           <option value={50}>50</option>
           <option value={100}>100</option>
         </select>
-        <div className="ml-2 text-xs text-slate-400">
+        <div className="ml-2 text-[11px] text-slate-400">
           Showing {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems}
         </div>
       </div>
@@ -58,7 +58,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
         </button>
 
         <div className="flex items-center gap-1 px-2">
-          <span className="text-xs text-slate-300 font-bold">
+          <span className="text-[11px] text-slate-300 font-bold">
             Page {currentPage} of {Math.max(1, totalPages)}
           </span>
         </div>

@@ -18,10 +18,10 @@ const LinkItem = ({ link }: { link: string }) => {
   const normalized = normalizeUrl(link) || link;
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm bg-white/[0.02] p-4 rounded-xl border border-white/8">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs bg-white/[0.02] p-4 rounded-xl border border-white/8">
       <div className="flex-1 break-all flex items-start gap-2.5 font-sans text-slate-200 leading-relaxed">
         <LinkIcon className="w-5 h-5 shrink-0 mt-0.5 text-indigo-400" />
-        <span className="whitespace-pre-wrap text-sm">{normalized}</span>
+        <span className="whitespace-pre-wrap text-xs">{normalized}</span>
       </div>
       <div className="flex items-center gap-2 shrink-0">
         <button
@@ -34,7 +34,7 @@ const LinkItem = ({ link }: { link: string }) => {
               setTimeout(() => setCopied(false), 2000);
             }
           }}
-          className="flex items-center gap-1.5 px-3 py-2 text-slate-300 hover:text-slate-100 bg-white/5 rounded-xl hover:bg-white/10 transition-colors font-semibold text-sm"
+          className="flex items-center gap-1.5 px-3 py-2 text-slate-300 hover:text-slate-100 bg-white/5 rounded-xl hover:bg-white/10 transition-colors font-semibold text-xs"
           title="Copy Link"
         >
           {copied ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
@@ -44,7 +44,7 @@ const LinkItem = ({ link }: { link: string }) => {
           href={normalized} 
           target="_blank" 
           rel="noreferrer"
-          className="flex items-center gap-1.5 px-3 py-2 text-indigo-300 hover:text-indigo-200 bg-transparent border border-white/12 text-white hover:bg-white/5 rounded-xl transition-colors font-semibold text-sm"
+          className="flex items-center gap-1.5 px-3 py-2 text-indigo-300 hover:text-indigo-200 bg-transparent border border-white/12 text-white hover:bg-white/5 rounded-xl transition-colors font-semibold text-xs"
           title="Open Link"
         >
           <ExternalLink className="w-4 h-4" />
@@ -201,10 +201,10 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
       {hasAttachments && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-300 font-mono font-bold block">Attached Files ({normalizedAttachments.length}):</span>
+            <span className="text-[11px] text-slate-300 font-mono font-bold block">Attached Files ({normalizedAttachments.length}):</span>
             <button 
               onClick={downloadAll} 
-              className="text-xs text-indigo-400 hover:text-indigo-300 font-bold uppercase tracking-wider flex items-center gap-1 bg-transparent border border-white/12 text-white hover:bg-white/5 px-2 py-1 rounded transition-colors"
+              className="text-[11px] text-indigo-400 hover:text-indigo-300 font-bold uppercase tracking-wider flex items-center gap-1 bg-transparent border border-white/12 text-white hover:bg-white/5 px-2 py-1 rounded transition-colors"
             >
               <Download className="w-3 h-3" /> Download All
             </button>
@@ -239,7 +239,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
                               <svg class="w-10 h-10 text-slate-500 mb-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                               </svg>
-                              <span class="text-xs text-slate-400 font-semibold text-center break-words px-2 max-w-[280px]">Image URL inaccessible (Direct options below)</span>
+                              <span class="text-[11px] text-slate-400 font-semibold text-center break-words px-2 max-w-[280px]">Image URL inaccessible (Direct options below)</span>
                             `;
                             parent.appendChild(placeholder);
                           }
@@ -250,7 +250,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
                     <div className="p-3 bg-slate-950/70 border-t border-white/8 flex flex-col gap-2.5">
                       <div className="flex items-center gap-2">
                         <ImageIcon className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                        <span className="text-xs text-slate-300 font-medium truncate flex-1 font-sans" title={fileTitle}>
+                        <span className="text-[11px] text-slate-300 font-medium truncate flex-1 font-sans" title={fileTitle}>
                           {fileTitle}
                         </span>
                       </div>
@@ -259,21 +259,21 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
                           href={att.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold text-slate-200 transition-colors border border-white/8"
+                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-[11px] font-bold text-slate-200 transition-colors border border-white/8"
                         >
                           <ExternalLink className="w-3.5 h-3.5 shrink-0" /> Open
                         </a>
                         <button
                           type="button"
                           onClick={() => handleCopyImage(att.url)}
-                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold text-slate-200 transition-colors border border-white/8"
+                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-[11px] font-bold text-slate-200 transition-colors border border-white/8"
                         >
                           <Copy className="w-3.5 h-3.5 shrink-0" /> Copy
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDownloadFile(att.url, fileTitle)}
-                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 text-slate-950 rounded-xl text-xs font-bold transition-colors"
+                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 text-slate-950 rounded-xl text-[11px] font-bold transition-colors"
                         >
                           <Download className="w-3.5 h-3.5 shrink-0" /> Download
                         </button>
@@ -283,7 +283,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
                 ) : (
                   <div className="flex flex-col items-center justify-center p-6 w-full flex-1 min-h-[160px]">
                     <FileText className="w-8 h-8 text-indigo-400 mb-2" />
-                    <span className="text-sm text-slate-200 font-medium font-sans mb-3 text-center break-words w-full px-2 line-clamp-2" title={fileTitle}>
+                    <span className="text-xs text-slate-200 font-medium font-sans mb-3 text-center break-words w-full px-2 line-clamp-2" title={fileTitle}>
                       {fileTitle}
                     </span>
                     <div className="flex items-center gap-2 w-full justify-center">
@@ -291,14 +291,14 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
                           href={att.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-xl font-bold text-xs text-white flex items-center gap-1.5 border border-white/8 transition-colors inline-flex"
+                          className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-xl font-bold text-[11px] text-white flex items-center gap-1.5 border border-white/8 transition-colors inline-flex"
                         >
                           <ExternalLink className="w-3.5 h-3.5" /> Open
                         </a>
                         <button
                           type="button"
                           onClick={() => handleDownloadFile(att.url, fileTitle)}
-                          className="px-3 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 text-indigo-300 rounded-xl font-bold text-xs flex items-center gap-1.5 border border-transparent transition-colors"
+                          className="px-3 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 text-indigo-300 rounded-xl font-bold text-[11px] flex items-center gap-1.5 border border-transparent transition-colors"
                         >
                           <Download className="w-3.5 h-3.5" /> Download
                         </button>
@@ -314,7 +314,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
       {/* Display Links */}
       {hasLinks && (
         <div className="space-y-1">
-          <span className="text-xs text-slate-300 font-mono font-bold block">References & Links:</span>
+          <span className="text-[11px] text-slate-300 font-mono font-bold block">References & Links:</span>
           <div className="flex flex-col gap-2">
             {extractedLinks.map((link, lIdx) => (
               <LinkItem key={lIdx} link={link} />
@@ -327,7 +327,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
       {hasTlAttachments && (
         <div className="space-y-2 border-t border-amber-500/15 pt-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-amber-500 font-mono font-bold block uppercase tracking-wider">
+            <span className="text-[11px] text-amber-500 font-mono font-bold block uppercase tracking-wider">
               ⚠️ TL / Supervisor Files ({normalizedTlAttachments.length}):
             </span>
           </div>
@@ -339,7 +339,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
               return (
               <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[380px] bg-white/[0.04] border border-transparent hover:border-transparent transition-all rounded-xl overflow-hidden flex flex-col">
                 {showSideBadges && (
-                  <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-amber-500 text-slate-950 font-bold text-xs rounded uppercase z-10 select-none">
+                  <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-amber-500 text-slate-950 font-bold text-[11px] rounded uppercase z-10 select-none">
                     TL
                   </div>
                 )}
@@ -366,7 +366,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
                               <svg class="w-10 h-10 text-amber-600/70 mb-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                               </svg>
-                              <span class="text-xs text-amber-500/80 font-semibold text-center break-words px-2 max-w-[280px]">Supervisor image URL inaccessible (Direct options below)</span>
+                              <span class="text-[11px] text-amber-500/80 font-semibold text-center break-words px-2 max-w-[280px]">Supervisor image URL inaccessible (Direct options below)</span>
                             `;
                             parent.appendChild(placeholder);
                           }
@@ -377,7 +377,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
                     <div className="p-3 bg-slate-950/70 border-t border-amber-500/10 flex flex-col gap-2.5">
                       <div className="flex items-center gap-2">
                         <ImageIcon className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                        <span className="text-xs text-amber-400 font-medium truncate flex-1 font-sans" title={fileTitle}>
+                        <span className="text-[11px] text-amber-400 font-medium truncate flex-1 font-sans" title={fileTitle}>
                           {fileTitle}
                         </span>
                       </div>
@@ -385,21 +385,21 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
                         <button
                           type="button"
                           onClick={() => handleOpenUrl(att.url)}
-                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold text-slate-200 transition-colors border border-white/8"
+                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-[11px] font-bold text-slate-200 transition-colors border border-white/8"
                         >
                           <ExternalLink className="w-3.5 h-3.5 shrink-0" /> Open
                         </button>
                         <button
                           type="button"
                           onClick={() => handleCopyImage(att.url)}
-                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold text-slate-200 transition-colors border border-white/8"
+                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-[11px] font-bold text-slate-200 transition-colors border border-white/8"
                         >
                           <Copy className="w-3.5 h-3.5 shrink-0" /> Copy
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDownloadFile(att.url, fileTitle)}
-                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-bold transition-colors"
+                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-[11px] font-bold transition-colors"
                         >
                           <Download className="w-3.5 h-3.5 shrink-0" /> Download
                         </button>
@@ -409,21 +409,21 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
                 ) : (
                   <div className="flex flex-col items-center justify-center p-6 w-full flex-1 min-h-[160px]">
                     <FileText className="w-8 h-8 text-amber-500 mb-2" />
-                    <span className="text-sm text-slate-200 font-medium font-sans mb-3 text-center break-words w-full px-2 line-clamp-2" title={fileTitle}>
+                    <span className="text-xs text-slate-200 font-medium font-sans mb-3 text-center break-words w-full px-2 line-clamp-2" title={fileTitle}>
                       {fileTitle}
                     </span>
                     <div className="flex items-center gap-2 w-full justify-center">
                        <button
                          type="button"
                          onClick={() => handleOpenUrl(att.url)}
-                         className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-xl font-bold text-xs text-white flex items-center gap-1.5 border border-white/8 transition-colors"
+                         className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-xl font-bold text-[11px] text-white flex items-center gap-1.5 border border-white/8 transition-colors"
                        >
                          <ExternalLink className="w-3.5 h-3.5" /> Open
                        </button>
                        <button
                          type="button"
                          onClick={() => handleDownloadFile(att.url, fileTitle)}
-                         className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/10 text-amber-300 rounded-xl font-bold text-xs flex items-center gap-1.5 border border-transparent transition-colors"
+                         className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/10 text-amber-300 rounded-xl font-bold text-[11px] flex items-center gap-1.5 border border-transparent transition-colors"
                        >
                          <Download className="w-3.5 h-3.5" /> Download
                        </button>
@@ -439,14 +439,14 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
       {/* Display TL Links */}
       {hasTlLinks && (
         <div className="space-y-1 border-t border-amber-500/15 pt-3">
-          <span className="text-xs text-amber-500 font-mono font-bold block uppercase tracking-wider">
+          <span className="text-[11px] text-amber-500 font-mono font-bold block uppercase tracking-wider">
             ⚠️ TL / Supervisor References & Links:
           </span>
           <div className="flex flex-col gap-2">
             {extractedTlLinks.map((link, lIdx) => (
               <div key={lIdx} className="relative">
                 {showSideBadges && (
-                  <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-amber-500 text-slate-950 font-bold text-xs rounded uppercase z-10 select-none">
+                  <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-amber-500 text-slate-950 font-bold text-[11px] rounded uppercase z-10 select-none">
                     TL
                   </span>
                 )}

@@ -90,13 +90,13 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
   return (
     <div id="assignment-control" className="bg-transparent border border-white/8 p-4 rounded-xl flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <span className="text-xs uppercase tracking-wider text-slate-400 font-bold">Ownership & Assignment</span>
+        <span className="text-[11px] uppercase tracking-wider text-slate-400 font-bold">Ownership & Assignment</span>
         {isAssigned ? (
-          <span className="text-xs px-2 py-0.5 rounded-lg font-bold bg-transparent border border-white/12 text-white text-indigo-400 border border-transparent">
+          <span className="text-[11px] px-2 py-0.5 rounded-lg font-bold bg-transparent border border-white/12 text-white text-indigo-400 border border-transparent">
             👤 Assigned
           </span>
         ) : (
-          <span className="text-xs px-2 py-0.5 rounded-lg font-bold bg-amber-500/10 text-amber-400 border border-transparent animate-pulse">
+          <span className="text-[11px] px-2 py-0.5 rounded-lg font-bold bg-amber-500/10 text-amber-400 border border-transparent animate-pulse">
             ⚠️ Unassigned
           </span>
         )}
@@ -107,12 +107,12 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
           {currentAssigneeName ? currentAssigneeName.charAt(0) : "?"}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs text-slate-400 leading-none mb-1">Assignee</p>
-          <p className="text-sm font-bold text-slate-200 truncate">
+          <p className="text-[11px] text-slate-400 leading-none mb-1">Assignee</p>
+          <p className="text-xs font-bold text-slate-200 truncate">
             {currentAssigneeName || "Unassigned Queue"}
           </p>
           {currentAssigneeName && getAgentLOB(currentAssigneeName) && (
-            <p className="text-xs text-slate-500 font-sans mt-0.5">
+            <p className="text-[11px] text-slate-500 font-sans mt-0.5">
               LOB: {getAgentLOB(currentAssigneeName)}
             </p>
           )}
@@ -138,7 +138,7 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
               disabled={loading}
-              className="w-full bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/8 font-sans font-bold text-xs uppercase tracking-wider py-1.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/8 font-sans font-bold text-[11px] uppercase tracking-wider py-1.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <User className="w-3 h-3" />
               {currentAssigneeName ? "Reassign" : "Assign"}
@@ -148,7 +148,7 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
               <div className="absolute top-full mt-1.5 right-0 z-50 bg-slate-950 border border-white/8 rounded-xl w-64 flex flex-col overflow-hidden">
                 {/* Header */}
                 <div className="p-2.5 border-b border-white/8/40 bg-[#18181f] flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Assign Agent</span>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Assign Agent</span>
                   <button 
                     onClick={() => setDropdownOpen(false)}
                     className="text-slate-500 hover:text-slate-350 p-0.5 rounded-xl hover:bg-white/5 transition-colors cursor-pointer"
@@ -166,7 +166,7 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
                       placeholder="Search agent..."
                       value={assignSearchQuery}
                       onChange={(e) => setAssignSearchQuery(e.target.value)}
-                      className="w-full bg-[#1e1e24] border border-white/8/40 rounded-xl text-xs py-1.5 pl-8 pr-7 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/85 transition-colors font-sans"
+                      className="w-full bg-[#1e1e24] border border-white/8/40 rounded-xl text-[11px] py-1.5 pl-8 pr-7 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/85 transition-colors font-sans"
                       autoFocus
                     />
                     {assignSearchQuery && (
@@ -183,7 +183,7 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
                 {/* Scrollable list of agents */}
                 <div className="max-h-56 overflow-y-auto p-1.5 space-y-0.5 bg-[#15151a] scrollbar-thin">
                   {getAgents().length === 0 ? (
-                    <p className="text-center py-6 text-xs text-slate-500 font-sans">No agents found</p>
+                    <p className="text-center py-6 text-[11px] text-slate-500 font-sans">No agents found</p>
                   ) : (
                     getAgents().map((agent) => {
                       const lob = getAgentLOB(agent);
@@ -193,11 +193,11 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
                         <button
                           key={agent}
                           onClick={() => handleAssignSelect(agent)}
-                          className={`w-full text-left px-2.5 py-1.5 text-xs rounded-xl transition-all flex items-center justify-between font-medium cursor-pointer ${ isSelected ? "bg-indigo-500/10 text-indigo-300 font-bold border border-transparent" : "text-slate-300 hover:bg-white/[0.06] hover:text-white" }`}
+                          className={`w-full text-left px-2.5 py-1.5 text-[11px] rounded-xl transition-all flex items-center justify-between font-medium cursor-pointer ${ isSelected ? "bg-indigo-500/10 text-indigo-300 font-bold border border-transparent" : "text-slate-300 hover:bg-white/[0.06] hover:text-white" }`}
                         >
                           <span className="truncate pr-2">{agent}</span>
                           {lob && (
-                            <span className={`shrink-0 text-xs font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${ isChat ? "bg-emerald-500/10 text-emerald-400 border border-transparent" : "bg-blue-500/10 text-blue-450 border border-transparent" }`}>
+                            <span className={`shrink-0 text-[11px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${ isChat ? "bg-emerald-500/10 text-emerald-400 border border-transparent" : "bg-blue-500/10 text-blue-450 border border-transparent" }`}>
                               {lob === 'Chat' ? 'Chat' : 'Call'}
                             </span>
                           )}

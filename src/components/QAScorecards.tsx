@@ -125,11 +125,11 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
     <div className="flex flex-col gap-6 animate-fade-in w-full">
       <div className="flex items-center justify-between bg-white/5 border border-white/8 p-5 rounded-xl shrink-0">
         <div>
-          <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+          <h2 className="text-base font-bold text-slate-100 flex items-center gap-2">
             <CheckCircle className="w-5 h-5 text-green-400" />
             QA & Quality Assurance
           </h2>
-          <p className="text-sm text-slate-400">View and manage interaction scorecards.</p>
+          <p className="text-xs text-slate-400">View and manage interaction scorecards.</p>
         </div>
         {isEditor && view === 'list' && (
           <div className="flex gap-2">
@@ -161,8 +161,8 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
 
       {isEditingQuestions ? (
         <div className="bg-white/5 border border-white/8 rounded-xl p-6 w-full max-w-4xl mx-auto space-y-6">
-          <h3 className="text-lg font-bold text-slate-100 pb-4 border-b border-white/8">Manage QA Criteria</h3>
-          <p className="text-sm text-slate-400">Configure the questions and maximum scores that will be used for all new scorecards.</p>
+          <h3 className="text-sm font-bold text-slate-100 pb-4 border-b border-white/8">Manage QA Criteria</h3>
+          <p className="text-xs text-slate-400">Configure the questions and maximum scores that will be used for all new scorecards.</p>
           <div className="space-y-4">
             {localQuestions.map((q, idx) => (
               <div key={q.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-transparent p-4 rounded-xl border border-white/8">
@@ -174,7 +174,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                   placeholder="e.g. Greeting & Opening"
                 />
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-400 uppercase font-bold tracking-wider">Max Score</span>
+                  <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Max Score</span>
                   <input
                     type="number"
                     min={1}
@@ -189,7 +189,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
               </div>
             ))}
           </div>
-          <button onClick={handleAddQuestion} className="w-full py-3 border border-dashed border-white/15 hover:border-white/15 text-slate-400 hover:text-slate-200 rounded-xl transition flex items-center justify-center gap-2 font-bold text-sm">
+          <button onClick={handleAddQuestion} className="w-full py-3 border border-dashed border-white/15 hover:border-white/15 text-slate-400 hover:text-slate-200 rounded-xl transition flex items-center justify-center gap-2 font-bold text-xs">
             <PlusCircle className="w-4 h-4" /> Add New Criterion
           </button>
           <div className="flex justify-end pt-6 border-t border-white/8 gap-2">
@@ -199,7 +199,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
         </div>
       ) : view === 'list' ? (
         <div className="bg-white/5 border border-white/8 rounded-xl p-6 flex flex-col min-h-0">
-          <h3 className="text-lg font-bold text-slate-100 mb-4 pb-4 border-b border-white/8">Recent Evaluations</h3>
+          <h3 className="text-sm font-bold text-slate-100 mb-4 pb-4 border-b border-white/8">Recent Evaluations</h3>
           {myScores.length === 0 ? (
             <div className="text-slate-400 text-center py-8">No QA scorecards found.</div>
           ) : (
@@ -219,15 +219,15 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-bold text-slate-100 uppercase text-sm tracking-wider">{score.agentName}</span>
-                          <span className="text-slate-500 text-xs">• Eval By: {score.qaName}</span>
-                          <span className="text-slate-500 text-xs">• {new Date(score.createdAt).toLocaleString()}</span>
+                          <span className="font-bold text-slate-100 uppercase text-xs tracking-wider">{score.agentName}</span>
+                          <span className="text-slate-500 text-[11px]">• Eval By: {score.qaName}</span>
+                          <span className="text-slate-500 text-[11px]">• {new Date(score.createdAt).toLocaleString()}</span>
                         </div>
-                        <div className="text-slate-300 text-sm">
+                        <div className="text-slate-300 text-xs">
                           Clinic: <span className="font-semibold text-white">{score.clinicName}</span> | Ref: <span className="font-mono text-indigo-300">{score.chatOrCallId}</span>
                         </div>
                         {score.notes && !isExpanded && (
-                          <div className="mt-2 text-xs text-slate-400 italic bg-white/5 p-2 rounded-xl inline-block">
+                          <div className="mt-2 text-[11px] text-slate-400 italic bg-white/5 p-2 rounded-xl inline-block">
                             "{score.notes.substring(0, 60)}{score.notes.length > 60 ? '...' : ''}"
                           </div>
                         )}
@@ -235,7 +235,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                       
                       <div className="flex items-center gap-4">
                         <div className="bg-white/[0.04] border border-white/8 rounded-xl px-4 py-2 flex flex-col items-center min-w-[100px]">
-                          <div className={`text-xl font-bold ${pctColor}`}>{!isNaN(Number(score.totalScore)) ? Number(score.totalScore) : 0}<span className="text-xs text-slate-500">/{!isNaN(Number(score.maxTotalScore)) ? Number(score.maxTotalScore) : 0}</span></div>
+                          <div className={`text-base font-bold ${pctColor}`}>{!isNaN(Number(score.totalScore)) ? Number(score.totalScore) : 0}<span className="text-[11px] text-slate-500">/{!isNaN(Number(score.maxTotalScore)) ? Number(score.maxTotalScore) : 0}</span></div>
                         </div>
                         <Search className={`w-5 h-5 text-slate-500 transition-transform ${isExpanded ? 'rotate-90 text-slate-300' : ''}`} />
                       </div>
@@ -243,12 +243,12 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                     
                     {isExpanded && (
                       <div className="p-4 border-t border-white/8 bg-transparent">
-                        <h4 className="text-sm font-bold text-slate-200 mb-3">Detailed Scorecard</h4>
+                        <h4 className="text-xs font-bold text-slate-200 mb-3">Detailed Scorecard</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                           {(score.questionsSnapshot || qaTemplate).map(q => (
                             <div key={q.id} className="flex justify-between items-center p-3 rounded-xl bg-white/[0.04] border border-white/8">
-                              <span className="text-xs font-semibold text-slate-300 flex-1 pr-2">{q.text}</span>
-                              <div className="font-sans bg-white/[0.03] px-2 py-1 rounded text-sm whitespace-nowrap">
+                              <span className="text-[11px] font-semibold text-slate-300 flex-1 pr-2">{q.text}</span>
+                              <div className="font-sans bg-white/[0.03] px-2 py-1 rounded text-xs whitespace-nowrap">
                                 <span className={score.scores[q.id] < q.maxScore ? 'text-amber-400' : 'text-green-400'}>
                                   {score.scores[q.id] ?? 0}
                                 </span>
@@ -260,8 +260,8 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                         
                         {score.notes && (
                           <div className="mb-2">
-                            <h4 className="text-xs uppercase font-bold tracking-widest text-slate-500 mb-2">Coaching & Feedback</h4>
-                            <div className="text-sm text-slate-300 whitespace-pre-wrap bg-white/[0.04] p-4 rounded-xl border border-white/8">
+                            <h4 className="text-[11px] uppercase font-bold tracking-widest text-slate-500 mb-2">Coaching & Feedback</h4>
+                            <div className="text-xs text-slate-300 whitespace-pre-wrap bg-white/[0.04] p-4 rounded-xl border border-white/8">
                               {score.notes}
                             </div>
                           </div>
@@ -276,11 +276,11 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="bg-white/5 border border-white/8 rounded-xl p-6 w-full max-w-4xl mx-auto space-y-6">
-          <h3 className="text-lg font-bold text-slate-100 pb-4 border-b border-white/8">Evaluate Interaction</h3>
+          <h3 className="text-sm font-bold text-slate-100 pb-4 border-b border-white/8">Evaluate Interaction</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Agent Name</label>
+              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Agent Name</label>
               <select
                 value={targetAgent}
                 onChange={(e) => setTargetAgent(e.target.value)}
@@ -293,7 +293,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
             </div>
             
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Clinic Name</label>
+              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Clinic Name</label>
               <input
                 type="text"
                 value={clinicName}
@@ -306,7 +306,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Chat / Call ID</label>
+              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Chat / Call ID</label>
               <input
                 type="text"
                 value={chatOrCallId}
@@ -320,13 +320,13 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
           </div>
 
           <div className="pt-4 mt-6 border-t border-white/8">
-            <h4 className="text-sm font-bold tracking-wide text-slate-200 mb-4">Scorecard Criteria</h4>
+            <h4 className="text-xs font-bold tracking-wide text-slate-200 mb-4">Scorecard Criteria</h4>
             <div className="space-y-4">
               {qaTemplate.map((q) => (
                 <div key={q.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-transparent p-4 rounded-xl border border-white/8">
                   <div className="flex-1">
                     <span className="font-semibold text-slate-200">{q.text}</span>
-                    <p className="text-xs text-slate-500 mt-1">Max Score: {q.maxScore}</p>
+                    <p className="text-[11px] text-slate-500 mt-1">Max Score: {q.maxScore}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <input
@@ -347,7 +347,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
           </div>
 
           <div className="pt-4 border-t border-white/8">
-            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Coaching & Additional Feedback</label>
+            <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Coaching & Additional Feedback</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -358,9 +358,9 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
 
           <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-white/8">
             <div className="mb-4 sm:mb-0">
-              <span className="text-sm text-slate-400">Calculated Final Score: </span>
-              <span className="text-xl font-bold text-green-400 ml-2">
-                {!isNaN(Number(calculateTotal())) ? Number(calculateTotal()) : 0} <span className="text-sm text-slate-500">/ {!isNaN(Number(calculateMax())) ? Number(calculateMax()) : 0}</span>
+              <span className="text-xs text-slate-400">Calculated Final Score: </span>
+              <span className="text-base font-bold text-green-400 ml-2">
+                {!isNaN(Number(calculateTotal())) ? Number(calculateTotal()) : 0} <span className="text-xs text-slate-500">/ {!isNaN(Number(calculateMax())) ? Number(calculateMax()) : 0}</span>
               </span>
             </div>
             

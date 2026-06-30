@@ -97,7 +97,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
 
     return (
       <span 
-        className={`px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide inline-block max-w-full truncate ${style}`}
+        className={`px-3 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wide inline-block max-w-full truncate ${style}`}
         title={label}
       >
         {label}
@@ -108,19 +108,19 @@ export const CaseTable: React.FC<CaseTableProps> = ({
   const getTypeBadge = (item: CRMCase) => {
     if (item.crmType === "inquiry") {
       return (
-        <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-transparent border border-white/12 text-white text-indigo-400 border border-transparent">
+        <span className="px-2 py-0.5 rounded-xl text-[11px] font-bold bg-transparent border border-white/12 text-white text-indigo-400 border border-transparent">
           Inquiry
         </span>
       );
     } else if (item.crmType === "complaint") {
       return (
-        <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-rose-500/10 text-rose-400 border border-transparent">
+        <span className="px-2 py-0.5 rounded-xl text-[11px] font-bold bg-rose-500/10 text-rose-400 border border-transparent">
           Complaint
         </span>
       );
     } else if (item.crmType === "client_comm") {
       return (
-        <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-transparent border border-white/12 text-white text-emerald-400 border border-transparent">
+        <span className="px-2 py-0.5 rounded-xl text-[11px] font-bold bg-transparent border border-white/12 text-white text-emerald-400 border border-transparent">
           Client Comm
         </span>
       );
@@ -128,25 +128,25 @@ export const CaseTable: React.FC<CaseTableProps> = ({
       const platform = item.raw.platform;
       if (platform === "tamara") {
         return (
-          <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-amber-500/10 text-amber-400 border border-transparent">
+          <span className="px-2 py-0.5 rounded-xl text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-transparent">
             Tamara
           </span>
         );
       } else if (platform === "tabby") {
         return (
-          <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-teal-500/10 text-teal-400 border border-transparent">
+          <span className="px-2 py-0.5 rounded-xl text-[11px] font-bold bg-teal-500/10 text-teal-400 border border-transparent">
             Tabby
           </span>
         );
       } else if (platform === "one_time_payment") {
         return (
-          <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-transparent border border-white/12 text-white text-blue-400 border border-transparent">
+          <span className="px-2 py-0.5 rounded-xl text-[11px] font-bold bg-transparent border border-white/12 text-white text-blue-400 border border-transparent">
             One Time
           </span>
         );
       }
       return (
-        <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-slate-500/10 text-slate-400 border border-transparent">
+        <span className="px-2 py-0.5 rounded-xl text-[11px] font-bold bg-slate-500/10 text-slate-400 border border-transparent">
           Payment
         </span>
       );
@@ -157,8 +157,8 @@ export const CaseTable: React.FC<CaseTableProps> = ({
     <div id="crm-table-container" className="w-full h-full flex flex-col min-h-0 bg-transparent rounded-xl border border-white/8 overflow-hidden">
       {/* Table grid for larger screens */}
       <div className="hidden lg:block overflow-x-auto min-h-0 custom-scrollbar">
-        <table className="w-full min-w-[900px] text-left text-xs text-slate-300 whitespace-nowrap table-fixed">
-          <thead className="bg-transparent text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-white/8 sticky top-0 z-15">
+        <table className="w-full min-w-[900px] text-left text-[11px] text-slate-300 whitespace-nowrap table-fixed">
+          <thead className="bg-transparent text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-white/8 sticky top-0 z-15">
             <tr>
               <th className="p-2 w-6"></th>
               <th className="p-2 w-32">
@@ -207,7 +207,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                           <div className="w-2 h-2 rounded-full bg-blue-500 mx-auto" title="Unread activity" />
                         )}
                       </td>
-                      <td className="p-2 font-sans text-xs text-slate-100 font-bold truncate">
+                      <td className="p-2 font-sans text-[11px] text-slate-100 font-bold truncate">
                         {item.referenceId}
                       </td>
                       <td className="p-2">
@@ -217,14 +217,14 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                         <span className="font-bold text-slate-100 block truncate">
                           {item.patientName || "—"}
                         </span>
-                        <span className="text-xs text-slate-400 truncate block mt-0.5 font-sans">
+                        <span className="text-[11px] text-slate-400 truncate block mt-0.5 font-sans">
                           {item.phoneNumber || "—"}
                         </span>
                       </td>
-                      <td className="p-2 truncate text-slate-400 font-medium text-xs">
+                      <td className="p-2 truncate text-slate-400 font-medium text-[11px]">
                         {CLINIC_LABELS[item.clinicName] || item.clinicName}
                       </td>
-                      <td className="p-2 truncate text-slate-400 text-xs">
+                      <td className="p-2 truncate text-slate-400 text-[11px]">
                         {item.crmType === "inquiry" ? item.agentName : item.assignedToName || "Unassigned"}
                       </td>
                       <td className="p-2 overflow-hidden">
@@ -232,7 +232,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                       </td>
                       <td className="p-2">
                         <span 
-                          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-xl text-xs border ${sla.color}`}
+                          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-xl text-[11px] border ${sla.color}`}
                           title={`Created: ${new Date(item.createdAt).toLocaleString()}`}
                         >
                           <Clock className="w-2.5 h-2.5 shrink-0" />
@@ -303,7 +303,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                   className={`p-4 cursor-pointer transition-all space-y-3 ${ isSelected ? "bg-indigo-600/15 border-l-4 border-indigo-500 text-white" : "hover:bg-transparent" }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-sans text-xs text-slate-100 font-bold">
+                    <span className="font-sans text-[11px] text-slate-100 font-bold">
                       {item.referenceId}
                     </span>
                     <div className="flex items-center gap-1.5">
@@ -313,29 +313,29 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                   </div>
 
                   <div className="space-y-1">
-                    <h4 className="text-sm font-bold text-slate-200">
+                    <h4 className="text-xs font-bold text-slate-200">
                       {item.patientName || "Subject Log"}
                     </h4>
-                    <p className="text-xs text-slate-400 font-sans">
+                    <p className="text-[11px] text-slate-400 font-sans">
                       {item.phoneNumber || "—"}
                     </p>
-                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                    <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
                       {item.subject}
                     </p>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2 pt-1">
                     {getStatusBadge(item.crmType, item.status)}
-                    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-xl text-xs border ${sla.color}`}>
+                    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-xl text-[11px] border ${sla.color}`}>
                       <Clock className="w-2.5 h-2.5" />
                       {sla.label}
                     </span>
-                    <span className="text-xs text-slate-500 font-sans ml-auto">
+                    <span className="text-[11px] text-slate-500 font-sans ml-auto">
                       {CLINIC_LABELS[item.clinicName] || item.clinicName}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-white/[0.02]">
+                  <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-white/[0.02]">
                     <span className="truncate">
                       👤 {item.crmType === "inquiry" ? item.agentName : item.assignedToName || "Unassigned"}
                     </span>

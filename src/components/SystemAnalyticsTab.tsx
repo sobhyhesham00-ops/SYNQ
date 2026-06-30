@@ -77,7 +77,7 @@ export const SystemAnalyticsTab: React.FC<SystemAnalyticsTabProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
         {/* Attendance Interactive Chart */}
         <div className="bg-white/5 border border-white/8 p-5 rounded-xl flex flex-col h-80">
-          <h3 className="text-sm font-bold text-slate-100 mb-4 flex items-center gap-2">
+          <h3 className="text-xs font-bold text-slate-100 mb-4 flex items-center gap-2">
             <Activity className="w-4 h-4 text-emerald-400" />
             Live Attendance
           </h3>
@@ -108,7 +108,7 @@ export const SystemAnalyticsTab: React.FC<SystemAnalyticsTabProps> = ({
 
         {/* Requests & Swaps Interactive Chart */}
         <div className="bg-white/5 border border-white/8 p-5 rounded-xl flex flex-col h-80">
-          <h3 className="text-sm font-bold text-slate-100 mb-4 flex items-center gap-2">
+          <h3 className="text-xs font-bold text-slate-100 mb-4 flex items-center gap-2">
             <PieChart className="w-4 h-4 text-indigo-400" />
             Roster Requests
           </h3>
@@ -139,7 +139,7 @@ export const SystemAnalyticsTab: React.FC<SystemAnalyticsTabProps> = ({
 
         {/* General Inquiries Chart */}
         <div className="bg-white/5 border border-white/8 p-5 rounded-xl flex flex-col h-80">
-          <h3 className="text-sm font-bold text-slate-100 mb-4 flex items-center gap-2">
+          <h3 className="text-xs font-bold text-slate-100 mb-4 flex items-center gap-2">
             <FileText className="w-4 h-4 text-blue-400" />
             General Inquiries Status
           </h3>
@@ -164,7 +164,7 @@ export const SystemAnalyticsTab: React.FC<SystemAnalyticsTabProps> = ({
 
         {/* Tabby/Tamara & Complaints Chart */}
         <div className="bg-white/5 border border-white/8 p-5 rounded-xl flex flex-col h-80">
-          <h3 className="text-sm font-bold text-slate-100 mb-4 flex items-center gap-2">
+          <h3 className="text-xs font-bold text-slate-100 mb-4 flex items-center gap-2">
             <Activity className="w-4 h-4 text-emerald-400" />
             Complaints / Payments
           </h3>
@@ -190,7 +190,7 @@ export const SystemAnalyticsTab: React.FC<SystemAnalyticsTabProps> = ({
 
       {/* Aggregate Daily Creation Trend */}
       <div className="bg-white/5 border border-white/8 p-5 rounded-xl h-96">
-        <h3 className="text-sm font-bold text-slate-100 mb-6 flex items-center gap-2">
+        <h3 className="text-xs font-bold text-slate-100 mb-6 flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-indigo-400" />
           General Inquiries, Tabby/Tamara, And Complaints Creation Volume (Daily Trends)
         </h3>

@@ -416,13 +416,13 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/[0.04] p-6 rounded-[32px] border-none relative overflow-hidden">
         <div className="absolute top-0 right-0 p-32 bg-indigo-500/5 blur-[80px] rounded-full pointer-events-none" />
         <div className="relative z-10">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+          <h2 className="text-lg font-bold text-white flex items-center gap-3">
             <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-full">
               <ClipboardList className="w-6 h-6" />
             </div>
             TL Control Center
           </h2>
-          <p className="text-xs text-slate-400 mt-2 max-w-2xl font-medium">
+          <p className="text-[11px] text-slate-400 mt-2 max-w-2xl font-medium">
             {isAnyFilterActive ? (
               <span className="text-sky-300 font-bold bg-sky-500/10 px-2.5 py-1 rounded-xl">
                 ⚠️ Interactive Historical Search Mode active! All-time records matching your filter criteria are displayed.
@@ -438,7 +438,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
           {isAnyFilterActive && (
             <button
               onClick={handleResetFilters}
-              className="px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 border-none transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+              className="px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-bold text-slate-300 border-none transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
               title="Return to Today Only"
             >
               <RotateCcw className="w-4 h-4 text-rose-400" /> Reset to Today
@@ -448,7 +448,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
           <button
             onClick={handleExportData}
             disabled={filteredList.length === 0}
-            className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border-none rounded-lg text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+            className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border-none rounded-lg text-slate-300 text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
             title={filteredList.length === 0 ? "No data to export" : "Export filtered list to Excel"}
           >
             <Download className="w-4 h-4 text-indigo-400" /> Export Data
@@ -456,7 +456,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
 
           <div className="flex items-center gap-2 bg-transparent border border-white/12 text-white px-4 py-2.5 rounded-lg shrink-0">
             <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
-            <span className="text-xs font-bold text-indigo-300 uppercase tracking-widest">
+            <span className="text-[11px] font-bold text-indigo-300 uppercase tracking-widest">
               {filteredList.length} Items Listed
             </span>
           </div>
@@ -470,8 +470,8 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
             <User className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-white">Online Team Leaders Today</h4>
-            <p className="text-xs text-slate-400 mt-0.5">Real-time leadership presence and shift logging</p>
+            <h4 className="text-xs font-bold text-white">Online Team Leaders Today</h4>
+            <p className="text-[11px] text-slate-400 mt-0.5">Real-time leadership presence and shift logging</p>
           </div>
         </div>
 
@@ -479,13 +479,13 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
           {TEAM_LEADERS.map(tlName => {
             const log = tlLoginLogs.find(l => l.tlName === tlName && l.date === todayStr);
             return (
-              <div key={tlName} className="flex items-center gap-2 text-sm bg-white/[0.05] px-4 py-2 rounded-lg border-none">
+              <div key={tlName} className="flex items-center gap-2 text-xs bg-white/[0.05] px-4 py-2 rounded-lg border-none">
                 <div className={`w-2.5 h-2.5 rounded-full ${log?.onlineStatus === 'online' ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`} />
                 <span className="font-bold text-slate-200">{tlName}</span>
                 {log ? (
-                  <span className="text-xs text-slate-400 font-mono pl-1 border-l border-white/8 ml-1">First login: {new Date(log.loggedInAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  <span className="text-[11px] text-slate-400 font-mono pl-1 border-l border-white/8 ml-1">First login: {new Date(log.loggedInAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 ) : (
-                  <span className="text-xs text-slate-500 font-sans pl-1 border-l border-white/8 ml-1">Not logged in today</span>
+                  <span className="text-[11px] text-slate-500 font-sans pl-1 border-l border-white/8 ml-1">Not logged in today</span>
                 )}
               </div>
             );
@@ -494,7 +494,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
       </div>
 
       <div className="space-y-3 relative z-10">
-        <h3 className="text-sm font-bold text-slate-300 uppercase tracking-widest px-1">Today at a Glance</h3>
+        <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest px-1">Today at a Glance</h3>
         {/* Summary Clickable Counter Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Click to filter Inquiries */}
@@ -506,13 +506,13 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
               <div className={`p-2.5 rounded-full ${selectedTypeFilter === "inquiry" ? "bg-amber-500/10 text-amber-300" : "bg-amber-500/10 text-amber-400"}`}>
                 <HelpCircle className="w-5 h-5" />
               </div>
-              <span className="text-xs bg-white/[0.06] text-slate-400 font-sans px-2 py-1 rounded-xl border border-white/8">
+              <span className="text-[11px] bg-white/[0.06] text-slate-400 font-sans px-2 py-1 rounded-xl border border-white/8">
                 {selectedTypeFilter === "inquiry" ? "ACTIVE" : "CLICK"}
               </span>
             </div>
             <div>
-              <p className="text-xs text-amber-400 uppercase tracking-widest font-bold">Inquiries</p>
-              <p className="text-3xl font-bold text-white tracking-tight mt-1">{displayInquiriesCount}</p>
+              <p className="text-[11px] text-amber-400 uppercase tracking-widest font-bold">Inquiries</p>
+              <p className="text-xl font-bold text-white tracking-tight mt-1">{displayInquiriesCount}</p>
             </div>
           </button>
 
@@ -525,13 +525,13 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
               <div className={`p-2.5 rounded-full ${selectedTypeFilter === "tabbyTamara" ? "bg-cyan-500/10 text-cyan-500" : "bg-cyan-500/10 text-cyan-500"}`}>
                 <Wallet className="w-5 h-5" />
               </div>
-              <span className="text-xs bg-white/[0.06] text-slate-400 font-sans px-2 py-1 rounded-xl border border-white/8">
+              <span className="text-[11px] bg-white/[0.06] text-slate-400 font-sans px-2 py-1 rounded-xl border border-white/8">
                 {selectedTypeFilter === "tabbyTamara" ? "ACTIVE" : "CLICK"}
               </span>
             </div>
             <div>
-              <p className="text-xs text-cyan-500 uppercase tracking-widest font-bold">Alternative Pay</p>
-              <p className="text-3xl font-bold text-white tracking-tight mt-1">{displayTTRequestsCount}</p>
+              <p className="text-[11px] text-cyan-500 uppercase tracking-widest font-bold">Alternative Pay</p>
+              <p className="text-xl font-bold text-white tracking-tight mt-1">{displayTTRequestsCount}</p>
             </div>
           </button>
 
@@ -544,13 +544,13 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
               <div className={`p-2.5 rounded-full ${selectedTypeFilter === "complaint" ? "bg-rose-500/10 text-rose-300" : "bg-rose-500/10 text-rose-400"}`}>
                 <AlertTriangle className="w-5 h-5" />
               </div>
-              <span className="text-xs bg-white/[0.06] text-slate-400 font-sans px-2 py-1 rounded-xl border border-white/8">
+              <span className="text-[11px] bg-white/[0.06] text-slate-400 font-sans px-2 py-1 rounded-xl border border-white/8">
                 {selectedTypeFilter === "complaint" ? "ACTIVE" : "CLICK"}
               </span>
             </div>
             <div>
-              <p className="text-xs text-rose-400 uppercase tracking-widest font-bold">Complaints</p>
-              <p className="text-3xl font-bold text-white tracking-tight mt-1">{displayComplaintsCount}</p>
+              <p className="text-[11px] text-rose-400 uppercase tracking-widest font-bold">Complaints</p>
+              <p className="text-xl font-bold text-white tracking-tight mt-1">{displayComplaintsCount}</p>
             </div>
           </button>
 
@@ -563,13 +563,13 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
               <div className={`p-2.5 rounded-full ${selectedTypeFilter === "clientComm" ? "bg-indigo-500/10 text-indigo-300" : "bg-indigo-500/10 text-indigo-400"}`}>
                 <MessageCircle className="w-5 h-5" />
               </div>
-              <span className="text-xs bg-white/[0.06] text-slate-400 font-sans px-2 py-1 rounded-xl border border-white/8">
+              <span className="text-[11px] bg-white/[0.06] text-slate-400 font-sans px-2 py-1 rounded-xl border border-white/8">
                 {selectedTypeFilter === "clientComm" ? "ACTIVE" : "CLICK"}
               </span>
             </div>
             <div>
-              <p className="text-xs text-indigo-400 uppercase tracking-widest font-bold">Client Comm</p>
-              <p className="text-3xl font-bold text-white tracking-tight mt-1">{displayClientCommsCount}</p>
+              <p className="text-[11px] text-indigo-400 uppercase tracking-widest font-bold">Client Comm</p>
+              <p className="text-xl font-bold text-white tracking-tight mt-1">{displayClientCommsCount}</p>
             </div>
           </button>
 
@@ -582,13 +582,13 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
               <div className="p-2.5 rounded-full bg-white/10 text-slate-300">
                 <ClipboardList className="w-5 h-5" />
               </div>
-              <span className="text-xs bg-transparent border border-white/12 text-white text-emerald-400 font-sans px-2 py-0.5 rounded-xl border border-transparent font-bold">
+              <span className="text-[11px] bg-transparent border border-white/12 text-white text-emerald-400 font-sans px-2 py-0.5 rounded-xl border border-transparent font-bold">
                 {isAnyFilterActive ? "FILTERED" : "TODAY"}
               </span>
             </div>
             <div>
-              <p className="text-xs text-slate-400 uppercase tracking-widest font-bold">Combined Queue</p>
-              <p className="text-2xl font-bold text-slate-100 tracking-tight">{displayTotalCount}</p>
+              <p className="text-[11px] text-slate-400 uppercase tracking-widest font-bold">Combined Queue</p>
+              <p className="text-lg font-bold text-slate-100 tracking-tight">{displayTotalCount}</p>
             </div>
           </button>
         </div>
@@ -599,13 +599,13 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
         {/* Clinic Dropdown */}
         <div className="md:col-span-3 space-y-2">
           <div className="flex justify-between items-center mb-1">
-            <label className="text-xs text-slate-400 font-bold flex items-center gap-1.5 ml-1">
+            <label className="text-[11px] text-slate-400 font-bold flex items-center gap-1.5 ml-1">
               <Building className="w-4 h-4 text-slate-500" /> Clinics (Multi)
             </label>
             {filterClinics.length > 0 && (
               <button
                 onClick={() => setFilterClinics([])}
-                className="text-xs text-rose-400 hover:text-rose-300 font-bold uppercase cursor-pointer"
+                className="text-[11px] text-rose-400 hover:text-rose-300 font-bold uppercase cursor-pointer"
               >
                 Clear
               </button>
@@ -620,7 +620,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
                 setCurrentPage(1);
               }
             }}
-            className="w-full bg-white/[0.08] border-none rounded-xl px-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 cursor-pointer font-medium appearance-none"
+            className="w-full bg-white/[0.08] border-none rounded-xl px-4 py-3 text-xs text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 cursor-pointer font-medium appearance-none"
           >
             <option value="">➕ Add Clinic to Filter...</option>
             {CLINIC_OPTIONS.filter(c => !filterClinics.includes(c.value)).map(c => (
@@ -632,7 +632,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
               {filterClinics.map(c => {
                 const label = CLINIC_OPTIONS.find(opt => opt.value === c)?.label || c;
                 return (
-                  <span key={c} className="bg-transparent border border-white/12 text-white text-emerald-300 border-none px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                  <span key={c} className="bg-transparent border border-white/12 text-white text-emerald-300 border-none px-2.5 py-1 rounded-xl text-[11px] font-bold flex items-center gap-1.5">
                     {label}
                     <button onClick={() => setFilterClinics(prev => prev.filter(x => x !== c))} className="hover:text-white cursor-pointer">&times;</button>
                   </span>
@@ -645,13 +645,13 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
         {/* Date Picker */}
         <div className="md:col-span-3 space-y-2 relative">
           <div className="flex justify-between items-center mb-1">
-            <label className="text-xs text-slate-400 font-bold flex items-center gap-1.5 ml-1">
+            <label className="text-[11px] text-slate-400 font-bold flex items-center gap-1.5 ml-1">
               <Calendar className="w-4 h-4 text-slate-500" /> Date
             </label>
             {filterDate && (
               <button
                 onClick={() => setFilterDate("")}
-                className="text-xs text-rose-400 hover:text-rose-300 font-bold uppercase cursor-pointer"
+                className="text-[11px] text-rose-400 hover:text-rose-300 font-bold uppercase cursor-pointer"
               >
                 Clear
               </button>
@@ -661,13 +661,13 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
             type="date"
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
-            className="w-full bg-white/[0.08] border-none rounded-xl px-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 cursor-pointer font-medium"
+            className="w-full bg-white/[0.08] border-none rounded-xl px-4 py-3 text-xs text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 cursor-pointer font-medium"
           />
         </div>
 
         {/* Phone number Search */}
         <div className="md:col-span-3 space-y-2 text-left">
-          <label className="text-xs text-slate-400 font-bold flex items-center gap-1.5 ml-1">
+          <label className="text-[11px] text-slate-400 font-bold flex items-center gap-1.5 ml-1">
             <Phone className="w-4 h-4 text-slate-500" /> Phone Partial Lookup
           </label>
           <div className="relative">
@@ -679,7 +679,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
                 setFilterPhone(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full bg-white/[0.08] border-none rounded-xl pl-11 pr-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 font-sans"
+              className="w-full bg-white/[0.08] border-none rounded-xl pl-11 pr-4 py-3 text-xs text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 font-sans"
             />
             <Search className="w-4 h-4 text-slate-400 absolute left-4 top-4" />
           </div>
@@ -690,7 +690,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
           <button
             type="button"
             onClick={() => setSortOldestFirst(!sortOldestFirst)}
-            className={`w-full h-12 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer border-none ${ sortOldestFirst ? "bg-amber-500/10 text-amber-400 hover:bg-amber-500/10" : "bg-white/[0.05] text-slate-300 hover:bg-white/[0.08]" }`}
+            className={`w-full h-12 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer border-none ${ sortOldestFirst ? "bg-amber-500/10 text-amber-400 hover:bg-amber-500/10" : "bg-white/[0.05] text-slate-300 hover:bg-white/[0.08]" }`}
           >
             <ArrowUpDown className="w-4 h-4 shrink-0" />
             {sortOldestFirst ? "⚠️ Oldest First" : "🗓️ Latest First"}
@@ -701,10 +701,10 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
       {/* Dispatch queue combined list */}
       <div className="bg-white/[0.04] p-1 rounded-[32px] border-none overflow-hidden mt-6">
         <div className="p-6">
-          <h3 className="text-lg font-bold text-white font-sans flex items-center gap-2">
+          <h3 className="text-sm font-bold text-white font-sans flex items-center gap-2">
             <ClipboardList className="w-5 h-5 text-indigo-400" /> Unified Case Pipeline
           </h3>
-          <p className="text-sm text-slate-400 mt-1 font-medium">
+          <p className="text-xs text-slate-400 mt-1 font-medium">
             Matched dispatch cases in queue: <strong className="text-indigo-400">{filteredList.length}</strong>
           </p>
         </div>
@@ -715,10 +715,10 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
             <div className="w-12 h-12 rounded-full bg-white/[0.06] flex items-center justify-center mx-auto text-slate-400 mb-2">
               <Filter className="w-6 h-6 text-slate-500" />
             </div>
-            <p className="text-sm font-bold text-white">
+            <p className="text-xs font-bold text-white">
               No matching dispatch files under current targets.
             </p>
-            <p className="text-xs text-slate-400 max-w-md mx-auto">
+            <p className="text-[11px] text-slate-400 max-w-md mx-auto">
               {isAnyFilterActive ? (
                 <span>There are currently no active pending tickets matching the filters. Close some filters to go back to today's list.</span>
               ) : (

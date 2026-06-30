@@ -55,7 +55,7 @@ export const CaseConversation: React.FC<CaseConversationProps> = ({
     <div id="case-conversation-flow" className="space-y-4">
       <div className="flex items-center gap-2 mb-1">
         <MessageSquare className="w-4 h-4 text-emerald-400" />
-        <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Conversation History</h3>
+        <h3 className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">Conversation History</h3>
       </div>
 
       <div className="bg-transparent border border-white/8 rounded-xl p-1 md:p-2">

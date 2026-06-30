@@ -44,7 +44,7 @@ export const FilterPresetBar: React.FC<FilterPresetBarProps> = ({
         <div className="relative">
           <button
             onClick={() => setOpen(o => !o)}
-            className="flex items-center gap-1.5 text-xs font-bold text-slate-300 bg-white/5 px-3 py-1.5 rounded-xl hover:bg-white/10 transition-colors"
+            className="flex items-center gap-1.5 text-[11px] font-bold text-slate-300 bg-white/5 px-3 py-1.5 rounded-xl hover:bg-white/10 transition-colors"
             id={`preset-dropdown-trigger-${currentTab}`}
           >
             Saved Presets ({tabPresets.length})
@@ -59,7 +59,7 @@ export const FilterPresetBar: React.FC<FilterPresetBarProps> = ({
                 >
                   <button
                     onClick={() => { onLoad(p); setOpen(false); }}
-                    className="text-xs text-slate-200 text-left flex-1 font-semibold hover:text-indigo-300 transition-colors"
+                    className="text-[11px] text-slate-200 text-left flex-1 font-semibold hover:text-indigo-300 transition-colors"
                   >
                     {p.name}
                   </button>
@@ -84,12 +84,12 @@ export const FilterPresetBar: React.FC<FilterPresetBarProps> = ({
           onChange={e => setNewName(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSave()}
           placeholder="Name this filter..."
-          className="bg-white/[0.02] border border-white/8 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 outline-none focus:border-indigo-500 w-36 placeholder:text-slate-600"
+          className="bg-white/[0.02] border border-white/8 rounded-xl px-2.5 py-1.5 text-[11px] text-slate-200 outline-none focus:border-indigo-500 w-36 placeholder:text-slate-600"
         />
         <button
           onClick={handleSave}
           disabled={!newName.trim()}
-          className="px-3 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 disabled:opacity-40 disabled:pointer-events-none text-white text-xs font-bold rounded-xl transition-all"
+          className="px-3 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 disabled:opacity-40 disabled:pointer-events-none text-white text-[11px] font-bold rounded-xl transition-all"
         >
           Save
         </button>

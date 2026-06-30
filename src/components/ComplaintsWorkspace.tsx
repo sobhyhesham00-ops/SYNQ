@@ -134,10 +134,10 @@ export const ComplaintsWorkspace: React.FC<ComplaintsWorkspaceProps> = ({
         <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mx-auto text-slate-500">
           <AlertTriangle className="w-6 h-6 text-pink-500" />
         </div>
-        <p className="text-sm font-bold text-slate-100 font-sans">
+        <p className="text-xs font-bold text-slate-100 font-sans">
           No complaints matching criteria.
         </p>
-        <p className="text-xs text-slate-400 font-sans">
+        <p className="text-[11px] text-slate-400 font-sans">
           Logged complaints, issues and dispute timelines will load here.
         </p>
       </div>
@@ -146,7 +146,7 @@ export const ComplaintsWorkspace: React.FC<ComplaintsWorkspaceProps> = ({
 
   return (
     <div className="flex flex-col gap-4 animate-fade-in font-sans w-full">
-      <p className="text-xs uppercase tracking-wider text-slate-400 font-bold mb-1 pl-1 text-left font-sans">
+      <p className="text-[11px] uppercase tracking-wider text-slate-400 font-bold mb-1 pl-1 text-left font-sans">
         📁 {filteredComps.length} Complaints Found
       </p>
 

@@ -43,7 +43,7 @@ export const CaseAttachments: React.FC<CaseAttachmentsProps> = ({ caseData }) =>
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Paperclip className="w-4 h-4 text-emerald-400" />
-          <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+          <h3 className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">
             Files & Screenshots ({allAttachedObjects.length})
           </h3>
         </div>
@@ -51,7 +51,7 @@ export const CaseAttachments: React.FC<CaseAttachmentsProps> = ({ caseData }) =>
         {allAttachedObjects.length === 0 ? (
           <div className="bg-transparent border border-dashed border-white/8 rounded-xl p-6 text-center">
             <Paperclip className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-            <p className="text-slate-400 text-xs italic">No uploaded media or files.</p>
+            <p className="text-slate-400 text-[11px] italic">No uploaded media or files.</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
@@ -78,10 +78,10 @@ export const CaseAttachments: React.FC<CaseAttachmentsProps> = ({ caseData }) =>
                   )}
 
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-slate-200 truncate" title={file.name}>
+                    <p className="text-[11px] font-bold text-slate-200 truncate" title={file.name}>
                       {file.name}
                     </p>
-                    <p className="text-xs text-slate-500 font-mono mt-0.5 uppercase tracking-wide">
+                    <p className="text-[11px] text-slate-500 font-mono mt-0.5 uppercase tracking-wide">
                       {file.type ? file.type.split('/')[1] || file.type : 'Unknown'}
                     </p>
                   </div>
@@ -91,7 +91,7 @@ export const CaseAttachments: React.FC<CaseAttachmentsProps> = ({ caseData }) =>
                     download={file.name}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-3 w-full bg-white/5 hover:bg-white/10 text-slate-300 font-bold text-xs uppercase tracking-wider py-1 rounded-xl text-center flex items-center justify-center gap-1.5 transition-all"
+                    className="mt-3 w-full bg-white/5 hover:bg-white/10 text-slate-300 font-bold text-[11px] uppercase tracking-wider py-1 rounded-xl text-center flex items-center justify-center gap-1.5 transition-all"
                   >
                     <Download className="w-3 h-3" /> View / Download
                   </a>
@@ -106,13 +106,13 @@ export const CaseAttachments: React.FC<CaseAttachmentsProps> = ({ caseData }) =>
       <div className="pt-2 border-t border-white/8">
         <div className="flex items-center gap-2 mb-3">
           <LinkIcon className="w-4 h-4 text-emerald-400" />
-          <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+          <h3 className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">
             Referenced Links ({allLinks.length})
           </h3>
         </div>
 
         {allLinks.length === 0 ? (
-          <p className="text-xs text-slate-500 italic px-1">No shared web URLs.</p>
+          <p className="text-[11px] text-slate-500 italic px-1">No shared web URLs.</p>
         ) : (
           <div className="space-y-2">
             {allLinks.map((link, idx) => (
@@ -121,7 +121,7 @@ export const CaseAttachments: React.FC<CaseAttachmentsProps> = ({ caseData }) =>
                 href={link.startsWith('http') ? link : `https://${link}`}
                 target="_blank"
                 rel="noreferrer"
-                className="block bg-transparent border border-white/8 hover:border-transparent rounded-xl p-2.5 text-xs text-indigo-400 hover:text-indigo-300 transition-all font-sans truncate"
+                className="block bg-transparent border border-white/8 hover:border-transparent rounded-xl p-2.5 text-[11px] text-indigo-400 hover:text-indigo-300 transition-all font-sans truncate"
               >
                 🔗 {link}
               </a>

@@ -19,8 +19,8 @@ export const InquiryRepliesViewer: React.FC<InquiryRepliesViewerProps> = ({ inqu
           <CheckCircle2 className="w-4 h-4" />
         </div>
         <div>
-          <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest block font-sans">Solutions & Activity Logs</span>
-          <span className="text-xs text-slate-400">Recorded client resolutions and correspondence</span>
+          <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-widest block font-sans">Solutions & Activity Logs</span>
+          <span className="text-[11px] text-slate-400">Recorded client resolutions and correspondence</span>
         </div>
       </div>
 
@@ -38,18 +38,18 @@ export const InquiryRepliesViewer: React.FC<InquiryRepliesViewerProps> = ({ inqu
                 <div className="p-3 bg-white/[0.04] border border-white/8 rounded-xl space-y-2 hover:bg-white/[0.05] duration-150">
                   <div className="flex justify-between items-center gap-2 flex-wrap">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-bold text-slate-200">{reply.senderName}</span>
-                      <span className={`text-xs font-bold uppercase tracking-widest px-1.5 py-0.2 rounded border ${isTL ? 'text-amber-400 bg-amber-500/5 border-transparent' : 'text-emerald-400 bg-transparent border border-white/12 text-white border-transparent'}`}>
+                      <span className="text-[11px] font-bold text-slate-200">{reply.senderName}</span>
+                      <span className={`text-[11px] font-bold uppercase tracking-widest px-1.5 py-0.2 rounded border ${isTL ? 'text-amber-400 bg-amber-500/5 border-transparent' : 'text-emerald-400 bg-transparent border border-white/12 text-white border-transparent'}`}>
                         {reply.authorRole || "Leader"}
                       </span>
                     </div>
-                    <span className="text-xs text-slate-500 font-sans flex items-center gap-1">
+                    <span className="text-[11px] text-slate-500 font-sans flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       {new Date(reply.createdAt).toLocaleString()}
                     </span>
                   </div>
                   {reply.text && (
-                    <p className="text-xs text-slate-300 leading-relaxed font-sans whitespace-pre-wrap">
+                    <p className="text-[11px] text-slate-300 leading-relaxed font-sans whitespace-pre-wrap">
                       {reply.text}
                     </p>
                   )}
@@ -76,19 +76,19 @@ export const InquiryRepliesViewer: React.FC<InquiryRepliesViewerProps> = ({ inqu
             <div className="p-3 bg-white/[0.04] border border-white/8 rounded-xl space-y-2 hover:bg-white/[0.05] duration-150">
               <div className="flex justify-between items-center gap-2">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-bold text-slate-200">{inquiry.answeredBy || "Leader"}</span>
-                  <span className="text-xs font-bold uppercase tracking-widest px-1.5 py-0.2 rounded border text-emerald-400 bg-transparent border border-white/12 text-white border-transparent">
+                  <span className="text-[11px] font-bold text-slate-200">{inquiry.answeredBy || "Leader"}</span>
+                  <span className="text-[11px] font-bold uppercase tracking-widest px-1.5 py-0.2 rounded border text-emerald-400 bg-transparent border border-white/12 text-white border-transparent">
                     TEAM LEADER
                   </span>
                 </div>
                 {inquiry.answeredAt && (
-                  <span className="text-xs text-slate-500 font-sans flex items-center gap-1">
+                  <span className="text-[11px] text-slate-500 font-sans flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     {new Date(inquiry.answeredAt).toLocaleString()}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed font-sans">
+              <p className="text-[11px] text-slate-300 leading-relaxed font-sans">
                 {inquiry.answer}
               </p>
             </div>

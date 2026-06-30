@@ -243,19 +243,19 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
         <div className="absolute top-0 right-0 p-32 bg-indigo-500/5 blur-[80px] rounded-full pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-white font-sans text-left flex items-center gap-3">
+            <h2 className="text-lg font-bold tracking-tight text-white font-sans text-left flex items-center gap-3">
               <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-full">
                 <ClipboardList className="w-6 h-6" />
               </div>
               My Submissions
             </h2>
-            <p className="text-slate-400 text-sm font-sans text-left mt-2 max-w-xl font-medium">
+            <p className="text-slate-400 text-xs font-sans text-left mt-2 max-w-xl font-medium">
               Track and review inquiries, Tabby/Tamara Requests, and Patient Complaints submitted by you.
             </p>
           </div>
           <div className="flex items-center gap-2 self-start md:self-center bg-transparent border border-white/12 text-white px-4 py-2.5 rounded-lg">
             <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
-            <span className="text-xs font-bold text-indigo-300 uppercase tracking-widest">
+            <span className="text-[11px] font-bold text-indigo-300 uppercase tracking-widest">
               {filteredList.length} Matching Records
             </span>
           </div>
@@ -266,7 +266,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
       <div className="bg-[#181a20] p-6 rounded-[32px] gap-4 grid grid-cols-1 md:grid-cols-12 items-end">
         {/* Date Picker */}
         <div className="md:col-span-3 space-y-2 my-auto">
-          <label className="text-xs font-bold text-slate-400 flex items-center gap-1.5 ml-1">
+          <label className="text-[11px] font-bold text-slate-400 flex items-center gap-1.5 ml-1">
             <Calendar className="w-4 h-4 text-slate-500" />
             Submission Date
           </label>
@@ -274,20 +274,20 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
             type="date"
             value={subDate}
             onChange={(e) => setSubDate(e.target.value)}
-            className="w-full bg-[#1f222a] border-none rounded-xl px-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 select-none cursor-pointer font-medium"
+            className="w-full bg-[#1f222a] border-none rounded-xl px-4 py-3 text-xs text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 select-none cursor-pointer font-medium"
           />
         </div>
 
         {/* Clinic Dropdown */}
         <div className="md:col-span-3 space-y-2">
           <div className="flex justify-between items-center mb-1">
-            <label className="text-xs font-bold text-slate-400 flex items-center gap-1.5 ml-1">
+            <label className="text-[11px] font-bold text-slate-400 flex items-center gap-1.5 ml-1">
               <Building className="w-4 h-4 text-slate-500" /> Clinics (Multi)
             </label>
             {subClinics.length > 0 && (
               <button
                 onClick={() => setSubClinics([])}
-                className="text-xs text-rose-400 hover:text-rose-300 font-bold uppercase cursor-pointer"
+                className="text-[11px] text-rose-400 hover:text-rose-300 font-bold uppercase cursor-pointer"
               >
                 Clear
               </button>
@@ -301,7 +301,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                 setSubClinics([...subClinics, val]);
               }
             }}
-            className="w-full bg-[#1f222a] border-none rounded-xl px-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 cursor-pointer font-medium appearance-none"
+            className="w-full bg-[#1f222a] border-none rounded-xl px-4 py-3 text-xs text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 cursor-pointer font-medium appearance-none"
           >
             <option value="">➕ Add Clinic to Filter...</option>
             {CLINIC_OPTIONS.filter(c => !subClinics.includes(c.value)).map(c => (
@@ -313,7 +313,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
               {subClinics.map(c => {
                 const label = CLINIC_OPTIONS.find(opt => opt.value === c)?.label || c;
                 return (
-                  <span key={c} className="bg-transparent border border-white/12 text-white text-indigo-300 border-none px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                  <span key={c} className="bg-transparent border border-white/12 text-white text-indigo-300 border-none px-2.5 py-1 rounded-xl text-[11px] font-bold flex items-center gap-1.5">
                     {label}
                     <button onClick={() => setSubClinics(prev => prev.filter(x => x !== c))} className="hover:text-white cursor-pointer">&times;</button>
                   </span>
@@ -325,7 +325,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
 
         {/* Phone Input */}
         <div className="md:col-span-3 space-y-2 my-auto">
-          <label className="text-xs font-bold text-slate-400 flex items-center gap-1.5 ml-1">
+          <label className="text-[11px] font-bold text-slate-400 flex items-center gap-1.5 ml-1">
             <Phone className="w-4 h-4 text-slate-500" />
             Patient Phone No.
           </label>
@@ -335,7 +335,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
               placeholder="Search by phone..."
               value={subPhone}
               onChange={(e) => setSubPhone(e.target.value)}
-              className="w-full bg-[#1f222a] border-none rounded-xl pl-11 pr-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 font-sans"
+              className="w-full bg-[#1f222a] border-none rounded-xl pl-11 pr-4 py-3 text-xs text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 font-sans"
             />
             <Search className="w-4 h-4 text-slate-400 absolute left-4 top-4" />
           </div>
@@ -343,14 +343,14 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
 
         {/* Status filter */}
         <div className="md:col-span-3 space-y-2 my-auto">
-          <label className="text-xs font-bold text-slate-400 flex items-center gap-1.5 ml-1">
+          <label className="text-[11px] font-bold text-slate-400 flex items-center gap-1.5 ml-1">
             <ClipboardList className="w-4 h-4 text-slate-500" />
             Status Category
           </label>
           <select
             value={subStatusFilter}
             onChange={(e) => setSubStatusFilter(e.target.value as "pending" | "all")}
-            className="w-full bg-[#1f222a] border-none rounded-xl px-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 cursor-pointer font-medium appearance-none"
+            className="w-full bg-[#1f222a] border-none rounded-xl px-4 py-3 text-xs text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 cursor-pointer font-medium appearance-none"
           >
             <option value="pending">⏳ Pending Cases Only</option>
             <option value="all">📁 All submissions</option>
@@ -365,10 +365,10 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
             <div className="w-12 h-12 rounded-full bg-[#1f222a] flex items-center justify-center mx-auto text-slate-400 mb-2">
               <ClipboardList className="w-6 h-6 text-indigo-400" />
             </div>
-            <p className="text-sm font-bold text-slate-200">
+            <p className="text-xs font-bold text-slate-200">
               No matching submissions.
             </p>
-            <p className="text-xs text-slate-400 max-w-md mx-auto">
+            <p className="text-[11px] text-slate-400 max-w-md mx-auto">
               Please try adjusting your filters (e.g., date, clinic, or change Status Category to "All Submissions") to locate your history.
             </p>
           </div>
@@ -446,35 +446,35 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                     <div>
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {/* Type Badge */}
-                        <span className={`text-xs uppercase tracking-wider font-bold px-2 py-0.5 rounded border ${typeBadgeClass}`}>
+                        <span className={`text-[11px] uppercase tracking-wider font-bold px-2 py-0.5 rounded border ${typeBadgeClass}`}>
                           {typeName}
                         </span>
 
                         {/* Clinic Badge */}
-                        <span className="text-xs bg-white/5 text-slate-300 px-2 py-0.5 border border-white/8 rounded font-sans font-bold">
+                        <span className="text-[11px] bg-white/5 text-slate-300 px-2 py-0.5 border border-white/8 rounded font-sans font-bold">
                           🏰 {getClinicLabel(item.clinicName)}
                         </span>
 
                         {/* Phone Number summary */}
                         {item.phoneNumber && (
-                          <span className="text-xs bg-sky-500/10 text-sky-300 px-2 py-0.5 border border-transparent rounded font-sans font-bold">
+                          <span className="text-[11px] bg-sky-500/10 text-sky-300 px-2 py-0.5 border border-transparent rounded font-sans font-bold">
                             📞 {item.phoneNumber}
                           </span>
                         )}
 
                         {/* Patient Name summary if exists */}
                         {("patientName" in item.data) && item.data.patientName && (
-                          <span className="text-xs bg-transparent border border-white/12 text-white text-emerald-300 px-2 py-0.5 border border-transparent rounded font-sans font-bold uppercase">
+                          <span className="text-[11px] bg-transparent border border-white/12 text-white text-emerald-300 px-2 py-0.5 border border-transparent rounded font-sans font-bold uppercase">
                             👤 {item.data.patientName}
                           </span>
                         )}
                       </div>
 
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="font-sans text-xs text-slate-500 bg-transparent px-1.5 py-0.5 rounded">
+                        <span className="font-sans text-[11px] text-slate-500 bg-transparent px-1.5 py-0.5 rounded">
                           {resolvedRef}
                         </span>
-                        <span className="text-xs text-slate-500 font-sans">
+                        <span className="text-[11px] text-slate-500 font-sans">
                           {itemDateLabel}
                         </span>
                       </div>
@@ -484,7 +484,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                   {/* Status & expand toggle controls */}
                   <div className="flex items-center gap-2 sm:self-center self-end">
                     {/* Status Label */}
-                    <span className={`text-xs uppercase tracking-wider font-bold px-2 py-0.5 rounded-xl font-sans leading-none ${ item.status === "completed" || item.status === "closed" || item.status === "answered" ? "bg-emerald-500/10 border border-transparent text-emerald-400" : "bg-amber-500/10 border border-transparent text-amber-300" }`}>
+                    <span className={`text-[11px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-xl font-sans leading-none ${ item.status === "completed" || item.status === "closed" || item.status === "answered" ? "bg-emerald-500/10 border border-transparent text-emerald-400" : "bg-amber-500/10 border border-transparent text-amber-300" }`}>
                       {item.status === "tl_link_ready" ? "🔗 Link Ready" :
                        item.status === "awaiting_client_contact" ? "📞 Awaiting Contact" :
                        item.status === "ready_for_partner" ? "🤝 Ready for Partner" :
@@ -507,11 +507,11 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                     {/* RENDER INQUIRY OPTION */}
                     {item.type === "inquiry" && (
                       <div className="space-y-4">
-                        <div className="bg-white/[0.02] border border-white/8 p-4 rounded-xl text-xs space-y-2 text-slate-200">
-                          <p className="text-xs uppercase font-bold text-slate-400 tracking-wider">
+                        <div className="bg-white/[0.02] border border-white/8 p-4 rounded-xl text-[11px] space-y-2 text-slate-200">
+                          <p className="text-[11px] uppercase font-bold text-slate-400 tracking-wider">
                             📝 Submitted Inquiry Details
                           </p>
-                          <p className="whitespace-pre-line leading-relaxed italic text-sm">
+                          <p className="whitespace-pre-line leading-relaxed italic text-xs">
                             "{item.data.text}"
                           </p>
                         </div>
@@ -519,7 +519,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                         {/* Inquiry Photo & Link Attachments */}
                         {((item.data.photos && item.data.photos.length > 0) || item.data.screenshot || item.data.links?.length > 0) && (
                           <div className="space-y-3 bg-slate-900/20 border border-white/8 p-4 rounded-xl">
-                            <span className="text-xs text-slate-400 uppercase tracking-widest font-bold block">
+                            <span className="text-[11px] text-slate-400 uppercase tracking-widest font-bold block">
                               📎 Uploaded Attachments & Proofs
                             </span>
                             <AttachmentsDisplay
@@ -546,7 +546,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                               e.stopPropagation();
                               handleCopyInquiry(e, item.data);
                             }}
-                            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/8 rounded-xl text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/8 rounded-xl text-slate-300 text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                           >
                             <Copy className="w-3.5 h-3.5" /> Copy Details
                           </button>
@@ -556,7 +556,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                                 e.stopPropagation();
                                 onEditItem("inquiry", item.data);
                               }}
-                              className="px-3 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 border border-transparent rounded-xl text-emerald-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                              className="px-3 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 border border-transparent rounded-xl text-emerald-300 text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                             >
                               <Pencil className="w-3.5 h-3.5" /> Edit ({getRemainingEditTime(item.createdAt)})
                             </button>
@@ -600,9 +600,9 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                     {item.type === "complaint" && (
                       <div className="space-y-5">
                         {/* Patient info specifications */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-transparent border border-white/8 p-4 rounded-xl text-xs">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-transparent border border-white/8 p-4 rounded-xl text-[11px]">
                           <div>
-                            <span className="text-xs text-slate-400 uppercase tracking-wider font-bold block mb-1">
+                            <span className="text-[11px] text-slate-400 uppercase tracking-wider font-bold block mb-1">
                               SUBMITTING AGENT
                             </span>
                             <span className="text-slate-200 font-bold font-sans">
@@ -611,7 +611,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                           </div>
 
                           <div>
-                            <span className="text-xs text-slate-400 uppercase tracking-wider font-bold block mb-1">
+                            <span className="text-[11px] text-slate-400 uppercase tracking-wider font-bold block mb-1">
                               CUSTOMER TYPE
                             </span>
                             <span className="text-slate-200 font-bold font-sans">
@@ -620,7 +620,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                           </div>
 
                           <div>
-                            <span className="text-xs text-slate-400 uppercase tracking-wider font-bold block mb-1">
+                            <span className="text-[11px] text-slate-400 uppercase tracking-wider font-bold block mb-1">
                               CONTACT MOBILE
                             </span>
                             <span className="text-slate-200 font-bold font-sans">
@@ -629,7 +629,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                           </div>
 
                           <div>
-                            <span className="text-xs text-slate-400 uppercase tracking-wider font-bold block mb-1">
+                            <span className="text-[11px] text-slate-400 uppercase tracking-wider font-bold block mb-1">
                               FILE NUMBER
                             </span>
                             <span className="text-slate-200 font-bold font-sans">
@@ -640,17 +640,17 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
 
                         {/* Patient ID number if new */}
                         {!item.data.isOldCustomer && item.data.idNumber && (
-                          <div className="bg-slate-900/60 border border-white/8 p-3.5 rounded-xl text-xs flex justify-between items-center">
+                          <div className="bg-slate-900/60 border border-white/8 p-3.5 rounded-xl text-[11px] flex justify-between items-center">
                             <div>
-                              <span className="text-xs text-slate-400 uppercase tracking-wider font-bold block mb-0.5">
+                              <span className="text-[11px] text-slate-400 uppercase tracking-wider font-bold block mb-0.5">
                                 ID NUMBER (NEW CUSTOMER REQUIREMENT)
                               </span>
-                              <span className="text-slate-200 font-sans font-bold text-sm">
+                              <span className="text-slate-200 font-sans font-bold text-xs">
                                 {item.data.idNumber}
                               </span>
                             </div>
                             <CopyWrap text={item.data.idNumber} label="ID Number">
-                              <button className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold text-slate-300 border border-white/8 transition-all cursor-pointer">
+                              <button className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded-xl text-[11px] font-bold text-slate-300 border border-white/8 transition-all cursor-pointer">
                                 Copy ID
                               </button>
                             </CopyWrap>
@@ -659,10 +659,10 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
 
                         {/* Complaint detailed content */}
                         <div className="space-y-2">
-                          <span className="text-xs text-slate-400 uppercase tracking-widest font-bold block">
+                          <span className="text-[11px] text-slate-400 uppercase tracking-widest font-bold block">
                             🚨 Patient Complaint Details
                           </span>
-                          <div className="bg-white/[0.02] border border-white/8 p-4 rounded-xl text-xs text-slate-200 leading-relaxed italic">
+                          <div className="bg-white/[0.02] border border-white/8 p-4 rounded-xl text-[11px] text-slate-200 leading-relaxed italic">
                             <p className="whitespace-pre-line">
                               "{item.data.complaintDetails}"
                             </p>
@@ -672,7 +672,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                         {/* Complaint Attachments */}
                         {((item.data.photos && item.data.photos.length > 0) || item.data.imageUrl || item.data.screenshot || (item.data.links && item.data.links.length > 0)) && (
                           <div className="space-y-3 bg-slate-900/20 border border-white/8 p-4 rounded-xl">
-                            <span className="text-xs text-slate-400 uppercase tracking-widest font-bold block">
+                            <span className="text-[11px] text-slate-400 uppercase tracking-widest font-bold block">
                               📎 Uploaded Attachments & Proofs
                             </span>
                             <AttachmentsDisplay
@@ -691,13 +691,13 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                           <div className="border border-transparent bg-rose-500/[0.02] p-5 rounded-xl space-y-3">
                             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-rose-500/10 pb-2">
                               <div className="flex items-center gap-2">
-                                <span className="text-rose-400 text-sm font-bold">📋</span>
-                                <p className="text-xs text-rose-400 uppercase tracking-wider font-bold">
+                                <span className="text-rose-400 text-xs font-bold">📋</span>
+                                <p className="text-[11px] text-rose-400 uppercase tracking-wider font-bold">
                                   Team Leader Answer ({item.data.tlName || "TL"})
                                 </p>
                               </div>
                               {item.data.tlResolutionType && (
-                                <span className="inline-flex items-center px-2 py-0.5 bg-rose-500/10 border border-transparent rounded-xl text-xs font-bold uppercase text-rose-300 tracking-wider">
+                                <span className="inline-flex items-center px-2 py-0.5 bg-rose-500/10 border border-transparent rounded-xl text-[11px] font-bold uppercase text-rose-300 tracking-wider">
                                   {item.data.tlResolutionType === "refund" ? "💳 Refund" :
                                    item.data.tlResolutionType === "replacement" ? "🔄 Replacement" :
                                    item.data.tlResolutionType === "apology" ? "✉ Apology" :
@@ -707,7 +707,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs text-slate-200 leading-relaxed font-semibold whitespace-pre-line">
+                            <p className="text-[11px] text-slate-200 leading-relaxed font-semibold whitespace-pre-line">
                               {item.data.tlComment}
                             </p>
                           </div>
@@ -716,12 +716,12 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                         {/* Dynamic TL Resolution form rendering if current user is TL or operations */}
                         {activeComplaintHandlingId === item.data.id && isTLOreSupport && (
                           <div className="p-5 bg-rose-500/[0.02] border border-transparent rounded-xl space-y-4 text-left w-full mt-1">
-                            <p className="text-xs font-bold text-rose-400 uppercase tracking-widest flex items-center gap-1.5">
+                            <p className="text-[11px] font-bold text-rose-400 uppercase tracking-widest flex items-center gap-1.5">
                               <PenTool className="w-3.5 h-3.5" /> TL Resolution Panel
                             </p>
 
                             <div>
-                              <label className="text-xs text-slate-400 uppercase tracking-widest font-bold block mb-2">
+                              <label className="text-[11px] text-slate-400 uppercase tracking-widest font-bold block mb-2">
                                 Resolution Type <span className="text-red-400">*</span>
                               </label>
                               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -737,7 +737,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                                     key={opt.value}
                                     type="button"
                                     onClick={() => setTlComplaintResolutionType(opt.value)}
-                                    className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all text-left cursor-pointer ${ tlComplaintResolutionType === opt.value ? "bg-rose-500/10 border-transparent text-rose-300 animate-fade-in" : "bg-transparent border-white/8 text-slate-400 hover:border-white/15" }`}
+                                    className={`px-3 py-2 rounded-xl text-[11px] font-bold border transition-all text-left cursor-pointer ${ tlComplaintResolutionType === opt.value ? "bg-rose-500/10 border-transparent text-rose-300 animate-fade-in" : "bg-transparent border-white/8 text-slate-400 hover:border-white/15" }`}
                                   >
                                     {opt.label}
                                   </button>
@@ -746,14 +746,14 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                             </div>
 
                             <div>
-                              <label className="text-xs text-slate-400 uppercase tracking-widest font-bold block mb-2">
+                              <label className="text-[11px] text-slate-400 uppercase tracking-widest font-bold block mb-2">
                                 Resolution Details / Instructions <span className="text-red-400">*</span>
                               </label>
                               <textarea
                                 placeholder="Explain the resolution..."
                                 value={tlComplaintComment}
                                 onChange={(e) => setTlComplaintComment(e.target.value)}
-                                className="w-full bg-white/5 border border-white/8 rounded-xl px-3 py-2.5 text-xs text-slate-100 min-h-[100px] resize-none focus:outline-none focus:border-rose-500"
+                                className="w-full bg-white/5 border border-white/8 rounded-xl px-3 py-2.5 text-[11px] text-slate-100 min-h-[100px] resize-none focus:outline-none focus:border-rose-500"
                               />
                             </div>
 
@@ -761,7 +761,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                               <button
                                 type="button"
                                 onClick={() => setActiveComplaintHandlingId(null)}
-                                className="px-4 py-2 hover:bg-white/10 rounded-xl text-xs font-bold text-slate-400 cursor-pointer"
+                                className="px-4 py-2 hover:bg-white/10 rounded-xl text-[11px] font-bold text-slate-400 cursor-pointer"
                               >
                                 Cancel
                               </button>
@@ -769,7 +769,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                                 type="button"
                                 disabled={!tlComplaintComment.trim() || !tlComplaintResolutionType}
                                 onClick={() => handleTLCommentComplaint(item.data.id, tlComplaintComment, tlComplaintResolutionType)}
-                                className="px-5 py-2 bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer"
+                                className="px-5 py-2 bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[11px] font-bold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer"
                               >
                                 <CheckCircle2 className="w-4 h-4" /> Submit Resolution
                               </button>
@@ -784,7 +784,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                               e.stopPropagation();
                               handleCopyComplaint(e, item.data);
                             }}
-                            className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/8 rounded-xl text-slate-300 hover:text-slate-100 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-auto"
+                            className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/8 rounded-xl text-slate-300 hover:text-slate-100 text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-auto"
                           >
                             <Copy className="w-3.5 h-3.5" /> Copy Details
                           </button>
@@ -795,7 +795,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                                 e.stopPropagation();
                                 handleDeleteComplaint(item.data.id);
                               }}
-                              className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/10 rounded-xl text-rose-400 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-2"
+                              className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/10 rounded-xl text-rose-400 text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-2"
                             >
                               <Trash2 className="w-3.5 h-3.5" /> Delete
                             </button>
@@ -807,7 +807,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                                 e.stopPropagation();
                                 onEditItem("tt_complaint", item.data);
                               }}
-                              className="px-3 py-2 bg-transparent border border-white/12 text-white hover:bg-white/5 border border-transparent rounded-xl text-emerald-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                              className="px-3 py-2 bg-transparent border border-white/12 text-white hover:bg-white/5 border border-transparent rounded-xl text-emerald-300 text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                             >
                               <Pencil className="w-3.5 h-3.5" /> Edit ({getRemainingEditTime(item.createdAt)})
                             </button>
@@ -820,7 +820,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                                 setActiveComplaintHandlingId(item.data.id);
                                 setTlComplaintComment("");
                               }}
-                              className="px-4 py-2 bg-amber-600 hover:brightness-110 text-slate-950 font-bold text-xs rounded-xl cursor-pointer"
+                              className="px-4 py-2 bg-amber-600 hover:brightness-110 text-slate-950 font-bold text-[11px] rounded-xl cursor-pointer"
                             >
                               Reply & Review
                             </button>
@@ -845,7 +845,7 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                                 e.stopPropagation();
                                 handleToggleContactComplaint(item.data.id, "not_contacted");
                               }}
-                              className="px-3 py-2 bg-transparent border border-white/12 text-white border border-transparent text-indigo-300 font-bold text-xs rounded-xl cursor-pointer"
+                              className="px-3 py-2 bg-transparent border border-white/12 text-white border border-transparent text-indigo-300 font-bold text-[11px] rounded-xl cursor-pointer"
                             >
                               Reopen Case
                             </button>

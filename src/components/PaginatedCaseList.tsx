@@ -131,10 +131,10 @@ export function PaginatedCaseList<T>({
     <div className="bg-white/[0.04] p-0 rounded-xl overflow-hidden border border-white/8 w-full flex flex-col">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/8 px-5 py-4 bg-transparent gap-3 flex-wrap">
         <div>
-          <h3 className="text-base font-bold text-slate-100 font-sans flex items-center gap-2">
+          <h3 className="text-sm font-bold text-slate-100 font-sans flex items-center gap-2">
             {icon} {title}
           </h3>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-[11px] text-slate-400 mt-1">
             Total items matching criteria: <strong className="text-indigo-400">{totalItems}</strong>
           </p>
         </div>
@@ -142,7 +142,7 @@ export function PaginatedCaseList<T>({
         {itemToPhone && (
           <div className="flex items-center gap-2 flex-1 max-w-xs">
             <div className="relative flex-1">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">🔍</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none">🔍</span>
               <input
                 type="text"
                 value={phoneFilter}
@@ -151,13 +151,13 @@ export function PaginatedCaseList<T>({
                   setCurrentPage(1);
                 }}
                 placeholder="Search by phone..."
-                className="w-full bg-white/[0.06] border border-white/8 rounded-xl pl-9 pr-4 py-2.5 text-sm font-sans text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500/60 focus:bg-black/60 transition-all"
+                className="w-full bg-white/[0.06] border border-white/8 rounded-xl pl-9 pr-4 py-2.5 text-xs font-sans text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500/60 focus:bg-black/60 transition-all"
               />
             </div>
             {phoneFilter && (
               <button
                 onClick={() => { setPhoneFilter(""); setCurrentPage(1); }}
-                className="text-xs text-rose-400 hover:text-rose-300 border border-transparent bg-rose-500/10 rounded-xl px-2.5 py-2.5 transition-all font-bold"
+                className="text-[11px] text-rose-400 hover:text-rose-300 border border-transparent bg-rose-500/10 rounded-xl px-2.5 py-2.5 transition-all font-bold"
               >
                 ✕
               </button>
@@ -168,7 +168,7 @@ export function PaginatedCaseList<T>({
         {itemToClinic && (
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 ${showFilters || clinicsFilter.length > 0 ? "bg-indigo-500/10 text-indigo-300 border border-transparent" : "bg-white/5 text-slate-300 border border-white/8 hover:bg-white/10"}`}
+            className={`px-3 py-1.5 text-[11px] font-bold rounded-xl transition-all flex items-center gap-1.5 ${showFilters || clinicsFilter.length > 0 ? "bg-indigo-500/10 text-indigo-300 border border-transparent" : "bg-white/5 text-slate-300 border border-white/8 hover:bg-white/10"}`}
           >
             <Filter className="w-3.5 h-3.5" />
             Filters {clinicsFilter.length > 0 ? "(Active)" : ""}
@@ -181,13 +181,13 @@ export function PaginatedCaseList<T>({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {availableClinics && (
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Filter by Clinics</label>
+                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Filter by Clinics</label>
                 <div className="flex flex-wrap gap-1.5 max-h-[120px] overflow-y-auto pr-1">
                   {availableClinics.map(c => (
                     <button
                       key={c}
                       onClick={() => toggleClinic(c)}
-                      className={`px-3 py-1.5 text-xs font-bold rounded-xl border transition-all ${ clinicsFilter.includes(c) ? 'bg-indigo-500/10 border-transparent text-indigo-300' : 'bg-white/5 border-white/8 text-slate-400 hover:text-slate-200 hover:bg-white/10' }`}
+                      className={`px-3 py-1.5 text-[11px] font-bold rounded-xl border transition-all ${ clinicsFilter.includes(c) ? 'bg-indigo-500/10 border-transparent text-indigo-300' : 'bg-white/5 border-white/8 text-slate-400 hover:text-slate-200 hover:bg-white/10' }`}
                     >
                       {c.replace('_', ' ')}
                     </button>
@@ -195,7 +195,7 @@ export function PaginatedCaseList<T>({
                   {clinicsFilter.length > 0 && (
                      <button
                        onClick={() => { setClinicsFilter([]); setCurrentPage(1); }}
-                       className="px-3 py-1.5 text-xs font-bold rounded-xl border border-transparent bg-rose-500/10 text-rose-300 transition-all hover:bg-rose-500/10 tracking-wider"
+                       className="px-3 py-1.5 text-[11px] font-bold rounded-xl border border-transparent bg-rose-500/10 text-rose-300 transition-all hover:bg-rose-500/10 tracking-wider"
                      >
                        Clear
                      </button>
@@ -209,7 +209,7 @@ export function PaginatedCaseList<T>({
 
       {showBulk && (
         <div className="bg-slate-900 p-3.5 border-b border-white/8 flex flex-wrap items-center gap-3">
-          <label className="flex items-center gap-2 text-xs font-bold text-slate-300 cursor-pointer select-none">
+          <label className="flex items-center gap-2 text-[11px] font-bold text-slate-300 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={allPageSelected}
@@ -221,13 +221,13 @@ export function PaginatedCaseList<T>({
 
           {selectedIds.size > 0 && (
             <div className="flex items-center gap-2 ml-auto flex-wrap">
-              <span className="text-xs font-bold text-indigo-300">
+              <span className="text-[11px] font-bold text-indigo-300">
                 {selectedIds.size} selected
               </span>
               <select
                 value={bulkTargetAgent}
                 onChange={(e) => setBulkTargetAgent(e.target.value)}
-                className="bg-white/[0.06] border border-white/8 rounded-xl px-2 py-1.5 text-xs text-slate-200 outline-none focus:border-indigo-500"
+                className="bg-white/[0.06] border border-white/8 rounded-xl px-2 py-1.5 text-[11px] text-slate-200 outline-none focus:border-indigo-500"
               >
                 <option value="">Assign selected to...</option>
                 {(agentsList || []).map(a => (
@@ -237,7 +237,7 @@ export function PaginatedCaseList<T>({
               <button
                 onClick={handleBulkAssignSubmit}
                 disabled={!bulkTargetAgent || isBulkSubmitting}
-                className="px-3 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 disabled:opacity-50 disabled:pointer-events-none text-white text-xs font-bold rounded-xl transition-all"
+                className="px-3 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 disabled:opacity-50 disabled:pointer-events-none text-white text-[11px] font-bold rounded-xl transition-all"
               >
                 {isBulkSubmitting ? "Assigning..." : "Assign"}
               </button>
@@ -259,10 +259,10 @@ export function PaginatedCaseList<T>({
             <div className="w-12 h-12 rounded-full bg-slate-800/50 flex items-center justify-center mx-auto text-slate-400 mb-2">
               <Filter className="w-6 h-6 text-slate-500" />
             </div>
-            <p className="text-sm font-bold text-slate-300 font-sans">
+            <p className="text-xs font-bold text-slate-300 font-sans">
               No Cases Found
             </p>
-            <p className="text-xs text-slate-500 max-w-[250px] mx-auto leading-relaxed">
+            <p className="text-[11px] text-slate-500 max-w-[250px] mx-auto leading-relaxed">
               {emptyMessage}
             </p>
           </div>

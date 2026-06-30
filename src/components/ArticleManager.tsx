@@ -164,7 +164,7 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
       {/* Sidebar Tabs */}
       <div className="w-1/4 min-w-[250px] border-r border-white/8 p-4 flex flex-col gap-2 bg-slate-900/40">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-bold text-slate-100 uppercase tracking-widest text-sm flex items-center gap-2">
+          <h2 className="font-bold text-slate-100 uppercase tracking-widest text-xs flex items-center gap-2">
             {category === 'knowledge' ? <Book className="w-4 h-4 text-cyan-400" /> : <Tag className="w-4 h-4 text-emerald-400" />}
             {category === 'knowledge' ? 'Knowledge Base' : 'Offers & Promotions'}
           </h2>
@@ -180,18 +180,18 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
             <button
               key={article.id}
               onClick={() => { setSelectedArticleId(article.id); setIsEditing(false); }}
-              className={`text-left px-4 py-3 rounded-xl transition-all font-medium text-sm border ${ selectedArticleId === article.id && !isEditing ? 'bg-white/10 border-white/15 text-slate-100' : 'bg-white/5 text-slate-400 border-transparent hover:bg-white/10 hover:text-slate-200' }`}
+              className={`text-left px-4 py-3 rounded-xl transition-all font-medium text-xs border ${ selectedArticleId === article.id && !isEditing ? 'bg-white/10 border-white/15 text-slate-100' : 'bg-white/5 text-slate-400 border-transparent hover:bg-white/10 hover:text-slate-200' }`}
             >
               <div className="line-clamp-2">{article.title}</div>
             </button>
           ))}
           {articles.length === 0 && !isEditing && (
-            <div className="text-center py-10 text-slate-500 text-xs italic">
+            <div className="text-center py-10 text-slate-500 text-[11px] italic">
               No content published yet.
             </div>
           )}
           {isEditing && selectedArticleId === 'new' && (
-            <div className="text-left px-4 py-3 rounded-xl bg-transparent border border-white/12 text-white text-indigo-100 border border-transparent font-medium text-sm italic">
+            <div className="text-left px-4 py-3 rounded-xl bg-transparent border border-white/12 text-white text-indigo-100 border border-transparent font-medium text-xs italic">
               Creating New...
             </div>
           )}
@@ -203,9 +203,9 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
         {isEditing && selectedArticleId === 'new' || (isEditing && selectedArticle) ? (
           /* Editor Mode */
           <div className="flex flex-col h-full overflow-hidden max-w-[800px] mx-auto bg-white/[0.02] rounded-xl p-6 border border-white/8">
-            <h3 className="font-bold text-slate-100 text-xl mb-6">{selectedArticleId === 'new' ? 'Create New Entry' : 'Edit Entry'}</h3>
+            <h3 className="font-bold text-slate-100 text-base mb-6">{selectedArticleId === 'new' ? 'Create New Entry' : 'Edit Entry'}</h3>
             
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Title Name</label>
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Title Name</label>
             <input 
               type="text" 
               placeholder="E.g. Travel Policy Q3, New Cash Offer..."
@@ -214,29 +214,29 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
               className="w-full bg-white/[0.03] border border-white/8 rounded-xl px-4 py-3 text-slate-100 font-bold mb-6 outline-none focus:border-indigo-500 transition-colors"
             />
             
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Notes / Description (Optional)</label>
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Notes / Description (Optional)</label>
             <textarea 
               placeholder="Detailed notes and descriptions..."
               value={content}
               onChange={e => setContent(e.target.value)}
-              className="w-full flex-1 bg-white/[0.03] border border-white/8 rounded-xl px-4 py-3 text-slate-200 text-sm mb-6 outline-none focus:border-indigo-500 transition-colors resize-none min-h-[150px]"
+              className="w-full flex-1 bg-white/[0.03] border border-white/8 rounded-xl px-4 py-3 text-slate-200 text-xs mb-6 outline-none focus:border-indigo-500 transition-colors resize-none min-h-[150px]"
             />
             
             <div className="mb-6">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-between">
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-between">
                 <span>Attachments</span>
-                <span className="text-xs text-yellow-500/80 bg-yellow-500/10 px-2 py-0.5 rounded-lg">Max 3MB limit</span>
+                <span className="text-[11px] text-yellow-500/80 bg-yellow-500/10 px-2 py-0.5 rounded-lg">Max 3MB limit</span>
               </p>
               <div className="flex flex-wrap gap-2">
                 {attachments.map((att, i) => (
-                  <div key={i} className="flex items-center gap-2 bg-transparent border border-white/12 text-white border border-transparent rounded-xl px-3 py-1.5 text-xs text-indigo-100">
+                  <div key={i} className="flex items-center gap-2 bg-transparent border border-white/12 text-white border border-transparent rounded-xl px-3 py-1.5 text-[11px] text-indigo-100">
                     <File className="w-3 h-3 text-indigo-400" />
                     <span className="truncate max-w-[200px]">{att.name}</span>
                     <button onClick={() => removeAttachment(i)} className="text-indigo-400 hover:text-red-400 ml-2"><Trash2 className="w-3 h-3"/></button>
                   </div>
                 ))}
                 
-                <label className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 rounded-xl px-4 py-2 text-xs font-bold cursor-pointer transition-colors">
+                <label className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 rounded-xl px-4 py-2 text-[11px] font-bold cursor-pointer transition-colors">
                   <Paperclip className="w-3 h-3" /> Upload File
                   <input type="file" className="hidden" onChange={handleFileUpload} />
                 </label>
@@ -249,13 +249,13 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
                   setIsEditing(false);
                   if (selectedArticleId === 'new') setSelectedArticleId(articles[0]?.id || null);
                 }}
-                className="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-slate-700 hover:bg-slate-600 transition-colors"
+                className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-slate-700 hover:bg-slate-600 transition-colors"
               >
                 Cancel
               </button>
               <button 
                 onClick={handleSave}
-                className="px-5 py-2.5 rounded-xl text-sm font-bold bg-transparent border border-white/12 text-white hover:bg-white/5 text-white transition-colors"
+                className="px-5 py-2.5 rounded-xl text-xs font-bold bg-transparent border border-white/12 text-white hover:bg-white/5 text-white transition-colors"
               >
                 Save
               </button>
@@ -266,16 +266,16 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
           <div className="h-full overflow-y-auto max-w-[800px] mx-auto p-2 scrollbar-thin">
             <div className="flex justify-between items-start mb-8 pt-4">
               <div>
-                <h1 className="text-3xl font-sans font-bold text-slate-100 mb-2 leading-tight">{selectedArticle.title}</h1>
-                <p className="text-xs text-slate-400 flex items-center gap-2">
+                <h1 className="text-xl font-sans font-bold text-slate-100 mb-2 leading-tight">{selectedArticle.title}</h1>
+                <p className="text-[11px] text-slate-400 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                   Published by <span className="font-bold text-slate-200">{selectedArticle.createdBy}</span> on {new Date(selectedArticle.createdAt).toLocaleDateString()}
                 </p>
               </div>
               {isTL && (
                 <div className="flex gap-2">
-                  <button onClick={startEdit} className="text-xs font-bold bg-transparent border border-white/12 text-white text-indigo-300 hover:bg-white/5 border border-transparent px-4 py-2 rounded-xl transition-colors">Edit</button>
-                  <button onClick={() => handleDelete(selectedArticle.id)} className="text-xs font-bold bg-rose-500/10 text-rose-300 hover:bg-rose-500/10 border border-transparent px-4 py-2 rounded-xl transition-colors">Delete</button>
+                  <button onClick={startEdit} className="text-[11px] font-bold bg-transparent border border-white/12 text-white text-indigo-300 hover:bg-white/5 border border-transparent px-4 py-2 rounded-xl transition-colors">Edit</button>
+                  <button onClick={() => handleDelete(selectedArticle.id)} className="text-[11px] font-bold bg-rose-500/10 text-rose-300 hover:bg-rose-500/10 border border-transparent px-4 py-2 rounded-xl transition-colors">Delete</button>
                 </div>
               )}
             </div>
@@ -288,7 +288,7 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
             
             {selectedArticle.attachments && selectedArticle.attachments.length > 0 && (
               <div className="bg-[#1a1a1c] rounded-xl p-6 border border-white/8">
-                <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2 mb-4">
+                <h4 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2 mb-4">
                   <Paperclip className="w-4 h-4" /> Available Downloads & Resources
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -299,8 +299,8 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
                           <File className="w-5 h-5" />
                         </div>
                         <div className="truncate">
-                          <p className="text-sm font-bold text-slate-200 truncate">{att.name}</p>
-                          <p className="text-xs text-slate-500 font-mono mt-0.5">{formatSize(att.size)}</p>
+                          <p className="text-xs font-bold text-slate-200 truncate">{att.name}</p>
+                          <p className="text-[11px] text-slate-500 font-mono mt-0.5">{formatSize(att.size)}</p>
                         </div>
                       </div>
                       <a href={att.url} download={att.name} className="opacity-0 group-hover:opacity-100 bg-emerald-500/10 hover:bg-emerald-500/10 border border-transparent p-2.5 rounded-full text-emerald-400 transition-all shrink-0" title="Download File">
@@ -315,7 +315,7 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-slate-500 gap-4 opacity-50">
             {category === 'knowledge' ? <Book className="w-20 h-20 text-slate-700" /> : <Tag className="w-20 h-20 text-slate-700" />}
-            <p className="text-lg font-medium">Select a topic from the menu to open.</p>
+            <p className="text-sm font-medium">Select a topic from the menu to open.</p>
           </div>
         )}
       </div>

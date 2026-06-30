@@ -81,11 +81,11 @@ export const DataVault: React.FC<DataVaultProps> = ({ userName }) => {
               <Database className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-100">Local Data Vault</h2>
-              <p className="text-xs text-slate-400">Securely backup your workspace data to this device</p>
+              <h2 className="text-sm font-bold text-slate-100">Local Data Vault</h2>
+              <p className="text-[11px] text-slate-400">Securely backup your workspace data to this device</p>
             </div>
           </div>
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-lg bg-transparent border border-white/12 text-white border border-transparent text-xs font-bold text-emerald-400 uppercase tracking-widest">
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-lg bg-transparent border border-white/12 text-white border border-transparent text-[11px] font-bold text-emerald-400 uppercase tracking-widest">
             <ShieldCheck className="w-3 h-3" />
             Encryption Enabled
           </div>
@@ -95,30 +95,30 @@ export const DataVault: React.FC<DataVaultProps> = ({ userName }) => {
           <div className="p-4 rounded-xl bg-transparent border border-white/8 space-y-2">
             <div className="flex items-center gap-2 text-slate-500 mb-1">
               <Clock className="w-3.5 h-3.5" />
-              <span className="text-xs font-bold uppercase">Last Device Backup</span>
+              <span className="text-[11px] font-bold uppercase">Last Device Backup</span>
             </div>
-            <p className="text-sm font-medium text-slate-200">{lastBackup || 'Never'}</p>
+            <p className="text-xs font-medium text-slate-200">{lastBackup || 'Never'}</p>
           </div>
           <div className="p-4 rounded-xl bg-transparent border border-white/8 space-y-2">
             <div className="flex items-center gap-2 text-slate-500 mb-1">
               <Smartphone className="w-3.5 h-3.5" />
-              <span className="text-xs font-bold uppercase">Storage Locality</span>
+              <span className="text-[11px] font-bold uppercase">Storage Locality</span>
             </div>
-            <p className="text-sm font-medium text-slate-200">Local Hardware</p>
+            <p className="text-xs font-medium text-slate-200">Local Hardware</p>
           </div>
           <div className="p-4 rounded-xl bg-transparent border border-white/8 space-y-2">
             <div className="flex items-center gap-2 text-slate-500 mb-1">
               <HardDrive className="w-3.5 h-3.5" />
-              <span className="text-xs font-bold uppercase">Archive Size</span>
+              <span className="text-[11px] font-bold uppercase">Archive Size</span>
             </div>
-            <p className="text-sm font-medium text-slate-200">{backupSize || '0.00 KB'}</p>
+            <p className="text-xs font-medium text-slate-200">{backupSize || '0.00 KB'}</p>
           </div>
         </div>
 
         <div className="p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/10 mb-6">
           <div className="flex gap-3">
             <AlertCircle className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <p className="text-[11px] text-slate-400 leading-relaxed">
               Downloading a backup saves a snapshot of all team schedules, requests, and logs to your device. 
               This ensures you have a permanent record of your data that exists independently of the cloud servers.
             </p>
@@ -128,7 +128,7 @@ export const DataVault: React.FC<DataVaultProps> = ({ userName }) => {
         <button
           onClick={handleBackup}
           disabled={isExporting}
-          className="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50"
+          className="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50"
         >
           {isExporting ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
           {isExporting ? 'Generating Local Archive...' : 'Download Full Local Backup'}
@@ -136,15 +136,15 @@ export const DataVault: React.FC<DataVaultProps> = ({ userName }) => {
       </div>
 
       <div className="px-6 py-4 bg-white/5 border-t border-white/8 flex flex-wrap items-center justify-center gap-6">
-        <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase">
+        <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase">
           <CheckCircle2 className="w-3 h-3 text-emerald-500" />
           JSON Compliant
         </div>
-        <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase">
+        <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase">
           <CheckCircle2 className="w-3 h-3 text-emerald-500" />
           Offline Sync Ready
         </div>
-        <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase">
+        <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase">
           <CheckCircle2 className="w-3 h-3 text-emerald-500" />
           Device Bound
         </div>
