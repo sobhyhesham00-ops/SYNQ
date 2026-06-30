@@ -12043,6 +12043,12 @@ ${ttNotes}`
                             "text-teal-600",
                           )}
                           {buildBtn(
+                            "global-dashboard",
+                            <LayoutDashboard className="w-4 h-4 text-emerald-400" />,
+                            "Daily Team Leader View",
+                            "bg-emerald-500/10 border-transparent text-emerald-100",
+                          )}
+                          {buildBtn(
                             "attendance",
                             <UserCheck className="w-4 h-4 text-indigo-400" />,
                             "Daily Attendance",
