@@ -90,20 +90,20 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
   return (
     <div id="assignment-control" className="bg-transparent border border-white/5 p-4 rounded-xl flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Ownership & Assignment</span>
+        <span className="text-xs uppercase tracking-wider text-slate-400 font-bold">Ownership & Assignment</span>
         {isAssigned ? (
-          <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+          <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
             👤 Assigned
           </span>
         ) : (
-          <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 animate-pulse">
+          <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 animate-pulse">
             ⚠️ Unassigned
           </span>
         )}
       </div>
 
       <div className="flex items-center gap-2.5">
-        <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-slate-300 font-bold border border-white/10">
+        <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center text-slate-300 font-bold border border-white/10">
           {currentAssigneeName ? currentAssigneeName.charAt(0) : "?"}
         </div>
         <div className="flex-1 min-w-0">
@@ -112,7 +112,7 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
             {currentAssigneeName || "Unassigned Queue"}
           </p>
           {currentAssigneeName && getAgentLOB(currentAssigneeName) && (
-            <p className="text-[9px] text-slate-500 font-mono mt-0.5">
+            <p className="text-xs text-slate-500 font-mono mt-0.5">
               LOB: {getAgentLOB(currentAssigneeName)}
             </p>
           )}
@@ -138,20 +138,20 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
               disabled={loading}
-              className="w-full bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 font-sans font-black text-[10px] uppercase tracking-wider py-1.5 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 font-sans font-black text-xs uppercase tracking-wider py-1.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <User className="w-3 h-3" />
               {currentAssigneeName ? "Reassign" : "Assign"}
             </button>
 
             {dropdownOpen && (
-              <div className="absolute top-full mt-1.5 right-0 z-50 bg-[#141419] border border-slate-700/60 rounded-xl w-64 shadow-2xl flex flex-col overflow-hidden">
+              <div className="absolute top-full mt-1.5 right-0 z-50 bg-slate-950 border border-slate-700/60 rounded-xl w-64 shadow flex flex-col overflow-hidden">
                 {/* Header */}
                 <div className="p-2.5 border-b border-slate-700/40 bg-[#18181f] flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Assign Agent</span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Assign Agent</span>
                   <button 
                     onClick={() => setDropdownOpen(false)}
-                    className="text-slate-500 hover:text-slate-350 p-0.5 rounded-md hover:bg-white/5 transition-colors cursor-pointer"
+                    className="text-slate-500 hover:text-slate-350 p-0.5 rounded-xl hover:bg-white/5 transition-colors cursor-pointer"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -166,7 +166,7 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
                       placeholder="Search agent..."
                       value={assignSearchQuery}
                       onChange={(e) => setAssignSearchQuery(e.target.value)}
-                      className="w-full bg-[#1e1e24] border border-slate-700/40 rounded-lg text-xs py-1.5 pl-8 pr-7 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/85 transition-colors font-sans"
+                      className="w-full bg-[#1e1e24] border border-slate-700/40 rounded-xl text-xs py-1.5 pl-8 pr-7 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/85 transition-colors font-sans"
                       autoFocus
                     />
                     {assignSearchQuery && (
@@ -193,7 +193,7 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
                         <button
                           key={agent}
                           onClick={() => handleAssignSelect(agent)}
-                          className={`w-full text-left px-2.5 py-1.5 text-xs rounded-lg transition-all flex items-center justify-between font-medium cursor-pointer ${
+                          className={`w-full text-left px-2.5 py-1.5 text-xs rounded-xl transition-all flex items-center justify-between font-medium cursor-pointer ${
                             isSelected
                               ? "bg-indigo-500/15 text-indigo-300 font-bold border border-indigo-500/20"
                               : "text-slate-300 hover:bg-white/[0.06] hover:text-white"
@@ -201,7 +201,7 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
                         >
                           <span className="truncate pr-2">{agent}</span>
                           {lob && (
-                            <span className={`shrink-0 text-[8px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                            <span className={`shrink-0 text-xs font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider ${
                               isChat 
                                 ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
                                 : "bg-blue-500/10 text-blue-450 border border-blue-500/20"

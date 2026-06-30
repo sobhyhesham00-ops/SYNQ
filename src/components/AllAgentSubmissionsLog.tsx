@@ -28,7 +28,7 @@ const CopyButton = ({ text, tooltip, icon: Icon = Copy }: { text: string, toolti
       className="p-1.5 hover:bg-white/10 rounded text-slate-400 hover:text-slate-200 transition-colors flex items-center justify-center gap-1 border border-transparent cursor-pointer"
     >
       {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Icon className="w-3.5 h-3.5" />}
-      <span className="text-[11px] hidden sm:inline">{tooltip}</span>
+      <span className="text-xs hidden sm:inline">{tooltip}</span>
     </button>
   );
 };
@@ -71,19 +71,19 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {req.type === 'swap' ? (
           <>
-            <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">Swap Date</p><p className="text-[13px] text-slate-200 mt-0.5">{req.date}</p></div>
-            {req.swapWithAgent && <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">With Agent</p><p className="text-[13px] text-slate-200 mt-0.5">{req.swapWithAgent} ({req.swapWithShift})</p></div>}
+            <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">Swap Date</p><p className="text-sm text-slate-200 mt-0.5">{req.date}</p></div>
+            {req.swapWithAgent && <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">With Agent</p><p className="text-sm text-slate-200 mt-0.5">{req.swapWithAgent} ({req.swapWithShift})</p></div>}
           </>
         ) : (
           <>
-            <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">Start Date</p><p className="text-[13px] text-slate-200 mt-0.5">{req.startDate}</p></div>
-            <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">End Date</p><p className="text-[13px] text-slate-200 mt-0.5">{req.endDate}</p></div>
+            <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">Start Date</p><p className="text-sm text-slate-200 mt-0.5">{req.startDate}</p></div>
+            <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">End Date</p><p className="text-sm text-slate-200 mt-0.5">{req.endDate}</p></div>
           </>
         )}
       </div>
     );
     if (req.notes) {
-      secondaryContent = <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📝 Notes</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words italic pl-2 border-l-2 border-white/10">{req.notes}</p></div>;
+      secondaryContent = <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">📝 Notes</p><p className="text-sm text-slate-200 mt-0.5 whitespace-pre-wrap break-words italic pl-2 border-l-2 border-white/10">{req.notes}</p></div>;
     }
   } else if (req._cType === 'inq') {
     title = 'Clinic Inquiry';
@@ -99,20 +99,20 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
     primaryContent = (
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-widest bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center gap-1.5">
+          <span className="px-2.5 py-1 rounded-xl text-xs font-bold uppercase tracking-widest bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center gap-1.5">
             ❓ Clinic Inquiry
           </span>
           {req.answer && (
-            <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+            <span className="px-2.5 py-1 rounded-xl text-xs font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
               💬 Answered
             </span>
           )}
         </div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{getClinicLabel(req.clinicName)}</p></div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📞 Phone</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">💬 Inquiry</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.text}</p></div>
+        <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-sm text-slate-200 mt-0.5">{getClinicLabel(req.clinicName)}</p></div>
+        <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">📞 Phone</p><p className="text-sm text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
+        <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">💬 Inquiry</p><p className="text-sm text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.text}</p></div>
         {req.answer && (
-          <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">✅ Answer</p><p className="text-[13px] text-emerald-200 mt-0.5 whitespace-pre-wrap break-words">{req.answer}</p></div>
+          <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">✅ Answer</p><p className="text-sm text-emerald-200 mt-0.5 whitespace-pre-wrap break-words">{req.answer}</p></div>
         )}
       </div>
     );
@@ -130,14 +130,14 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
 
     primaryContent = (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">👤 Patient</p><p className="text-[13px] text-slate-200 mt-0.5">{req.patientName || 'N/A'} <span className="text-slate-400 text-[11px]">({req.platform})</span></p></div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📞 Phone</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{getClinicLabel(req.clinicName)}</p></div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">💰 Amount</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{pricing.finalPriceFormatted} <span className="text-[10px] text-slate-500">({pricing.priceBeforeFeeFormatted} + 5%)</span></p></div>
+        <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">👤 Patient</p><p className="text-sm text-slate-200 mt-0.5">{req.patientName || 'N/A'} <span className="text-slate-400 text-xs">({req.platform})</span></p></div>
+        <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">📞 Phone</p><p className="text-sm text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
+        <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-sm text-slate-200 mt-0.5">{getClinicLabel(req.clinicName)}</p></div>
+        <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">💰 Amount</p><p className="text-sm text-slate-200 mt-0.5 font-mono">{pricing.finalPriceFormatted} <span className="text-xs text-slate-500">({pricing.priceBeforeFeeFormatted} + 5%)</span></p></div>
       </div>
     );
     if (req.notes) {
-      secondaryContent = <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📝 Notes</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words italic pl-2 border-l-2 border-white/10">{req.notes}</p></div>;
+      secondaryContent = <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">📝 Notes</p><p className="text-sm text-slate-200 mt-0.5 whitespace-pre-wrap break-words italic pl-2 border-l-2 border-white/10">{req.notes}</p></div>;
     }
   } else if (req._cType === 'tt_complaint') {
     title = 'Complaint';
@@ -152,14 +152,14 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
 
     primaryContent = (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">👤 Patient</p><p className="text-[13px] text-slate-200 mt-0.5">{req.patientName || 'N/A'}</p></div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📞 Phone</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{getClinicLabel(req.clinicName)}</p></div>
-        <div className="sm:col-span-2"><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">⚠️ Complaint</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.complaintDetails}</p></div>
+        <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">👤 Patient</p><p className="text-sm text-slate-200 mt-0.5">{req.patientName || 'N/A'}</p></div>
+        <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">📞 Phone</p><p className="text-sm text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
+        <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-sm text-slate-200 mt-0.5">{getClinicLabel(req.clinicName)}</p></div>
+        <div className="sm:col-span-2"><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">⚠️ Complaint</p><p className="text-sm text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.complaintDetails}</p></div>
       </div>
     );
     if (req.tlComment) {
-      tlResponseContent = <div><p className="text-[11px] uppercase text-amber-500 font-semibold tracking-wider">TL Comment</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.tlComment}</p></div>;
+      tlResponseContent = <div><p className="text-xs uppercase text-amber-500 font-semibold tracking-wider">TL Comment</p><p className="text-sm text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.tlComment}</p></div>;
     }
   } else if (req._cType === 'comm') {
     title = 'Client Communication';
@@ -175,14 +175,14 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
 
     primaryContent = (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">👤 Patient</p><p className="text-[13px] text-slate-200 mt-0.5">{req.patientName || 'N/A'}</p></div>
-        <div><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📞 Phone</p><p className="text-[13px] text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
-        <div className="sm:col-span-2"><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-[13px] text-slate-200 mt-0.5">{getClinicLabel(req.clinicName)}</p></div>
-        <div className="sm:col-span-2"><p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider">📝 Notes</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.notes || 'No notes yet'}</p></div>
+        <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">👤 Patient</p><p className="text-sm text-slate-200 mt-0.5">{req.patientName || 'N/A'}</p></div>
+        <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">📞 Phone</p><p className="text-sm text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
+        <div className="sm:col-span-2"><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-sm text-slate-200 mt-0.5">{getClinicLabel(req.clinicName)}</p></div>
+        <div className="sm:col-span-2"><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">📝 Notes</p><p className="text-sm text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.notes || 'No notes yet'}</p></div>
       </div>
     );
     if (req.handlingNotes) {
-      tlResponseContent = <div><p className="text-[11px] uppercase text-sky-500 font-semibold tracking-wider">TL Handling Notes</p><p className="text-[13px] text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.handlingNotes}</p></div>;
+      tlResponseContent = <div><p className="text-xs uppercase text-sky-500 font-semibold tracking-wider">TL Handling Notes</p><p className="text-sm text-slate-200 mt-0.5 whitespace-pre-wrap break-words">{req.handlingNotes}</p></div>;
     }
   }
 
@@ -230,23 +230,23 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
       {/* Header */}
       <div className="p-4 border-b border-white/5 bg-transparent flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div className="flex items-center gap-3 flex-wrap">
-          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded border text-[11px] font-semibold uppercase tracking-wider ${statusClass}`}>
+          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded border text-xs font-semibold uppercase tracking-wider ${statusClass}`}>
             {statusIcon}
             <span>{STATUS_LABELS[req.status] || req.status?.replace(/_/g, ' ')}</span>
           </div>
           <div className="text-[15px] font-semibold text-slate-100 flex items-center gap-2">
             {title}
-            <span className="text-[12px] text-slate-500 font-mono px-2 py-0.5 bg-transparent rounded">
+            <span className="text-sm text-slate-500 font-mono px-2 py-0.5 bg-transparent rounded">
               {formatCaseRef(req.id, req._cType, req.createdAt, req.caseRef)}
             </span>
           </div>
         </div>
         <div className="flex flex-col sm:items-end gap-1">
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+          <div className="flex items-center gap-1.5 text-xs text-slate-400">
             <Clock className="w-3.5 h-3.5 opacity-70" />
             {new Date(req.createdAt).toLocaleString()}
           </div>
-          <div className={`px-2 py-0.5 rounded text-[10px] font-mono border ${sla.color}`}>
+          <div className={`px-2 py-0.5 rounded text-xs font-mono border ${sla.color}`}>
             {sla.label}
           </div>
         </div>
@@ -267,13 +267,13 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
           <div className="mt-4 pt-4 border-t border-white/5 space-y-4">
             {secondaryContent}
             {tlResponseContent && (
-              <div className="bg-slate-800/50 rounded-lg p-3 border border-white/5">
+              <div className="bg-slate-800/50 rounded-xl p-3 border border-white/5">
                  {tlResponseContent}
               </div>
             )}
             {hasAttachments && (
                <div>
-                  <p className="text-[11px] uppercase text-slate-500 font-semibold tracking-wider mb-2">Attachments & Links</p>
+                  <p className="text-xs uppercase text-slate-500 font-semibold tracking-wider mb-2">Attachments & Links</p>
                   <AttachmentsDisplay 
                      photos={[...(req.photos || []), ...(req.screenshot ? [req.screenshot] : []), ...(req.imageUrl ? [req.imageUrl] : []), ...(req.paymentScreenshot ? [req.paymentScreenshot] : [])]} 
                      attachments={(req as any).attachments}
@@ -285,7 +285,7 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
                </div>
             )}
             {handlerLabel && (
-              <div className="pt-2 text-[11px] text-slate-500 uppercase tracking-wider font-semibold">
+              <div className="pt-2 text-xs text-slate-500 uppercase tracking-wider font-semibold">
                 Handled By: <span className="text-slate-300">{handlerLabel}</span> 
                 {req.handledAt && <span> at {new Date(req.handledAt).toLocaleString()}</span>}
                 {req.updatedAt && <span> (Updated: {new Date(req.updatedAt).toLocaleString()})</span>}
@@ -315,7 +315,7 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
           {collectionMap[req._cType] && (
             <button 
               onClick={() => setShowReply(!showReply)} 
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors text-[12px] font-semibold cursor-pointer ${showReply ? 'bg-indigo-500/20 text-indigo-300' : 'bg-white/5 hover:bg-white/10 text-slate-300'}`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors text-sm font-semibold cursor-pointer ${showReply ? 'bg-indigo-500/20 text-indigo-300' : 'bg-white/5 hover:bg-white/10 text-slate-300'}`}
             >
               <MessageSquare className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Reply / Conversation</span>
@@ -324,7 +324,7 @@ const RequestCard = ({ req, currentUser, addSystemNotification }: any) => {
 
           <button 
             onClick={() => setExpanded(!expanded)} 
-            className="flex items-center gap-1 px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 text-[12px] font-semibold text-slate-300 transition-colors cursor-pointer"
+            className="flex items-center gap-1 px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 text-sm font-semibold text-slate-300 transition-colors cursor-pointer"
           >
             {expanded ? (
                <>
@@ -462,58 +462,58 @@ export const AllAgentSubmissionsLog = ({
         <h2 className="text-3xl font-bold text-slate-100 font-display text-left">
           Agent Submissions Log (Management)
         </h2>
-        <p className="text-slate-400 text-[14px] text-left mt-1">
+        <p className="text-slate-400 text-sm text-left mt-1">
           Monitor all agents' submission statuses, inquiries, and custom action requests in real-time.
         </p>
       </div>
 
       {/* 4-Stat Summary Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white/[0.04] border border-slate-800 p-4 rounded-xl flex flex-col items-center justify-center shadow-lg">
+        <div className="bg-white/[0.04] border border-slate-800 p-4 rounded-xl flex flex-col items-center justify-center shadow-sm">
           <span className="text-2xl font-black text-slate-100">{allRequests.length}</span>
-          <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-1">Total Lifetime</span>
+          <span className="text-xs text-slate-500 uppercase tracking-widest font-bold mt-1">Total Lifetime</span>
         </div>
-        <div className="bg-white/[0.04] border border-indigo-800 p-4 rounded-xl flex flex-col items-center justify-center shadow-lg">
+        <div className="bg-white/[0.04] border border-indigo-800 p-4 rounded-xl flex flex-col items-center justify-center shadow-sm">
           <span className="text-2xl font-black text-indigo-400">{filtered.length}</span>
-          <span className="text-[10px] text-indigo-500/70 uppercase tracking-widest font-bold mt-1">Matched Filtered</span>
+          <span className="text-xs text-indigo-500/70 uppercase tracking-widest font-bold mt-1">Matched Filtered</span>
         </div>
-        <div className="bg-white/[0.04] border border-amber-900/40 p-4 rounded-xl flex flex-col items-center justify-center shadow-lg">
+        <div className="bg-white/[0.04] border border-amber-900/40 p-4 rounded-xl flex flex-col items-center justify-center shadow-sm">
           <span className="text-2xl font-black text-amber-400">
             {filtered.filter(r => ['pending','pending_partner','submitted','not_confirmed','pending_tl'].includes(r.status)).length}
           </span>
-          <span className="text-[10px] text-amber-500/70 uppercase tracking-widest font-bold mt-1">Pending Filtered</span>
+          <span className="text-xs text-amber-500/70 uppercase tracking-widest font-bold mt-1">Pending Filtered</span>
         </div>
-        <div className="bg-white/[0.04] border border-emerald-900/40 p-4 rounded-xl flex flex-col items-center justify-center shadow-lg">
+        <div className="bg-white/[0.04] border border-emerald-900/40 p-4 rounded-xl flex flex-col items-center justify-center shadow-sm">
           <span className="text-2xl font-black text-emerald-400">
             {filtered.filter(r => ['approved','answered','confirmed','closed','contacted'].includes(r.status)).length}
           </span>
-          <span className="text-[10px] text-emerald-500/70 uppercase tracking-widest font-bold mt-1">Resolved Filtered</span>
+          <span className="text-xs text-emerald-500/70 uppercase tracking-widest font-bold mt-1">Resolved Filtered</span>
         </div>
       </div>
 
-      <div className="bg-slate-950 border border-white/5 rounded-2xl shadow-xl p-5 space-y-4">
+      <div className="bg-slate-950 border border-white/5 rounded-2xl shadow p-5 space-y-4">
         <div className='flex justify-between items-center flex-wrap gap-2 mb-4 pb-4 border-b border-white/5'>
           <div className="flex gap-2 flex-wrap">
-            <div className='flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-md text-[11px] uppercase tracking-wider font-bold text-slate-300'>
+            <div className='flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-xl text-xs uppercase tracking-wider font-bold text-slate-300'>
               <ClipboardList className="w-3.5 h-3.5" />
               <span>{allRequests.length} Total</span>
             </div>
-            <div className='flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-md text-[11px] uppercase tracking-wider font-bold text-amber-400'>
+            <div className='flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs uppercase tracking-wider font-bold text-amber-400'>
               <Clock className="w-3.5 h-3.5" />
               <span>{pendingCount} Pending</span>
             </div>
-            <div className='flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-md text-[11px] uppercase tracking-wider font-bold text-emerald-400'>
+            <div className='flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs uppercase tracking-wider font-bold text-emerald-400'>
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>{resolvedCount} Resolved</span>
             </div>
           </div>
-          <div className="text-[12px] font-medium text-slate-400">
+          <div className="text-sm font-medium text-slate-400">
             Showing {sorted.length} of {allRequests.length} total
           </div>
         </div>
 
         {isNoFiltersActive && (
-          <div className="bg-amber-500/10 border border-amber-500/20 text-amber-500 px-4 py-2 rounded-lg text-[13px] font-medium mb-4 flex items-center gap-2">
+          <div className="bg-amber-500/10 border border-amber-500/20 text-amber-500 px-4 py-2 rounded-xl text-sm font-medium mb-4 flex items-center gap-2">
             <Clock className="w-4 h-4" />
             Showing all pending requests. Use filters to view history.
           </div>
@@ -522,7 +522,7 @@ export const AllAgentSubmissionsLog = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3 pb-4 border-b border-white/5">
           <div className="relative w-full xl:col-span-2">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input type="text" placeholder="Search ID, Agent, Patient..." value={search} onChange={e => setSearch(e.target.value)} className="w-full pl-9 pr-4 py-1.5 bg-slate-900/60 border border-slate-700/40 rounded-lg text-[12px] text-white focus:outline-none focus:border-indigo-500 font-sans" />
+            <input type="text" placeholder="Search ID, Agent, Patient..." value={search} onChange={e => setSearch(e.target.value)} className="w-full pl-9 pr-4 py-1.5 bg-slate-900/60 border border-slate-700/40 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 font-sans" />
           </div>
           
           {/* New Filters Start */}
@@ -530,7 +530,7 @@ export const AllAgentSubmissionsLog = ({
             type="date" 
             value={filterDate} 
             onChange={(e) => setFilterDate(e.target.value)} 
-            className="w-full bg-white/[0.03] border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 [color-scheme:dark]" 
+            className="w-full bg-white/[0.03] border border-slate-700/40 rounded-xl text-sm text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 [color-scheme:dark]" 
           />
           <div className="relative">
             <select 
@@ -541,7 +541,7 @@ export const AllAgentSubmissionsLog = ({
                   setFilterClinics([...filterClinics, val]);
                 }
               }} 
-              className="w-full bg-white/[0.03] border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-white/[0.03] border border-slate-700/40 rounded-xl text-sm text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500"
             >
               <option value="">➕ Add Clinic to Filter...</option>
               {CLINIC_OPTIONS.filter(c => !filterClinics.includes(c.value)).map(c => (
@@ -549,7 +549,7 @@ export const AllAgentSubmissionsLog = ({
               ))}
             </select>
             {filterClinics.length > 0 && (
-              <div className="absolute top-full left-0 z-50 mt-1 flex flex-wrap gap-1 bg-slate-800 p-2 rounded-lg border border-slate-700 shadow-xl w-64">
+              <div className="absolute top-full left-0 z-50 mt-1 flex flex-wrap gap-1 bg-slate-800 p-2 rounded-xl border border-slate-700 shadow w-64">
                 <span className="w-full text-xs text-slate-400 font-bold mb-1 flex justify-between">
                   Selected Clinics:
                   <button onClick={() => setFilterClinics([])} className="text-rose-400 hover:text-rose-300">Clear</button>
@@ -557,7 +557,7 @@ export const AllAgentSubmissionsLog = ({
                 {filterClinics.map(c => {
                   const label = CLINIC_OPTIONS.find(opt => opt.value === c)?.label || c;
                   return (
-                    <span key={c} className="bg-indigo-500/20 text-indigo-300 border-none px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
+                    <span key={c} className="bg-indigo-500/20 text-indigo-300 border-none px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1">
                       {label}
                       <button onClick={() => setFilterClinics(prev => prev.filter(x => x !== c))} className="hover:text-white cursor-pointer">&times;</button>
                     </span>
@@ -571,18 +571,18 @@ export const AllAgentSubmissionsLog = ({
             placeholder="Search by phone..." 
             value={filterPhone} 
             onChange={(e) => setFilterPhone(e.target.value)} 
-            className="w-full bg-white/[0.03] border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 placeholder-slate-500" 
+            className="w-full bg-white/[0.03] border border-slate-700/40 rounded-xl text-sm text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 placeholder-slate-500" 
           />
           {/* New Filters End */}
 
           <div className="flex gap-2 w-full xl:col-span-2 items-center flex-wrap lg:justify-end">
-            <select value={filterAgent} onChange={e => setFilterAgent(e.target.value)} className="bg-slate-900/60 border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer">
+            <select value={filterAgent} onChange={e => setFilterAgent(e.target.value)} className="bg-slate-900/60 border border-slate-700/40 rounded-xl text-sm text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer">
               <option value="all">All Agents</option>
               {agentsList.map(name => (
                 <option key={name} value={name}>{name}</option>
               ))}
             </select>
-            <select value={filterType} onChange={e => setFilterType(e.target.value)} className="bg-slate-900/60 border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer">
+            <select value={filterType} onChange={e => setFilterType(e.target.value)} className="bg-slate-900/60 border border-slate-700/40 rounded-xl text-sm text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer">
               <option value="all">All Types</option>
               <option value="sched">Leaves/Swaps</option>
               <option value="inq">Inquiries</option>
@@ -590,7 +590,7 @@ export const AllAgentSubmissionsLog = ({
               <option value="tt_complaint">Complaints</option>
               <option value="comm">Client Comms</option>
             </select>
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="bg-slate-900/60 border border-slate-700/40 rounded-lg text-[12px] text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer">
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="bg-slate-900/60 border border-slate-700/40 rounded-xl text-sm text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer">
               <option value="date_desc">Newest First</option>
               <option value="date_asc">Oldest First</option>
               <option value="status">By Status</option>
@@ -605,7 +605,7 @@ export const AllAgentSubmissionsLog = ({
                   setFilterType('all');
                   setFilterAgent('all');
                 }}
-                className="px-3 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 rounded-lg text-[12px] font-bold hover:bg-slate-700 whitespace-nowrap cursor-pointer transition-colors"
+                className="px-3 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 rounded-xl text-sm font-bold hover:bg-slate-700 whitespace-nowrap cursor-pointer transition-colors"
                 title="Clear Filters"
               >
                 Clear
@@ -618,7 +618,7 @@ export const AllAgentSubmissionsLog = ({
           {sorted.length === 0 ? (
             <div className="text-center py-12 text-slate-400 space-y-3">
               <ClipboardList className="w-12 h-12 mx-auto text-slate-600" />
-              <p className="text-[14px]">No agent submissions matched your criteria.</p>
+              <p className="text-sm">No agent submissions matched your criteria.</p>
             </div>
           ) : (
             sorted.map((req) => {

@@ -296,12 +296,12 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
     <div className="space-y-5">
       {/* ── Section header ───────────────────────────────────────── */}
       <div className="flex items-center gap-3 pb-1 border-b border-white/5">
-        <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+        <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
           <Coffee className="w-4 h-4 text-amber-400" />
         </div>
         <div>
           <h3 className="text-sm font-bold text-slate-100 font-display tracking-tight">Break Schedule</h3>
-          <p className="text-[10px] text-slate-500">
+          <p className="text-xs text-slate-500">
             {isTLOrAdmin ? 'Publish break & lunch times for your team' : 'Your assigned breaks and lunch times'}
           </p>
         </div>
@@ -320,14 +320,14 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                   <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
                   <span className="text-xs font-black text-amber-300 uppercase tracking-wider">Today's Schedule</span>
                 </div>
-                <span className="text-[10px] text-slate-500 font-mono">{formatDateNice(todayBreak.date)}</span>
+                <span className="text-xs text-slate-500 font-mono">{formatDateNice(todayBreak.date)}</span>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-transparent border border-amber-500/15 rounded-xl p-3 flex flex-col gap-1">
                   <div className="flex items-center gap-1.5 text-amber-400">
                     <Coffee className="w-3.5 h-3.5" />
-                    <span className="text-[9px] font-black uppercase tracking-wider">Break</span>
+                    <span className="text-xs font-black uppercase tracking-wider">Break</span>
                   </div>
                   {todayBreak.breakTime ? (
                     <p className="text-xl font-black text-slate-100 font-mono">{fmtTime(todayBreak.breakTime)}</p>
@@ -339,7 +339,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                 <div className="bg-transparent border border-orange-500/15 rounded-xl p-3 flex flex-col gap-1">
                   <div className="flex items-center gap-1.5 text-orange-400">
                     <Utensils className="w-3.5 h-3.5" />
-                    <span className="text-[9px] font-black uppercase tracking-wider">Lunch</span>
+                    <span className="text-xs font-black uppercase tracking-wider">Lunch</span>
                   </div>
                   {todayBreak.lunchTime ? (
                     <p className="text-xl font-black text-slate-100 font-mono">{fmtTime(todayBreak.lunchTime)}</p>
@@ -352,12 +352,12 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
               {/* Visual timeline for today */}
               {(todayBreak.breakTime || todayBreak.lunchTime) && (
                 <div className="pt-2 border-t border-white/5">
-                  <p className="text-[9px] uppercase font-bold text-slate-500 tracking-wider mb-2">Timeline</p>
+                  <p className="text-xs uppercase font-bold text-slate-500 tracking-wider mb-2">Timeline</p>
                   <div className="flex items-center gap-0">
                     {/* Shift start */}
                     <div className="flex flex-col items-center gap-1 shrink-0">
                       <div className="w-2 h-2 rounded-full bg-indigo-400" />
-                      <span className="text-[8px] text-slate-500 font-mono">{todayBreak.shiftLabel?.split('-')[0]?.trim() || 'Start'}</span>
+                      <span className="text-xs text-slate-500 font-mono">{todayBreak.shiftLabel?.split('-')[0]?.trim() || 'Start'}</span>
                     </div>
                     <div className="flex-1 h-0.5 bg-white/10" />
                     {todayBreak.breakTime && (
@@ -366,7 +366,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                           <div className="w-3 h-3 rounded-full bg-amber-400 flex items-center justify-center">
                             <Coffee className="w-2 h-2 text-slate-900" />
                           </div>
-                          <span className="text-[8px] text-amber-400 font-mono font-bold">{fmtTime(todayBreak.breakTime)}</span>
+                          <span className="text-xs text-amber-400 font-mono font-bold">{fmtTime(todayBreak.breakTime)}</span>
                         </div>
                         <div className="flex-1 h-0.5 bg-white/10" />
                       </>
@@ -377,7 +377,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                           <div className="w-3 h-3 rounded-full bg-orange-400 flex items-center justify-center">
                             <Utensils className="w-2 h-2 text-slate-900" />
                           </div>
-                          <span className="text-[8px] text-orange-400 font-mono font-bold">{fmtTime(todayBreak.lunchTime)}</span>
+                          <span className="text-xs text-orange-400 font-mono font-bold">{fmtTime(todayBreak.lunchTime)}</span>
                         </div>
                         <div className="flex-1 h-0.5 bg-white/10" />
                       </>
@@ -385,7 +385,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                     {/* Shift end */}
                     <div className="flex flex-col items-center gap-1 shrink-0">
                       <div className="w-2 h-2 rounded-full bg-indigo-400" />
-                      <span className="text-[8px] text-slate-500 font-mono">{todayBreak.shiftLabel?.split('-')[1]?.trim() || 'End'}</span>
+                      <span className="text-xs text-slate-500 font-mono">{todayBreak.shiftLabel?.split('-')[1]?.trim() || 'End'}</span>
                     </div>
                   </div>
                 </div>
@@ -395,7 +395,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
             <div className="bg-transparent border border-white/5 rounded-2xl p-5 text-center">
               <Coffee className="w-6 h-6 text-slate-600 mx-auto mb-2" />
               <p className="text-xs text-slate-500">No break schedule set for today.</p>
-              <p className="text-[10px] text-slate-600 mt-0.5">Your TL will publish your break times here.</p>
+              <p className="text-xs text-slate-600 mt-0.5">Your TL will publish your break times here.</p>
             </div>
           )}
 
@@ -403,13 +403,13 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
           {myUpcomingBreaks.filter(s => s.date !== todayStr).length > 0 && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Upcoming</p>
+                <p className="text-xs uppercase font-bold text-slate-500 tracking-wider">Upcoming</p>
                 <div className="flex gap-1">
                   {[3, 7, 14].map(d => (
                     <button
                       key={d}
                       onClick={() => setAgentViewDays(d)}
-                      className={`px-2 py-0.5 rounded-lg text-[9px] font-bold transition-all ${agentViewDays === d ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/25' : 'text-slate-500 hover:text-slate-300'}`}
+                      className={`px-2 py-0.5 rounded-xl text-xs font-bold transition-all ${agentViewDays === d ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/25' : 'text-slate-500 hover:text-slate-300'}`}
                     >
                       {d}d
                     </button>
@@ -422,7 +422,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                 .map(shift => (
                   <div key={shift.id} className="flex items-center gap-3 p-3 bg-transparent border border-white/5 rounded-xl hover:border-white/10 transition-all">
                     <div className="text-center shrink-0 w-10">
-                      <p className="text-[8px] text-slate-500 uppercase font-bold">
+                      <p className="text-xs text-slate-500 uppercase font-bold">
                         {new Date(shift.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' })}
                       </p>
                       <p className="text-sm font-black text-slate-200">
@@ -431,17 +431,17 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                     </div>
                     <div className="flex-1 flex flex-wrap gap-2">
                       {shift.breakTime && (
-                        <span className="flex items-center gap-1 text-[10px] font-mono text-amber-400 bg-amber-500/10 border border-amber-500/15 px-2 py-0.5 rounded-lg">
+                        <span className="flex items-center gap-1 text-xs font-mono text-amber-400 bg-amber-500/10 border border-amber-500/15 px-2 py-0.5 rounded-xl">
                           <Coffee className="w-2.5 h-2.5" /> {fmtTime(shift.breakTime)}
                         </span>
                       )}
                       {shift.lunchTime && (
-                        <span className="flex items-center gap-1 text-[10px] font-mono text-orange-400 bg-orange-500/10 border border-orange-500/15 px-2 py-0.5 rounded-lg">
+                        <span className="flex items-center gap-1 text-xs font-mono text-orange-400 bg-orange-500/10 border border-orange-500/15 px-2 py-0.5 rounded-xl">
                           <Utensils className="w-2.5 h-2.5" /> {fmtTime(shift.lunchTime)}
                         </span>
                       )}
                     </div>
-                    <span className="text-[9px] text-slate-600 font-mono">{shift.shiftLabel}</span>
+                    <span className="text-xs text-slate-600 font-mono">{shift.shiftLabel}</span>
                   </div>
                 ))}
             </div>
@@ -465,7 +465,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                 <button
                   key={tab.id}
                   onClick={() => setActiveUploadTab(tab.id)}
-                  className={`flex-1 py-2.5 text-[10px] font-black uppercase tracking-wider transition-all ${
+                  className={`flex-1 py-2.5 text-xs font-black uppercase tracking-wider transition-all ${
                     activeUploadTab === tab.id
                       ? 'text-amber-300 border-b-2 border-amber-400 bg-amber-500/5'
                       : 'text-slate-500 hover:text-slate-300'
@@ -481,10 +481,10 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
               {activeUploadTab === 'paste' && (
                 <div className="space-y-3">
                   <div className="bg-indigo-500/5 border border-indigo-500/15 rounded-xl p-3 space-y-1 text-left">
-                    <p className="text-[9px] font-black text-indigo-300 uppercase tracking-wider">Expected format (CSV or paste from Excel)</p>
-                    <p className="text-[10px] text-slate-400 font-mono">date, agent_name, break_time, lunch_time</p>
-                    <p className="text-[10px] text-slate-500 font-mono">2025-07-01, Sara Ahmed, 10:30, 13:00</p>
-                    <p className="text-[10px] text-slate-500">Date formats accepted: YYYY-MM-DD, MM/DD/YYYY, DD-MM-YYYY</p>
+                    <p className="text-xs font-black text-indigo-300 uppercase tracking-wider">Expected format (CSV or paste from Excel)</p>
+                    <p className="text-xs text-slate-400 font-mono">date, agent_name, break_time, lunch_time</p>
+                    <p className="text-xs text-slate-500 font-mono">2025-07-01, Sara Ahmed, 10:30, 13:00</p>
+                    <p className="text-xs text-slate-500">Date formats accepted: YYYY-MM-DD, MM/DD/YYYY, DD-MM-YYYY</p>
                   </div>
 
                   <textarea
@@ -498,7 +498,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                   <div className="flex gap-2">
                     <button
                       onClick={handleParseCSV}
-                      className="flex-1 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="flex-1 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Upload className="w-3.5 h-3.5" /> Parse & Preview
                     </button>
@@ -522,7 +522,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                         className="space-y-2 pt-2"
                       >
                         <div className="flex items-center justify-between">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                             Preview — {parsed.filter(r => r.status === 'matched').length} of {parsed.length} rows matched
                           </p>
                           <button
@@ -537,7 +537,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                           {parsed.map((row, i) => (
                             <div
                               key={i}
-                              className={`flex items-center gap-2 p-2 rounded-lg text-[10px] border ${
+                              className={`flex items-center gap-2 p-2 rounded-xl text-xs border ${
                                 row.status === 'matched'
                                   ? 'bg-emerald-500/5 border-emerald-500/15 text-slate-200'
                                   : 'bg-rose-500/5 border-rose-500/15 text-rose-300'
@@ -551,7 +551,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                                   {row.lunchTime && <span className="text-orange-400">🍽 {row.lunchTime}</span>}
                                 </div>
                               ) : (
-                                <span className="text-rose-400 text-[9px] ml-auto">{row.error}</span>
+                                <span className="text-rose-400 text-xs ml-auto">{row.error}</span>
                               )}
                             </div>
                           ))}
@@ -561,7 +561,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                           <button
                             onClick={handlePublishCSV}
                             disabled={isPublishing}
-                            className="w-full py-2.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/25 text-amber-300 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                            className="w-full py-2.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/25 text-amber-300 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                           >
                             {isPublishing ? (
                               <><span className="animate-spin">⟳</span> Publishing...</>
@@ -581,23 +581,23 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <label className="text-[9px] uppercase font-bold text-slate-500 tracking-wider block">Date</label>
+                      <label className="text-xs uppercase font-bold text-slate-500 tracking-wider block">Date</label>
                       <input
                         type="date"
                         value={manualDate}
                         onChange={e => { setManualDate(e.target.value); setManualAgent(''); }}
-                        className="w-full bg-white/[0.02] border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500/50"
+                        className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500/50"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[9px] uppercase font-bold text-slate-500 tracking-wider block">
+                      <label className="text-xs uppercase font-bold text-slate-500 tracking-wider block">
                         Agent {manualDate && <span className="text-slate-600">({agentsOnDate.length} scheduled)</span>}
                       </label>
                       <select
                         value={manualAgent}
                         onChange={e => setManualAgent(e.target.value)}
-                        className="w-full bg-white/[0.02] border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500/50"
+                        className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500/50"
                       >
                         <option value="">-- Select agent --</option>
                         {agentsOnDate.map(name => (
@@ -609,13 +609,13 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
-                      <label className="text-[9px] uppercase font-bold text-amber-500/70 tracking-wider flex items-center gap-1">
+                      <label className="text-xs uppercase font-bold text-amber-500/70 tracking-wider flex items-center gap-1">
                         <Coffee className="w-3 h-3" /> Break Time
                       </label>
                       <select
                         value={manualBreak}
                         onChange={e => setManualBreak(e.target.value)}
-                        className="w-full bg-white/[0.02] border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500/50"
+                        className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500/50"
                       >
                         <option value="">Not set</option>
                         {TIME_PRESETS.map(t => (
@@ -625,13 +625,13 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-[9px] uppercase font-bold text-orange-500/70 tracking-wider flex items-center gap-1">
+                      <label className="text-xs uppercase font-bold text-orange-500/70 tracking-wider flex items-center gap-1">
                         <Utensils className="w-3 h-3" /> Lunch Time
                       </label>
                       <select
                         value={manualLunch}
                         onChange={e => setManualLunch(e.target.value)}
-                        className="w-full bg-white/[0.02] border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-orange-500/50"
+                        className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-orange-500/50"
                       >
                         <option value="">Not set</option>
                         {TIME_PRESETS.map(t => (
@@ -644,7 +644,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                   <button
                     onClick={handleManualPublish}
                     disabled={!manualAgent || !manualDate}
-                    className="w-full py-2.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/25 text-amber-300 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="w-full py-2.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/25 text-amber-300 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <Send className="w-3.5 h-3.5" /> Save & Notify Agent
                   </button>
@@ -656,7 +656,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
           {/* ── Published break schedule summary (TL view) ─────── */}
           {uniqueDatesWithBreaks.length > 0 && (
             <div className="space-y-2">
-              <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider flex items-center gap-1.5">
+              <p className="text-xs uppercase font-bold text-slate-500 tracking-wider flex items-center gap-1.5">
                 <Calendar className="w-3 h-3" /> Published Break Days
               </p>
 
@@ -675,11 +675,11 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                         {isToday && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />}
                         <span className={`text-xs font-bold ${isToday ? 'text-amber-300' : 'text-slate-200'}`}>
                           {formatDateNice(date)}
-                          {isToday && <span className="ml-1.5 text-[9px] text-amber-500/70 font-black uppercase">Today</span>}
+                          {isToday && <span className="ml-1.5 text-xs text-amber-500/70 font-black uppercase">Today</span>}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[9px] text-slate-500 flex items-center gap-1">
+                        <span className="text-xs text-slate-500 flex items-center gap-1">
                           <Users className="w-3 h-3" /> {dayShifts.length}
                         </span>
                         {isExpanded ? <ChevronUp className="w-3.5 h-3.5 text-slate-500" /> : <ChevronDown className="w-3.5 h-3.5 text-slate-500" />}
@@ -697,18 +697,18 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                         >
                           <div className="p-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {dayShifts.map(shift => (
-                              <div key={shift.id} className="flex items-center gap-2 p-2 bg-transparent rounded-lg">
-                                <div className="w-6 h-6 rounded-md bg-white/5 flex items-center justify-center text-[8px] font-black text-slate-400 shrink-0">
+                              <div key={shift.id} className="flex items-center gap-2 p-2 bg-transparent rounded-xl">
+                                <div className="w-6 h-6 rounded-xl bg-white/5 flex items-center justify-center text-xs font-black text-slate-400 shrink-0">
                                   {shift.agentName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-[10px] font-semibold text-slate-200 truncate">{shift.agentName}</p>
+                                  <p className="text-xs font-semibold text-slate-200 truncate">{shift.agentName}</p>
                                   <div className="flex gap-1.5 mt-0.5 flex-wrap">
                                     {shift.breakTime && (
-                                      <span className="text-[9px] text-amber-400 font-mono">☕ {fmtTime(shift.breakTime)}</span>
+                                      <span className="text-xs text-amber-400 font-mono">☕ {fmtTime(shift.breakTime)}</span>
                                     )}
                                     {shift.lunchTime && (
-                                      <span className="text-[9px] text-orange-400 font-mono">🍽 {fmtTime(shift.lunchTime)}</span>
+                                      <span className="text-xs text-orange-400 font-mono">🍽 {fmtTime(shift.lunchTime)}</span>
                                     )}
                                   </div>
                                 </div>
@@ -728,7 +728,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
             <div className="text-center py-6 border border-dashed border-white/5 rounded-xl">
               <Sparkles className="w-5 h-5 text-slate-600 mx-auto mb-1.5" />
               <p className="text-xs text-slate-500">No break schedules published yet.</p>
-              <p className="text-[10px] text-slate-600 mt-0.5">Upload a CSV or add entries manually above.</p>
+              <p className="text-xs text-slate-600 mt-0.5">Upload a CSV or add entries manually above.</p>
             </div>
           )}
         </div>

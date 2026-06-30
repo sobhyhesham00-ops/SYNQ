@@ -227,7 +227,7 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
     >
       {/* Photos Section */}
       <div className="space-y-1.5">
-        <label className="text-[10px] font-bold uppercase tracking-widest block text-slate-400">
+        <label className="text-xs font-bold uppercase tracking-widest block text-slate-400">
           {photosLabel}
         </label>
         
@@ -235,20 +235,20 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
             {photos.map((photo, index) => {
               const isImage = photo.startsWith('data:image/') || photo.startsWith('http');
               return (
-              <div key={index} className="relative group w-24 h-24 rounded-xl border border-white/10 overflow-hidden bg-white/[0.04] shadow-lg">
+              <div key={index} className="relative group w-24 h-24 rounded-xl border border-white/10 overflow-hidden bg-white/[0.04] shadow-sm">
                 {isImage ? (
                   <img referrerPolicy="no-referrer" src={photo} alt="screenshot" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center bg-slate-800">
                     <ImageIcon className="w-6 h-6 text-slate-400 mb-1" />
-                    <span className="text-[8px] text-slate-400 font-bold uppercase truncate max-w-[80px]">File</span>
+                    <span className="text-xs text-slate-400 font-bold uppercase truncate max-w-[80px]">File</span>
                   </div>
                 )}
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <button
                     type="button"
                     onClick={() => handleRemovePhoto(index)}
-                    className="p-1.5 bg-rose-500 rounded-lg hover:bg-rose-400 transition-colors shadow-lg active:scale-95"
+                    className="p-1.5 bg-rose-500 rounded-xl hover:bg-rose-400 transition-colors shadow-sm active:scale-95"
                 >
                     <X className="w-4 h-4 text-white" />
                 </button>
@@ -267,14 +267,14 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
                 {isUploading ? (
                   <>
                     <Loader2 className="w-6 h-6 text-indigo-400 animate-spin" />
-                    <span className="text-[9px] text-indigo-300 font-bold uppercase mt-2">
+                    <span className="text-xs text-indigo-300 font-bold uppercase mt-2">
                        {uploadProgress ? `${uploadProgress.current}/${uploadProgress.total}` : 'Uploading'}
                     </span>
                   </>
                 ) : (
                   <>
                     <Camera className="w-6 h-6 text-slate-500 group-hover:text-indigo-400 transition-colors" />
-                    <span className="text-[9px] text-slate-500 font-bold uppercase mt-1 group-hover:text-indigo-300">Add File</span>
+                    <span className="text-xs text-slate-500 font-bold uppercase mt-1 group-hover:text-indigo-300">Add File</span>
                   </>
                 )}
             </label>
@@ -283,7 +283,7 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
 
       {/* Links Section */}
       <div className="space-y-1.5">
-        <label className="text-[10px] font-bold uppercase tracking-widest block text-slate-400">
+        <label className="text-xs font-bold uppercase tracking-widest block text-slate-400">
           Useful Links / URLs
         </label>
         <div className="flex items-center gap-2">
@@ -294,13 +294,13 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
               placeholder="e.g. ticket link, reference..."
               value={tempLinkInput}
               onChange={(e) => setTempLinkInput(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all"
+              className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all"
             />
           </div>
           <button
             type="button"
             onClick={handleAddLink}
-            className="px-3 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/20 text-indigo-300 text-xs font-bold rounded-lg transition-all active:scale-95 h-[34px] uppercase"
+            className="px-3 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/20 text-indigo-300 text-xs font-bold rounded-xl transition-all active:scale-95 h-[34px] uppercase"
           >
             Add
           </button>
@@ -309,12 +309,12 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
         {links.length > 0 && (
           <div className="space-y-1.5 pt-1">
             {links.map((linkStr, index) => (
-              <div key={index} className="flex justify-between items-center p-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-xs">
+              <div key={index} className="flex justify-between items-center p-2 bg-white/5 border border-white/10 rounded-xl text-xs">
                 <span className="text-indigo-300 underline font-mono truncate max-w-[200px]">{linkStr}</span>
                 <button
                   type="button"
                   onClick={() => handleRemoveLink(index)}
-                  className="text-red-400 hover:text-red-300 text-[10px] font-medium uppercase font-bold transition-all px-2 py-1 bg-red-400/10 rounded-lg border border-red-400/20 active:scale-95"
+                  className="text-red-400 hover:text-red-300 text-xs font-medium uppercase font-bold transition-all px-2 py-1 bg-red-400/10 rounded-xl border border-red-400/20 active:scale-95"
                 >
                   Remove
                 </button>

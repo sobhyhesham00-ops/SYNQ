@@ -15,13 +15,13 @@ export const KPICalculatorPanel = () => {
   const abandonRate = totalCalls && answeredCalls ? (((Number(totalCalls) - Number(answeredCalls)) / Number(totalCalls)) * 100).toFixed(1) : null;
 
   const inputClass = 'w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono font-bold';
-  const labelClass = 'block text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-1';
+  const labelClass = 'block text-xs text-slate-400 uppercase tracking-wider font-bold mb-1';
 
   const KPIResult = ({ label, value, unit, color, target }: any) => (
     <div className={`bg-transparent border ${color} rounded-2xl p-4 flex flex-col gap-1`}>
-      <p className='text-[10px] text-slate-500 uppercase tracking-widest font-bold'>{label}</p>
+      <p className='text-xs text-slate-500 uppercase tracking-widest font-bold'>{label}</p>
       <p className='text-3xl font-black text-white font-mono'>{value ?? '—'}{value ? <span className='text-lg text-slate-400 ml-1'>{unit}</span> : null}</p>
-      {target && <p className='text-[10px] text-slate-600'>Target: {target}</p>}
+      {target && <p className='text-xs text-slate-600'>Target: {target}</p>}
     </div>
   );
 

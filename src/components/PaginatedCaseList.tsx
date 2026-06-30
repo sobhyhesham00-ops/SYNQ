@@ -128,7 +128,7 @@ export function PaginatedCaseList<T>({
   };
 
   return (
-    <div className="bg-white/[0.04] p-0 rounded-2xl shadow-xl overflow-hidden border border-slate-700/60 w-full flex flex-col">
+    <div className="bg-white/[0.04] p-0 rounded-2xl shadow overflow-hidden border border-slate-700/60 w-full flex flex-col">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-700/60 px-5 py-4 bg-transparent gap-3 flex-wrap">
         <div>
           <h3 className="text-base font-bold text-slate-100 font-display flex items-center gap-2">
@@ -157,7 +157,7 @@ export function PaginatedCaseList<T>({
             {phoneFilter && (
               <button
                 onClick={() => { setPhoneFilter(""); setCurrentPage(1); }}
-                className="text-xs text-rose-400 hover:text-rose-300 border border-rose-500/20 bg-rose-500/10 rounded-lg px-2.5 py-2.5 transition-all font-bold"
+                className="text-xs text-rose-400 hover:text-rose-300 border border-rose-500/20 bg-rose-500/10 rounded-xl px-2.5 py-2.5 transition-all font-bold"
               >
                 ✕
               </button>
@@ -168,7 +168,7 @@ export function PaginatedCaseList<T>({
         {itemToClinic && (
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${showFilters || clinicsFilter.length > 0 ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" : "bg-white/5 text-slate-300 border border-white/10 hover:bg-white/10"}`}
+            className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 ${showFilters || clinicsFilter.length > 0 ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" : "bg-white/5 text-slate-300 border border-white/10 hover:bg-white/10"}`}
           >
             <Filter className="w-3.5 h-3.5" />
             Filters {clinicsFilter.length > 0 ? "(Active)" : ""}
@@ -177,17 +177,17 @@ export function PaginatedCaseList<T>({
       </div>
 
       {showFilters && itemToClinic && (
-        <div className="bg-[#18181c] p-4 border-b border-slate-700/60 space-y-4">
+        <div className="bg-slate-900 p-4 border-b border-slate-700/60 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {availableClinics && (
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Filter by Clinics</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Filter by Clinics</label>
                 <div className="flex flex-wrap gap-1.5 max-h-[120px] overflow-y-auto pr-1">
                   {availableClinics.map(c => (
                     <button
                       key={c}
                       onClick={() => toggleClinic(c)}
-                      className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${
+                      className={`px-3 py-1.5 text-xs font-bold rounded-xl border transition-all ${
                         clinicsFilter.includes(c)
                           ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300'
                           : 'bg-white/5 border-white/10 text-slate-400 hover:text-slate-200 hover:bg-white/10'
@@ -199,7 +199,7 @@ export function PaginatedCaseList<T>({
                   {clinicsFilter.length > 0 && (
                      <button
                        onClick={() => { setClinicsFilter([]); setCurrentPage(1); }}
-                       className="px-3 py-1.5 text-xs font-bold rounded-lg border border-rose-500/20 bg-rose-500/10 text-rose-300 transition-all hover:bg-rose-500/20 tracking-wider"
+                       className="px-3 py-1.5 text-xs font-bold rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-300 transition-all hover:bg-rose-500/20 tracking-wider"
                      >
                        Clear
                      </button>
@@ -212,7 +212,7 @@ export function PaginatedCaseList<T>({
       )}
 
       {showBulk && (
-        <div className="bg-[#161620] p-3.5 border-b border-slate-700/60 flex flex-wrap items-center gap-3">
+        <div className="bg-slate-900 p-3.5 border-b border-slate-700/60 flex flex-wrap items-center gap-3">
           <label className="flex items-center gap-2 text-xs font-bold text-slate-300 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -231,7 +231,7 @@ export function PaginatedCaseList<T>({
               <select
                 value={bulkTargetAgent}
                 onChange={(e) => setBulkTargetAgent(e.target.value)}
-                className="bg-white/[0.06] border border-white/10 rounded-lg px-2 py-1.5 text-xs text-slate-200 outline-none focus:border-indigo-500"
+                className="bg-white/[0.06] border border-white/10 rounded-xl px-2 py-1.5 text-xs text-slate-200 outline-none focus:border-indigo-500"
               >
                 <option value="">Assign selected to...</option>
                 {(agentsList || []).map(a => (
@@ -241,13 +241,13 @@ export function PaginatedCaseList<T>({
               <button
                 onClick={handleBulkAssignSubmit}
                 disabled={!bulkTargetAgent || isBulkSubmitting}
-                className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:pointer-events-none text-white text-xs font-bold rounded-lg transition-all"
+                className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:pointer-events-none text-white text-xs font-bold rounded-xl transition-all"
               >
                 {isBulkSubmitting ? "Assigning..." : "Assign"}
               </button>
               <button
                 onClick={() => setSelectedIds(new Set())}
-                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10"
+                className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-white/10"
                 title="Clear selection"
               >
                 <X className="w-3.5 h-3.5" />

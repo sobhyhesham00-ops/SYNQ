@@ -31,13 +31,13 @@ export const CaseTimeline: React.FC<CaseTimelineProps> = ({ entityType, entityId
   }, [entityType, entityId]);
 
   if (loading) return (
-    <div className="py-4 text-center text-[11px] text-slate-500 animate-pulse" id={`timeline-loading-${entityId}`}>
+    <div className="py-4 text-center text-xs text-slate-500 animate-pulse" id={`timeline-loading-${entityId}`}>
       Loading audit trail...
     </div>
   );
 
   if (events.length === 0) return (
-    <div className="py-4 text-center text-[11px] text-slate-500" id={`timeline-empty-${entityId}`}>
+    <div className="py-4 text-center text-xs text-slate-500" id={`timeline-empty-${entityId}`}>
       No audit history yet for this record.
     </div>
   );
@@ -53,8 +53,8 @@ export const CaseTimeline: React.FC<CaseTimelineProps> = ({ entityType, entityId
               {meta.icon}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[11px] text-slate-200 leading-snug">{ev.summary}</p>
-              <p className="text-[10px] text-slate-500 font-mono mt-0.5">
+              <p className="text-xs text-slate-200 leading-snug">{ev.summary}</p>
+              <p className="text-xs text-slate-500 font-mono mt-0.5">
                 {new Date(ev.createdAt).toLocaleString()} · {ev.actorRole}
               </p>
             </div>

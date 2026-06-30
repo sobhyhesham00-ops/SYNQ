@@ -236,24 +236,24 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
             >
               {comm.callCenterAgentName}
             </span>
-            <span className="text-[10px] text-slate-400 lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded font-sans shrink-0">
+            <span className="text-xs text-slate-400 lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded font-sans shrink-0">
               {getAgentLOB(comm.callCenterAgentName)}
             </span>
-            <span className="font-mono text-[10px] text-slate-500 bg-transparent px-1.5 py-0.5 rounded shrink-0">
+            <span className="font-mono text-xs text-slate-500 bg-transparent px-1.5 py-0.5 rounded shrink-0">
               {formatCaseRef(comm.id, "client_comm", comm.createdAt, comm.caseRef)}
             </span>
-            <span className="text-[9px] text-slate-500 font-mono shrink-0">
+            <span className="text-xs text-slate-500 font-mono shrink-0">
               {new Date(comm.createdAt).toLocaleString()}
             </span>
           </div>
 
           {/* Row 2: Patient Name, Clinic, Phone */}
-          <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-300 flex-wrap">
+          <div className="flex items-center gap-2 pt-1 text-xs text-slate-300 flex-wrap">
             {comm.patientName && <span className="font-bold">{comm.patientName}</span>}
             {comm.clinicName && (
               <>
                 <span className="text-slate-600">•</span>
-                <span className="text-xs sm:text-[13px] font-black font-sans text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md tracking-wide">
+                <span className="text-xs sm:text-sm font-black font-sans text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-xl tracking-wide">
                   {getClinicLabel(comm.clinicName)}
                 </span>
               </>
@@ -261,13 +261,13 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
             {comm.phoneNumber && <span>• {comm.phoneNumber}</span>}
             
             {comm.language && (
-               <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border border-white/10 shrink-0 ml-2 ${comm.language === "Arabic" ? "bg-emerald-500/10 text-emerald-300" : "bg-blue-500/10 text-blue-300"}`}>
+               <span className={`text-xs font-black uppercase px-2 py-0.5 rounded border border-white/10 shrink-0 ml-2 ${comm.language === "Arabic" ? "bg-emerald-500/10 text-emerald-300" : "bg-blue-500/10 text-blue-300"}`}>
                  {comm.language}
                </span>
             )}
 
             {(comm.assignedToName || comm.assignedTo) && (
-              <span className="text-[10px] text-indigo-300 bg-indigo-500/10 border border-indigo-500/25 px-2 py-0.5 rounded font-bold font-sans flex items-center gap-1 shrink-0 ml-2 animate-pulse">
+              <span className="text-xs text-indigo-300 bg-indigo-500/10 border border-indigo-500/25 px-2 py-0.5 rounded font-bold font-sans flex items-center gap-1 shrink-0 ml-2 animate-pulse">
                 📌 Assigned to: {comm.assignedToName || comm.assignedTo}
               </span>
             )}
@@ -277,7 +277,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
         {/* Status Badges & Toggle */}
         <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
           <span
-            className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg uppercase tracking-wider shrink-0 ${
+            className={`px-2 py-0.5 border text-xs font-bold rounded-xl uppercase tracking-wider shrink-0 ${
               comm.status === "contacted"
                 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                 : comm.status === "in_progress"
@@ -287,7 +287,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
           >
             {comm.status === "contacted" ? "✓ Contacted" : comm.status === "in_progress" ? "⚡ In Progress" : "⏳ Pending"}
           </span>
-          <span className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 ${commSLABadge}`}>
+          <span className={`px-2 py-0.5 border text-xs font-bold rounded-xl shrink-0 flex items-center gap-1 ${commSLABadge}`}>
              ⏱ {commAgeLabel} open
           </span>
           {isSuperAdmin && (
@@ -296,7 +296,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
                 e.stopPropagation();
                 handleDeleteClientComms(comm.id);
               }}
-              className="text-stone-400 hover:text-rose-400 p-1 rounded-md transition-all shrink-0 ml-1.5"
+              className="text-stone-400 hover:text-rose-400 p-1 rounded-xl transition-all shrink-0 ml-1.5"
               title="Delete Request"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -308,10 +308,10 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
       {isExpanded && (
         <div className="w-full flex-col flex space-y-4 text-left">
           {/* Core Detail Grid */}
-      <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl space-y-2 text-xs text-left">
+      <div className="p-3 bg-white/5 border border-white/10 rounded-xl space-y-2 text-xs text-left">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-2 gap-y-1">
           <div>
-            <p className="text-[9px] text-slate-400 uppercase tracking-wider">
+            <p className="text-xs text-slate-400 uppercase tracking-wider">
               Requested By:
             </p>
             <p className="text-slate-200 font-bold truncate">
@@ -324,7 +324,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
             </p>
           </div>
           <div>
-            <p className="text-[9px] text-slate-400 uppercase tracking-wider">
+            <p className="text-xs text-slate-400 uppercase tracking-wider">
               Patient Name:
             </p>
             <p className="text-slate-200 font-bold truncate">
@@ -337,7 +337,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
             </p>
           </div>
           <div>
-            <p className="text-[9px] text-slate-400 uppercase tracking-wider">
+            <p className="text-xs text-slate-400 uppercase tracking-wider">
               Phone number:
             </p>
             <p className="text-indigo-300 font-mono font-bold truncate">
@@ -352,10 +352,10 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
         </div>
 
         <div className="border-t border-white/5 pt-1.5 text-xs text-slate-300">
-          <p className="text-[9px] text-slate-400 uppercase tracking-wider mb-0.5 font-bold">
+          <p className="text-xs text-slate-400 uppercase tracking-wider mb-0.5 font-bold">
             Notes / Inquiry:
           </p>
-          <div className="bg-transparent p-2 rounded-lg border border-white/[0.03] text-slate-300 leading-normal font-sans italic">
+          <div className="bg-transparent p-2 rounded-xl border border-white/[0.03] text-slate-300 leading-normal font-sans italic">
             <CopyWrap
               text={comm.notes || ""}
               label="Notes"
@@ -385,10 +385,10 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
           <div className="border-t border-indigo-500/20 pt-1.5 text-xs text-indigo-300">
             {comm.handlingNotes && (
               <>
-                <p className="text-[9px] text-indigo-400 uppercase tracking-wider mb-0.5 font-bold">
+                <p className="text-xs text-indigo-400 uppercase tracking-wider mb-0.5 font-bold">
                   Resolution Notes ({comm.handledBy}):
                 </p>
-                <div className="bg-indigo-950/20 p-2 rounded-lg border border-indigo-500/10 text-slate-200 leading-normal font-sans mb-1">
+                <div className="bg-indigo-950/20 p-2 rounded-xl border border-indigo-500/10 text-slate-200 leading-normal font-sans mb-1">
                   <CopyWrap
                     text={comm.handlingNotes || ""}
                     label="Resolution Notes"
@@ -416,10 +416,10 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
       {/* Timers */}
       <div className="p-3 bg-transparent rounded-xl border border-white/[0.02] flex items-center justify-between text-xs font-sans">
         <div className="space-y-0.5 text-left">
-          <p className="text-[9px] text-slate-400 uppercase">
+          <p className="text-xs text-slate-400 uppercase">
             {isClosed ? "Closed By" : "Submitted"}:
           </p>
-          <p className="text-[10px] text-slate-300">
+          <p className="text-xs text-slate-300">
             {isClosed
               ? comm.handledBy
               : new Date(comm.createdAt).toLocaleString()}
@@ -427,7 +427,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
         </div>
 
         <div className="text-right space-y-0.5">
-          <p className="text-[9px] text-slate-400 uppercase font-bold">
+          <p className="text-xs text-slate-400 uppercase font-bold">
             {isClosed
               ? "Turnaround Time"
               : isInProgress
@@ -452,15 +452,15 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
 
       {/* Inline Handling form */}
       {activeCcHandlingId === comm.id && (
-        <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl space-y-2 text-left animate-fade-in mt-1">
-          <label className="text-[9px] font-bold text-slate-300 uppercase tracking-widest block mb-1">
+        <div className="p-3 bg-white/5 border border-white/20 rounded-xl space-y-2 text-left animate-fade-in mt-1">
+          <label className="text-xs font-bold text-slate-300 uppercase tracking-widest block mb-1">
             Handling Notes & Attachments *
           </label>
           <textarea
             placeholder="What was the outcome of contacting the client?"
             value={ccHandlingNotes}
             onChange={(e) => setCcHandlingNotes(e.target.value)}
-            className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-2.5 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[60px]"
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-2.5 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[60px]"
             required
           />
           <MultiAttachmentUpload
@@ -477,7 +477,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
                 setActiveCcHandlingId(null);
                 setCcHandlingPhotos([]);
               }}
-              className="px-2.5 py-1.5 hover:bg-white/20 backdrop-blur-md rounded-lg text-[10px] font-bold text-slate-400 cursor-pointer"
+              className="px-2.5 py-1.5 hover:bg-white/20 rounded-xl text-xs font-bold text-slate-400 cursor-pointer"
             >
               Cancel
             </button>
@@ -495,7 +495,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
                 );
                 setCcHandlingPhotos([]);
               }}
-              className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 active:scale-95 text-slate-950 text-[10px] font-black rounded-lg shadow cursor-pointer transition-all flex items-center gap-1"
+              className="px-3.5 py-1.5 bg-emerald-600 hover:brightness-110 active:scale-95 text-slate-950 text-xs font-black rounded-xl shadow cursor-pointer transition-all flex items-center gap-1"
             >
               Confirm Handled
             </button>
@@ -508,7 +508,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
         {isSuperAdmin && (
           <button
             onClick={() => handleDeleteClientComms(comm.id)}
-            className="px-2 py-1.5 hover:bg-rose-500/15 border border-transparent hover:border-rose-500/10 rounded-lg text-rose-400 text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer"
+            className="px-2 py-1.5 hover:bg-rose-500/15 border border-transparent hover:border-rose-500/10 rounded-xl text-rose-400 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
             title="Delete Request"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -519,21 +519,21 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
           <div className="relative mr-auto" ref={assignDropdownRef}>
             <button
               onClick={() => setShowAssignDropdown(!showAssignDropdown)}
-              className="px-3 py-1.5 text-indigo-400 hover:text-indigo-300 bg-indigo-500/15 hover:bg-indigo-500/25 rounded-lg flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-wider border border-indigo-500/20 cursor-pointer"
+              className="px-3 py-1.5 text-indigo-400 hover:text-indigo-300 bg-indigo-500/15 hover:bg-indigo-500/25 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-xs uppercase tracking-wider border border-indigo-500/20 cursor-pointer"
             >
               <UserIcon className="w-3.5 h-3.5" />{" "}
               {(comm.assignedToName || comm.assignedTo) ? "Reassign" : "Assign Agent"}
             </button>
             {showAssignDropdown && (
-              <div className="absolute bottom-full left-0 mb-2 z-50 bg-[#141419] border border-slate-700/60 rounded-xl w-72 shadow-2xl flex flex-col overflow-hidden">
+              <div className="absolute bottom-full left-0 mb-2 z-50 bg-slate-950 border border-slate-700/60 rounded-xl w-72 shadow flex flex-col overflow-hidden">
                 {/* Header */}
                 <div className="p-2.5 border-b border-slate-700/40 bg-[#18181f] flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                     Assign Agent
                   </span>
                   <button
                     onClick={() => setShowAssignDropdown(false)}
-                    className="text-slate-500 hover:text-slate-350 p-0.5 rounded-md hover:bg-white/5 transition-colors cursor-pointer"
+                    className="text-slate-500 hover:text-slate-350 p-0.5 rounded-xl hover:bg-white/5 transition-colors cursor-pointer"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -548,7 +548,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
                       placeholder="Search agent name..."
                       value={assignSearchQuery}
                       onChange={(e) => setAssignSearchQuery(e.target.value)}
-                      className="w-full bg-[#1e1e24] border border-slate-700/40 rounded-lg text-xs py-1.5 pl-8 pr-7 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/85 transition-colors font-sans"
+                      className="w-full bg-[#1e1e24] border border-slate-700/40 rounded-xl text-xs py-1.5 pl-8 pr-7 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/85 transition-colors font-sans"
                       autoFocus
                     />
                     {assignSearchQuery && (
@@ -578,7 +578,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
                           key={agentName}
                           onClick={() => handleAssignAgent(agentName)}
                           disabled={isAssigning}
-                          className={`w-full text-left px-2.5 py-1.5 text-xs rounded-lg transition-all flex items-center justify-between font-medium cursor-pointer ${
+                          className={`w-full text-left px-2.5 py-1.5 text-xs rounded-xl transition-all flex items-center justify-between font-medium cursor-pointer ${
                             isSelected
                               ? "bg-indigo-500/15 text-indigo-300 font-bold border border-indigo-500/20"
                               : "text-slate-300 hover:bg-white/[0.06] hover:text-white"
@@ -587,7 +587,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
                           <span className="truncate pr-2">{agentName}</span>
                           {lob && (
                             <span
-                              className={`shrink-0 text-[8px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                              className={`shrink-0 text-xs font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider ${
                                 isChat
                                   ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                                   : "bg-blue-500/10 text-blue-450 border border-blue-500/20"
@@ -615,7 +615,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
                 data: { ...comm },
               })
             }
-            className="px-2.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-lg text-emerald-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-2.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-xl text-emerald-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
             title={`Edit communication (${getRemainingEditTime(comm.createdAt)})`}
           >
             <Pencil className="w-3.5 h-3.5" />
@@ -653,7 +653,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
               "Client communication details copied with beautiful emojis!"
             );
           }}
-          className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-slate-100 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+          className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-slate-300 hover:text-slate-100 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
           title="Copy Request details"
         >
           <Copy className="w-3.5 h-3.5" />
@@ -663,7 +663,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
         {canTakeRequest && (
           <button
             onClick={() => handleTakeClientComm(comm.id)}
-            className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-sans font-black text-xs rounded-xl shadow-lg cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
+            className="px-4 py-2 bg-amber-600 hover:brightness-110 text-slate-950 font-sans font-black text-xs rounded-xl shadow-sm cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
           >
             Open Request
           </button>
@@ -675,7 +675,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
               setActiveCcHandlingId(comm.id);
               setCcHandlingNotes("");
             }}
-            className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 text-slate-100 font-sans font-black text-xs rounded-xl shadow-lg cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
+            className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 text-slate-100 font-sans font-black text-xs rounded-xl shadow-sm cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
           >
             Finalize Handled
           </button>
@@ -687,7 +687,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
             currentUser?.name === comm.openedBy) && (
             <button
               onClick={() => handleMarkClientCommDone(comm.id)}
-              className={`px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 text-slate-950 font-sans font-black text-xs rounded-xl shadow-lg cursor-pointer transition-all active:scale-95 flex items-center gap-1.5 ${canProcessRequest ? "ml-1" : ""}`}
+              className={`px-4 py-2 bg-emerald-600 hover:brightness-110 text-slate-950 font-sans font-black text-xs rounded-xl shadow-sm cursor-pointer transition-all active:scale-95 flex items-center gap-1.5 ${canProcessRequest ? "ml-1" : ""}`}
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
               {currentUser?.role === "tl" && comm.status === "pending"
@@ -710,7 +710,7 @@ export const ClientCommCard: React.FC<ClientCommCardProps> = ({
 
       {/* Case Activity Audit Trail */}
       <div className="w-full mt-3 pt-3 border-t border-white/5 mx-[2px] space-y-1.5 text-left">
-        <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-display">
+        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-display">
           Case Activity Timeline
         </h4>
         <CaseTimeline entityType="client_comm" entityId={comm.id} />

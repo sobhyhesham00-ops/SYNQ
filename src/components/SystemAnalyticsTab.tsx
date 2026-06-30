@@ -76,7 +76,7 @@ export const SystemAnalyticsTab: React.FC<SystemAnalyticsTabProps> = ({
     <div className="space-y-6 animate-fade-in mb-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
         {/* Attendance Interactive Chart */}
-        <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col h-80 shadow-xl">
+        <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col h-80 shadow">
           <h3 className="text-sm font-bold text-slate-100 mb-4 flex items-center gap-2">
             <Activity className="w-4 h-4 text-emerald-400" />
             Live Attendance
@@ -107,7 +107,7 @@ export const SystemAnalyticsTab: React.FC<SystemAnalyticsTabProps> = ({
         </div>
 
         {/* Requests & Swaps Interactive Chart */}
-        <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col h-80 shadow-xl">
+        <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col h-80 shadow">
           <h3 className="text-sm font-bold text-slate-100 mb-4 flex items-center gap-2">
             <PieChart className="w-4 h-4 text-indigo-400" />
             Roster Requests
@@ -138,7 +138,7 @@ export const SystemAnalyticsTab: React.FC<SystemAnalyticsTabProps> = ({
         </div>
 
         {/* General Inquiries Chart */}
-        <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col h-80 shadow-xl">
+        <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col h-80 shadow">
           <h3 className="text-sm font-bold text-slate-100 mb-4 flex items-center gap-2">
             <FileText className="w-4 h-4 text-blue-400" />
             General Inquiries Status
@@ -163,7 +163,7 @@ export const SystemAnalyticsTab: React.FC<SystemAnalyticsTabProps> = ({
         </div>
 
         {/* Tabby/Tamara & Complaints Chart */}
-        <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col h-80 shadow-xl">
+        <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col h-80 shadow">
           <h3 className="text-sm font-bold text-slate-100 mb-4 flex items-center gap-2">
             <Activity className="w-4 h-4 text-emerald-400" />
             Complaints / Payments
@@ -189,7 +189,7 @@ export const SystemAnalyticsTab: React.FC<SystemAnalyticsTabProps> = ({
       </div>
 
       {/* Aggregate Daily Creation Trend */}
-      <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl h-96 shadow-xl">
+      <div className="bg-white/5 border border-white/10 p-5 rounded-2xl h-96 shadow">
         <h3 className="text-sm font-bold text-slate-100 mb-6 flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-indigo-400" />
           General Inquiries, Tabby/Tamara, And Complaints Creation Volume (Daily Trends)

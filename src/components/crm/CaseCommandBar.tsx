@@ -73,7 +73,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
     filters.date;
 
   return (
-    <div id="case-search-filter-command-bar" className="bg-white/[0.05] backdrop-blur-xl border border-white/5 p-4 rounded-2xl space-y-4 sticky top-0 z-40 shadow-2xl">
+    <div id="case-search-filter-command-bar" className="bg-white/[0.05] border border-white/5 p-4 rounded-2xl space-y-4 sticky top-0 z-40 shadow">
       {/* 1. View Segment Filters & Count */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/5 pb-3">
         <div className="flex flex-wrap gap-2.5">
@@ -90,7 +90,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
                 onClick={() => onQuickViewChange(v.id as CRMQuickView)}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                   isActive
-                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500/20"
+                    ? "bg-indigo-600 text-white shadow-sm shadow-indigo-500/10 ring-1 ring-indigo-500/20"
                     : "bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white"
                 }`}
               >
@@ -103,7 +103,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
 
         <div className="flex items-center gap-1.5 text-xs text-slate-400 font-mono">
           <span>Results:</span>
-          <span className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/15 text-indigo-300 font-extrabold rounded-lg font-mono">
+          <span className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/15 text-indigo-300 font-extrabold rounded-xl font-mono">
             {totalResults} matches
           </span>
         </div>
@@ -158,7 +158,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-white/5 bg-transparent p-4 rounded-xl">
           {/* Filter 1: Case Type */}
           <div>
-            <label className="block text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1.5">Case Type</label>
+            <label className="block text-xs uppercase tracking-wider text-slate-500 font-bold mb-1.5">Case Type</label>
             <select
               value={filters.type}
               onChange={(e) => handleFilterSelect('type', e.target.value)}
@@ -173,7 +173,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
 
           {/* Filter 2: Clinic */}
           <div>
-            <label className="block text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1.5">Clinic Name</label>
+            <label className="block text-xs uppercase tracking-wider text-slate-500 font-bold mb-1.5">Clinic Name</label>
             <select
               value={filters.clinic}
               onChange={(e) => handleFilterSelect('clinic', e.target.value)}
@@ -190,7 +190,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
 
           {/* Filter 3: Submitter */}
           <div>
-            <label className="block text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1.5">Created By</label>
+            <label className="block text-xs uppercase tracking-wider text-slate-500 font-bold mb-1.5">Created By</label>
             <select
               value={filters.submitter}
               onChange={(e) => handleFilterSelect('submitter', e.target.value)}
@@ -207,7 +207,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
 
           {/* Filter 4: Assignee */}
           <div>
-            <label className="block text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1.5">Assignee</label>
+            <label className="block text-xs uppercase tracking-wider text-slate-500 font-bold mb-1.5">Assignee</label>
             <select
               value={filters.assignee}
               onChange={(e) => handleFilterSelect('assignee', e.target.value)}
@@ -224,7 +224,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
 
           {/* Filter 5: SLA Age */}
           <div>
-            <label className="block text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1.5">SLA Age</label>
+            <label className="block text-xs uppercase tracking-wider text-slate-500 font-bold mb-1.5">SLA Age</label>
             <select
               value={filters.sla}
               onChange={(e) => handleFilterSelect('sla', e.target.value)}
@@ -241,7 +241,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
 
           {/* Filter 6: Status */}
           <div>
-            <label className="block text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1.5">Status Filter</label>
+            <label className="block text-xs uppercase tracking-wider text-slate-500 font-bold mb-1.5">Status Filter</label>
             <select
               value={filters.status}
               onChange={(e) => handleFilterSelect('status', e.target.value)}
@@ -259,7 +259,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
 
           {/* Filter 7: Date Range */}
           <div>
-            <label className="block text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1.5">Created Date</label>
+            <label className="block text-xs uppercase tracking-wider text-slate-500 font-bold mb-1.5">Created Date</label>
             <div className="relative">
               <input
                 type="date"
@@ -272,7 +272,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
 
           {/* Filter 8: Source Channel */}
           <div>
-            <label className="block text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1.5">Source Channel</label>
+            <label className="block text-xs uppercase tracking-wider text-slate-500 font-bold mb-1.5">Source Channel</label>
             <select
               value={filters.sourceChannel}
               onChange={(e) => handleFilterSelect('sourceChannel', e.target.value)}

@@ -262,7 +262,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
               <HelpCircle className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-[11px] text-amber-400 uppercase tracking-widest font-bold">
+              <p className="text-xs text-amber-400 uppercase tracking-widest font-bold">
                 Pending Inquiries
               </p>
               <p className="text-3xl font-black text-white mt-1">
@@ -272,11 +272,11 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
           </div>
 
           <div className="bg-[#1f222a] p-5 rounded-[24px] flex items-center gap-4 transition-transform hover:scale-[1.02]">
-            <div className="p-3.5 bg-[#2bc9d7]/10 text-[#2bc9d7] rounded-full">
+            <div className="p-3.5 bg-cyan-500/10 text-cyan-500 rounded-full">
               <Wallet className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-[11px] text-[#2bc9d7] uppercase tracking-widest font-bold">
+              <p className="text-xs text-cyan-500 uppercase tracking-widest font-bold">
                 Tabby & Tamara
               </p>
               <p className="text-3xl font-black text-white mt-1">
@@ -290,7 +290,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
               <AlertTriangle className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-[11px] text-rose-400 uppercase tracking-widest font-bold">
+              <p className="text-xs text-rose-400 uppercase tracking-widest font-bold">
                 Active Complaints
               </p>
               <p className="text-3xl font-black text-white mt-1">
@@ -312,7 +312,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
             {filterClinics.length > 0 && (
               <button
                 onClick={() => setFilterClinics([])}
-                className="text-[10px] text-rose-400 hover:text-rose-300 font-bold uppercase cursor-pointer"
+                className="text-xs text-rose-400 hover:text-rose-300 font-bold uppercase cursor-pointer"
               >
                 Clear
               </button>
@@ -338,7 +338,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
               {filterClinics.map(c => {
                 const label = CLINIC_OPTIONS.find(opt => opt.value === c)?.label || c;
                 return (
-                  <span key={c} className="bg-emerald-500/10 text-emerald-300 border-none px-2.5 py-1 rounded-md text-[10px] font-bold flex items-center gap-1.5">
+                  <span key={c} className="bg-emerald-500/10 text-emerald-300 border-none px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5">
                     {label}
                     <button onClick={() => setFilterClinics(prev => prev.filter(x => x !== c))} className="hover:text-white cursor-pointer">&times;</button>
                   </span>
@@ -357,7 +357,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
             {filterDate && (
               <button
                 onClick={() => setFilterDate("")}
-                className="text-[10px] text-rose-400 hover:text-rose-300 font-bold uppercase"
+                className="text-xs text-rose-400 hover:text-rose-300 font-bold uppercase"
               >
                 Clear
               </button>
@@ -445,8 +445,8 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
               typeIcon = <HelpCircle className="w-3.5 h-3.5 text-amber-400" />;
               typeName = "Inquiry";
             } else if (item.type === "tabbyTamara") {
-              typeBadgeClass = "bg-[#2bc9d7]/10 text-[#2bc9d7] border-[#2bc9d7]/20";
-              typeIcon = <Wallet className="w-3.5 h-3.5 text-[#2bc9d7]" />;
+              typeBadgeClass = "bg-cyan-500/10 text-cyan-500 border-cyan-500/20";
+              typeIcon = <Wallet className="w-3.5 h-3.5 text-cyan-500" />;
               typeName = "Tabby/Tamara";
             } else if (item.type === "complaint") {
               typeBadgeClass = "bg-rose-500/10 text-rose-300 border-rose-500/20";
@@ -467,7 +467,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
             } else if (item.type === "inquiry") {
               stripeColor = "bg-amber-500";
             } else if (item.type === "tabbyTamara") {
-              stripeColor = "bg-[#2bc9d7]";
+              stripeColor = "bg-cyan-500";
             }
 
             return (
@@ -505,38 +505,38 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                     <div>
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {/* Type Badge */}
-                        <span className={`text-[9px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded border ${typeBadgeClass}`}>
+                        <span className={`text-xs uppercase tracking-wider font-extrabold px-2 py-0.5 rounded border ${typeBadgeClass}`}>
                           {typeName}
                         </span>
 
                         {/* Clinic Badge */}
-                        <span className="text-[10px] bg-white/5 text-slate-300 px-2 py-0.5 border border-white/10 rounded font-sans font-bold">
+                        <span className="text-xs bg-white/5 text-slate-300 px-2 py-0.5 border border-white/10 rounded font-sans font-bold">
                           🏰 {getClinicLabel(item.clinicName)}
                         </span>
 
                         {/* Agent Submitter */}
-                        <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 border border-slate-700/60 rounded font-sans font-bold">
+                        <span className="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 border border-slate-700/60 rounded font-sans font-bold">
                           👤 Agent: {item.agentName}
                         </span>
 
                         {/* Phone Number */}
                         {item.phoneNumber && (
-                          <span className="text-[10px] bg-sky-500/10 text-sky-300 px-2 py-0.5 border border-sky-500/20 rounded font-mono font-bold">
+                          <span className="text-xs bg-sky-500/10 text-sky-300 px-2 py-0.5 border border-sky-500/20 rounded font-mono font-bold">
                             📞 {item.phoneNumber}
                           </span>
                         )}
 
                         {/* SLA Age Badge */}
-                        <span className={`text-[9px] uppercase tracking-wider px-2 py-0.5 rounded border ${ageBadgeColor}`}>
+                        <span className={`text-xs uppercase tracking-wider px-2 py-0.5 rounded border ${ageBadgeColor}`}>
                           ⏳ {ageLabel}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="font-mono text-[9px] text-slate-500 bg-transparent px-1.5 py-0.5 rounded">
+                        <span className="font-mono text-xs text-slate-500 bg-transparent px-1.5 py-0.5 rounded">
                           {resolvedRef}
                         </span>
-                        <span className="text-[9px] text-slate-500 font-mono">
+                        <span className="text-xs text-slate-500 font-mono">
                           {itemDateLabel}
                         </span>
                       </div>
@@ -545,7 +545,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
 
                   {/* Status Indicator & expansion arrow */}
                   <div className="flex items-center gap-2 sm:self-center self-end">
-                    <span className="text-[9px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-md font-sans leading-none bg-amber-500/10 border border-amber-500/30 text-amber-300">
+                    <span className="text-xs uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-xl font-sans leading-none bg-amber-500/10 border border-amber-500/30 text-amber-300">
                       {item.status === "tl_link_ready" ? "🔗 Link Ready" :
                        item.status === "awaiting_client_contact" ? "📞 Awaiting Contact" :
                        item.status === "ready_for_partner" ? "🤝 Ready for Partner" :
@@ -555,7 +555,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                        item.status || "Open/Pending"}
                     </span>
 
-                    <div className="text-slate-400 hover:text-emerald-400 p-1 rounded-md transition-all shrink-0 ml-1 flex items-center justify-center">
+                    <div className="text-slate-400 hover:text-emerald-400 p-1 rounded-xl transition-all shrink-0 ml-1 flex items-center justify-center">
                       {isExpanded ? <ChevronUp className="w-4 h-4 text-emerald-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                     </div>
                   </div>
@@ -568,7 +568,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                     {item.type === "inquiry" && (
                       <div className="space-y-4">
                         <div className="bg-white/[0.03] border border-white/5 p-4 rounded-xl text-xs space-y-2 text-slate-200">
-                          <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                          <p className="text-xs uppercase font-bold text-slate-400 tracking-wider">
                             📝 Submitted Inquiry Details
                           </p>
                           <p className="whitespace-pre-line leading-relaxed italic text-sm">
@@ -577,8 +577,8 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                         </div>
 
                         {((item.data.photos && item.data.photos.length > 0) || item.data.screenshot || item.data.links?.length > 0) && (
-                          <div className="space-y-3 bg-[#1e1e1e]/20 border border-white/5 p-4 rounded-xl">
-                            <span className="text-[10px] text-slate-400 uppercase tracking-widest font-black block">
+                          <div className="space-y-3 bg-slate-900/20 border border-white/5 p-4 rounded-xl">
+                            <span className="text-xs text-slate-400 uppercase tracking-widest font-black block">
                               📎 Uploaded Attachments & Proofs
                             </span>
                             <AttachmentsDisplay
@@ -603,7 +603,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                               e.stopPropagation();
                               handleCopyInquiry(e, item.data);
                             }}
-                            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                           >
                             <Copy className="w-3.5 h-3.5" /> Copy Details
                           </button>
@@ -614,7 +614,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                                 e.stopPropagation();
                                 onEditItem("inquiry", item.data);
                               }}
-                              className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-lg text-emerald-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                              className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-xl text-emerald-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                             >
                               <Pencil className="w-3.5 h-3.5" /> Edit ({getRemainingEditTime(item.createdAt)})
                             </button>
@@ -659,7 +659,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                       <div className="space-y-5">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-transparent border border-white/5 p-4 rounded-xl text-xs">
                           <div>
-                            <span className="text-[9px] text-slate-400 uppercase tracking-wider font-bold block mb-1">
+                            <span className="text-xs text-slate-400 uppercase tracking-wider font-bold block mb-1">
                               SUBMITTING AGENT
                             </span>
                             <span className="text-slate-200 font-bold font-sans">
@@ -668,7 +668,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                           </div>
 
                           <div>
-                            <span className="text-[9px] text-slate-400 uppercase tracking-wider font-bold block mb-1">
+                            <span className="text-xs text-slate-400 uppercase tracking-wider font-bold block mb-1">
                               CUSTOMER TYPE
                             </span>
                             <span className="text-slate-200 font-bold font-sans">
@@ -677,7 +677,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                           </div>
 
                           <div>
-                            <span className="text-[9px] text-slate-400 uppercase tracking-wider font-bold block mb-1">
+                            <span className="text-xs text-slate-400 uppercase tracking-wider font-bold block mb-1">
                               CONTACT MOBILE
                             </span>
                             <span className="text-slate-200 font-bold font-mono">
@@ -686,7 +686,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                           </div>
 
                           <div>
-                            <span className="text-[9px] text-slate-400 uppercase tracking-wider font-bold block mb-1">
+                            <span className="text-xs text-slate-400 uppercase tracking-wider font-bold block mb-1">
                               FILE NUMBER
                             </span>
                             <span className="text-slate-200 font-bold font-mono">
@@ -696,9 +696,9 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                         </div>
 
                         {!item.data.isOldCustomer && item.data.idNumber && (
-                          <div className="bg-[#1e1e1e]/60 border border-white/5 p-3.5 rounded-xl text-xs flex justify-between items-center">
+                          <div className="bg-slate-900/60 border border-white/5 p-3.5 rounded-xl text-xs flex justify-between items-center">
                             <div>
-                              <span className="text-[9px] text-slate-400 uppercase tracking-wider font-bold block mb-0.5">
+                              <span className="text-xs text-slate-400 uppercase tracking-wider font-bold block mb-0.5">
                                 ID NUMBER (NEW CUSTOMER REQUIREMENT)
                               </span>
                               <span className="text-slate-200 font-mono font-bold text-sm">
@@ -706,7 +706,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                               </span>
                             </div>
                             <CopyWrap text={item.data.idNumber} label="ID Number">
-                              <button className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] font-bold text-slate-300 border border-white/5 transition-all cursor-pointer">
+                              <button className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold text-slate-300 border border-white/5 transition-all cursor-pointer">
                                 Copy ID
                               </button>
                             </CopyWrap>
@@ -714,7 +714,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                         )}
 
                         <div className="space-y-2">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-widest font-black block">
+                          <span className="text-xs text-slate-400 uppercase tracking-widest font-black block">
                             🚨 Patient Complaint Details
                           </span>
                           <div className="bg-white/[0.03] border border-white/5 p-4 rounded-xl text-xs text-slate-200 leading-relaxed italic">
@@ -725,8 +725,8 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                         </div>
 
                         {((item.data.photos && item.data.photos.length > 0) || item.data.imageUrl || item.data.screenshot || (item.data.links && item.data.links.length > 0)) && (
-                          <div className="space-y-3 bg-[#1e1e1e]/20 border border-white/5 p-4 rounded-xl">
-                            <span className="text-[10px] text-slate-400 uppercase tracking-widest font-black block">
+                          <div className="space-y-3 bg-slate-900/20 border border-white/5 p-4 rounded-xl">
+                            <span className="text-xs text-slate-400 uppercase tracking-widest font-black block">
                               📎 Uploaded Attachments & Proofs
                             </span>
                             <AttachmentsDisplay
@@ -745,12 +745,12 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-rose-500/10 pb-2">
                               <div className="flex items-center gap-2">
                                 <span className="text-rose-400 text-sm font-bold">📋</span>
-                                <p className="text-[10px] text-rose-400 uppercase tracking-wider font-extrabold">
+                                <p className="text-xs text-rose-400 uppercase tracking-wider font-extrabold">
                                   Team Leader Answer ({item.data.tlName || "TL"})
                                 </p>
                               </div>
                               {item.data.tlResolutionType && (
-                                <span className="inline-flex items-center px-2 py-0.5 bg-rose-500/15 border border-rose-500/30 rounded-md text-[9px] font-black uppercase text-rose-300 tracking-wider">
+                                <span className="inline-flex items-center px-2 py-0.5 bg-rose-500/15 border border-rose-500/30 rounded-xl text-xs font-black uppercase text-rose-300 tracking-wider">
                                   {item.data.tlResolutionType === "refund" ? "💳 Refund" :
                                    item.data.tlResolutionType === "replacement" ? "🔄 Replacement" :
                                    item.data.tlResolutionType === "apology" ? "✉ apology" :
@@ -767,13 +767,13 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                         )}
 
                         {activeComplaintHandlingId === item.data.id && isTLOreSupport && (
-                          <div className="p-5 bg-rose-500/[0.02] border border-rose-500/20 rounded-xl space-y-4 shadow-xl text-left w-full mt-1">
-                            <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest flex items-center gap-1.5">
+                          <div className="p-5 bg-rose-500/[0.02] border border-rose-500/20 rounded-xl space-y-4 shadow text-left w-full mt-1">
+                            <p className="text-xs font-black text-rose-400 uppercase tracking-widest flex items-center gap-1.5">
                               <PenTool className="w-3.5 h-3.5" /> TL Resolution Panel
                             </p>
 
                             <div>
-                              <label className="text-[9px] text-slate-400 uppercase tracking-widest font-bold block mb-2">
+                              <label className="text-xs text-slate-400 uppercase tracking-widest font-bold block mb-2">
                                 Resolution Type <span className="text-red-400">*</span>
                               </label>
                               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -789,7 +789,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                                     key={opt.value}
                                     type="button"
                                     onClick={() => setTlComplaintResolutionType(opt.value)}
-                                    className={`px-3 py-2 rounded-lg text-xs font-bold border transition-all text-left cursor-pointer ${
+                                    className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all text-left cursor-pointer ${
                                       tlComplaintResolutionType === opt.value
                                         ? "bg-rose-500/20 border-rose-500/40 text-rose-300 animate-fade-in"
                                         : "bg-transparent border-white/10 text-slate-400 hover:border-white/20"
@@ -802,14 +802,14 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                             </div>
 
                             <div>
-                              <label className="text-[9px] text-slate-400 uppercase tracking-widest font-bold block mb-2">
+                              <label className="text-xs text-slate-400 uppercase tracking-widest font-bold block mb-2">
                                 Resolution Details / Instructions <span className="text-red-400">*</span>
                               </label>
                               <textarea
                                 placeholder="Explain the resolution..."
                                 value={tlComplaintComment}
                                 onChange={(e) => setTlComplaintComment(e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-slate-100 min-h-[100px] resize-none focus:outline-none focus:border-rose-500"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-slate-100 min-h-[100px] resize-none focus:outline-none focus:border-rose-500"
                               />
                             </div>
 
@@ -817,7 +817,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                               <button
                                 type="button"
                                 onClick={() => setActiveComplaintHandlingId(null)}
-                                className="px-4 py-2 hover:bg-white/10 rounded-lg text-xs font-bold text-slate-400 cursor-pointer"
+                                className="px-4 py-2 hover:bg-white/10 rounded-xl text-xs font-bold text-slate-400 cursor-pointer"
                               >
                                 Cancel
                               </button>
@@ -825,7 +825,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                                 type="button"
                                 disabled={!tlComplaintComment.trim() || !tlComplaintResolutionType}
                                 onClick={() => handleTLCommentComplaint(item.data.id, tlComplaintComment, tlComplaintResolutionType)}
-                                className="px-5 py-2 bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer"
+                                className="px-5 py-2 bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer"
                               >
                                 <CheckCircle2 className="w-4 h-4" /> Submit Resolution
                               </button>
@@ -839,7 +839,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                               e.stopPropagation();
                               handleCopyComplaint(e, item.data);
                             }}
-                            className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-slate-100 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-auto"
+                            className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-slate-300 hover:text-slate-100 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-auto"
                           >
                             <Copy className="w-3.5 h-3.5" /> Copy Details
                           </button>
@@ -850,7 +850,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                                 e.stopPropagation();
                                 handleDeleteComplaint(item.data.id);
                               }}
-                              className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-transparent hover:border-rose-500/10 rounded-lg text-rose-400 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-2"
+                              className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-transparent hover:border-rose-500/10 rounded-xl text-rose-400 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-2"
                             >
                               <Trash2 className="w-3.5 h-3.5" /> Delete
                             </button>
@@ -862,7 +862,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                                 e.stopPropagation();
                                 onEditItem("tt_complaint", item.data);
                               }}
-                              className="px-3 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-lg text-emerald-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                              className="px-3 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-xl text-emerald-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                             >
                               <Pencil className="w-3.5 h-3.5" /> Edit ({getRemainingEditTime(item.createdAt)})
                             </button>
@@ -875,7 +875,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                                 setActiveComplaintHandlingId(item.data.id);
                                 setTlComplaintComment("");
                               }}
-                              className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-black text-xs rounded-xl shadow-lg cursor-pointer"
+                              className="px-4 py-2 bg-amber-600 hover:brightness-110 text-slate-950 font-black text-xs rounded-xl shadow-sm cursor-pointer"
                             >
                               Reply & Review
                             </button>
@@ -898,7 +898,7 @@ export const AgentSubmissionsDashboard: React.FC<AgentSubmissionsDashboardProps>
                                 e.stopPropagation();
                                 handleToggleContactComplaint(item.data.id, "not_contacted");
                               }}
-                              className="px-3 py-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-bold text-[10px] rounded-lg cursor-pointer"
+                              className="px-3 py-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-bold text-xs rounded-xl cursor-pointer"
                             >
                               Reopen Case
                             </button>

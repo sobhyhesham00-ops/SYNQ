@@ -129,7 +129,7 @@ export const CaseActivityTimeline: React.FC<CaseActivityTimelineProps> = ({ case
           {sortedEvents.map((evt) => (
             <div key={evt.id} className="relative">
               {/* Vertical line node */}
-              <span className={`absolute -left-[30px] top-0 w-5 h-5 rounded-lg flex items-center justify-center border ${getBorderColor(evt.type)} ${getBgColor(evt.type)} shadow-md`}>
+              <span className={`absolute -left-[30px] top-0 w-5 h-5 rounded-xl flex items-center justify-center border ${getBorderColor(evt.type)} ${getBgColor(evt.type)} shadow-md`}>
                 {getIcon(evt.type)}
               </span>
 
@@ -139,22 +139,22 @@ export const CaseActivityTimeline: React.FC<CaseActivityTimelineProps> = ({ case
                     <h4 className="text-xs font-bold text-slate-200">
                       {evt.title}
                     </h4>
-                    <p className="text-[10px] text-slate-400 mt-1 font-medium whitespace-pre-wrap leading-relaxed">
+                    <p className="text-xs text-slate-400 mt-1 font-medium whitespace-pre-wrap leading-relaxed">
                       {evt.description}
                     </p>
                   </div>
-                  <span className="text-[9px] text-slate-500 font-mono flex items-center gap-1 shrink-0 bg-white/5 px-2 py-0.5 rounded-md border border-white/5">
+                  <span className="text-xs text-slate-500 font-mono flex items-center gap-1 shrink-0 bg-white/5 px-2 py-0.5 rounded-xl border border-white/5">
                     {new Date(evt.date).toLocaleDateString([], { month: 'short', day: 'numeric' })} · {new Date(evt.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
 
                 {evt.details && (
-                  <div className="mt-2 bg-white/[0.03] border border-white/5 p-2 rounded-lg text-xs font-mono text-slate-400 select-all max-h-32 overflow-y-auto">
+                  <div className="mt-2 bg-white/[0.03] border border-white/5 p-2 rounded-xl text-xs font-mono text-slate-400 select-all max-h-32 overflow-y-auto">
                     {evt.details}
                   </div>
                 )}
 
-                <p className="text-[9px] text-slate-500 mt-2 font-black uppercase tracking-wider">
+                <p className="text-xs text-slate-500 mt-2 font-black uppercase tracking-wider">
                   👤 {evt.user}
                 </p>
               </div>

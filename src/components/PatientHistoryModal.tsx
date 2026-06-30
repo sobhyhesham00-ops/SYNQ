@@ -49,7 +49,7 @@ const STATUS_COLOR: Record<string, string> = {
 const CopyBtn = ({ value, label }: { value: string; label?: string }) => (
   <button
     onClick={e => { e.stopPropagation(); copyToClipboard(value, `${label || 'Copied'}!`); }}
-    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 transition-colors text-[10px] font-mono ml-1 shrink-0"
+    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 transition-colors text-xs font-mono ml-1 shrink-0"
     title={`Copy ${label || value}`}
   >
     <Copy className="w-2.5 h-2.5" />
@@ -60,7 +60,7 @@ const LinkRow = ({ url }: { url: string }) => (
   <div className="flex items-center gap-1.5 py-0.5">
     <Link2 className="w-3 h-3 text-indigo-400 shrink-0" />
     <a href={url} target="_blank" rel="noopener noreferrer"
-      className="text-[11px] text-indigo-300 hover:text-indigo-200 underline truncate max-w-[280px]"
+      className="text-xs text-indigo-300 hover:text-indigo-200 underline truncate max-w-[280px]"
       onClick={e => e.stopPropagation()}
     >{url}</a>
     <CopyBtn value={url} label="link" />
@@ -71,14 +71,14 @@ const PhotoGrid = ({ photos, label }: { photos: string[]; label: string }) => {
   if (!photos?.length) return null;
   return (
     <div className="space-y-1.5">
-      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
         <ImageIcon className="w-3 h-3" /> {label} ({photos.length})
       </p>
       <div className="flex flex-wrap gap-2">
         {photos.map((src, i) => (
           <a key={i} href={src} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
             <img src={src} alt={`${label} ${i + 1}`}
-              className="w-16 h-16 rounded-lg object-cover border border-white/10 hover:border-indigo-400 transition-colors cursor-pointer"
+              className="w-16 h-16 rounded-xl object-cover border border-white/10 hover:border-indigo-400 transition-colors cursor-pointer"
             />
           </a>
         ))}
@@ -91,17 +91,17 @@ const RepliesThread = ({ replies }: { replies: any[] }) => {
   if (!replies?.length) return null;
   return (
     <div className="space-y-2">
-      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
         <ReplyIcon className="w-3 h-3" /> Reply Thread ({replies.length})
       </p>
       <div className="space-y-2 pl-2 border-l border-white/5">
         {replies.map((r, i) => {
           const isAgent = r.authorRole === 'agent' || (!r.authorRole && !['tl','qa','admin','superadmin','director'].includes(r.authorRole));
           return (
-            <div key={r.id || i} className={`rounded-xl p-3 border text-[11px] ${isAgent ? 'bg-white/[0.04] border-white/5' : 'bg-indigo-500/5 border-indigo-500/10'}`}>
+            <div key={r.id || i} className={`rounded-xl p-3 border text-xs ${isAgent ? 'bg-white/[0.04] border-white/5' : 'bg-indigo-500/5 border-indigo-500/10'}`}>
               <div className="flex items-center justify-between gap-2 mb-1.5">
                 <span className={`font-bold ${isAgent ? 'text-slate-300' : 'text-indigo-300'}`}>{r.senderName}</span>
-                <span className="text-slate-600 font-mono text-[10px]">{new Date(r.createdAt).toLocaleString()}</span>
+                <span className="text-slate-600 font-mono text-xs">{new Date(r.createdAt).toLocaleString()}</span>
               </div>
               {r.text && (
                 <div className="flex items-start gap-1">
@@ -207,7 +207,7 @@ const FullRecordDetail = ({ item }: { item: any }) => {
     <div className="mt-3 pt-3 border-t border-white/5 space-y-4 animate-fade-in" onClick={e => e.stopPropagation()}>
 
       {/* Meta row */}
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-slate-400">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
         <span className="flex items-center gap-1"><User className="w-3 h-3" /> Agent: <span className="text-slate-300 font-semibold">{item.agentName}</span></span>
         {item.assignedToName && (
           <span className="flex items-center gap-1 text-indigo-400"><User className="w-3 h-3" /> Assigned: <span className="font-semibold">{item.assignedToName}</span></span>
@@ -229,7 +229,7 @@ const FullRecordDetail = ({ item }: { item: any }) => {
 
       {/* Case ref copy */}
       <div className="flex items-center gap-2">
-        <span className="text-[10px] text-slate-500 font-mono">{item.caseRef}</span>
+        <span className="text-xs text-slate-500 font-mono">{item.caseRef}</span>
         <CopyBtn value={item.caseRef} label="case ref" />
       </div>
 
@@ -238,9 +238,9 @@ const FullRecordDetail = ({ item }: { item: any }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {keyFields.map((f, i) => (
             <div key={i} className="space-y-0.5 col-span-1 md:col-span-2 last:col-span-1 md:last:col-span-2">
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{f.label}</p>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">{f.label}</p>
               <div className="flex items-start gap-1">
-                <p className="text-[11px] text-slate-200 leading-relaxed flex-1 bg-white/[0.04] rounded-lg p-2 border border-white/5 whitespace-pre-wrap">{f.value}</p>
+                <p className="text-xs text-slate-200 leading-relaxed flex-1 bg-white/[0.04] rounded-xl p-2 border border-white/5 whitespace-pre-wrap">{f.value}</p>
                 <CopyBtn value={f.value} label={f.label} />
               </div>
             </div>
@@ -251,7 +251,7 @@ const FullRecordDetail = ({ item }: { item: any }) => {
       {/* Links */}
       {allLinks.length > 0 && (
         <div className="space-y-1.5">
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
             <Link2 className="w-3 h-3" /> Links ({allLinks.length})
           </p>
           {allLinks.map((url, i) => <LinkRow key={i} url={url} />)}
@@ -270,7 +270,7 @@ const FullRecordDetail = ({ item }: { item: any }) => {
       {/* File Attachments */}
       {fileAttachments.length > 0 && (
         <div>
-          <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Attached Files ({fileAttachments.length})</h4>
+          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Attached Files ({fileAttachments.length})</h4>
           <div className="grid grid-cols-2 gap-2">
             {fileAttachments.map((att, idx) => (
               <a
@@ -278,14 +278,14 @@ const FullRecordDetail = ({ item }: { item: any }) => {
                 href={att.url}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 p-2 bg-white/[0.02] border border-white/10 rounded-lg hover:border-white/20 transition-all"
+                className="flex items-center gap-2 p-2 bg-white/[0.02] border border-white/10 rounded-xl hover:border-white/20 transition-all"
               >
                 <div className="w-10 h-10 rounded bg-indigo-500/10 text-indigo-400 shrink-0 flex items-center justify-center border border-indigo-500/10">
                   <FileText className="w-5 h-5" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <span className="text-[11px] text-slate-200 block font-medium truncate">{att.name}</span>
-                  <span className="text-[9px] text-slate-500 uppercase tracking-wider">file</span>
+                  <span className="text-xs text-slate-200 block font-medium truncate">{att.name}</span>
+                  <span className="text-xs text-slate-500 uppercase tracking-wider">file</span>
                 </div>
               </a>
             ))}
@@ -296,15 +296,15 @@ const FullRecordDetail = ({ item }: { item: any }) => {
       {/* Agent follow-ups */}
       {agentFollowUps.length > 0 && (
         <div className="space-y-2">
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
             <CheckCircle className="w-3 h-3 text-emerald-400" /> Agent Follow-ups ({agentFollowUps.length})
           </p>
           <div className="space-y-2 pl-2 border-l border-white/5">
             {agentFollowUps.map((fu, i) => (
-              <div key={i} className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-3 text-[11px]">
+              <div key={i} className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-3 text-xs">
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-bold text-emerald-300">{fu.senderName}</span>
-                  <span className="text-slate-600 font-mono text-[10px]">{new Date(fu.createdAt).toLocaleString()}</span>
+                  <span className="text-slate-600 font-mono text-xs">{new Date(fu.createdAt).toLocaleString()}</span>
                 </div>
                 <div className="flex items-start gap-1">
                   <p className="text-slate-300 flex-1">{fu.text}</p>
@@ -323,7 +323,7 @@ const FullRecordDetail = ({ item }: { item: any }) => {
       {/* Navigate button */}
       <button
         onClick={e => { e.stopPropagation(); }}
-        className="text-[11px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
+        className="text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
       >
         {/* handled by parent onClick */}
       </button>
@@ -458,7 +458,7 @@ export const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[990] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm font-sans" id="patient-history-modal-overlay">
-      <div className="w-full max-w-2xl bg-[#0f0f13] border border-white/10 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
+      <div className="w-full max-w-2xl bg-slate-950 border border-white/10 rounded-2xl shadow flex flex-col max-h-[90vh]">
 
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-white/10 shrink-0">
@@ -468,7 +468,7 @@ export const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({
             </div>
             <div>
               <h3 className="text-sm font-bold text-slate-100">Patient History Lookup</h3>
-              <p className="text-[11px] text-slate-400 mt-0.5">Full read-only history across all case types</p>
+              <p className="text-xs text-slate-400 mt-0.5">Full read-only history across all case types</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors">
@@ -490,12 +490,12 @@ export const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({
           {search && (
             <div className="flex items-center gap-3 mt-2 flex-wrap">
               <button onClick={() => copyToClipboard(search, 'Phone copied!')}
-                className="flex items-center gap-1.5 text-[10px] text-slate-400 hover:text-slate-200 transition-colors">
+                className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors">
                 <Copy className="w-3 h-3" /> Copy number
               </button>
               {results.length > 0 && (
                 <button onClick={handleCopyAll}
-                  className={`flex items-center gap-1.5 text-[10px] transition-colors ${copiedId === 'all' ? 'text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}>
+                  className={`flex items-center gap-1.5 text-xs transition-colors ${copiedId === 'all' ? 'text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}>
                   <Copy className="w-3 h-3" /> {copiedId === 'all' ? 'Copied!' : 'Copy full history'}
                 </button>
               )}
@@ -519,18 +519,18 @@ export const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({
           {hasSearch && results.length > 0 && (
             <>
               {/* Summary strip */}
-              <div className="bg-[#16161c] rounded-xl p-3.5 flex flex-wrap items-center gap-3 border border-white/5">
+              <div className="bg-slate-900 rounded-xl p-3.5 flex flex-wrap items-center gap-3 border border-white/5">
                 <div>
                   {patientName && patientName !== '—' && (
                     <p className="text-sm font-bold text-slate-100">{patientName}</p>
                   )}
-                  <p className="text-[11px] text-slate-400 font-mono">{search}</p>
+                  <p className="text-xs text-slate-400 font-mono">{search}</p>
                 </div>
                 <div className="flex flex-wrap gap-2 ml-auto">
                   {(Object.entries(counts) as [string, number][]).filter(([, n]) => n > 0).map(([type, n]) => {
                     const m = TYPE_META[type as keyof typeof TYPE_META];
                     return (
-                      <span key={type} className={`flex items-center gap-1 px-2.5 py-1 rounded-full border text-[10px] font-bold ${m.bg} ${m.color}`}>
+                      <span key={type} className={`flex items-center gap-1 px-2.5 py-1 rounded-full border text-xs font-bold ${m.bg} ${m.color}`}>
                         {m.icon} {n} {m.label}
                       </span>
                     );
@@ -552,22 +552,22 @@ export const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({
                       </div>
                       <div className="flex-1 min-w-0">
                         <div
-                          className="bg-[#16161c] border border-white/5 rounded-xl p-3.5 cursor-pointer hover:border-white/10 transition-colors"
+                          className="bg-slate-900 border border-white/5 rounded-xl p-3.5 cursor-pointer hover:border-white/10 transition-colors"
                           onClick={() => setExpandedId(isExpanded ? null : item.id)}
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className={`text-[10px] font-bold uppercase tracking-wider ${m.color}`}>{m.label}</span>
-                                <span className={`px-2 py-0.5 rounded-md border text-[9px] font-bold uppercase tracking-wider ${statusCls}`}>
+                                <span className={`text-xs font-bold uppercase tracking-wider ${m.color}`}>{m.label}</span>
+                                <span className={`px-2 py-0.5 rounded-xl border text-xs font-bold uppercase tracking-wider ${statusCls}`}>
                                   {item.status?.replace(/_/g, ' ')}
                                 </span>
                               </div>
                               <p className="text-xs font-semibold text-slate-200 mt-1">{item.patientName} · {getClinicLabel(item.clinicName)}</p>
-                              <p className="text-[11px] text-slate-400 font-mono mt-0.5">{item.caseRef}</p>
+                              <p className="text-xs text-slate-400 font-mono mt-0.5">{item.caseRef}</p>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
-                              <p className="text-[10px] text-slate-500 font-mono text-right">
+                              <p className="text-xs text-slate-500 font-mono text-right">
                                 {new Date(item.createdAt).toLocaleDateString()}
                               </p>
                               {isExpanded
@@ -583,7 +583,7 @@ export const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({
                             <div className="mt-3 pt-3 border-t border-white/5">
                               <button
                                 onClick={e => { e.stopPropagation(); onNavigate(TAB_NAV[item._type]); onClose(); }}
-                                className="text-[11px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
+                                className="text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
                               >
                                 Open in {m.label} tab →
                               </button>
@@ -601,7 +601,7 @@ export const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({
 
         {/* Footer */}
         <div className="p-4 border-t border-white/5 shrink-0">
-          <p className="text-[10px] text-slate-600 text-center font-mono">
+          <p className="text-xs text-slate-600 text-center font-mono">
             Searching live data · {results.length} record{results.length !== 1 ? 's' : ''} found
           </p>
         </div>

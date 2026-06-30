@@ -155,7 +155,7 @@ export function AnnouncementsTab({
       </div>
 
       {isTL && (
-        <form onSubmit={handlePost} className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-2xl space-y-4">
+        <form onSubmit={handlePost} className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
           <h3 className="text-lg font-bold text-slate-200">Post New Update</h3>
           <textarea
             value={message}
@@ -167,15 +167,15 @@ export function AnnouncementsTab({
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Attach Photo / Screenshot</label>
+              <label className="text-xs uppercase font-bold text-slate-400 block mb-1">Attach Photo / Screenshot</label>
               <div className="flex items-center gap-2">
-                <label className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs cursor-pointer border border-white/10 select-none transition-colors">
+                <label className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs cursor-pointer border border-white/10 select-none transition-colors">
                   <Paperclip className="w-3.5 h-3.5" />
                   Upload Photo file
                   <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
                 </label>
                 {imageUrl && (
-                  <button type="button" onClick={() => setImageUrl('')} className="p-1 px-2.5 bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 border border-rose-500/30 rounded-lg text-xs transition-colors cursor-pointer">
+                  <button type="button" onClick={() => setImageUrl('')} className="p-1 px-2.5 bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 border border-rose-500/30 rounded-xl text-xs transition-colors cursor-pointer">
                     Clear
                   </button>
                 )}
@@ -185,17 +185,17 @@ export function AnnouncementsTab({
                 value={imageUrl.startsWith('data:') ? '' : imageUrl} 
                 onChange={e => setImageUrl(e.target.value)} 
                 placeholder="Or paste an Image URL..." 
-                className="w-full bg-white/[0.02] border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-yellow-500 mt-1" 
+                className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-yellow-500 mt-1" 
                 disabled={imageUrl.startsWith('data:')}
               />
             </div>
             <div>
-              <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Reference Link (Optional)</label>
-              <input type="url" value={linkUrl} onChange={e => setLinkUrl(e.target.value)} placeholder="https://..." className="w-full bg-slate-900/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-yellow-500" />
+              <label className="text-xs uppercase font-bold text-slate-400 block mb-1">Reference Link (Optional)</label>
+              <input type="url" value={linkUrl} onChange={e => setLinkUrl(e.target.value)} placeholder="https://..." className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-yellow-500" />
             </div>
             <div>
-              <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Target Clinic</label>
-              <select value={clinicFilter} onChange={e => setClinicFilter(e.target.value)} className="w-full bg-slate-900/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-yellow-500 cursor-pointer">
+              <label className="text-xs uppercase font-bold text-slate-400 block mb-1">Target Clinic</label>
+              <select value={clinicFilter} onChange={e => setClinicFilter(e.target.value)} className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-yellow-500 cursor-pointer">
                 <option value="all" className="bg-slate-800 text-white font-sans">All Clinics (Global)</option>
                 {CLINIC_OPTIONS.map(c => (
 <option key={c.value} value={c.value} className="bg-slate-800 text-white font-sans">{c.label}</option>
@@ -206,23 +206,23 @@ export function AnnouncementsTab({
 
           {imageUrl && (
             <div className="p-3 bg-white/[0.02] border border-white/5 rounded-xl flex items-center gap-4">
-              <img src={imageUrl} alt="Upload preview" className="w-20 h-16 object-cover rounded-lg border border-white/10 shadow-lg shrink-0" />
+              <img src={imageUrl} alt="Upload preview" className="w-20 h-16 object-cover rounded-xl border border-white/10 shrink-0" />
               <div className="space-y-1 text-left">
-                <p className="text-[11px] font-bold text-slate-300">Attached Photo Attachment</p>
-                <p className="text-[9px] text-slate-500">{imageUrl.startsWith('data:') ? 'Local Image Base64 Data Binary File' : 'External Web URL Link resource'}</p>
+                <p className="text-xs font-bold text-slate-300">Attached Photo Attachment</p>
+                <p className="text-xs text-slate-500">{imageUrl.startsWith('data:') ? 'Local Image Base64 Data Binary File' : 'External Web URL Link resource'}</p>
               </div>
             </div>
           )}
           
           <div className="flex justify-end pt-2">
-            <button type="submit" className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold px-6 py-2.5 rounded-xl text-sm flex items-center gap-2 cursor-pointer transition-colors shadow-lg shadow-yellow-500/20">
+            <button type="submit" className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold px-6 py-2.5 rounded-xl text-sm flex items-center gap-2 cursor-pointer transition-colors">
               <CheckCircle2 className="w-4 h-4" /> Publish Update
             </button>
           </div>
         </form>
       )}
 
-      <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-6 backdrop-blur-xl min-h-[400px]">
+      <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-6 min-h-[400px]">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-bold text-slate-200">Updates History</h3>
           <div className="relative">
@@ -234,7 +234,7 @@ export function AnnouncementsTab({
                   setFilterClinics([...filterClinics, val]);
                 }
               }} 
-              className="bg-white/[0.04] border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 outline-none cursor-pointer"
+              className="bg-white/[0.04] border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-300 outline-none cursor-pointer"
             >
                <option value="" className="font-sans">➕ Add Clinic to Filter...</option>
                {CLINIC_OPTIONS.filter(c => !filterClinics.includes(c.value)).map(c => (
@@ -242,7 +242,7 @@ export function AnnouncementsTab({
                ))}
             </select>
             {filterClinics.length > 0 && (
-              <div className="absolute top-full right-0 z-50 mt-1 flex flex-wrap gap-1 bg-slate-800 p-2 rounded-lg border border-slate-700 shadow-xl w-64">
+              <div className="absolute top-full right-0 z-50 mt-1 flex flex-wrap gap-1 bg-slate-800 p-2 rounded-xl border border-slate-700 shadow w-64">
                 <span className="w-full text-xs text-slate-400 font-bold mb-1 flex justify-between">
                   Selected Clinics:
                   <button onClick={() => setFilterClinics([])} className="text-rose-400 hover:text-rose-300">Clear</button>
@@ -250,7 +250,7 @@ export function AnnouncementsTab({
                 {filterClinics.map(c => {
                   const label = CLINIC_OPTIONS.find(opt => opt.value === c)?.label || c;
                   return (
-                    <span key={c} className="bg-amber-500/20 text-amber-300 border-none px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
+                    <span key={c} className="bg-amber-500/20 text-amber-300 border-none px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1">
                       {label}
                       <button onClick={() => setFilterClinics(prev => prev.filter(x => x !== c))} className="hover:text-white cursor-pointer">&times;</button>
                     </span>
@@ -268,7 +268,7 @@ export function AnnouncementsTab({
             filtered.map(a => (
               <div key={a.id} className="p-5 border border-white/10 rounded-2xl bg-white/5 relative group space-y-3">
                 {isTL && (
-                  <button onClick={() => handleDelete(a.id)} className="absolute top-4 right-4 text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-rose-400/10 rounded-lg cursor-pointer text-xs font-bold">
+                  <button onClick={() => handleDelete(a.id)} className="absolute top-4 right-4 text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-rose-400/10 rounded-xl cursor-pointer text-xs font-bold">
                     Delete
                   </button>
                 )}
@@ -279,7 +279,7 @@ export function AnnouncementsTab({
                   </div>
                   <div>
                     <h4 className="text-orange-400 font-bold text-sm tracking-wide">{a.author || "System"}</h4>
-                    <p className="text-[10px] text-slate-400 font-mono flex items-center gap-1.5 flex-wrap">
+                    <p className="text-xs text-slate-400 font-mono flex items-center gap-1.5 flex-wrap">
                       <span>{new Date(a.createdAt || Date.now()).toLocaleString()}</span>
                       <span className="text-slate-600">•</span>
                       <span className="text-xs font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded uppercase tracking-wider">
@@ -295,13 +295,13 @@ export function AnnouncementsTab({
                 
                 {a.imageUrl && (
                   <div className="p-2.5 bg-white/[0.03] rounded-xl max-w-lg border border-white/5 space-y-2">
-                    <img src={a.imageUrl} alt="Attached Announcement File" className="w-full max-h-72 object-contain rounded-lg shadow-xl" />
+                    <img src={a.imageUrl} alt="Attached Announcement File" className="w-full max-h-72 object-contain rounded-xl" />
                     <div className="flex items-center justify-between">
-                      <p className="text-[10px] text-slate-500 font-mono">Image attached by Management</p>
+                      <p className="text-xs text-slate-500 font-mono">Image attached by Management</p>
                       <button 
                         type="button" 
                         onClick={() => triggerDownload(a.imageUrl || '', `announcement_file_${a.id}.png`)}
-                        className="px-2.5 py-1 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/25 text-yellow-300 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors flex items-center gap-1.5 cursor-pointer"
+                        className="px-2.5 py-1 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/25 text-yellow-300 rounded-xl text-xs font-black uppercase tracking-wider transition-colors flex items-center gap-1.5 cursor-pointer"
                       >
                         <Download className="w-3.5 h-3.5" /> Download Image
                       </button>
@@ -312,7 +312,7 @@ export function AnnouncementsTab({
                 {/* Open Link */}
                 {a.linkUrl && (
                   <div className="pt-1">
-                    <a href={a.linkUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/20 rounded-lg text-xs font-bold transition-colors">
+                    <a href={a.linkUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/20 rounded-xl text-xs font-bold transition-colors">
                       <Link className="w-3.5 h-3.5" /> Open Attached URL: {new URL(a.linkUrl).hostname}
                     </a>
                   </div>
@@ -321,7 +321,7 @@ export function AnnouncementsTab({
                 {/* Emojis Section: Cannot post text reply, can only leave emoji */}
                 <div className="pt-3 border-t border-white/5 flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-1.5 bg-white/[0.02] p-1.5 rounded-xl border border-white/5">
-                    <span className="text-[10px] text-slate-400 uppercase font-black tracking-wider px-2 border-r border-white/10 select-none">Reactions Only:</span>
+                    <span className="text-xs text-slate-400 uppercase font-black tracking-wider px-2 border-r border-white/10 select-none">Reactions Only:</span>
                     <div className="flex items-center gap-1">
                       {EMOJI_OPTIONS.map(emoji => {
                         const reactors = (a.reactions || {})[emoji] || [];
@@ -330,7 +330,7 @@ export function AnnouncementsTab({
                           <button
                             key={emoji}
                             onClick={() => handleReactionToggle(a.id, emoji)}
-                            className={`px-2 py-1 rounded-lg text-xs transition-all relative group flex items-center gap-1 cursor-pointer select-none border ${
+                            className={`px-2 py-1 rounded-xl text-xs transition-all relative group flex items-center gap-1 cursor-pointer select-none border ${
                               hasReacted 
                                 ? 'bg-amber-500/15 border-amber-500/35 text-amber-300 scale-105 shadow-inner' 
                                 : 'bg-white/5 border-transparent hover:bg-white/10 text-slate-400'
@@ -339,12 +339,12 @@ export function AnnouncementsTab({
                           >
                             <span>{emoji}</span>
                             {reactors.length > 0 && (
-                              <span className="text-[10px] font-bold font-mono text-slate-300">{reactors.length}</span>
+                              <span className="text-xs font-bold font-mono text-slate-300">{reactors.length}</span>
                             )}
 
                             {/* Tooltip containing reactor names */}
                             {reactors.length > 0 && (
-                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2 py-1 bg-slate-950 text-[9px] font-mono text-slate-200 rounded border border-white/10 whitespace-nowrap z-30 shadow-2xl">
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2 py-1 bg-slate-950 text-xs font-mono text-slate-200 rounded border border-white/10 whitespace-nowrap z-30 shadow">
                                 {reactors.map(name => name.split(' ')[0]).join(', ')}
                               </div>
                             )}
@@ -354,7 +354,7 @@ export function AnnouncementsTab({
                     </div>
                   </div>
 
-                  <p className="text-[9px] text-slate-500 italic mt-0.5 select-none font-sans">
+                  <p className="text-xs text-slate-500 italic mt-0.5 select-none font-sans">
                     * Text reply disabled by Team Leader permissions. Emoji reactions active.
                   </p>
                 </div>

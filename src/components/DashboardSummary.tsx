@@ -81,7 +81,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
           <motion.div 
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="p-5 border border-amber-500/30 rounded-2xl bg-gradient-to-r from-amber-500/15 via-yellow-500/5 to-transparent backdrop-blur-xl relative overflow-hidden group shadow-lg shadow-yellow-500/5"
+            className="p-5 border border-amber-500/30 rounded-2xl bg-gradient-to-r from-amber-500/15 via-yellow-500/5 to-transparent relative overflow-hidden group"
           >
             {/* Pulsing glow layer */}
             <div className="absolute top-0 right-0 w-48 h-12 bg-yellow-500/10 blur-xl rounded-full pointer-events-none" />
@@ -95,14 +95,14 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
                 </div>
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-amber-500/20 text-amber-300 rounded-md border border-amber-400/20">
+                    <span className="text-xs font-black uppercase tracking-wider px-2 py-0.5 bg-amber-500/20 text-amber-300 rounded-xl border border-amber-400/20">
                       Live Broadcast
                     </span>
                     <span className="text-xs text-slate-400 font-mono">
                       {latest.author} • {new Date(latest.createdAt).toLocaleDateString()} at {new Date(latest.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                     {latest.clinicFilter && latest.clinicFilter !== 'all' && (
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 bg-indigo-500/20 text-indigo-300 rounded border border-indigo-500/30">
+                      <span className="text-xs font-mono px-1.5 py-0.5 bg-indigo-500/20 text-indigo-300 rounded border border-indigo-500/30">
                         Target: {latest.clinicFilter}
                       </span>
                     )}
@@ -118,7 +118,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
               <div className="shrink-0 flex items-center gap-3 self-end md:self-center">
                 <button 
                   onClick={() => onNavigate('tl-announcements')}
-                  className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-black text-xs uppercase tracking-widest rounded-xl transition-all flex items-center gap-2 shadow-lg shadow-amber-500/10 cursor-pointer"
+                  className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-black text-xs uppercase tracking-widest rounded-xl transition-all flex items-center gap-2 cursor-pointer"
                 >
                   Read Full Board <ArrowRight className="w-3.5 h-3.5" />
                 </button>
@@ -133,7 +133,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="lg:col-span-2 p-6 rounded-2xl bg-indigo-600 shadow-xl shadow-indigo-600/20 flex flex-col justify-between relative overflow-hidden group"
+          className="lg:col-span-2 p-6 rounded-2xl bg-indigo-600 flex flex-col justify-between relative overflow-hidden group"
         >
           <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform duration-700">
             <TrendingUp className="w-48 h-48 text-white" />
@@ -141,11 +141,11 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
           
           <div className="relative z-10 text-left">
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-xl flex items-center justify-center border border-white/30 text-white">
+              <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center border border-white/30 text-white">
                  {isTL ? <ShieldCheck className="w-5 h-5" /> : <Users className="w-5 h-5" />}
               </div>
               <div>
-                <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em]">Operational Overview</p>
+                <p className="text-white/60 text-xs font-black uppercase tracking-[0.2em]">Operational Overview</p>
                 <h2 className="text-2xl font-black text-white tracking-tight">Salam, {(currentUser?.name || '').split(' ')[0]} 👋</h2>
                 <p className="text-sm text-indigo-200 mt-1">{currentUser?.name}</p>
                 
@@ -167,7 +167,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
 
                 {currentUser?.role === 'agent' && normalizeAgentLob(currentUser?.lob, currentUser?.role) && (
                   <div className="mt-2">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                       {normalizeAgentLob(currentUser.lob, currentUser.role) === 'Call Center' ? '📞 Call Center' : '💬 Chat'}
                     </span>
                   </div>
@@ -184,7 +184,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
           <div className="relative z-10 flex gap-3 mt-6">
             <button 
               onClick={() => onNavigate('roster')}
-              className="px-5 py-2 bg-white text-indigo-600 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+              className="px-5 py-2 bg-white text-indigo-600 rounded-xl font-black text-xs uppercase tracking-widest shadow-sm active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
             >
               Go to Roster <ArrowRight className="w-3.5 h-3.5" />
             </button>
@@ -203,7 +203,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
             <div className="w-12 h-12 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400">
               <Clock className="w-5 h-5" />
             </div>
-            <div className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-full text-[10px] font-bold uppercase tracking-widest">
+            <div className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-bold uppercase tracking-widest">
               Active
             </div>
           </div>

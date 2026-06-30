@@ -35,8 +35,16 @@ service cloud.firestore {
           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'tl' ||
           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'director' ||
           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'qa' ||
-          (resource != null && resource.data.agentName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name) ||
-          (request.resource != null && request.resource.data.agentName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name)
+          (resource != null && (
+            resource.data.agentName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name ||
+            resource.data.submittedByName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name ||
+            resource.data.assignedToName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name
+          )) ||
+          (request.resource != null && (
+            request.resource.data.agentName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name ||
+            request.resource.data.submittedByName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name ||
+            request.resource.data.assignedToName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name
+          ))
         );
     }
 
@@ -78,15 +86,7 @@ service cloud.firestore {
       allow read: if request.auth != null;
       allow write: if canWriteFintech();
     }
-    // Explicitly add support for tabby_tamara and tabby_tamara_complaints aliases, which correctly use getUserRole()
-    match /tabby_tamara/{docId} {
-      allow read: if request.auth != null;
-      allow write: if canWriteFintech();
-    }
-    match /tabby_tamara_complaints/{docId} {
-      allow read: if request.auth != null;
-      allow write: if canWriteFintech();
-    }
+
 
     match /client_comms/{docId} {
       allow read, write: if isSignedIn();

@@ -70,7 +70,7 @@ const StatusBadge = ({
   if (workflowStatus === "completed") {
     return (
       <span
-        className={`px-2 py-0.5 rounded-lg text-[11px] font-bold tracking-widest uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5 ${className}`}
+        className={`px-2 py-0.5 rounded-xl text-xs font-bold tracking-widest uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5 ${className}`}
       >
         ✅ Closed
       </span>
@@ -78,7 +78,7 @@ const StatusBadge = ({
   } else if (status === "not_confirmed") {
     return (
       <span
-        className={`px-2 py-0.5 rounded-lg text-[11px] font-bold tracking-widest uppercase bg-amber-500/10 text-amber-500 border border-amber-500/20 flex items-center gap-1.5 ${className}`}
+        className={`px-2 py-0.5 rounded-xl text-xs font-bold tracking-widest uppercase bg-amber-500/10 text-amber-500 border border-amber-500/20 flex items-center gap-1.5 ${className}`}
       >
         <AlertCircle className="w-3.5 h-3.5" /> Pending TL
       </span>
@@ -86,7 +86,7 @@ const StatusBadge = ({
   } else if (status === "rejected") {
     return (
       <span
-        className={`px-2 py-0.5 rounded-lg text-[11px] font-bold tracking-widest uppercase bg-red-500/10 text-red-500 border border-red-500/20 flex items-center gap-1.5 ${className}`}
+        className={`px-2 py-0.5 rounded-xl text-xs font-bold tracking-widest uppercase bg-red-500/10 text-red-500 border border-red-500/20 flex items-center gap-1.5 ${className}`}
       >
         <Trash2 className="w-3.5 h-3.5" /> Rejected
       </span>
@@ -94,7 +94,7 @@ const StatusBadge = ({
   } else if (status === "confirmed" && customerContacted === "contacted") {
     return (
       <span
-        className={`px-2 py-0.5 rounded-lg text-[11px] font-bold tracking-widest uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center gap-1.5 ${className}`}
+        className={`px-2 py-0.5 rounded-xl text-xs font-bold tracking-widest uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center gap-1.5 ${className}`}
       >
         <CheckCircle2 className="w-3.5 h-3.5" /> Contacted
       </span>
@@ -102,7 +102,7 @@ const StatusBadge = ({
   } else {
     return (
       <span
-        className={`px-2 py-0.5 rounded-lg text-[11px] font-bold tracking-widest uppercase bg-orange-500/10 text-orange-400 border border-orange-500/20 flex items-center gap-1.5 ${className}`}
+        className={`px-2 py-0.5 rounded-xl text-xs font-bold tracking-widest uppercase bg-orange-500/10 text-orange-400 border border-orange-500/20 flex items-center gap-1.5 ${className}`}
       >
         <Clock className="w-3.5 h-3.5" /> Contact Pending
       </span>
@@ -128,7 +128,7 @@ const ProviderGlowBadge = ({ platform, className = "" }: any) => {
 
   return (
     <span
-      className={`px-3 py-1.5 rounded-lg text-[11px] font-black tracking-widest uppercase border bg-gradient-to-r flex items-center gap-1 ${colorClass} ${className}`}
+      className={`px-3 py-1.5 rounded-xl text-xs font-black tracking-widest uppercase border bg-gradient-to-r flex items-center gap-1 ${colorClass} ${className}`}
     >
       {label}
     </span>
@@ -169,7 +169,7 @@ const CRMField = ({
       className="flex flex-col gap-1.5 p-3 rounded-xl hover:bg-white/[0.04] transition-colors cursor-pointer group text-left border border-transparent hover:border-slate-700/40"
       onClick={handleCopy}
     >
-      <div className="flex items-center justify-between text-[11px] text-slate-500 font-bold tracking-widest uppercase">
+      <div className="flex items-center justify-between text-xs text-slate-500 font-bold tracking-widest uppercase">
         <span className="flex items-center gap-1.5">
           <Icon className="w-3.5 h-3.5 text-slate-600" /> {label}
         </span>
@@ -207,7 +207,7 @@ const TimelineStep = ({
       {completed && <Check className="w-3.5 h-3.5 text-indigo-400" />}
     </div>
     <span
-      className={`text-[10px] sm:text-xs font-bold mt-2 uppercase tracking-wide text-center ${completed ? "text-indigo-400" : active ? "text-slate-300" : "text-slate-600"}`}
+      className={`text-xs sm:text-xs font-bold mt-2 uppercase tracking-wide text-center ${completed ? "text-indigo-400" : active ? "text-slate-300" : "text-slate-600"}`}
     >
       {label}
     </span>
@@ -788,17 +788,17 @@ export const TabbyTamaraCard = ({
             >
               {req.submittedByName || req.agentName}
             </span>
-            <span className="text-[10px] text-slate-400 lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded font-sans shrink-0">
+            <span className="text-xs text-slate-400 lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded font-sans shrink-0">
               {getAgentLOB(req.submittedByName || req.agentName || "")}
             </span>
-            <span className="font-mono text-[10px] text-slate-500 bg-transparent px-1.5 py-0.5 rounded shrink-0">
+            <span className="font-mono text-xs text-slate-500 bg-transparent px-1.5 py-0.5 rounded shrink-0">
               {formatCaseRef(req.id, "tt_request", req.createdAt, req.caseRef)}
             </span>
-            <span className="text-[9px] text-slate-500 font-mono shrink-0">
+            <span className="text-xs text-slate-500 font-mono shrink-0">
               {new Date(req.createdAt).toLocaleString()}
             </span>
             <span
-              className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border shrink-0 ${
+              className={`text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-xl border shrink-0 ${
                 sourceChannel === "call_center"
                   ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
                   : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
@@ -807,21 +807,21 @@ export const TabbyTamaraCard = ({
               {sourceChannel === "call_center" ? "Call Center" : "Social Media"}
             </span>
             {req.isOldCustomer && (
-              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase bg-slate-800 text-slate-300 border border-slate-700/50 shrink-0">
+              <span className="px-1.5 py-0.5 rounded text-xs font-bold tracking-widest uppercase bg-slate-800 text-slate-300 border border-slate-700/50 shrink-0">
                 Returning Pt
               </span>
             )}
           </div>
 
           {/* Row 2: Patient Name, Clinic, Phone */}
-          <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-300 flex-wrap">
+          <div className="flex items-center gap-2 pt-1 text-xs text-slate-300 flex-wrap">
             {req.patientName && (
               <span className="font-bold">{req.patientName}</span>
             )}
             {req.clinicName && (
               <>
                 <span className="text-slate-600">•</span>
-                <span className="text-xs sm:text-[13px] font-black font-sans text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md tracking-wide">
+                <span className="text-xs sm:text-sm font-black font-sans text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-xl tracking-wide">
                   {getClinicLabel(req.clinicName)}
                 </span>
               </>
@@ -829,7 +829,7 @@ export const TabbyTamaraCard = ({
             {req.phoneNumber && <span>• {req.phoneNumber}</span>}
 
             <span
-              className={`text-[10px] px-2 py-0.5 border rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-2 ${
+              className={`text-xs px-2 py-0.5 border rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-2 ${
                 req.platform === "tabby"
                   ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
                   : req.platform === "tamara"
@@ -842,17 +842,17 @@ export const TabbyTamaraCard = ({
               💳 {req.platform?.toUpperCase() || "N/A"}
             </span>
 
-            <span className="text-[10px] bg-white/5 text-slate-300 px-2 py-0.5 border border-white/10 rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-1">
+            <span className="text-xs bg-white/5 text-slate-300 px-2 py-0.5 border border-white/10 rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-1">
               📁 File: {req.fileNumber || req.idNumber || "N/A"}
             </span>
 
-            <span className="text-[10px] bg-white/5 text-slate-300 px-2 py-0.5 border border-white/10 rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-1">
+            <span className="text-xs bg-white/5 text-slate-300 px-2 py-0.5 border border-white/10 rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-1">
               💰 {pricing.finalPriceFormatted}{" "}
               {req.paymentLength ? `(${req.paymentLength}mo)` : ""}
             </span>
 
             {req.isFollowUp && (
-              <span className="text-[10px] bg-pink-500/10 text-pink-400 border border-pink-500/30 px-2 py-0.5 rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-1 animate-pulse">
+              <span className="text-xs bg-pink-500/10 text-pink-400 border border-pink-500/30 px-2 py-0.5 rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-1 animate-pulse">
                 📅 Scheduled: {req.followUpDate}
               </span>
             )}
@@ -863,7 +863,7 @@ export const TabbyTamaraCard = ({
         <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
           {isPendingContact && (
             <span
-              className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-widest bg-orange-500/10 text-orange-400 border border-orange-500/20 ${isOverdue ? "bg-red-500/10 text-red-400 border-red-500/20" : ""}`}
+              className={`flex items-center gap-1.5 px-2 py-0.5 rounded-xl text-xs font-bold uppercase tracking-widest bg-orange-500/10 text-orange-400 border border-orange-500/20 ${isOverdue ? "bg-red-500/10 text-red-400 border-red-500/20" : ""}`}
             >
               <AlertCircle className="w-3.5 h-3.5 animate-pulse" />{" "}
               {getElapsedTimerString(req.confirmedAt || req.createdAt)}
@@ -888,7 +888,7 @@ export const TabbyTamaraCard = ({
                 toast.error("Failed to copy request details.");
               }
             }}
-            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer hidden sm:flex"
+            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer hidden sm:flex"
             title="Copy details with links and attachments"
           >
             <Copy className="w-3 h-3" /> Copy
@@ -901,7 +901,7 @@ export const TabbyTamaraCard = ({
                 onToggle();
               }
             }}
-            className="p-1 rounded-md hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+            className="p-1 rounded-xl hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
           >
             {isExpanded ? (
               <ChevronUp className="w-5 h-5" />
@@ -970,15 +970,15 @@ export const TabbyTamaraCard = ({
                         }`}
                       >
                         {req.status === "rejected" && i === 1 ? (
-                          <span className="text-[10px] font-bold">X</span>
+                          <span className="text-xs font-bold">X</span>
                         ) : step.done ? (
                           <Check className="w-3 h-3 text-white" />
                         ) : (
-                          <span className="text-[9px] font-mono">{i + 1}</span>
+                          <span className="text-xs font-mono">{i + 1}</span>
                         )}
                       </div>
                       <span
-                        className={`text-[9px] font-bold uppercase tracking-wide whitespace-nowrap text-center ${
+                        className={`text-xs font-bold uppercase tracking-wide whitespace-nowrap text-center ${
                           req.status === "rejected" && i === 1
                             ? "text-red-400"
                             : step.done
@@ -1013,12 +1013,12 @@ export const TabbyTamaraCard = ({
               className="w-full px-5 py-3 flex items-center justify-between text-left hover:bg-transparent transition-colors group"
             >
               <div className="flex items-center gap-3">
-                <span className="text-[10px] font-bold text-slate-400 group-hover:text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-400 group-hover:text-slate-300 uppercase tracking-widest flex items-center gap-2">
                   <FileText className="w-4 h-4 text-slate-500" /> Notes &
                   Attachments
                 </span>
                 {hasAttachments && (
-                  <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-lg text-[10px] font-bold tracking-widest uppercase">
+                  <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-xl text-xs font-bold tracking-widest uppercase">
                     Has Files
                   </span>
                 )}
@@ -1033,7 +1033,7 @@ export const TabbyTamaraCard = ({
               <div className="px-5 pb-5 space-y-5">
                 {req.notes && (
                   <div className="p-4 bg-white/[0.03] border border-slate-700/40 rounded-xl text-xs text-slate-300 font-medium leading-relaxed">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">
                       Agent Notes
                     </span>
                     {req.notes}
@@ -1041,7 +1041,7 @@ export const TabbyTamaraCard = ({
                 )}
                 {hasAttachments && (
                   <div className="space-y-3">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block">
                       Original Submission Files
                     </span>
                     <AttachmentsDisplay
@@ -1061,7 +1061,7 @@ export const TabbyTamaraCard = ({
                   req.clientIdAttachments.length > 0) ||
                   (req.clientIdPhotos && req.clientIdPhotos.length > 0)) && (
                   <div className="space-y-3">
-                    <span className="text-[10px] font-bold text-teal-400 uppercase tracking-widest block">
+                    <span className="text-xs font-bold text-teal-400 uppercase tracking-widest block">
                       🪪 Client ID Attachments
                     </span>
                     <AttachmentsDisplay
@@ -1084,7 +1084,7 @@ export const TabbyTamaraCard = ({
                   (req.paymentProofPhotos &&
                     req.paymentProofPhotos.length > 0)) && (
                   <div className="space-y-3">
-                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block">
+                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest block">
                       {" "}
                       Payment Proof Attachments
                     </span>
@@ -1107,7 +1107,7 @@ export const TabbyTamaraCard = ({
                   req.partnerAttachments.length > 0) ||
                   (req.partnerPhotos && req.partnerPhotos.length > 0)) && (
                   <div className="space-y-3">
-                    <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest block">
+                    <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest block">
                       {" "}
                       Partner Submission Files
                     </span>
@@ -1139,7 +1139,7 @@ export const TabbyTamaraCard = ({
               <div className="absolute top-0 left-0 bottom-0 w-1 bg-amber-400"></div>
               <div className="flex flex-col gap-4 pl-3">
                 <div className="flex flex-col gap-1.5 w-full">
-                  <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest flex items-center gap-1.5 mb-1 opacity-80">
+                  <span className="text-xs font-bold text-amber-500 uppercase tracking-widest flex items-center gap-1.5 mb-1 opacity-80">
                     <CheckCircle2 className="w-3 h-3" /> Payment Link(s)
                   </span>
                   {(() => {
@@ -1162,9 +1162,9 @@ export const TabbyTamaraCard = ({
                             key={index}
                             className="flex flex-col gap-1.5 w-full bg-white/[0.02] p-3 rounded-xl border border-white/5"
                           >
-                            <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider flex items-center gap-1.5 pl-1">
+                            <span className="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-1.5 pl-1">
                               <span>🔗 Link #{index + 1}</span>
-                              <span className="text-slate-500 font-medium normal-case text-[9px]">
+                              <span className="text-slate-500 font-medium normal-case text-xs">
                                 {index === 0
                                   ? "(First/Original)"
                                   : index === paymentLinks.length - 1
@@ -1193,7 +1193,7 @@ export const TabbyTamaraCard = ({
                                     e.stopPropagation();
                                     copyToClipboard(pLink, "Payment Link Copied!");
                                   }}
-                                  className="px-2 py-1 bg-amber-500/10 border border-amber-500/25 hover:bg-amber-500/20 text-amber-400 rounded-md text-[9px] font-bold uppercase transition-all whitespace-nowrap cursor-pointer"
+                                  className="px-2 py-1 bg-amber-500/10 border border-amber-500/25 hover:bg-amber-500/20 text-amber-400 rounded-xl text-xs font-bold uppercase transition-all whitespace-nowrap cursor-pointer"
                                 >
                                   Copy Link
                                 </button>
@@ -1208,7 +1208,7 @@ export const TabbyTamaraCard = ({
 
                 {req.tlNotes && (
                   <div className="p-4 bg-slate-800/60 border border-emerald-500/20 rounded-xl mt-1">
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex justify-between items-center">
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex justify-between items-center">
                       <span className="uppercase tracking-widest">
                         TL Notes ({req.confirmedBy || "System"})
                       </span>
@@ -1231,7 +1231,7 @@ export const TabbyTamaraCard = ({
 
                 {req.tlLinks && (
                   <div className="mt-1 space-y-2">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block">
                       TL Links
                     </span>
                     <div className="flex flex-col gap-2">
@@ -1257,7 +1257,7 @@ export const TabbyTamaraCard = ({
 
                 {req.tlPhotos && req.tlPhotos.length > 0 && (
                   <div className="mt-2">
-                    <p className="text-[10px] text-amber-400/70 uppercase tracking-wider font-bold mb-1">
+                    <p className="text-xs text-amber-400/70 uppercase tracking-wider font-bold mb-1">
                       TL Attachments
                     </p>
                     <AttachmentsDisplay photos={req.tlPhotos} links={[]} />
@@ -1266,7 +1266,7 @@ export const TabbyTamaraCard = ({
 
                 {req.tlSupportingLinks && req.tlSupportingLinks.length > 0 && (
                   <div className="mt-2 space-y-1">
-                    <span className="text-[10px] text-slate-400 uppercase tracking-wider font-bold block mb-1">
+                    <span className="text-xs text-slate-400 uppercase tracking-wider font-bold block mb-1">
                       TL Supporting Links
                     </span>
                     <AttachmentsDisplay
@@ -1284,7 +1284,7 @@ export const TabbyTamaraCard = ({
               {/* Show existing follow-up replies */}
               {(req.agentFollowUps || []).length > 0 && (
                 <div className="px-5 pt-4 pb-0 space-y-2">
-                  <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">
+                  <p className="text-xs text-slate-400 uppercase tracking-widest font-bold">
                     Post-Confirmation Notes ({(req.agentFollowUps || []).length}
                     )
                   </p>
@@ -1295,11 +1295,11 @@ export const TabbyTamaraCard = ({
                     >
                       <div className="flex items-center justify-between mb-1.5">
                         <span
-                          className={`font-bold text-[10px] ${fu.senderRole === "tl" ? "text-amber-400" : "text-indigo-400"}`}
+                          className={`font-bold text-xs ${fu.senderRole === "tl" ? "text-amber-400" : "text-indigo-400"}`}
                         >
                           {fu.senderRole === "tl" ? "" : ""} {fu.senderName}
                         </span>
-                        <span className="text-[10px] text-slate-500 font-mono">
+                        <span className="text-xs text-slate-500 font-mono">
                           {new Date(fu.createdAt).toLocaleString()}
                         </span>
                       </div>
@@ -1322,7 +1322,7 @@ export const TabbyTamaraCard = ({
               <div className="px-4 py-2">
                 <button
                   onClick={() => setShowFollowUp((v) => !v)}
-                  className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="text-xs font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
                   {showFollowUp
@@ -1405,7 +1405,7 @@ export const TabbyTamaraCard = ({
               <div className="absolute top-0 left-0 bottom-0 w-1 bg-red-500"></div>
               <div className="pl-3">
                 <div className="p-4 bg-red-950/20 border border-red-500/10 rounded-xl">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex justify-between items-center">
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex justify-between items-center">
                     <span className="uppercase tracking-widest">
                       Rejection Reason ({req.confirmedBy || "System"})
                     </span>
@@ -1438,7 +1438,7 @@ export const TabbyTamaraCard = ({
                 </h4>
                 <div className="bg-indigo-950/20 border border-indigo-500/20 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 overflow-hidden mb-4">
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
                       Generate Link For
                     </span>
                     <span className="text-lg font-black text-white font-mono tracking-tight mt-0.5">
@@ -1449,7 +1449,7 @@ export const TabbyTamaraCard = ({
                     </span>
                   </div>
                   <div className="flex flex-col sm:text-right">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
                       Base Target
                     </span>
                     <span className="text-sm font-semibold text-slate-300 font-mono mt-0.5">
@@ -1470,7 +1470,7 @@ export const TabbyTamaraCard = ({
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5 flex justify-between">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1.5 flex justify-between">
                       <span>
                         Payment Link <span className="text-red-400">*</span>
                       </span>
@@ -1484,7 +1484,7 @@ export const TabbyTamaraCard = ({
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5 flex justify-between">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1.5 flex justify-between">
                       <span>Guidance Notes</span>
                     </label>
                     <textarea
@@ -1495,7 +1495,7 @@ export const TabbyTamaraCard = ({
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5 flex justify-between">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1.5 flex justify-between">
                       <span>
                         Supporting Links{" "}
                         <span className="text-slate-600 font-medium">
@@ -1512,7 +1512,7 @@ export const TabbyTamaraCard = ({
                     />
                   </div>
                   <div className="border-t border-white/10 pt-3">
-                    <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-2">
+                    <p className="text-xs text-slate-400 uppercase tracking-wider font-bold mb-2">
                       📎 Attach Payment Confirmation / ID (optional)
                     </p>
                     <MultiAttachmentUpload
@@ -1607,7 +1607,7 @@ export const TabbyTamaraCard = ({
                         data: { ...req },
                       })
                     }
-                    className="px-3 py-1.5 text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-widest border border-blue-500/20"
+                    className="px-3 py-1.5 text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-xs uppercase tracking-widest border border-blue-500/20"
                   >
                     <Pencil className="w-3.5 h-3.5" />{" "}
                     <span className="hidden sm:inline">Edit</span>
@@ -1619,7 +1619,7 @@ export const TabbyTamaraCard = ({
             {isTLOreSupport && (
               <button
                 onClick={handleShareAction}
-                className="px-3 py-1.5 text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-widest border border-indigo-500/20 hidden md:flex"
+                className="px-3 py-1.5 text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-xs uppercase tracking-widest border border-indigo-500/20 hidden md:flex"
               >
                 <Share className="w-3.5 h-3.5" />{" "}
                 <span className="hidden sm:inline">Share Full Case</span>
@@ -1635,7 +1635,7 @@ export const TabbyTamaraCard = ({
                     data: req,
                   });
                 }}
-                className="px-3 py-1.5 text-teal-400 hover:text-teal-300 bg-teal-500/10 hover:bg-teal-500/20 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-widest border border-teal-500/20 cursor-pointer"
+                className="px-3 py-1.5 text-teal-400 hover:text-teal-300 bg-teal-500/10 hover:bg-teal-500/20 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-xs uppercase tracking-widest border border-teal-500/20 cursor-pointer"
               >
                 <Eye className="w-3.5 h-3.5 text-teal-400" />{" "}
                 <span className="hidden sm:inline">Details</span>
@@ -1646,7 +1646,7 @@ export const TabbyTamaraCard = ({
             {canClaim && (
               <button
                 onClick={handleClaimRequest}
-                className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-500/30 ring-1 ring-indigo-500/30"
+                className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl flex items-center gap-1.5 transition-colors font-bold text-xs uppercase tracking-widest shadow-sm shadow-indigo-500/30 ring-1 ring-indigo-500/30"
               >
                 <CheckIcon className="w-3.5 h-3.5" /> Claim Case
               </button>
@@ -1657,21 +1657,21 @@ export const TabbyTamaraCard = ({
               <div className="relative" ref={assignDropdownRef}>
                 <button
                   onClick={() => setShowAssignDropdown(!showAssignDropdown)}
-                  className="px-3 py-1.5 text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-widest border border-indigo-500/20 cursor-pointer"
+                  className="px-3 py-1.5 text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-xs uppercase tracking-widest border border-indigo-500/20 cursor-pointer"
                 >
                   <User className="w-3.5 h-3.5" />{" "}
                   {req.assignedToName ? "Reassign" : "Assign Agent"}
                 </button>
                 {showAssignDropdown && (
-                  <div className="absolute bottom-full right-0 mb-2 z-50 bg-black/40 border border-white/[0.08] rounded-xl w-72 shadow-2xl flex flex-col overflow-hidden">
+                  <div className="absolute bottom-full right-0 mb-2 z-50 bg-black/40 border border-white/[0.08] rounded-xl w-72 shadow flex flex-col overflow-hidden">
                     {/* Header */}
                     <div className="p-2.5 border-b border-white/[0.06] bg-white/[0.04] flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                         Assign Agent
                       </span>
                       <button
                         onClick={() => setShowAssignDropdown(false)}
-                        className="text-slate-500 hover:text-slate-350 p-0.5 rounded-md hover:bg-white/5 transition-colors cursor-pointer"
+                        className="text-slate-500 hover:text-slate-350 p-0.5 rounded-xl hover:bg-white/5 transition-colors cursor-pointer"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -1686,7 +1686,7 @@ export const TabbyTamaraCard = ({
                           placeholder="Search agent name..."
                           value={assignSearchQuery}
                           onChange={(e) => setAssignSearchQuery(e.target.value)}
-                          className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg text-xs py-1.5 pl-8 pr-7 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/85 transition-colors font-sans"
+                          className="w-full bg-white/[0.04] border border-white/[0.06] rounded-xl text-xs py-1.5 pl-8 pr-7 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/85 transition-colors font-sans"
                           autoFocus
                         />
                         {assignSearchQuery && (
@@ -1716,7 +1716,7 @@ export const TabbyTamaraCard = ({
                               key={agentName}
                               onClick={() => handleAssignAgent(agentName)}
                               disabled={isAssigning}
-                              className={`w-full text-left px-2.5 py-1.5 text-xs rounded-lg transition-all flex items-center justify-between font-medium cursor-pointer ${
+                              className={`w-full text-left px-2.5 py-1.5 text-xs rounded-xl transition-all flex items-center justify-between font-medium cursor-pointer ${
                                 isSelected
                                   ? "bg-indigo-500/15 text-indigo-300 font-bold border border-indigo-500/20"
                                   : "text-slate-300 hover:bg-white/[0.06] hover:text-white"
@@ -1725,7 +1725,7 @@ export const TabbyTamaraCard = ({
                               <span className="truncate pr-2">{agentName}</span>
                               {lob && (
                                 <span
-                                  className={`shrink-0 text-[8px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                                  className={`shrink-0 text-xs font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider ${
                                     isChat
                                       ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                                       : "bg-blue-500/10 text-blue-450 border border-blue-500/20"
@@ -1757,7 +1757,7 @@ export const TabbyTamaraCard = ({
                   toast.error("Failed to copy request details.");
                 }
               }}
-              className="px-3 py-1.5 text-slate-400 hover:text-white bg-slate-700/60 hover:bg-slate-600/80 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[10px] uppercase tracking-widest border border-slate-600/40"
+              className="px-3 py-1.5 text-slate-400 hover:text-white bg-slate-700/60 hover:bg-slate-600/80 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-xs uppercase tracking-widest border border-slate-600/40"
             >
               <Copy className="w-3.5 h-3.5" />{" "}
               <span className="hidden sm:inline">Copy Text</span>
@@ -1770,7 +1770,7 @@ export const TabbyTamaraCard = ({
                     onClick={() =>
                       handleMarkPatientContactedTT(req.id, "contacted")
                     }
-                    className="px-3 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 transition-colors"
+                    className="px-3 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center gap-1.5 transition-colors"
                     title="Force Close without notes"
                   >
                     <span className="hidden sm:inline">Force Close</span>
@@ -1787,7 +1787,7 @@ export const TabbyTamaraCard = ({
                       setTlFintechLinks(req.tlLinks || "");
                     }
                   }}
-                  className={`px-4 py-1.5 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 transition-all ${activeFintechHandlingId === req.id ? "bg-slate-700 text-white shadow-inner" : "bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg shadow-indigo-500/30 ring-1 ring-indigo-500/30"}`}
+                  className={`px-4 py-1.5 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center gap-1.5 transition-all ${activeFintechHandlingId === req.id ? "bg-slate-700 text-white shadow-inner" : "bg-indigo-600 text-white hover:bg-indigo-500 shadow-sm shadow-indigo-500/30 ring-1 ring-indigo-500/30"}`}
                 >
                   <PenTool className="w-3.5 h-3.5" />{" "}
                   {activeFintechHandlingId === req.id
@@ -1810,7 +1810,7 @@ export const TabbyTamaraCard = ({
               workflowStatus !== "sent_to_partner" && (
                 <button
                   onClick={() => setIsCrmMaterialsMode(!isCrmMaterialsMode)}
-                  className={`px-4 py-1.5 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 transition-all ${isCrmMaterialsMode ? "bg-slate-700 text-white shadow-inner" : "bg-emerald-600 text-white hover:bg-emerald-500 shadow-lg shadow-emerald-500/30 ring-1 ring-emerald-505/30"}`}
+                  className={`px-4 py-1.5 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center gap-1.5 transition-all ${isCrmMaterialsMode ? "bg-slate-700 text-white shadow-inner" : "bg-emerald-600 text-white hover:bg-emerald-500 shadow-sm shadow-emerald-500/30 ring-1 ring-emerald-505/30"}`}
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />{" "}
                   <span className="hidden sm:inline">
@@ -1825,7 +1825,7 @@ export const TabbyTamaraCard = ({
               workflowStatus !== "sent_to_partner" && (
                 <button
                   onClick={() => setShowPartnerPanel(!showPartnerPanel)}
-                  className={`px-4 py-1.5 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 transition-all ${showPartnerPanel ? "bg-slate-700 text-white shadow-inner" : "bg-gradient-to-r from-indigo-600 to-indigo-700 text-white hover:from-indigo-500 hover:to-indigo-600 shadow-lg shadow-indigo-500/30"}`}
+                  className={`px-4 py-1.5 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center gap-1.5 transition-all ${showPartnerPanel ? "bg-slate-700 text-white shadow-inner" : "bg-gradient-to-r from-indigo-600 to-indigo-700 text-white hover:from-indigo-500 hover:to-indigo-600 shadow-sm shadow-indigo-500/30"}`}
                 >
                   <ExternalLink className="w-3.5 h-3.5" />{" "}
                   <span className="hidden sm:inline">
@@ -1896,7 +1896,7 @@ export const TabbyTamaraCard = ({
 
               <div className="space-y-4">
                 <div>
-                  <label className="text-[10px] font-bold text-emerald-500/70 uppercase tracking-widest block mb-1">
+                  <label className="text-xs font-bold text-emerald-500/70 uppercase tracking-widest block mb-1">
                     Contact Notes / Remark Text
                   </label>
                   <textarea
@@ -1933,7 +1933,7 @@ export const TabbyTamaraCard = ({
                 <div className="flex justify-end gap-2 pt-2">
                   <button
                     onClick={() => setIsCrmMaterialsMode(false)}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-[10px] font-bold uppercase tracking-widest"
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold uppercase tracking-widest"
                   >
                     Cancel
                   </button>
@@ -1973,7 +1973,7 @@ export const TabbyTamaraCard = ({
                         );
                       }
                     }}
-                    className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-[10px] font-bold transition-all shadow-lg shadow-emerald-500/20 uppercase tracking-widest flex items-center gap-2"
+                    className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-emerald-500/20 uppercase tracking-widest flex items-center gap-2"
                   >
                     {isClientIdUploading || isPaymentProofUploading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -1999,7 +1999,7 @@ export const TabbyTamaraCard = ({
 
               <div className="space-y-4">
                 <div>
-                  <label className="text-[10px] font-bold text-indigo-500/75 uppercase tracking-widest block mb-1">
+                  <label className="text-xs font-bold text-indigo-500/75 uppercase tracking-widest block mb-1">
                     Partner Submissions Notes (Optional)
                   </label>
                   <textarea
@@ -2024,14 +2024,14 @@ export const TabbyTamaraCard = ({
                 <div className="flex justify-end gap-2 pt-2">
                   <button
                     onClick={() => setShowPartnerPanel(false)}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-[10px] font-bold uppercase tracking-widest"
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold uppercase tracking-widest"
                   >
                     Cancel
                   </button>
                   <button
                     disabled={isPartnerUploading || isPartnerSubmitting}
                     onClick={handleSendToPartner}
-                    className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-[10px] font-bold transition-all shadow-lg shadow-indigo-500/20 uppercase tracking-widest flex items-center gap-2"
+                    className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-indigo-500/20 uppercase tracking-widest flex items-center gap-2"
                   >
                     {isPartnerUploading || isPartnerSubmitting ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -2059,7 +2059,7 @@ export const TabbyTamaraCard = ({
 
           {/* Case Activity Audit Trail */}
           <div className="bg-white/[0.02] p-5 border-t border-slate-700/40 space-y-2 text-left">
-            <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-display">
+            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-display">
               Case Activity Timeline
             </h4>
             <CaseTimeline entityType="tt_request" entityId={req.id} />

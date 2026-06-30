@@ -123,7 +123,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in w-full">
-      <div className="flex items-center justify-between bg-white/5 border border-white/10 p-5 rounded-2xl shrink-0 backdrop-blur-xl">
+      <div className="flex items-center justify-between bg-white/5 border border-white/10 p-5 rounded-2xl shrink-0">
         <div>
           <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
             <CheckCircle className="w-5 h-5 text-green-400" />
@@ -160,7 +160,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
       </div>
 
       {isEditingQuestions ? (
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl w-full max-w-4xl mx-auto space-y-6">
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 w-full max-w-4xl mx-auto space-y-6">
           <h3 className="text-lg font-bold text-slate-100 pb-4 border-b border-white/10">Manage QA Criteria</h3>
           <p className="text-sm text-slate-400">Configure the questions and maximum scores that will be used for all new scorecards.</p>
           <div className="space-y-4">
@@ -170,7 +170,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                   type="text"
                   value={q.text}
                   onChange={(e) => handleUpdateQuestion(idx, 'text', e.target.value)}
-                  className="flex-1 bg-white/[0.04] border border-slate-700 rounded-lg px-3 py-2 text-slate-200 outline-none focus:border-green-500"
+                  className="flex-1 bg-white/[0.04] border border-slate-700 rounded-xl px-3 py-2 text-slate-200 outline-none focus:border-green-500"
                   placeholder="e.g. Greeting & Opening"
                 />
                 <div className="flex items-center gap-2">
@@ -180,7 +180,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                     min={1}
                     value={q.maxScore}
                     onChange={(e) => handleUpdateQuestion(idx, 'maxScore', e.target.value)}
-                    className="w-20 text-center bg-white/[0.04] border border-slate-700 rounded-lg px-2 py-2 text-green-400 font-bold outline-none focus:border-green-500"
+                    className="w-20 text-center bg-white/[0.04] border border-slate-700 rounded-xl px-2 py-2 text-green-400 font-bold outline-none focus:border-green-500"
                   />
                   <button onClick={() => handleRemoveQuestion(idx)} className="ml-2 text-red-500 hover:text-red-400 p-2">
                     <XCircle className="w-5 h-5" />
@@ -198,7 +198,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
           </div>
         </div>
       ) : view === 'list' ? (
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl flex flex-col min-h-0">
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col min-h-0">
           <h3 className="text-lg font-bold text-slate-100 mb-4 pb-4 border-b border-white/10">Recent Evaluations</h3>
           {myScores.length === 0 ? (
             <div className="text-slate-400 text-center py-8">No QA scorecards found.</div>
@@ -227,7 +227,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                           Clinic: <span className="font-semibold text-white">{score.clinicName}</span> | Ref: <span className="font-mono text-indigo-300">{score.chatOrCallId}</span>
                         </div>
                         {score.notes && !isExpanded && (
-                          <div className="mt-2 text-xs text-slate-400 italic bg-white/5 p-2 rounded-lg inline-block">
+                          <div className="mt-2 text-xs text-slate-400 italic bg-white/5 p-2 rounded-xl inline-block">
                             "{score.notes.substring(0, 60)}{score.notes.length > 60 ? '...' : ''}"
                           </div>
                         )}
@@ -275,7 +275,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
           )}
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl w-full max-w-4xl mx-auto space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white/5 border border-white/10 rounded-2xl p-6 w-full max-w-4xl mx-auto space-y-6">
           <h3 className="text-lg font-bold text-slate-100 pb-4 border-b border-white/10">Evaluate Interaction</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -337,7 +337,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                       onChange={(e) => handleScoreChange(q.id, e.target.value)}
                       required
                       placeholder="0"
-                      className="w-20 text-center bg-white/[0.04] border border-slate-700 rounded-lg px-2 py-2 text-green-400 font-bold outline-none focus:border-green-500 transition-colors"
+                      className="w-20 text-center bg-white/[0.04] border border-slate-700 rounded-xl px-2 py-2 text-green-400 font-bold outline-none focus:border-green-500 transition-colors"
                     />
                     <span className="text-slate-500 font-bold">/ {q.maxScore}</span>
                   </div>
@@ -366,7 +366,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
             
             <button
               type="submit"
-              className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg shadow-green-500/20 text-white rounded-xl font-bold tracking-wide transition-all"
+              className="w-full sm:w-auto px-8 py-3 bg-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-sm shadow-green-500/20 text-white rounded-xl font-bold tracking-wide transition-all"
             >
               Submit Evaluation
             </button>

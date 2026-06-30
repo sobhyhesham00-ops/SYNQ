@@ -30,7 +30,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
             onItemsPerPageChange(Number(e.target.value));
             onPageChange(1);
           }}
-          className="bg-white/[0.02] border border-white/10 rounded-md text-xs text-slate-200 outline-none px-2 py-1"
+          className="bg-white/[0.02] border border-white/10 rounded-xl text-xs text-slate-200 outline-none px-2 py-1"
         >
           <option value={25}>25</option>
           <option value={50}>50</option>

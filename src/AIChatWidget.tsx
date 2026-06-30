@@ -61,10 +61,10 @@ export const AIChatWidget = () => {
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
       {isOpen && (
-        <div className="w-80 sm:w-96 h-[400px] bg-white/[0.04] border border-indigo-500/30 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in font-sans relative">
+        <div className="w-80 sm:w-96 h-[400px] bg-white/[0.04] border border-indigo-500/30 rounded-2xl shadow flex flex-col overflow-hidden animate-fade-in font-sans relative">
           <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/5 to-purple-500/5 pointer-events-none" />
           
-          <div className="bg-indigo-950/80 border-b border-indigo-500/20 p-4 flex justify-between items-center backdrop-blur-md z-10">
+          <div className="bg-indigo-950/80 border-b border-indigo-500/20 p-4 flex justify-between items-center  z-10">
             <h3 className="font-bold text-indigo-100 flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-pink-400" />
               Synq AI Assistant
@@ -119,7 +119,7 @@ export const AIChatWidget = () => {
 
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-14 h-14 bg-gradient-to-r from-indigo-500 to-pink-500 rounded-full shadow-lg shadow-indigo-500/25 flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all text-white border border-white/20"
+        className="w-14 h-14 bg-gradient-to-r from-indigo-500 to-pink-500 rounded-full shadow-sm shadow-indigo-500/25 flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all text-white border border-white/20"
       >
         {isOpen ? <X className="w-6 h-6" /> : <Sparkles className="w-6 h-6" />}
       </button>

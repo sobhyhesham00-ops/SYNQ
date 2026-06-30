@@ -276,7 +276,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
           </div>
           <button
             onClick={() => setSearchTerm("")}
-            className="px-3 py-2 bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 text-slate-400 hover:text-white rounded-xl text-[11px] font-bold transition-all uppercase tracking-wider"
+            className="px-3 py-2 bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 text-slate-400 hover:text-white rounded-xl text-xs font-bold transition-all uppercase tracking-wider"
           >
             Clear
           </button>
@@ -284,7 +284,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap items-center gap-3 py-2 px-3.5 bg-white/[0.01] border border-white/5 rounded-xl text-[10px] text-slate-400 mb-6 font-mono">
+      <div className="flex flex-wrap items-center gap-3 py-2 px-3.5 bg-white/[0.01] border border-white/5 rounded-xl text-xs text-slate-400 mb-6 font-mono">
         <span className="font-bold text-slate-300 mr-1 flex items-center gap-1">
           <Clock className="w-3 h-3 text-slate-400" /> Resolution SLA:
         </span>
@@ -315,7 +315,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
         <table className="w-full text-left border-collapse min-w-[640px]">
           <thead>
             <tr className="border-b border-white/5 bg-white/[0.01]">
-              <th className="p-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 min-w-[150px]">
+              <th className="p-3 text-xs font-bold uppercase tracking-wider text-slate-400 min-w-[150px]">
                 <button 
                   onClick={() => toggleSort("name")}
                   className="flex items-center gap-1 hover:text-white transition-colors"
@@ -324,19 +324,19 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
                   {sortBy === "name" && (sortOrder === "desc" ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />)}
                 </button>
               </th>
-              <th className="p-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 text-center">
+              <th className="p-3 text-xs font-bold uppercase tracking-wider text-slate-400 text-center">
                 Wk 1 (Oldest)
               </th>
-              <th className="p-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 text-center">
+              <th className="p-3 text-xs font-bold uppercase tracking-wider text-slate-400 text-center">
                 Wk 2
               </th>
-              <th className="p-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 text-center">
+              <th className="p-3 text-xs font-bold uppercase tracking-wider text-slate-400 text-center">
                 Wk 3
               </th>
-              <th className="p-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 text-center">
+              <th className="p-3 text-xs font-bold uppercase tracking-wider text-slate-400 text-center">
                 Wk 4 (Latest)
               </th>
-              <th className="p-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 text-center">
+              <th className="p-3 text-xs font-bold uppercase tracking-wider text-slate-400 text-center">
                 <button 
                   onClick={() => toggleSort("count")}
                   className="flex items-center gap-1 mx-auto hover:text-white transition-colors"
@@ -345,7 +345,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
                   {sortBy === "count" && (sortOrder === "desc" ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />)}
                 </button>
               </th>
-              <th className="p-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 text-center">
+              <th className="p-3 text-xs font-bold uppercase tracking-wider text-slate-400 text-center">
                 <button 
                   onClick={() => toggleSort("speed")}
                   className="flex items-center gap-1 mx-auto hover:text-white transition-colors"
@@ -394,8 +394,8 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
                               })}
                               className={`w-full max-w-[100px] mx-auto py-2.5 rounded-xl flex flex-col justify-center items-center cursor-pointer transition-all ${meta.bg}`}
                             >
-                              <span className="text-[11px] leading-none mb-0.5">{meta.label}</span>
-                              <span className="text-[8px] font-mono opacity-50 font-normal">
+                              <span className="text-xs leading-none mb-0.5">{meta.label}</span>
+                              <span className="text-xs font-mono opacity-50 font-normal">
                                 {wData.count > 0 ? `${wData.count} tkt` : ""}
                               </span>
                             </button>
@@ -434,7 +434,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
-            className="mt-4 p-3.5 bg-slate-900 border border-white/10 rounded-xl text-xs text-slate-300 flex items-center justify-between gap-4 shadow-xl"
+            className="mt-4 p-3.5 bg-slate-900 border border-white/10 rounded-xl text-xs text-slate-300 flex items-center justify-between gap-4 shadow"
           >
             <div className="flex items-center gap-2">
               <span className="text-emerald-400 font-bold">●</span>
@@ -452,7 +452,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
             </div>
             <button
               onClick={() => setSelectedCell(null)}
-              className="text-slate-500 hover:text-slate-300 font-black cursor-pointer px-2 py-1 bg-white/5 rounded-md hover:bg-white/10"
+              className="text-slate-500 hover:text-slate-300 font-black cursor-pointer px-2 py-1 bg-white/5 rounded-xl hover:bg-white/10"
             >
               Close
             </button>
@@ -475,11 +475,11 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
                   <div key={cand.agentName} className="flex items-start justify-between gap-2 border-b border-white/5 pb-2 last:border-b-0 last:pb-0">
                     <div>
                       <p className="text-xs font-bold text-slate-200">{cand.agentName}</p>
-                      <p className="text-[10px] text-slate-400 mt-0.5">
+                      <p className="text-xs text-slate-400 mt-0.5">
                         Avg speed: <span className="text-rose-400 font-bold">{cand.overallAvg?.toFixed(1)}h</span> ({cand.overallCount} resolved)
                       </p>
                     </div>
-                    <span className="px-2 py-0.5 rounded-md bg-rose-500/10 border border-rose-500/20 text-[9px] text-rose-300 font-bold tracking-wider uppercase">
+                    <span className="px-2 py-0.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 font-bold tracking-wider uppercase">
                       Needs coaching
                     </span>
                   </div>
@@ -492,7 +492,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
             )}
           </div>
           {mentorshipCandidates.length > 0 && (
-            <div className="mt-4 pt-3 border-t border-white/5 flex items-center gap-2 text-[10px] text-rose-400/80">
+            <div className="mt-4 pt-3 border-t border-white/5 flex items-center gap-2 text-xs text-rose-400/80">
               <BookOpen className="w-3.5 h-3.5" />
               <span>SLA coaching recommended. Pair them with star performers to review workflows.</span>
             </div>
@@ -512,11 +512,11 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
                   <div key={star.agentName} className="flex items-start justify-between gap-2 border-b border-white/5 pb-2 last:border-b-0 last:pb-0">
                     <div>
                       <p className="text-xs font-bold text-slate-200">{star.agentName}</p>
-                      <p className="text-[10px] text-slate-400 mt-0.5">
+                      <p className="text-xs text-slate-400 mt-0.5">
                         Avg speed: <span className="text-emerald-400 font-bold">{star.overallAvg?.toFixed(1)}h</span> ({star.overallCount} resolved)
                       </p>
                     </div>
-                    <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[9px] text-emerald-300 font-bold tracking-wider uppercase">
+                    <span className="px-2 py-0.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300 font-bold tracking-wider uppercase">
                       Fast responder
                     </span>
                   </div>
@@ -529,7 +529,7 @@ export const WeeklyPerformanceHeatmap: React.FC<WeeklyPerformanceHeatmapProps> =
             )}
           </div>
           {starPerformers.length > 0 && (
-            <div className="mt-4 pt-3 border-t border-white/5 flex items-center gap-2 text-[10px] text-emerald-400/80">
+            <div className="mt-4 pt-3 border-t border-white/5 flex items-center gap-2 text-xs text-emerald-400/80">
               <Zap className="w-3.5 h-3.5" />
               <span>Recognize star performers during the next huddle to boost team spirit!</span>
             </div>

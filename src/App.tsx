@@ -1565,7 +1565,7 @@ export default function App() {
                 );
                 toast.custom(
                   (t) => (
-                    <div className="bg-[#1e1e1e]/40 backdrop-blur-lg/95 border border-amber-500/40 text-white rounded-2xl p-4 shadow-2xl flex flex-col gap-2 max-w-sm border-l-4 border-l-amber-500 backdrop-blur-md animate-fade-in text-left">
+                    <div className="bg-slate-900/40 /95 border border-amber-500/40 text-white rounded-2xl p-4 shadow flex flex-col gap-2 max-w-sm border-l-4 border-l-amber-500  animate-fade-in text-left">
                       <div className="flex items-start gap-3">
                         <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-500 shrink-0 border border-amber-500/20">
                           <Bell className="w-5 h-5 animate-bounce" />
@@ -1574,7 +1574,7 @@ export default function App() {
                           <h4 className="font-bold text-sm text-amber-400">
                             New Broadcast Posted!
                           </h4>
-                          <p className="text-[10px] text-slate-400 font-bold mt-0.5">
+                          <p className="text-xs text-slate-400 font-bold mt-0.5">
                             By {latest.author || "System"}
                           </p>
                           <p className="text-xs text-slate-300 mt-1 line-clamp-2 leading-relaxed italic">
@@ -1588,13 +1588,13 @@ export default function App() {
                             setActiveTab("tl-announcements");
                             toast.dismiss(t);
                           }}
-                          className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 rounded-lg text-xs font-black uppercase tracking-wider cursor-pointer transition-all shrink-0"
+                          className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 rounded-xl text-xs font-black uppercase tracking-wider cursor-pointer transition-all shrink-0"
                         >
                           Read Now
                         </button>
                         <button
                           onClick={() => toast.dismiss(t)}
-                          className="px-3 py-1.5 bg-white/10 hover:bg-[#1e1e1e]/40 backdrop-blur-lg/40/15 text-white rounded-lg text-xs font-bold cursor-pointer transition-colors"
+                          className="px-3 py-1.5 bg-white/10 hover:bg-slate-900/40 /40/15 text-white rounded-xl text-xs font-bold cursor-pointer transition-colors"
                         >
                           Dismiss
                         </button>
@@ -10530,7 +10530,7 @@ ${ttNotes}`
           </div>
 
           <div className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-3">
-            <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold pt-1">
+            <p className="text-xs uppercase tracking-widest text-slate-500 font-bold pt-1">
               System Restore (Admin Only)
             </p>
             <div className="relative">
@@ -10539,7 +10539,7 @@ ${ttNotes}`
                 placeholder="Admin Password"
                 value={killSwitchPassword}
                 onChange={(e) => setKillSwitchPassword(e.target.value)}
-                className="w-full pl-4 pr-10 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 transition-colors"
+                className="w-full pl-4 pr-10 py-2 bg-white/5  border border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 transition-colors"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     const creds = getStorageItem<Record<string, string>>(
@@ -10590,7 +10590,7 @@ ${ttNotes}`
               placeholder="Security Check: Favorite car?"
               value={killSwitchCar}
               onChange={(e) => setKillSwitchCar(e.target.value)}
-              className="w-full px-4 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 transition-colors"
+              className="w-full px-4 py-2 bg-white/5  border border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 transition-colors"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   const creds = getStorageItem<Record<string, string>>(
@@ -10742,7 +10742,7 @@ ${ttNotes}`
                         <h1 className="text-3xl font-black text-indigo-200 font-display tracking-tight">
                           Welcome, {matchedName.split(" ")[0]}
                         </h1>
-                        <p className="text-indigo-400/80 text-[10px] font-mono uppercase tracking-[0.3em] mt-2">
+                        <p className="text-indigo-400/80 text-xs font-mono uppercase tracking-[0.3em] mt-2">
                           Ready to sign in
                         </p>
                       </div>
@@ -10751,7 +10751,7 @@ ${ttNotes}`
 
                   return (
                     <div className="text-center">
-                      <p className="text-indigo-400/80 text-[10px] font-mono uppercase tracking-[0.3em] mt-1">
+                      <p className="text-indigo-400/80 text-xs font-mono uppercase tracking-[0.3em] mt-1">
                         Sign in to SYNQ
                       </p>
                     </div>
@@ -10771,7 +10771,7 @@ ${ttNotes}`
                     </p>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase tracking-widest text-indigo-300 font-bold block text-left">
+                    <label className="text-xs uppercase tracking-widest text-indigo-300 font-bold block text-left">
                       New Password
                     </label>
                     <input
@@ -10782,7 +10782,7 @@ ${ttNotes}`
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase tracking-widest text-indigo-300 font-bold block text-left">
+                    <label className="text-xs uppercase tracking-widest text-indigo-300 font-bold block text-left">
                       Confirm New Password
                     </label>
                     <input
@@ -10857,7 +10857,7 @@ ${ttNotes}`
               ) : isRegistering ? (
                 <div className="space-y-6 relative z-10">
                   <div className="space-y-1">
-                    <span className="text-[10px] uppercase tracking-widest text-indigo-300 font-bold block mb-1">
+                    <span className="text-xs uppercase tracking-widest text-indigo-300 font-bold block mb-1">
                       Username
                     </span>
                     <div className="px-4 py-3 bg-white/[0.03] border border-indigo-500/20 rounded-xl text-slate-100 font-medium text-sm font-mono tracking-wide text-left shadow-inner shadow-black/50">
@@ -10866,7 +10866,7 @@ ${ttNotes}`
                   </div>
 
                   <div className="space-y-1">
-                    <span className="text-[10px] uppercase tracking-widest text-indigo-300 font-bold block mb-1">
+                    <span className="text-xs uppercase tracking-widest text-indigo-300 font-bold block mb-1">
                       Password
                     </span>
                     <div className="px-4 py-3 bg-white/[0.03] border border-indigo-500/20 rounded-xl text-slate-100 font-medium text-sm font-mono tracking-widest text-left shadow-inner shadow-black/50">
@@ -10899,7 +10899,7 @@ ${ttNotes}`
                 >
                   <div className="space-y-1.5">
                     <label
-                      className="text-[10px] uppercase tracking-widest text-indigo-300 font-bold block text-left"
+                      className="text-xs uppercase tracking-widest text-indigo-300 font-bold block text-left"
                       htmlFor="login-name"
                     >
                       User Name
@@ -10917,7 +10917,7 @@ ${ttNotes}`
 
                   <div className="space-y-1.5 ">
                     <label
-                      className="text-[10px] uppercase tracking-widest text-indigo-300 font-bold block text-left"
+                      className="text-xs uppercase tracking-widest text-indigo-300 font-bold block text-left"
                       htmlFor="login-password"
                     >
                       Password
@@ -10948,7 +10948,7 @@ ${ttNotes}`
                   </div>
 
                   {loginError && (
-                    <div className="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl text-[11px] font-mono flex items-center gap-2">
+                    <div className="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl text-xs font-mono flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
                       <span>{loginError}</span>
                     </div>
@@ -10965,13 +10965,13 @@ ${ttNotes}`
                   </button>
 
                   {!credentialsReady && (
-                    <p className="text-[10px] text-indigo-400/70 text-center font-mono animate-pulse mt-2 tracking-wider">
+                    <p className="text-xs text-indigo-400/70 text-center font-mono animate-pulse mt-2 tracking-wider">
                       ⏳ Syncing secure credentials...
                     </p>
                   )}
 
                   {!directoryReady && (
-                    <p className="text-[10px] text-indigo-400/70 text-center font-mono animate-pulse mt-2 tracking-wider">
+                    <p className="text-xs text-indigo-400/70 text-center font-mono animate-pulse mt-2 tracking-wider">
                       ⏳ Syncing user directory...
                     </p>
                   )}
@@ -10980,7 +10980,7 @@ ${ttNotes}`
                     <button
                       type="button"
                       onClick={() => setIsSynqVersionModalOpen(true)}
-                      className="px-4 py-2 bg-white/[0.03] border border-cyan-500/20 hover:border-cyan-500/40 hover:bg-black/60 rounded-full text-[10px] font-bold tracking-widest text-slate-300 hover:text-cyan-400 transition-all flex items-center gap-3 cursor-pointer shadow-xl shadow-black/40 relative group overflow-hidden"
+                      className="px-4 py-2 bg-white/[0.03] border border-cyan-500/20 hover:border-cyan-500/40 hover:bg-black/60 rounded-full text-xs font-bold tracking-widest text-slate-300 hover:text-cyan-400 transition-all flex items-center gap-3 cursor-pointer shadow shadow-black/40 relative group overflow-hidden"
                     >
                       <div className="relative w-2.5 h-2.5 flex items-center justify-center shrink-0">
                         <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 z-10 animate-pulse" />
@@ -11011,7 +11011,7 @@ ${ttNotes}`
           /* User Logged In Portal */
           <div className="flex-1 flex flex-col gap-6 my-4 lg:my-6">
             {/* Global Workspace Header / Navbar with Global Search */}
-            <header className="w-full bg-[#111116] border border-white/6 px-4 py-2.5 rounded-xl flex items-center justify-between gap-4 relative z-40">
+            <header className="w-full bg-[#111116] border border-white/5 px-4 py-2.5 rounded-xl flex items-center justify-between gap-4 relative z-40">
               <div className="flex items-center gap-3">
                 <div className="text-left">
                   <motion.div
@@ -11034,7 +11034,7 @@ ${ttNotes}`
                       !
                     </h1>
                   </motion.div>
-                  <p className="text-[10px] text-slate-500 font-mono font-bold tracking-tight">
+                  <p className="text-xs text-slate-500 font-mono font-bold tracking-tight">
                     {currentUser.role === "tl" ? "Team Leader" : currentUser.role === "director" ? "Director" : currentUser.role === "qa" ? "Quality Assurance" : "Agent"}
                   </p>
                 </div>
@@ -11043,13 +11043,13 @@ ${ttNotes}`
               {/* Timezones & Weather Active Control Selector */}
               <div
                 id="timezone-weather-selector"
-                className="flex items-center gap-4 bg-transparent border border-white/8 rounded-xl px-3 py-1.5"
+                className="flex items-center gap-4 bg-transparent border border-white/10 rounded-xl px-3 py-1.5"
               >
                 <div className="flex items-center gap-4 px-2">
                   {/* EGYPT DISPLAY */}
                   <div className="flex items-center gap-2">
                     <div className="text-left font-mono">
-                      <div className="text-[8px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.1">
+                      <div className="text-xs text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.1">
                         <span>🇪🇬 Cairo</span>
                         <span className="w-1 h-1 rounded-full bg-[#10B981] animate-pulse" />
                       </div>
@@ -11064,7 +11064,7 @@ ${ttNotes}`
                     </div>
 
                     {ramadanTemp !== null && (
-                      <div className="flex items-center gap-1 text-[11px] font-mono text-[#FCD34D] bg-[#FCD34D]/5 border border-[#FCD34D]/15 px-1.5 py-0.5 rounded-lg select-none">
+                      <div className="flex items-center gap-1 text-xs font-mono text-[#FCD34D] bg-[#FCD34D]/5 border border-[#FCD34D]/15 px-1.5 py-0.5 rounded-xl select-none">
                         {ramadanWeatherCode === 0 ? (
                           <Sun className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
                         ) : ramadanWeatherCode < 3 ? (
@@ -11085,7 +11085,7 @@ ${ttNotes}`
                   {/* UAE DISPLAY */}
                   <div className="flex items-center gap-2">
                     <div className="text-left font-mono">
-                      <div className="text-[8px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.1">
+                      <div className="text-xs text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.1">
                         <span>🇦🇪 Dubai</span>
                         <span className="w-1 h-1 rounded-full bg-cyan-400 animate-pulse" />
                       </div>
@@ -11100,7 +11100,7 @@ ${ttNotes}`
                     </div>
 
                     {uaeTemp !== null && (
-                      <div className="flex items-center gap-1 text-[11px] font-mono text-[#60A5FA] bg-[#60A5FA]/5 border border-[#60A5FA]/15 px-1.5 py-0.5 rounded-lg select-none">
+                      <div className="flex items-center gap-1 text-xs font-mono text-[#60A5FA] bg-[#60A5FA]/5 border border-[#60A5FA]/15 px-1.5 py-0.5 rounded-xl select-none">
                         {uaeWeatherCode === 0 ? (
                           <Sun className="w-3.5 h-3.5 text-orange-400 animate-pulse" />
                         ) : uaeWeatherCode < 3 ? (
@@ -11157,8 +11157,8 @@ ${ttNotes}`
                       className="fixed inset-0 z-30"
                       onClick={() => setIsGlobalSearchPanelOpen(false)}
                     />
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#1a1b23] border border-white/10 rounded-2xl shadow-2xl z-45 p-1.5 max-h-96 overflow-y-auto flex flex-col divide-y divide-white/5">
-                      <div className="p-3 text-[10px] text-slate-400 font-extrabold uppercase tracking-wider bg-[#1a1b23] flex items-center justify-between border-b border-white/5 rounded-t-xl font-mono">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#1a1b23] border border-white/10 rounded-2xl shadow z-45 p-1.5 max-h-96 overflow-y-auto flex flex-col divide-y divide-white/5">
+                      <div className="p-3 text-xs text-slate-400 font-extrabold uppercase tracking-wider bg-[#1a1b23] flex items-center justify-between border-b border-white/5 rounded-t-xl font-mono">
                         <span>
                           Results for "{globalSearchInput}":{" "}
                           {globalSearchResults.length} records
@@ -11249,11 +11249,11 @@ ${ttNotes}`
                             >
                               <div className="flex items-center justify-between gap-1.5">
                                 <span
-                                  className={`text-[8px] font-extrabold uppercase tracking-widest px-1.5 py-0.5 rounded font-mono ${badgeClasses}`}
+                                  className={`text-xs font-extrabold uppercase tracking-widest px-1.5 py-0.5 rounded font-mono ${badgeClasses}`}
                                 >
                                   {typeLabel}
                                 </span>
-                                <span className="text-[10px] text-slate-500 font-mono">
+                                <span className="text-xs text-slate-500 font-mono">
                                   Ref: {item.caseRef}
                                 </span>
                               </div>
@@ -11262,12 +11262,12 @@ ${ttNotes}`
                                   {item.patientName}
                                 </p>
                                 {item.clinicName && (
-                                  <span className="text-[10px] text-zinc-400 font-semibold max-w-[120px] truncate">
+                                  <span className="text-xs text-zinc-400 font-semibold max-w-[120px] truncate">
                                     {getClinicLabel(item.clinicName)}
                                   </span>
                                 )}
                               </div>
-                              <div className="flex items-center justify-between gap-2 text-[10px] text-slate-400 mt-0.5 font-mono">
+                              <div className="flex items-center justify-between gap-2 text-xs text-slate-400 mt-0.5 font-mono">
                                 <span className="text-slate-500 truncate">
                                   Submitted by: {item.agentName}
                                 </span>
@@ -11275,7 +11275,7 @@ ${ttNotes}`
                                   {item.phoneNumber}
                                 </span>
                               </div>
-                              <div className="flex justify-between items-center text-[9px] text-slate-500 border-t border-white/[0.03] pt-1">
+                              <div className="flex justify-between items-center text-xs text-slate-500 border-t border-white/[0.03] pt-1">
                                 <span>
                                   Status:{" "}
                                   <span className="font-semibold text-slate-400 capitalize">
@@ -11313,7 +11313,7 @@ ${ttNotes}`
                   <p className="text-xs font-bold text-slate-200">
                     {currentUser.name}
                   </p>
-                  <p className="text-[9px] text-slate-500 font-mono font-black uppercase tracking-widest">
+                  <p className="text-xs text-slate-500 font-mono font-black uppercase tracking-widest">
                     {currentUser.role || "Agent"}
                   </p>
                 </div>
@@ -11340,14 +11340,14 @@ ${ttNotes}`
                   <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-400 to-indigo-500" />
 
                   <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-black text-cyan-400 uppercase tracking-widest flex items-center gap-2">
+                    <span className="text-xs font-black text-cyan-400 uppercase tracking-widest flex items-center gap-2">
                       <span className="flex h-2 w-2 relative">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400"></span>
                       </span>
                       Cairo Time
                     </span>
-                    <span className="text-[10px] text-slate-400 font-mono tracking-wider">
+                    <span className="text-xs text-slate-400 font-mono tracking-wider">
                       {new Date().toLocaleDateString("en-US", {
                         timeZone: "Africa/Cairo",
                         month: "short",
@@ -11379,14 +11379,14 @@ ${ttNotes}`
                           )}
                           <span>{ramadanTemp.toFixed(1)}°C</span>
                         </div>
-                        <span className="text-[7px] text-amber-400/80 uppercase font-mono tracking-widest font-extrabold animate-pulse">
+                        <span className="text-xs text-amber-400/80 uppercase font-mono tracking-widest font-extrabold animate-pulse">
                           Real-time
                         </span>
                       </div>
                     )}
                   </div>
 
-                  <div className="flex justify-between items-center text-[9px] text-slate-400">
+                  <div className="flex justify-between items-center text-xs text-slate-400">
                     <span className="truncate flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
                       10th of Ramadan
@@ -11405,7 +11405,7 @@ ${ttNotes}`
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-16 h-12 bg-white/[0.03] rounded-xl flex items-center justify-center shadow-lg shadow-black/40 border border-cyan-500/20 hover:border-cyan-500/40 transition-all shrink-0 relative overflow-hidden">
+                      <div className="w-16 h-12 bg-white/[0.03] rounded-xl flex items-center justify-center shadow-sm shadow-black/40 border border-cyan-500/20 hover:border-cyan-500/40 transition-all shrink-0 relative overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-indigo-500/5 opacity-40 pointer-events-none" />
                         <CoolLogo className="w-14 h-10" showText={false} />
                       </div>
@@ -11414,7 +11414,7 @@ ${ttNotes}`
                           Synq
                         </h1>
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[9px] text-indigo-300 font-extrabold uppercase tracking-wide">
+                          <span className="text-xs text-indigo-300 font-extrabold uppercase tracking-wide">
                             Work Portal
                           </span>
                         </div>
@@ -11463,7 +11463,7 @@ ${ttNotes}`
                         {unreadCount > 0 && (
                           <span className="absolute -top-1 -right-1 flex h-3 w-3">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500 text-[8px] font-black font-sans text-white flex items-center justify-center">
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500 text-xs font-black font-sans text-white flex items-center justify-center">
                               {unreadCount}
                             </span>
                           </span>
@@ -11475,7 +11475,7 @@ ${ttNotes}`
                   <div className="p-4 rounded-xl bg-white/[0.04] border border-cyan-500/15 space-y-4 relative overflow-hidden">
                     <div className="flex items-center gap-3 relative">
                       <div className="relative shrink-0">
-                        <div className="w-10 h-10 rounded-full bg-[#1c1c2e] border border-cyan-500/20 flex items-center justify-center text-[11px] font-bold tracking-widest font-mono text-cyan-400">
+                        <div className="w-10 h-10 rounded-full bg-[#1c1c2e] border border-cyan-500/20 flex items-center justify-center text-xs font-bold tracking-widest font-mono text-cyan-400">
                           {(currentUser?.name || "")
                             .split(".")
                             .map((n) => n[0])
@@ -11494,7 +11494,7 @@ ${ttNotes}`
                             }`}
                           />
                           <span
-                            className={`relative inline-flex rounded-full h-3 w-3 border border-[#121217] ${
+                            className={`relative inline-flex rounded-full h-3 w-3 border border-slate-950 ${
                               (currentUser.status || "online") === "online"
                                 ? "bg-emerald-500"
                                 : (currentUser.status || "online") === "busy"
@@ -11508,13 +11508,13 @@ ${ttNotes}`
                         <p className="text-xs font-black text-slate-100 truncate tracking-wide">
                           {formatAgentName(currentUser.name)}
                         </p>
-                        <p className="text-[9px] text-slate-400 mt-0.5">
+                        <p className="text-xs text-slate-400 mt-0.5">
                           Username:{" "}
                           <span className="font-mono text-indigo-300 font-bold">
                             {currentUser.name}
                           </span>
                         </p>
-                        <p className="text-[10px] uppercase tracking-widest font-mono text-cyan-400 font-bold mt-1">
+                        <p className="text-xs uppercase tracking-widest font-mono text-cyan-400 font-bold mt-1">
                           {currentUser.role === "tl"
                             ? "Team Leader"
                             : supportAssignments[currentUser.name]
@@ -11525,14 +11525,14 @@ ${ttNotes}`
                     </div>
 
                     {supportAssignments[currentUser.name] && (
-                      <div className="text-[9px] bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 p-2.5 rounded-lg space-y-1 font-sans">
-                        <p className="font-extrabold uppercase tracking-widest text-[#a5b4fc] text-[8px]">
+                      <div className="text-xs bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 p-2.5 rounded-xl space-y-1 font-sans">
+                        <p className="font-extrabold uppercase tracking-widest text-indigo-300 text-xs">
                           Support Assigned By
                         </p>
                         <p className="text-slate-100 font-semibold flex items-center gap-1">
                           {supportAssignments[currentUser.name].assignedBy}
                         </p>
-                        <p className="text-[8px] text-slate-400">
+                        <p className="text-xs text-slate-400">
                           {new Date(
                             supportAssignments[currentUser.name].assignedAt,
                           ).toLocaleString()}
@@ -11552,7 +11552,7 @@ ${ttNotes}`
                           ))) && (
                         <button
                           onClick={handleInstallClick}
-                          className="w-full px-3 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-indigo-500/25 text-indigo-300 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                          className="w-full px-3 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-indigo-500/25 text-indigo-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                         >
                           <Download className="w-3.5 h-3.5" />
                           Download Desktop App
@@ -11594,7 +11594,7 @@ ${ttNotes}`
                           window.location.reload();
                         }, 1000);
                       }}
-                      className="w-full px-3 py-2 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/20 hover:to-teal-500/20 border border-emerald-500/25 text-emerald-300 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-2"
+                      className="w-full px-3 py-2 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/20 hover:to-teal-500/20 border border-emerald-500/25 text-emerald-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-2"
                     >
                       <RefreshCw className="w-3.5 h-3.5 animate-pulse" />
                       Update App (Force Sync)
@@ -11605,7 +11605,7 @@ ${ttNotes}`
                     currentUser?.name?.toLowerCase() === "sobhyhesham00@gmail.com" ? (
                       <button
                         onClick={() => setIsResetPasswordModalOpen(true)}
-                        className="w-full px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/10 text-blue-300 rounded-lg text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-2"
+                        className="w-full px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/10 text-blue-300 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-2"
                       >
                         <Key className="w-3.5 h-3.5" />
                         Reset Password
@@ -11615,7 +11615,7 @@ ${ttNotes}`
                     <button
                       type="button"
                       onClick={() => setIsSynqVersionModalOpen(true)}
-                      className="w-full px-3 py-2 bg-cyan-500/10 hover:bg-cyan-500/15 border border-cyan-500/20 hover:border-cyan-500/40 text-cyan-300 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-3.5 cursor-pointer mb-2 relative group overflow-hidden"
+                      className="w-full px-3 py-2 bg-cyan-500/10 hover:bg-cyan-500/15 border border-cyan-500/20 hover:border-cyan-500/40 text-cyan-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-3.5 cursor-pointer mb-2 relative group overflow-hidden"
                     >
                       <div className="relative w-2.5 h-2.5 flex items-center justify-center shrink-0">
                         <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 z-10 animate-pulse" />
@@ -11641,7 +11641,7 @@ ${ttNotes}`
                     <button
                       id="signout-button"
                       onClick={handleSignOut}
-                      className="w-full px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/10 text-rose-300 rounded-lg text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-2"
+                      className="w-full px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/10 text-rose-300 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-2"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       Sign Out Portal
@@ -11687,7 +11687,7 @@ ${ttNotes}`
                             },
                           );
                         }}
-                        className="w-full px-3 py-1.5 bg-red-950 border border-red-500/50 text-red-200 hover:bg-red-900 rounded-lg text-[10px] font-bold transition-all mt-2 uppercase cursor-pointer shadow-lg shadow-red-900/20"
+                        className="w-full px-3 py-1.5 bg-red-950 border border-red-500/50 text-red-200 hover:bg-red-900 rounded-xl text-xs font-bold transition-all mt-2 uppercase cursor-pointer shadow-sm shadow-red-900/20"
                       >
                         Factory Reset All Data
                       </button>
@@ -11701,8 +11701,8 @@ ${ttNotes}`
                     const buildBtn = (id, icon, label, bgColors = "") => {
                       const isActive = activeTab === id;
                       const baseClass = isActive
-                        ? `${bgColors} text-white shadow-lg scale-[1.02] font-bold border`
-                        : "border-transparent text-slate-300 hover:bg-white/20 backdrop-blur-md/60 hover:text-white border font-medium hover:scale-[1.01]";
+                        ? `${bgColors} text-white shadow-sm scale-[1.02] font-bold border`
+                        : "border-transparent text-slate-300 hover:bg-white/20 /60 hover:text-white border font-medium hover:scale-[1.01]";
 
                       return (
                         <button
@@ -11720,7 +11720,7 @@ ${ttNotes}`
 
                     const groupTitle = (title, emoji, color) => (
                       <span
-                        className={`text-[10px] tracking-wider uppercase font-bold ${color} block px-3 mt-4 mb-1.5`}
+                        className={`text-xs tracking-wider uppercase font-bold ${color} block px-3 mt-4 mb-1.5`}
                       >
                         {emoji} {title}
                       </span>
@@ -12011,7 +12011,7 @@ ${ttNotes}`
                 </nav>
 
                 {/* Mini Standalone Disclaimer block */}
-                <div className="mt-auto pt-4 border-t border-white/5 text-[10px] text-slate-400 space-y-2">
+                <div className="mt-auto pt-4 border-t border-white/5 text-xs text-slate-400 space-y-2">
                   <div className="flex items-center gap-1.5 text-indigo-300 font-semibold font-mono">
                     <Info className="w-3.5 h-3.5 text-indigo-400" /> STANDALONE
                     COMPLIANT
@@ -12103,7 +12103,7 @@ ${ttNotes}`
                               </span>
                               {staleSLA.inquiries > 0 && (
                                 <span
-                                  className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all"
+                                  className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-xl text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all"
                                   onClick={() => setActiveTab("inquiries")}
                                 >
                                   {staleSLA.inquiries} Inquiries Stale &gt;2h
@@ -12111,7 +12111,7 @@ ${ttNotes}`
                               )}
                               {staleSLA.ttPending > 0 && (
                                 <span
-                                  className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all"
+                                  className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-xl text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all"
                                   onClick={() => setActiveTab("tabby-tamara")}
                                 >
                                   {staleSLA.ttPending} TT Awaiting Confirm
@@ -12119,7 +12119,7 @@ ${ttNotes}`
                               )}
                               {staleSLA.ttOverdue > 0 && (
                                 <span
-                                  className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all"
+                                  className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-xl text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all"
                                   onClick={() => setActiveTab("tabby-tamara")}
                                 >
                                   {staleSLA.ttOverdue} TT Contact OVERDUE
@@ -12127,7 +12127,7 @@ ${ttNotes}`
                               )}
                               {staleSLA.complaints > 0 && (
                                 <span
-                                  className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all"
+                                  className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-xl text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all"
                                   onClick={() => setActiveTab("complaints")}
                                 >
                                   {staleSLA.complaints} Complaints &gt;8h Open
@@ -12135,7 +12135,7 @@ ${ttNotes}`
                               )}
                               {staleSLA.comms > 0 && (
                                 <span
-                                  className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all"
+                                  className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-xl text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all"
                                   onClick={() => setActiveTab("client-comms")}
                                 >
                                   {staleSLA.comms} Comms Pending &gt;2h
@@ -12220,7 +12220,7 @@ ${ttNotes}`
                       <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="bg-indigo-600/10 border border-indigo-500/20 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 mb-4 shadow-xl shadow-indigo-500/5"
+                        className="bg-indigo-600/10 border border-indigo-500/20 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 mb-4 shadow shadow-indigo-500/5"
                       >
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 relative">
@@ -12231,7 +12231,7 @@ ${ttNotes}`
                           <div className="text-left">
                             <h4 className="text-sm font-bold text-slate-100 flex items-center gap-2">
                               Communication Queue Active
-                              <span className="bg-rose-500/20 text-rose-300 text-[9px] px-2 py-0.5 rounded-full border border-rose-500/30 font-black">
+                              <span className="bg-rose-500/20 text-rose-300 text-xs px-2 py-0.5 rounded-full border border-rose-500/30 font-black">
                                 {
                                   clientComms.filter(
                                     (c) =>
@@ -12244,7 +12244,7 @@ ${ttNotes}`
                                 REQUESTS
                               </span>
                             </h4>
-                            <p className="text-[10px] text-slate-400 uppercase tracking-widest font-medium">
+                            <p className="text-xs text-slate-400 uppercase tracking-widest font-medium">
                               Awaiting handling and resolution
                             </p>
                           </div>
@@ -12271,7 +12271,7 @@ ${ttNotes}`
 
                             return (
                               <div className="text-center sm:text-right px-4 py-2 bg-transparent rounded-xl border border-white/5 flex-1 sm:flex-initial">
-                                <p className="text-[8px] text-slate-500 uppercase font-black tracking-tighter">
+                                <p className="text-xs text-slate-500 uppercase font-black tracking-tighter">
                                   Queue Time (Oldest)
                                 </p>
                                 <p className="text-sm font-mono text-amber-400 font-bold tabular-nums">
@@ -12282,7 +12282,7 @@ ${ttNotes}`
                           })()}
                           <button
                             onClick={() => setActiveTab("client-comms")}
-                            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-500/30 flex-1 sm:flex-initial uppercase tracking-wider"
+                            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-indigo-500/30 flex-1 sm:flex-initial uppercase tracking-wider"
                           >
                             Process Queue
                           </button>
@@ -12316,7 +12316,7 @@ ${ttNotes}`
                               <div
                                 key={inq.id}
                                 id={`inquiry-${inq.id}`}
-                                className="relative overflow-hidden p-5 rounded-2xl border backdrop-blur-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-2xl bg-gradient-to-r from-indigo-950/40 via-purple-950/20 to-slate-950/80 border-indigo-500/30"
+                                className="relative overflow-hidden p-5 rounded-2xl border  flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow bg-gradient-to-r from-indigo-950/40 via-purple-950/20 to-slate-950/80 border-indigo-500/30"
                               >
                                 {/* Glow indicator line */}
                                 <div className="absolute top-0 bottom-0 left-0 w-1 bg-gradient-to-b from-indigo-400 to-purple-500"></div>
@@ -12333,10 +12333,10 @@ ${ttNotes}`
                                   </div>
                                   <div className="space-y-1">
                                     <div className="flex items-center gap-2">
-                                      <span className="text-[9px] font-mono uppercase tracking-wider bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-lg font-bold">
+                                      <span className="text-xs font-mono uppercase tracking-wider bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-xl font-bold">
                                         Inquiry Update
                                       </span>
-                                      <span className="text-[9px] text-slate-400">
+                                      <span className="text-xs text-slate-400">
                                         {new Date(
                                           inq.sentAt ||
                                             inq.answeredAt ||
@@ -12376,7 +12376,7 @@ ${ttNotes}`
 
                                 <button
                                   onClick={() => handleMarkInquirySeen(inq.id)}
-                                  className="px-4.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl cursor-pointer shadow-lg hover:brightness-105 transition-all text-center self-end sm:self-center shrink-0 active:scale-95"
+                                  className="px-4.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl cursor-pointer shadow-sm hover:brightness-105 transition-all text-center self-end sm:self-center shrink-0 active:scale-95"
                                 >
                                   Mark as Read & Dismiss
                                 </button>
@@ -12409,7 +12409,7 @@ ${ttNotes}`
                             .map((req) => (
                               <div
                                 key={req.id}
-                                className="relative overflow-hidden p-5 rounded-2xl border backdrop-blur-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-2xl bg-gradient-to-r from-amber-950/40 via-yellow-950/25 to-slate-950/80 border-amber-500/30"
+                                className="relative overflow-hidden p-5 rounded-2xl border  flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow bg-gradient-to-r from-amber-950/40 via-yellow-950/25 to-slate-950/80 border-amber-500/30"
                               >
                                 {/* Glow indicator line */}
                                 <div className="absolute top-0 bottom-0 left-0 w-1 bg-gradient-to-b from-amber-400 to-yellow-500"></div>
@@ -12420,13 +12420,13 @@ ${ttNotes}`
                                   </div>
                                   <div className="space-y-1 w-full text-left">
                                     <div className="flex flex-wrap items-center gap-2">
-                                      <span className="text-[9px] font-mono uppercase tracking-wider bg-amber-500/20 text-yellow-300 px-2 py-0.5 rounded-lg font-bold">
+                                      <span className="text-xs font-mono uppercase tracking-wider bg-amber-500/20 text-yellow-300 px-2 py-0.5 rounded-xl font-bold">
                                         Customer Contact Required
                                       </span>
-                                      <span className="text-[10px] text-emerald-400 font-extrabold uppercase bg-emerald-500/10 px-2 py-1.5 rounded border border-emerald-500/20">
+                                      <span className="text-xs text-emerald-400 font-extrabold uppercase bg-emerald-500/10 px-2 py-1.5 rounded border border-emerald-500/20">
                                         Confirmed by {req.confirmedBy}
                                       </span>
-                                      <span className="text-[9px] text-slate-400">
+                                      <span className="text-xs text-slate-400">
                                         {new Date(
                                           req.createdAt,
                                         ).toLocaleString()}
@@ -12503,7 +12503,7 @@ ${ttNotes}`
                             .map((comp) => (
                               <div
                                 key={comp.id}
-                                className="relative overflow-hidden p-5 rounded-2xl border backdrop-blur-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-2xl bg-gradient-to-r from-rose-950/40 via-red-950/25 to-slate-950/80 border-rose-500/30"
+                                className="relative overflow-hidden p-5 rounded-2xl border  flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow bg-gradient-to-r from-rose-950/40 via-red-950/25 to-slate-950/80 border-rose-500/30"
                               >
                                 {/* Glow indicator line */}
                                 <div className="absolute top-0 bottom-0 left-0 w-1 bg-gradient-to-b from-rose-400 to-red-500"></div>
@@ -12514,13 +12514,13 @@ ${ttNotes}`
                                   </div>
                                   <div className="space-y-1 w-full text-left">
                                     <div className="flex flex-wrap items-center gap-2">
-                                      <span className="text-[9px] font-mono uppercase tracking-wider bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded-lg font-bold">
+                                      <span className="text-xs font-mono uppercase tracking-wider bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded-xl font-bold">
                                         Complaint Resolution & Contact Required
                                       </span>
-                                      <span className="text-[10px] text-amber-300 font-extrabold uppercase bg-amber-500/10 px-2 py-1.5 rounded border border-amber-500/20">
+                                      <span className="text-xs text-amber-300 font-extrabold uppercase bg-amber-500/10 px-2 py-1.5 rounded border border-amber-500/20">
                                         TL Commented by {comp.tlHandledBy}
                                       </span>
-                                      <span className="text-[9px] text-slate-400">
+                                      <span className="text-xs text-slate-400">
                                         {new Date(
                                           comp.createdAt,
                                         ).toLocaleString()}
@@ -12566,7 +12566,7 @@ ${ttNotes}`
                       partnerPendingSwaps.length > 0 && (
                         <div
                           id="swaps-awaiting-agreement-panel"
-                          className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/25 p-5 sm:p-6 rounded-2xl backdrop-blur-xl flex flex-col space-y-4 shadow-xl animate-fade-in relative overflow-hidden"
+                          className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/25 p-5 sm:p-6 rounded-2xl  flex flex-col space-y-4 shadow animate-fade-in relative overflow-hidden"
                         >
                           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500"></div>
                           <div className="flex items-center gap-2.5">
@@ -12591,7 +12591,7 @@ ${ttNotes}`
                             {partnerPendingSwaps.map((req) => (
                               <div
                                 key={req.id}
-                                className="p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-white/10 transition-all"
+                                className="p-4 bg-white/5  border border-white/10 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-white/10 transition-all"
                               >
                                 <div className="space-y-1">
                                   <p className="text-sm font-semibold text-slate-100">
@@ -12657,7 +12657,7 @@ ${ttNotes}`
 
                     {activeTab === "profile" && currentUser && (
                       <div className="space-y-6 max-w-4xl mx-auto w-full animate-fade-in relative z-10 p-4 sm:p-0 text-left">
-                        <div className="bg-white/10 backdrop-blur-md/80 backdrop-blur-xl border border-white/10 p-6 sm:p-8 rounded-2xl shadow-2xl relative overflow-hidden">
+                        <div className="bg-white/10 /80  border border-white/10 p-6 sm:p-8 rounded-2xl shadow relative overflow-hidden">
                           <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
                           <div className="flex flex-col sm:flex-row items-center gap-6 mb-8">
                             <div className="relative group">
@@ -12665,18 +12665,18 @@ ${ttNotes}`
                                 <img
                                   src={currentUser.avatarUrl}
                                   alt="Avatar"
-                                  className="w-24 h-24 rounded-full object-cover border-4 border-slate-700 shadow-xl"
+                                  className="w-24 h-24 rounded-full object-cover border-4 border-slate-700 shadow"
                                 />
                               ) : (
-                                <div className="w-24 h-24 rounded-full bg-indigo-500/20 text-indigo-400 border-4 border-slate-700 shadow-xl flex items-center justify-center text-3xl font-bold font-display uppercase">
+                                <div className="w-24 h-24 rounded-full bg-indigo-500/20 text-indigo-400 border-4 border-slate-700 shadow flex items-center justify-center text-3xl font-bold font-display uppercase">
                                   {formatAgentName(currentUser.name).substring(
                                     0,
                                     2,
                                   )}
                                 </div>
                               )}
-                              <label className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 rounded-full cursor-pointer transition-opacity backdrop-blur-sm">
-                                <span className="text-[10px] uppercase font-bold text-white tracking-wider flex items-center gap-1">
+                              <label className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 rounded-full cursor-pointer transition-opacity ">
+                                <span className="text-xs uppercase font-bold text-white tracking-wider flex items-center gap-1">
                                   <Upload className="w-3 h-3" /> Edit
                                 </span>
                                 <input
@@ -12732,7 +12732,7 @@ ${ttNotes}`
                                   {formatAgentName(currentUser.name)}{" "}
                                   {currentUser.role === "tl" ? "" : ""}
                                 </h2>
-                                <p className="text-xs font-mono text-slate-500 uppercase tracking-widest bg-[#1e1e1e]/40 backdrop-blur-lg/50 px-2 py-1 rounded mb-1">
+                                <p className="text-xs font-mono text-slate-500 uppercase tracking-widest bg-slate-900/40 /50 px-2 py-1 rounded mb-1">
                                   LOB: {getAgentLOB(currentUser.name)}
                                 </p>
                               </div>
@@ -12791,7 +12791,7 @@ ${ttNotes}`
                                       toast.success("Personal phone updated!");
                                     }
                                   }}
-                                  className="text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-slate-300 hover:bg-white/10 transition-all cursor-pointer"
+                                  className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-slate-300 hover:bg-white/10 transition-all cursor-pointer"
                                 >
                                   Edit Phone
                                 </button>
@@ -12825,7 +12825,7 @@ ${ttNotes}`
                                       toast.success("Contact email updated!");
                                     }
                                   }}
-                                  className="text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-slate-300 hover:bg-white/10 transition-all cursor-pointer"
+                                  className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-slate-300 hover:bg-white/10 transition-all cursor-pointer"
                                 >
                                   Edit Email
                                 </button>
@@ -12835,7 +12835,7 @@ ${ttNotes}`
                                     setSoundEnabled(nextState);
                                     if (nextState) triggerNotificationAlert();
                                   }}
-                                  className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 border rounded-lg transition-all cursor-pointer ${soundEnabled ? "bg-indigo-500/20 border-indigo-500/30 text-indigo-300" : "bg-white/10 backdrop-blur-md/80 border-slate-700 text-slate-500 hover:text-slate-300"}`}
+                                  className={`text-xs font-bold uppercase tracking-wider px-3 py-1.5 border rounded-xl transition-all cursor-pointer ${soundEnabled ? "bg-indigo-500/20 border-indigo-500/30 text-indigo-300" : "bg-white/10 /80 border-slate-700 text-slate-500 hover:text-slate-300"}`}
                                 >
                                   {soundEnabled ? " Sound: ON" : " Sound: OFF"}
                                 </button>
@@ -12849,7 +12849,7 @@ ${ttNotes}`
                                 My Personal Inbox & Notes
                               </h3>
                               <textarea
-                                className="w-full h-32 bg-white/5 backdrop-blur-xl border border-white/20 text-slate-100 p-3 rounded-xl focus:border-indigo-500 outline-none resize-none text-sm font-medium"
+                                className="w-full h-32 bg-white/5  border border-white/20 text-slate-100 p-3 rounded-xl focus:border-indigo-500 outline-none resize-none text-sm font-medium"
                                 placeholder="Write anything... scratchpad... thoughts... "
                               ></textarea>
                             </div>
@@ -12864,7 +12864,7 @@ ${ttNotes}`
                                   onChange={(e) =>
                                     setTodoFilter(e.target.value as any)
                                   }
-                                  className="bg-white/5 backdrop-blur-xl border border-white/10 text-xs font-bold text-slate-300 rounded px-2 py-1 outline-none"
+                                  className="bg-white/5  border border-white/10 text-xs font-bold text-slate-300 rounded px-2 py-1 outline-none"
                                 >
                                   <option value="All">All Categories</option>
                                   <option value="Work">Work</option>
@@ -12913,11 +12913,11 @@ ${ttNotes}`
                                     type="text"
                                     placeholder="I need to..."
                                     required
-                                    className="flex-1 bg-white/5 backdrop-blur-xl border border-white/20 text-slate-100 px-3 py-2 text-sm rounded-xl outline-none focus:border-indigo-500"
+                                    className="flex-1 bg-white/5  border border-white/20 text-slate-100 px-3 py-2 text-sm rounded-xl outline-none focus:border-indigo-500"
                                   />
                                   <select
                                     name="category"
-                                    className="bg-white/5 backdrop-blur-xl border border-white/20 text-slate-100 px-2 text-xs rounded-xl outline-none focus:border-indigo-500"
+                                    className="bg-white/5  border border-white/20 text-slate-100 px-2 text-xs rounded-xl outline-none focus:border-indigo-500"
                                   >
                                     <option value="Work">Work</option>
                                     <option value="Personal">Personal</option>
@@ -12929,11 +12929,11 @@ ${ttNotes}`
                                     placeholder="Mins?"
                                     title="Remind in X mins"
                                     min="1"
-                                    className="w-20 bg-white/5 backdrop-blur-xl border border-white/20 text-slate-100 px-2 py-2 text-sm rounded-xl outline-none focus:border-indigo-500 text-center"
+                                    className="w-20 bg-white/5  border border-white/20 text-slate-100 px-2 py-2 text-sm rounded-xl outline-none focus:border-indigo-500 text-center"
                                   />
                                   <button
                                     type="submit"
-                                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl transition-colors font-bold shadow-lg shadow-indigo-500/20"
+                                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl transition-colors font-bold shadow-sm shadow-indigo-500/20"
                                   >
                                     +
                                   </button>
@@ -12960,7 +12960,7 @@ ${ttNotes}`
                                     .map((t) => (
                                       <div
                                         key={t.id}
-                                        className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${t.isCompleted ? "bg-white/10 backdrop-blur-md/30 border-slate-700/30 opacity-60" : "bg-white/10 backdrop-blur-md/80 border-slate-700 shadow-sm"}`}
+                                        className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${t.isCompleted ? "bg-white/10 /30 border-slate-700/30 opacity-60" : "bg-white/10 /80 border-slate-700 shadow-sm"}`}
                                       >
                                         <input
                                           type="checkbox"
@@ -12978,7 +12978,7 @@ ${ttNotes}`
                                                 "personal",
                                               );
                                           }}
-                                          className="w-4 h-4 rounded text-indigo-500 accent-indigo-500 bg-[#1e1e1e]/40 backdrop-blur-lg"
+                                          className="w-4 h-4 rounded text-indigo-500 accent-indigo-500 bg-slate-900/40 "
                                         />
                                         <div className="flex-1 min-w-0 flex flex-col justify-center">
                                           <div className="flex items-center gap-2">
@@ -12989,7 +12989,7 @@ ${ttNotes}`
                                             </p>
                                             {t.category && (
                                               <span
-                                                className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase ${t.category === "Urgent" ? "bg-rose-500/20 text-rose-300" : t.category === "Work" ? "bg-indigo-500/20 text-indigo-300" : "bg-emerald-500/20 text-emerald-300"}`}
+                                                className={`text-xs px-1.5 py-0.5 rounded-full font-bold uppercase ${t.category === "Urgent" ? "bg-rose-500/20 text-rose-300" : t.category === "Work" ? "bg-indigo-500/20 text-indigo-300" : "bg-emerald-500/20 text-emerald-300"}`}
                                               >
                                                 {t.category}
                                               </span>
@@ -12997,7 +12997,7 @@ ${ttNotes}`
                                           </div>
                                           {t.reminderTimeMs &&
                                             !t.isCompleted && (
-                                              <p className="text-[10px] text-amber-400 font-mono flex items-center gap-1 mt-0.5">
+                                              <p className="text-xs text-amber-400 font-mono flex items-center gap-1 mt-0.5">
                                                 <Clock className="w-3 h-3" />{" "}
                                                 Remind around{" "}
                                                 {new Date(
@@ -13030,7 +13030,7 @@ ${ttNotes}`
 
                           {/* Activity & Data Vault Section */}
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-                            <div className="bg-[#1e1e1e]/40 backdrop-blur-lg/40 rounded-2xl border border-white/5 p-6 backdrop-blur-xl">
+                            <div className="bg-slate-900/40 /40 rounded-2xl border border-white/5 p-6 ">
                               <div className="flex items-center gap-4 mb-6">
                                 <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
                                   <Activity className="w-6 h-6" />
@@ -13045,7 +13045,7 @@ ${ttNotes}`
                                 </div>
                               </div>
                               <div className="space-y-4">
-                                <div className="flex items-center justify-between p-3 rounded-lg bg-transparent">
+                                <div className="flex items-center justify-between p-3 rounded-xl bg-transparent">
                                   <span className="text-xs text-slate-400">
                                     Cloud Sync
                                   </span>
@@ -13054,7 +13054,7 @@ ${ttNotes}`
                                     Synced
                                   </span>
                                 </div>
-                                <div className="flex items-center justify-between p-3 rounded-lg bg-transparent">
+                                <div className="flex items-center justify-between p-3 rounded-xl bg-transparent">
                                   <span className="text-xs text-slate-400">
                                     Persistence Engine
                                   </span>
@@ -13062,7 +13062,7 @@ ${ttNotes}`
                                     IndexedDB Offline
                                   </span>
                                 </div>
-                                <div className="flex items-center justify-between p-3 rounded-lg bg-transparent">
+                                <div className="flex items-center justify-between p-3 rounded-xl bg-transparent">
                                   <span className="text-xs text-slate-400">
                                     Local OS
                                   </span>
@@ -13097,7 +13097,7 @@ ${ttNotes}`
                                       toast.error("Failed to generate backup.");
                                     }
                                   }}
-                                  className="w-full mt-4 flex items-center justify-center gap-2 p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 transition-all text-indigo-300 font-bold text-sm"
+                                  className="w-full mt-4 flex items-center justify-center gap-2 p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 transition-all text-indigo-300 font-bold text-sm"
                                 >
                                   <FileText className="w-4 h-4" /> Export Device
                                   Backup
@@ -13308,7 +13308,7 @@ ${ttNotes}`
                           return (
                             <>
                               {/* NEW LOGIN STYLE REMINDER BANNER */}
-                              <div className="bg-gradient-to-r from-indigo-500/10 to-blue-500/10 border border-indigo-500/20 rounded-2xl p-5 shadow-2xl relative overflow-hidden backdrop-blur-md">
+                              <div className="bg-gradient-to-r from-indigo-500/10 to-blue-500/10 border border-indigo-500/20 rounded-2xl p-5 shadow relative overflow-hidden ">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
                                 <div className="flex flex-col sm:flex-row items-start gap-4">
                                   <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
@@ -13328,17 +13328,17 @@ ${ttNotes}`
                                       <span className="text-xs uppercase tracking-widest text-slate-400 font-bold">
                                         Your Login ID:
                                       </span>
-                                      <code className="px-2.5 py-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-xs font-mono text-cyan-300">
+                                      <code className="px-2.5 py-1 bg-white/5  border border-white/10 rounded-xl text-xs font-mono text-cyan-300">
                                         first_letter.last_name
                                       </code>
                                       <span className="text-xs text-slate-400 font-semibold">
                                         • e.g., Hesham Sobhy enters
                                       </span>
-                                      <code className="px-2 py-0.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-md text-xs font-mono text-amber-300 font-bold">
+                                      <code className="px-2 py-0.5 bg-white/5  border border-white/10 rounded-xl text-xs font-mono text-amber-300 font-bold">
                                         h.sobhy
                                       </code>
                                     </div>
-                                    <p className="text-[10px] text-slate-400 pt-1">
+                                    <p className="text-xs text-slate-400 pt-1">
                                       * Your pre-agreed passwords remain exactly
                                       the same.
                                     </p>
@@ -13356,7 +13356,7 @@ ${ttNotes}`
                                     className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                                       dashboardViewMode === "personal"
                                         ? "bg-gradient-to-r from-indigo-500/20 to-indigo-500/10 text-slate-100 border border-indigo-500/40 font-bold shadow-md shadow-indigo-500/10"
-                                        : "text-slate-400 hover:text-slate-100 hover:bg-white/20 backdrop-blur-md"
+                                        : "text-slate-400 hover:text-slate-100 hover:bg-white/20 "
                                     }`}
                                   >
                                     <UserIcon className="w-3.5 h-3.5 text-cyan-400" />
@@ -13374,7 +13374,7 @@ ${ttNotes}`
                                     className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                                       dashboardViewMode === "team"
                                         ? "bg-gradient-to-r from-indigo-500/20 to-indigo-500/10 text-slate-100 border border-indigo-500/40 font-bold shadow-md shadow-indigo-500/10"
-                                        : "text-slate-400 hover:text-slate-100 hover:bg-white/20 backdrop-blur-md"
+                                        : "text-slate-400 hover:text-slate-100 hover:bg-white/20 "
                                     }`}
                                   >
                                     <Users className="w-3.5 h-3.5 text-indigo-400" />
@@ -13392,10 +13392,10 @@ ${ttNotes}`
                                         onClick={() =>
                                           setAgentDashboardTab(tab)
                                         }
-                                        className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                                        className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                                           agentDashboardTab === tab
                                             ? "bg-indigo-500 text-white shadow font-black"
-                                            : "text-slate-400 hover:text-slate-100 hover:bg-white/20 backdrop-blur-md"
+                                            : "text-slate-400 hover:text-slate-100 hover:bg-white/20 "
                                         }`}
                                       >
                                         {tab}
@@ -13480,7 +13480,7 @@ ${ttNotes}`
                                       myComms.length >= 10;
 
                                     return (
-                                      <div className="bg-gradient-to-r from-slate-900 via-[#18182b] to-indigo-950/30 border border-indigo-500/20 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4 text-left font-sans">
+                                      <div className="bg-gradient-to-r from-slate-900 via-[#18182b] to-indigo-950/30 border border-indigo-500/20 rounded-2xl p-5 sm:p-6 shadow space-y-4 text-left font-sans">
                                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                           <div className="space-y-1">
                                             <div className="flex items-center gap-2">
@@ -13497,7 +13497,7 @@ ${ttNotes}`
                                             </p>
                                           </div>
                                           <div className="flex items-center gap-2 bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/25">
-                                            <span className="text-[10px] font-black text-indigo-300 font-mono tracking-wider">
+                                            <span className="text-xs font-black text-indigo-300 font-mono tracking-wider">
                                               LEVEL{" "}
                                               {!isNaN(agentLevel)
                                                 ? agentLevel
@@ -13528,7 +13528,7 @@ ${ttNotes}`
                                                   className="h-full bg-gradient-to-r from-[#22d3ee] to-[#6366f1] rounded-full transition-all duration-1000"
                                                 />
                                               </div>
-                                              <div className="flex justify-between items-center text-[9px] text-slate-400 pt-0.5 font-mono">
+                                              <div className="flex justify-between items-center text-xs text-slate-400 pt-0.5 font-mono">
                                                 <span>
                                                   Level{" "}
                                                   {!isNaN(agentLevel)
@@ -13564,21 +13564,21 @@ ${ttNotes}`
                                             <div className="flex flex-wrap gap-2.5 font-sans">
                                               {holdsGoldPunctuality ? (
                                                 <span
-                                                  className="px-2.5 py-1 bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-[9px] font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5"
+                                                  className="px-2.5 py-1 bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-xs font-black uppercase tracking-wider rounded-xl flex items-center gap-1.5"
                                                   title="Worked more than 120 minutes overall on shifts."
                                                 >
                                                   <Sparkles className="w-3 h-3 text-yellow-400" />{" "}
                                                   Duty Star
                                                 </span>
                                               ) : (
-                                                <span className="px-2.5 py-1 bg-white/5 text-slate-500 text-[9px] font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5 opacity-40">
+                                                <span className="px-2.5 py-1 bg-white/5 text-slate-500 text-xs font-black uppercase tracking-wider rounded-xl flex items-center gap-1.5 opacity-40">
                                                   Duty Star (Locked)
                                                 </span>
                                               )}
 
                                               {isGrandmasterResovler ? (
                                                 <span
-                                                  className="px-2.5 py-1 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[9px] font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5"
+                                                  className="px-2.5 py-1 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-black uppercase tracking-wider rounded-xl flex items-center gap-1.5"
                                                   title="Handled more than 25 ticket resolutions in total."
                                                 >
                                                   <Activity className="w-3 h-3 text-rose-400" />{" "}
@@ -13586,7 +13586,7 @@ ${ttNotes}`
                                                 </span>
                                               ) : (
                                                 <span
-                                                  className="px-2.5 py-1 bg-white/5 text-slate-500 text-[9px] font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5 opacity-40"
+                                                  className="px-2.5 py-1 bg-white/5 text-slate-500 text-xs font-black uppercase tracking-wider rounded-xl flex items-center gap-1.5 opacity-40"
                                                   title="Need 25 total resolutions"
                                                 >
                                                   Resolve King (Locked)
@@ -13595,7 +13595,7 @@ ${ttNotes}`
 
                                               {isTeamCommunicator ? (
                                                 <span
-                                                  className="px-2.5 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-[9px] font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5"
+                                                  className="px-2.5 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-black uppercase tracking-wider rounded-xl flex items-center gap-1.5"
                                                   title="Registered communication requests"
                                                 >
                                                   <MessageSquare className="w-3 h-3 text-cyan-400" />{" "}
@@ -13603,7 +13603,7 @@ ${ttNotes}`
                                                 </span>
                                               ) : (
                                                 <span
-                                                  className="px-2.5 py-1 bg-white/5 text-slate-500 text-[9px] font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5 opacity-40"
+                                                  className="px-2.5 py-1 bg-white/5 text-slate-500 text-xs font-black uppercase tracking-wider rounded-xl flex items-center gap-1.5 opacity-40"
                                                   title="Need 10 communication requests"
                                                 >
                                                   Talk Master (Locked)
@@ -13615,7 +13615,7 @@ ${ttNotes}`
                                           {/* Instant Stats overview Card */}
                                           <div className="bg-transparent p-4 rounded-2xl border border-white/5 flex items-center justify-between font-sans">
                                             <div className="space-y-0.5 text-left">
-                                              <span className="text-[10px] text-indigo-300 font-bold uppercase tracking-wider font-mono">
+                                              <span className="text-xs text-indigo-300 font-bold uppercase tracking-wider font-mono">
                                                 Operations Badge Rank
                                               </span>
                                               <p className="text-xl font-bold text-slate-100 font-display">
@@ -13625,7 +13625,7 @@ ${ttNotes}`
                                                     ? " Gold Operator"
                                                     : " Elite Core Agent"}
                                               </p>
-                                              <p className="text-[9px] text-slate-450">
+                                              <p className="text-xs text-slate-450">
                                                 Continuous ranking metric
                                                 updated in live database cycles
                                               </p>
@@ -13832,7 +13832,7 @@ ${ttNotes}`
 
                                       return (
                                         <div className="space-y-6">
-                                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xl">
+                                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-5 ">
                                             <div>
                                               <h2 className="text-xl font-black text-slate-100 font-display">
                                                 My Daily Work Dashboard
@@ -13845,7 +13845,7 @@ ${ttNotes}`
                                                 </strong>
                                               </p>
                                             </div>
-                                            <div className="flex items-center gap-1.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-1 self-stretch sm:self-auto justify-between">
+                                            <div className="flex items-center gap-1.5 bg-white/5  border border-white/10 rounded-2xl p-1 self-stretch sm:self-auto justify-between">
                                               <button
                                                 onClick={() => {
                                                   const d = new Date(
@@ -13858,7 +13858,7 @@ ${ttNotes}`
                                                       .split("T")[0],
                                                   );
                                                 }}
-                                                className="p-1.5 hover:bg-white/20 backdrop-blur-md rounded-xl text-slate-300 hover:text-slate-100 transition-all cursor-pointer text-xs"
+                                                className="p-1.5 hover:bg-white/20  rounded-xl text-slate-300 hover:text-slate-100 transition-all cursor-pointer text-xs"
                                               >
                                                 &larr; Prev
                                               </button>
@@ -13881,7 +13881,7 @@ ${ttNotes}`
                                                       .split("T")[0],
                                                   );
                                                 }}
-                                                className="p-1.5 hover:bg-white/20 backdrop-blur-md rounded-xl text-slate-300 hover:text-slate-100 transition-all cursor-pointer text-xs"
+                                                className="p-1.5 hover:bg-white/20  rounded-xl text-slate-300 hover:text-slate-100 transition-all cursor-pointer text-xs"
                                               >
                                                 Next &rarr;
                                               </button>
@@ -13890,7 +13890,7 @@ ${ttNotes}`
 
                                           <div className="grid grid-cols-1 md:grid-cols-12 gap-5 animate-fade-in">
                                             <div className="md:col-span-4 bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-                                              <span className="text-[10px] font-black uppercase text-indigo-300 tracking-wider mb-4">
+                                              <span className="text-xs font-black uppercase text-indigo-300 tracking-wider mb-4">
                                                 Daily Resolve Ratio
                                               </span>
                                               <div className="relative w-32 h-32 flex items-center justify-center">
@@ -13950,7 +13950,7 @@ ${ttNotes}`
                                                       : 0}
                                                     %
                                                   </span>
-                                                  <span className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">
+                                                  <span className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-0.5">
                                                     Resolved
                                                   </span>
                                                 </div>
@@ -13988,7 +13988,7 @@ ${ttNotes}`
                                               >
                                                 <div className="flex justify-between items-center text-indigo-400">
                                                   <HelpCircle className="w-4 h-4" />
-                                                  <span className="text-[9px] font-mono bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded text-indigo-300">
+                                                  <span className="text-xs font-mono bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded text-indigo-300">
                                                     Inquiries
                                                   </span>
                                                 </div>
@@ -13996,7 +13996,7 @@ ${ttNotes}`
                                                   <p className="text-2xl font-mono text-slate-100 font-black">
                                                     {myDailyInq.length}
                                                   </p>
-                                                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">
+                                                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-0.5">
                                                     Medical Qs Logged
                                                   </p>
                                                 </div>
@@ -14022,7 +14022,7 @@ ${ttNotes}`
                                               >
                                                 <div className="flex justify-between items-center text-emerald-400">
                                                   <Wallet className="w-4 h-4" />
-                                                  <span className="text-[9px] font-mono bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded text-emerald-300">
+                                                  <span className="text-xs font-mono bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded text-emerald-300">
                                                     Fintech
                                                   </span>
                                                 </div>
@@ -14030,7 +14030,7 @@ ${ttNotes}`
                                                   <p className="text-2xl font-mono text-slate-100 font-black">
                                                     {myDailyFin.length}
                                                   </p>
-                                                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">
+                                                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-0.5">
                                                     Tabby & Tamara Link Requests
                                                   </p>
                                                 </div>
@@ -14056,7 +14056,7 @@ ${ttNotes}`
                                               >
                                                 <div className="flex justify-between items-center text-pink-400">
                                                   <MessageSquare className="w-4 h-4" />
-                                                  <span className="text-[9px] font-mono bg-pink-500/10 border border-pink-500/20 px-1.5 py-0.5 rounded text-pink-300">
+                                                  <span className="text-xs font-mono bg-pink-500/10 border border-pink-500/20 px-1.5 py-0.5 rounded text-pink-300">
                                                     Client Comms
                                                   </span>
                                                 </div>
@@ -14064,7 +14064,7 @@ ${ttNotes}`
                                                   <p className="text-2xl font-mono text-slate-100 font-black">
                                                     {myDailyCom.length}
                                                   </p>
-                                                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">
+                                                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-0.5">
                                                     Client Dials Handled
                                                   </p>
                                                 </div>
@@ -14093,16 +14093,16 @@ ${ttNotes}`
                                                 >
                                                   <div className="flex justify-between items-center text-cyan-400">
                                                     <Clock className="w-4 h-4 animate-pulse" />
-                                                    <span className="text-[9px] font-mono bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded text-cyan-300">
+                                                    <span className="text-xs font-mono bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded text-cyan-300">
                                                       Shift
                                                     </span>
                                                   </div>
                                                   <div className="mt-4">
-                                                    <p className="text-[14px] font-mono text-slate-100 font-bold truncate">
+                                                    <p className="text-sm font-mono text-slate-100 font-bold truncate">
                                                       {clockInStr} -{" "}
                                                       {clockOutStr}
                                                     </p>
-                                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">
+                                                    <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-1">
                                                       Shift Active Stream
                                                     </p>
                                                   </div>
@@ -14114,7 +14114,7 @@ ${ttNotes}`
                                           {["agent", "sme"].includes(
                                             currentUser.role as string,
                                           ) && (
-                                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-md">
+                                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 ">
                                               <h3 className="text-sm font-extrabold text-slate-100 uppercase tracking-wider flex items-center gap-2 mb-4">
                                                 <AlertTriangle className="w-4 h-4 text-pink-400" />
                                                 Punctuality & Sub-Session
@@ -14132,10 +14132,10 @@ ${ttNotes}`
                                                     scale: 1,
                                                   }}
                                                   transition={{ duration: 0.3 }}
-                                                  className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-between"
+                                                  className="p-3 bg-white/5  border border-white/10 rounded-xl flex items-center justify-between"
                                                 >
                                                   <div>
-                                                    <p className="text-[10px] text-slate-400 font-black uppercase">
+                                                    <p className="text-xs text-slate-400 font-black uppercase">
                                                       Schedule Compliance
                                                     </p>
                                                     <p
@@ -14164,10 +14164,10 @@ ${ttNotes}`
                                                     duration: 0.3,
                                                     delay: 0.05,
                                                   }}
-                                                  className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-between"
+                                                  className="p-3 bg-white/5  border border-white/10 rounded-xl flex items-center justify-between"
                                                 >
                                                   <div>
-                                                    <p className="text-[10px] text-slate-400 font-black uppercase">
+                                                    <p className="text-xs text-slate-400 font-black uppercase">
                                                       Total Active Work
                                                     </p>
                                                     <p className="text-sm font-bold text-slate-100 mt-0.5 font-mono">
@@ -14192,10 +14192,10 @@ ${ttNotes}`
                                                     duration: 0.3,
                                                     delay: 0.1,
                                                   }}
-                                                  className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-between"
+                                                  className="p-3 bg-white/5  border border-white/10 rounded-xl flex items-center justify-between"
                                                 >
                                                   <div>
-                                                    <p className="text-[10px] text-slate-400 font-black uppercase">
+                                                    <p className="text-xs text-slate-400 font-black uppercase">
                                                       Restroom duration
                                                     </p>
                                                     <p
@@ -14211,7 +14211,7 @@ ${ttNotes}`
                                                           )
                                                         : 0}{" "}
                                                       min{" "}
-                                                      <span className="text-[10px] text-slate-500">
+                                                      <span className="text-xs text-slate-500">
                                                         / 10m cap
                                                       </span>
                                                     </p>
@@ -14232,10 +14232,10 @@ ${ttNotes}`
                                                     duration: 0.3,
                                                     delay: 0.15,
                                                   }}
-                                                  className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-between"
+                                                  className="p-3 bg-white/5  border border-white/10 rounded-xl flex items-center justify-between"
                                                 >
                                                   <div>
-                                                    <p className="text-[10px] text-slate-400 font-black uppercase">
+                                                    <p className="text-xs text-slate-400 font-black uppercase">
                                                       Breaks & Lunch Used
                                                     </p>
                                                     <p
@@ -14252,7 +14252,7 @@ ${ttNotes}`
                                                           )
                                                         : 0}{" "}
                                                       min{" "}
-                                                      <span className="text-[10px] text-slate-500">
+                                                      <span className="text-xs text-slate-500">
                                                         / 45m cap
                                                       </span>
                                                     </p>
@@ -14406,7 +14406,7 @@ ${ttNotes}`
 
                                       return (
                                         <div className="space-y-6">
-                                          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl">
+                                          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 ">
                                             <h3 className="text-xl font-black text-slate-100 font-display">
                                               Weekly Work Output & Trends
                                             </h3>
@@ -14442,7 +14442,7 @@ ${ttNotes}`
                                                         key={idx}
                                                         className="flex-1 flex flex-col items-center group relative cursor-pointer"
                                                       >
-                                                        <div className="absolute -top-12 opacity-0 group-hover:opacity-100 bg-transparent border border-indigo-400 px-2 py-1 rounded text-[10px] text-slate-100 font-mono transition-opacity duration-200 z-10 font-bold whitespace-nowrap shadow-xl">
+                                                        <div className="absolute -top-12 opacity-0 group-hover:opacity-100 bg-transparent border border-indigo-400 px-2 py-1 rounded text-xs text-slate-100 font-mono transition-opacity duration-200 z-10 font-bold whitespace-nowrap shadow">
                                                           {dp.total} tasks |{" "}
                                                           {dp.hours.toFixed(1)}
                                                           rs
@@ -14455,7 +14455,7 @@ ${ttNotes}`
                                                           }}
                                                         />
 
-                                                        <span className="text-[9px] font-bold text-slate-400 font-sans tracking-tight mt-2 rotate-12 sm:rotate-0">
+                                                        <span className="text-xs font-bold text-slate-400 font-sans tracking-tight mt-2 rotate-12 sm:rotate-0">
                                                           {dp.label}
                                                         </span>
                                                       </div>
@@ -14472,8 +14472,8 @@ ${ttNotes}`
                                                 </h4>
 
                                                 <div className="space-y-4">
-                                                  <div className="p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl">
-                                                    <span className="text-[10px] text-slate-500 uppercase tracking-widest font-black">
+                                                  <div className="p-4 bg-white/5  border border-white/10 rounded-2xl">
+                                                    <span className="text-xs text-slate-500 uppercase tracking-widest font-black">
                                                       Aggregate Resolved Tasks
                                                     </span>
                                                     <div className="flex items-baseline gap-2 mt-1">
@@ -14486,8 +14486,8 @@ ${ttNotes}`
                                                     </div>
                                                   </div>
 
-                                                  <div className="p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl">
-                                                    <span className="text-[10px] text-slate-500 uppercase tracking-widest font-black">
+                                                  <div className="p-4 bg-white/5  border border-white/10 rounded-2xl">
+                                                    <span className="text-xs text-slate-500 uppercase tracking-widest font-black">
                                                       Logged Clock Duration
                                                     </span>
                                                     <div className="flex items-baseline gap-2 mt-1">
@@ -14692,7 +14692,7 @@ ${ttNotes}`
 
                                       return (
                                         <div className="space-y-6">
-                                          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl">
+                                          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 ">
                                             <h3 className="text-xl font-black text-slate-100 font-display">
                                               Monthly Performance & Achievement
                                               Desk
@@ -14707,7 +14707,7 @@ ${ttNotes}`
                                           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 animate-fade-in">
                                             <div className="md:col-span-5 bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center justify-between text-center">
                                               <div>
-                                                <span className="text-[10px] font-black uppercase text-indigo-300 tracking-wider">
+                                                <span className="text-xs font-black uppercase text-indigo-300 tracking-wider">
                                                   Motivational Badge Status
                                                 </span>
                                                 <h4 className="text-xs text-slate-400 mt-1 uppercase font-bold tracking-tight">
@@ -14729,14 +14729,14 @@ ${ttNotes}`
                                                 </p>
                                               </div>
 
-                                              <div className="text-[10px] text-slate-500 font-mono font-black uppercase tracking-widest">
+                                              <div className="text-xs text-slate-500 font-mono font-black uppercase tracking-widest">
                                                 Calculated Live from Database
                                                 logs
                                               </div>
                                             </div>
 
                                             <div className="md:col-span-7 space-y-4">
-                                              <div className="p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
+                                              <div className="p-6 bg-white/5 border border-white/10 rounded-2xl ">
                                                 <h4 className="text-sm font-extrabold text-slate-100 uppercase tracking-wider mb-4">
                                                   30-Day Operation Ratios
                                                 </h4>
@@ -14792,7 +14792,7 @@ ${ttNotes}`
 
                                               <div className="grid grid-cols-3 gap-3 font-sans">
                                                 <div className="p-4 bg-white/5 border border-white/10 rounded-2xl text-center">
-                                                  <span className="text-[9px] text-slate-500 uppercase font-black">
+                                                  <span className="text-xs text-slate-500 uppercase font-black">
                                                     Medical Qs
                                                   </span>
                                                   <p className="text-xl font-mono text-slate-100 font-black mt-1">
@@ -14800,7 +14800,7 @@ ${ttNotes}`
                                                   </p>
                                                 </div>
                                                 <div className="p-4 bg-white/5 border border-white/10 rounded-2xl text-center">
-                                                  <span className="text-[9px] text-[#22d3ee] uppercase font-black">
+                                                  <span className="text-xs text-[#22d3ee] uppercase font-black">
                                                     Fintech Cash
                                                   </span>
                                                   <p className="text-xl font-mono text-slate-100 font-black mt-1">
@@ -14808,7 +14808,7 @@ ${ttNotes}`
                                                   </p>
                                                 </div>
                                                 <div className="p-4 bg-white/5 border border-white/10 rounded-2xl text-center">
-                                                  <span className="text-[9px] text-slate-400 uppercase font-black font-sans">
+                                                  <span className="text-xs text-slate-400 uppercase font-black font-sans">
                                                     Dials Handled
                                                   </span>
                                                   <p className="text-xl font-mono text-slate-100 font-black mt-1">
@@ -14825,15 +14825,15 @@ ${ttNotes}`
                               ) : (
                                 <div className="space-y-6">
                                   {/* Header Controls Banner */}
-                                  <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-xl animate-fade-in">
+                                  <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-5  animate-fade-in">
                                     <div>
                                       <div className="flex items-center gap-2">
-                                        <span className="px-2 py-0.5 text-[9px] font-black uppercase tracking-widest bg-cyan-500/20 text-cyan-300 rounded border border-cyan-500/30">
+                                        <span className="px-2 py-0.5 text-xs font-black uppercase tracking-widest bg-cyan-500/20 text-cyan-300 rounded border border-cyan-500/30">
                                           Synq Engine
                                         </span>
                                         {selectedDashboardDate ===
                                           getLocalISOString() && (
-                                          <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-emerald-400">
+                                          <span className="flex items-center gap-1 text-xs font-black uppercase tracking-widest text-emerald-400">
                                             <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping" />
                                             Live Today
                                           </span>
@@ -14873,7 +14873,7 @@ ${ttNotes}`
                                         />
                                       </div>
 
-                                      <div className="flex items-center gap-1.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-1">
+                                      <div className="flex items-center gap-1.5 bg-white/5  border border-white/10 rounded-2xl p-1">
                                         <button
                                           onClick={() => {
                                             const d = new Date(
@@ -14884,7 +14884,7 @@ ${ttNotes}`
                                               d.toISOString().split("T")[0],
                                             );
                                           }}
-                                          className="p-2 hover:bg-white/20 backdrop-blur-md rounded-xl text-slate-300 hover:text-slate-100 transition-all cursor-pointer"
+                                          className="p-2 hover:bg-white/20  rounded-xl text-slate-300 hover:text-slate-100 transition-all cursor-pointer"
                                         >
                                           &larr;
                                         </button>
@@ -14909,7 +14909,7 @@ ${ttNotes}`
                                               d.toISOString().split("T")[0],
                                             );
                                           }}
-                                          className="p-2 hover:bg-white/20 backdrop-blur-md rounded-xl text-slate-300 hover:text-slate-100 transition-all cursor-pointer"
+                                          className="p-2 hover:bg-white/20  rounded-xl text-slate-300 hover:text-slate-100 transition-all cursor-pointer"
                                         >
                                           &rarr;
                                         </button>
@@ -14972,13 +14972,13 @@ ${ttNotes}`
                                         {range.endLabel}
                                       </strong>
                                     </div>
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 font-mono">
+                                    <span className="text-xs font-black uppercase tracking-widest text-slate-400 font-mono">
                                       TimeZone: Real-time Live Sync
                                     </span>
                                   </div>
 
                                   {/* Agent Excellence Team Leaderboard */}
-                                  <div className="bg-white/5 border border-white/10 rounded-2xl shadow-sm text-slate-100 p-6 shadow-2xl space-y-4 text-left animate-fade-in font-sans">
+                                  <div className="bg-white/5 border border-white/10 rounded-2xl shadow-sm text-slate-100 p-6 shadow space-y-4 text-left animate-fade-in font-sans">
                                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-3">
                                       <div>
                                         <h3 className="font-extrabold text-transparent bg-gradient-to-r from-yellow-300 via-indigo-200 to-amber-300 bg-clip-text text-lg font-display flex items-center gap-2">
@@ -14991,7 +14991,7 @@ ${ttNotes}`
                                           schedule adherence
                                         </p>
                                       </div>
-                                      <span className="px-2 py-0.5 text-[9px] font-black uppercase tracking-widest bg-yellow-500/10 text-yellow-500 rounded border border-yellow-500/20 font-mono">
+                                      <span className="px-2 py-0.5 text-xs font-black uppercase tracking-widest bg-yellow-500/10 text-yellow-500 rounded border border-yellow-500/20 font-mono">
                                         Gamified Arena
                                       </span>
                                     </div>
@@ -14999,7 +14999,7 @@ ${ttNotes}`
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                       {/* Podium Top 3 */}
                                       <div className="bg-transparent p-4 rounded-2xl border border-white/5 space-y-3.5 flex flex-col justify-center">
-                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider font-mono">
+                                        <p className="text-xs text-slate-500 font-bold uppercase tracking-wider font-mono">
                                           Today's Prestige Podium
                                         </p>
                                         {(() => {
@@ -15089,12 +15089,12 @@ ${ttNotes}`
                                                 <div className="flex flex-col items-center space-y-2">
                                                   <div className="w-10 h-10 rounded-full bg-slate-400/20 border-2 border-slate-700 flex items-center justify-center font-bold text-slate-100 text-sm relative"></div>
                                                   <div className="bg-gradient-to-t from-slate-400/10 to-slate-400/20 border border-slate-400/20 rounded-t-xl p-2 w-full text-center space-y-0.5">
-                                                    <p className="text-[10px] font-black text-slate-200 truncate">
+                                                    <p className="text-xs font-black text-slate-200 truncate">
                                                       {formatAgentName(
                                                         top3[1].name,
                                                       )}
                                                     </p>
-                                                    <p className="text-[9px] text-slate-400 font-bold font-mono">
+                                                    <p className="text-xs text-slate-400 font-bold font-mono">
                                                       {top3[1].xp} XP
                                                     </p>
                                                   </div>
@@ -15104,14 +15104,14 @@ ${ttNotes}`
                                               {/* 1st Place */}
                                               {top3[0] && (
                                                 <div className="flex flex-col items-center space-y-2">
-                                                  <div className="w-12 h-12 rounded-full bg-yellow-400/20 border-2 border-yellow-400 flex items-center justify-center font-bold text-slate-100 text-base relative -top-1 shadow-lg shadow-yellow-500/10"></div>
+                                                  <div className="w-12 h-12 rounded-full bg-yellow-400/20 border-2 border-yellow-400 flex items-center justify-center font-bold text-slate-100 text-base relative -top-1 shadow-sm shadow-yellow-500/10"></div>
                                                   <div className="bg-gradient-to-t from-yellow-500/10 to-yellow-500/20 border border-yellow-400/30 rounded-t-2xl p-3 w-full text-center space-y-0.5 scale-105 relative z-10">
                                                     <p className="text-xs font-black text-yellow-300 truncate">
                                                       {formatAgentName(
                                                         top3[0].name,
                                                       )}
                                                     </p>
-                                                    <p className="text-[10px] text-yellow-400 font-extrabold font-mono">
+                                                    <p className="text-xs text-yellow-400 font-extrabold font-mono">
                                                       {top3[0].xp} XP
                                                     </p>
                                                   </div>
@@ -15123,12 +15123,12 @@ ${ttNotes}`
                                                 <div className="flex flex-col items-center space-y-2">
                                                   <div className="w-9 h-9 rounded-full bg-amber-600/20 border-2 border-amber-600 flex items-center justify-center font-bold text-slate-100 text-xs relative"></div>
                                                   <div className="bg-gradient-to-t from-amber-600/10 to-amber-600/20 border border-amber-600/20 rounded-t-xl p-2 w-full text-center space-y-0.5">
-                                                    <p className="text-[9px] font-black text-amber-300 truncate">
+                                                    <p className="text-xs font-black text-amber-300 truncate">
                                                       {formatAgentName(
                                                         top3[2].name,
                                                       )}
                                                     </p>
-                                                    <p className="text-[9px] text-slate-400 font-bold font-mono">
+                                                    <p className="text-xs text-slate-400 font-bold font-mono">
                                                       {top3[2].xp} XP
                                                     </p>
                                                   </div>
@@ -15141,7 +15141,7 @@ ${ttNotes}`
 
                                       {/* Ranks list view */}
                                       <div className="bg-white/[0.03] p-4 rounded-2xl border border-white/5 space-y-2.5">
-                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider font-mono">
+                                        <p className="text-xs text-slate-500 font-bold uppercase tracking-wider font-mono">
                                           Operations Leaderboard Rankings
                                         </p>
                                         <div className="space-y-1.5 max-h-[160px] overflow-y-auto pr-1">
@@ -15232,22 +15232,22 @@ ${ttNotes}`
                                                 return (
                                                   <div
                                                     key={row.name}
-                                                    className="flex justify-between items-center bg-white/10 backdrop-blur-md/[0.02] border border-white/5 p-2 rounded-xl text-xs font-sans"
+                                                    className="flex justify-between items-center bg-white/10 /[0.02] border border-white/5 p-2 rounded-xl text-xs font-sans"
                                                   >
                                                     <div className="flex items-center gap-2.5">
-                                                      <span className="font-mono text-[10px] w-4 text-center text-slate-500 font-bold">
+                                                      <span className="font-mono text-xs w-4 text-center text-slate-500 font-bold">
                                                         #{rankIndex + 1}
                                                       </span>
                                                       <div className="text-left font-sans">
                                                         <p className="font-bold text-slate-100 leading-normal">
                                                           {row.name}
                                                         </p>
-                                                        <p className="text-[8px] text-slate-400 uppercase font-mono tracking-wider">
+                                                        <p className="text-xs text-slate-400 uppercase font-mono tracking-wider">
                                                           {row.lob}
                                                         </p>
                                                       </div>
                                                     </div>
-                                                    <span className="font-mono font-black text-[#22d3ee] bg-[#22d3ee]/10 border border-[#22d3ee]/20 px-2 py-0.5 rounded-lg text-[9px]">
+                                                    <span className="font-mono font-black text-[#22d3ee] bg-[#22d3ee]/10 border border-[#22d3ee]/20 px-2 py-0.5 rounded-xl text-xs">
                                                       {row.xp} XP
                                                     </span>
                                                   </div>
@@ -15262,7 +15262,7 @@ ${ttNotes}`
                                   {/* Operational Performance Core Ring & KPI Grid */}
                                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                                     {/* Overall composite score circle gauge */}
-                                    <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl flex flex-col items-center justify-center text-center">
+                                    <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-2xl p-6  flex flex-col items-center justify-center text-center">
                                       <p className="text-slate-400 text-xs font-black uppercase tracking-wider mb-4">
                                         Day Resolve Efficiency
                                       </p>
@@ -15321,7 +15321,7 @@ ${ttNotes}`
                                               : 0}
                                             %
                                           </span>
-                                          <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">
+                                          <span className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-0.5">
                                             Completed
                                           </span>
                                         </div>
@@ -15336,13 +15336,13 @@ ${ttNotes}`
                                     {/* 2x2 metric micro scorecard grid */}
                                     <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                       {/* 1. Inquiries */}
-                                      <div className="p-5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md hover:border-white/20 transition-all flex flex-col justify-between">
+                                      <div className="p-5 bg-white/5 border border-white/10 rounded-2xl  hover:border-white/20 transition-all flex flex-col justify-between">
                                         <div>
                                           <div className="flex justify-between items-start">
                                             <span className="p-2 bg-blue-500/15 text-blue-400 rounded-2xl border border-blue-500/20">
                                               <HelpCircle className="w-5 h-5" />
                                             </span>
-                                            <span className="text-right text-[10px] font-black uppercase tracking-widest text-[#38bdf8] bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">
+                                            <span className="text-right text-xs font-black uppercase tracking-widest text-[#38bdf8] bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">
                                               {!isNaN(
                                                 Math.round(resolutionRate),
                                               )
@@ -15368,7 +15368,7 @@ ${ttNotes}`
                                             <p className="text-slate-100 font-black font-mono">
                                               {answeredInquiries.length}
                                             </p>
-                                            <p className="text-[10px] text-slate-400">
+                                            <p className="text-xs text-slate-400">
                                               Answered
                                             </p>
                                           </div>
@@ -15378,7 +15378,7 @@ ${ttNotes}`
                                                 ? `${!isNaN(Math.round(avgResTimeMin)) ? Math.round(avgResTimeMin) : 0}m`
                                                 : "-"}
                                             </p>
-                                            <p className="text-[10px] text-slate-400">
+                                            <p className="text-xs text-slate-400">
                                               Avg Speed of Answer
                                             </p>
                                           </div>
@@ -15386,13 +15386,13 @@ ${ttNotes}`
                                       </div>
 
                                       {/* 2. Fintech Integration */}
-                                      <div className="p-5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md hover:border-white/20 transition-all flex flex-col justify-between">
+                                      <div className="p-5 bg-white/5 border border-white/10 rounded-2xl  hover:border-white/20 transition-all flex flex-col justify-between">
                                         <div>
                                           <div className="flex justify-between items-start">
                                             <span className="p-2 bg-amber-500/15 text-amber-400 rounded-2xl border border-amber-500/20">
                                               <Wallet className="w-5 h-5" />
                                             </span>
-                                            <span className="text-right text-[10px] font-black uppercase tracking-widest text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
+                                            <span className="text-right text-xs font-black uppercase tracking-widest text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
                                               {!isNaN(Math.round(fintechRate))
                                                 ? Math.round(fintechRate)
                                                 : 0}
@@ -15416,7 +15416,7 @@ ${ttNotes}`
                                             <p className="text-slate-100 font-black font-mono">
                                               {confirmedFintech.length}
                                             </p>
-                                            <p className="text-[10px] text-slate-400">
+                                            <p className="text-xs text-slate-400">
                                               Approved
                                             </p>
                                           </div>
@@ -15436,7 +15436,7 @@ ${ttNotes}`
                                               }
                                               M
                                             </p>
-                                            <p className="text-[10px] text-slate-400">
+                                            <p className="text-xs text-slate-400">
                                               Platform Shares
                                             </p>
                                           </div>
@@ -15444,13 +15444,13 @@ ${ttNotes}`
                                       </div>
 
                                       {/* 3. Complaints & Comm Requests */}
-                                      <div className="p-5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md hover:border-white/20 transition-all flex flex-col justify-between">
+                                      <div className="p-5 bg-white/5 border border-white/10 rounded-2xl  hover:border-white/20 transition-all flex flex-col justify-between">
                                         <div>
                                           <div className="flex justify-between items-start">
                                             <span className="p-2 bg-rose-500/15 text-rose-400 rounded-2xl border border-rose-500/20">
                                               <MessageSquare className="w-5 h-5" />
                                             </span>
-                                            <span className="text-right text-[10px] font-black uppercase tracking-widest text-rose-300 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-full">
+                                            <span className="text-right text-xs font-black uppercase tracking-widest text-rose-300 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-full">
                                               {opComplaints.length > 0
                                                 ? `${Math.round((closedComplaints.length / opComplaints.length) * 100)}%`
                                                 : "100%"}{" "}
@@ -15474,7 +15474,7 @@ ${ttNotes}`
                                             <p className="text-slate-100 font-black font-mono">
                                               {closedComplaints.length}
                                             </p>
-                                            <p className="text-[10px] text-slate-400">
+                                            <p className="text-xs text-slate-400">
                                               Resolved
                                             </p>
                                           </div>
@@ -15487,7 +15487,7 @@ ${ttNotes}`
                                                 ).length
                                               }
                                             </p>
-                                            <p className="text-[10px] text-slate-400">
+                                            <p className="text-xs text-slate-400">
                                               Awaiting TL Review
                                             </p>
                                           </div>
@@ -15495,13 +15495,13 @@ ${ttNotes}`
                                       </div>
 
                                       {/* 4. Client Communication requests */}
-                                      <div className="p-5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md hover:border-white/20 transition-all flex flex-col justify-between">
+                                      <div className="p-5 bg-white/5 border border-white/10 rounded-2xl  hover:border-white/20 transition-all flex flex-col justify-between">
                                         <div>
                                           <div className="flex justify-between items-start">
                                             <span className="p-2 bg-indigo-500/15 text-indigo-400 rounded-2xl border border-indigo-500/20">
                                               <MessageCircle className="w-5 h-5" />
                                             </span>
-                                            <span className="text-right text-[10px] font-black uppercase tracking-widest text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full">
+                                            <span className="text-right text-xs font-black uppercase tracking-widest text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full">
                                               {opComms.length > 0
                                                 ? `${Math.round((contactedComms.length / opComms.length) * 100)}%`
                                                 : "100%"}{" "}
@@ -15525,7 +15525,7 @@ ${ttNotes}`
                                             <p className="text-slate-100 font-black font-mono">
                                               {contactedComms.length}
                                             </p>
-                                            <p className="text-[10px] text-slate-400">
+                                            <p className="text-xs text-slate-400">
                                               Assigned & Dialed
                                             </p>
                                           </div>
@@ -15537,7 +15537,7 @@ ${ttNotes}`
                                                 ).length
                                               }
                                             </p>
-                                            <p className="text-[10px] text-slate-400">
+                                            <p className="text-xs text-slate-400">
                                               Unassigned Backlog
                                             </p>
                                           </div>
@@ -15546,7 +15546,7 @@ ${ttNotes}`
 
                                       {/* 5. QA Performance */}
                                       <div
-                                        className="p-5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md hover:border-green-500/30 transition-all flex flex-col justify-between cursor-pointer"
+                                        className="p-5 bg-white/5 border border-white/10 rounded-2xl  hover:border-green-500/30 transition-all flex flex-col justify-between cursor-pointer"
                                         onClick={() =>
                                           setActiveTab("qa-scorecard")
                                         }
@@ -15556,7 +15556,7 @@ ${ttNotes}`
                                             <span className="p-2 bg-green-500/15 text-green-400 rounded-2xl border border-green-500/20">
                                               <ShieldCheck className="w-5 h-5" />
                                             </span>
-                                            <span className="text-right text-[10px] font-black uppercase tracking-widest text-green-300 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">
+                                            <span className="text-right text-xs font-black uppercase tracking-widest text-green-300 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">
                                               QA Metrics
                                             </span>
                                           </div>
@@ -15613,7 +15613,7 @@ ${ttNotes}`
                                                   <p className="text-slate-100 font-black font-mono">
                                                     {qasLength}
                                                   </p>
-                                                  <p className="text-[10px] text-slate-400">
+                                                  <p className="text-xs text-slate-400">
                                                     Total Evaluations Today
                                                   </p>
                                                 </>
@@ -15626,7 +15626,7 @@ ${ttNotes}`
                                   </div>
 
                                   {/* Hourly Load Distribution SVG Interactive Chart */}
-                                  <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl">
+                                  <div className="bg-white/5 border border-white/10 rounded-2xl p-6 ">
                                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                                       <div>
                                         <h3 className="text-lg font-black text-slate-100 font-display">
@@ -15640,7 +15640,7 @@ ${ttNotes}`
                                       </div>
 
                                       {/* Interactive Selector for metric inside SVG chart */}
-                                      <div className="flex items-center gap-1.5 bg-white/5 backdrop-blur-xl border border-white/10 p-1 rounded-xl">
+                                      <div className="flex items-center gap-1.5 bg-white/5  border border-white/10 p-1 rounded-xl">
                                         {(
                                           [
                                             "all",
@@ -15654,10 +15654,10 @@ ${ttNotes}`
                                             onClick={() =>
                                               setDashboardChartMetric(m)
                                             }
-                                            className={`px-3 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all cursor-pointer ${
+                                            className={`px-3 py-1.5 text-xs font-black uppercase rounded-xl transition-all cursor-pointer ${
                                               dashboardChartMetric === m
                                                 ? "bg-indigo-500 text-white"
-                                                : "text-slate-400 hover:bg-white/20 backdrop-blur-md hover:text-slate-100"
+                                                : "text-slate-400 hover:bg-white/20  hover:text-slate-100"
                                             }`}
                                           >
                                             {m === "all"
@@ -15823,7 +15823,7 @@ ${ttNotes}`
                                                     height="24"
                                                     className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
                                                   >
-                                                    <div className="bg-indigo-950/90 border border-indigo-400 text-slate-100 text-[9px] font-bold px-1.5 py-0.5 rounded text-center">
+                                                    <div className="bg-indigo-950/90 border border-indigo-400 text-slate-100 text-xs font-bold px-1.5 py-0.5 rounded text-center">
                                                       Value: {pt.val}
                                                     </div>
                                                   </foreignObject>
@@ -15835,7 +15835,7 @@ ${ttNotes}`
                                       </svg>
 
                                       {/* Chart X Axis Labels */}
-                                      <div className="absolute bottom-1.5 inset-x-0 flex justify-between px-1 text-[9px] font-black text-slate-400 font-mono tracking-tight">
+                                      <div className="absolute bottom-1.5 inset-x-0 flex justify-between px-1 text-xs font-black text-slate-400 font-mono tracking-tight">
                                         {hourlyCounts.map((hc, idx) => (
                                           <span
                                             key={idx}
@@ -15857,13 +15857,13 @@ ${ttNotes}`
                                   {/* Left Column: LOB speed table, Right Column: Agent shift timeline / roster */}
                                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                                     {/* LOB Performance Card */}
-                                    <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl flex flex-col justify-between">
+                                    <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-2xl p-6  flex flex-col justify-between">
                                       <div>
                                         <h3 className="text-base font-black text-slate-100 font-display flex items-center gap-2">
                                           <Activity className="w-4 h-4 text-cyan-400" />
                                           Channels & LOB Statistics
                                         </h3>
-                                        <p className="text-[11px] text-slate-400 mt-0.5">
+                                        <p className="text-xs text-slate-400 mt-0.5">
                                           Performance segmented by work
                                           divisions and lines of business for
                                           this operational day
@@ -15976,7 +15976,7 @@ ${ttNotes}`
 
                                       {/* Daily Schedule & Absenteeism Analysis */}
                                       <div className="mt-6 p-5 bg-white/5 border border-white/10 rounded-2xl">
-                                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                                        <p className="text-xs text-slate-400 font-black uppercase tracking-wider mb-3 flex items-center gap-1.5">
                                           <Clock className="w-3.5 h-3.5 text-indigo-400" />
                                           Daily Roster & Absenteeism
                                         </p>
@@ -16108,16 +16108,16 @@ ${ttNotes}`
 
                                               {/* Metric Badges Grid */}
                                               <div className="grid grid-cols-2 gap-2.5 pt-1.5">
-                                                <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl">
-                                                  <span className="text-[10px] uppercase font-black text-slate-500 tracking-wider">
+                                                <div className="p-3 bg-white/5  border border-white/10 rounded-xl">
+                                                  <span className="text-xs uppercase font-black text-slate-500 tracking-wider">
                                                     Scheduled
                                                   </span>
                                                   <p className="text-xl font-mono text-slate-100 font-black mt-0.5">
                                                     {totalScheduled}
                                                   </p>
                                                 </div>
-                                                <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl">
-                                                  <span className="text-[10px] uppercase font-black text-slate-500 tracking-wider">
+                                                <div className="p-3 bg-white/5  border border-white/10 rounded-xl">
+                                                  <span className="text-xs uppercase font-black text-slate-500 tracking-wider">
                                                     Present
                                                   </span>
                                                   <p className="text-xl font-mono text-emerald-400 font-black mt-0.5">
@@ -16125,7 +16125,7 @@ ${ttNotes}`
                                                   </p>
                                                 </div>
                                                 <div className="p-3 bg-rose-500/10 border border-rose-500/15 rounded-xl">
-                                                  <span className="text-[10px] uppercase font-black text-rose-300 tracking-wider">
+                                                  <span className="text-xs uppercase font-black text-rose-300 tracking-wider">
                                                     Absentees
                                                   </span>
                                                   <p className="text-xl font-mono text-rose-400 font-black mt-0.5">
@@ -16133,7 +16133,7 @@ ${ttNotes}`
                                                   </p>
                                                 </div>
                                                 <div className="p-3 bg-indigo-500/10 border border-indigo-500/15 rounded-xl">
-                                                  <span className="text-[10px] uppercase font-black text-indigo-300 tracking-wider">
+                                                  <span className="text-xs uppercase font-black text-indigo-300 tracking-wider">
                                                     Approved Leave
                                                   </span>
                                                   <p className="text-xl font-mono text-indigo-400 font-black mt-0.5">
@@ -16145,7 +16145,7 @@ ${ttNotes}`
                                               {/* Breakdown on Absentee Agent names */}
                                               {absenteeCount > 0 && (
                                                 <div className="mt-2.5 p-3 bg-rose-950/20 border border-rose-500/20 rounded-xl">
-                                                  <p className="text-[10px] font-black uppercase text-rose-300 tracking-widest mb-1.5 flex items-center gap-1">
+                                                  <p className="text-xs font-black uppercase text-rose-300 tracking-widest mb-1.5 flex items-center gap-1">
                                                     <span className="w-1.5 h-1.5 bg-rose-400 rounded-full animate-pulse" />
                                                     Flagged Absentees:
                                                   </p>
@@ -16165,7 +16165,7 @@ ${ttNotes}`
                                             return absents.map((node) => (
                                               <span
                                                 key={node.id}
-                                                className="px-2 py-0.5 bg-rose-500/10 border border-rose-500/20 text-rose-300 rounded font-mono text-[9px] font-bold"
+                                                className="px-2 py-0.5 bg-rose-500/10 border border-rose-500/20 text-rose-300 rounded font-mono text-xs font-bold"
                                               >
                                                 {node.agentName}
                                               </span>
@@ -16176,7 +16176,7 @@ ${ttNotes}`
                                     </div>
 
                                     {/* Agent roster attendance statistics table with elegant slider timelines */}
-                                    <div className="lg:col-span-8 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl">
+                                    <div className="lg:col-span-8 bg-white/5 border border-white/10 rounded-2xl p-6 ">
                                       <h3 className="text-base font-black text-slate-100 font-display flex items-center gap-2 mb-2">
                                         <Users className="w-4 h-4 text-cyan-400 animate-pulse" />
                                         On-Duty Roster Timeline (
@@ -16191,7 +16191,7 @@ ${ttNotes}`
                                       <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
                                         <table className="w-full text-left border-collapse">
                                           <thead>
-                                            <tr className="border-b border-white/10 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                            <tr className="border-b border-white/10 text-xs font-bold uppercase tracking-wider text-slate-400">
                                               <th className="pb-3 text-slate-100">
                                                 Agent
                                               </th>
@@ -16305,17 +16305,17 @@ ${ttNotes}`
                                                 return (
                                                   <tr
                                                     key={log.id}
-                                                    className="hover:bg-white/20 backdrop-blur-md transition-colors"
+                                                    className="hover:bg-white/20  transition-colors"
                                                   >
                                                     <td className="py-3 font-bold text-slate-100 whitespace-nowrap">
                                                       {log.agentName}
                                                     </td>
                                                     <td className="py-3 whitespace-nowrap">
-                                                      <span className="px-2 py-0.5 rounded-full text-[9px] font-bold tracking-tight bg-white/5 text-slate-300">
+                                                      <span className="px-2 py-0.5 rounded-full text-xs font-bold tracking-tight bg-white/5 text-slate-300">
                                                         {agentLOB}
                                                       </span>
                                                     </td>
-                                                    <td className="py-3 font-mono text-[11px] whitespace-nowrap">
+                                                    <td className="py-3 font-mono text-xs whitespace-nowrap">
                                                       {displayInterval}
                                                     </td>
                                                     <td className="py-3 text-center font-mono font-bold text-slate-100 whitespace-nowrap">
@@ -16379,8 +16379,8 @@ ${ttNotes}`
 
                         {/* High Fidelity Performance Indicators */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm shadow-md">
-                            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">
+                          <div className="p-4 bg-white/5 border border-white/10 rounded-2xl  shadow-md">
+                            <p className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1">
                               Pending Swaps
                             </p>
                             <p className="text-4xl font-black text-slate-100">
@@ -16396,8 +16396,8 @@ ${ttNotes}`
                             </div>
                           </div>
 
-                          <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm shadow-md">
-                            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">
+                          <div className="p-4 bg-white/5 border border-white/10 rounded-2xl  shadow-md">
+                            <p className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1">
                               Annual Leaves
                             </p>
                             <p className="text-4xl font-black text-slate-100">
@@ -16413,8 +16413,8 @@ ${ttNotes}`
                             </div>
                           </div>
 
-                          <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm shadow-md">
-                            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">
+                          <div className="p-4 bg-white/5 border border-white/10 rounded-2xl  shadow-md">
+                            <p className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1">
                               Approved Monthly
                             </p>
                             <p className="text-4xl font-black text-slate-100">
@@ -16430,8 +16430,8 @@ ${ttNotes}`
                             </div>
                           </div>
 
-                          <div className="p-4 bg-white/10 backdrop-blur-md/6 border border-white/10 rounded-2xl backdrop-blur-sm shadow-md">
-                            <p className="text-[10px] uppercase tracking-widest text-rose-400 font-bold mb-1">
+                          <div className="p-4 bg-white/10 /6 border border-white/10 rounded-2xl  shadow-md">
+                            <p className="text-xs uppercase tracking-widest text-rose-400 font-bold mb-1">
                               Violations Blocked
                             </p>
                             <p className="text-4xl font-black text-rose-300">
@@ -16449,7 +16449,7 @@ ${ttNotes}`
                         </div>
 
                         {/* Operations Live Wallboard & SLA Gauge */}
-                        <div className="bg-white/5 border border-white/10 rounded-2xl shadow-sm text-slate-100 p-6 shadow-2xl space-y-6">
+                        <div className="bg-white/5 border border-white/10 rounded-2xl shadow-sm text-slate-100 p-6 shadow space-y-6">
                           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-4">
                             <div>
                               <h3 className="font-extrabold text-transparent bg-gradient-to-r from-blue-300 via-indigo-200 to-cyan-300 bg-clip-text text-lg font-display flex items-center gap-2">
@@ -16461,7 +16461,7 @@ ${ttNotes}`
                                 Metrics, and AUX Occupancy
                               </p>
                             </div>
-                            <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-[10px] font-black uppercase text-emerald-400 font-mono tracking-wider">
+                            <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-black uppercase text-emerald-400 font-mono tracking-wider">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                               Synchronized Feed
                             </div>
@@ -16469,12 +16469,12 @@ ${ttNotes}`
 
                           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             {/* SLA Gauge - SVG Circle representation */}
-                            <div className="p-5 bg-white/10 backdrop-blur-md/[0.02] border border-white/5 rounded-2xl flex flex-col justify-between space-y-4">
+                            <div className="p-5 bg-white/10 /[0.02] border border-white/5 rounded-2xl flex flex-col justify-between space-y-4">
                               <div className="text-left">
-                                <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+                                <p className="text-xs uppercase font-bold text-slate-500 tracking-wider">
                                   Inquiry Queue SLA
                                 </p>
-                                <p className="text-[11px] text-slate-400 mt-0.5 font-sans">
+                                <p className="text-xs text-slate-400 mt-0.5 font-sans">
                                   Target: &gt;95% within 2 min Response Goal
                                 </p>
                               </div>
@@ -16524,7 +16524,7 @@ ${ttNotes}`
                                   <span className="text-2xl font-black text-slate-100 font-mono">
                                     96.4%
                                   </span>
-                                  <p className="text-[9px] text-indigo-300 font-bold uppercase tracking-wider mt-0.5">
+                                  <p className="text-xs text-indigo-300 font-bold uppercase tracking-wider mt-0.5">
                                     Met Goal
                                   </p>
                                 </div>
@@ -16541,13 +16541,13 @@ ${ttNotes}`
                             </div>
 
                             {/* Live Queue Monitor (Simulator Interface) */}
-                            <div className="p-5 bg-white/10 backdrop-blur-md/[0.02] border border-white/5 rounded-2xl space-y-4 flex flex-col justify-between">
+                            <div className="p-5 bg-white/10 /[0.02] border border-white/5 rounded-2xl space-y-4 flex flex-col justify-between">
                               <div className="flex justify-between items-start">
                                 <div className="text-left">
-                                  <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+                                  <p className="text-xs uppercase font-bold text-slate-500 tracking-wider">
                                     Simulated In-Flow Queue
                                   </p>
-                                  <p className="text-[11px] text-slate-400 mt-0.5 font-sans">
+                                  <p className="text-xs text-slate-400 mt-0.5 font-sans">
                                     Trigger mock client events to check
                                     operational response
                                   </p>
@@ -16556,7 +16556,7 @@ ${ttNotes}`
 
                               <div className="grid grid-cols-3 gap-2.5">
                                 <div className="bg-transparent p-2.5 rounded-xl border border-white/5 text-center">
-                                  <p className="text-[9px] text-slate-400 font-bold uppercase font-sans">
+                                  <p className="text-xs text-slate-400 font-bold uppercase font-sans">
                                     Active Calls
                                   </p>
                                   <p className="text-lg font-black text-rose-450 font-mono mt-0.5 animate-pulse">
@@ -16564,7 +16564,7 @@ ${ttNotes}`
                                   </p>
                                 </div>
                                 <div className="bg-transparent p-2.5 rounded-xl border border-white/5 text-center">
-                                  <p className="text-[9px] text-slate-400 font-bold uppercase font-sans">
+                                  <p className="text-xs text-slate-400 font-bold uppercase font-sans">
                                     Hold Time
                                   </p>
                                   <p className="text-lg font-black text-amber-300 font-mono mt-0.5">
@@ -16572,7 +16572,7 @@ ${ttNotes}`
                                   </p>
                                 </div>
                                 <div className="bg-transparent p-2.5 rounded-xl border border-white/5 text-center">
-                                  <p className="text-[9px] text-slate-400 font-bold uppercase font-sans">
+                                  <p className="text-xs text-slate-400 font-bold uppercase font-sans">
                                     Tasks open
                                   </p>
                                   <p className="text-lg font-black text-[#22d3ee] font-mono mt-0.5">
@@ -16653,17 +16653,17 @@ ${ttNotes}`
                             </div>
 
                             {/* Live Action/Audit Ticker Console Logs */}
-                            <div className="p-5 bg-white/10 backdrop-blur-md/[0.02] border border-white/5 rounded-2xl flex flex-col justify-between space-y-3">
+                            <div className="p-5 bg-white/10 /[0.02] border border-white/5 rounded-2xl flex flex-col justify-between space-y-3">
                               <div className="text-left">
-                                <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+                                <p className="text-xs uppercase font-bold text-slate-500 tracking-wider">
                                   Live Activity Log
                                 </p>
-                                <p className="text-[11px] text-slate-400 mt-0.5 font-sans">
+                                <p className="text-xs text-slate-400 mt-0.5 font-sans">
                                   Operations system ledger output
                                 </p>
                               </div>
 
-                              <div className="bg-white/[0.04] p-3 rounded-xl border border-white/5 text-left font-mono text-[10px] space-y-1.5 h-24 overflow-y-auto leading-snug">
+                              <div className="bg-white/[0.04] p-3 rounded-xl border border-white/5 text-left font-mono text-xs space-y-1.5 h-24 overflow-y-auto leading-snug">
                                 {liveOpsLogs.map((logStr, index) => {
                                   const isLive =
                                     logStr.includes("[Operational]");
@@ -16717,8 +16717,8 @@ ${ttNotes}`
                                     .length || 1;
 
                                 return (
-                                  <div className="flex flex-col gap-1.5 text-[10px] font-sans">
-                                    <p className="text-slate-400 font-bold uppercase tracking-wider text-left text-[9px] mb-0.5">
+                                  <div className="flex flex-col gap-1.5 text-xs font-sans">
+                                    <p className="text-slate-400 font-bold uppercase tracking-wider text-left text-xs mb-0.5">
                                       Aux Occupancy ({activeTotal} Active on
                                       Shift)
                                     </p>
@@ -16759,7 +16759,7 @@ ${ttNotes}`
                                         title={`Restroom AUX: ${activeAUXRestroom}`}
                                       />
                                     </div>
-                                    <div className="flex flex-wrap gap-x-2.5 gap-y-1 font-mono text-[9px] text-slate-400 mt-1">
+                                    <div className="flex flex-wrap gap-x-2.5 gap-y-1 font-mono text-xs text-slate-400 mt-1">
                                       <span className="flex items-center gap-1">
                                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />{" "}
                                         On-Duty: {activeOnDuty}
@@ -16785,7 +16785,7 @@ ${ttNotes}`
                         </div>
 
                         {/* Immediate Approval Queue Panel */}
-                        <div className="bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl flex flex-col shadow-2xl overflow-hidden">
+                        <div className="bg-white/5 border border-white/10 rounded-2xl  flex flex-col shadow overflow-hidden">
                           <div className="p-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 gap-3">
                             <div>
                               <h3 className="font-bold text-slate-100 text-lg font-display">
@@ -16798,7 +16798,7 @@ ${ttNotes}`
                             </div>
                             <div className="flex gap-4 items-center">
                               {selectedPendingRequests.size > 0 && (
-                                <div className="flex items-center gap-2 mr-4 bg-indigo-500/10 px-3 py-1.5 rounded-lg border border-indigo-500/20">
+                                <div className="flex items-center gap-2 mr-4 bg-indigo-500/10 px-3 py-1.5 rounded-xl border border-indigo-500/20">
                                   <span className="text-xs font-bold text-indigo-300 mr-2">
                                     {selectedPendingRequests.size} Selected
                                   </span>
@@ -16810,7 +16810,7 @@ ${ttNotes}`
                                       );
                                       setSelectedPendingRequests(new Set());
                                     }}
-                                    className="px-2.5 py-1 bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-[10px] uppercase rounded transition-colors shadow"
+                                    className="px-2.5 py-1 bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs uppercase rounded transition-colors shadow"
                                   >
                                     Approve All
                                   </button>
@@ -16822,17 +16822,17 @@ ${ttNotes}`
                                       );
                                       setSelectedPendingRequests(new Set());
                                     }}
-                                    className="px-2.5 py-1 bg-rose-500 hover:bg-rose-400 text-white font-bold text-[10px] uppercase rounded transition-colors shadow"
+                                    className="px-2.5 py-1 bg-rose-500 hover:bg-rose-400 text-white font-bold text-xs uppercase rounded transition-colors shadow"
                                   >
                                     Decline All
                                   </button>
                                 </div>
                               )}
-                              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-blue-300 bg-blue-500/10 px-2 py-1 rounded">
+                              <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-blue-300 bg-blue-500/10 px-2 py-1 rounded">
                                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>{" "}
                                 Swap (24h Requirement)
                               </div>
-                              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-emerald-300 bg-emerald-500/10 px-2 py-1 rounded">
+                              <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-emerald-300 bg-emerald-500/10 px-2 py-1 rounded">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>{" "}
                                 Annual (14d Requirement)
                               </div>
@@ -16841,12 +16841,12 @@ ${ttNotes}`
 
                           <div className="overflow-x-auto w-full -mx-4 px-4 sm:mx-0 sm:px-0">
                             <table className="w-full text-left min-w-[700px]">
-                              <thead className="text-[10px] uppercase tracking-widest text-slate-400 border-b border-white/5 bg-[#1e1e1e]/40 backdrop-blur-lg/40">
+                              <thead className="text-xs uppercase tracking-widest text-slate-400 border-b border-white/5 bg-slate-900/40 /40">
                                 <tr>
                                   <th className="px-6 py-4 font-bold max-w-[20px]">
                                     <input
                                       type="checkbox"
-                                      className="w-4 h-4 rounded border-slate-700 bg-white/10 backdrop-blur-md text-indigo-500 cursor-pointer"
+                                      className="w-4 h-4 rounded border-slate-700 bg-white/10  text-indigo-500 cursor-pointer"
                                       onChange={(e) => {
                                         if (e.target.checked) {
                                           setSelectedPendingRequests(
@@ -16932,12 +16932,12 @@ ${ttNotes}`
                                     return (
                                       <tr
                                         key={req.id}
-                                        className="border-b border-white/5 hover:bg-white/20 backdrop-blur-md transition-colors"
+                                        className="border-b border-white/5 hover:bg-white/20  transition-colors"
                                       >
                                         <td className="px-6 py-4">
                                           <input
                                             type="checkbox"
-                                            className="w-4 h-4 rounded border-slate-700 bg-white/10 backdrop-blur-md text-indigo-500 cursor-pointer"
+                                            className="w-4 h-4 rounded border-slate-700 bg-white/10  text-indigo-500 cursor-pointer"
                                             checked={selectedPendingRequests.has(
                                               req.id,
                                             )}
@@ -16957,11 +16957,11 @@ ${ttNotes}`
                                         </td>
                                         <td className="px-6 py-4">
                                           {isSwap ? (
-                                            <span className="px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-300 rounded-lg text-[10px] font-bold uppercase tracking-wider">
+                                            <span className="px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-300 rounded-xl text-xs font-bold uppercase tracking-wider">
                                               Shift Swap
                                             </span>
                                           ) : (
-                                            <span className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 rounded-lg text-[10px] font-bold uppercase tracking-wider">
+                                            <span className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 rounded-xl text-xs font-bold uppercase tracking-wider">
                                               Annual Leave
                                             </span>
                                           )}
@@ -17009,7 +17009,7 @@ ${ttNotes}`
                                                   }
                                                 </span>
                                               </p>
-                                              <p className="text-[11px] text-slate-400 italic">
+                                              <p className="text-xs text-slate-400 italic">
                                                 "
                                                 {(req as SwapRequest).notes ||
                                                   "No comments"}
@@ -17092,7 +17092,7 @@ ${ttNotes}`
                                                   "Request details copied — with beautiful emojis!",
                                                 );
                                               }}
-                                              className="p-1.5 hover:bg-white/10 text-slate-300 hover:text-slate-100 rounded-lg transition-all cursor-pointer flex items-center justify-center border border-white/5 hover:border-white/15"
+                                              className="p-1.5 hover:bg-white/10 text-slate-300 hover:text-slate-100 rounded-xl transition-all cursor-pointer flex items-center justify-center border border-white/5 hover:border-white/10"
                                               title="Copy Request details"
                                             >
                                               <Copy className="w-3.5 h-3.5" />
@@ -17161,7 +17161,7 @@ ${ttNotes}`
                                   setLogFilter("all");
                                   setLogPage(1);
                                 }}
-                                className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+                                className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-xl transition-all ${
                                   logFilter === "all"
                                     ? "bg-indigo-500 text-white shadow"
                                     : "text-slate-400 hover:text-slate-100"
@@ -17174,7 +17174,7 @@ ${ttNotes}`
                                   setLogFilter("swap");
                                   setLogPage(1);
                                 }}
-                                className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+                                className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-xl transition-all ${
                                   logFilter === "swap"
                                     ? "bg-indigo-500 text-white shadow"
                                     : "text-slate-400 hover:text-slate-100"
@@ -17187,7 +17187,7 @@ ${ttNotes}`
                                   setLogFilter("annual");
                                   setLogPage(1);
                                 }}
-                                className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+                                className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-xl transition-all ${
                                   logFilter === "annual"
                                     ? "bg-indigo-500 text-white shadow"
                                     : "text-slate-400 hover:text-slate-100"
@@ -17233,10 +17233,10 @@ ${ttNotes}`
                           </div>
 
                           {/* Logs Table */}
-                          <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-xl">
+                          <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow">
                             <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
                               <table className="w-full text-left min-w-[800px]">
-                                <thead className="text-[10px] uppercase tracking-widest text-slate-400 border-b border-white/5 bg-[#1e1e1e]/40 backdrop-blur-lg/40">
+                                <thead className="text-xs uppercase tracking-widest text-slate-400 border-b border-white/5 bg-slate-900/40 /40">
                                   <tr>
                                     <th className="px-6 py-4 font-bold">
                                       REF #
@@ -17277,9 +17277,9 @@ ${ttNotes}`
                                       return (
                                         <tr
                                           key={req.id}
-                                          className="border-b border-white/5 hover:bg-white/20 backdrop-blur-md transition-colors"
+                                          className="border-b border-white/5 hover:bg-white/20  transition-colors"
                                         >
-                                          <td className="px-6 py-4 font-mono text-[10px] text-slate-400">
+                                          <td className="px-6 py-4 font-mono text-xs text-slate-400">
                                             {formatCaseRef(
                                               req.id,
                                               "sched",
@@ -17292,11 +17292,11 @@ ${ttNotes}`
                                           </td>
                                           <td className="px-6 py-4">
                                             {isSwap ? (
-                                              <span className="px-2 py-0.5 bg-blue-500/10 text-blue-300 border border-blue-500/20 rounded-md text-[10px] font-bold uppercase">
+                                              <span className="px-2 py-0.5 bg-blue-500/10 text-blue-300 border border-blue-500/20 rounded-xl text-xs font-bold uppercase">
                                                 Shift Swap
                                               </span>
                                             ) : (
-                                              <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 rounded-md text-[10px] font-bold uppercase">
+                                              <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 rounded-xl text-xs font-bold uppercase">
                                                 Annual
                                               </span>
                                             )}
@@ -17354,33 +17354,33 @@ ${ttNotes}`
                                           </td>
                                           <td className="px-6 py-4">
                                             {req.status === "approved" && (
-                                              <span className="px-2 py-1 bg-emerald-500/20 text-emerald-300 rounded-md text-xs font-semibold flex items-center gap-1 w-max">
+                                              <span className="px-2 py-1 bg-emerald-500/20 text-emerald-300 rounded-xl text-xs font-semibold flex items-center gap-1 w-max">
                                                 <CheckCircle2 className="w-3.5 h-3.5" />{" "}
                                                 Approved
                                               </span>
                                             )}
                                             {req.status === "declined" && (
-                                              <span className="px-2 py-1 bg-rose-500/20 text-rose-300 rounded-md text-xs font-semibold flex items-center gap-1 w-max">
+                                              <span className="px-2 py-1 bg-rose-500/20 text-rose-300 rounded-xl text-xs font-semibold flex items-center gap-1 w-max">
                                                 <XCircle className="w-3.5 h-3.5" />{" "}
                                                 Declined
                                               </span>
                                             )}
                                             {req.status === "pending" && (
-                                              <span className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-md text-xs font-semibold flex items-center gap-1 w-max animate-pulse">
+                                              <span className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-xl text-xs font-semibold flex items-center gap-1 w-max animate-pulse">
                                                 <Clock className="w-3.5 h-3.5" />{" "}
                                                 Pending Approval
                                               </span>
                                             )}
                                             {req.status ===
                                               "pending_partner" && (
-                                              <span className="px-2 py-1 bg-indigo-500/20 text-indigo-300 rounded-md text-xs font-semibold flex items-center gap-1 w-max animate-pulse">
+                                              <span className="px-2 py-1 bg-indigo-500/20 text-indigo-300 rounded-xl text-xs font-semibold flex items-center gap-1 w-max animate-pulse">
                                                 <Clock className="w-3.5 h-3.5" />{" "}
                                                 Awaiting Partner
                                               </span>
                                             )}
                                             {req.status ===
                                               "declined_by_partner" && (
-                                              <span className="px-2 py-1 bg-rose-500/20 text-rose-300 rounded-md text-xs font-semibold flex items-center gap-1 w-max">
+                                              <span className="px-2 py-1 bg-rose-500/20 text-rose-300 rounded-xl text-xs font-semibold flex items-center gap-1 w-max">
                                                 <XCircle className="w-3.5 h-3.5" />{" "}
                                                 Declined by Partner
                                               </span>
@@ -17396,7 +17396,7 @@ ${ttNotes}`
                                                   </span>
                                                 </p>
                                                 {req.ruleViolation && (
-                                                  <p className="text-[10px] text-rose-400 bg-rose-500/10 p-1.5 rounded border border-rose-500/20">
+                                                  <p className="text-xs text-rose-400 bg-rose-500/10 p-1.5 rounded border border-rose-500/20">
                                                     Violation flag:{" "}
                                                     {req.violationMessage}
                                                   </p>
@@ -17435,7 +17435,7 @@ ${ttNotes}`
                                   setLogPage((p) => Math.max(1, p - 1))
                                 }
                                 disabled={logPage === 1}
-                                className="px-4 py-2 text-sm font-medium text-slate-300 bg-white/10 rounded-lg disabled:opacity-50 hover:bg-white/20 transition-all font-sans"
+                                className="px-4 py-2 text-sm font-medium text-slate-300 bg-white/10 rounded-xl disabled:opacity-50 hover:bg-white/20 transition-all font-sans"
                               >
                                 &larr; Prev
                               </button>
@@ -17447,7 +17447,7 @@ ${ttNotes}`
                                   setLogPage((p) => Math.min(totalPages, p + 1))
                                 }
                                 disabled={logPage === totalPages}
-                                className="px-4 py-2 text-sm font-medium text-slate-300 bg-white/10 rounded-lg disabled:opacity-50 hover:bg-white/20 transition-all font-sans"
+                                className="px-4 py-2 text-sm font-medium text-slate-300 bg-white/10 rounded-xl disabled:opacity-50 hover:bg-white/20 transition-all font-sans"
                               >
                                 Next &rarr;
                               </button>
@@ -17480,7 +17480,7 @@ ${ttNotes}`
                         {/* Four-Column Quad Report Actions Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                           {/* Card 1: Custom Audit timeframe summary text download */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl  flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-indigo-500/15 border border-indigo-500/20 text-indigo-400 rounded-xl flex items-center justify-center">
                                 <FileText className="w-5 h-5" />
@@ -17488,7 +17488,7 @@ ${ttNotes}`
                               <h4 className="font-bold text-slate-100 text-sm">
                                 Text Summary Audit
                               </h4>
-                              <p className="text-[11px] text-slate-400 leading-relaxed">
+                              <p className="text-xs text-slate-400 leading-relaxed">
                                 Download high-level counts and detailed audit
                                 lists of all modifications formatted in clean
                                 plain text.
@@ -17496,14 +17496,14 @@ ${ttNotes}`
                             </div>
 
                             <div className="space-y-3 pt-4">
-                              <div className="grid grid-cols-4 gap-1.5 bg-white/[0.03] p-0.5 border border-white/5 rounded-lg select-none">
+                              <div className="grid grid-cols-4 gap-1.5 bg-white/[0.03] p-0.5 border border-white/5 rounded-xl select-none">
                                 {(
                                   ["day", "week", "month", "year"] as const
                                 ).map((p) => (
                                   <button
                                     key={p}
                                     onClick={() => setReportPeriod(p)}
-                                    className={`py-1 text-[10px] font-bold rounded-md capitalize transition-all cursor-pointer ${
+                                    className={`py-1 text-xs font-bold rounded-xl capitalize transition-all cursor-pointer ${
                                       reportPeriod === p
                                         ? "bg-indigo-500 text-white shadow"
                                         : "text-slate-400 hover:text-slate-100"
@@ -17516,7 +17516,7 @@ ${ttNotes}`
 
                               <button
                                 onClick={() => downloadReportTxt(reportPeriod)}
-                                className="w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all shadow-lg flex items-center justify-center gap-1.5 cursor-pointer mt-2"
+                                className="w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer mt-2"
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 Get {reportPeriod.toUpperCase()} Text
@@ -17525,7 +17525,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 2: Master Roster Shift Swaps & Annual Leaves Export */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl  flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-blue-500/15 border border-blue-500/20 text-blue-400 rounded-xl flex items-center justify-center">
                                 <GitPullRequest className="w-5 h-5" />
@@ -17533,7 +17533,7 @@ ${ttNotes}`
                               <h4 className="font-bold text-slate-100 text-sm font-sans">
                                 Shift swaps & Leave CSV
                               </h4>
-                              <p className="text-[11px] text-slate-400 leading-relaxed">
+                              <p className="text-xs text-slate-400 leading-relaxed">
                                 Download complete records databases of all shift
                                 trades, partner-agreements, and yearly leave
                                 decisions to CSV.
@@ -17567,7 +17567,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 3: Agent Clock Timesheet Logs Export */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl  flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center">
                                 <Clock className="w-5 h-5" />
@@ -17575,7 +17575,7 @@ ${ttNotes}`
                               <h4 className="font-bold text-slate-100 text-sm">
                                 Attendance Timesheet CSV
                               </h4>
-                              <p className="text-[11px] text-slate-400 leading-relaxed">
+                              <p className="text-xs text-slate-400 leading-relaxed">
                                 Extract raw clocking punches, total break times,
                                 lunch duration metrics, and overtime violations
                                 per agent.
@@ -17608,7 +17608,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 4: Agent Inquiries & Feed Cases Export */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl  flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-purple-500/15 border border-purple-500/20 text-purple-400 rounded-xl flex items-center justify-center">
                                 <HelpCircle className="w-5 h-5" />
@@ -17616,7 +17616,7 @@ ${ttNotes}`
                               <h4 className="font-bold text-slate-100 text-sm font-sans">
                                 Inquiries & Answers CSV
                               </h4>
-                              <p className="text-[11px] text-slate-400 leading-relaxed">
+                              <p className="text-xs text-slate-400 leading-relaxed">
                                 Extract every submitted agent question,
                                 corresponding clinic name labels, forwarded
                                 timestamps, and answers.
@@ -17650,7 +17650,7 @@ ${ttNotes}`
                         {/* New rows of module exports */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                           {/* Card 5: Tabby & Tamara Fintech Requests */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl  flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-amber-500/15 border border-amber-500/20 text-amber-400 rounded-xl flex items-center justify-center">
                                 <Wallet className="w-5 h-5" />
@@ -17658,7 +17658,7 @@ ${ttNotes}`
                               <h4 className="font-bold text-slate-100 text-sm font-sans">
                                 Fintech Payments CSV
                               </h4>
-                              <p className="text-[11px] text-slate-400 leading-relaxed">
+                              <p className="text-xs text-slate-400 leading-relaxed">
                                 Extract Tabby, Tamara, and payment link
                                 applications, including amounts, customer
                                 contacts, and confirmation logs.
@@ -17677,7 +17677,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 6: General Service & Clinical Complaints */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl  flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-rose-500/15 border border-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center">
                                 <AlertTriangle className="w-5 h-5" />
@@ -17685,7 +17685,7 @@ ${ttNotes}`
                               <h4 className="font-bold text-slate-100 text-sm font-sans">
                                 Corporate Complaints CSV
                               </h4>
-                              <p className="text-[11px] text-slate-400 leading-relaxed">
+                              <p className="text-xs text-slate-400 leading-relaxed">
                                 Extract general service complaints, clinical
                                 issue descriptions, management resolution
                                 comments, and resolution status logs.
@@ -17704,7 +17704,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 7: Client Communications */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl  flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-cyan-500/15 border border-cyan-500/20 text-cyan-400 rounded-xl flex items-center justify-center">
                                 <PhoneCall className="w-5 h-5" />
@@ -17712,7 +17712,7 @@ ${ttNotes}`
                               <h4 className="font-bold text-slate-100 text-sm font-sans">
                                 Client Hotline Comms CSV
                               </h4>
-                              <p className="text-[11px] text-slate-400 leading-relaxed">
+                              <p className="text-xs text-slate-400 leading-relaxed">
                                 Extract dialect preferences, clinic assignment
                                 paths, call notes, feedback, and dispatch
                                 resolution timelines.
@@ -17731,7 +17731,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 8: Direct Case Leads */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl  flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-teal-500/15 border border-teal-500/20 text-teal-400 rounded-xl flex items-center justify-center">
                                 <ClipboardList className="w-5 h-5" />
@@ -17739,7 +17739,7 @@ ${ttNotes}`
                               <h4 className="font-bold text-slate-100 text-sm font-sans">
                                 Patient Case Leads CSV
                               </h4>
-                              <p className="text-[11px] text-slate-400 leading-relaxed">
+                              <p className="text-xs text-slate-400 leading-relaxed">
                                 Extract direct patient enquiry clinic streams,
                                 active medical helpline histories, and lead
                                 source attributes.
@@ -17758,7 +17758,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 9: Active Work Schedules */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl  flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-pink-500/15 border border-pink-500/20 text-pink-400 rounded-xl flex items-center justify-center">
                                 <Calendar className="w-5 h-5" />
@@ -17766,7 +17766,7 @@ ${ttNotes}`
                               <h4 className="font-bold text-slate-100 text-sm font-sans">
                                 Master Work Schedules CSV
                               </h4>
-                              <p className="text-[11px] text-slate-400 leading-relaxed">
+                              <p className="text-xs text-slate-400 leading-relaxed">
                                 Extract the complete master roster schedule
                                 database specifying agent names, shifts, and
                                 date assignments.
@@ -17785,7 +17785,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 11: RTM Live Attendance Summary Digest */}
-                          <div className="bg-gradient-to-br from-emerald-500/5 to-teal-500/5 border border-emerald-500/15 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-gradient-to-br from-emerald-500/5 to-teal-500/5 border border-emerald-500/15 p-5 rounded-2xl  flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center">
                                 <Activity className="w-5 h-5 text-emerald-400 animate-pulse" />
@@ -17793,7 +17793,7 @@ ${ttNotes}`
                               <h4 className="font-bold text-slate-100 text-sm font-sans">
                                 RTM Live Attendance Digest
                               </h4>
-                              <p className="text-[11px] text-slate-400 leading-relaxed">
+                              <p className="text-xs text-slate-400 leading-relaxed">
                                 Download a structured summary plain-text digest
                                 of active logged agents on lunch, restroom
                                 breaks & over-timers.
@@ -17829,7 +17829,7 @@ ${ttNotes}`
 
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             {/* Shift Swap Module */}
-                            <div className="bg-white/5 border border-white/10 p-6 rounded-2xl backdrop-blur-xl flex flex-col space-y-5 shadow-lg relative overflow-hidden">
+                            <div className="bg-white/5 border border-white/10 p-6 rounded-2xl  flex flex-col space-y-5 shadow-sm relative overflow-hidden">
                               <div className="absolute top-0 left-0 right-0 h-1 bg-blue-500"></div>
                               <div className="flex items-center gap-2.5">
                                 <div className="w-9 h-9 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center justify-center">
@@ -17858,7 +17858,7 @@ ${ttNotes}`
                               >
                                 <div className="space-y-1">
                                   <label
-                                    className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block"
+                                    className="text-xs font-bold uppercase tracking-widest text-slate-400 block"
                                     htmlFor="swap-date"
                                   >
                                     Shift Date
@@ -17878,14 +17878,14 @@ ${ttNotes}`
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                   <div className="space-y-1">
                                     <label
-                                      className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block"
+                                      className="text-xs font-bold uppercase tracking-widest text-slate-400 block"
                                       htmlFor="swap-shift"
                                     >
                                       Your Shift
                                     </label>
                                     <select
                                       id="swap-shift"
-                                      className="text-slate-100 w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl   focus:outline-none focus:border-indigo-500"
+                                      className="text-slate-100 w-full px-4 py-2.5 bg-white/5  border border-white/20 rounded-xl   focus:outline-none focus:border-indigo-500"
                                       value={swapShift}
                                       onChange={(e) =>
                                         setSwapShift(e.target.value)
@@ -17895,7 +17895,7 @@ ${ttNotes}`
                                         <option
                                           key={s.id}
                                           value={s.label}
-                                          className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                          className="bg-white/10  text-slate-100 "
                                         >
                                           {s.display} ({s.label})
                                         </option>
@@ -17905,14 +17905,14 @@ ${ttNotes}`
 
                                   <div className="space-y-1">
                                     <label
-                                      className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block"
+                                      className="text-xs font-bold uppercase tracking-widest text-slate-400 block"
                                       htmlFor="swap-target-shift"
                                     >
                                       Target Shift
                                     </label>
                                     <select
                                       id="swap-target-shift"
-                                      className="text-slate-100 w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl   focus:outline-none focus:border-indigo-500"
+                                      className="text-slate-100 w-full px-4 py-2.5 bg-white/5  border border-white/20 rounded-xl   focus:outline-none focus:border-indigo-500"
                                       value={swapTargetShift}
                                       onChange={(e) =>
                                         setSwapTargetShift(e.target.value)
@@ -17922,7 +17922,7 @@ ${ttNotes}`
                                         <option
                                           key={s.id}
                                           value={s.label}
-                                          className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                          className="bg-white/10  text-slate-100 "
                                         >
                                           {s.display} ({s.label})
                                         </option>
@@ -17933,14 +17933,14 @@ ${ttNotes}`
 
                                 <div className="space-y-1">
                                   <label
-                                    className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block"
+                                    className="text-xs font-bold uppercase tracking-widest text-slate-400 block"
                                     htmlFor="swap-partner"
                                   >
                                     Swap with Agent
                                   </label>
                                   <select
                                     id="swap-partner"
-                                    className="text-slate-100 w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-xl   focus:outline-none focus:border-indigo-500 font-medium"
+                                    className="text-slate-100 w-full px-4 py-2.5 bg-white/5  border border-white/20 rounded-xl   focus:outline-none focus:border-indigo-500 font-medium"
                                     value={swapTargetAgent}
                                     onChange={(e) =>
                                       setSwapTargetAgent(e.target.value)
@@ -17949,7 +17949,7 @@ ${ttNotes}`
                                   >
                                     <option
                                       value=""
-                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                      className="bg-white/10  text-slate-100 "
                                     >
                                       -- Select Partner Agent --
                                     </option>
@@ -17961,7 +17961,7 @@ ${ttNotes}`
                                         <option
                                           key={name}
                                           value={name}
-                                          className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                          className="bg-white/10  text-slate-100 "
                                         >
                                           {name} ({getAgentLOB(name)})
                                         </option>
@@ -17971,7 +17971,7 @@ ${ttNotes}`
 
                                 <div className="space-y-1">
                                   <label
-                                    className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block"
+                                    className="text-xs font-bold uppercase tracking-widest text-slate-400 block"
                                     htmlFor="swap-notes"
                                   >
                                     Notes / Reason
@@ -18007,7 +18007,7 @@ ${ttNotes}`
                                       <p className="font-bold">
                                         Notice Rule Violation Detected
                                       </p>
-                                      <p className="mt-0.5 text-[11px] leading-relaxed text-rose-200">
+                                      <p className="mt-0.5 text-xs leading-relaxed text-rose-200">
                                         {swapWarning}
                                       </p>
                                     </div>
@@ -18022,8 +18022,8 @@ ${ttNotes}`
                                   }
                                   className={`w-full py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
                                     swapWarning !== null || isSwapUploading
-                                      ? "bg-[#1e1e1e]/40 backdrop-blur-lg/40/20 backdrop-blur-md text-slate-500 cursor-not-allowed border border-white/5"
-                                      : "bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/25 cursor-pointer"
+                                      ? "bg-slate-900/40 /40/20  text-slate-500 cursor-not-allowed border border-white/5"
+                                      : "bg-indigo-500 hover:bg-indigo-600 text-white shadow-sm shadow-indigo-500/25 cursor-pointer"
                                   }`}
                                 >
                                   {isSwapUploading ? (
@@ -18042,7 +18042,7 @@ ${ttNotes}`
                             </div>
 
                             {/* Annual Leave Module */}
-                            <div className="bg-white/5 border border-white/10 p-6 rounded-2xl backdrop-blur-xl flex flex-col space-y-5 shadow-lg relative overflow-hidden">
+                            <div className="bg-white/5 border border-white/10 p-6 rounded-2xl  flex flex-col space-y-5 shadow-sm relative overflow-hidden">
                               <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500"></div>
                               <div className="flex items-center gap-2.5">
                                 <div className="w-9 h-9 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center">
@@ -18072,7 +18072,7 @@ ${ttNotes}`
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                   <div className="space-y-1">
                                     <label
-                                      className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block"
+                                      className="text-xs font-bold uppercase tracking-widest text-slate-400 block"
                                       htmlFor="annual-start"
                                     >
                                       Start Date
@@ -18091,7 +18091,7 @@ ${ttNotes}`
 
                                   <div className="space-y-1">
                                     <label
-                                      className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block"
+                                      className="text-xs font-bold uppercase tracking-widest text-slate-400 block"
                                       htmlFor="annual-end"
                                     >
                                       End Date (Inclusive)
@@ -18111,7 +18111,7 @@ ${ttNotes}`
 
                                 <div className="space-y-1">
                                   <label
-                                    className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block"
+                                    className="text-xs font-bold uppercase tracking-widest text-slate-400 block"
                                     htmlFor="annual-notes"
                                   >
                                     Comments / Leave justification
@@ -18147,7 +18147,7 @@ ${ttNotes}`
                                       <p className="font-bold">
                                         Notice Rule Violation Detected
                                       </p>
-                                      <p className="mt-0.5 text-[11px] leading-relaxed text-rose-200">
+                                      <p className="mt-0.5 text-xs leading-relaxed text-rose-200">
                                         {annualWarning}
                                       </p>
                                     </div>
@@ -18162,8 +18162,8 @@ ${ttNotes}`
                                   }
                                   className={`w-full py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
                                     annualWarning !== null || isAnnualUploading
-                                      ? "bg-[#1e1e1e]/40 backdrop-blur-lg/40/20 backdrop-blur-md text-slate-500 cursor-not-allowed border border-white/5"
-                                      : "bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/25 cursor-pointer"
+                                      ? "bg-slate-900/40 /40/20  text-slate-500 cursor-not-allowed border border-white/5"
+                                      : "bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm shadow-emerald-500/25 cursor-pointer"
                                   }`}
                                 >
                                   {isAnnualUploading ? (
@@ -18233,7 +18233,7 @@ ${ttNotes}`
 
                           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             {/* Submit Inquiry Form (Left Side / Col Span 1) */}
-                            <div className="lg:col-span-1 bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl space-y-5">
+                            <div className="lg:col-span-1 bg-white/5 border border-white/10 p-5 rounded-2xl  space-y-5">
                               <h3 className="text-base font-bold text-slate-100 font-display flex items-center gap-2 border-b border-white/5 pb-3">
                                 <HelpCircle className="w-5 h-5 text-indigo-400" />
                                 Submit New Inquiry
@@ -18260,7 +18260,7 @@ ${ttNotes}`
                                       </span>
                                     </span>
                                     {inquiryClinicName && (
-                                      <span className="text-[10px] text-emerald-400 font-mono font-bold uppercase">
+                                      <span className="text-xs text-emerald-400 font-mono font-bold uppercase">
                                         Passed
                                       </span>
                                     )}
@@ -18270,12 +18270,12 @@ ${ttNotes}`
                                     onChange={(e) =>
                                       setInquiryClinicName(e.target.value)
                                     }
-                                    className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
+                                    className="w-full px-4 py-3 bg-white/5  border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                     required
                                   >
                                     <option
                                       value=""
-                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                      className="bg-white/10  text-slate-100 "
                                     >
                                       -- Select Clinic * --
                                     </option>
@@ -18283,7 +18283,7 @@ ${ttNotes}`
                                       <option
                                         key={c.value}
                                         value={c.value}
-                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                        className="bg-white/10  text-slate-100 "
                                       >
                                         {c.label}
                                       </option>
@@ -18301,7 +18301,7 @@ ${ttNotes}`
                                       </span>
                                     </span>
                                     {inquiryPlatform && (
-                                      <span className="text-[10px] text-emerald-400 font-mono font-bold uppercase">
+                                      <span className="text-xs text-emerald-400 font-mono font-bold uppercase">
                                         Passed
                                       </span>
                                     )}
@@ -18311,54 +18311,54 @@ ${ttNotes}`
                                     onChange={(e) =>
                                       setInquiryPlatform(e.target.value)
                                     }
-                                    className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
+                                    className="w-full px-4 py-3 bg-white/5  border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                     required
                                   >
                                     <option
                                       value=""
-                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                      className="bg-white/10  text-slate-100 "
                                     >
                                       -- Select Platform * --
                                     </option>
                                     <option
                                       value="snapchat"
-                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                      className="bg-white/10  text-slate-100 "
                                     >
                                       Snapchat
                                     </option>
                                     <option
                                       value="whatsapp"
-                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                      className="bg-white/10  text-slate-100 "
                                     >
                                       WhatsApp
                                     </option>
                                     <option
                                       value="tiktok"
-                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                      className="bg-white/10  text-slate-100 "
                                     >
                                       TikTok
                                     </option>
                                     <option
                                       value="instagram"
-                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                      className="bg-white/10  text-slate-100 "
                                     >
                                       Instagram
                                     </option>
                                     <option
                                       value="facebook"
-                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                      className="bg-white/10  text-slate-100 "
                                     >
                                       Facebook
                                     </option>
                                     <option
                                       value="phone_call"
-                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                      className="bg-white/10  text-slate-100 "
                                     >
                                       Phone Call
                                     </option>
                                     <option
                                       value="other"
-                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                      className="bg-white/10  text-slate-100 "
                                     >
                                       Other
                                     </option>
@@ -18381,7 +18381,7 @@ ${ttNotes}`
                                     onChange={(e) =>
                                       setInquiryPatientName(e.target.value)
                                     }
-                                    className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+                                    className="w-full px-4 py-3 bg-white/5  border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                   />
                                 </div>
 
@@ -18399,7 +18399,7 @@ ${ttNotes}`
                                       onClick={() =>
                                         setInquiryCustomerType("new")
                                       }
-                                      className={`py-2 text-xs font-medium rounded-lg transition-all text-center cursor-pointer ${inquiryCustomerType === "new" ? "bg-indigo-600 text-white shadow-md font-bold" : "text-slate-400 hover:text-slate-200"}`}
+                                      className={`py-2 text-xs font-medium rounded-xl transition-all text-center cursor-pointer ${inquiryCustomerType === "new" ? "bg-indigo-600 text-white shadow-md font-bold" : "text-slate-400 hover:text-slate-200"}`}
                                     >
                                       🆕 New Customer
                                     </button>
@@ -18408,7 +18408,7 @@ ${ttNotes}`
                                       onClick={() =>
                                         setInquiryCustomerType("old")
                                       }
-                                      className={`py-2 text-xs font-medium rounded-lg transition-all text-center cursor-pointer ${inquiryCustomerType === "old" ? "bg-indigo-600 text-white shadow-md font-bold" : "text-slate-400 hover:text-slate-200"}`}
+                                      className={`py-2 text-xs font-medium rounded-xl transition-all text-center cursor-pointer ${inquiryCustomerType === "old" ? "bg-indigo-600 text-white shadow-md font-bold" : "text-slate-400 hover:text-slate-200"}`}
                                     >
                                       📂 Old Customer
                                     </button>
@@ -18432,7 +18432,7 @@ ${ttNotes}`
                                       onChange={(e) =>
                                         setInquiryFileNumber(e.target.value)
                                       }
-                                      className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+                                      className="w-full px-4 py-3 bg-white/5  border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                     />
                                   </div>
                                 )}
@@ -18478,9 +18478,9 @@ ${ttNotes}`
                                           if (val === "+971") val = "";
                                           setInquiryPhoneNumber(val);
                                         }}
-                                        className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-mono"
+                                        className="w-full px-4 py-3 bg-white/5  border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-mono"
                                       />
-                                      <p className="text-[10px] text-slate-400 mt-1">
+                                      <p className="text-xs text-slate-400 mt-1">
                                         * Please enter the number starting from 5
                                         (e.g., 501234567)
                                       </p>
@@ -18496,7 +18496,7 @@ ${ttNotes}`
                                           placeholder="@username"
                                           value={inquiryInstagram}
                                           onChange={(e) => setInquiryInstagram(e.target.value)}
-                                          className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+                                          className="w-full px-4 py-3 bg-white/5  border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                         />
                                       </div>
                                       <div className="space-y-1.5">
@@ -18508,7 +18508,7 @@ ${ttNotes}`
                                           placeholder="@username"
                                           value={inquiryTiktok}
                                           onChange={(e) => setInquiryTiktok(e.target.value)}
-                                          className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+                                          className="w-full px-4 py-3 bg-white/5  border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                         />
                                       </div>
                                     </div>
@@ -18527,7 +18527,7 @@ ${ttNotes}`
                                     onChange={(e) =>
                                       setInquiryFileId(e.target.value)
                                     }
-                                    className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+                                    className="w-full px-4 py-3 bg-white/5  border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                   />
                                 </div>
 
@@ -18542,7 +18542,7 @@ ${ttNotes}`
                                     </label>
 
                                     {/* Direction toggle options for Arabic/English */}
-                                    <div className="flex items-center gap-1 bg-white/5 backdrop-blur-xl border border-white/10 p-0.5 rounded-lg text-[10px]">
+                                    <div className="flex items-center gap-1 bg-white/5  border border-white/10 p-0.5 rounded-xl text-xs">
                                       <button
                                         type="button"
                                         onClick={() =>
@@ -18597,12 +18597,12 @@ ${ttNotes}`
                                     }
                                     rows={4}
                                     dir={inquiryLanguageDir}
-                                    className={`w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans placeholder-slate-500 resize-none ${inquiryLanguageDir === "rtl" ? "text-right" : "text-left"}`}
+                                    className={`w-full px-4 py-3 bg-white/5  border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans placeholder-slate-500 resize-none ${inquiryLanguageDir === "rtl" ? "text-right" : "text-left"}`}
                                   />
                                   {["agent", "sme"].includes(
                                     currentUser?.role as string,
                                   ) && (
-                                    <div className="text-right text-[10px] text-slate-400 mt-1 font-mono">
+                                    <div className="text-right text-xs text-slate-400 mt-1 font-mono">
                                       {inquiryText.length}/500 characters
                                     </div>
                                   )}
@@ -18611,7 +18611,7 @@ ${ttNotes}`
                                 {/* Follow-up / Schedule for Later */}
                                 <div className="space-y-3 p-3.5 bg-white/5 border border-white/5 rounded-2xl text-left">
                                   <div className="flex items-center justify-between">
-                                    <span className="text-[12px] font-bold text-slate-300">
+                                    <span className="text-sm font-bold text-slate-300">
                                       Schedule for Later Date / Follow-up?
                                     </span>
                                     <label className="relative inline-flex items-center cursor-pointer">
@@ -18621,12 +18621,12 @@ ${ttNotes}`
                                         onChange={(e) => setInqIsFollowUp(e.target.checked)}
                                         className="sr-only peer"
                                       />
-                                      <div className="w-11 h-6 bg-[#1e1e1e]/40 backdrop-blur-md peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                      <div className="w-11 h-6 bg-slate-900/40  peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                                     </label>
                                   </div>
                                   {inqIsFollowUp && (
                                     <div className="space-y-1.5 animate-fade-in pt-1 text-left">
-                                      <label className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider block">
+                                      <label className="text-xs font-bold text-indigo-400 uppercase tracking-wider block">
                                         Follow-up Date *
                                       </label>
                                       <input
@@ -18652,7 +18652,7 @@ ${ttNotes}`
                                 <button
                                   type="submit"
                                   disabled={isFormSubmitting}
-                                  className={`w-full py-2.5 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 ${isFormSubmitting ? "bg-indigo-800 pointer-events-none opacity-60" : "bg-indigo-600 hover:bg-indigo-500 shadow-indigo-500/10 active:scale-[0.98]"}`}
+                                  className={`w-full py-2.5 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5 ${isFormSubmitting ? "bg-indigo-800 pointer-events-none opacity-60" : "bg-indigo-600 hover:bg-indigo-500 shadow-indigo-500/10 active:scale-[0.98]"}`}
                                 >
                                   {isFormSubmitting ? (
                                     <>
@@ -18676,7 +18676,7 @@ ${ttNotes}`
                                 <div className="flex bg-white/5 border border-white/10 p-1.5 rounded-xl text-sm font-bold flex-wrap">
                                   <button
                                     onClick={() => setAgentInquiryView("my")}
-                                    className={`flex-1 py-2.5 rounded-lg transition-all ${agentInquiryView === "my" ? "bg-indigo-600 text-white shadow-lg" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"}`}
+                                    className={`flex-1 py-2.5 rounded-xl transition-all ${agentInquiryView === "my" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"}`}
                                   >
                                     My Submission Timeline
                                   </button>
@@ -18684,7 +18684,7 @@ ${ttNotes}`
                                     onClick={() =>
                                       setAgentInquiryView("global")
                                     }
-                                    className={`flex-1 py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 ${agentInquiryView === "global" ? "bg-indigo-600 text-white shadow-lg" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"}`}
+                                    className={`flex-1 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 ${agentInquiryView === "global" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"}`}
                                   >
                                     <Search className="w-4 h-4" />
                                     Global Inquiry History
@@ -18692,7 +18692,7 @@ ${ttNotes}`
                                 </div>
 
                                 {agentInquiryView === "my" && (
-                                  <div className="p-5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl">
+                                  <div className="p-5 bg-white/5 border border-white/10 rounded-2xl ">
                                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/5 pb-4 mb-4">
                                       <div>
                                         <h3 className="text-base font-bold text-slate-100 font-display">
@@ -18778,26 +18778,26 @@ ${ttNotes}`
                                               <div
                                                 key={inq.id}
                                                 id={`inquiry-${inq.id}`}
-                                                className="p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl space-y-3 hover:border-white/10 transition-all duration-300 overflow-hidden relative flex flex-col w-full"
+                                                className="p-4 bg-white/5  border border-white/10 rounded-2xl space-y-3 hover:border-white/10 transition-all duration-300 overflow-hidden relative flex flex-col w-full"
                                               >
                                                 {/* Top Info row */}
                                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-2">
                                                   <div className="flex flex-wrap items-center gap-2">
                                                     <span
-                                                      className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg uppercase tracking-wide shrink-0 ${statusColor}`}
+                                                      className={`px-2 py-0.5 border text-xs font-bold rounded-xl uppercase tracking-wide shrink-0 ${statusColor}`}
                                                     >
                                                       {statusText}
                                                     </span>
                                                     {inq.viewingStatus ===
                                                       "tl_viewing" && (
-                                                      <span className="px-2 py-0.5 border text-[9px] font-bold rounded-lg bg-amber-500/10 border-amber-500/25 text-amber-400 shrink-0 flex items-center gap-1">
+                                                      <span className="px-2 py-0.5 border text-xs font-bold rounded-xl bg-amber-500/10 border-amber-500/25 text-amber-400 shrink-0 flex items-center gap-1">
                                                         👁 Team Leader Viewing
                                                       </span>
                                                     )}
                                                     {inq.status !==
                                                       "answered" && (
                                                       <span
-                                                        className={`px-2 py-0.5 border text-[9px] font-bold rounded-lg shrink-0 flex items-center gap-1 ${ageBadgeColor}`}
+                                                        className={`px-2 py-0.5 border text-xs font-bold rounded-xl shrink-0 flex items-center gap-1 ${ageBadgeColor}`}
                                                       >
                                                         ⏱ {ageLabel}
                                                       </span>
@@ -18811,7 +18811,7 @@ ${ttNotes}`
                                                             "Clinic name copied!",
                                                           );
                                                         }}
-                                                        className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 border border-indigo-500/30 rounded-lg font-bold flex items-center gap-1 cursor-pointer hover:bg-indigo-500/30 transition-colors"
+                                                        className="text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 border border-indigo-500/30 rounded-xl font-bold flex items-center gap-1 cursor-pointer hover:bg-indigo-500/30 transition-colors"
                                                         title="Copy Clinic"
                                                       >
                                                         {getClinicLabel(
@@ -18833,13 +18833,13 @@ ${ttNotes}`
                                                             "Phone copied (no leading zero)",
                                                           );
                                                         }}
-                                                        className="text-[10px] bg-sky-500/10 text-sky-300 px-2.5 py-0.5 border border-sky-500/20 rounded-lg font-mono flex items-center gap-1 cursor-pointer hover:bg-sky-500/20 transition-colors"
+                                                        className="text-xs bg-sky-500/10 text-sky-300 px-2.5 py-0.5 border border-sky-500/20 rounded-xl font-mono flex items-center gap-1 cursor-pointer hover:bg-sky-500/20 transition-colors"
                                                         title="Copy Phone Number"
                                                       >
                                                         {inq.phoneNumber}
                                                       </span>
                                                     )}
-                                                    <span className="font-mono text-[10px] text-slate-500 bg-transparent px-1.5 py-0.5 rounded mr-1">
+                                                    <span className="font-mono text-xs text-slate-500 bg-transparent px-1.5 py-0.5 rounded mr-1">
                                                       {formatCaseRef(
                                                         inq.id,
                                                         "inquiry",
@@ -18847,7 +18847,7 @@ ${ttNotes}`
                                                         inq.caseRef,
                                                       )}
                                                     </span>
-                                                    <span className="text-[10px] text-slate-400">
+                                                    <span className="text-xs text-slate-400">
                                                       {new Date(
                                                         inq.createdAt,
                                                       ).toLocaleString()}
@@ -18864,7 +18864,7 @@ ${ttNotes}`
                                                               inq.id,
                                                             )
                                                           }
-                                                          className="text-[10px] bg-indigo-500/10 border border-indigo-500/25 text-indigo-300 font-bold px-2 py-0.5 rounded-md hover:bg-indigo-500/20 transition-all"
+                                                          className="text-xs bg-indigo-500/10 border border-indigo-500/25 text-indigo-300 font-bold px-2 py-0.5 rounded-xl hover:bg-indigo-500/20 transition-all"
                                                         >
                                                           Mark Read
                                                         </button>
@@ -18876,7 +18876,7 @@ ${ttNotes}`
                                                             inq.id,
                                                           )
                                                         }
-                                                        className="text-[10px] text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 p-1 rounded-md transition-all shrink-0 font-sans"
+                                                        className="text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 p-1 rounded-xl transition-all shrink-0 font-sans"
                                                         title="Delete Inquiry"
                                                       >
                                                         Delete
@@ -18893,7 +18893,7 @@ ${ttNotes}`
                                                             data: { ...inq },
                                                           })
                                                         }
-                                                        className="text-[10px] bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 font-bold px-2 py-0.5 rounded-md hover:bg-emerald-500/20 transition-all flex items-center gap-1 shrink-0 cursor-pointer"
+                                                        className="text-xs bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 font-bold px-2 py-0.5 rounded-xl hover:bg-emerald-500/20 transition-all flex items-center gap-1 shrink-0 cursor-pointer"
                                                         title={`Edit inquiry (${getRemainingEditTime(inq.createdAt)})`}
                                                       >
                                                         <Pencil className="w-2.5 h-2.5" />{" "}
@@ -18911,7 +18911,7 @@ ${ttNotes}`
                                                           data: inq,
                                                         })
                                                       }
-                                                      className="px-3 py-1.5 bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/20 rounded-lg text-teal-400 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-2"
+                                                      className="px-3 py-1.5 bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/20 rounded-xl text-teal-400 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-2"
                                                     >
                                                       <Eye className="w-3 h-3 text-teal-400" />{" "}
                                                       View Details
@@ -18953,7 +18953,7 @@ ${ttNotes}`
                                                           "Inquiry copied!",
                                                         );
                                                       }}
-                                                      className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                                                      className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                                                     >
                                                       <Copy className="w-3 h-3" />{" "}
                                                       Copy Details
@@ -18997,12 +18997,12 @@ ${ttNotes}`
                                                 {inq.status === "sent" && (
                                                   <div className="p-3 bg-orange-500/5 border border-orange-500/10 rounded-xl space-y-1">
                                                     <div className="flex justify-between items-center">
-                                                      <p className="text-[10px] font-mono font-bold text-orange-400 flex items-center gap-1">
+                                                      <p className="text-xs font-mono font-bold text-orange-400 flex items-center gap-1">
                                                         <Send className="w-3 h-3 animate-pulse" />
                                                         Forwarded to Client
                                                         Partner
                                                       </p>
-                                                      <span className="text-[9px] text-slate-500">
+                                                      <span className="text-xs text-slate-500">
                                                         {new Date(
                                                           inq.sentAt || "",
                                                         ).toLocaleString()}
@@ -19028,7 +19028,7 @@ ${ttNotes}`
 
                                                 {/* Customer Contacted Status Dropdown */}
                                                 <div className="flex flex-wrap items-center gap-2.5 pt-3 border-t border-white/5">
-                                                  <span className="text-[11px] text-slate-400 font-medium">
+                                                  <span className="text-xs text-slate-400 font-medium">
                                                     Customer Contact Status:
                                                   </span>
                                                   <select
@@ -19042,23 +19042,23 @@ ${ttNotes}`
                                                         e.target.value as any,
                                                       )
                                                     }
-                                                    className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-2.5 py-1 text-[11px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
+                                                    className="bg-white/5  border border-white/10 rounded-xl px-2.5 py-1 text-xs text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                                                   >
                                                     <option
                                                       value="not_contacted"
-                                                      className="bg-white/10 backdrop-blur-md text-slate-100 backdrop-blur-lg  font-sans"
+                                                      className="bg-white/10  text-slate-100   font-sans"
                                                     >
                                                       Not Contacted
                                                     </option>
                                                     <option
                                                       value="contacted"
-                                                      className="bg-white/10 backdrop-blur-md text-slate-100 backdrop-blur-lg  font-sans"
+                                                      className="bg-white/10  text-slate-100   font-sans"
                                                     >
                                                       Contacted
                                                     </option>
                                                     <option
                                                       value="attempted"
-                                                      className="bg-white/10 backdrop-blur-md text-slate-100 backdrop-blur-lg  font-sans"
+                                                      className="bg-white/10  text-slate-100   font-sans"
                                                     >
                                                       ⏳ Contact Attempted
                                                     </option>
@@ -19073,7 +19073,7 @@ ${ttNotes}`
                                 )}
 
                                 {agentInquiryView === "global" && (
-                                  <div className="p-5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl animate-fade-in">
+                                  <div className="p-5 bg-white/5 border border-white/10 rounded-2xl  animate-fade-in">
                                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/5 pb-4 mb-4">
                                       <div>
                                         <h3 className="text-base font-bold text-slate-100 font-display">
@@ -19102,7 +19102,7 @@ ${ttNotes}`
                                           onClick={() =>
                                             setGlobalInquirySearch("")
                                           }
-                                          className="p-2 hover:bg-white/10 rounded-lg text-slate-400"
+                                          className="p-2 hover:bg-white/10 rounded-xl text-slate-400"
                                         >
                                           <X className="w-4 h-4" />
                                         </button>
@@ -19178,9 +19178,9 @@ ${ttNotes}`
                                           <div
                                             key={inq.id}
                                             id={`inquiry-${inq.id}`}
-                                            className="p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl hover:border-indigo-500/30 transition-all font-sans text-left space-y-3"
+                                            className="p-4 bg-white/5  border border-white/10 rounded-2xl hover:border-indigo-500/30 transition-all font-sans text-left space-y-3"
                                           >
-                                            <div className="flex flex-wrap gap-2 items-center justify-between text-[10px] pb-2 border-b border-white/5">
+                                            <div className="flex flex-wrap gap-2 items-center justify-between text-xs pb-2 border-b border-white/5">
                                               <div className="flex items-center gap-2">
                                                 <span
                                                   onClick={() => {
@@ -19189,7 +19189,7 @@ ${ttNotes}`
                                                       "Agent name copied!",
                                                     );
                                                   }}
-                                                  className="bg-white/10 backdrop-blur-md text-slate-300 font-bold px-2 py-0.5 rounded-lg border border-slate-700 cursor-pointer hover:bg-white/20 backdrop-blur-md transition-colors"
+                                                  className="bg-white/10  text-slate-300 font-bold px-2 py-0.5 rounded-xl border border-slate-700 cursor-pointer hover:bg-white/20  transition-colors"
                                                   title="Copy Agent Name"
                                                 >
                                                   {inq.agentName}
@@ -19202,7 +19202,7 @@ ${ttNotes}`
                                                         "Clinic name copied!",
                                                       );
                                                     }}
-                                                    className="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2.5 py-0.5 rounded-lg cursor-pointer hover:bg-indigo-500/20 transition-colors"
+                                                    className="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2.5 py-0.5 rounded-xl cursor-pointer hover:bg-indigo-500/20 transition-colors"
                                                     title="Copy Clinic"
                                                   >
                                                     {getClinicLabel(
@@ -19220,14 +19220,14 @@ ${ttNotes}`
                                                         "Phone copied (no leading zero)",
                                                       );
                                                     }}
-                                                    className="bg-sky-500/10 text-sky-300 border border-sky-500/20 px-2.5 py-0.5 rounded-lg font-mono tracking-wider cursor-pointer hover:bg-sky-500/20 transition-colors"
+                                                    className="bg-sky-500/10 text-sky-300 border border-sky-500/20 px-2.5 py-0.5 rounded-xl font-mono tracking-wider cursor-pointer hover:bg-sky-500/20 transition-colors"
                                                     title="Copy Phone Number"
                                                   >
                                                     {inq.phoneNumber}
                                                   </span>
                                                 )}
                                               </div>
-                                              <span className="font-mono text-[10px] text-slate-500 bg-transparent px-1.5 py-0.5 rounded mr-1">
+                                              <span className="font-mono text-xs text-slate-500 bg-transparent px-1.5 py-0.5 rounded mr-1">
                                                 {formatCaseRef(
                                                   inq.id,
                                                   "inquiry",
@@ -19251,7 +19251,7 @@ ${ttNotes}`
                                             />
                                             {inq.status === "sent" && (
                                               <div className="mt-3 p-2 bg-orange-500/10 border-l-2 border-orange-500/50 rounded-r-xl">
-                                                <p className="text-[10px] font-mono text-orange-400">
+                                                <p className="text-xs font-mono text-orange-400">
                                                   ⏳ Escalated to client.
                                                   Awaiting response.
                                                 </p>
@@ -19288,7 +19288,7 @@ ${ttNotes}`
                                 restroom visits in real-time
                               </p>
                             </div>
-                            <div className="px-4 py-2 bg-white/10 backdrop-blur-md/80 border border-white/5 rounded-2xl flex items-center gap-2.5">
+                            <div className="px-4 py-2 bg-white/10 /80 border border-white/5 rounded-2xl flex items-center gap-2.5">
                               <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse"></span>
                               <span className="text-xs text-slate-300 font-mono font-semibold">
                                 System Year Context: {systemTime.getFullYear()}
@@ -19300,13 +19300,13 @@ ${ttNotes}`
                             {/* Left & Middle Column (Main Control Desk) */}
                             <div className="lg:col-span-2 space-y-6">
                               {/* Live Desk Console Panel */}
-                              <div className="p-6 sm:p-8 bg-white/5 border border-white/10 rounded-2xl shadow-sm text-slate-100 shadow-2xl relative overflow-hidden flex flex-col items-center text-center space-y-6">
+                              <div className="p-6 sm:p-8 bg-white/5 border border-white/10 rounded-2xl shadow-sm text-slate-100 shadow relative overflow-hidden flex flex-col items-center text-center space-y-6">
                                 {/* Pulse glow background ornament */}
                                 <div className="absolute top-10 w-96 h-96 bg-indigo-500/10 blur-[100px] rounded-full -z-10 animate-pulse"></div>
 
                                 {/* Top live digital clock display */}
                                 <div className="space-y-1">
-                                  <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold font-mono">
+                                  <p className="text-xs uppercase tracking-widest text-slate-400 font-bold font-mono">
                                     Current Live Time
                                   </p>
                                   <p className="text-5xl font-black text-slate-100 font-mono tracking-tight drop-shadow-md">
@@ -19345,25 +19345,25 @@ ${ttNotes}`
                                   if (status === "working") {
                                     statusLabel = "On Shift (Active Working)";
                                     ringStyle =
-                                      "border-emerald-500/30 bg-emerald-500/5 shadow-lg shadow-emerald-500/5";
+                                      "border-emerald-500/30 bg-emerald-500/5 shadow-sm shadow-emerald-500/5";
                                     textStyle = "text-emerald-400";
                                     dotStyle = "bg-emerald-500 animate-pulse";
                                   } else if (status === "break") {
                                     statusLabel = "On 15-Minute Break";
                                     ringStyle =
-                                      "border-amber-500/30 bg-amber-500/5 shadow-lg shadow-amber-500/5";
+                                      "border-amber-500/30 bg-amber-500/5 shadow-sm shadow-amber-500/5";
                                     textStyle = "text-amber-400";
                                     dotStyle = "bg-amber-500 animate-pulse";
                                   } else if (status === "lunch") {
                                     statusLabel = "On 30-Minute Lunch";
                                     ringStyle =
-                                      "border-pink-500/30 bg-pink-500/5 shadow-lg shadow-pink-500/5";
+                                      "border-pink-500/30 bg-pink-500/5 shadow-sm shadow-pink-500/5";
                                     textStyle = "text-pink-400";
                                     dotStyle = "bg-pink-500 animate-pulse";
                                   } else if (status === "restroom") {
                                     statusLabel = "At Restroom";
                                     ringStyle =
-                                      "border-indigo-500/30 bg-indigo-500/5 shadow-lg shadow-indigo-500/5";
+                                      "border-indigo-500/30 bg-indigo-500/5 shadow-sm shadow-indigo-500/5";
                                     textStyle = "text-indigo-400";
                                     dotStyle = "bg-indigo-500 animate-pulse";
                                   }
@@ -19477,7 +19477,7 @@ ${ttNotes}`
 
                                       {conf.limit > 0 && (
                                         <div className="space-y-1">
-                                          <div className="w-full bg-white/10 backdrop-blur-md rounded-full h-2">
+                                          <div className="w-full bg-white/10  rounded-full h-2">
                                             <div
                                               className={`h-2 rounded-full transition-all duration-1000 ${conf.barColor}`}
                                               style={{
@@ -19485,7 +19485,7 @@ ${ttNotes}`
                                               }}
                                             ></div>
                                           </div>
-                                          <div className="flex justify-between text-[9px] text-slate-500 font-mono">
+                                          <div className="flex justify-between text-xs text-slate-500 font-mono">
                                             <span>
                                               Started at{" "}
                                               {new Date(
@@ -19509,7 +19509,7 @@ ${ttNotes}`
 
                                       {conf.limit > 0 &&
                                         progressPercentage >= 100 && (
-                                          <p className="text-[10px] text-rose-400 font-bold animate-pulse text-center font-sans">
+                                          <p className="text-xs text-rose-400 font-bold animate-pulse text-center font-sans">
                                             Overtime! You have exceeded your
                                             allocated {conf.limit}-minute{" "}
                                             {conf.name.toLowerCase()} limit.
@@ -19533,7 +19533,7 @@ ${ttNotes}`
                                       return (
                                         <button
                                           onClick={handleClockIn}
-                                          className="w-full py-5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-100 font-black text-base tracking-widest rounded-2xl shadow-xl shadow-emerald-500/10 hover:shadow-emerald-500/20 active:scale-[0.99] transition-all cursor-pointer font-display flex items-center justify-center gap-3 uppercase animate-pulse"
+                                          className="w-full py-5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-100 font-black text-base tracking-widest rounded-2xl shadow shadow-emerald-500/10 hover:shadow-emerald-500/20 active:scale-[0.99] transition-all cursor-pointer font-display flex items-center justify-center gap-3 uppercase animate-pulse"
                                         >
                                           <CheckCircle2 className="w-5 h-5 text-slate-100 shrink-0" />
                                           Clock In For Shift
@@ -19544,11 +19544,11 @@ ${ttNotes}`
                                     return (
                                       <div className="space-y-4">
                                         <div className="flex justify-between items-center mb-1">
-                                          <p className="text-[10px] uppercase tracking-widest text-slate-400 font-black font-mono">
+                                          <p className="text-xs uppercase tracking-widest text-slate-400 font-black font-mono">
                                             Active Controllers
                                           </p>
                                           <span
-                                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase flex items-center gap-1.5 ${
+                                            className={`px-2.5 py-0.5 rounded-full text-xs font-black uppercase flex items-center gap-1.5 ${
                                               status === "working"
                                                 ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
                                                 : "bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 animate-pulse"
@@ -19570,7 +19570,7 @@ ${ttNotes}`
                                             }
                                             className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${
                                               status === "break"
-                                                ? "bg-amber-500/25 border-amber-400 text-slate-100 shadow-lg shadow-amber-500/15 scale-[1.03]"
+                                                ? "bg-amber-500/25 border-amber-400 text-slate-100 shadow-sm shadow-amber-500/15 scale-[1.03]"
                                                 : "bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/20 text-amber-300 hover:scale-[1.03]"
                                             }`}
                                           >
@@ -19584,7 +19584,7 @@ ${ttNotes}`
                                             }
                                             className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${
                                               status === "lunch"
-                                                ? "bg-pink-500/25 border-pink-400 text-slate-100 shadow-lg shadow-pink-500/15 scale-[1.03]"
+                                                ? "bg-pink-500/25 border-pink-400 text-slate-100 shadow-sm shadow-pink-500/15 scale-[1.03]"
                                                 : "bg-pink-500/10 hover:bg-pink-500/20 border-pink-500/20 text-pink-300 hover:scale-[1.03]"
                                             }`}
                                           >
@@ -19598,7 +19598,7 @@ ${ttNotes}`
                                             }
                                             className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${
                                               status === "restroom"
-                                                ? "bg-indigo-500/25 border-indigo-400 text-white shadow-lg shadow-indigo-500/15 scale-[1.03]"
+                                                ? "bg-indigo-500/25 border-indigo-400 text-white shadow-sm shadow-indigo-500/15 scale-[1.03]"
                                                 : "bg-indigo-500/10 hover:bg-indigo-500/20 border-indigo-500/20 text-indigo-300 hover:scale-[1.03]"
                                             }`}
                                           >
@@ -19612,7 +19612,7 @@ ${ttNotes}`
                                             }
                                             className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${
                                               status === "meeting"
-                                                ? "bg-cyan-500/25 border-cyan-400 text-slate-100 shadow-lg shadow-cyan-500/15 scale-[1.03]"
+                                                ? "bg-cyan-500/25 border-cyan-400 text-slate-100 shadow-sm shadow-cyan-500/15 scale-[1.03]"
                                                 : "bg-cyan-500/10 hover:bg-cyan-500/20 border-cyan-500/20 text-cyan-300 hover:scale-[1.03]"
                                             }`}
                                           >
@@ -19626,7 +19626,7 @@ ${ttNotes}`
                                             }
                                             className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${
                                               status === "one_on_one"
-                                                ? "bg-violet-500/25 border-violet-400 text-slate-100 shadow-lg shadow-violet-500/15 scale-[1.03]"
+                                                ? "bg-violet-500/25 border-violet-400 text-slate-100 shadow-sm shadow-violet-500/15 scale-[1.03]"
                                                 : "bg-violet-500/10 hover:bg-violet-500/20 border-violet-500/20 text-violet-300 hover:scale-[1.03]"
                                             }`}
                                           >
@@ -19640,7 +19640,7 @@ ${ttNotes}`
                                             }
                                             className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${
                                               status === "personal"
-                                                ? "bg-emerald-500/25 border-emerald-400 text-white shadow-lg shadow-emerald-500/15 scale-[1.03]"
+                                                ? "bg-emerald-500/25 border-emerald-400 text-white shadow-sm shadow-emerald-500/15 scale-[1.03]"
                                                 : "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/20 text-emerald-300 hover:scale-[1.03]"
                                             }`}
                                           >
@@ -19653,7 +19653,7 @@ ${ttNotes}`
                                           <div className="pt-2 animate-fade-in">
                                             <button
                                               onClick={handleEndActivity}
-                                              className="w-full py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-slate-100 font-black text-xs tracking-wider rounded-xl shadow-xl shadow-indigo-500/10 hover:shadow-indigo-500/20 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 uppercase font-display"
+                                              className="w-full py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-slate-100 font-black text-xs tracking-wider rounded-xl shadow shadow-indigo-500/10 hover:shadow-indigo-500/20 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 uppercase font-display"
                                             >
                                               <ArrowRight className="w-4 h-4 text-slate-100" />
                                               End AUX & Resume Active Work
@@ -19825,7 +19825,7 @@ ${ttNotes}`
                                   <h3 className="font-bold text-slate-100 text-sm font-display">
                                     Time Card Sessions
                                   </h3>
-                                  <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">
+                                  <span className="text-xs text-slate-500 uppercase tracking-widest font-bold">
                                     Personal Feed
                                   </span>
                                 </div>
@@ -19848,14 +19848,14 @@ ${ttNotes}`
                                       {myLogs.map((log) => (
                                         <div
                                           key={log.id}
-                                          className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl space-y-2 text-xs"
+                                          className="p-3 bg-white/5  border border-white/10 rounded-2xl space-y-2 text-xs"
                                         >
-                                          <div className="flex justify-between items-center text-[10px] border-b border-white/5 pb-1 font-mono">
+                                          <div className="flex justify-between items-center text-xs border-b border-white/5 pb-1 font-mono">
                                             <span className="text-indigo-300 font-bold">
                                               {log.date}
                                             </span>
                                             <span
-                                              className={`px-1.5 py-0.5 rounded ${log.status === "clocked_out" ? "bg-white/10 backdrop-blur-md text-slate-400" : "bg-emerald-500/15 text-emerald-300"}`}
+                                              className={`px-1.5 py-0.5 rounded ${log.status === "clocked_out" ? "bg-white/10  text-slate-400" : "bg-emerald-500/15 text-emerald-300"}`}
                                             >
                                               {log.status.toUpperCase()}
                                             </span>
@@ -19890,11 +19890,11 @@ ${ttNotes}`
 
                                             {log.activities.length > 0 && (
                                               <div className="pt-1.5 space-y-1">
-                                                <p className="text-[10px] text-slate-500 uppercase font-black font-mono">
+                                                <p className="text-xs text-slate-500 uppercase font-black font-mono">
                                                   Logged Sub-Sessions (
                                                   {log.activities.length}):
                                                 </p>
-                                                <div className="pl-2 border-l border-white/10 space-y-1 text-[11px] font-mono">
+                                                <div className="pl-2 border-l border-white/10 space-y-1 text-xs font-mono">
                                                   {log.activities.map((act) => (
                                                     <p
                                                       key={act.id}
@@ -19973,7 +19973,7 @@ ${ttNotes}`
 
                           <button
                             onClick={handleDownloadInquiriesReport}
-                            className="px-5 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 cursor-pointer w-full md:w-auto"
+                            className="px-5 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-indigo-500/20 flex items-center justify-center gap-2 cursor-pointer w-full md:w-auto"
                           >
                             <Download className="w-4 h-4" />
                             Download Inquiries CSV Report
@@ -19983,13 +19983,13 @@ ${ttNotes}`
                         {/* Dynamic Analytics & Charts Row */}
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                           {/* Panel 1: Status Distribution Donut Chart */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl  flex flex-col justify-between">
                             <div>
                               <h3 className="text-sm font-bold text-slate-100 font-display mb-1 flex items-center gap-2">
                                 <PieChart className="w-4 h-4 text-indigo-400" />
                                 Inquiries Status Ratio
                               </h3>
-                              <p className="text-[11px] text-slate-400 mb-4">
+                              <p className="text-xs text-slate-400 mb-4">
                                 Proportion of pending versus fully resolved
                                 client responses.
                               </p>
@@ -20085,13 +20085,13 @@ ${ttNotes}`
                           </div>
 
                           {/* Panel 2: Clinic Volume Breakdown */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl lg:col-span-2 flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl  lg:col-span-2 flex flex-col justify-between">
                             <div>
                               <h3 className="text-sm font-bold text-slate-100 font-display mb-1 flex items-center gap-2">
                                 <BarChart2 className="w-4 h-4 text-emerald-400" />
                                 Clinic Load Analysis & Distribution Chart
                               </h3>
-                              <p className="text-[11px] text-slate-400 mb-4">
+                              <p className="text-xs text-slate-400 mb-4">
                                 Total inquiries incoming from each of the five
                                 mandatory medical clinics.
                               </p>
@@ -20216,7 +20216,7 @@ ${ttNotes}`
                                   onChange={(e) =>
                                     setInquirySearchQuery(e.target.value)
                                   }
-                                  className="w-full pl-10 pr-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+                                  className="w-full pl-10 pr-4 py-2.5 bg-white/5  border border-white/10 rounded-2xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                 />
                               </div>
                               <div className="relative flex gap-1.5 w-full md:w-auto shrink-0 border-r border-white/10 pr-4 mr-1">
@@ -20234,11 +20234,11 @@ ${ttNotes}`
                                       ]);
                                     }
                                   }}
-                                  className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-2.5 py-2 text-[11px] text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
+                                  className="bg-white/5  border border-white/10 rounded-xl px-2.5 py-2 text-xs text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                                 >
                                   <option
                                     value=""
-                                    className="bg-white/10 backdrop-blur-md text-slate-100"
+                                    className="bg-white/10  text-slate-100"
                                   >
                                     ➕ Add Clinic to Filter...
                                   </option>
@@ -20249,14 +20249,14 @@ ${ttNotes}`
                                     <option
                                       key={c.value}
                                       value={c.value}
-                                      className="bg-white/10 backdrop-blur-md text-slate-100"
+                                      className="bg-white/10  text-slate-100"
                                     >
                                       {c.label}
                                     </option>
                                   ))}
                                 </select>
                                 {inquiryClinicsFilter.length > 0 && (
-                                  <div className="absolute top-full left-0 z-50 mt-1 flex flex-wrap gap-1 bg-slate-800 p-2 rounded-lg border border-slate-700 shadow-xl w-64">
+                                  <div className="absolute top-full left-0 z-50 mt-1 flex flex-wrap gap-1 bg-slate-800 p-2 rounded-xl border border-slate-700 shadow w-64">
                                     <span className="w-full text-xs text-slate-400 font-bold mb-1 flex justify-between">
                                       Selected Clinics:
                                       <button
@@ -20276,7 +20276,7 @@ ${ttNotes}`
                                       return (
                                         <span
                                           key={c}
-                                          className="bg-indigo-500/20 text-indigo-300 border-none px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1"
+                                          className="bg-indigo-500/20 text-indigo-300 border-none px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1"
                                         >
                                           {label}
                                           <button
@@ -20308,7 +20308,7 @@ ${ttNotes}`
                                     <button
                                       key={pill.id || "all"}
                                       onClick={() => setInquiryStatusFilter(pill.id)}
-                                      className={`px-3.5 py-1.5 rounded-xl border text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-all shrink-0 ${
+                                      className={`px-3.5 py-1.5 rounded-xl border text-xs font-bold uppercase tracking-wider cursor-pointer transition-all shrink-0 ${
                                         inquiryStatusFilter === pill.id
                                           ? "bg-indigo-600/20 border-indigo-500/30 text-white shadow shadow-indigo-500/5 font-extrabold"
                                           : "border-white/5 text-slate-400 bg-transparent hover:text-slate-100"
@@ -20738,15 +20738,15 @@ ${ttNotes}`
                                     <span className="text-sm sm:text-lg font-black text-slate-100 font-mono leading-none">
                                       {count}
                                     </span>
-                                    <span className="text-[7px] text-slate-500 font-bold uppercase leading-none mt-0.5">
+                                    <span className="text-xs text-slate-500 font-bold uppercase leading-none mt-0.5">
                                       {Math.round(pct)}%
                                     </span>
                                   </div>
                                 </div>
-                                <span className="mt-2 text-[10px] sm:text-xs font-black text-slate-300 tracking-wide">
+                                <span className="mt-2 text-xs sm:text-xs font-black text-slate-300 tracking-wide">
                                   {label}
                                 </span>
-                                <span className="text-[8px] sm:text-[9px] text-slate-500 font-mono">
+                                <span className="text-xs sm:text-xs text-slate-500 font-mono">
                                   Goal: {target}
                                 </span>
                               </div>
@@ -20778,7 +20778,7 @@ ${ttNotes}`
                                 <div className="lg:col-span-4 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden group">
                                   <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl group-hover:scale-125 transition-all duration-500" />
                                   <div>
-                                    <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 text-[9px] font-black uppercase tracking-widest rounded-full border border-indigo-400/20">
+                                    <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 text-xs font-black uppercase tracking-widest rounded-full border border-indigo-400/20">
                                       Overall Performance
                                     </span>
                                     <h3 className="text-4xl sm:text-5xl font-black text-slate-100 font-mono tracking-tight mt-4">
@@ -20790,7 +20790,7 @@ ${ttNotes}`
                                   </div>
                                   <div className="grid grid-cols-2 gap-3 border-t border-white/5 pt-4 mt-4">
                                     <div className="bg-transparent border border-white/5 rounded-xl p-2">
-                                      <p className="text-[8px] text-slate-500 font-black uppercase tracking-wider">
+                                      <p className="text-xs text-slate-500 font-black uppercase tracking-wider">
                                         This Week
                                       </p>
                                       <p className="text-sm font-black text-emerald-400 font-mono mt-0.5">
@@ -20798,7 +20798,7 @@ ${ttNotes}`
                                       </p>
                                     </div>
                                     <div className="bg-transparent border border-white/5 rounded-xl p-2">
-                                      <p className="text-[8px] text-slate-500 font-black uppercase tracking-wider">
+                                      <p className="text-xs text-slate-500 font-black uppercase tracking-wider">
                                         This Month
                                       </p>
                                       <p className="text-sm font-black text-indigo-400 font-mono mt-0.5">
@@ -20859,19 +20859,19 @@ ${ttNotes}`
                                       <Sparkles className="w-3.5 h-3.5 text-indigo-400" />{" "}
                                       Unlockable Achievements
                                     </h3>
-                                    <p className="text-[10px] text-slate-500 mt-0.5">
+                                    <p className="text-xs text-slate-500 mt-0.5">
                                       Collect points to level up and earn custom
                                       certificates.
                                     </p>
                                   </div>
                                   {nextMilestone ? (
-                                    <span className="text-[10px] sm:text-xs font-mono font-black bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full">
+                                    <span className="text-xs sm:text-xs font-mono font-black bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full">
                                       {totalCasesHandled} /{" "}
                                       {nextMilestone.threshold} cases for{" "}
                                       {nextMilestone.name}
                                     </span>
                                   ) : (
-                                    <span className="text-[10px] sm:text-xs font-mono font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full">
+                                    <span className="text-xs sm:text-xs font-mono font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full">
                                       Maximum Rank Reached! 🏆👑
                                     </span>
                                   )}
@@ -20894,15 +20894,15 @@ ${ttNotes}`
                                           {m.name.split(" ")[1] ||
                                             m.name.split(" ")[0]}
                                           {!isAchieved && (
-                                            <span className="absolute -bottom-1 -right-1 bg-slate-930 border border-white/10 text-[9px] px-1 rounded-md text-slate-500 font-mono select-none">
+                                            <span className="absolute -bottom-1 -right-1 bg-slate-930 border border-white/10 text-xs px-1 rounded-xl text-slate-500 font-mono select-none">
                                               🔒
                                             </span>
                                           )}
                                         </div>
-                                        <span className="text-[11px] font-extrabold tracking-wide text-center leading-tight">
+                                        <span className="text-xs font-extrabold tracking-wide text-center leading-tight">
                                           {m.name.split(" ")[0]}
                                         </span>
-                                        <span className="text-[9px] text-slate-500 font-mono mt-0.5">
+                                        <span className="text-xs text-slate-500 font-mono mt-0.5">
                                           {m.threshold} Cases
                                         </span>
                                       </div>
@@ -20918,7 +20918,7 @@ ${ttNotes}`
                                     <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
                                       Feed Logs & Cases
                                     </h3>
-                                    <p className="text-[11px] text-slate-500 mt-0.5">
+                                    <p className="text-xs text-slate-500 mt-0.5">
                                       Full filterable repository of handled
                                       tasks
                                     </p>
@@ -20961,7 +20961,7 @@ ${ttNotes}`
                                 <div className="flex flex-col gap-3 py-2 border-t border-b border-white/5">
                                   {/* Type selector line */}
                                   <div className="flex flex-wrap items-center gap-1.5">
-                                    <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider mr-2">
+                                    <span className="text-xs font-black uppercase text-slate-500 tracking-wider mr-2">
                                       Type:
                                     </span>
                                     {[
@@ -20996,15 +20996,15 @@ ${ttNotes}`
                                         onClick={() =>
                                           setMyCasesTypeFilter(pill.id)
                                         }
-                                        className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition-all flex items-center gap-1.5 ${
+                                        className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 ${
                                           myCasesTypeFilter === pill.id
-                                            ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/25 scale-102"
+                                            ? "bg-indigo-500 text-white shadow-sm shadow-indigo-500/25 scale-102"
                                             : "bg-white/5 hover:bg-white/10 text-slate-300 hover:text-slate-100 border border-white/5"
                                         }`}
                                       >
                                         {pill.label}
                                         <span
-                                          className={`px-1.5 py-0.2 rounded-full font-mono text-[9px] font-black ${
+                                          className={`px-1.5 py-0.2 rounded-full font-mono text-xs font-black ${
                                             myCasesTypeFilter === pill.id
                                               ? "bg-white/20 text-white"
                                               : "bg-white/5 text-slate-400"
@@ -21018,7 +21018,7 @@ ${ttNotes}`
 
                                   {/* Status filter row */}
                                   <div className="flex flex-wrap items-center gap-1.5">
-                                    <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider mr-2">
+                                    <span className="text-xs font-black uppercase text-slate-500 tracking-wider mr-2">
                                       Status:
                                     </span>
                                     {[
@@ -21037,7 +21037,7 @@ ${ttNotes}`
                                         onClick={() =>
                                           setMyCasesStatusFilter(pill.id)
                                         }
-                                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all ${
+                                        className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all ${
                                           myCasesStatusFilter === pill.id
                                             ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
                                             : "bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 border border-transparent"
@@ -21365,7 +21365,7 @@ ${ttNotes}`
 
                                 {showLegacyCases && (
                                   <div className="p-5 border-t border-white/5 space-y-4">
-                                    <p className="text-[11px] text-slate-500 italic">
+                                    <p className="text-xs text-slate-500 italic">
                                       These are direct customer leads logs
                                       mapped from the legacy `cases`
                                       sub-collection for data preservation.
@@ -21396,7 +21396,7 @@ ${ttNotes}`
                                                     {c.patientName ||
                                                       "Unknown Patient"}
                                                   </p>
-                                                  <p className="text-[10px] text-slate-500 font-mono">
+                                                  <p className="text-xs text-slate-500 font-mono">
                                                     Ref:{" "}
                                                     {formatCaseRef(
                                                       c.id,
@@ -21407,22 +21407,22 @@ ${ttNotes}`
                                                   </p>
                                                 </div>
                                                 {c.status && (
-                                                  <span className="px-1.5 py-0.2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded font-mono text-[9px] uppercase">
+                                                  <span className="px-1.5 py-0.2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded font-mono text-xs uppercase">
                                                     {c.status}
                                                   </span>
                                                 )}
                                               </div>
-                                              <div className="grid grid-cols-2 gap-2 bg-transparent p-2 rounded-lg text-slate-400">
+                                              <div className="grid grid-cols-2 gap-2 bg-transparent p-2 rounded-xl text-slate-400">
                                                 <div>
-                                                  <p className="text-[8px] text-slate-600 font-bold uppercase">
+                                                  <p className="text-xs text-slate-600 font-bold uppercase">
                                                     Phone
                                                   </p>
-                                                  <p className="font-mono text-[11px] text-slate-300">
+                                                  <p className="font-mono text-xs text-slate-300">
                                                     {c.phoneNumber || "N/A"}
                                                   </p>
                                                 </div>
                                                 <div>
-                                                  <p className="text-[8px] text-slate-600 font-bold uppercase">
+                                                  <p className="text-xs text-slate-600 font-bold uppercase">
                                                     Agent
                                                   </p>
                                                   <p className="text-slate-300 font-semibold">
@@ -21431,7 +21431,7 @@ ${ttNotes}`
                                                 </div>
                                               </div>
                                               {c.inquiry && (
-                                                <p className="text-slate-400 leading-relaxed bg-transparent border border-white/5 p-2 rounded-lg">
+                                                <p className="text-slate-400 leading-relaxed bg-transparent border border-white/5 p-2 rounded-xl">
                                                   {c.inquiry}
                                                 </p>
                                               )}
@@ -21675,7 +21675,7 @@ ${ttNotes}`
                           <div className="flex flex-wrap gap-2.5 self-stretch md:self-auto">
                             <button
                               onClick={handleCopyCSVReport}
-                              className="flex-1 sm:flex-initial px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/10 font-sans"
+                              className="flex-1 sm:flex-initial px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-indigo-600/10 font-sans"
                             >
                               <Download className="w-4 h-4 text-indigo-200" />
                               Export CSV Report
@@ -21683,7 +21683,7 @@ ${ttNotes}`
 
                             <button
                               onClick={() => setTlIsPrintMode(!tlIsPrintMode)}
-                              className="flex-1 sm:flex-initial px-4 py-2.5 bg-white/10 backdrop-blur-md hover:bg-white/20 backdrop-blur-md backdrop-blur-xl border border-white/20 text-slate-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans"
+                              className="flex-1 sm:flex-initial px-4 py-2.5 bg-white/10  hover:bg-white/20   border border-white/20 text-slate-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans"
                             >
                               <Printer className="w-4 h-4 text-slate-400" />
                               {tlIsPrintMode
@@ -21773,7 +21773,7 @@ ${ttNotes}`
 
                           if (tlIsPrintMode) {
                             return (
-                              <div className="p-8 bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl space-y-6 animate-fade-in text-slate-100 print:p-0 print:bg-white/10 backdrop-blur-md print:text-black">
+                              <div className="p-8 bg-white/5  border border-white/20 rounded-2xl space-y-6 animate-fade-in text-slate-100 print:p-0 print:bg-white/10  print:text-black">
                                 <div className="flex justify-between items-center border-b border-white/10 pb-4 print:border-black">
                                   <div>
                                     <h3 className="text-xl font-extrabold font-display uppercase tracking-wider">
@@ -21785,7 +21785,7 @@ ${ttNotes}`
                                   </div>
                                   <button
                                     onClick={() => window.print()}
-                                    className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/20 print:hidden"
+                                    className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-sm shadow-emerald-500/20 print:hidden"
                                   >
                                     <Printer className="w-4 h-4" /> Trigger
                                     Browser Print
@@ -21794,7 +21794,7 @@ ${ttNotes}`
 
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-sans print:gap-2">
                                   <div className="p-3 bg-white/5 border border-white/5 rounded-xl print:border-black print:bg-transparent print:text-black">
-                                    <p className="text-[10px] text-slate-400 uppercase font-bold font-mono">
+                                    <p className="text-xs text-slate-400 uppercase font-bold font-mono">
                                       Date Context
                                     </p>
                                     <p className="text-sm font-bold mt-0.5">
@@ -21802,7 +21802,7 @@ ${ttNotes}`
                                     </p>
                                   </div>
                                   <div className="p-3 bg-white/5 border border-white/5 rounded-xl print:border-black print:bg-transparent print:text-black">
-                                    <p className="text-[10px] text-slate-400 uppercase font-bold font-mono">
+                                    <p className="text-xs text-slate-400 uppercase font-bold font-mono">
                                       Total Agents on Duty
                                     </p>
                                     <p className="text-sm font-bold mt-0.5">
@@ -21815,7 +21815,7 @@ ${ttNotes}`
                                     </p>
                                   </div>
                                   <div className="p-3 bg-white/5 border border-white/5 rounded-xl print:border-black print:bg-transparent print:text-black">
-                                    <p className="text-[10px] text-slate-400 uppercase font-bold font-mono">
+                                    <p className="text-xs text-slate-400 uppercase font-bold font-mono">
                                       Active on Break/Lunch
                                     </p>
                                     <p className="text-sm font-bold mt-0.5">
@@ -21833,7 +21833,7 @@ ${ttNotes}`
                                     </p>
                                   </div>
                                   <div className="p-3 bg-white/5 border border-white/5 rounded-xl print:border-black print:bg-transparent print:text-black">
-                                    <p className="text-[10px] text-slate-400 uppercase font-bold font-mono">
+                                    <p className="text-xs text-slate-400 uppercase font-bold font-mono">
                                       Compliance Warnings
                                     </p>
                                     <p className="text-sm font-bold text-rose-400 mt-0.5 print:text-black">
@@ -21854,7 +21854,7 @@ ${ttNotes}`
                                 <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 border border-white/10 rounded-2xl print:border-black">
                                   <table className="w-full text-left border-collapse text-xs print:text-black">
                                     <thead>
-                                      <tr className="bg-white/5 border-b border-white/10 text-[10px] font-bold text-slate-300 font-mono print:border-black print:bg-transparent print:text-black">
+                                      <tr className="bg-white/5 border-b border-white/10 text-xs font-bold text-slate-300 font-mono print:border-black print:bg-transparent print:text-black">
                                         <th className="px-4 py-3">
                                           Agent Name
                                         </th>
@@ -21918,17 +21918,17 @@ ${ttNotes}`
                                         return (
                                           <tr
                                             key={agent}
-                                            className="print:text-black hover:bg-white/20 backdrop-blur-md transition-all"
+                                            className="print:text-black hover:bg-white/20  transition-all"
                                           >
                                             <td className="px-4 py-3 font-bold uppercase">
                                               {agent}{" "}
-                                              <span className="text-[10px] text-slate-400 font-normal lowercase bg-white/10 backdrop-blur-md px-1.5 py-0.5 rounded ml-2 font-sans">
+                                              <span className="text-xs text-slate-400 font-normal lowercase bg-white/10  px-1.5 py-0.5 rounded ml-2 font-sans">
                                                 {getAgentLOB(agent)}
                                               </span>
                                             </td>
                                             <td className="px-4 py-3 font-mono">
                                               <span
-                                                className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${
+                                                className={`px-2 py-0.5 rounded text-xs uppercase font-bold ${
                                                   statusText === "Shift On-Duty"
                                                     ? "bg-emerald-500/10 text-emerald-400"
                                                     : statusText.includes(
@@ -22023,7 +22023,7 @@ ${ttNotes}`
                                 <div className="flex justify-end pr-2 pt-4">
                                   <button
                                     onClick={() => setTlIsPrintMode(false)}
-                                    className="px-4 py-2 bg-white/10 backdrop-blur-md text-slate-300 rounded-xl text-xs font-bold hover:bg-[#1e1e1e]/40 backdrop-blur-lg/40/20 backdrop-blur-md cursor-pointer print:hidden"
+                                    className="px-4 py-2 bg-white/10  text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-900/40 /40/20  cursor-pointer print:hidden"
                                   >
                                     &larr; Exit Roster View
                                   </button>
@@ -22218,7 +22218,7 @@ ${ttNotes}`
                                   return (
                                     <div className="space-y-6">
                                       {/* Control Bar */}
-                                      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#1e1e1e]/40 backdrop-blur-lg/50 p-4 border border-white/5 rounded-2xl">
+                                      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-900/40 /50 p-4 border border-white/5 rounded-2xl">
                                         <div className="flex items-center gap-3">
                                           <span className="relative flex h-3 w-3">
                                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -22240,7 +22240,7 @@ ${ttNotes}`
                                               setRtmSearch(e.target.value)
                                             }
                                             placeholder="Search agents by name..."
-                                            className="w-full pl-9 pr-4 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-sm focus:border-indigo-500 text-slate-200 outline-none transition-all placeholder:text-slate-600 focus:bg-black/70"
+                                            className="w-full pl-9 pr-4 py-2 bg-white/5  border border-white/10 rounded-xl text-sm focus:border-indigo-500 text-slate-200 outline-none transition-all placeholder:text-slate-600 focus:bg-black/70"
                                           />
                                         </div>
                                       </div>
@@ -22331,7 +22331,7 @@ ${ttNotes}`
                                                             {agent}
                                                           </span>
                                                           <span
-                                                            className={`text-[9px] uppercase font-mono mt-0.5 font-semibold ${group.lobText}`}
+                                                            className={`text-xs uppercase font-mono mt-0.5 font-semibold ${group.lobText}`}
                                                           >
                                                             {getAgentLOB(agent)}
                                                           </span>
@@ -22342,7 +22342,7 @@ ${ttNotes}`
                                                         group.id !==
                                                           "offline" && (
                                                           <div
-                                                            className={`flex items-center gap-1 mt-1 text-[10px] font-mono opacity-80 border-t ${group.cardBorder} pt-1.5`}
+                                                            className={`flex items-center gap-1 mt-1 text-xs font-mono opacity-80 border-t ${group.cardBorder} pt-1.5`}
                                                           >
                                                             <Clock className="w-3 h-3" />
                                                             <ActiveTimer
@@ -22361,7 +22361,7 @@ ${ttNotes}`
                                                               e.stopPropagation()
                                                             }
                                                           >
-                                                            <p className="text-[9px] uppercase font-bold text-slate-400 mb-1 font-sans">
+                                                            <p className="text-xs uppercase font-bold text-slate-400 mb-1 font-sans">
                                                               Set Agent AUX
                                                             </p>
                                                             <select
@@ -22376,53 +22376,53 @@ ${ttNotes}`
                                                                   null,
                                                                 );
                                                               }}
-                                                              className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded text-[10px] text-slate-200 px-1 py-1 flex items-center justify-center focus:outline-none focus:border-indigo-500 font-medium font-sans"
+                                                              className="w-full bg-white/5  border border-white/10 rounded text-xs text-slate-200 px-1 py-1 flex items-center justify-center focus:outline-none focus:border-indigo-500 font-medium font-sans"
                                                             >
                                                               <option
                                                                 value="working"
-                                                                className="bg-white/10 backdrop-blur-md"
+                                                                className="bg-white/10 "
                                                               >
                                                                 Online / On Duty
                                                               </option>
                                                               <option
                                                                 value="break"
-                                                                className="bg-white/10 backdrop-blur-md"
+                                                                className="bg-white/10 "
                                                               >
                                                                 On Break
                                                               </option>
                                                               <option
                                                                 value="lunch"
-                                                                className="bg-white/10 backdrop-blur-md"
+                                                                className="bg-white/10 "
                                                               >
                                                                 On Lunch
                                                               </option>
                                                               <option
                                                                 value="restroom"
-                                                                className="bg-white/10 backdrop-blur-md"
+                                                                className="bg-white/10 "
                                                               >
                                                                 Restroom
                                                               </option>
                                                               <option
                                                                 value="meeting"
-                                                                className="bg-white/10 backdrop-blur-md"
+                                                                className="bg-white/10 "
                                                               >
                                                                 In Meeting
                                                               </option>
                                                               <option
                                                                 value="one_on_one"
-                                                                className="bg-white/10 backdrop-blur-md"
+                                                                className="bg-white/10 "
                                                               >
                                                                 1:1 Session
                                                               </option>
                                                               <option
                                                                 value="personal"
-                                                                className="bg-white/10 backdrop-blur-md"
+                                                                className="bg-white/10 "
                                                               >
                                                                 Personal Time
                                                               </option>
                                                               <option
                                                                 value="clocked_out"
-                                                                className="bg-white/10 backdrop-blur-md text-rose-300"
+                                                                className="bg-white/10  text-rose-300"
                                                               >
                                                                 Force Clock Out
                                                               </option>
@@ -22590,7 +22590,7 @@ ${ttNotes}`
                                   return (
                                     <div
                                       id="compliance-alerts-panel"
-                                      className="p-6 bg-[#180d14]/80 border border-rose-500/20 rounded-2xl space-y-4 shadow-2xl relative overflow-hidden backdrop-blur-xl"
+                                      className="p-6 bg-[#180d14]/80 border border-rose-500/20 rounded-2xl space-y-4 shadow relative overflow-hidden "
                                     >
                                       <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -22600,7 +22600,7 @@ ${ttNotes}`
                                             <AlertTriangle className="w-4 h-4 text-rose-400 animate-pulse" />
                                             Live Compliance Alerts & Aux Watch
                                           </h4>
-                                          <p className="text-[11px] text-slate-400 font-sans">
+                                          <p className="text-xs text-slate-400 font-sans">
                                             Real-time tracker displaying active
                                             and cumulative aggregate daily
                                             auxiliary limit violations per
@@ -22608,7 +22608,7 @@ ${ttNotes}`
                                           </p>
                                         </div>
                                         <span
-                                          className={`px-2.5 py-1 text-[10px] font-black rounded-xl border uppercase tracking-wider ${
+                                          className={`px-2.5 py-1 text-xs font-black rounded-xl border uppercase tracking-wider ${
                                             complianceViolations.length > 0
                                               ? "bg-rose-500/20 text-rose-300 border-rose-500/30 font-mono animate-pulse"
                                               : "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
@@ -22630,7 +22630,7 @@ ${ttNotes}`
                                             <p className="text-xs font-bold text-emerald-300 font-sans">
                                               All Agents are 100% Compliant
                                             </p>
-                                            <p className="text-[10px] text-slate-400 mt-0.5 font-sans">
+                                            <p className="text-xs text-slate-400 mt-0.5 font-sans">
                                               No active alarm status logs or
                                               cumulative auxiliary overtime
                                               events detected under today's
@@ -22651,7 +22651,7 @@ ${ttNotes}`
                                                     <p className="text-xs font-black text-slate-100 uppercase tracking-wide font-display">
                                                       {entry.agentName}
                                                     </p>
-                                                    <span className="inline-block text-[8px] font-extrabold uppercase text-rose-300 bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.5 rounded-md mt-1 font-sans">
+                                                    <span className="inline-block text-xs font-extrabold uppercase text-rose-300 bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.5 rounded-xl mt-1 font-sans">
                                                       LOB: {entry.lob}
                                                     </span>
                                                   </div>
@@ -22660,7 +22660,7 @@ ${ttNotes}`
                                                       (v) =>
                                                         v.isCurrentlyActive,
                                                     ) && (
-                                                      <span className="flex items-center gap-1.5 text-[8px] bg-red-500/20 text-red-300 border border-red-500/30 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest animate-pulse font-sans">
+                                                      <span className="flex items-center gap-1.5 text-xs bg-red-500/20 text-red-300 border border-red-500/30 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest animate-pulse font-sans">
                                                         <span className="w-1.5 h-1.5 rounded-full bg-red-500 block"></span>
                                                         Overtime Now
                                                       </span>
@@ -22673,7 +22673,7 @@ ${ttNotes}`
                                                     (violation, idx) => (
                                                       <div
                                                         key={idx}
-                                                        className="flex flex-col gap-1 p-2 bg-white/5 border border-white/5 rounded-xl text-[11px] font-sans"
+                                                        className="flex flex-col gap-1 p-2 bg-white/5 border border-white/5 rounded-xl text-xs font-sans"
                                                       >
                                                         <div className="flex items-center justify-between font-bold">
                                                           <span className="text-slate-200">
@@ -22688,7 +22688,7 @@ ${ttNotes}`
                                                             Over
                                                           </span>
                                                         </div>
-                                                        <div className="flex justify-between text-[9px] text-slate-400 mt-0.5">
+                                                        <div className="flex justify-between text-xs text-slate-400 mt-0.5">
                                                           <span>
                                                             Allotted:{" "}
                                                             {violation.limit}m
@@ -22723,7 +22723,7 @@ ${ttNotes}`
                                                     `Direct compliance warning notification dispatched dynamically to ${entry.agentName}!`,
                                                   );
                                                 }}
-                                                className="w-full py-1.5 bg-rose-500/10 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 rounded-xl text-[9px] uppercase font-bold tracking-wider hover:scale-[1.01] active:scale-[0.99] cursor-pointer transition-all flex items-center justify-center gap-1.5 font-sans"
+                                                className="w-full py-1.5 bg-rose-500/10 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 rounded-xl text-xs uppercase font-bold tracking-wider hover:scale-[1.01] active:scale-[0.99] cursor-pointer transition-all flex items-center justify-center gap-1.5 font-sans"
                                               >
                                                 <Bell className="w-3.5 h-3.5" />
                                                 Send Direct Compliance Ping
@@ -22749,7 +22749,7 @@ ${ttNotes}`
                                         setTlSearchQuery(e.target.value)
                                       }
                                       placeholder="Filter status table by agent name..."
-                                      className="w-full pl-9 pr-4 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
+                                      className="w-full pl-9 pr-4 py-2 bg-white/5  border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
                                     />
                                   </div>
 
@@ -22762,35 +22762,35 @@ ${ttNotes}`
                                       onChange={(e) =>
                                         setTlStatusFilter(e.target.value as any)
                                       }
-                                      className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-300 focus:outline-none focus:border-indigo-500 cursor-pointer"
+                                      className="w-full px-3 py-2 bg-white/5  border border-white/10 rounded-xl text-xs text-slate-300 focus:outline-none focus:border-indigo-500 cursor-pointer"
                                     >
                                       <option
                                         value="all"
-                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                        className="bg-white/10  text-slate-100 "
                                       >
                                         All Agents
                                       </option>
                                       <option
                                         value="in"
-                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                        className="bg-white/10  text-slate-100 "
                                       >
                                         Clocked In (IN)
                                       </option>
                                       <option
                                         value="out"
-                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                        className="bg-white/10  text-slate-100 "
                                       >
                                         Clocked Out (OUT)
                                       </option>
                                       <option
                                         value="break_lunch"
-                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                        className="bg-white/10  text-slate-100 "
                                       >
                                         On Break / Lunch Activity
                                       </option>
                                       <option
                                         value="overtime"
-                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                        className="bg-white/10  text-slate-100 "
                                       >
                                         Warning / Overtime Limit Exceeded
                                       </option>
@@ -22799,7 +22799,7 @@ ${ttNotes}`
                                 </div>
 
                                 {/* Live station usage & totals board */}
-                                <div className="p-6 bg-white/5 border border-white/10 rounded-2xl space-y-4 shadow-xl">
+                                <div className="p-6 bg-white/5 border border-white/10 rounded-2xl space-y-4 shadow">
                                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                                     <div>
                                       <h3 className="font-bold text-slate-100 text-base font-display">
@@ -22906,7 +22906,7 @@ ${ttNotes}`
                                       <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 border border-white/5 rounded-2xl bg-white/[0.04] overflow-visible">
                                         <table className="w-full text-left border-collapse min-w-[750px]">
                                           <thead>
-                                            <tr className="bg-white/5 border-b border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-400 font-sans">
+                                            <tr className="bg-white/5 border-b border-white/10 text-xs font-black uppercase tracking-widest text-slate-400 font-sans">
                                               <th className="px-5 py-3">
                                                 Agent Name
                                               </th>
@@ -22964,12 +22964,12 @@ ${ttNotes}`
                                               return (
                                                 <tr
                                                   key={name}
-                                                  className="hover:bg-white/20 backdrop-blur-md transition-all"
+                                                  className="hover:bg-white/20  transition-all"
                                                 >
                                                   {/* Name */}
                                                   <td className="px-5 py-4 font-bold text-slate-100 font-display uppercase tracking-wide">
                                                     <div>{name}</div>
-                                                    <div className="text-[9px] text-slate-400 font-normal lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded-lg mt-1 w-max block">
+                                                    <div className="text-xs text-slate-400 font-normal lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded-xl mt-1 w-max block">
                                                       {getAgentLOB(name)}
                                                     </div>
                                                   </td>
@@ -22989,59 +22989,59 @@ ${ttNotes}`
                                                               .value as any,
                                                           )
                                                         }
-                                                        className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg text-[10px] text-slate-100 px-2 py-1 focus:outline-none focus:border-indigo-500 font-bold uppercase cursor-pointer max-w-[120px]"
+                                                        className="bg-white/5  border border-white/10 rounded-xl text-xs text-slate-100 px-2 py-1 focus:outline-none focus:border-indigo-500 font-bold uppercase cursor-pointer max-w-[120px]"
                                                       >
                                                         <option
                                                           value="working"
-                                                          className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                                          className="bg-white/10  text-slate-100 "
                                                         >
                                                           On Shift (Working)
                                                         </option>
                                                         <option
                                                           value="break"
-                                                          className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                                          className="bg-white/10  text-slate-100 "
                                                         >
                                                           On Break
                                                         </option>
                                                         <option
                                                           value="lunch"
-                                                          className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                                          className="bg-white/10  text-slate-100 "
                                                         >
                                                           On Lunch
                                                         </option>
                                                         <option
                                                           value="restroom"
-                                                          className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                                          className="bg-white/10  text-slate-100 "
                                                         >
                                                           In Restroom
                                                         </option>
                                                         <option
                                                           value="clocked_out"
-                                                          className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                                          className="bg-white/10  text-slate-100 "
                                                         >
                                                           Clocked Out
                                                         </option>
                                                         <option
                                                           value="day_off"
-                                                          className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                                          className="bg-white/10  text-slate-100 "
                                                         >
                                                           Day Off
                                                         </option>
                                                         <option
                                                           value="casual"
-                                                          className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                                          className="bg-white/10  text-slate-100 "
                                                         >
                                                           Casual Leave
                                                         </option>
                                                         <option
                                                           value="annual"
-                                                          className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                                          className="bg-white/10  text-slate-100 "
                                                         >
                                                           Annual Leave
                                                         </option>
                                                         <option
                                                           value="no_show"
-                                                          className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                                          className="bg-white/10  text-slate-100 "
                                                         >
                                                           No Show
                                                         </option>
@@ -23051,7 +23051,7 @@ ${ttNotes}`
 
                                                   {/* Shifts */}
                                                   <td className="px-3 py-4 space-y-0.5">
-                                                    <p className="text-[10px] text-slate-400 font-mono">
+                                                    <p className="text-xs text-slate-400 font-mono">
                                                       In:{" "}
                                                       <span className="text-emerald-400 font-semibold">
                                                         {stats.clockIn
@@ -23068,7 +23068,7 @@ ${ttNotes}`
                                                           : "--:--"}
                                                       </span>
                                                     </p>
-                                                    <p className="text-[10px] text-slate-400 font-mono">
+                                                    <p className="text-xs text-slate-400 font-mono">
                                                       Out:{" "}
                                                       <span className="text-rose-400 font-semibold">
                                                         {stats.clockOut
@@ -23091,7 +23091,7 @@ ${ttNotes}`
 
                                                   {/* Total Break */}
                                                   <td className="px-4 py-4 space-y-1">
-                                                    <div className="flex justify-between text-[10px] font-mono">
+                                                    <div className="flex justify-between text-xs font-mono">
                                                       <span
                                                         className={
                                                           stats.breakMins > 15
@@ -23108,7 +23108,7 @@ ${ttNotes}`
                                                         of 15m
                                                       </span>
                                                     </div>
-                                                    <div className="w-full bg-white/10 backdrop-blur-md rounded-full h-1 relative">
+                                                    <div className="w-full bg-white/10  rounded-full h-1 relative">
                                                       <div
                                                         className={`h-1 rounded-full transition-all duration-300 ${stats.breakMins > 15 ? "bg-rose-500 animate-pulse" : "bg-amber-400"}`}
                                                         style={{
@@ -23120,7 +23120,7 @@ ${ttNotes}`
 
                                                   {/* Total Lunch */}
                                                   <td className="px-4 py-4 space-y-1">
-                                                    <div className="flex justify-between text-[10px] font-mono">
+                                                    <div className="flex justify-between text-xs font-mono">
                                                       <span
                                                         className={
                                                           stats.lunchMins > 30
@@ -23137,7 +23137,7 @@ ${ttNotes}`
                                                         of 30m
                                                       </span>
                                                     </div>
-                                                    <div className="w-full bg-white/10 backdrop-blur-md rounded-full h-1 relative">
+                                                    <div className="w-full bg-white/10  rounded-full h-1 relative">
                                                       <div
                                                         className={`h-1 rounded-full transition-all duration-300 ${stats.lunchMins > 30 ? "bg-rose-500 animate-pulse" : "bg-pink-400"}`}
                                                         style={{
@@ -23155,7 +23155,7 @@ ${ttNotes}`
                                                       )}
                                                       ins
                                                     </p>
-                                                    <p className="text-[10px] text-slate-500 font-sans">
+                                                    <p className="text-xs text-slate-500 font-sans">
                                                       {stats.restroomCount}{" "}
                                                       sessions logged
                                                     </p>
@@ -23164,7 +23164,7 @@ ${ttNotes}`
                                                   {/* Compliance status banner */}
                                                   <td className="px-5 py-4 text-right">
                                                     {isCurrentlyExceeded && (
-                                                      <span className="px-2 py-0.5 rounded bg-rose-500/20 border border-rose-500/40 text-rose-300 font-bold text-[9px] uppercase tracking-wide select-none animate-pulse block text-center max-w-[130px] ml-auto">
+                                                      <span className="px-2 py-0.5 rounded bg-rose-500/20 border border-rose-500/40 text-rose-300 font-bold text-xs uppercase tracking-wide select-none animate-pulse block text-center max-w-[130px] ml-auto">
                                                         Overtime Now (+
                                                         {currentExceedBy.toFixed(
                                                           1,
@@ -23174,13 +23174,13 @@ ${ttNotes}`
                                                     )}
                                                     {!isCurrentlyExceeded &&
                                                       exceededLimit && (
-                                                        <span className="px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/20 text-rose-300/80 font-bold text-[9px] uppercase tracking-wide block text-center max-w-[130px] ml-auto">
+                                                        <span className="px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/20 text-rose-300/80 font-bold text-xs uppercase tracking-wide block text-center max-w-[130px] ml-auto">
                                                           Limit Exceeded
                                                         </span>
                                                       )}
                                                     {!isCurrentlyExceeded &&
                                                       !exceededLimit && (
-                                                        <span className="px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 font-bold text-[9px] uppercase tracking-wide block text-center max-w-[130px] ml-auto">
+                                                        <span className="px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 font-bold text-xs uppercase tracking-wide block text-center max-w-[130px] ml-auto">
                                                           Compliant
                                                         </span>
                                                       )}
@@ -23266,7 +23266,7 @@ ${ttNotes}`
                         {(isSuperAdmin ||
                           isTLOreSupport ||
                           currentUser?.role === "tl") && (
-                          <div className="bg-gradient-to-r from-violet-500/15 via-indigo-500/10 to-blue-500/15 border border-indigo-500/30 rounded-2xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 shadow-xl">
+                          <div className="bg-gradient-to-r from-violet-500/15 via-indigo-500/10 to-blue-500/15 border border-indigo-500/30 rounded-2xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 shadow">
                             <div className="space-y-1 text-left">
                               <div className="flex items-center gap-2">
                                 <span
@@ -23314,7 +23314,7 @@ ${ttNotes}`
                                   }}
                                   className="sr-only peer"
                                 />
-                                <div className="w-14 h-7 bg-white/5 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white/10 backdrop-blur-md after:border-slate-700 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-600 border border-white/10"></div>
+                                <div className="w-14 h-7 bg-white/5 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white/10  after:border-slate-700 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-600 border border-white/10"></div>
                               </label>
                             </div>
                           </div>
@@ -23324,7 +23324,7 @@ ${ttNotes}`
                         {(isSuperAdmin ||
                           isTLOreSupport ||
                           currentUser?.role === "tl") && (
-                          <div className="bg-white/5 border border-white/10 rounded-2xl shadow-sm text-slate-100 p-6 shadow-2xl space-y-5 text-left">
+                          <div className="bg-white/5 border border-white/10 rounded-2xl shadow-sm text-slate-100 p-6 shadow space-y-5 text-left">
                             <div>
                               <h3 className="font-extrabold text-slate-100 text-base font-display flex items-center gap-2">
                                 <PlusCircle className="w-5 h-5 text-indigo-400" />
@@ -23341,7 +23341,7 @@ ${ttNotes}`
                               className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end"
                             >
                               <div className="md:col-span-1 space-y-1.5 font-sans">
-                                <label className="text-[10px] text-slate-400 font-extrabold uppercase font-sans">
+                                <label className="text-xs text-slate-400 font-extrabold uppercase font-sans">
                                   1. Choose Agent
                                 </label>
                                 <select
@@ -23349,12 +23349,12 @@ ${ttNotes}`
                                   onChange={(e) =>
                                     setManualRosterAgent(e.target.value)
                                   }
-                                  className="w-full px-3 py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer focus:border-indigo-500 font-sans"
+                                  className="w-full px-3 py-2.5 bg-white/5  border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer focus:border-indigo-500 font-sans"
                                 >
                                   <option value="">-- Choose Agent --</option>
                                   {agentsList.map((name) => (
                                     <option
-                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                      className="bg-white/10  text-slate-100 "
                                       key={name}
                                       value={name}
                                     >
@@ -23365,7 +23365,7 @@ ${ttNotes}`
                               </div>
 
                               <div className="md:col-span-1 space-y-1.5">
-                                <label className="text-[10px] text-slate-400 font-extrabold uppercase font-sans">
+                                <label className="text-xs text-slate-400 font-extrabold uppercase font-sans">
                                   2. Coverage Date
                                 </label>
                                 <input
@@ -23374,12 +23374,12 @@ ${ttNotes}`
                                   onChange={(e) =>
                                     setManualRosterDate(e.target.value)
                                   }
-                                  className="w-full px-3 py-1.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none focus:border-indigo-500 h-[42px]"
+                                  className="w-full px-3 py-1.5 bg-white/5  border border-white/10 rounded-xl text-xs text-slate-100 outline-none focus:border-indigo-500 h-[42px]"
                                 />
                               </div>
 
                               <div className="md:col-span-1 space-y-1.5 font-sans">
-                                <label className="text-[10px] text-slate-400 font-extrabold uppercase font-sans">
+                                <label className="text-xs text-slate-400 font-extrabold uppercase font-sans">
                                   3. Schedule Shift
                                 </label>
                                 <select
@@ -23387,11 +23387,11 @@ ${ttNotes}`
                                   onChange={(e) =>
                                     setManualRosterShift(e.target.value)
                                   }
-                                  className="w-full px-3 py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer focus:border-indigo-500 font-sans"
+                                  className="w-full px-3 py-2.5 bg-white/5  border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer focus:border-indigo-500 font-sans"
                                 >
                                   {SHIFTS.map((s) => (
                                     <option
-                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                      className="bg-white/10  text-slate-100 "
                                       key={s.id}
                                       value={s.label}
                                     >
@@ -23399,7 +23399,7 @@ ${ttNotes}`
                                     </option>
                                   ))}
                                   <option
-                                    className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                    className="bg-white/10  text-slate-100 "
                                     value="Off"
                                   >
                                     Rest Day (Off Day)
@@ -23410,7 +23410,7 @@ ${ttNotes}`
                               <div className="md:col-span-1 block">
                                 <button
                                   type="submit"
-                                  className="w-full h-[42px] bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-500/20 cursor-pointer hover:scale-[1.02]"
+                                  className="w-full h-[42px] bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-sm shadow-indigo-500/20 cursor-pointer hover:scale-[1.02]"
                                 >
                                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                                   Submit Roster Shift
@@ -23419,7 +23419,7 @@ ${ttNotes}`
 
                               {/* Shift Notes Field spanning full width */}
                               <div className="md:col-span-4 space-y-1.5">
-                                <label className="text-[10px] text-slate-400 font-extrabold uppercase font-sans">
+                                <label className="text-xs text-slate-400 font-extrabold uppercase font-sans">
                                   4. Roster Shift Notes (Saves to Shift details)
                                 </label>
                                 <input
@@ -23429,7 +23429,7 @@ ${ttNotes}`
                                   onChange={(e) =>
                                     setManualRosterNotes(e.target.value)
                                   }
-                                  className="w-full px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500"
+                                  className="w-full px-4 py-2.5 bg-white/5  border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500"
                                 />
                               </div>
                             </form>
@@ -23451,34 +23451,34 @@ ${ttNotes}`
 
                         {/* Informative coverage card indicators */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                          <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-                            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">
+                          <div className="p-4 bg-white/5 border border-white/10 rounded-2xl ">
+                            <p className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1">
                               Active Scheduled Days
                             </p>
                             <p className="text-2xl font-black text-slate-100">
                               {allScheduleDates.length} Days Covered
                             </p>
-                            <p className="text-[10px] text-indigo-300 mt-1">
+                            <p className="text-xs text-indigo-300 mt-1">
                               {allScheduleDates.length > 0
                                 ? `${formatDateNice(allScheduleDates[0])} to ${formatDateNice(allScheduleDates[allScheduleDates.length - 1])}`
                                 : "Roster empty, using default rotation window"}
                             </p>
                           </div>
 
-                          <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-                            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">
+                          <div className="p-4 bg-white/5 border border-white/10 rounded-2xl ">
+                            <p className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1">
                               Coverage Scope
                             </p>
                             <p className="text-2xl font-black text-slate-100">
                               {schedules.length} Assigned Shifts
                             </p>
-                            <p className="text-[10px] text-emerald-300 mt-1">
+                            <p className="text-xs text-emerald-300 mt-1">
                               Supporting standard rotation & manual uploads
                             </p>
                           </div>
 
-                          <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-                            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1 font-mono">
+                          <div className="p-4 bg-white/5 border border-white/10 rounded-2xl ">
+                            <p className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1 font-mono">
                               My Upcoming Shift
                             </p>
                             {["agent", "sme"].includes(
@@ -23498,7 +23498,7 @@ ${ttNotes}`
                                       <p className="text-2xl font-black text-indigo-300 truncate">
                                         {myShiftsArr[0].shiftLabel}
                                       </p>
-                                      <p className="text-[10px] text-indigo-200 mt-1">
+                                      <p className="text-xs text-indigo-200 mt-1">
                                         Next on:{" "}
                                         {formatDateNice(myShiftsArr[0].date)}
                                       </p>
@@ -23510,7 +23510,7 @@ ${ttNotes}`
                                     <p className="text-2xl font-black text-slate-400">
                                       Rest / No Shift
                                     </p>
-                                    <p className="text-[10px] text-slate-500 mt-1">
+                                    <p className="text-xs text-slate-500 mt-1">
                                       No upcoming scheduled shifts found
                                     </p>
                                   </>
@@ -23521,7 +23521,7 @@ ${ttNotes}`
                                 <p className="text-2xl font-black text-amber-300">
                                   TL Supervision
                                 </p>
-                                <p className="text-[10px] text-slate-400 mt-1">
+                                <p className="text-xs text-slate-400 mt-1">
                                   Roster upload and override controls enabled
                                 </p>
                               </>
@@ -23531,7 +23531,7 @@ ${ttNotes}`
 
                         {false ? (
                           <div className="space-y-6">
-                            <div className="p-12 text-center rounded-2xl border border-dashed border-indigo-500/30 bg-white/10 backdrop-blur-md/[0.02] space-y-4 shadow-xl text-left">
+                            <div className="p-12 text-center rounded-2xl border border-dashed border-indigo-500/30 bg-white/10 /[0.02] space-y-4 shadow text-left">
                               <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto text-indigo-400 shadow-inner">
                                 <Shield className="w-8 h-8" />
                               </div>
@@ -23548,7 +23548,7 @@ ${ttNotes}`
                                 </p>
                               </div>
                               <div className="flex justify-center">
-                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-amber-500/10 border border-amber-500/25 text-amber-300 font-bold uppercase text-[9px] tracking-wider font-mono mx-auto">
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-amber-500/10 border border-amber-500/25 text-amber-300 font-bold uppercase text-xs tracking-wider font-mono mx-auto">
                                   <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></span>
                                   Roster Draft Stage
                                 </div>
@@ -23556,7 +23556,7 @@ ${ttNotes}`
                             </div>
 
                             {/* Display personalized preview list */}
-                            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-xl space-y-4 text-left">
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow space-y-4 text-left">
                               <div className="border-b border-white/5 pb-3">
                                 <h4 className="text-sm font-black text-indigo-300 uppercase tracking-widest font-mono">
                                   My Shift Coverage Preview
@@ -23592,11 +23592,11 @@ ${ttNotes}`
                                       return (
                                         <div
                                           key={shift.id}
-                                          className="p-4 bg-white/10 backdrop-blur-md/[0.02] border border-white/5 rounded-2xl flex flex-col justify-between gap-3 shadow text-left"
+                                          className="p-4 bg-white/10 /[0.02] border border-white/5 rounded-2xl flex flex-col justify-between gap-3 shadow text-left"
                                         >
                                           <div className="flex items-center justify-between w-full">
                                             <div>
-                                              <p className="text-[10px] text-slate-400 font-mono font-medium">
+                                              <p className="text-xs text-slate-400 font-mono font-medium">
                                                 {formatDateNice(shift.date)}
                                               </p>
                                               <p className="text-xs font-bold text-slate-100 mt-1 uppercase tracking-wide">
@@ -23604,7 +23604,7 @@ ${ttNotes}`
                                               </p>
                                             </div>
                                             <span
-                                              className={`px-2 py-0.5 text-[10px] font-black rounded border uppercase tracking-wider ${style.bg}`}
+                                              className={`px-2 py-0.5 text-xs font-black rounded border uppercase tracking-wider ${style.bg}`}
                                             >
                                               {style.display}
                                             </span>
@@ -23613,12 +23613,12 @@ ${ttNotes}`
                                             shift.lunchTime) && (
                                             <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
                                               {shift.breakTime && (
-                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono text-[9px]">
+                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono text-xs">
                                                   ☕ Break: {shift.breakTime}
                                                 </span>
                                               )}
                                               {shift.lunchTime && (
-                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20 font-mono text-[9px]">
+                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20 font-mono text-xs">
                                                   🍔 Lunch: {shift.lunchTime}
                                                 </span>
                                               )}
@@ -23645,7 +23645,7 @@ ${ttNotes}`
                                   onChange={(e) =>
                                     setScheduleFilterAgent(e.target.value)
                                   }
-                                  className="px-4 py-2 bg-black/45 hover:bg-white/20 backdrop-blur-md backdrop-blur-xl border border-white/10 focus:border-indigo-500/85 focus:ring-1 focus:ring-indigo-500 rounded-xl text-xs text-slate-100 placeholder-slate-400 outline-none transition-all w-full sm:w-64"
+                                  className="px-4 py-2 bg-black/45 hover:bg-white/20   border border-white/10 focus:border-indigo-500/85 focus:ring-1 focus:ring-indigo-500 rounded-xl text-xs text-slate-100 placeholder-slate-400 outline-none transition-all w-full sm:w-64"
                                 />
 
                                 {/* View Mode */}
@@ -23655,7 +23655,7 @@ ${ttNotes}`
                                       setScheduleViewMode("week");
                                       setSchedulePageOffset(0);
                                     }}
-                                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                                    className={`px-3 py-1 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                                       scheduleViewMode === "week"
                                         ? "bg-indigo-500 text-white shadow-md"
                                         : "text-slate-400 hover:text-slate-100"
@@ -23668,7 +23668,7 @@ ${ttNotes}`
                                       setScheduleViewMode("fortnight");
                                       setSchedulePageOffset(0);
                                     }}
-                                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                                    className={`px-3 py-1 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                                       scheduleViewMode === "fortnight"
                                         ? "bg-indigo-500 text-white shadow-md"
                                         : "text-slate-400 hover:text-slate-100"
@@ -23681,7 +23681,7 @@ ${ttNotes}`
                                       setScheduleViewMode("month");
                                       setSchedulePageOffset(0);
                                     }}
-                                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                                    className={`px-3 py-1 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                                       scheduleViewMode === "month"
                                         ? "bg-indigo-500 text-white shadow-md"
                                         : "text-slate-400 hover:text-slate-100"
@@ -23694,7 +23694,7 @@ ${ttNotes}`
 
                               {/* Horizontal Paging Actions */}
                               <div className="flex items-center gap-2 self-stretch sm:self-auto justify-between sm:justify-end">
-                                <span className="text-[11px] text-slate-400 font-medium">
+                                <span className="text-xs text-slate-400 font-medium">
                                   Showing offsets: {safeOffset + 1}{" "}
                                   {Math.min(
                                     safeOffset + displayDaysCount,
@@ -23710,7 +23710,7 @@ ${ttNotes}`
                                         Math.max(0, prev - displayDaysCount),
                                       )
                                     }
-                                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-100 disabled:opacity-30 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-100 disabled:opacity-30 rounded-xl text-xs font-bold transition-all cursor-pointer"
                                   >
                                     &larr; Prev
                                   </button>
@@ -23728,7 +23728,7 @@ ${ttNotes}`
                                         ),
                                       )
                                     }
-                                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-100 disabled:opacity-30 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-100 disabled:opacity-30 rounded-xl text-xs font-bold transition-all cursor-pointer"
                                   >
                                     Next &rarr;
                                   </button>
@@ -23741,7 +23741,7 @@ ${ttNotes}`
                                     <button
                                       onClick={syncShiftsToGoogleCalendar}
                                       disabled={isSyncingCalendar}
-                                      className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-indigo-600/20"
+                                      className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-sm shadow-indigo-600/20"
                                       title="Sync with Google Calendar"
                                     >
                                       {isSyncingCalendar ? (
@@ -23753,7 +23753,7 @@ ${ttNotes}`
                                     </button>
                                     <button
                                       onClick={downloadShiftsICS}
-                                      className="px-4 py-1.5 bg-white/20 backdrop-blur-md hover:bg-slate-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-slate-700/20"
+                                      className="px-4 py-1.5 bg-white/20  hover:bg-slate-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-sm shadow-slate-700/20"
                                       title="Download .ics for Outlook/Apple Calendar"
                                     >
                                       <Download className="w-3.5 h-3.5" />
@@ -23765,13 +23765,13 @@ ${ttNotes}`
                             </div>
 
                             {/* Active Schedule visual Matrix grid */}
-                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 sm:p-6 shadow space-y-4">
                               <div className="flex justify-between items-center pb-2 border-b border-white/5">
                                 <h3 className="font-bold text-slate-100 text-base font-display">
                                   {" "}
                                   Roster Coverage Planner
                                 </h3>
-                                <span className="text-[10px] text-indigo-300 font-mono flex items-center gap-1.5 font-bold uppercase">
+                                <span className="text-xs text-indigo-300 font-mono flex items-center gap-1.5 font-bold uppercase">
                                   <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>{" "}
                                   Active Database
                                 </span>
@@ -23873,7 +23873,7 @@ ${ttNotes}`
                                     };
 
                                     return (
-                                      <div className="bg-[#12121e]/85 border border-indigo-500/25 rounded-2xl p-5 space-y-4 mb-6 text-left shadow-2xl relative overflow-hidden backdrop-blur-xl">
+                                      <div className="bg-[#12121e]/85 border border-indigo-500/25 rounded-2xl p-5 space-y-4 mb-6 text-left shadow relative overflow-hidden ">
                                         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
                                         <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -23886,7 +23886,7 @@ ${ttNotes}`
                                               </span>
                                               Roster Coverage Heatmap Analytics
                                             </h4>
-                                            <p className="text-[11px] text-slate-400 font-sans">
+                                            <p className="text-xs text-slate-400 font-sans">
                                               Live shift coverage matrix
                                               compared against custom targets.
                                               Hover on individual cells to
@@ -23901,7 +23901,7 @@ ${ttNotes}`
                                                 !heatmapConfigureOpen,
                                               )
                                             }
-                                            className="px-3.5 py-1.5 bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/25 text-indigo-300 rounded-xl text-[10px] uppercase font-black tracking-widest transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto"
+                                            className="px-3.5 py-1.5 bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/25 text-indigo-300 rounded-xl text-xs uppercase font-black tracking-widest transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto"
                                           >
                                             <Sliders className="w-3.5 h-3.5" />
                                             {heatmapConfigureOpen
@@ -23912,9 +23912,9 @@ ${ttNotes}`
 
                                         {/* Interactive Target Configurator Panel */}
                                         {heatmapConfigureOpen && (
-                                          <div className="p-4 bg-[#1e1e1e]/40 backdrop-blur-lg/40 rounded-2xl border border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-5 text-left transition-all">
+                                          <div className="p-4 bg-slate-900/40 /40 rounded-2xl border border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-5 text-left transition-all">
                                             <div className="space-y-2">
-                                              <label className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
+                                              <label className="text-xs text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
                                                 Morning Shift Target (07-16)
                                               </label>
                                               <div className="flex items-center gap-2">
@@ -23933,7 +23933,7 @@ ${ttNotes}`
                                                       val,
                                                     );
                                                   }}
-                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-lg border border-white/10 transition-all flex items-center justify-center cursor-pointer"
+                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-xl border border-white/10 transition-all flex items-center justify-center cursor-pointer"
                                                 >
                                                   -
                                                 </button>
@@ -23953,7 +23953,7 @@ ${ttNotes}`
                                                       val,
                                                     );
                                                   }}
-                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-lg border border-white/10 transition-all flex items-center justify-center cursor-pointer"
+                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-xl border border-white/10 transition-all flex items-center justify-center cursor-pointer"
                                                 >
                                                   +
                                                 </button>
@@ -23964,7 +23964,7 @@ ${ttNotes}`
                                             </div>
 
                                             <div className="space-y-2">
-                                              <label className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
+                                              <label className="text-xs text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
                                                 Afternoon Shift Target (13-22)
                                               </label>
                                               <div className="flex items-center gap-2">
@@ -23984,7 +23984,7 @@ ${ttNotes}`
                                                       val,
                                                     );
                                                   }}
-                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-lg border border-white/10 transition-all flex items-center justify-center cursor-pointer"
+                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-xl border border-white/10 transition-all flex items-center justify-center cursor-pointer"
                                                 >
                                                   -
                                                 </button>
@@ -24005,7 +24005,7 @@ ${ttNotes}`
                                                       val,
                                                     );
                                                   }}
-                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-lg border border-white/10 transition-all flex items-center justify-center cursor-pointer"
+                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-xl border border-white/10 transition-all flex items-center justify-center cursor-pointer"
                                                 >
                                                   +
                                                 </button>
@@ -24016,7 +24016,7 @@ ${ttNotes}`
                                             </div>
 
                                             <div className="space-y-2">
-                                              <label className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
+                                              <label className="text-xs text-slate-400 font-extrabold uppercase tracking-wider block font-sans">
                                                 Night Shift Target (22-07)
                                               </label>
                                               <div className="flex items-center gap-2">
@@ -24033,7 +24033,7 @@ ${ttNotes}`
                                                       val,
                                                     );
                                                   }}
-                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-lg border border-white/10 transition-all flex items-center justify-center cursor-pointer"
+                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-xl border border-white/10 transition-all flex items-center justify-center cursor-pointer"
                                                 >
                                                   -
                                                 </button>
@@ -24051,7 +24051,7 @@ ${ttNotes}`
                                                       val,
                                                     );
                                                   }}
-                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-lg border border-white/10 transition-all flex items-center justify-center cursor-pointer"
+                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-xl border border-white/10 transition-all flex items-center justify-center cursor-pointer"
                                                 >
                                                   +
                                                 </button>
@@ -24068,7 +24068,7 @@ ${ttNotes}`
                                           <div className="min-w-[850px] space-y-2">
                                             {/* Header row containing Dates */}
                                             <div className="flex">
-                                              <div className="w-44 shrink-0 flex items-center pl-3 text-[10px] font-black uppercase text-indigo-300 tracking-wider font-display border-r border-white/5">
+                                              <div className="w-44 shrink-0 flex items-center pl-3 text-xs font-black uppercase text-indigo-300 tracking-wider font-display border-r border-white/5">
                                                 Shift vs Date
                                               </div>
                                               <div className="flex-1 flex gap-1.5 pl-3">
@@ -24084,9 +24084,9 @@ ${ttNotes}`
                                                     return (
                                                       <div
                                                         key={dateStr}
-                                                        className="flex-1 text-center bg-[#1e1e1e]/40 backdrop-blur-lg/30 py-1.5 rounded-xl border border-white/5 shadow-sm"
+                                                        className="flex-1 text-center bg-slate-900/40 /30 py-1.5 rounded-xl border border-white/5 shadow-sm"
                                                       >
-                                                        <p className="text-[9px] text-indigo-300 uppercase font-black tracking-wider leading-none">
+                                                        <p className="text-xs text-indigo-300 uppercase font-black tracking-wider leading-none">
                                                           {dayLabel}
                                                         </p>
                                                         <p className="text-xs font-black text-slate-200 mt-1">
@@ -24135,11 +24135,11 @@ ${ttNotes}`
                                                   className="flex items-stretch"
                                                 >
                                                   {/* Left Row Title & Header */}
-                                                  <div className="w-44 shrink-0 flex flex-col justify-center text-left pl-3 py-1 bg-[#1e1e1e]/40 backdrop-blur-lg/30 border-r border-white/5 rounded-l-xl select-none">
+                                                  <div className="w-44 shrink-0 flex flex-col justify-center text-left pl-3 py-1 bg-slate-900/40 /30 border-r border-white/5 rounded-l-xl select-none">
                                                     <p className="text-xs font-black text-slate-200 font-display">
                                                       {row.label}
                                                     </p>
-                                                    <p className="text-[8px] text-indigo-200/60 font-medium">
+                                                    <p className="text-xs text-indigo-200/60 font-medium">
                                                       Target: {row.target} Agent
                                                       {row.target !== 1
                                                         ? "s"
@@ -24195,7 +24195,7 @@ ${ttNotes}`
                                                             key={dateStr}
                                                             className={`flex-1 min-h-[44px] relative group flex flex-col items-center justify-center rounded-xl transition-all select-none duration-150 cursor-help ${cellStyle}`}
                                                           >
-                                                            <span className="text-[11px] font-extrabold tracking-tight">
+                                                            <span className="text-xs font-extrabold tracking-tight">
                                                               {count}/{target}
                                                             </span>
                                                             <span className="text-[7.5px] uppercase tracking-widest leading-none font-bold opacity-60 mt-0.5">
@@ -24203,18 +24203,18 @@ ${ttNotes}`
                                                             </span>
 
                                                             {/* Tooltip listing agents */}
-                                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 hidden group-hover:block bg-transparent border border-indigo-500/30 text-slate-100 rounded-xl p-3 shadow-2xl z-50 text-[10px] leading-relaxed backdrop-blur-md">
+                                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 hidden group-hover:block bg-transparent border border-indigo-500/30 text-slate-100 rounded-xl p-3 shadow z-50 text-xs leading-relaxed ">
                                                               <p className="font-extrabold text-indigo-300 border-b border-indigo-500/20 pb-0.5 mb-1.5 flex items-center justify-between">
                                                                 <span>
                                                                   Coverage
                                                                   Details
                                                                 </span>
-                                                                <span className="text-[8px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.2 rounded font-mono uppercase tracking-widest">
+                                                                <span className="text-xs bg-indigo-500/20 text-indigo-300 px-1.5 py-0.2 rounded font-mono uppercase tracking-widest">
                                                                   {row.term}
                                                                 </span>
                                                               </p>
 
-                                                              <p className="text-slate-400 text-[9px] mb-1 font-sans">
+                                                              <p className="text-slate-400 text-xs mb-1 font-sans">
                                                                 {statusText} (
                                                                 {count} of{" "}
                                                                 {target} agents
@@ -24249,7 +24249,7 @@ ${ttNotes}`
                                                                         <span className="font-bold">
                                                                           {name}
                                                                         </span>
-                                                                        <span className="text-[8px] text-slate-500">
+                                                                        <span className="text-xs text-slate-500">
                                                                           (
                                                                           {getAgentLOB(
                                                                             name,
@@ -24275,28 +24275,28 @@ ${ttNotes}`
                                         </div>
 
                                         {/* Quick Stats Insights Bar & Legend */}
-                                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-3 border-t border-white/5 text-[10px] text-slate-400">
+                                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-3 border-t border-white/5 text-xs text-slate-400">
                                           {/* Heatmap Legend */}
                                           <div className="flex flex-wrap gap-3 items-center">
                                             <span className="font-bold text-slate-300">
                                               Keys:
                                             </span>
                                             <span className="flex items-center gap-1">
-                                              <span className="w-2.5 h-2.5 rounded bg-emerald-500/20 border border-emerald-500/40 inline-block text-[7px] text-center font-bold"></span>
+                                              <span className="w-2.5 h-2.5 rounded bg-emerald-500/20 border border-emerald-500/40 inline-block text-xs text-center font-bold"></span>
                                               Optimal (100%+)
                                             </span>
                                             <span className="flex items-center gap-1">
-                                              <span className="w-2.5 h-2.5 rounded bg-amber-500/15 border border-amber-500/35 inline-block text-[7px] text-center font-bold">
+                                              <span className="w-2.5 h-2.5 rounded bg-amber-500/15 border border-amber-500/35 inline-block text-xs text-center font-bold">
                                                 !
                                               </span>
                                               Sufficient (50%+)
                                             </span>
                                             <span className="flex items-center gap-1">
-                                              <span className="w-2.5 h-2.5 rounded bg-orange-500/15 border border-orange-500/35 inline-block text-[7px] text-center font-bold"></span>
+                                              <span className="w-2.5 h-2.5 rounded bg-orange-500/15 border border-orange-500/35 inline-block text-xs text-center font-bold"></span>
                                               Understaffed (&lt;50%)
                                             </span>
                                             <span className="flex items-center gap-1">
-                                              <span className="w-2.5 h-2.5 rounded bg-rose-500/10 border border-rose-500/30 inline-block text-[7px] text-center font-bold"></span>
+                                              <span className="w-2.5 h-2.5 rounded bg-rose-500/10 border border-rose-500/30 inline-block text-xs text-center font-bold"></span>
                                               0 Coverage
                                             </span>
                                           </div>
@@ -24339,7 +24339,7 @@ ${ttNotes}`
                                               understaffedEntries.length === 0
                                             ) {
                                               return (
-                                                <span className="text-emerald-400 font-bold flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-lg font-sans">
+                                                <span className="text-emerald-400 font-bold flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-xl font-sans">
                                                   Optimal Coverage Across
                                                   Display Horizon
                                                 </span>
@@ -24381,7 +24381,7 @@ ${ttNotes}`
                                     <table className="w-full text-left border-collapse table-fixed min-w-[800px]">
                                       <thead>
                                         <tr className="bg-white/5 border-b border-white/5">
-                                          <th className="px-5 py-3.5 text-xs font-bold text-slate-200 w-52 font-display bg-[#1e1e1e]/40 backdrop-blur-lg border-r border-white/5 shadow-md sticky left-0 z-10">
+                                          <th className="px-5 py-3.5 text-xs font-bold text-slate-200 w-52 font-display bg-slate-900/40  border-r border-white/5 shadow-md sticky left-0 z-10">
                                             Agent Name
                                           </th>
                                           {activeDisplayDates.map((dateStr) => {
@@ -24401,13 +24401,13 @@ ${ttNotes}`
                                                 key={dateStr}
                                                 className="px-3 py-3 text-center border-r border-white/5 min-w-[90px]"
                                               >
-                                                <p className="text-[10px] text-indigo-300 uppercase font-bold tracking-wider">
+                                                <p className="text-xs text-indigo-300 uppercase font-bold tracking-wider">
                                                   {dayName}
                                                 </p>
                                                 <p className="text-base font-black text-slate-100">
                                                   {dayNum}
                                                 </p>
-                                                <p className="text-[9px] text-slate-400">
+                                                <p className="text-xs text-slate-400">
                                                   {monthName}
                                                 </p>
                                               </th>
@@ -24432,11 +24432,11 @@ ${ttNotes}`
                                           visibleAgents.map((agentName) => (
                                             <tr
                                               key={agentName}
-                                              className="border-b border-white/5 hover:bg-white/20 backdrop-blur-md transition-all"
+                                              className="border-b border-white/5 hover:bg-white/20  transition-all"
                                             >
-                                              <td className="px-5 py-3 text-xs font-bold text-slate-100 font-sans bg-[#1e1e1e]/40 backdrop-blur-lg border-r border-white/5 shadow-sm sticky left-0 z-10 truncate min-w-[140px]">
+                                              <td className="px-5 py-3 text-xs font-bold text-slate-100 font-sans bg-slate-900/40  border-r border-white/5 shadow-sm sticky left-0 z-10 truncate min-w-[140px]">
                                                 {agentName}
-                                                <span className="block text-[8px] text-slate-400 font-normal lowercase tracking-wide font-sans">
+                                                <span className="block text-xs text-slate-400 font-normal lowercase tracking-wide font-sans">
                                                   {getAgentLOB(agentName)}
                                                 </span>
                                               </td>
@@ -24486,10 +24486,10 @@ ${ttNotes}`
                                                             { ...findShift },
                                                           );
                                                       }}
-                                                      className={`p-1 border-r border-white/5 hover:bg-white/20 backdrop-blur-md/40 transition-all relative group ${isSuperAdmin && findShift ? "cursor-pointer hover:ring-1 ring-inset ring-indigo-500/50" : "cursor-help"}`}
+                                                      className={`p-1 border-r border-white/5 hover:bg-white/20 /40 transition-all relative group ${isSuperAdmin && findShift ? "cursor-pointer hover:ring-1 ring-inset ring-indigo-500/50" : "cursor-help"}`}
                                                     >
                                                       <div
-                                                        className={`mx-auto rounded-lg px-2 py-2 text-center border text-[10px] font-bold ${style.bg} transition-all flex items-center justify-center gap-1 relative overflow-hidden`}
+                                                        className={`mx-auto rounded-xl px-2 py-2 text-center border text-xs font-bold ${style.bg} transition-all flex items-center justify-center gap-1 relative overflow-hidden`}
                                                       >
                                                         <span className="relative z-10">
                                                           {style.display}
@@ -24500,7 +24500,7 @@ ${ttNotes}`
                                                         {findShift?.activities &&
                                                           findShift.activities
                                                             .length > 0 && (
-                                                            <div className="absolute bottom-0 left-0 right-0 h-1 flex bg-[#1e1e1e]/40 backdrop-blur-lg/40">
+                                                            <div className="absolute bottom-0 left-0 right-0 h-1 flex bg-slate-900/40 /40">
                                                               {findShift.activities.map(
                                                                 (a, i) => (
                                                                   <div
@@ -24520,7 +24520,7 @@ ${ttNotes}`
                                                           findShift.activities
                                                             .length > 0) ||
                                                         isSuperAdmin) && (
-                                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block bg-[#1e1e1e]/40 backdrop-blur-lg border border-indigo-400/40 text-slate-100 rounded-xl p-3 shadow-2xl z-50 text-[10px] leading-relaxed backdrop-blur-md">
+                                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block bg-slate-900/40  border border-indigo-400/40 text-slate-100 rounded-xl p-3 shadow z-50 text-xs leading-relaxed ">
                                                           <p className="font-extrabold text-indigo-300 border-b border-indigo-400/20 pb-0.5 mb-1.5 flex items-center justify-between font-display">
                                                             <span>Details</span>
                                                             <span className="text-slate-400 font-mono scale-75">
@@ -24542,7 +24542,7 @@ ${ttNotes}`
                                                             findShift.activities
                                                               .length > 0 && (
                                                               <div className="space-y-1 mb-2">
-                                                                <p className="text-[9px] font-bold uppercase text-slate-500 tracking-wider">
+                                                                <p className="text-xs font-bold uppercase text-slate-500 tracking-wider">
                                                                   Intraday
                                                                   Timeline:
                                                                 </p>
@@ -24564,7 +24564,7 @@ ${ttNotes}`
                                                                         key={i}
                                                                         className="flex items-center gap-1.5 justify-between bg-white/[0.03] px-1.5 py-0.5 rounded border border-white/5"
                                                                       >
-                                                                        <span className="font-mono text-[9px] text-indigo-200">
+                                                                        <span className="font-mono text-xs text-indigo-200">
                                                                           {
                                                                             act.startTime
                                                                           }
@@ -24586,7 +24586,7 @@ ${ttNotes}`
 
                                                           {isSuperAdmin &&
                                                             findShift && (
-                                                              <p className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest text-center mt-2 bg-emerald-500/10 border border-emerald-500/20 py-0.5 rounded">
+                                                              <p className="text-xs text-emerald-400 font-bold uppercase tracking-widest text-center mt-2 bg-emerald-500/10 border border-emerald-500/20 py-0.5 rounded">
                                                                 Click to edit
                                                                 intervals
                                                               </p>
@@ -24624,11 +24624,11 @@ ${ttNotes}`
                                         return (
                                           <div
                                             key={agentName}
-                                            className="p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl space-y-2"
+                                            className="p-4 bg-white/5  border border-white/10 rounded-2xl space-y-2"
                                           >
                                             <p className="text-xs font-bold text-slate-100 border-b border-white/5 pb-1 font-display flex justify-between items-center">
                                               <span>{agentName}</span>
-                                              <span className="text-[9px] text-slate-400 font-normal lowercase tracking-wide bg-white/5 border border-white/5 px-1.5 py-0.5 rounded-lg">
+                                              <span className="text-xs text-slate-400 font-normal lowercase tracking-wide bg-white/5 border border-white/5 px-1.5 py-0.5 rounded-xl">
                                                 {getAgentLOB(agentName)}
                                               </span>
                                             </p>
@@ -24678,11 +24678,11 @@ ${ttNotes}`
                                                       }}
                                                       className={`p-2 bg-white/5 border border-white/5 rounded-xl flex flex-col justify-between items-stretch relative ${isSuperAdmin && findShift ? "cursor-pointer hover:border-indigo-500/50" : ""}`}
                                                     >
-                                                      <span className="text-[9px] text-slate-400 font-medium mb-1 truncate block">
+                                                      <span className="text-xs text-slate-400 font-medium mb-1 truncate block">
                                                         {dayLabel}
                                                       </span>
                                                       <span
-                                                        className={`px-1.5 py-1 rounded border text-[9px] font-semibold text-center truncate block ${style.bg} relative overflow-hidden`}
+                                                        className={`px-1.5 py-1 rounded border text-xs font-semibold text-center truncate block ${style.bg} relative overflow-hidden`}
                                                       >
                                                         <span className="relative z-10">
                                                           {style.display}
@@ -24690,7 +24690,7 @@ ${ttNotes}`
                                                         {findShift?.activities &&
                                                           findShift.activities
                                                             .length > 0 && (
-                                                            <div className="absolute bottom-0 left-0 right-0 h-1 flex bg-[#1e1e1e]/40 backdrop-blur-lg/40 opacity-70">
+                                                            <div className="absolute bottom-0 left-0 right-0 h-1 flex bg-slate-900/40 /40 opacity-70">
                                                               {findShift.activities.map(
                                                                 (a, i) => (
                                                                   <div
@@ -24703,8 +24703,8 @@ ${ttNotes}`
                                                           )}
                                                       </span>
                                                       {findShift?.shiftNotes && (
-                                                        <div className="mt-1.5 border-t border-white/5 pt-1 text-[9px] text-indigo-300 font-sans italic break-words flex items-start gap-1 leading-normal text-left">
-                                                          <span className="shrink-0 text-[10px]"></span>
+                                                        <div className="mt-1.5 border-t border-white/5 pt-1 text-xs text-indigo-300 font-sans italic break-words flex items-start gap-1 leading-normal text-left">
+                                                          <span className="shrink-0 text-xs"></span>
                                                           <span>
                                                             {
                                                               findShift.shiftNotes
@@ -24715,7 +24715,7 @@ ${ttNotes}`
                                                       {findShift?.activities &&
                                                         findShift.activities
                                                           .length > 0 && (
-                                                          <div className="mt-1.5 border-t border-white/5 pt-1 text-[8px] text-slate-400 font-sans flex flex-col gap-0.5">
+                                                          <div className="mt-1.5 border-t border-white/5 pt-1 text-xs text-slate-400 font-sans flex flex-col gap-0.5">
                                                             {[
                                                               ...findShift.activities,
                                                             ]
@@ -24743,7 +24743,7 @@ ${ttNotes}`
                                                             {findShift
                                                               .activities
                                                               .length > 2 && (
-                                                              <span className="text-center text-[7px] mt-0.5 bg-white/5 py-0.5 rounded">
+                                                              <span className="text-center text-xs mt-0.5 bg-white/5 py-0.5 rounded">
                                                                 +
                                                                 {findShift
                                                                   .activities
@@ -24757,7 +24757,7 @@ ${ttNotes}`
                                                       {isSuperAdmin &&
                                                         findShift && (
                                                           <div className="mt-2 text-center">
-                                                            <span className="text-[7px] text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-1 py-[1px] rounded border border-indigo-500/20">
+                                                            <span className="text-xs text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-1 py-[1px] rounded border border-indigo-500/20">
                                                               Edit Intraday
                                                             </span>
                                                           </div>
@@ -24774,7 +24774,7 @@ ${ttNotes}`
                                   </div>
 
                                   {/* Shift legend details */}
-                                  <div className="flex flex-wrap justify-start gap-4 text-[10px] text-slate-400 pt-2 border-t border-white/5">
+                                  <div className="flex flex-wrap justify-start gap-4 text-xs text-slate-400 pt-2 border-t border-white/5">
                                     <span className="flex items-center gap-1.5">
                                       <span className="w-2.5 h-2.5 rounded bg-emerald-500/20 border border-emerald-500/40 block"></span>
                                       Morning Shift: 07:00 - 16:00
@@ -24801,7 +24801,7 @@ ${ttNotes}`
                               currentUser?.role === "sme" ||
                               isSuperAdmin) &&
                               schedules.length > 0 && (
-                                <div className="bg-white/5 border border-amber-500/20 rounded-2xl p-5 sm:p-6 shadow-2xl space-y-6 mt-6">
+                                <div className="bg-white/5 border border-amber-500/20 rounded-2xl p-5 sm:p-6 shadow space-y-6 mt-6">
                                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-4">
                                     <div>
                                       <h3 className="font-extrabold text-transparent bg-gradient-to-r from-amber-400 to-orange-300 bg-clip-text text-lg font-display flex items-center gap-2 text-left">
@@ -24817,7 +24817,7 @@ ${ttNotes}`
                                         slots trigger push notifications.
                                       </p>
                                     </div>
-                                    <span className="px-2.5 py-1 text-[10px] font-black tracking-wider uppercase text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-full font-mono">
+                                    <span className="px-2.5 py-1 text-xs font-black tracking-wider uppercase text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-full font-mono">
                                       TL & Admin Control
                                     </span>
                                   </div>
@@ -24848,7 +24848,7 @@ ${ttNotes}`
                                           return (
                                             <div
                                               key={shift.id}
-                                              className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between gap-3 hover:border-white/15 transition-all text-left"
+                                              className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between gap-3 hover:border-white/10 transition-all text-left"
                                             >
                                               <div className="flex justify-between items-start gap-2">
                                                 <div>
@@ -24857,14 +24857,14 @@ ${ttNotes}`
                                                       {shift.agentName}
                                                     </span>
                                                   </h4>
-                                                  <span className="text-[10px] text-slate-400 font-normal lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded-lg mt-1 inline-block">
+                                                  <span className="text-xs text-slate-400 font-normal lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded-xl mt-1 inline-block">
                                                     {getAgentLOB(
                                                       shift.agentName,
                                                     )}
                                                   </span>
                                                 </div>
                                                 <span
-                                                  className={`px-2 py-0.5 rounded border text-[10px] font-semibold ${style.bg}`}
+                                                  className={`px-2 py-0.5 rounded border text-xs font-semibold ${style.bg}`}
                                                 >
                                                   {style.display}
                                                 </span>
@@ -24875,7 +24875,7 @@ ${ttNotes}`
                                                 <div className="space-y-3 pt-2 border-t border-white/5 mt-1">
                                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                     <div className="space-y-1">
-                                                      <label className="text-[9px] text-slate-400 font-extrabold uppercase font-sans">
+                                                      <label className="text-xs text-slate-400 font-extrabold uppercase font-sans">
                                                         Break Time
                                                       </label>
                                                       <input
@@ -24886,11 +24886,11 @@ ${ttNotes}`
                                                             e.target.value,
                                                           )
                                                         }
-                                                        className="w-full px-2.5 py-1.5 bg-slate-950 border border-white/10 rounded-lg text-xs text-slate-100 outline-none focus:border-indigo-500 font-sans"
+                                                        className="w-full px-2.5 py-1.5 bg-slate-950 border border-white/10 rounded-xl text-xs text-slate-100 outline-none focus:border-indigo-500 font-sans"
                                                       />
                                                     </div>
                                                     <div className="space-y-1">
-                                                      <label className="text-[9px] text-slate-400 font-extrabold uppercase font-sans">
+                                                      <label className="text-xs text-slate-400 font-extrabold uppercase font-sans">
                                                         Lunch Time
                                                       </label>
                                                       <input
@@ -24901,7 +24901,7 @@ ${ttNotes}`
                                                             e.target.value,
                                                           )
                                                         }
-                                                        className="w-full px-2.5 py-1.5 bg-slate-950 border border-white/10 rounded-lg text-xs text-slate-100 outline-none focus:border-indigo-500 font-sans"
+                                                        className="w-full px-2.5 py-1.5 bg-slate-950 border border-white/10 rounded-xl text-xs text-slate-100 outline-none focus:border-indigo-500 font-sans"
                                                       />
                                                     </div>
                                                   </div>
@@ -24912,7 +24912,7 @@ ${ttNotes}`
                                                           null,
                                                         )
                                                       }
-                                                      className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-slate-300 rounded-lg text-[10px] font-extrabold uppercase tracking-wide cursor-pointer transition-colors"
+                                                      className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-slate-300 rounded-xl text-xs font-extrabold uppercase tracking-wide cursor-pointer transition-colors"
                                                     >
                                                       Cancel
                                                     </button>
@@ -24924,7 +24924,7 @@ ${ttNotes}`
                                                           blLunchTime,
                                                         )
                                                       }
-                                                      className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-lg text-[10px] uppercase tracking-wide cursor-pointer transition-colors"
+                                                      className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wide cursor-pointer transition-colors"
                                                     >
                                                       Save & Notify
                                                     </button>
@@ -24934,22 +24934,22 @@ ${ttNotes}`
                                                 <div className="flex items-center justify-between pt-2 border-t border-white/5 mt-1 gap-2">
                                                   <div className="flex flex-wrap gap-2">
                                                     {shift.breakTime ? (
-                                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-mono leading-none">
+                                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-mono leading-none">
                                                         ☕ Break:{" "}
                                                         {shift.breakTime}
                                                       </span>
                                                     ) : (
-                                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/5 text-slate-650 border border-dashed border-white/10 text-[10px] leading-none">
+                                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xl bg-white/5 text-slate-650 border border-dashed border-white/10 text-xs leading-none">
                                                         ☕ Break: Not set
                                                       </span>
                                                     )}
                                                     {shift.lunchTime ? (
-                                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-orange-500/10 text-orange-400 border border-orange-500/20 text-[10px] font-mono leading-none">
+                                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xl bg-orange-500/10 text-orange-400 border border-orange-500/20 text-xs font-mono leading-none">
                                                         🍔 Lunch:{" "}
                                                         {shift.lunchTime}
                                                       </span>
                                                     ) : (
-                                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/5 text-slate-650 border border-dashed border-white/10 text-[10px] leading-none">
+                                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xl bg-white/5 text-slate-650 border border-dashed border-white/10 text-xs leading-none">
                                                         🍔 Lunch: Not set
                                                       </span>
                                                     )}
@@ -24966,7 +24966,7 @@ ${ttNotes}`
                                                         shift.lunchTime || "",
                                                       );
                                                     }}
-                                                    className="px-3 py-1 bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-300 border border-white/5 hover:border-indigo-500/20 text-slate-300 rounded-lg text-[10px] font-extrabold uppercase tracking-wide cursor-pointer transition-all"
+                                                    className="px-3 py-1 bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-300 border border-white/5 hover:border-indigo-500/20 text-slate-300 rounded-xl text-xs font-extrabold uppercase tracking-wide cursor-pointer transition-all"
                                                   >
                                                     Assign
                                                   </button>
@@ -24982,7 +24982,7 @@ ${ttNotes}`
                               )}
 
                             {/* P2P Shift Swap Trade Market & Trade Hub */}
-                            <div className="bg-white/5 border border-white/10 rounded-2xl shadow-sm text-slate-100 p-5 sm:p-6 shadow-2xl space-y-6 mt-6">
+                            <div className="bg-white/5 border border-white/10 rounded-2xl shadow-sm text-slate-100 p-5 sm:p-6 shadow space-y-6 mt-6">
                               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-4">
                                 <div>
                                   <h3 className="font-extrabold text-transparent bg-gradient-to-r from-blue-300 via-indigo-200 to-cyan-300 bg-clip-text text-lg font-display flex items-center gap-2">
@@ -24995,19 +24995,19 @@ ${ttNotes}`
                                     assignments within LOBs
                                   </p>
                                 </div>
-                                <div className="flex bg-white/[0.03] rounded-xl p-1 border border-white/5 text-[9px] font-black uppercase text-indigo-300 tracking-wider">
+                                <div className="flex bg-white/[0.03] rounded-xl p-1 border border-white/5 text-xs font-black uppercase text-indigo-300 tracking-wider">
                                   Peer To Peer Market
                                 </div>
                               </div>
 
                               <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                                 {/* Interactive Trade Listing Launcher Form */}
-                                <div className="bg-white/10 backdrop-blur-md/[0.01] p-5 border border-white/5 rounded-2xl space-y-4 text-left">
+                                <div className="bg-white/10 /[0.01] p-5 border border-white/5 rounded-2xl space-y-4 text-left">
                                   <div>
                                     <p className="text-xs font-black text-rose-450 uppercase tracking-widest">
                                       Publish Open Trade Offer
                                     </p>
-                                    <p className="text-[11px] text-slate-400 mt-0.5 font-sans">
+                                    <p className="text-xs text-slate-400 mt-0.5 font-sans">
                                       Offer up one of your scheduled shifts for
                                       peer coverage
                                     </p>
@@ -25016,7 +25016,7 @@ ${ttNotes}`
                                   <div className="space-y-3.5">
                                     {/* Selected Date */}
                                     <div className="space-y-1">
-                                      <label className="text-[10px] text-slate-400 font-bold uppercase font-sans">
+                                      <label className="text-xs text-slate-400 font-bold uppercase font-sans">
                                         1. Select Your Shift Event
                                       </label>
                                       {(() => {
@@ -25035,7 +25035,7 @@ ${ttNotes}`
                                           );
                                         if (myShedList.length === 0) {
                                           return (
-                                            <div className="p-2 bg-rose-500/5 border border-rose-500/10 rounded-xl text-[10px] text-rose-300">
+                                            <div className="p-2 bg-rose-500/5 border border-rose-500/10 rounded-xl text-xs text-rose-300">
                                               No upcoming shifts found in your
                                               schedule.
                                             </div>
@@ -25047,17 +25047,17 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setP2pSelectedDate(e.target.value)
                                             }
-                                            className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
+                                            className="w-full px-3 py-2 bg-white/5  border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
                                           >
                                             <option
-                                              className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                              className="bg-white/10  text-slate-100 "
                                               value=""
                                             >
                                               -- Choose Assigned Date --
                                             </option>
                                             {myShedList.map((s) => (
                                               <option
-                                                className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                                className="bg-white/10  text-slate-100 "
                                                 key={s.id}
                                                 value={s.date}
                                               >
@@ -25072,7 +25072,7 @@ ${ttNotes}`
 
                                     {/* Target Partner Agent */}
                                     <div className="space-y-1">
-                                      <label className="text-[10px] text-slate-400 font-bold uppercase font-sans">
+                                      <label className="text-xs text-slate-400 font-bold uppercase font-sans">
                                         2. Targeted Trading Partner
                                       </label>
                                       <select
@@ -25080,10 +25080,10 @@ ${ttNotes}`
                                         onChange={(e) =>
                                           setP2pTargetAgent(e.target.value)
                                         }
-                                        className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
+                                        className="w-full px-3 py-2 bg-white/5  border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
                                       >
                                         <option
-                                          className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                          className="bg-white/10  text-slate-100 "
                                           value=""
                                         >
                                           -- Let Any Peer in LOB Grab It --
@@ -25098,7 +25098,7 @@ ${ttNotes}`
                                           )
                                           .map((aName) => (
                                             <option
-                                              className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                              className="bg-white/10  text-slate-100 "
                                               key={aName}
                                               value={aName}
                                             >
@@ -25106,7 +25106,7 @@ ${ttNotes}`
                                             </option>
                                           ))}
                                       </select>
-                                      <p className="text-[9px] text-[#22d3ee] font-medium leading-relaxed mt-0.5 font-sans">
+                                      <p className="text-xs text-[#22d3ee] font-medium leading-relaxed mt-0.5 font-sans">
                                         * LOB filter active: Showing agents
                                         sharing your department (
                                         {getAgentLOB(currentUser.name)})
@@ -25115,7 +25115,7 @@ ${ttNotes}`
 
                                     {/* Target Shift */}
                                     <div className="space-y-1">
-                                      <label className="text-[10px] text-slate-400 font-bold uppercase font-sans">
+                                      <label className="text-xs text-slate-400 font-bold uppercase font-sans">
                                         3. Shift You Want to Gain
                                       </label>
                                       <select
@@ -25123,11 +25123,11 @@ ${ttNotes}`
                                         onChange={(e) =>
                                           setP2pTargetShift(e.target.value)
                                         }
-                                        className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
+                                        className="w-full px-3 py-2 bg-white/5  border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
                                       >
                                         {SHIFTS.map((s) => (
                                           <option
-                                            className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                            className="bg-white/10  text-slate-100 "
                                             key={s.id}
                                             value={s.label}
                                           >
@@ -25135,7 +25135,7 @@ ${ttNotes}`
                                           </option>
                                         ))}
                                         <option
-                                          className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                          className="bg-white/10  text-slate-100 "
                                           value="Off"
                                         >
                                           Rest Day (Off Day)
@@ -25145,7 +25145,7 @@ ${ttNotes}`
 
                                     {/* Notes */}
                                     <div className="space-y-1">
-                                      <label className="text-[10px] text-slate-400 font-bold uppercase font-sans">
+                                      <label className="text-xs text-slate-400 font-bold uppercase font-sans">
                                         4. Optional Offer Description
                                       </label>
                                       <input
@@ -25155,7 +25155,7 @@ ${ttNotes}`
                                         onChange={(e) =>
                                           setP2pNotes(e.target.value)
                                         }
-                                        className="w-full px-3 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 outline-none"
+                                        className="w-full px-3 py-2 bg-white/5  border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 outline-none"
                                       />
                                     </div>
 
@@ -25296,7 +25296,7 @@ ${ttNotes}`
                                     <p className="text-xs font-black text-[#22d3ee] uppercase tracking-widest font-sans">
                                       Available Trades Board Listings
                                     </p>
-                                    <p className="text-[11px] text-slate-400 mt-0.5 font-sans">
+                                    <p className="text-xs text-slate-400 mt-0.5 font-sans">
                                       Review peer postings, accept direct
                                       proposals, or review status
                                     </p>
@@ -25320,7 +25320,7 @@ ${ttNotes}`
                                       }
                                       return (
                                         <table className="w-full text-xs font-sans">
-                                          <thead className="bg-[#1e1e2d] text-slate-400 text-[10px] font-bold uppercase tracking-wider sticky top-0 border-b border-white/5 font-sans">
+                                          <thead className="bg-[#1e1e2d] text-slate-400 text-xs font-bold uppercase tracking-wider sticky top-0 border-b border-white/5 font-sans">
                                             <tr>
                                               <th className="px-4 py-3 text-left">
                                                 Agent Offering
@@ -25356,11 +25356,11 @@ ${ttNotes}`
                                               return (
                                                 <tr
                                                   key={req.id}
-                                                  className="hover:bg-white/10 backdrop-blur-md/[0.02] transition-colors"
+                                                  className="hover:bg-white/10 /[0.02] transition-colors"
                                                 >
                                                   <td className="px-4 py-3.5 font-bold text-slate-100">
                                                     {req.agentName}
-                                                    <span className="block text-[8px] text-slate-400 font-normal lowercase">
+                                                    <span className="block text-xs text-slate-400 font-normal lowercase">
                                                       {getAgentLOB(
                                                         req.agentName,
                                                       )}
@@ -25374,28 +25374,28 @@ ${ttNotes}`
                                                   </td>
                                                   <td className="px-4 py-3.5 text-slate-350">
                                                     {req.swapWithAgent}
-                                                    <span className="block text-[8px] text-indigo-300 font-bold lowercase">
+                                                    <span className="block text-xs text-indigo-300 font-bold lowercase">
                                                       Wants: {req.swapWithShift}
                                                     </span>
                                                   </td>
                                                   <td className="px-4 py-3.5">
                                                     {req.status ===
                                                     "pending_partner" ? (
-                                                      <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
                                                         Negotiation P2P
                                                       </span>
                                                     ) : req.status ===
                                                       "pending" ? (
-                                                      <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                                                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
                                                         Awaiting TL
                                                       </span>
                                                     ) : req.status ===
                                                       "approved" ? (
-                                                      <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                                                         Approved
                                                       </span>
                                                     ) : (
-                                                      <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-white/5 text-slate-400 border border-white/5">
+                                                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-white/5 text-slate-400 border border-white/5">
                                                         {req.status}
                                                       </span>
                                                     )}
@@ -25416,7 +25416,7 @@ ${ttNotes}`
                                                               "Accepted P2P trade request! It has been submitted to TL queue.",
                                                             );
                                                           }}
-                                                          className="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded text-[10px] font-bold transition-all cursor-pointer font-sans"
+                                                          className="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded text-xs font-bold transition-all cursor-pointer font-sans"
                                                         >
                                                           Accept
                                                         </button>
@@ -25430,7 +25430,7 @@ ${ttNotes}`
                                                               "Declined custom trade request.",
                                                             );
                                                           }}
-                                                          className="px-2 py-1 bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 text-slate-300 rounded text-[10px] font-bold transition-all border border-white/5 cursor-pointer font-sans"
+                                                          className="px-2 py-1 bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 text-slate-300 rounded text-xs font-bold transition-all border border-white/5 cursor-pointer font-sans"
                                                         >
                                                           Reject
                                                         </button>
@@ -25461,12 +25461,12 @@ ${ttNotes}`
                                                             "Deleted your trade offer listing.",
                                                           );
                                                         }}
-                                                        className="px-2 py-1 bg-rose-500/10 hover:bg-rose-500 border border-rose-500/20 text-rose-300 hover:text-white rounded text-[10px] font-bold transition-all cursor-pointer font-sans"
+                                                        className="px-2 py-1 bg-rose-500/10 hover:bg-rose-500 border border-rose-500/20 text-rose-300 hover:text-white rounded text-xs font-bold transition-all cursor-pointer font-sans"
                                                       >
                                                         Rescind
                                                       </button>
                                                     ) : (
-                                                      <span className="text-[10px] text-slate-500 italic font-sans">
+                                                      <span className="text-xs text-slate-500 italic font-sans">
                                                         No action
                                                       </span>
                                                     )}
@@ -25480,7 +25480,7 @@ ${ttNotes}`
                                     })()}
                                   </div>
 
-                                  <div className="text-[10px] text-slate-500 italic text-left font-sans">
+                                  <div className="text-xs text-slate-500 italic text-left font-sans">
                                     * Shift trading matches rule parameters
                                     including 24-hour advance submission limit.
                                     All swaps route to Operations Leader once
@@ -25556,8 +25556,8 @@ ${ttNotes}`
                               <div className="space-y-6">
                                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                                   {/* ... existing requests metrics ... */}
-                                  <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-                                    <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">
+                                  <div className="p-4 bg-white/5 border border-white/10 rounded-2xl ">
+                                    <p className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1">
                                       Total Submissions
                                     </p>
                                     <p className="text-2xl font-black text-slate-100">
@@ -25569,13 +25569,13 @@ ${ttNotes}`
                                               currentUser?.name?.toLowerCase(),
                                           ).length}
                                     </p>
-                                    <p className="text-[10px] text-indigo-300 mt-1">
+                                    <p className="text-xs text-indigo-300 mt-1">
                                       Logged requests in standalone storage
                                     </p>
                                   </div>
 
-                                  <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl backdrop-blur-sm">
-                                    <p className="text-[10px] uppercase tracking-widest text-amber-300 font-bold mb-1">
+                                  <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl ">
+                                    <p className="text-xs uppercase tracking-widest text-amber-300 font-bold mb-1">
                                       ⏳ Awaiting TL Confirm
                                     </p>
                                     <p className="text-2xl font-black text-amber-400">
@@ -25590,13 +25590,13 @@ ${ttNotes}`
                                               r.status === "not_confirmed",
                                           ).length}
                                     </p>
-                                    <p className="text-[10px] text-amber-200 mt-1">
+                                    <p className="text-xs text-amber-200 mt-1">
                                       Requires Team Leader review
                                     </p>
                                   </div>
 
-                                  <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl backdrop-blur-sm">
-                                    <p className="text-[10px] uppercase tracking-widest text-rose-300 font-bold mb-1">
+                                  <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl ">
+                                    <p className="text-xs uppercase tracking-widest text-rose-300 font-bold mb-1">
                                       Confirmed / Pending Contact
                                     </p>
                                     <p className="text-2xl font-black text-rose-400">
@@ -25616,13 +25616,13 @@ ${ttNotes}`
                                                 "not_contacted",
                                           ).length}
                                     </p>
-                                    <p className="text-[10px] text-rose-300 mt-1">
+                                    <p className="text-xs text-rose-300 mt-1">
                                       Confirmed but client not contacted yet
                                     </p>
                                   </div>
 
-                                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl backdrop-blur-sm">
-                                    <p className="text-[10px] uppercase tracking-widest text-emerald-300 font-bold mb-1">
+                                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl ">
+                                    <p className="text-xs uppercase tracking-widest text-emerald-300 font-bold mb-1">
                                       Successfully Contacted
                                     </p>
                                     <p className="text-2xl font-black text-emerald-400">
@@ -25643,7 +25643,7 @@ ${ttNotes}`
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
-                                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl h-56 shadow-xl">
+                                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl  h-56 shadow">
                                     <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
                                       <Activity className="w-4 h-4 text-amber-400" />
                                       T&T Request Load By Clinic
@@ -25763,7 +25763,7 @@ ${ttNotes}`
                                       );
                                     })()}
                                   </div>
-                                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl h-56 shadow-xl">
+                                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl  h-56 shadow">
                                     <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
                                       <PieChart className="w-4 h-4 text-emerald-400" />
                                       T&T Approvals vs Rejected
@@ -25854,8 +25854,8 @@ ${ttNotes}`
                               <div className="space-y-6 animate-fade-in">
                                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                                   {/* ... existing complaints metrics ... */}
-                                  <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-                                    <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">
+                                  <div className="p-4 bg-white/5 border border-white/10 rounded-2xl ">
+                                    <p className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1">
                                       Total Complaints
                                     </p>
                                     <p className="text-2xl font-black text-slate-100">
@@ -25867,13 +25867,13 @@ ${ttNotes}`
                                               currentUser?.name?.toLowerCase(),
                                           ).length}
                                     </p>
-                                    <p className="text-[10px] text-pink-300 mt-1 font-sans">
+                                    <p className="text-xs text-pink-300 mt-1 font-sans">
                                       Registered complaints in session
                                     </p>
                                   </div>
 
-                                  <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl backdrop-blur-sm">
-                                    <p className="text-[10px] uppercase tracking-widest text-amber-300 font-bold mb-1">
+                                  <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl ">
+                                    <p className="text-xs uppercase tracking-widest text-amber-300 font-bold mb-1">
                                       ⏳ Awaiting TL Action
                                     </p>
                                     <p className="text-2xl font-black text-amber-400">
@@ -25888,13 +25888,13 @@ ${ttNotes}`
                                               c.status === "pending_tl",
                                           ).length}
                                     </p>
-                                    <p className="text-[10px] text-amber-200 mt-1 font-sans">
+                                    <p className="text-xs text-amber-200 mt-1 font-sans">
                                       Pending Team Leader comment
                                     </p>
                                   </div>
 
-                                  <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl backdrop-blur-sm">
-                                    <p className="text-[10px] uppercase tracking-widest text-rose-300 font-bold mb-1">
+                                  <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl ">
+                                    <p className="text-xs uppercase tracking-widest text-rose-300 font-bold mb-1">
                                       Pending Client Contact
                                     </p>
                                     <p className="text-2xl font-black text-rose-400">
@@ -25909,13 +25909,13 @@ ${ttNotes}`
                                               c.status === "need_contact",
                                           ).length}
                                     </p>
-                                    <p className="text-[10px] text-rose-300 mt-1 font-sans font-medium animate-pulse">
+                                    <p className="text-xs text-rose-300 mt-1 font-sans font-medium animate-pulse">
                                       Pending client contacted action
                                     </p>
                                   </div>
 
-                                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl backdrop-blur-sm">
-                                    <p className="text-[10px] uppercase tracking-widest text-emerald-300 font-bold mb-1">
+                                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl ">
+                                    <p className="text-xs uppercase tracking-widest text-emerald-300 font-bold mb-1">
                                       Successfully Closed
                                     </p>
                                     <p className="text-2xl font-black text-emerald-400">
@@ -25930,13 +25930,13 @@ ${ttNotes}`
                                               c.status === "closed",
                                           ).length}
                                     </p>
-                                    <p className="text-[10px] text-emerald-300 mt-1 font-sans">
+                                    <p className="text-xs text-emerald-300 mt-1 font-sans">
                                       Closed complaints loop
                                     </p>
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-1 mt-6">
-                                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl h-56 shadow-xl">
+                                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl  h-56 shadow">
                                     <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
                                       <Activity className="w-4 h-4 text-rose-400" />
                                       Complaints Load By Clinic
@@ -26061,8 +26061,8 @@ ${ttNotes}`
                             ) : (
                               <div className="space-y-6">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
-                                  <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-                                    <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">
+                                  <div className="p-4 bg-white/5 border border-white/10 rounded-2xl ">
+                                    <p className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1">
                                       Total Requests
                                     </p>
                                     <p className="text-2xl font-black text-slate-100">
@@ -26082,13 +26082,13 @@ ${ttNotes}`
                                                 currentUser?.name?.toLowerCase(),
                                           ).length}
                                     </p>
-                                    <p className="text-[10px] text-indigo-300 mt-1 font-sans">
+                                    <p className="text-xs text-indigo-300 mt-1 font-sans">
                                       All communication requests in session
                                     </p>
                                   </div>
 
-                                  <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl backdrop-blur-sm">
-                                    <p className="text-[10px] uppercase tracking-widest text-amber-300 font-bold mb-1">
+                                  <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl ">
+                                    <p className="text-xs uppercase tracking-widest text-amber-300 font-bold mb-1">
                                       ⏳ Pending Response
                                     </p>
                                     <p className="text-2xl font-black text-amber-400">
@@ -26105,13 +26105,13 @@ ${ttNotes}`
                                               c.status === "pending",
                                           ).length}
                                     </p>
-                                    <p className="text-[10px] text-amber-200 mt-1 font-sans">
+                                    <p className="text-xs text-amber-200 mt-1 font-sans">
                                       Currently awaiting agent interaction
                                     </p>
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-1 mt-6">
-                                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-xl h-56 shadow-xl">
+                                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl  h-56 shadow">
                                     <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
                                       <Activity className="w-4 h-4 text-indigo-400" />
                                       Comms By Status
@@ -26218,7 +26218,7 @@ ${ttNotes}`
                               ) && (
                                 <div className="lg:col-span-12 space-y-4">
                                   {localSubTab === "requests" ? (
-                                    <div className="p-6 bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl space-y-4 shadow-2xl">
+                                    <div className="p-6 bg-white/5  border border-white/20 rounded-2xl space-y-4 shadow">
                                       <h3 className="text-lg font-bold text-slate-100 font-display flex items-center gap-2 text-left">
                                         <PlusCircle className="w-5 h-5 text-indigo-400" />
                                         New Installment Request
@@ -26243,7 +26243,7 @@ ${ttNotes}`
                                       >
                                         {/* Patient Name */}
                                         <div className="space-y-1.5 text-left">
-                                          <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                                          <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
                                             Patient Name *
                                           </label>
                                           <input
@@ -26253,14 +26253,14 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setTtPatientName(e.target.value)
                                             }
-                                            className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium"
+                                            className="w-full bg-white/5  border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium"
                                             required
                                           />
                                         </div>
 
                                         {/* File Number */}
                                         <div className="space-y-1.5 text-left">
-                                          <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                                          <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
                                             File Number (Optional)
                                           </label>
                                           <input
@@ -26270,14 +26270,14 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setTtFileNumber(e.target.value)
                                             }
-                                            className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
+                                            className="w-full bg-white/5  border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
                                           />
                                         </div>
 
                                         {/* Old Customer Switch & ID Number */}
                                         <div className="space-y-3.5 p-3.5 bg-white/5 border border-white/5 rounded-2xl text-left">
                                           <div className="flex items-center justify-between">
-                                            <span className="text-[12px] font-bold text-slate-300">
+                                            <span className="text-sm font-bold text-slate-300">
                                               Is this an Old Customer?
                                             </span>
                                             <label className="relative inline-flex items-center cursor-pointer">
@@ -26291,13 +26291,13 @@ ${ttNotes}`
                                                 }
                                                 className="sr-only peer"
                                               />
-                                              <div className="w-11 h-6 bg-[#1e1e1e]/40 backdrop-blur-lg/40/20 backdrop-blur-md peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 backdrop-blur-md after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                              <div className="w-11 h-6 bg-slate-900/40 /40/20  peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10  after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                                             </label>
                                           </div>
 
                                           {!ttIsOldCustomer && (
                                             <div className="space-y-1.5 animate-fade-in pt-1 text-left">
-                                              <label className="text-[11px] font-bold text-amber-400 uppercase tracking-wider block">
+                                              <label className="text-xs font-bold text-amber-400 uppercase tracking-wider block">
                                                 ID Number *
                                               </label>
                                               <input
@@ -26316,7 +26316,7 @@ ${ttNotes}`
 
                                         {/* Price */}
                                         <div className="space-y-1.5 text-left">
-                                          <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                                          <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
                                             Price *
                                           </label>
                                           <div className="relative">
@@ -26332,7 +26332,7 @@ ${ttNotes}`
                                                   e.target.value,
                                                 )
                                               }
-                                              className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl pl-12 pr-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
+                                              className="w-full bg-white/5  border border-white/10 rounded-xl pl-12 pr-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
                                               required
                                             />
                                           </div>
@@ -26406,7 +26406,7 @@ ${ttNotes}`
 
                                            {!ttNoPhone ? (
                                              <div className="space-y-1.5 text-left">
-                                               <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-mono">
+                                               <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block font-mono">
                                                  Phone Number *
                                                </label>
                                                <input
@@ -26425,17 +26425,17 @@ ${ttNotes}`
                                                    if (val === "+971") val = "";
                                                    setTtPhoneNumber(val);
                                                  }}
-                                                 className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
+                                                 className="w-full bg-white/5  border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
                                                  required
                                                />
-                                               <p className="text-[10px] text-slate-400 mt-1">
+                                               <p className="text-xs text-slate-400 mt-1">
                                                  * Please enter the number starting from 5 (e.g., 501234567)
                                                </p>
                                              </div>
                                            ) : (
                                              <div className="grid grid-cols-2 gap-3 animate-fade-in text-left">
                                                <div className="space-y-1.5">
-                                                 <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
+                                                 <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block font-sans">
                                                    Instagram Username
                                                  </label>
                                                  <input
@@ -26443,11 +26443,11 @@ ${ttNotes}`
                                                    placeholder="@username"
                                                    value={ttInstagram}
                                                    onChange={(e) => setTtInstagram(e.target.value)}
-                                                   className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                                                   className="w-full bg-white/5  border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
                                                  />
                                                </div>
                                                <div className="space-y-1.5">
-                                                 <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
+                                                 <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block font-sans">
                                                    TikTok Username
                                                  </label>
                                                  <input
@@ -26455,7 +26455,7 @@ ${ttNotes}`
                                                    placeholder="@username"
                                                    value={ttTiktok}
                                                    onChange={(e) => setTtTiktok(e.target.value)}
-                                                   className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                                                   className="w-full bg-white/5  border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
                                                  />
                                                </div>
                                              </div>
@@ -26464,7 +26464,7 @@ ${ttNotes}`
 
                                         {/* Platform selector */}
                                         <div className="space-y-1.5 text-left">
-                                          <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                                          <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
                                             Payment Platform / Type *
                                           </label>
                                           <div className="grid grid-cols-3 gap-2">
@@ -26473,10 +26473,10 @@ ${ttNotes}`
                                               onClick={() =>
                                                 setTtPlatform("tabby")
                                               }
-                                              className={`py-2 rounded-xl text-[11px] font-black uppercase transition-all tracking-wider flex items-center justify-center gap-1.5 border cursor-pointer ${
+                                              className={`py-2 rounded-xl text-xs font-black uppercase transition-all tracking-wider flex items-center justify-center gap-1.5 border cursor-pointer ${
                                                 ttPlatform === "tabby"
                                                   ? "bg-amber-400 border-amber-300 text-slate-950 shadow-md"
-                                                  : "bg-black/25 border-white/5 text-slate-400 hover:bg-white/20 backdrop-blur-md"
+                                                  : "bg-black/25 border-white/5 text-slate-400 hover:bg-white/20 "
                                               }`}
                                             >
                                               Tabby
@@ -26486,10 +26486,10 @@ ${ttNotes}`
                                               onClick={() =>
                                                 setTtPlatform("tamara")
                                               }
-                                              className={`py-2 rounded-xl text-[11px] font-black uppercase transition-all tracking-wider flex items-center justify-center gap-1.5 border cursor-pointer ${
+                                              className={`py-2 rounded-xl text-xs font-black uppercase transition-all tracking-wider flex items-center justify-center gap-1.5 border cursor-pointer ${
                                                 ttPlatform === "tamara"
                                                   ? "bg-pink-500 border-pink-400 text-slate-100 shadow-md"
-                                                  : "bg-black/25 border-white/5 text-slate-400 hover:bg-white/20 backdrop-blur-md"
+                                                  : "bg-black/25 border-white/5 text-slate-400 hover:bg-white/20 "
                                               }`}
                                             >
                                               Tamara
@@ -26501,11 +26501,11 @@ ${ttNotes}`
                                                   "one_time_payment" as any,
                                                 )
                                               }
-                                              className={`py-2 rounded-xl text-[10px] font-black uppercase transition-all tracking-wider flex items-center justify-center gap-1 border cursor-pointer ${
+                                              className={`py-2 rounded-xl text-xs font-black uppercase transition-all tracking-wider flex items-center justify-center gap-1 border cursor-pointer ${
                                                 ttPlatform ===
                                                 ("one_time_payment" as any)
                                                   ? "bg-emerald-500 border-emerald-400 text-white shadow-md"
-                                                  : "bg-black/25 border-white/5 text-slate-400 hover:bg-white/20 backdrop-blur-md"
+                                                  : "bg-black/25 border-white/5 text-slate-400 hover:bg-white/20 "
                                               }`}
                                             >
                                               One Time
@@ -26515,7 +26515,7 @@ ${ttNotes}`
 
                                         <div className="space-y-1 sm:col-span-2">
                                           <label
-                                            className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block ml-1"
+                                            className="text-xs font-bold uppercase tracking-widest text-slate-400 block ml-1"
                                             htmlFor="tt-clinic"
                                           >
                                             Clinic Name *
@@ -26526,12 +26526,12 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setTtClinicName(e.target.value)
                                             }
-                                            className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
+                                            className="w-full px-4 py-3 bg-white/5  border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                             required
                                           >
                                             <option
                                               value=""
-                                              className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                              className="bg-white/10  text-slate-100 "
                                             >
                                               Select a Clinic
                                             </option>
@@ -26539,7 +26539,7 @@ ${ttNotes}`
                                               <option
                                                 key={c.value}
                                                 value={c.value}
-                                                className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                                className="bg-white/10  text-slate-100 "
                                               >
                                                 {c.label}
                                               </option>
@@ -26550,7 +26550,7 @@ ${ttNotes}`
                                         {/* Scheduled for Later / Follow-up */}
                                         <div className="space-y-3.5 p-3.5 bg-white/5 border border-white/5 rounded-2xl text-left">
                                           <div className="flex items-center justify-between">
-                                            <span className="text-[12px] font-bold text-slate-300">
+                                            <span className="text-sm font-bold text-slate-300">
                                               Schedule for Later Date / Follow-up?
                                             </span>
                                             <label className="relative inline-flex items-center cursor-pointer">
@@ -26564,13 +26564,13 @@ ${ttNotes}`
                                                 }
                                                 className="sr-only peer"
                                               />
-                                              <div className="w-11 h-6 bg-[#1e1e1e]/40 backdrop-blur-md peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                              <div className="w-11 h-6 bg-slate-900/40  peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                                             </label>
                                           </div>
 
                                           {ttIsFollowUp && (
                                             <div className="space-y-1.5 animate-fade-in pt-1 text-left">
-                                              <label className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider block">
+                                              <label className="text-xs font-bold text-indigo-400 uppercase tracking-wider block">
                                                 Follow-up Date *
                                               </label>
                                               <input
@@ -26588,7 +26588,7 @@ ${ttNotes}`
 
                                         {/* Notes */}
                                         <div className="space-y-1.5 text-left">
-                                          <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                                          <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
                                             Additional Notes (Optional)
                                           </label>
                                           <textarea
@@ -26597,7 +26597,7 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setTtNotes(e.target.value)
                                             }
-                                            className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[70px] resize-y"
+                                            className="w-full bg-white/5  border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[70px] resize-y"
                                           />
                                         </div>
 
@@ -26637,7 +26637,7 @@ ${ttNotes}`
                                       </form>
                                     </div>
                                   ) : localSubTab === "complaints" ? (
-                                    <div className="p-6 bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl space-y-4 shadow-2xl animate-fade-in">
+                                    <div className="p-6 bg-white/5  border border-white/20 rounded-2xl space-y-4 shadow animate-fade-in">
                                       <h3 className="text-lg font-bold text-slate-100 font-display flex items-center gap-2 text-left">
                                         <AlertTriangle className="w-5 h-5 text-pink-500" />
                                         Log New Complaint
@@ -26664,7 +26664,7 @@ ${ttNotes}`
                                       >
                                         {/* Patient Name */}
                                         <div className="space-y-1.5 text-left">
-                                          <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                                          <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
                                             Patient Name *
                                           </label>
                                           <input
@@ -26674,14 +26674,14 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setTcPatientName(e.target.value)
                                             }
-                                            className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans font-medium"
+                                            className="w-full bg-white/5  border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans font-medium"
                                             required
                                           />
                                         </div>
 
                                         {/* File Number */}
                                         <div className="space-y-1.5 text-left">
-                                          <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                                          <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
                                             File Number (Optional)
                                           </label>
                                           <input
@@ -26691,14 +26691,14 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setTcFileNumber(e.target.value)
                                             }
-                                            className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-mono"
+                                            className="w-full bg-white/5  border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-mono"
                                           />
                                         </div>
 
                                         {/* Old Customer Switch */}
                                         <div className="space-y-3.5 p-3.5 bg-white/5 border border-white/5 rounded-2xl text-left">
                                           <div className="flex items-center justify-between">
-                                            <span className="text-[12px] font-bold text-slate-300 font-sans">
+                                            <span className="text-sm font-bold text-slate-300 font-sans">
                                               Is this an Old Customer?
                                             </span>
                                             <label className="relative inline-flex items-center cursor-pointer">
@@ -26712,13 +26712,13 @@ ${ttNotes}`
                                                 }
                                                 className="sr-only peer"
                                               />
-                                              <div className="w-11 h-6 bg-[#1e1e1e]/40 backdrop-blur-lg/40/20 backdrop-blur-md peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 backdrop-blur-md after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
+                                              <div className="w-11 h-6 bg-slate-900/40 /40/20  peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10  after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
                                             </label>
                                           </div>
 
                                           {!tcIsOldCustomer && (
                                             <div className="space-y-1.5 animate-fade-in pt-1 text-left">
-                                              <label className="text-[11px] font-bold text-amber-500 uppercase tracking-wider block">
+                                              <label className="text-xs font-bold text-amber-500 uppercase tracking-wider block">
                                                 ID Number *
                                               </label>
                                               <input
@@ -26767,7 +26767,7 @@ ${ttNotes}`
 
                                            {!tcNoPhone ? (
                                              <div className="space-y-1.5 text-left">
-                                               <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-mono">
+                                               <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block font-mono">
                                                  Phone Number *
                                                </label>
                                                <input
@@ -26786,17 +26786,17 @@ ${ttNotes}`
                                                    if (val === "+971") val = "";
                                                    setTcPhoneNumber(val);
                                                  }}
-                                                 className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-mono"
+                                                 className="w-full bg-white/5  border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-mono"
                                                  required
                                                />
-                                               <p className="text-[10px] text-slate-400 mt-1">
+                                               <p className="text-xs text-slate-400 mt-1">
                                                  * Please enter the number starting from 5 (e.g., 501234567)
                                                </p>
                                              </div>
                                            ) : (
                                              <div className="grid grid-cols-2 gap-3 animate-fade-in text-left">
                                                <div className="space-y-1.5">
-                                                 <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
+                                                 <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block font-sans">
                                                    Instagram Username
                                                  </label>
                                                  <input
@@ -26804,11 +26804,11 @@ ${ttNotes}`
                                                    placeholder="@username"
                                                    value={tcInstagram}
                                                    onChange={(e) => setTcInstagram(e.target.value)}
-                                                   className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans"
+                                                   className="w-full bg-white/5  border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans"
                                                  />
                                                </div>
                                                <div className="space-y-1.5">
-                                                 <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
+                                                 <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block font-sans">
                                                    TikTok Username
                                                  </label>
                                                  <input
@@ -26816,7 +26816,7 @@ ${ttNotes}`
                                                    placeholder="@username"
                                                    value={tcTiktok}
                                                    onChange={(e) => setTcTiktok(e.target.value)}
-                                                   className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans"
+                                                   className="w-full bg-white/5  border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans"
                                                  />
                                                </div>
                                              </div>
@@ -26825,7 +26825,7 @@ ${ttNotes}`
 
                                         <div className="space-y-1 sm:col-span-2">
                                           <label
-                                            className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block ml-1"
+                                            className="text-xs font-bold uppercase tracking-widest text-slate-400 block ml-1"
                                             htmlFor="tc-clinic"
                                           >
                                             Clinic Name *
@@ -26836,12 +26836,12 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setTcClinicName(e.target.value)
                                             }
-                                            className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
+                                            className="w-full px-4 py-3 bg-white/5  border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                             required
                                           >
                                             <option
                                               value=""
-                                              className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                              className="bg-white/10  text-slate-100 "
                                             >
                                               Select a Clinic
                                             </option>
@@ -26849,7 +26849,7 @@ ${ttNotes}`
                                               <option
                                                 key={c.value}
                                                 value={c.value}
-                                                className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                                className="bg-white/10  text-slate-100 "
                                               >
                                                 {c.label}
                                               </option>
@@ -26859,7 +26859,7 @@ ${ttNotes}`
 
                                         {/* Complaint details */}
                                         <div className="space-y-1.5 text-left">
-                                          <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                                          <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
                                             Customer Complaint / Issue Details *
                                           </label>
                                           <textarea
@@ -26870,7 +26870,7 @@ ${ttNotes}`
                                                 e.target.value,
                                               )
                                             }
-                                            className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-pink-500 font-sans min-h-[80px] resize-y font-medium"
+                                            className="w-full bg-white/5  border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-pink-500 font-sans min-h-[80px] resize-y font-medium"
                                             required
                                           />
                                         </div>
@@ -26878,7 +26878,7 @@ ${ttNotes}`
                                         {/* Follow-up / Schedule for Later */}
                                         <div className="space-y-3 p-3.5 bg-white/5 border border-white/5 rounded-2xl text-left">
                                           <div className="flex items-center justify-between">
-                                            <span className="text-[12px] font-bold text-slate-300">
+                                            <span className="text-sm font-bold text-slate-300">
                                               Schedule for Later Date / Follow-up?
                                             </span>
                                             <label className="relative inline-flex items-center cursor-pointer">
@@ -26888,12 +26888,12 @@ ${ttNotes}`
                                                 onChange={(e) => setTcIsFollowUp(e.target.checked)}
                                                 className="sr-only peer"
                                               />
-                                              <div className="w-11 h-6 bg-[#1e1e1e]/40 backdrop-blur-md peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                              <div className="w-11 h-6 bg-slate-900/40  peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                                             </label>
                                           </div>
                                           {tcIsFollowUp && (
                                             <div className="space-y-1.5 animate-fade-in pt-1 text-left">
-                                              <label className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider block">
+                                              <label className="text-xs font-bold text-indigo-400 uppercase tracking-wider block">
                                                 Follow-up Date *
                                               </label>
                                               <input
@@ -26934,7 +26934,7 @@ ${ttNotes}`
                                       </form>
                                     </div>
                                   ) : (
-                                    <div className="p-6 bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl space-y-4 shadow-2xl animate-fade-in">
+                                    <div className="p-6 bg-white/5  border border-white/20 rounded-2xl space-y-4 shadow animate-fade-in">
                                       <h3 className="text-lg font-bold text-slate-100 font-display flex items-center gap-2 text-left">
                                         <MessageSquare className="w-5 h-5 text-indigo-400" />
                                         Submit Communication Request
@@ -26958,7 +26958,7 @@ ${ttNotes}`
                                       >
                                         {/* Patient Name */}
                                         <div className="space-y-1 sm:col-span-2 text-left">
-                                          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block ml-1">
+                                          <label className="text-xs font-bold uppercase tracking-widest text-slate-400 block ml-1">
                                             Patient Name *
                                           </label>
                                           <input
@@ -26968,14 +26968,14 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setCcPatientName(e.target.value)
                                             }
-                                            className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-3 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans focus:ring-1 focus:ring-indigo-500/30"
+                                            className="w-full bg-white/5  border border-white/10 rounded-xl px-4 py-3 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans focus:ring-1 focus:ring-indigo-500/30"
                                             required
                                           />
                                         </div>
 
                                         {/* Clinic Name */}
                                         <div className="space-y-1 sm:col-span-2">
-                                          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block ml-1">
+                                          <label className="text-xs font-bold uppercase tracking-widest text-slate-400 block ml-1">
                                             Clinic Name *
                                           </label>
                                           <select
@@ -26983,12 +26983,12 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setCcClinicName(e.target.value)
                                             }
-                                            className="w-full px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
+                                            className="w-full px-4 py-3 bg-white/5  border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                             required
                                           >
                                             <option
                                               value=""
-                                              className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                              className="bg-white/10  text-slate-100 "
                                             >
                                               Select a Clinic
                                             </option>
@@ -26996,7 +26996,7 @@ ${ttNotes}`
                                               <option
                                                 key={c.value}
                                                 value={c.value}
-                                                className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                                className="bg-white/10  text-slate-100 "
                                               >
                                                 {c.label}
                                               </option>
@@ -27026,7 +27026,7 @@ ${ttNotes}`
 
                                            {!ccNoPhone ? (
                                              <div className="space-y-1.5 text-left">
-                                               <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-mono">
+                                               <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block font-mono">
                                                  Phone Number *
                                                </label>
                                                <input
@@ -27045,17 +27045,17 @@ ${ttNotes}`
                                                    if (val === "+971") val = "";
                                                    setCcPhoneNumber(val);
                                                  }}
-                                                 className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
+                                                 className="w-full bg-white/5  border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
                                                  required
                                                />
-                                               <p className="text-[10px] text-slate-400 mt-1">
+                                               <p className="text-xs text-slate-400 mt-1">
                                                  * Please enter the number starting from 5 (e.g., 501234567)
                                                </p>
                                              </div>
                                            ) : (
                                              <div className="grid grid-cols-2 gap-3 animate-fade-in text-left">
                                                <div className="space-y-1.5">
-                                                 <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
+                                                 <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block font-sans">
                                                    Instagram Username
                                                  </label>
                                                  <input
@@ -27063,11 +27063,11 @@ ${ttNotes}`
                                                    placeholder="@username"
                                                    value={ccInstagram}
                                                    onChange={(e) => setCcInstagram(e.target.value)}
-                                                   className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                                                   className="w-full bg-white/5  border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
                                                  />
                                                </div>
                                                <div className="space-y-1.5">
-                                                 <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
+                                                 <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block font-sans">
                                                    TikTok Username
                                                  </label>
                                                  <input
@@ -27075,7 +27075,7 @@ ${ttNotes}`
                                                    placeholder="@username"
                                                    value={ccTiktok}
                                                    onChange={(e) => setCcTiktok(e.target.value)}
-                                                   className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                                                   className="w-full bg-white/5  border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
                                                  />
                                                </div>
                                              </div>
@@ -27084,7 +27084,7 @@ ${ttNotes}`
 
                                         {/* Language */}
                                         <div className="space-y-1.5 text-left">
-                                          <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                                          <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
                                             Language Priority *
                                           </label>
                                           <div className="grid grid-cols-2 gap-2">
@@ -27119,7 +27119,7 @@ ${ttNotes}`
 
                                         {/* Source Channel Selection */}
                                         <div className="space-y-1.5 text-left">
-                                          <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                                          <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
                                             Source Channel *
                                           </label>
                                           <div className="grid grid-cols-3 gap-2">
@@ -27129,7 +27129,7 @@ ${ttNotes}`
                                               onClick={() =>
                                                 setCcChannel("call_center")
                                               }
-                                              className={`py-2 px-1 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center border cursor-pointer ${
+                                              className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center border cursor-pointer ${
                                                 ccChannel === "call_center"
                                                   ? "bg-indigo-600 border-indigo-500 text-white shadow"
                                                   : "bg-white/[0.02] border-white/5 text-slate-400"
@@ -27143,7 +27143,7 @@ ${ttNotes}`
                                               onClick={() =>
                                                 setCcChannel("chat")
                                               }
-                                              className={`py-2 px-1 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center border cursor-pointer ${
+                                              className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center border cursor-pointer ${
                                                 ccChannel === "chat"
                                                   ? "bg-indigo-600 border-indigo-500 text-white shadow"
                                                   : "bg-white/[0.02] border-white/5 text-slate-400"
@@ -27157,7 +27157,7 @@ ${ttNotes}`
                                               onClick={() =>
                                                 setCcChannel("social_media")
                                               }
-                                              className={`py-2 px-1 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center border cursor-pointer ${
+                                              className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center border cursor-pointer ${
                                                 ccChannel === "social_media"
                                                   ? "bg-indigo-600 border-indigo-500 text-white shadow"
                                                   : "bg-white/[0.02] border-white/5 text-slate-400"
@@ -27170,7 +27170,7 @@ ${ttNotes}`
 
                                         {/* Notes */}
                                         <div className="space-y-1.5 text-left">
-                                          <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                                          <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
                                             Inquiry Details / Notes *
                                           </label>
                                           <textarea
@@ -27179,7 +27179,7 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setCcNotes(e.target.value)
                                             }
-                                            className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[80px] resize-y font-medium"
+                                            className="w-full bg-white/5  border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[80px] resize-y font-medium"
                                             required
                                           />
                                         </div>
@@ -27196,7 +27196,7 @@ ${ttNotes}`
                                         {/* Follow-up / Schedule for Later */}
                                         <div className="space-y-3 p-3.5 bg-white/5 border border-white/5 rounded-2xl text-left">
                                           <div className="flex items-center justify-between">
-                                            <span className="text-[12px] font-bold text-slate-300">
+                                            <span className="text-sm font-bold text-slate-300">
                                               Schedule for Later Date / Follow-up?
                                             </span>
                                             <label className="relative inline-flex items-center cursor-pointer">
@@ -27206,12 +27206,12 @@ ${ttNotes}`
                                                 onChange={(e) => setCcIsFollowUp(e.target.checked)}
                                                 className="sr-only peer"
                                               />
-                                              <div className="w-11 h-6 bg-[#1e1e1e]/40 backdrop-blur-md peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                              <div className="w-11 h-6 bg-slate-900/40  peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                                             </label>
                                           </div>
                                           {ccIsFollowUp && (
                                             <div className="space-y-1.5 animate-fade-in pt-1 text-left">
-                                              <label className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider block">
+                                              <label className="text-xs font-bold text-indigo-400 uppercase tracking-wider block">
                                                 Follow-up Date *
                                               </label>
                                               <input
@@ -27341,7 +27341,7 @@ ${ttNotes}`
                                           </div>
                                           {/* Status Filters */}
                                           <div className="flex items-center gap-1.5 flex-wrap">
-                                            <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider">
+                                            <span className="text-xs font-black uppercase text-slate-500 tracking-wider">
                                               Status:
                                             </span>
                                             {[
@@ -27358,7 +27358,7 @@ ${ttNotes}`
                                                   );
                                                   setSelectedClientCommId(null);
                                                 }}
-                                                className={`px-2.5 py-1.5 rounded-full text-[10px] font-bold transition-all border cursor-pointer ${
+                                                className={`px-2.5 py-1.5 rounded-full text-xs font-bold transition-all border cursor-pointer ${
                                                   clientCommStatusFilter ===
                                                   pill.id
                                                     ? "bg-indigo-500 text-white border-indigo-400"
@@ -27592,7 +27592,7 @@ ${ttNotes}`
                                           </div>
                                           {/* Status Filters */}
                                           <div className="flex items-center gap-1.5 flex-wrap">
-                                            <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider">
+                                            <span className="text-xs font-black uppercase text-slate-500 tracking-wider">
                                               Status:
                                             </span>
                                             {[
@@ -27615,7 +27615,7 @@ ${ttNotes}`
                                                   );
                                                   setSelectedTTId(null);
                                                 }}
-                                                className={`px-2.5 py-1.5 rounded-full text-[10px] font-bold transition-all border cursor-pointer ${
+                                                className={`px-2.5 py-1.5 rounded-full text-xs font-bold transition-all border cursor-pointer ${
                                                   tabbyTamaraStatusFilter ===
                                                   pill.id
                                                     ? "bg-indigo-500 text-white border-indigo-400"
@@ -27812,7 +27812,7 @@ ${ttNotes}`
                                           </div>
                                           {/* Status Filters */}
                                           <div className="flex items-center gap-1.5 flex-wrap">
-                                            <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider">
+                                            <span className="text-xs font-black uppercase text-slate-500 tracking-wider">
                                               Status:
                                             </span>
                                             {[
@@ -27830,7 +27830,7 @@ ${ttNotes}`
                                                   );
                                                   setSelectedComplaintId(null);
                                                 }}
-                                                className={`px-2.5 py-1.5 rounded-full text-[10px] font-bold transition-all border cursor-pointer ${
+                                                className={`px-2.5 py-1.5 rounded-full text-xs font-bold transition-all border cursor-pointer ${
                                                   complaintStatusFilter ===
                                                   pill.id
                                                     ? "bg-indigo-500 text-white border-indigo-400"
@@ -28056,7 +28056,7 @@ ${ttNotes}`
                                   >
                                     <option
                                       value="all"
-                                      className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                      className="bg-white/10  text-slate-100 "
                                     >
                                       All Team Leaders
                                     </option>
@@ -28064,7 +28064,7 @@ ${ttNotes}`
                                       <option
                                         key={tl}
                                         value={tl}
-                                        className="bg-white/10 backdrop-blur-md text-slate-100 "
+                                        className="bg-white/10  text-slate-100 "
                                       >
                                         {tl}
                                       </option>
@@ -28103,7 +28103,7 @@ ${ttNotes}`
                                     >
                                       <option
                                         value=""
-                                        className="bg-white/10 backdrop-blur-md text-slate-100 backdrop-blur-lg"
+                                        className="bg-white/10  text-slate-100 "
                                       >
                                         -- Choose TL --
                                       </option>
@@ -28111,7 +28111,7 @@ ${ttNotes}`
                                         <option
                                           key={tl}
                                           value={tl}
-                                          className="bg-white/10 backdrop-blur-md text-slate-100 backdrop-blur-lg"
+                                          className="bg-white/10  text-slate-100 "
                                         >
                                           {tl}
                                         </option>
@@ -28188,7 +28188,7 @@ ${ttNotes}`
                                         feedbackAttachmentName,
                                       );
                                     }}
-                                    className="px-6 py-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:brightness-110 active:scale-95 text-slate-950 font-sans font-black text-xs uppercase tracking-wider rounded-xl shadow-lg cursor-pointer transition-all flex items-center gap-2"
+                                    className="px-6 py-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:brightness-110 active:scale-95 text-slate-950 font-sans font-black text-xs uppercase tracking-wider rounded-xl shadow-sm cursor-pointer transition-all flex items-center gap-2"
                                   >
                                     <Send className="w-4 h-4" />
                                     Send Direct Micro-Email
@@ -28215,7 +28215,7 @@ ${ttNotes}`
                                   return (
                                     <div
                                       key={f.id}
-                                      className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl p-6 shadow-xl space-y-6 text-left"
+                                      className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow space-y-6 text-left"
                                     >
                                       {/* Card Header */}
                                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/5 pb-4">
@@ -28228,7 +28228,7 @@ ${ttNotes}`
                                               <h4 className="font-bold text-slate-100 text-base">
                                                 {f.tlName}
                                               </h4>
-                                              <span className="text-[10px] text-slate-500 font-medium">
+                                              <span className="text-xs text-slate-500 font-medium">
                                                 Addressed to TL
                                               </span>
                                             </div>
@@ -28244,11 +28244,11 @@ ${ttNotes}`
 
                                         <div>
                                           {f.status === "pending_reply" ? (
-                                            <span className="px-3 py-1 text-[10px] font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-full animate-pulse">
+                                            <span className="px-3 py-1 text-xs font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-full animate-pulse">
                                               Pending Reply
                                             </span>
                                           ) : (
-                                            <span className="px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+                                            <span className="px-3 py-1 text-xs font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
                                               Replied
                                             </span>
                                           )}
@@ -28304,7 +28304,7 @@ ${ttNotes}`
                                                 {f.attachmentName ||
                                                   "evaluation_attachment"}
                                               </p>
-                                              <p className="text-[10px] text-slate-500 font-mono">
+                                              <p className="text-xs text-slate-500 font-mono">
                                                 Attachment Available
                                               </p>
                                             </div>
@@ -28313,7 +28313,7 @@ ${ttNotes}`
                                               download={
                                                 f.attachmentName || "attachment"
                                               }
-                                              className="px-3 py-1.5 bg-amber-400 hover:brightness-110 text-slate-950 font-sans font-bold text-[10px] rounded-lg transition-all"
+                                              className="px-3 py-1.5 bg-amber-400 hover:brightness-110 text-slate-950 font-sans font-bold text-xs rounded-xl transition-all"
                                             >
                                               Download
                                             </a>
@@ -28358,7 +28358,7 @@ ${ttNotes}`
                                                         : " "}{" "}
                                                       {r.senderName}
                                                     </span>
-                                                    <span className="text-[9px] text-slate-500 font-mono">
+                                                    <span className="text-xs text-slate-500 font-mono">
                                                       {new Date(
                                                         r.createdAt,
                                                       ).toLocaleString()}
@@ -28374,7 +28374,7 @@ ${ttNotes}`
                                                           return (
                                                             <span
                                                               key={wIdx}
-                                                              className="bg-indigo-550/20 text-indigo-200 font-bold px-1 py-0.5 rounded text-[11px]"
+                                                              className="bg-indigo-550/20 text-indigo-200 font-bold px-1 py-0.5 rounded text-xs"
                                                             >
                                                               {word}
                                                             </span>
@@ -28386,8 +28386,8 @@ ${ttNotes}`
 
                                                   {/* Reply Attachment */}
                                                   {r.attachment && (
-                                                    <div className="flex items-center gap-2 p-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg mt-2 justify-between">
-                                                      <span className="text-[10px] text-slate-400 truncate max-w-xs">
+                                                    <div className="flex items-center gap-2 p-2 bg-white/5 border border-white/10 rounded-xl mt-2 justify-between">
+                                                      <span className="text-xs text-slate-400 truncate max-w-xs">
                                                         {r.attachmentName ||
                                                           "reply_attachment"}
                                                       </span>
@@ -28397,7 +28397,7 @@ ${ttNotes}`
                                                           r.attachmentName ||
                                                           "reply_attachment"
                                                         }
-                                                        className="text-[9px] text-amber-400 hover:underline font-bold"
+                                                        className="text-xs text-amber-400 hover:underline font-bold"
                                                       >
                                                         Download
                                                       </a>
@@ -28446,7 +28446,7 @@ ${ttNotes}`
                                                     ],
                                                   );
                                                 }}
-                                                className="px-3 py-2 bg-amber-400 hover:brightness-110 text-slate-950 font-sans font-bold text-[10px] uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                                                className="px-3 py-2 bg-amber-400 hover:brightness-110 text-slate-950 font-sans font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"
                                               >
                                                 Send Reply
                                               </button>
@@ -28627,7 +28627,7 @@ ${ttNotes}`
                                 <button
                                   disabled={dirPage === 0}
                                   onClick={() => setDirPage((p) => p - 1)}
-                                  className="px-4 py-1.5 bg-white/10 rounded-lg text-sm disabled:opacity-30 hover:bg-white/20 transition-colors"
+                                  className="px-4 py-1.5 bg-white/10 rounded-xl text-sm disabled:opacity-30 hover:bg-white/20 transition-colors"
                                 >
                                   ← Prev
                                 </button>
@@ -28638,7 +28638,7 @@ ${ttNotes}`
                                       <button
                                         key={i}
                                         onClick={() => setDirPage(i)}
-                                        className={`w-8 h-8 rounded-lg text-sm font-bold transition-colors ${dirPage === i ? "bg-indigo-600 text-white" : "bg-white/10 text-slate-300 hover:bg-white/20"}`}
+                                        className={`w-8 h-8 rounded-xl text-sm font-bold transition-colors ${dirPage === i ? "bg-indigo-600 text-white" : "bg-white/10 text-slate-300 hover:bg-white/20"}`}
                                       >
                                         {i + 1}
                                       </button>
@@ -28648,7 +28648,7 @@ ${ttNotes}`
                                 <button
                                   disabled={dirPage >= totalPages - 1}
                                   onClick={() => setDirPage((p) => p + 1)}
-                                  className="px-4 py-1.5 bg-white/10 rounded-lg text-sm disabled:opacity-30 hover:bg-white/20 transition-colors"
+                                  className="px-4 py-1.5 bg-white/10 rounded-xl text-sm disabled:opacity-30 hover:bg-white/20 transition-colors"
                                 >
                                   Next →
                                 </button>
@@ -28749,7 +28749,7 @@ ${ttNotes}`
                                         browse
                                       </span>
                                     </p>
-                                    <p className="text-[10px] text-slate-500 mt-1 uppercase font-mono tracking-wider">
+                                    <p className="text-xs text-slate-500 mt-1 uppercase font-mono tracking-wider">
                                       Supports XLSX, XLS, CSV, TSV, TXT, JSON
                                     </p>
                                   </div>
@@ -28777,7 +28777,7 @@ ${ttNotes}`
                                     onChange={(e) =>
                                       setBulkEditField(e.target.value)
                                     }
-                                    className="bg-white/[0.03] border border-white/15 text-slate-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none cursor-pointer"
+                                    className="bg-white/[0.03] border border-white/10 text-slate-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none cursor-pointer"
                                   >
                                     <option value="Team Leader">
                                       Team Leader
@@ -28817,7 +28817,7 @@ ${ttNotes}`
 
                             <div className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-sm overflow-x-auto">
                               <table className="w-full text-left text-xs text-slate-300 whitespace-nowrap">
-                                <thead className="text-slate-400 bg-white/5 text-[10px] uppercase font-bold tracking-wider">
+                                <thead className="text-slate-400 bg-white/5 text-xs uppercase font-bold tracking-wider">
                                   <tr>
                                     {isSuperAdmin && (
                                       <th className="p-4 w-10">
@@ -29073,7 +29073,7 @@ ${ttNotes}`
                                                   />
                                                 </td>
                                               )}
-                                              <td className="p-4 text-slate-500 font-mono text-[11px]">
+                                              <td className="p-4 text-slate-500 font-mono text-xs">
                                                 {idx + 1}
                                               </td>
                                               <td className="p-4 text-slate-100 font-bold">
@@ -29091,7 +29091,7 @@ ${ttNotes}`
                                                           e.target.value,
                                                       })
                                                     }
-                                                    className="bg-black/60 border border-white/25 rounded px-2.5 py-1 text-xs text-slate-100定位 focus:outline-none w-44"
+                                                    className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100定位 focus:outline-none w-44"
                                                   />
                                                 ) : (
                                                   <>
@@ -29180,7 +29180,7 @@ ${ttNotes}`
                                                       emailVal
                                                     )}
                                                   </td>
-                                                  <td className="p-4 font-mono text-[12px]">
+                                                  <td className="p-4 font-mono text-sm">
                                                     {isEditing ? (
                                                       <input
                                                         type="text"
@@ -29256,7 +29256,7 @@ ${ttNotes}`
                                                         computedRole,
                                                       ) ? (
                                                       <span
-                                                        className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
+                                                        className={`px-2 py-1 rounded-xl text-xs font-bold ${
                                                           normalizeAgentLob(
                                                             lobVal ||
                                                               AGENT_LOBS[
@@ -29345,7 +29345,7 @@ ${ttNotes}`
                                                       />
                                                     ) : (
                                                       <span
-                                                        className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${roleVal.toLowerCase() === "tl" || roleVal.toLowerCase() === "team leader" ? "bg-amber-950/30 text-amber-400 border-amber-500/20" : roleVal.toLowerCase() === "qa" ? "bg-purple-950/30 text-purple-400 border-purple-500/20" : "bg-slate-800 text-slate-400 border-slate-700"}`}
+                                                        className={`font-bold py-1 px-3 rounded-xl text-xs border ${roleVal.toLowerCase() === "tl" || roleVal.toLowerCase() === "team leader" ? "bg-amber-950/30 text-amber-400 border-amber-500/20" : roleVal.toLowerCase() === "qa" ? "bg-purple-950/30 text-purple-400 border-purple-500/20" : "bg-slate-800 text-slate-400 border-slate-700"}`}
                                                       >
                                                         {roleVal}
                                                       </span>
@@ -29396,7 +29396,7 @@ ${ttNotes}`
                                                             true,
                                                           )
                                                         }
-                                                        className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[11px] font-bold cursor-pointer"
+                                                        className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold cursor-pointer"
                                                       >
                                                         Save
                                                       </button>
@@ -29406,7 +29406,7 @@ ${ttNotes}`
                                                             null,
                                                           )
                                                         }
-                                                        className="px-2 py-1 bg-white/10 hover:bg-white/15 text-slate-300 rounded text-[11px] font-bold cursor-pointer"
+                                                        className="px-2 py-1 bg-white/10 hover:bg-white/15 text-slate-300 rounded text-xs font-bold cursor-pointer"
                                                       >
                                                         Cancel
                                                       </button>
@@ -29558,7 +29558,7 @@ ${ttNotes}`
                                                   />
                                                 </td>
                                               )}
-                                              <td className="p-4 text-slate-500 font-mono text-[11px]">
+                                              <td className="p-4 text-slate-500 font-mono text-xs">
                                                 {idx + 1}
                                               </td>
                                               <td className="p-4 text-slate-100 font-bold">
@@ -29574,7 +29574,7 @@ ${ttNotes}`
                                                         name: e.target.value,
                                                       })
                                                     }
-                                                    className="bg-black/60 border border-white/25 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-44"
+                                                    className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-44"
                                                   />
                                                 ) : (
                                                   <>
@@ -29614,7 +29614,7 @@ ${ttNotes}`
                                                   meta.email || "-"
                                                 )}
                                               </td>
-                                              <td className="p-4 font-mono text-[12px]">
+                                              <td className="p-4 font-mono text-sm">
                                                 {isEditing ? (
                                                   <input
                                                     type="text"
@@ -29669,7 +29669,7 @@ ${ttNotes}`
                                                     meta.role,
                                                   ) ? (
                                                   <span
-                                                    className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
+                                                    className={`px-2 py-1 rounded-xl text-xs font-bold ${
                                                       normalizeAgentLob(
                                                         meta.lob ||
                                                           AGENT_LOBS[meta.name],
@@ -29747,7 +29747,7 @@ ${ttNotes}`
                                                   </select>
                                                 ) : (
                                                   <span
-                                                    className={`font-bold py-1 px-3 rounded-lg text-[11px] border ${meta.role === "tl" ? "bg-amber-950/30 text-amber-400 border-amber-500/20" : meta.role === "qa" ? "bg-purple-950/30 text-purple-400 border-purple-500/20" : "bg-slate-800 text-slate-400 border-slate-700"}`}
+                                                    className={`font-bold py-1 px-3 rounded-xl text-xs border ${meta.role === "tl" ? "bg-amber-950/30 text-amber-400 border-amber-500/20" : meta.role === "qa" ? "bg-purple-950/30 text-purple-400 border-purple-500/20" : "bg-slate-800 text-slate-400 border-slate-700"}`}
                                                   >
                                                     {meta.role === "tl"
                                                       ? "Team Leader"
@@ -29794,7 +29794,7 @@ ${ttNotes}`
                                                             false,
                                                           )
                                                         }
-                                                        className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[11px] font-bold cursor-pointer"
+                                                        className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold cursor-pointer"
                                                       >
                                                         Save
                                                       </button>
@@ -29804,7 +29804,7 @@ ${ttNotes}`
                                                             null,
                                                           )
                                                         }
-                                                        className="px-2 py-1 bg-white/10 hover:bg-white/15 text-slate-300 rounded text-[11px] font-bold cursor-pointer"
+                                                        className="px-2 py-1 bg-white/10 hover:bg-white/15 text-slate-300 rounded text-xs font-bold cursor-pointer"
                                                       >
                                                         Cancel
                                                       </button>
@@ -29878,7 +29878,7 @@ ${ttNotes}`
                                   <button
                                     disabled={dirPage === 0}
                                     onClick={() => setDirPage((p) => p - 1)}
-                                    className="px-4 py-1.5 bg-white/10 rounded-lg text-sm disabled:opacity-30 hover:bg-white/20 transition-colors cursor-pointer"
+                                    className="px-4 py-1.5 bg-white/10 rounded-xl text-sm disabled:opacity-30 hover:bg-white/20 transition-colors cursor-pointer"
                                   >
                                     ← Prev
                                   </button>
@@ -29889,7 +29889,7 @@ ${ttNotes}`
                                         <button
                                           key={i}
                                           onClick={() => setDirPage(i)}
-                                          className={`w-8 h-8 rounded-lg text-sm font-bold transition-colors ${dirPage === i ? "bg-indigo-600 text-white" : "bg-white/10 text-slate-300 hover:bg-white/20"} cursor-pointer`}
+                                          className={`w-8 h-8 rounded-xl text-sm font-bold transition-colors ${dirPage === i ? "bg-indigo-600 text-white" : "bg-white/10 text-slate-300 hover:bg-white/20"} cursor-pointer`}
                                         >
                                           {i + 1}
                                         </button>
@@ -29899,7 +29899,7 @@ ${ttNotes}`
                                   <button
                                     disabled={dirPage >= totalPages - 1}
                                     onClick={() => setDirPage((p) => p + 1)}
-                                    className="px-4 py-1.5 bg-white/10 rounded-lg text-sm disabled:opacity-30 hover:bg-white/20 transition-colors cursor-pointer"
+                                    className="px-4 py-1.5 bg-white/10 rounded-xl text-sm disabled:opacity-30 hover:bg-white/20 transition-colors cursor-pointer"
                                   >
                                     Next →
                                   </button>
@@ -29951,8 +29951,8 @@ ${ttNotes}`
           const textTemplate = generateClinicTemplate(templateInq);
 
           return (
-            <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in font-sans">
-              <div className="w-full max-w-xl bg-[#141416]/95 border border-white/10 rounded-2xl shadow-2xl p-6 space-y-4">
+            <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/60  animate-fade-in font-sans">
+              <div className="w-full max-w-xl bg-[#141416]/95 border border-white/10 rounded-2xl shadow p-6 space-y-4">
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
                     <span>📋 Review Standardized Clinic Template</span>
@@ -29962,7 +29962,7 @@ ${ttNotes}`
                       setShowClinicTemplateModal(false);
                       setTemplateInquiryId(null);
                     }}
-                    className="p-1 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-all cursor-pointer"
+                    className="p-1 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all cursor-pointer"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -29975,7 +29975,7 @@ ${ttNotes}`
                 </p>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider font-sans">
+                  <label className="text-xs font-bold text-indigo-400 uppercase tracking-wider font-sans">
                     Generated Clipboard Output Preview
                   </label>
                   <div className="relative">
@@ -29994,7 +29994,7 @@ ${ttNotes}`
                         "Standard clinic template copied to clipboard!",
                       );
                     }}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 hover:text-white text-slate-300 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 border border-white/5"
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 hover:text-white text-slate-300 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 border border-white/5"
                   >
                     <Copy className="w-3.5 h-3.5" /> Copy to Clipboard
                   </button>
@@ -30006,7 +30006,7 @@ ${ttNotes}`
                         setShowClinicTemplateModal(false);
                         setTemplateInquiryId(null);
                       }}
-                      className="px-4 py-2 bg-transparent hover:bg-white/5 text-slate-400 hover:text-white text-xs font-bold rounded-lg transition-all cursor-pointer"
+                      className="px-4 py-2 bg-transparent hover:bg-white/5 text-slate-400 hover:text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -30015,7 +30015,7 @@ ${ttNotes}`
                       onClick={async () => {
                         await handleSetInquirySent(templateInquiryId, true);
                       }}
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-all shadow-md active:scale-95 cursor-pointer flex items-center gap-1.5"
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer flex items-center gap-1.5"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" /> Confirm & Send
                     </button>
@@ -30077,18 +30077,18 @@ ${ttNotes}`
 
       {viewingRecord && (
         <div
-          className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-md p-0 sm:p-4"
+          className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center bg-black/80  p-0 sm:p-4"
           onClick={() => setViewingRecord(null)}
         >
           <div
-            className="bg-[#0d0d10] border border-white/10 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl"
+            className="bg-[#0d0d10] border border-white/10 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto shadow"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
             <div className="sticky top-0 bg-[#0d0d10] border-b border-white/10 px-5 py-4 flex items-center justify-between z-10">
               <div className="flex items-center gap-3">
                 <span
-                  className={`px-2 py-0.5 rounded text-[10px] font-black uppercase border ${
+                  className={`px-2 py-0.5 rounded text-xs font-black uppercase border ${
                     viewingRecord.type === "inq"
                       ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20"
                       : viewingRecord.type === "tt_request"
@@ -30114,7 +30114,7 @@ ${ttNotes}`
                             ? "Scheduling"
                             : "Case"}
                 </span>
-                <span className="font-mono text-[11px] text-slate-500">
+                <span className="font-mono text-xs text-slate-500">
                   {formatCaseRef(
                     viewingRecord.data.id,
                     viewingRecord.type,
@@ -30137,7 +30137,7 @@ ${ttNotes}`
               <div className="grid grid-cols-2 gap-3 text-left">
                 {viewingRecord.data.patientName && (
                   <div className="col-span-2 bg-transparent border border-white/5 rounded-xl p-3">
-                    <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1">
+                    <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">
                       Patient Name
                     </p>
                     <p className="text-base font-black text-white">
@@ -30155,7 +30155,7 @@ ${ttNotes}`
                       );
                     }}
                   >
-                    <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1">
+                    <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">
                       {" "}
                       Phone
                     </p>
@@ -30166,7 +30166,7 @@ ${ttNotes}`
                 )}
                 {viewingRecord.data.clinicName && (
                   <div className="bg-transparent border border-white/5 rounded-xl p-3">
-                    <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1">
+                    <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">
                       {" "}
                       Clinic
                     </p>
@@ -30177,7 +30177,7 @@ ${ttNotes}`
                 )}
                 {viewingRecord.data.agentName && (
                   <div className="bg-transparent border border-white/5 rounded-xl p-3">
-                    <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1">
+                    <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">
                       {" "}
                       Agent
                     </p>
@@ -30188,7 +30188,7 @@ ${ttNotes}`
                 )}
                 {viewingRecord.data.status && (
                   <div className="bg-transparent border border-white/5 rounded-xl p-3">
-                    <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1">
+                    <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">
                       Status
                     </p>
                     <p className="text-sm font-bold text-slate-200">
@@ -30197,7 +30197,7 @@ ${ttNotes}`
                   </div>
                 )}
                 <div className="bg-transparent border border-white/5 rounded-xl p-3">
-                  <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1">
+                  <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">
                     {" "}
                     Submitted
                   </p>
@@ -30213,7 +30213,7 @@ ${ttNotes}`
                 viewingRecord.data.notes ||
                 viewingRecord.data.inquiry) && (
                 <div className="bg-transparent border border-white/5 rounded-xl p-4 text-left">
-                  <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-2">
+                  <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-2">
                     {viewingRecord.type === "inq"
                       ? "Inquiry"
                       : viewingRecord.type === "tt_complaint"
@@ -30236,7 +30236,7 @@ ${ttNotes}`
                 viewingRecord.data.tlNotes ||
                 viewingRecord.data.tlComment) && (
                 <div className="bg-emerald-500/5 border border-emerald-500/15 rounded-xl p-4 text-left">
-                  <p className="text-[9px] text-emerald-400 uppercase tracking-widest font-bold mb-2">
+                  <p className="text-xs text-emerald-400 uppercase tracking-widest font-bold mb-2">
                     {viewingRecord.data.answer
                       ? " TL Answer"
                       : " TL Notes / Comment"}
@@ -30263,7 +30263,7 @@ ${ttNotes}`
                   viewingRecord.data.tlPhotos.length > 0) ||
                 viewingRecord.data.tlLinks) && (
                 <div className="space-y-2 text-left">
-                  <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">
+                  <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">
                     {" "}
                     Attachments
                   </p>
@@ -30293,7 +30293,7 @@ ${ttNotes}`
               {viewingRecord.data.replies &&
                 viewingRecord.data.replies.length > 0 && (
                   <div className="space-y-2 text-left">
-                    <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">
+                    <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">
                       {" "}
                       Thread ({viewingRecord.data.replies.length})
                     </p>
@@ -30303,10 +30303,10 @@ ${ttNotes}`
                         className="bg-transparent border border-white/5 rounded-xl p-3"
                       >
                         <div className="flex items-center justify-between mb-1">
-                          <p className="text-[10px] font-bold text-slate-300">
+                          <p className="text-xs font-bold text-slate-300">
                             {r.senderName}
                           </p>
-                          <p className="text-[9px] text-slate-600 font-mono">
+                          <p className="text-xs text-slate-600 font-mono">
                             {new Date(r.createdAt).toLocaleString()}
                           </p>
                         </div>
@@ -30465,8 +30465,8 @@ ${ttNotes}`
       )}
 
       {pendingCancelId && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="bg-[#0f0f13] border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4 mx-4">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 ">
+          <div className="bg-slate-950 border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow space-y-4 mx-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center border border-rose-500/20">
                 <AlertTriangle className="w-5 h-5 text-rose-400" />
@@ -30504,13 +30504,13 @@ ${ttNotes}`
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 "
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-[#0f0f13] border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4 mx-4"
+              className="bg-slate-950 border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow space-y-4 mx-4"
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-slate-500/10 flex items-center justify-center border border-slate-500/20">
@@ -30553,7 +30553,7 @@ ${ttNotes}`
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 "
           >
             <motion.div
               initial={{ scale: 0.9, y: 20, opacity: 0 }}
@@ -30578,7 +30578,7 @@ ${ttNotes}`
                 <h2 className="text-xl font-black text-cyan-300 font-display tracking-tight mt-2">
                   Synq Build v2.4.1
                 </h2>
-                <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[9px] font-mono tracking-widest text-slate-400 uppercase">
+                <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-mono tracking-widest text-slate-400 uppercase">
                   Production Node Enabled
                 </div>
               </div>
@@ -30610,7 +30610,7 @@ ${ttNotes}`
                 >
                   "App made by Hesham Sobhy"
                 </p>
-                <p className="text-[9px] text-cyan-400 font-mono tracking-[0.2em] mt-2 uppercase relative z-10 font-bold">
+                <p className="text-xs text-cyan-400 font-mono tracking-[0.2em] mt-2 uppercase relative z-10 font-bold">
                   Lead Software Architect
                 </p>
               </div>

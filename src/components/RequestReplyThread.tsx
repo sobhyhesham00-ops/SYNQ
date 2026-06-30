@@ -260,21 +260,21 @@ export function RequestReplyThread({
         className="w-full mt-3 px-4 py-3 bg-indigo-600/10 border border-indigo-500/20 hover:border-indigo-500/40 rounded-xl flex items-center justify-between group transition-all duration-200 cursor-pointer text-left shadow-sm select-none"
       >
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-indigo-500/15 text-indigo-400 group-hover:scale-105 transition-transform duration-200">
+          <div className="p-2 rounded-xl bg-indigo-500/15 text-indigo-400 group-hover:scale-105 transition-transform duration-200">
             <MessageSquare className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-[11px] font-bold text-indigo-300 uppercase tracking-widest block">CRM Activity & Notes Timeline</span>
+            <span className="text-xs font-bold text-indigo-300 uppercase tracking-widest block">CRM Activity & Notes Timeline</span>
             <span className="text-xs text-slate-400">Total events recorded: {(request.replies || []).length}</span>
           </div>
         </div>
         <div className="flex items-center gap-2.5">
           {newReplies > 0 && (
-            <span className="bg-indigo-500 text-white rounded-full text-[10px] font-bold px-2.2 py-0.5 animate-pulse shadow-md shadow-indigo-500/20">
+            <span className="bg-indigo-500 text-white rounded-full text-xs font-bold px-2.2 py-0.5 animate-pulse shadow-md shadow-indigo-500/20">
               {newReplies} new
             </span>
           )}
-          <span className="text-[10px] uppercase tracking-wider text-indigo-400 group-hover:text-indigo-300 font-bold flex items-center gap-1.5 bg-indigo-500/10 px-2.5 py-1 rounded-lg">
+          <span className="text-xs uppercase tracking-wider text-indigo-400 group-hover:text-indigo-300 font-bold flex items-center gap-1.5 bg-indigo-500/10 px-2.5 py-1 rounded-xl">
             Open Timeline
             <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-y-0.5" />
           </span>
@@ -342,7 +342,7 @@ export function RequestReplyThread({
   };
 
   return (
-    <div className="mt-4 bg-slate-950/40 border border-white/10 rounded-2xl p-5 space-y-5 text-left shadow-xl">
+    <div className="mt-4 bg-slate-950/40 border border-white/10 rounded-2xl p-5 space-y-5 text-left shadow">
       <div className="flex justify-between items-center pb-3 border-b border-white/5">
          <div className="flex items-center gap-2.5">
            <div className="p-2 bg-indigo-500/15 text-indigo-400 rounded-xl">
@@ -352,12 +352,12 @@ export function RequestReplyThread({
              <h4 className="text-xs font-bold text-slate-200 uppercase tracking-widest">
                Enterprise Timeline Feed
              </h4>
-             <p className="text-[10px] text-slate-400 mt-0.5">Chronological audit stream & correspondence logs</p>
+             <p className="text-xs text-slate-400 mt-0.5">Chronological audit stream & correspondence logs</p>
            </div>
          </div>
          <button 
            onClick={() => setIsOpen(false)} 
-           className="px-2.5 py-1.5 text-slate-400 hover:text-slate-200 transition-colors bg-white/5 hover:bg-white/10 rounded-lg cursor-pointer text-[10px] uppercase font-bold tracking-wider flex items-center gap-1 border border-white/5"
+           className="px-2.5 py-1.5 text-slate-400 hover:text-slate-200 transition-colors bg-white/5 hover:bg-white/10 rounded-xl cursor-pointer text-xs uppercase font-bold tracking-wider flex items-center gap-1 border border-white/5"
          >
            Collapse <ChevronUp className="w-3.5 h-3.5" />
          </button>
@@ -387,10 +387,10 @@ export function RequestReplyThread({
                     /* Timeline Activity Log */
                     <div className="bg-white/[0.02] border border-white/[0.05] rounded-xl p-3.5 flex items-center justify-between text-left hover:bg-white/[0.05] transition-colors shadow-sm">
                       <div className="space-y-1">
-                        <span className="text-[11px] font-bold text-slate-400 font-mono tracking-wider uppercase block">{eventInfo.title}</span>
+                        <span className="text-xs font-bold text-slate-400 font-mono tracking-wider uppercase block">{eventInfo.title}</span>
                         <p className="text-sm text-slate-200 leading-relaxed font-sans">{r.text}</p>
                       </div>
-                      <span className="text-[10px] text-slate-400 font-mono self-start mt-0.5 shrink-0 ml-4 bg-slate-950/40 px-2.5 py-1 rounded-md border border-white/5">{new Date(r.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                      <span className="text-xs text-slate-400 font-mono self-start mt-0.5 shrink-0 ml-4 bg-slate-950/40 px-2.5 py-1 rounded-xl border border-white/5">{new Date(r.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                     </div>
                   ) : (
                     /* User correspondency bubble / note */
@@ -399,12 +399,12 @@ export function RequestReplyThread({
                          <div className="flex items-center gap-2">
                            <span className={`font-bold text-sm ${r.senderName === currentUser.name ? 'text-indigo-300' : 'text-slate-200'}`}>{r.senderName}</span>
                            {r.authorRole && (
-                             <span className={`text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-md border ${r.authorRole === 'tl' ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' : 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20'}`}>
+                             <span className={`text-xs font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-xl border ${r.authorRole === 'tl' ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' : 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20'}`}>
                                {r.authorRole === 'tl' ? 'TEAM LEADER' : r.authorRole.toUpperCase()}
                              </span>
                            )}
                          </div>
-                         <span className="text-[11px] text-slate-400 font-mono bg-slate-950/30 px-2.5 py-1 rounded border border-white/5">{new Date(r.createdAt).toLocaleString()}</span>
+                         <span className="text-xs text-slate-400 font-mono bg-slate-950/30 px-2.5 py-1 rounded border border-white/5">{new Date(r.createdAt).toLocaleString()}</span>
                        </div>
                        
                        {r.text && <p className="text-sm text-slate-100 leading-relaxed font-sans whitespace-pre-line break-words text-left">{r.text}</p>}
@@ -452,7 +452,7 @@ export function RequestReplyThread({
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center bg-slate-800">
                         <File className="w-5 h-5 text-slate-400" />
-                        <span className="text-[7px] text-slate-400 font-extrabold truncate max-w-[50px] uppercase mt-0.5">{att.name}</span>
+                        <span className="text-xs text-slate-400 font-extrabold truncate max-w-[50px] uppercase mt-0.5">{att.name}</span>
                       </div>
                     )}
                     <button 
@@ -472,7 +472,7 @@ export function RequestReplyThread({
           {links.length > 0 && (
             <div className="flex flex-col gap-1.5">
               {links.map((linkStr, idx) => (
-                <div key={idx} className="flex justify-between items-center bg-white/5 border border-white/10 rounded-lg p-2 text-[10px] text-indigo-300 font-mono">
+                <div key={idx} className="flex justify-between items-center bg-white/5 border border-white/10 rounded-xl p-2 text-xs text-indigo-300 font-mono">
                    <span className="truncate max-w-[400px]">{linkStr}</span>
                    <button type="button" onClick={() => handleRemoveLink(idx)} className="text-red-400 hover:text-red-300 bg-red-400/10 hover:bg-red-400/20 rounded p-1 transition-all"><X className="w-3.5 h-3.5" /></button>
                 </div>
@@ -491,7 +491,7 @@ export function RequestReplyThread({
                 placeholder="Paste URL (e.g. Google Docs, Loom, Sheets, drive link...)" 
                 className="flex-grow bg-transparent text-xs text-white placeholder-slate-500 border-none outline-none focus:ring-0" 
               />
-              <button type="button" onClick={handleAddLink} className="text-[10px] font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg px-3 py-1.5 active:scale-95 transition-all">Add Link</button>
+              <button type="button" onClick={handleAddLink} className="text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl px-3 py-1.5 active:scale-95 transition-all">Add Link</button>
               <button type="button" onClick={() => setShowLinkInput(false)} className="text-slate-400 hover:text-rose-400 p-1.5 transition-all"><X className="w-3.5 h-3.5" /></button>
             </div>
           )}
@@ -516,14 +516,14 @@ export function RequestReplyThread({
             />
             
             {collectionName === "inquiries" && (
-              <div className="text-right text-[10px] text-slate-400 font-mono pr-1 -mt-1">
+              <div className="text-right text-xs text-slate-400 font-mono pr-1 -mt-1">
                 {text.length} / 500 characters
               </div>
             )}
             
             <div className="flex items-center justify-between border-t border-white/5 pt-2 flex-wrap gap-2">
               <div className="flex gap-2">
-                <label className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 border border-white/5 transition-all cursor-pointer text-[10px] uppercase font-bold tracking-wider select-none ${isUploading ? 'opacity-50 pointer-events-none' : ''}`} title="Attach files/images">
+                <label className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 border border-white/5 transition-all cursor-pointer text-xs uppercase font-bold tracking-wider select-none ${isUploading ? 'opacity-50 pointer-events-none' : ''}`} title="Attach files/images">
                   {isUploading ? (
                     <Loader2 className="w-3.5 h-3.5 text-indigo-400 animate-spin" />
                   ) : (
@@ -536,7 +536,7 @@ export function RequestReplyThread({
                 <button 
                   type="button" 
                   onClick={() => setShowLinkInput(!showLinkInput)} 
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 border border-white/5 transition-all cursor-pointer text-[10px] uppercase font-bold tracking-wider select-none ${showLinkInput ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/25' : ''}`} 
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 border border-white/5 transition-all cursor-pointer text-xs uppercase font-bold tracking-wider select-none ${showLinkInput ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/25' : ''}`} 
                   title="Attach hyperlink"
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -547,7 +547,7 @@ export function RequestReplyThread({
               <button 
                 type="submit" 
                 disabled={isUploading || (!String(text || '').trim() && attachments.length === 0 && links.length === 0 && replyPhotos.length === 0)} 
-                className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[10px] uppercase font-bold tracking-widest flex items-center gap-1.5 transition-all cursor-pointer hover:shadow-lg hover:shadow-indigo-500/15"
+                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs uppercase font-bold tracking-widest flex items-center gap-1.5 transition-all cursor-pointer hover:shadow-sm hover:shadow-indigo-500/15"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>Publish Update</span>

@@ -28,7 +28,7 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode; 
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
       return (
-        <div className="p-4 bg-red-900/50 text-red-100 rounded-lg whitespace-pre-wrap font-mono text-xs z-50 relative">
+        <div className="p-4 bg-red-900/50 text-red-100 rounded-xl whitespace-pre-wrap font-mono text-xs z-50 relative">
           <b>Messaging System Error:</b><br/>
           {this.state.error?.toString()}
         </div>

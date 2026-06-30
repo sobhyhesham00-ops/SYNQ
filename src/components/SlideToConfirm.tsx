@@ -129,7 +129,7 @@ export const SlideToConfirm: React.FC<SlideToConfirmProps> = ({
         onKeyDown={handleKeyDown}
         tabIndex={disabled ? -1 : 0}
         aria-label={label}
-        className={`absolute top-1 left-1 h-10 w-10 z-10 rounded-full flex items-center justify-center bg-gradient-to-br ${colorClass} shadow-lg transition-transform focus:outline-none focus:ring-2 focus:ring-white/50 ${
+        className={`absolute top-1 left-1 h-10 w-10 z-10 rounded-full flex items-center justify-center bg-gradient-to-br ${colorClass} shadow-sm transition-transform focus:outline-none focus:ring-2 focus:ring-white/50 ${
           isDragging ? '' : 'transition-all duration-300'
         }`}
         style={{ transform: `translateX(${dragX}px)` }}

@@ -165,7 +165,7 @@ const EditModalContent = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white/[0.04] border border-white/10 p-6 rounded-2xl w-full max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <div className="bg-white/[0.04] border border-white/10 p-6 rounded-2xl w-full max-w-md shadow relative max-h-[90vh] overflow-y-auto">
         <button
           onClick={() => setEditingItem(null)}
           className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors cursor-pointer"
@@ -422,7 +422,7 @@ const EditModalContent = ({
               </label>
               {data.isFollowUp && (
                 <div className="mt-2 animate-fade-in">
-                  <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1">
+                  <label className="block text-xs uppercase font-bold text-slate-400 mb-1">
                     Follow-up Date
                   </label>
                   <input
@@ -440,7 +440,7 @@ const EditModalContent = ({
           {type === "scheduling_request" && (
             <>
               <div className="mb-4">
-                <span className="inline-block px-3 py-1 bg-slate-800 text-slate-300 font-bold text-xs uppercase tracking-wider rounded-lg border border-slate-700">
+                <span className="inline-block px-3 py-1 bg-slate-800 text-slate-300 font-bold text-xs uppercase tracking-wider rounded-xl border border-slate-700">
                   {data.type === "swap" ? "Shift Swap" : "Annual Leave"}
                 </span>
               </div>
@@ -592,7 +592,7 @@ const EditModalContent = ({
             <button
               type="submit"
               disabled={isAgentUploading || isTlUploading}
-              className={`px-6 py-2 ${isAgentUploading || isTlUploading ? 'bg-emerald-500/50 cursor-not-allowed text-slate-500' : 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:brightness-110 text-slate-900 cursor-pointer'} rounded-xl text-sm font-black transition-all flex items-center gap-2`}
+              className={`px-6 py-2 ${isAgentUploading || isTlUploading ? 'bg-emerald-500/50 cursor-not-allowed text-slate-500' : 'bg-emerald-600 hover:brightness-110 text-slate-900 cursor-pointer'} rounded-xl text-sm font-black transition-all flex items-center gap-2`}
             >
               {isAgentUploading ? 'Uploading Agent files...' : isTlUploading ? 'Uploading TL files...' : 'Save Changes'}
             </button>

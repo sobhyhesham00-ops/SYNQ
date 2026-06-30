@@ -63,7 +63,7 @@ export const CaseAttachments: React.FC<CaseAttachmentsProps> = ({ caseData }) =>
                   className="bg-transparent border border-white/5 rounded-xl p-2.5 flex flex-col justify-between hover:bg-white/[0.06] transition-all group"
                 >
                   {isImg ? (
-                    <div className="relative aspect-video bg-white/[0.03] rounded-lg overflow-hidden mb-2.5 border border-white/5">
+                    <div className="relative aspect-video bg-white/[0.03] rounded-xl overflow-hidden mb-2.5 border border-white/5">
                       <img 
                         src={file.url} 
                         alt={file.name} 
@@ -72,16 +72,16 @@ export const CaseAttachments: React.FC<CaseAttachmentsProps> = ({ caseData }) =>
                       />
                     </div>
                   ) : (
-                    <div className="aspect-video bg-white/[0.03] rounded-lg flex items-center justify-center mb-2.5 border border-white/5">
+                    <div className="aspect-video bg-white/[0.03] rounded-xl flex items-center justify-center mb-2.5 border border-white/5">
                       <File className="w-8 h-8 text-slate-500" />
                     </div>
                   )}
 
                   <div className="min-w-0">
-                    <p className="text-[10px] font-bold text-slate-200 truncate" title={file.name}>
+                    <p className="text-xs font-bold text-slate-200 truncate" title={file.name}>
                       {file.name}
                     </p>
-                    <p className="text-[9px] text-slate-500 font-mono mt-0.5 uppercase tracking-wide">
+                    <p className="text-xs text-slate-500 font-mono mt-0.5 uppercase tracking-wide">
                       {file.type ? file.type.split('/')[1] || file.type : 'Unknown'}
                     </p>
                   </div>
@@ -91,7 +91,7 @@ export const CaseAttachments: React.FC<CaseAttachmentsProps> = ({ caseData }) =>
                     download={file.name}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-3 w-full bg-white/5 hover:bg-white/10 text-slate-300 font-black text-[9px] uppercase tracking-wider py-1 rounded-md text-center flex items-center justify-center gap-1.5 transition-all"
+                    className="mt-3 w-full bg-white/5 hover:bg-white/10 text-slate-300 font-black text-xs uppercase tracking-wider py-1 rounded-xl text-center flex items-center justify-center gap-1.5 transition-all"
                   >
                     <Download className="w-3 h-3" /> View / Download
                   </a>

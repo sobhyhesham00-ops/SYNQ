@@ -13,14 +13,14 @@ export const InquiryRepliesViewer: React.FC<InquiryRepliesViewerProps> = ({ inqu
   if (!hasLegacyAnswer && !hasReplies) return null;
 
   return (
-    <div className="mt-4 p-4 bg-transparent border border-emerald-500/15 rounded-xl space-y-4 text-left shadow-lg">
+    <div className="mt-4 p-4 bg-transparent border border-emerald-500/15 rounded-xl space-y-4 text-left shadow-sm">
       <div className="flex items-center gap-2 pb-2.5 border-b border-emerald-500/10">
-        <div className="p-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg">
+        <div className="p-1.5 bg-emerald-500/10 text-emerald-400 rounded-xl">
           <CheckCircle2 className="w-4 h-4" />
         </div>
         <div>
-          <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-widest block font-sans">Solutions & Activity Logs</span>
-          <span className="text-[9px] text-slate-400">Recorded client resolutions and correspondence</span>
+          <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest block font-sans">Solutions & Activity Logs</span>
+          <span className="text-xs text-slate-400">Recorded client resolutions and correspondence</span>
         </div>
       </div>
 
@@ -39,11 +39,11 @@ export const InquiryRepliesViewer: React.FC<InquiryRepliesViewerProps> = ({ inqu
                   <div className="flex justify-between items-center gap-2 flex-wrap">
                     <div className="flex items-center gap-1.5">
                       <span className="text-xs font-bold text-slate-200">{reply.senderName}</span>
-                      <span className={`text-[8px] font-extrabold uppercase tracking-widest px-1.5 py-0.2 rounded border ${isTL ? 'text-amber-400 bg-amber-500/5 border-amber-500/20' : 'text-emerald-400 bg-emerald-500/5 border-emerald-500/20'}`}>
+                      <span className={`text-xs font-extrabold uppercase tracking-widest px-1.5 py-0.2 rounded border ${isTL ? 'text-amber-400 bg-amber-500/5 border-amber-500/20' : 'text-emerald-400 bg-emerald-500/5 border-emerald-500/20'}`}>
                         {reply.authorRole || "Leader"}
                       </span>
                     </div>
-                    <span className="text-[9px] text-slate-500 font-mono flex items-center gap-1">
+                    <span className="text-xs text-slate-500 font-mono flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       {new Date(reply.createdAt).toLocaleString()}
                     </span>
@@ -77,12 +77,12 @@ export const InquiryRepliesViewer: React.FC<InquiryRepliesViewerProps> = ({ inqu
               <div className="flex justify-between items-center gap-2">
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-bold text-slate-200">{inquiry.answeredBy || "Leader"}</span>
-                  <span className="text-[8px] font-extrabold uppercase tracking-widest px-1.5 py-0.2 rounded border text-emerald-400 bg-emerald-500/5 border-emerald-500/20">
+                  <span className="text-xs font-extrabold uppercase tracking-widest px-1.5 py-0.2 rounded border text-emerald-400 bg-emerald-500/5 border-emerald-500/20">
                     TEAM LEADER
                   </span>
                 </div>
                 {inquiry.answeredAt && (
-                  <span className="text-[9px] text-slate-500 font-mono flex items-center gap-1">
+                  <span className="text-xs text-slate-500 font-mono flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     {new Date(inquiry.answeredAt).toLocaleString()}
                   </span>
