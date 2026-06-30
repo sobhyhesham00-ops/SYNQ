@@ -207,7 +207,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
     const norm = label.toLowerCase();
     if (norm.includes('07:00') || norm.includes('morning')) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-sans text-xs font-semibold">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-transparent border border-white/12 text-white text-emerald-400 border border-transparent font-sans text-xs font-semibold">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           {label}
         </span>
@@ -215,7 +215,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
     }
     if (norm.includes('13:00') || norm.includes('afternoon')) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono text-xs font-semibold">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-400 border border-transparent font-mono text-xs font-semibold">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
           {label}
         </span>
@@ -223,14 +223,14 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
     }
     if (norm.includes('22:00') || norm.includes('night')) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-sans text-xs font-semibold">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-transparent border border-white/12 text-white text-indigo-400 border border-transparent font-sans text-xs font-semibold">
           <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
           {label}
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-500/15 text-slate-400 border border-slate-500/20 font-sans text-xs">
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-500/10 text-slate-400 border border-transparent font-sans text-xs">
         <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
         {label}
       </span>
@@ -238,7 +238,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
   };
 
   return (
-    <div className="bg-white/[0.04] border border-slate-800 rounded-2xl p-6 sm:p-8 text-left space-y-6">
+    <div className="bg-white/[0.04] border border-white/8 rounded-xl p-6 sm:p-8 text-left space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2.5 font-sans">
@@ -257,7 +257,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
-        className={`relative border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center transition-all ${ dragActive ? 'border-indigo-400 bg-indigo-500/5' : 'border-slate-800 hover:border-slate-700 bg-slate-950/40' }`}
+        className={`relative border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center transition-all ${ dragActive ? 'border-indigo-400 bg-indigo-500/5' : 'border-white/8 hover:border-white/8 bg-slate-950/40' }`}
       >
         <input
           type="file"
@@ -278,11 +278,11 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
             <h4 className="text-slate-200 font-bold text-sm mb-0.5">Drag & drop your roster or any schedule file here</h4>
             <p className="text-slate-500 text-xs mb-3">or click to browse from your device</p>
             <div className="flex flex-wrap justify-center gap-1.5">
-              <span className="px-2.5 py-1 bg-indigo-500/10 rounded-xl text-xs font-bold font-sans text-indigo-300 border border-indigo-500/20 uppercase tracking-wide">
+              <span className="px-2.5 py-1 bg-transparent border border-white/12 text-white rounded-xl text-xs font-bold font-sans text-indigo-300 border border-transparent uppercase tracking-wide">
                 ⭐ Any File Supported
               </span>
               {['.XLSX', '.XLS', '.CSV', '.TXT', 'ALL FORMATS'].map(fType => (
-                <span key={fType} className="px-2 py-0.5 bg-white/[0.04] rounded text-xs font-mono text-slate-400 border border-slate-800">
+                <span key={fType} className="px-2 py-0.5 bg-white/[0.04] rounded text-xs font-mono text-slate-400 border border-white/8">
                   {fType}
                 </span>
               ))}
@@ -293,7 +293,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
 
       {/* Sheet Picker if multiple sheets found */}
       {availableSheets.length > 1 && (
-        <div className="bg-slate-950/40 border border-slate-800 rounded-2xl p-4 space-y-2 text-left">
+        <div className="bg-slate-950/40 border border-white/8 rounded-xl p-4 space-y-2 text-left">
           <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
             This file has multiple sheets — select which one to import:
           </label>
@@ -318,7 +318,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
                 }
               }
             }}
-            className="w-full bg-white/[0.04] border border-slate-700/60 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all cursor-pointer"
+            className="w-full bg-white/[0.04] border border-white/8 rounded-xl p-3 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all cursor-pointer"
           >
             {availableSheets.map(name => (
               <option key={name} value={name}>{name}</option>
@@ -331,7 +331,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
       {(uploadSuccess || uploadError || warnings.length > 0) && (
         <div className="space-y-3.5">
           {uploadError && (
-            <div className="flex items-start gap-3 bg-rose-500/10 border border-rose-500/20 p-4 rounded-xl text-rose-300">
+            <div className="flex items-start gap-3 bg-rose-500/10 border border-transparent p-4 rounded-xl text-rose-300">
               <AlertCircle className="w-5 h-5 shrink-0 text-rose-400 mt-0.5" />
               <div>
                 <h5 className="font-bold text-xs text-rose-400 uppercase tracking-wide">Import Failed</h5>
@@ -341,7 +341,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
           )}
 
           {uploadSuccess && (
-            <div className="flex items-start gap-3 bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl text-emerald-300">
+            <div className="flex items-start gap-3 bg-emerald-500/10 border border-transparent p-4 rounded-xl text-emerald-300">
               <CheckCircle className="w-5 h-5 shrink-0 text-emerald-400 mt-0.5" />
               <div>
                 <h5 className="font-bold text-xs text-emerald-400 uppercase tracking-wide">Import Successful</h5>
@@ -351,7 +351,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
           )}
 
           {warnings.length > 0 && (
-            <div className="flex flex-col gap-1.5 bg-amber-500/10 border border-amber-500/25 p-4 rounded-xl text-amber-300">
+            <div className="flex flex-col gap-1.5 bg-amber-500/10 border border-transparent p-4 rounded-xl text-amber-300">
               <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider">
                 <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
                 Parsing Warnings ({warnings.length})
@@ -368,8 +368,8 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
 
       {/* Preview Section */}
       {tempSchedules.length > 0 && (
-        <div className="bg-slate-950/60 rounded-2xl border border-slate-800 overflow-hidden">
-          <div className="p-4 bg-white/[0.04] border-b border-slate-800 flex flex-wrap justify-between items-center gap-3">
+        <div className="bg-slate-950/60 rounded-xl border border-white/8 overflow-hidden">
+          <div className="p-4 bg-white/[0.04] border-b border-white/8 flex flex-wrap justify-between items-center gap-3">
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4 text-indigo-400" />
               <h5 className="font-bold text-xs text-slate-200 uppercase tracking-wider">
@@ -382,7 +382,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
               <button
                 type="button"
                 onClick={handleConfirm}
-                className="px-3.5 py-1.5 bg-indigo-500 hover:bg-indigo-400 active:bg-indigo-600 text-white rounded-xl text-xs font-bold tracking-wide uppercase transition-colors shadow-sm cursor-pointer"
+                className="px-3.5 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 active:bg-indigo-600 text-white rounded-xl text-xs font-bold tracking-wide uppercase transition-colors cursor-pointer"
               >
                 Confirm & Use These Shifts
               </button>
@@ -398,7 +398,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
-              <thead className="bg-slate-905 bg-white/[0.04] text-slate-400 uppercase text-xs tracking-wider border-b border-slate-800">
+              <thead className="bg-slate-905 bg-white/[0.04] text-slate-400 uppercase text-xs tracking-wider border-b border-white/8">
                 <tr>
                   <th className="px-4 py-3 font-semibold">Agent Name</th>
                   <th className="px-4 py-3 font-semibold">Date</th>
@@ -419,7 +419,7 @@ export const ScheduleUpload: React.FC<ScheduleUploadProps> = ({
 
           {/* Pagination Controls */}
           {totalPages > 1 && (
-            <div className="p-3 bg-white/[0.04] border-t border-slate-800 flex items-center justify-between gap-4">
+            <div className="p-3 bg-white/[0.04] border-t border-white/8 flex items-center justify-between gap-4">
               <span className="text-xs text-slate-500 font-sans">
                 Showing {startIndex + 1}–{Math.min(startIndex + itemsPerPage, tempSchedules.length)} of {tempSchedules.length} rows
               </span>

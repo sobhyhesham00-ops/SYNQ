@@ -65,7 +65,7 @@ export const ScreenshotUpload: React.FC<ScreenshotUploadProps> = ({
           />
           <label 
             htmlFor="screenshot-input-file"
-            className="flex flex-col items-center justify-center gap-3 p-6 border-2 border-dashed border-white/10 rounded-2xl bg-white/5 hover:bg-white/10 hover:border-indigo-500/50 transition-all group-hover:scale-[1.01] active:scale-[0.98]"
+            className="flex flex-col items-center justify-center gap-3 p-6 border-2 border-dashed border-white/8 rounded-xl bg-white/5 hover:bg-white/10 hover:border-transparent transition-all group-hover:scale-[1.01] active:scale-[0.98]"
           >
             <div className="p-3 bg-white/10 rounded-xl text-slate-400 group-hover:text-indigo-400 group-hover:bg-indigo-500/10 transition-colors">
               <Camera className="w-6 h-6" />
@@ -77,7 +77,7 @@ export const ScreenshotUpload: React.FC<ScreenshotUploadProps> = ({
           </label>
         </div>
       ) : (
-        <div className="relative rounded-2xl overflow-hidden border border-white/20 group">
+        <div className="relative rounded-xl overflow-hidden border border-white/15 group">
           <img 
             src={screenshot} 
             alt="Upload Preview" 
@@ -93,7 +93,7 @@ export const ScreenshotUpload: React.FC<ScreenshotUploadProps> = ({
             </button>
             <label 
               htmlFor="screenshot-input-file-change"
-              className="p-2 bg-indigo-500 text-white rounded-xl hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer"
+              className="p-2 bg-indigo-500 text-white rounded-xl hover:scale-110 active:scale-95 transition-all cursor-pointer"
               title="Change recruitment image"
             >
               <ImageIcon className="w-5 h-5" />

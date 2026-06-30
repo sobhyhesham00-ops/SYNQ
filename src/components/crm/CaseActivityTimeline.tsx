@@ -97,11 +97,11 @@ export const CaseActivityTimeline: React.FC<CaseActivityTimelineProps> = ({ case
 
   const getBorderColor = (type: TimelineEvent['type']) => {
     switch (type) {
-      case 'submission': return 'border-cyan-500/20';
-      case 'reply': return 'border-indigo-500/20';
-      case 'assignment': return 'border-amber-500/20';
-      case 'resolution': return 'border-emerald-500/20';
-      default: return 'border-white/10';
+      case 'submission': return 'border-transparent';
+      case 'reply': return 'border-transparent';
+      case 'assignment': return 'border-transparent';
+      case 'resolution': return 'border-transparent';
+      default: return 'border-white/8';
     }
   };
 
@@ -125,15 +125,15 @@ export const CaseActivityTimeline: React.FC<CaseActivityTimelineProps> = ({ case
       {sortedEvents.length === 0 ? (
         <p className="text-xs text-slate-500 italic py-4">No activity logged.</p>
       ) : (
-        <div className="relative border-l border-white/5 ml-3 pl-6 space-y-5">
+        <div className="relative border-l border-white/8 ml-3 pl-6 space-y-5">
           {sortedEvents.map((evt) => (
             <div key={evt.id} className="relative">
               {/* Vertical line node */}
-              <span className={`absolute -left-[30px] top-0 w-5 h-5 rounded-xl flex items-center justify-center border ${getBorderColor(evt.type)} ${getBgColor(evt.type)} shadow-sm`}>
+              <span className={`absolute -left-[30px] top-0 w-5 h-5 rounded-xl flex items-center justify-center border ${getBorderColor(evt.type)} ${getBgColor(evt.type)}`}>
                 {getIcon(evt.type)}
               </span>
 
-              <div className="bg-transparent border border-white/5 rounded-xl p-3 hover:bg-white/[0.06] transition-all">
+              <div className="bg-transparent border border-white/8 rounded-xl p-3 hover:bg-white/[0.06] transition-all">
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h4 className="text-xs font-bold text-slate-200">
@@ -143,13 +143,13 @@ export const CaseActivityTimeline: React.FC<CaseActivityTimelineProps> = ({ case
                       {evt.description}
                     </p>
                   </div>
-                  <span className="text-xs text-slate-500 font-sans flex items-center gap-1 shrink-0 bg-white/5 px-2 py-0.5 rounded-xl border border-white/5">
+                  <span className="text-xs text-slate-500 font-sans flex items-center gap-1 shrink-0 bg-white/5 px-2 py-0.5 rounded-xl border border-white/8">
                     {new Date(evt.date).toLocaleDateString([], { month: 'short', day: 'numeric' })} · {new Date(evt.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
 
                 {evt.details && (
-                  <div className="mt-2 bg-white/[0.03] border border-white/5 p-2 rounded-xl text-xs font-sans text-slate-400 select-all max-h-32 overflow-y-auto">
+                  <div className="mt-2 bg-white/[0.03] border border-white/8 p-2 rounded-xl text-xs font-sans text-slate-400 select-all max-h-32 overflow-y-auto">
                     {evt.details}
                   </div>
                 )}

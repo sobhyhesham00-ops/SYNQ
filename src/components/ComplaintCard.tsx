@@ -112,7 +112,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
       
       {/* Unexpanded / Header State */}
       <div 
-        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full ${isExpanded ? "border-b border-white/5 pb-3 cursor-pointer hover:opacity-80" : ""}`}
+        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full ${isExpanded ? "border-b border-white/8 pb-3 cursor-pointer hover:opacity-80" : ""}`}
         onClick={(e) => {
           if (isExpanded) {
             e.stopPropagation();
@@ -132,7 +132,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
             >
               {comp.agentName}
             </span>
-            <span className="text-xs text-slate-400 lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded font-sans shrink-0">
+            <span className="text-xs text-slate-400 lowercase tracking-wide bg-white/5 border border-white/8 px-2 py-0.5 rounded font-sans shrink-0">
               {getAgentLOB(comp.agentName)}
             </span>
             <span className="font-sans text-xs text-slate-500 bg-transparent px-1.5 py-0.5 rounded shrink-0">
@@ -149,14 +149,14 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
             {comp.clinicName && (
               <>
                 <span className="text-slate-600">•</span>
-                <span className="text-xs sm:text-sm font-bold font-sans text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-xl tracking-wide">
+                <span className="text-xs sm:text-sm font-bold font-sans text-indigo-400 bg-transparent border border-white/12 text-white border border-transparent px-2 py-0.5 rounded-xl tracking-wide">
                   {getClinicLabel(comp.clinicName)}
                 </span>
               </>
             )}
             {comp.phoneNumber && <span>• {comp.phoneNumber}</span>}
             
-            <span className="text-xs bg-white/5 text-slate-300 px-2 py-0.5 border border-white/10 rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-2">
+            <span className="text-xs bg-white/5 text-slate-300 px-2 py-0.5 border border-white/8 rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-2">
                📁 File: {comp.fileNumber || "N/A"}
             </span>
           </div>
@@ -170,20 +170,20 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
               const text = `Complaint: ${comp.patientName} - ${getClinicLabel(comp.clinicName)} - ${comp.phoneNumber}`;
               copyToClipboard(text, 'Complaint details copied!');
             }}
-            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer hidden sm:flex"
+            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/8 rounded-xl text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer hidden sm:flex"
             title="Copy Details"
           >
             <Copy className="w-3 h-3" /> Copy
           </button>
           {(comp.assignedToName || comp.assignedTo) && (
-            <span className="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20 max-w-[100px] truncate leading-none">
+            <span className="text-xs font-bold text-indigo-400 bg-transparent border border-white/12 text-white px-1.5 py-0.5 rounded border border-transparent max-w-[100px] truncate leading-none">
               📌 {comp.assignedToName || comp.assignedTo}
             </span>
           )}
-          <span className={`text-xs uppercase tracking-wider font-bold px-2 py-0.5 rounded-xl font-sans leading-none ${ isPendingTL ? "bg-amber-500/10 border border-amber-500/30 text-amber-300 animate-pulse" : isNeedContact ? "bg-rose-500/10 border border-rose-500/30 text-rose-400 animate-pulse" : isClosed ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400" : "bg-slate-700 text-slate-300" }`}>
+          <span className={`text-xs uppercase tracking-wider font-bold px-2 py-0.5 rounded-xl font-sans leading-none ${ isPendingTL ? "bg-amber-500/10 border border-transparent text-amber-300 animate-pulse" : isNeedContact ? "bg-rose-500/10 border border-transparent text-rose-400 animate-pulse" : isClosed ? "bg-emerald-500/10 border border-transparent text-emerald-400" : "bg-slate-700 text-slate-300" }`}>
             {compStatusLabels[comp.status] || comp.status}
           </span>
-          <span className={`px-2 py-0.5 border text-xs font-bold rounded-xl shrink-0 flex items-center gap-1 ${isClosed ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-slate-700 text-slate-400 border-white/10"}`}>
+          <span className={`px-2 py-0.5 border text-xs font-bold rounded-xl shrink-0 flex items-center gap-1 ${isClosed ? "bg-emerald-500/10 text-emerald-500 border-transparent" : "bg-slate-700 text-slate-400 border-white/8"}`}>
             ⏱ {compAgeLabel} open
           </span>
           <div className="text-slate-400 hover:text-indigo-400 p-1 rounded-xl transition-all shrink-0 ml-1 flex items-center justify-center">
@@ -196,7 +196,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
       {isExpanded && (
         <div className="w-full overflow-hidden transition-all duration-300 flex flex-col text-left space-y-4">
           {/* Patient Info Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-transparent border border-white/5 p-4 rounded-xl text-xs">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-transparent border border-white/8 p-4 rounded-xl text-xs">
             <div>
               <span className="text-xs text-slate-400 uppercase tracking-wider font-bold block mb-1">
                 SUBMITTING AGENT
@@ -240,7 +240,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
 
           {/* Patient ID Code Block if New Customer */}
           {!comp.isOldCustomer && comp.idNumber && (
-            <div className="bg-slate-900/60 border border-white/5 p-3.5 rounded-xl text-xs flex justify-between items-center">
+            <div className="bg-slate-900/60 border border-white/8 p-4.5 rounded-xl text-xs flex justify-between items-center">
               <div>
                 <span className="text-xs text-slate-400 uppercase tracking-wider font-bold block mb-0.5">
                   ID NUMBER (NEW CUSTOMER REQUIREMENT)
@@ -250,7 +250,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
                 </span>
               </div>
               <CopyWrap text={comp.idNumber} label="ID Number">
-                <button className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold text-slate-300 border border-white/5 transition-all cursor-pointer">
+                <button className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold text-slate-300 border border-white/8 transition-all cursor-pointer">
                   Copy ID
                 </button>
               </CopyWrap>
@@ -262,7 +262,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
             <span className="text-xs text-slate-400 uppercase tracking-widest font-bold block">
               🚨 Patient Complaint Details
             </span>
-            <div className="bg-transparent border border-white/5 p-4 rounded-xl text-xs text-slate-200 leading-relaxed italic">
+            <div className="bg-transparent border border-white/8 p-4 rounded-xl text-xs text-slate-200 leading-relaxed italic">
               <p className="whitespace-pre-line">
                 "{comp.complaintDetails}"
               </p>
@@ -271,7 +271,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
 
           {/* PHOTO & LINK ATTACHMENTS */}
           {((comp.photos && comp.photos.length > 0) || comp.imageUrl || (comp.links && comp.links.length > 0)) && (
-            <div className="space-y-3 bg-slate-900/20 border border-white/5 p-4 rounded-xl">
+            <div className="space-y-3 bg-slate-900/20 border border-white/8 p-4 rounded-xl">
               <span className="text-xs text-slate-400 uppercase tracking-widest font-bold block">
                 📎 Uploaded Attachments & Proofs
               </span>
@@ -290,7 +290,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
 
           {/* TEAM LEADER RESOLUTION DISPLAY */}
           {comp.tlComment && (
-            <div className="border border-rose-500/20 bg-rose-500/[0.02] p-5 rounded-xl space-y-3">
+            <div className="border border-transparent bg-rose-500/[0.02] p-5 rounded-xl space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-rose-500/10 pb-2">
                 <div className="flex items-center gap-2">
                   <span className="text-rose-400 text-sm font-bold">📋</span>
@@ -299,7 +299,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
                   </p>
                 </div>
                 {comp.tlResolutionType && (
-                  <span className="inline-flex items-center px-2 py-0.5 bg-rose-500/15 border border-rose-500/30 rounded-xl text-xs font-bold uppercase text-rose-300 tracking-wider font-sans">
+                  <span className="inline-flex items-center px-2 py-0.5 bg-rose-500/10 border border-transparent rounded-xl text-xs font-bold uppercase text-rose-300 tracking-wider font-sans">
                     {comp.tlResolutionType === "refund" ? "💳 Refund" :
                      comp.tlResolutionType === "replacement" ? "🔄 Replacement" :
                      comp.tlResolutionType === "apology" ? "✉ apology" :
@@ -322,7 +322,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
 
           {/* CASE TIMERS AND SLA ACCENTS */}
           {isNeedContact && (
-            <div className="p-4 bg-transparent rounded-xl border border-white/5 flex items-center justify-between text-xs font-sans">
+            <div className="p-4 bg-transparent rounded-xl border border-white/8 flex items-center justify-between text-xs font-sans">
               <div className="space-y-0.5 text-left">
                 <p className="text-xs text-slate-400 uppercase tracking-wider font-bold">
                   Reviewed on:
@@ -338,7 +338,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
                 <p className="text-xs text-rose-400 uppercase font-bold tracking-wider">
                   SLA Timer on Agent:
                 </p>
-                <p className="font-sans text-xs font-bold px-3 py-1 rounded text-rose-400 bg-rose-500/10 animate-pulse border border-rose-500/20">
+                <p className="font-sans text-xs font-bold px-3 py-1 rounded text-rose-400 bg-rose-500/10 animate-pulse border border-transparent">
                   {getElapsedTimerString(
                     comp.commentedAt || comp.createdAt
                   )}
@@ -348,7 +348,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
           )}
 
           {isClosed && (
-            <div className="p-4 bg-transparent rounded-xl border border-white/5 flex items-center justify-between text-xs font-sans">
+            <div className="p-4 bg-transparent rounded-xl border border-white/8 flex items-center justify-between text-xs font-sans">
               <div className="space-y-0.5 text-left">
                 <p className="text-xs text-slate-400 uppercase tracking-wider font-bold">
                   Closed at:
@@ -364,7 +364,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
                 <p className="text-xs text-emerald-400 uppercase font-bold tracking-wider">
                   Completion Resolution SLA:
                 </p>
-                <p className="font-sans text-xs font-bold px-3 py-1 rounded text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
+                <p className="font-sans text-xs font-bold px-3 py-1 rounded text-emerald-400 bg-transparent border border-white/12 text-white border border-transparent">
                   {getElapsedTimerString(
                     comp.createdAt,
                     comp.closedAt,
@@ -375,7 +375,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
           )}
 
           {/* ASSIGN TO AGENT SELECTION CONTROL */}
-          <div className="border bg-slate-800/20 border-white/5 p-4 rounded-xl flex items-center justify-between gap-4 flex-wrap">
+          <div className="border bg-slate-800/20 border-white/8 p-4 rounded-xl flex items-center justify-between gap-4 flex-wrap">
             <div className="text-left font-sans">
               <span className="text-xs text-slate-400 uppercase tracking-wider font-bold block mb-0.5">
                 ASSIGNED WORKER
@@ -415,7 +415,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
 
           {/* DYNAMIC TL RESOLUTION FORM */}
           {activeComplaintHandlingId === comp.id && isTLOreSupport && (
-            <div className="p-5 bg-rose-500/[0.02] border border-rose-500/20 rounded-xl space-y-4 animate-fade-in mt-1 text-left w-full">
+            <div className="p-5 bg-rose-500/[0.02] border border-transparent rounded-xl space-y-4 animate-fade-in mt-1 text-left w-full">
               <p className="text-xs font-bold text-rose-400 uppercase tracking-widest flex items-center gap-1.5">
                 <PenTool className="w-3.5 h-3.5" /> TL Resolution Panel
               </p>
@@ -438,7 +438,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
                       key={opt.value}
                       type="button"
                       onClick={() => setTlComplaintResolutionType(opt.value)}
-                      className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all text-left cursor-pointer ${ tlComplaintResolutionType === opt.value ? "bg-rose-500/20 border-rose-500/40 text-rose-300" : "bg-transparent border-white/10 text-slate-400 hover:border-white/20" }`}
+                      className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all text-left cursor-pointer ${ tlComplaintResolutionType === opt.value ? "bg-rose-500/10 border-transparent text-rose-300" : "bg-transparent border-white/8 text-slate-400 hover:border-white/15" }`}
                     >
                       {opt.label}
                     </button>
@@ -455,7 +455,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
                   placeholder="Explain the resolution, what action the agent must take, and any instructions for the patient contact..."
                   value={tlComplaintComment}
                   onChange={(e) => setTlComplaintComment(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-slate-100 font-sans min-h-[100px] resize-none focus:outline-none focus:border-rose-500"
+                  className="w-full bg-white/5 border border-white/8 rounded-xl px-3 py-2.5 text-xs text-slate-100 font-sans min-h-[100px] resize-none focus:outline-none focus:border-rose-500"
                   required
                 />
               </div>
@@ -481,7 +481,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
           )}
 
           {/* FOOTER ACTIONS ROW */}
-          <div className="flex flex-wrap gap-2 items-center justify-end pt-4 border-t border-white/5 font-sans">
+          <div className="flex flex-wrap gap-2 items-center justify-end pt-4 border-t border-white/8 font-sans">
             {/* Copy Complete Request info */}
             <button
               onClick={(e) => {
@@ -511,7 +511,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
 
                 copyToClipboard(text, "Complaint details copied — including attachments info!");
               }}
-              className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-slate-300 hover:text-slate-100 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-auto"
+              className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/8 rounded-xl text-slate-300 hover:text-slate-100 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-auto"
             >
               <Copy className="w-3.5 h-3.5" />
               Copy details
@@ -524,7 +524,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
                   e.stopPropagation();
                   handleDeleteComplaint(comp.id);
                 }}
-                className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-transparent hover:border-rose-500/10 rounded-xl text-rose-400 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-2"
+                className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/10 rounded-xl text-rose-400 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-2"
                 title="Delete Complaint"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -542,7 +542,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
                     data: { ...comp },
                   });
                 }}
-                className="px-3 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-xl text-emerald-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-3 py-2 bg-transparent border border-white/12 text-white hover:bg-white/5 border border-transparent rounded-xl text-emerald-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 title={`Edit complaint (${getRemainingEditTime(comp.createdAt)})`}
               >
                 <Pencil className="w-3.5 h-3.5" />
@@ -583,7 +583,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
                   e.stopPropagation();
                   handleToggleContactComplaint(comp.id, "not_contacted");
                 }}
-                className="px-3 py-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-bold font-sans text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5 hover:brightness-110"
+                className="px-3 py-2 bg-transparent border border-white/12 text-white border border-transparent text-indigo-300 font-bold font-sans text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5 hover:brightness-110"
               >
                 Reopen Case
               </button>
@@ -591,7 +591,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
           </div>
 
           {/* THREAD OF DISCUSSIONS & REPLIES */}
-          <div className="w-full mt-4 pt-4 border-t border-white/5" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full mt-4 pt-4 border-t border-white/8" onClick={(e) => e.stopPropagation()}>
             <RequestReplyThread
               request={comp}
               currentUser={currentUser}
@@ -603,7 +603,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
           </div>
 
           {/* Case Activity Audit Trail */}
-          <div className="w-full mt-4 pt-4 border-t border-white/5 space-y-2 text-left" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full mt-4 pt-4 border-t border-white/8 space-y-2 text-left" onClick={(e) => e.stopPropagation()}>
             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-sans">
               Case Activity Timeline
             </h4>

@@ -49,7 +49,7 @@ export const CaseTimeline: React.FC<CaseTimelineProps> = ({ entityType, entityId
         const meta = ACTION_META[ev.action] || { label: ev.action, color: 'text-slate-400', icon: <Clock className="w-3.5 h-3.5" /> };
         return (
           <div key={ev.id || i} className="flex items-start gap-3 py-2.5 pl-1 relative">
-            <div className={`shrink-0 w-4 h-4 rounded-full bg-transparent border border-white/10 flex items-center justify-center mt-0.5 ${meta.color} z-10`}>
+            <div className={`shrink-0 w-4 h-4 rounded-full bg-transparent border border-white/8 flex items-center justify-center mt-0.5 ${meta.color} z-10`}>
               {meta.icon}
             </div>
             <div className="flex-1 min-w-0">

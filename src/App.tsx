@@ -415,17 +415,17 @@ async function fetchGoogleSheetCSV(
 }
 
 const getClinicBadgeColor = (clinic: string) => {
-  if (!clinic) return "bg-white/5 text-slate-300 border-white/10";
+  if (!clinic) return "bg-white/5 text-slate-300 border-white/8";
   const lp = clinic.toLowerCase();
   if (lp.includes("dermadent"))
-    return "bg-blue-500/10 text-blue-300 border-blue-500/20";
+    return "bg-blue-500/10 text-blue-300 border-transparent";
   if (lp.includes("onetouch"))
-    return "bg-emerald-500/10 text-emerald-300 border-emerald-500/20";
+    return "bg-emerald-500/10 text-emerald-300 border-transparent";
   if (lp.includes("welltouch"))
-    return "bg-rose-500/10 text-rose-300 border-rose-500/20";
+    return "bg-rose-500/10 text-rose-300 border-transparent";
   if (lp.includes("newage"))
-    return "bg-amber-500/10 text-amber-300 border-amber-500/20";
-  return "bg-white/5 text-slate-300 border-white/10";
+    return "bg-amber-500/10 text-amber-300 border-transparent";
+  return "bg-white/5 text-slate-300 border-white/8";
 };
 
 const CoolLogo = ({
@@ -1565,9 +1565,9 @@ export default function App() {
                 );
                 toast.custom(
                   (t) => (
-                    <div className="bg-slate-900/40 /95 border border-amber-500/40 text-white rounded-2xl p-4 flex flex-col gap-2 max-w-sm border-l-4 border-l-amber-500 animate-fade-in text-left">
+                    <div className="bg-slate-900/40 /95 border border-transparent text-white rounded-xl p-4 flex flex-col gap-2 max-w-sm border-l-4 border-l-amber-500 animate-fade-in text-left">
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-500 shrink-0 border border-amber-500/20">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 shrink-0 border border-transparent">
                           <Bell className="w-5 h-5 animate-bounce" />
                         </div>
                         <div className="flex-1">
@@ -1582,7 +1582,7 @@ export default function App() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex justify-end gap-2 mt-2 pt-1 border-t border-white/5">
+                      <div className="flex justify-end gap-2 mt-2 pt-1 border-t border-white/8">
                         <button
                           onClick={() => {
                             setActiveTab("tl-announcements");
@@ -10433,7 +10433,7 @@ ${ttNotes}`
   const getShiftBadgeStyle = (label: string) => {
     if (!label)
       return {
-        bg: "bg-slate-500/10 text-slate-400 border-slate-500/20",
+        bg: "bg-slate-500/10 text-slate-400 border-transparent",
         display: "Not Scheduled",
       };
     const norm = label.toLowerCase();
@@ -10446,7 +10446,7 @@ ${ttNotes}`
       norm === "morning shift"
     ) {
       return {
-        bg: "bg-sky-500/15 text-sky-300 border-sky-500/25",
+        bg: "bg-sky-500/10 text-sky-300 border-transparent",
         display: "Morning",
       };
     }
@@ -10460,7 +10460,7 @@ ${ttNotes}`
       norm === "afternoon shift"
     ) {
       return {
-        bg: "bg-amber-500/15 text-amber-300 border-amber-500/25",
+        bg: "bg-amber-500/10 text-amber-300 border-transparent",
         display: "Afternoon",
       };
     }
@@ -10480,7 +10480,7 @@ ${ttNotes}`
     }
     if (norm === "not scheduled" || norm === "unassigned") {
       return {
-        bg: "bg-slate-500/10 text-slate-400 border-slate-500/20",
+        bg: "bg-slate-500/10 text-slate-400 border-transparent",
         display: "Not Scheduled",
       };
     }
@@ -10493,12 +10493,12 @@ ${ttNotes}`
       norm === "r"
     ) {
       return {
-        bg: "bg-slate-500/10 text-slate-400 border-slate-500/20",
+        bg: "bg-slate-500/10 text-slate-400 border-transparent",
         display: "Off Day",
       };
     }
     return {
-      bg: "bg-slate-500/10 text-slate-400 border-slate-500/20",
+      bg: "bg-slate-500/10 text-slate-400 border-transparent",
       display: label,
     };
   };
@@ -10529,7 +10529,7 @@ ${ttNotes}`
             </p>
           </div>
 
-          <div className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-3">
+          <div className="bg-white/5 p-4 rounded-xl border border-white/8 space-y-3">
             <p className="text-xs uppercase tracking-widest text-slate-500 font-bold pt-1">
               System Restore (Admin Only)
             </p>
@@ -10539,7 +10539,7 @@ ${ttNotes}`
                 placeholder="Admin Password"
                 value={killSwitchPassword}
                 onChange={(e) => setKillSwitchPassword(e.target.value)}
-                className="w-full pl-4 pr-10 py-2 bg-white/5 border border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 transition-colors"
+                className="w-full pl-4 pr-10 py-2 bg-white/5 border border-white/8 rounded-xl text-sm outline-none focus:border-indigo-500 transition-colors"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     const creds = getStorageItem<Record<string, string>>(
@@ -10590,7 +10590,7 @@ ${ttNotes}`
               placeholder="Security Check: Favorite car?"
               value={killSwitchCar}
               onChange={(e) => setKillSwitchCar(e.target.value)}
-              className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm outline-none focus:border-indigo-500 transition-colors"
+              className="w-full px-4 py-2 bg-white/5 border border-white/8 rounded-xl text-sm outline-none focus:border-indigo-500 transition-colors"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   const creds = getStorageItem<Record<string, string>>(
@@ -10666,12 +10666,12 @@ ${ttNotes}`
         className="min-h-screen bg-[#080d1a] text-slate-100 flex flex-col items-center justify-center font-sans antialiased relative overflow-hidden"
       >
         {/* Background aesthetic blobs */}
-        <div className="fixed top-[-10%] -left-32 w-[600px] h-[600px] bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none"></div>
-        <div className="fixed bottom-[-10%] -right-32 w-[600px] h-[600px] bg-pink-500/20 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="fixed top-[-10%] -left-32 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="fixed bottom-[-10%] -right-32 w-[600px] h-[600px] bg-pink-500/10 rounded-full blur-[120px] pointer-events-none"></div>
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-blue-500/10 rounded-full blur-[150px] pointer-events-none"></div>
         <div className="flex flex-col items-center gap-6 z-10">
           <div className="relative flex items-center justify-center">
-            <div className="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+            <div className="w-16 h-16 border-4 border-transparent border-t-indigo-500 rounded-full animate-spin"></div>
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="text-xs font-bold tracking-widest text-indigo-400 font-sans">
                 S
@@ -10704,8 +10704,8 @@ ${ttNotes}`
       />
 
       {/* Background aesthetic blobs */}
-      <div className="fixed top-[-10%] -left-32 w-[600px] h-[600px] bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="fixed bottom-[-10%] -right-32 w-[600px] h-[600px] bg-pink-500/20 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="fixed top-[-10%] -left-32 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="fixed bottom-[-10%] -right-32 w-[600px] h-[600px] bg-pink-500/10 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-blue-500/10 rounded-full blur-[150px] pointer-events-none"></div>
 
       {/* Main Container */}
@@ -10713,10 +10713,10 @@ ${ttNotes}`
         {/* Check Installation */}
         {!currentUser ? (
           <div className="flex-1 flex flex-col items-center justify-center my-12 animate-fade-in relative">
-            <div className="w-full max-w-md bg-black/60 border border-indigo-500/20 p-8 rounded-2xl relative overflow-hidden">
+            <div className="w-full max-w-md bg-black/60 border border-transparent p-8 rounded-xl relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500 group-hover:h-1.5 transition-all duration-500"></div>
 
-              <div className="absolute -inset-20 bg-indigo-500/10 blur-[100px] pointer-events-none group-hover:bg-indigo-500/20 transition-all duration-1000"></div>
+              <div className="absolute -inset-20 bg-indigo-500/10 blur-[100px] pointer-events-none group-hover:bg-indigo-500/10 transition-all duration-1000"></div>
 
               <div className="flex flex-col items-center mb-10 relative z-10">
                 <div className="w-full flex items-center justify-center mb-6">
@@ -10761,7 +10761,7 @@ ${ttNotes}`
 
               {showForcePasswordChange ? (
                 <div className="space-y-5 relative z-10">
-                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 text-xs text-amber-200">
+                  <div className="bg-amber-500/10 border border-transparent rounded-xl p-4 text-xs text-amber-200">
                     <p className="font-bold text-slate-100 mb-1">
                       🔐 Password Reset Required
                     </p>
@@ -10778,7 +10778,7 @@ ${ttNotes}`
                       type="password"
                       value={forceNewPassword}
                       onChange={(e) => setForceNewPassword(e.target.value)}
-                      className="w-full px-4 py-3.5 bg-white/[0.03] border border-indigo-500/20 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500/50 text-sm font-sans transition-all"
+                      className="w-full px-4 py-3.5 bg-white/[0.03] border border-transparent rounded-xl text-slate-100 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500/50 text-sm font-sans transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -10791,7 +10791,7 @@ ${ttNotes}`
                       onChange={(e) =>
                         setForceNewPasswordConfirm(e.target.value)
                       }
-                      className="w-full px-4 py-3.5 bg-white/[0.03] border border-indigo-500/20 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500/50 text-sm font-sans transition-all"
+                      className="w-full px-4 py-3.5 bg-white/[0.03] border border-transparent rounded-xl text-slate-100 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500/50 text-sm font-sans transition-all"
                     />
                   </div>
                   <button
@@ -10860,7 +10860,7 @@ ${ttNotes}`
                     <span className="text-xs uppercase tracking-widest text-indigo-300 font-bold block mb-1">
                       Username
                     </span>
-                    <div className="px-4 py-3 bg-white/[0.03] border border-indigo-500/20 rounded-xl text-slate-100 font-medium text-sm font-mono tracking-wide text-left">
+                    <div className="px-4 py-3 bg-white/[0.03] border border-transparent rounded-xl text-slate-100 font-medium text-sm font-mono tracking-wide text-left">
                       {loginName.toLowerCase()}
                     </div>
                   </div>
@@ -10869,7 +10869,7 @@ ${ttNotes}`
                     <span className="text-xs uppercase tracking-widest text-indigo-300 font-bold block mb-1">
                       Password
                     </span>
-                    <div className="px-4 py-3 bg-white/[0.03] border border-indigo-500/20 rounded-xl text-slate-100 font-medium text-sm font-mono tracking-widest text-left">
+                    <div className="px-4 py-3 bg-white/[0.03] border border-transparent rounded-xl text-slate-100 font-medium text-sm font-mono tracking-widest text-left">
                       ••••••••
                     </div>
                   </div>
@@ -10907,7 +10907,7 @@ ${ttNotes}`
                     <input
                       id="login-name"
                       type="text"
-                      className="w-full px-4 py-3.5 bg-white/[0.03] border border-indigo-500/20 rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-500/50 transition-all text-sm font-sans"
+                      className="w-full px-4 py-3.5 bg-white/[0.03] border border-transparent rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-500/50 transition-all text-sm font-sans"
                       placeholder="e.g. h.sobhy"
                       value={loginName}
                       onChange={(e) => setLoginName(e.target.value)}
@@ -10926,7 +10926,7 @@ ${ttNotes}`
                       <input
                         id="login-password"
                         type={showLoginPassword ? "text" : "password"}
-                        className="w-full pl-4 pr-12 py-3.5 bg-white/[0.03] border border-indigo-500/20 rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-500/50 transition-all text-sm font-sans"
+                        className="w-full pl-4 pr-12 py-3.5 bg-white/[0.03] border border-transparent rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-500/50 transition-all text-sm font-sans"
                         placeholder="Enter credentials"
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
@@ -10948,7 +10948,7 @@ ${ttNotes}`
                   </div>
 
                   {loginError && (
-                    <div className="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl text-xs font-sans flex items-center gap-2">
+                    <div className="p-3 bg-rose-500/10 border border-transparent text-rose-400 rounded-xl text-xs font-sans flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
                       <span>{loginError}</span>
                     </div>
@@ -10976,11 +10976,11 @@ ${ttNotes}`
                     </p>
                   )}
 
-                  <div className="flex justify-center mt-6 pt-4 border-t border-white/5">
+                  <div className="flex justify-center mt-6 pt-4 border-t border-white/8">
                     <button
                       type="button"
                       onClick={() => setIsSynqVersionModalOpen(true)}
-                      className="px-4 py-2 bg-white/[0.03] border border-cyan-500/20 hover:border-cyan-500/40 hover:bg-black/60 rounded-full text-xs font-bold tracking-widest text-slate-300 hover:text-cyan-400 transition-all flex items-center gap-3 cursor-pointer relative group overflow-hidden"
+                      className="px-4 py-2 bg-white/[0.03] border border-transparent hover:border-transparent hover:bg-black/60 rounded-lg text-xs font-bold tracking-widest text-slate-300 hover:text-cyan-400 transition-all flex items-center gap-3 cursor-pointer relative group overflow-hidden"
                     >
                       <div className="relative w-2.5 h-2.5 flex items-center justify-center shrink-0">
                         <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 z-10 animate-pulse" />
@@ -11011,7 +11011,7 @@ ${ttNotes}`
           /* User Logged In Portal */
           <div className="flex-1 flex flex-col gap-6 my-4 lg:my-6">
             {/* Global Workspace Header / Navbar with Global Search */}
-            <header className="w-full bg-[#111116] border border-white/5 px-4 py-2.5 rounded-xl flex items-center justify-between gap-4 relative z-40">
+            <header className="w-full bg-[#111116] border border-white/8 px-4 py-2.5 rounded-xl flex items-center justify-between gap-4 relative z-40">
               <div className="flex items-center gap-3">
                 <div className="text-left">
                   <motion.div
@@ -11043,7 +11043,7 @@ ${ttNotes}`
               {/* Timezones & Weather Active Control Selector */}
               <div
                 id="timezone-weather-selector"
-                className="flex items-center gap-4 bg-transparent border border-white/10 rounded-xl px-3 py-1.5"
+                className="flex items-center gap-4 bg-transparent border border-white/8 rounded-xl px-3 py-1.5"
               >
                 <div className="flex items-center gap-4 px-2">
                   {/* EGYPT DISPLAY */}
@@ -11135,7 +11135,7 @@ ${ttNotes}`
                       setIsGlobalSearchPanelOpen(true);
                     }}
                     onFocus={() => setIsGlobalSearchPanelOpen(true)}
-                    className="w-full pl-9 pr-8 py-2 bg-white/5 border border-white/10 rounded-2xl text-xs text-slate-100 focus:outline-none focus:border-indigo-500 focus:bg-white/10 placeholder:text-slate-500 transition-all font-sans"
+                    className="w-full pl-9 pr-8 py-2 bg-white/5 border border-white/8 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-indigo-500 focus:bg-white/10 placeholder:text-slate-500 transition-all font-sans"
                   />
                   {globalSearchInput && (
                     <button
@@ -11157,8 +11157,8 @@ ${ttNotes}`
                       className="fixed inset-0 z-30"
                       onClick={() => setIsGlobalSearchPanelOpen(false)}
                     />
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#1a1b23] border border-white/10 rounded-2xl shadow-sm z-45 p-1.5 max-h-96 overflow-y-auto flex flex-col divide-y divide-white/5">
-                      <div className="p-3 text-xs text-slate-400 font-bold uppercase tracking-wider bg-[#1a1b23] flex items-center justify-between border-b border-white/5 rounded-t-xl font-mono">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#1a1b23] border border-white/8 rounded-xl z-45 p-1.5 max-h-96 overflow-y-auto flex flex-col divide-y divide-white/5">
+                      <div className="p-3 text-xs text-slate-400 font-bold uppercase tracking-wider bg-[#1a1b23] flex items-center justify-between border-b border-white/8 rounded-t-xl font-mono">
                         <span>
                           Results for "{globalSearchInput}":{" "}
                           {globalSearchResults.length} records
@@ -11185,16 +11185,16 @@ ${ttNotes}`
                             : "";
                           const badgeClasses = {
                             inquiry:
-                              "bg-amber-500/10 text-amber-400 border border-amber-500/20",
+                              "bg-amber-500/10 text-amber-400 border border-transparent",
                             tabby_tamara:
-                              "bg-rose-500/10 text-rose-400 border border-rose-500/20",
+                              "bg-rose-500/10 text-rose-400 border border-transparent",
                             complaint:
-                              "bg-red-500/10 text-red-500 border border-red-500/20",
+                              "bg-red-500/10 text-red-500 border border-transparent",
                             client_comm:
-                              "bg-sky-500/10 text-sky-400 border border-sky-500/20",
-                            case: "bg-orange-500/10 text-orange-400 border border-orange-500/20",
+                              "bg-sky-500/10 text-sky-400 border border-transparent",
+                            case: "bg-orange-500/10 text-orange-400 border border-transparent",
                             request:
-                              "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20",
+                              "bg-indigo-500/10 text-indigo-400 border border-transparent",
                           }[item.type];
 
                           const typeLabel = {
@@ -11303,7 +11303,7 @@ ${ttNotes}`
                     onClick={() => setIsPatientHistoryOpen(true)}
                     title="Patient History Lookup"
                     id="patient-lookup-trigger-btn"
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-300 hover:text-indigo-200 text-xs font-bold transition-all cursor-pointer mr-2"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-transparent border border-white/12 text-white hover:bg-white/5 border border-transparent text-indigo-300 hover:text-indigo-200 text-xs font-bold transition-all cursor-pointer mr-2"
                   >
                     <Phone className="w-4 h-4 text-indigo-400" />
                     <span className="hidden sm:inline">Patient Lookup</span>
@@ -11317,7 +11317,7 @@ ${ttNotes}`
                     {currentUser.role || "Agent"}
                   </p>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center font-bold text-xs text-indigo-400 font-sans">
+                <div className="w-8 h-8 rounded-full bg-indigo-500/10 border border-transparent flex items-center justify-center font-bold text-xs text-indigo-400 font-sans">
                   {currentUser.name
                     ? currentUser.name
                         .split(" ")
@@ -11333,7 +11333,7 @@ ${ttNotes}`
             {/* Split Content structure */}
             <div className="flex-1 flex flex-col md:flex-row gap-6 md:gap-8">
               {/* Navigation / Sidebar Menu */}
-              <aside className="w-full md:w-64 border border-white/5 bg-transparent flex flex-col p-4 rounded-xl space-y-4">
+              <aside className="w-full md:w-64 border border-white/8 bg-transparent flex flex-col p-4 rounded-xl space-y-4">
                 {/* Egypt Local Time & 10th of Ramadan Weather */}
                 <div className="p-4 rounded-xl bg-white/[0.04] border border-cyan-500/15 space-y-3 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-indigo-500/5 opacity-40 pointer-events-none" />
@@ -11357,7 +11357,7 @@ ${ttNotes}`
                     </span>
                   </div>
 
-                  <div className="flex items-baseline justify-between py-1 border-y border-white/5">
+                  <div className="flex items-baseline justify-between py-1 border-y border-white/8">
                     <p className="text-2xl font-bold text-slate-100 font-sans tracking-tight">
                       {currentTime.toLocaleTimeString("en-US", {
                         timeZone: "Africa/Cairo",
@@ -11405,7 +11405,7 @@ ${ttNotes}`
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-16 h-12 bg-white/[0.03] rounded-xl flex items-center justify-center border border-cyan-500/20 hover:border-cyan-500/40 transition-all shrink-0 relative overflow-hidden">
+                      <div className="w-16 h-12 bg-white/[0.03] rounded-xl flex items-center justify-center border border-transparent hover:border-transparent transition-all shrink-0 relative overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-indigo-500/5 opacity-40 pointer-events-none" />
                         <CoolLogo className="w-14 h-10" showText={false} />
                       </div>
@@ -11434,7 +11434,7 @@ ${ttNotes}`
                           );
                           if (nextState) triggerNotificationAlert();
                         }}
-                        className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-center w-10 h-10 shadow-sm ${ soundEnabled ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-500/30" : "bg-rose-500/10 border-rose-500/20 text-rose-400 hover:bg-rose-500/20 hover:border-rose-500/30" }`}
+                        className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-center w-10 h-10 ${ soundEnabled ? "bg-indigo-500/10 border-transparent text-indigo-400 hover:bg-indigo-500/10 hover:border-transparent" : "bg-rose-500/10 border-transparent text-rose-400 hover:bg-rose-500/10 hover:border-transparent" }`}
                         title={
                           soundEnabled
                             ? "Mute Notification Sounds"
@@ -11452,7 +11452,7 @@ ${ttNotes}`
                       <button
                         id="notif-bell-btn"
                         onClick={() => setIsNotifDrawerOpen(true)}
-                        className="relative p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-slate-300 hover:text-slate-100 cursor-pointer group flex items-center justify-center w-10 h-10"
+                        className="relative p-2.5 rounded-xl bg-white/5 border border-white/8 hover:bg-white/10 hover:border-white/15 transition-all text-slate-300 hover:text-slate-100 cursor-pointer group flex items-center justify-center w-10 h-10"
                         title="Real-time Alerts Inbox"
                       >
                         <Bell className="w-4 h-4" />
@@ -11471,7 +11471,7 @@ ${ttNotes}`
                   <div className="p-4 rounded-xl bg-white/[0.04] border border-cyan-500/15 space-y-4 relative overflow-hidden">
                     <div className="flex items-center gap-3 relative">
                       <div className="relative shrink-0">
-                        <div className="w-10 h-10 rounded-full bg-[#1c1c2e] border border-cyan-500/20 flex items-center justify-center text-xs font-bold tracking-widest font-mono text-cyan-400">
+                        <div className="w-10 h-10 rounded-full bg-[#1c1c2e] border border-transparent flex items-center justify-center text-xs font-bold tracking-widest font-mono text-cyan-400">
                           {(currentUser?.name || "")
                             .split(".")
                             .map((n) => n[0])
@@ -11509,7 +11509,7 @@ ${ttNotes}`
                     </div>
 
                     {supportAssignments[currentUser.name] && (
-                      <div className="text-xs bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 p-2.5 rounded-xl space-y-1 font-sans">
+                      <div className="text-xs bg-indigo-500/10 border border-transparent text-indigo-200 p-2.5 rounded-xl space-y-1 font-sans">
                         <p className="font-bold uppercase tracking-widest text-indigo-300 text-xs">
                           Support Assigned By
                         </p>
@@ -11536,7 +11536,7 @@ ${ttNotes}`
                           ))) && (
                         <button
                           onClick={handleInstallClick}
-                          className="w-full px-3 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-indigo-500/25 text-indigo-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                          className="w-full px-3 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-transparent text-indigo-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                         >
                           <Download className="w-3.5 h-3.5" />
                           Download Desktop App
@@ -11578,7 +11578,7 @@ ${ttNotes}`
                           window.location.reload();
                         }, 1000);
                       }}
-                      className="w-full px-3 py-2 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/20 hover:to-teal-500/20 border border-emerald-500/25 text-emerald-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-2"
+                      className="w-full px-3 py-2 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/20 hover:to-teal-500/20 border border-transparent text-emerald-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-2"
                     >
                       <RefreshCw className="w-3.5 h-3.5 animate-pulse" />
                       Update App (Force Sync)
@@ -11589,7 +11589,7 @@ ${ttNotes}`
                     currentUser?.name?.toLowerCase() === "sobhyhesham00@gmail.com" ? (
                       <button
                         onClick={() => setIsResetPasswordModalOpen(true)}
-                        className="w-full px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/10 text-blue-300 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-2"
+                        className="w-full px-3 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 border border-blue-500/10 text-blue-300 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-2"
                       >
                         <Key className="w-3.5 h-3.5" />
                         Reset Password
@@ -11599,7 +11599,7 @@ ${ttNotes}`
                     <button
                       type="button"
                       onClick={() => setIsSynqVersionModalOpen(true)}
-                      className="w-full px-3 py-2 bg-cyan-500/10 hover:bg-cyan-500/15 border border-cyan-500/20 hover:border-cyan-500/40 text-cyan-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-3.5 cursor-pointer mb-2 relative group overflow-hidden"
+                      className="w-full px-3 py-2 bg-cyan-500/10 hover:bg-cyan-500/10 border border-transparent hover:border-transparent text-cyan-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-3.5 cursor-pointer mb-2 relative group overflow-hidden"
                     >
                       <div className="relative w-2.5 h-2.5 flex items-center justify-center shrink-0">
                         <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 z-10 animate-pulse" />
@@ -11625,7 +11625,7 @@ ${ttNotes}`
                     <button
                       id="signout-button"
                       onClick={handleSignOut}
-                      className="w-full px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/10 text-rose-300 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-2"
+                      className="w-full px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/10 border border-rose-500/10 text-rose-300 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-2"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       Sign Out Portal
@@ -11671,7 +11671,7 @@ ${ttNotes}`
                             },
                           );
                         }}
-                        className="w-full px-3 py-1.5 bg-red-950 border border-red-500/50 text-red-200 hover:bg-red-900 rounded-xl text-xs font-bold transition-all mt-2 uppercase cursor-pointer"
+                        className="w-full px-3 py-1.5 bg-red-950 border border-transparent text-red-200 hover:bg-red-900 rounded-xl text-xs font-bold transition-all mt-2 uppercase cursor-pointer"
                       >
                         Factory Reset All Data
                       </button>
@@ -11685,7 +11685,7 @@ ${ttNotes}`
                     const buildBtn = (id, icon, label, bgColors = "") => {
                       const isActive = activeTab === id;
                       const baseClass = isActive
-                        ? `${bgColors} text-white shadow-sm scale-[1.02] font-bold border`
+                        ? `${bgColors} text-white scale-[1.02] font-bold border`
                         : "border-transparent text-slate-300 hover:bg-white/20 /60 hover:text-white border font-medium hover:scale-[1.01]";
 
                       return (
@@ -11722,13 +11722,13 @@ ${ttNotes}`
                             "global-dashboard",
                             <LayoutDashboard className="w-4 h-4 text-emerald-400" />,
                             "Daily Team Leader View",
-                            "bg-emerald-500/20 border-emerald-500/30 text-emerald-100",
+                            "bg-emerald-500/10 border-transparent text-emerald-100",
                           )}
                           {buildBtn(
                             "attendance",
                             <UserCheck className="w-4 h-4 text-indigo-400" />,
                             "Daily Attendance",
-                            "bg-indigo-500/20 border-indigo-500/30 text-indigo-100",
+                            "bg-indigo-500/10 border-transparent text-indigo-100",
                           )}
                           {buildBtn(
                             "tl-announcements",
@@ -11740,38 +11740,38 @@ ${ttNotes}`
                             "inquiries",
                             <HelpCircle className="w-4 h-4 text-amber-500" />,
                             "General Inquiries",
-                            "bg-amber-500/20 border-amber-500/30 text-amber-100",
+                            "bg-amber-500/10 border-transparent text-amber-100",
                           )}
                           {buildBtn(
                             "tabby-tamara",
                             <Wallet className="w-4 h-4 text-rose-500" />,
                             "Tabby & Tamara Requests",
-                            "bg-rose-500/20 border-rose-500/30 text-rose-100",
+                            "bg-rose-500/10 border-transparent text-rose-100",
                           )}
                           {buildBtn(
                             "complaints",
                             <AlertTriangle className="w-4 h-4 text-red-500" />,
                             "Complaints",
-                            "bg-red-500/20 border-red-500/30 text-red-100",
+                            "bg-red-500/10 border-transparent text-red-100",
                           )}
                           {buildBtn(
                             "client-comms",
                             <MessageSquare className="w-4 h-4 text-sky-500" />,
                             "Client Comm Requests",
-                            "bg-sky-500/20 border-sky-500/30 text-sky-100",
+                            "bg-sky-500/10 border-transparent text-sky-100",
                           )}
                           {buildBtn(
                             "cases",
                             <History className="w-4 h-4 text-orange-500" />,
                             "My Cases",
-                            "bg-orange-500/20 border-orange-500/30 text-orange-100",
+                            "bg-orange-500/10 border-transparent text-orange-100",
                           )}
                           {currentUser.role === "tl" &&
                             buildBtn(
                               "agent-submissions",
                               <Layers className="w-4 h-4 text-emerald-400" />,
                               "Agent Submissions",
-                              "bg-emerald-500/20 border-emerald-500/30 text-emerald-100",
+                              "bg-emerald-500/10 border-transparent text-emerald-100",
                             )}
 
                           {groupTitle(
@@ -11783,7 +11783,7 @@ ${ttNotes}`
                             "profile",
                             <UserIcon className="w-4 h-4 text-pink-400" />,
                             "My Profile & Workspace",
-                            "bg-indigo-500/20 border-indigo-500/30 text-indigo-100",
+                            "bg-indigo-500/10 border-transparent text-indigo-100",
                           )}
                           {buildBtn(
                             "dashboard",
@@ -11813,13 +11813,13 @@ ${ttNotes}`
                             "schedules",
                             <Calendar className="w-4 h-4" />,
                             "Schedules & Roster",
-                            "bg-blue-500/20 border-blue-500/30 text-blue-100",
+                            "bg-blue-500/10 border-transparent text-blue-100",
                           )}
                           {buildBtn(
                             "overview",
                             <UserCheck className="w-4 h-4" />,
                             "Approvals & Leave Console",
-                            "bg-blue-500/20 border-blue-500/30 text-blue-100",
+                            "bg-blue-500/10 border-transparent text-blue-100",
                           )}
 
                           {groupTitle("System Controls", "", "text-slate-400")}
@@ -11834,19 +11834,19 @@ ${ttNotes}`
                             "directory",
                             <Users className="w-4 h-4 text-cyan-600" />,
                             "Headcount & Directory",
-                            "bg-slate-500/20 border-slate-500/30 text-slate-200",
+                            "bg-slate-500/10 border-transparent text-slate-200",
                           )}
                           {buildBtn(
                             "tl-feedback",
                             <MessageCircle className="w-4 h-4 text-pink-500" />,
                             "Director Hub",
-                            "bg-pink-500/20 border-pink-500/30 text-pink-100",
+                            "bg-pink-500/10 border-transparent text-pink-100",
                           )}
                           {buildBtn(
                             "qa-scorecard",
                             <CheckCircle2 className="w-4 h-4 text-green-500" />,
                             "QA Scorecards",
-                            "bg-green-500/20 border-green-500/30 text-green-100",
+                            "bg-green-500/10 border-transparent text-green-100",
                           )}
                           {buildBtn(
                             "kpi-calculator",
@@ -11881,43 +11881,43 @@ ${ttNotes}`
                             "inquiries",
                             <HelpCircle className="w-4 h-4 text-amber-500" />,
                             "General Inquiries",
-                            "bg-amber-500/20 border-amber-500/30 text-amber-100",
+                            "bg-amber-500/10 border-transparent text-amber-100",
                           )}
                           {buildBtn(
                             "tabby-tamara",
                             <Wallet className="w-4 h-4 text-rose-500" />,
                             "Tabby & Tamara Requests",
-                            "bg-rose-500/20 border-rose-500/30 text-rose-100",
+                            "bg-rose-500/10 border-transparent text-rose-100",
                           )}
                           {buildBtn(
                             "complaints",
                             <AlertTriangle className="w-4 h-4 text-red-500" />,
                             "Complaints",
-                            "bg-red-500/20 border-red-500/30 text-red-100",
+                            "bg-red-500/10 border-transparent text-red-100",
                           )}
                           {buildBtn(
                             "client-comms",
                             <MessageSquare className="w-4 h-4 text-sky-500" />,
                             "Client Comm Requests",
-                            "bg-sky-500/20 border-sky-500/30 text-sky-100",
+                            "bg-sky-500/10 border-transparent text-sky-100",
                           )}
                           {buildBtn(
                             "cases",
                             <History className="w-4 h-4 text-orange-500" />,
                             "My Cases",
-                            "bg-orange-500/20 border-orange-500/30 text-orange-100",
+                            "bg-orange-500/10 border-transparent text-orange-100",
                           )}
                           {buildBtn(
                             "my-submissions",
                             <ClipboardList className="w-4 h-4 text-emerald-400" />,
                             "My Submissions",
-                            "bg-emerald-500/20 border-emerald-500/30 text-emerald-100",
+                            "bg-emerald-500/10 border-transparent text-emerald-100",
                           )}
                           {buildBtn(
                             "qa-scorecard",
                             <CheckCircle2 className="w-4 h-4 text-green-500" />,
                             "My QA Scorecards",
-                            "bg-green-500/20 border-green-500/30 text-green-100",
+                            "bg-green-500/10 border-transparent text-green-100",
                           )}
                           {buildBtn(
                             "kpi-calculator",
@@ -11935,7 +11935,7 @@ ${ttNotes}`
                             "profile",
                             <UserIcon className="w-4 h-4 text-pink-400" />,
                             "My Profile & Workspace",
-                            "bg-indigo-500/20 border-indigo-500/30 text-indigo-100",
+                            "bg-indigo-500/10 border-transparent text-indigo-100",
                           )}
                           {buildBtn(
                             "dashboard",
@@ -11959,19 +11959,19 @@ ${ttNotes}`
                             "schedules",
                             <Calendar className="w-4 h-4" />,
                             "My Schedule",
-                            "bg-blue-500/20 border-blue-500/30 text-blue-100",
+                            "bg-blue-500/10 border-transparent text-blue-100",
                           )}
                           {buildBtn(
                             "apply",
                             <PlusCircle className="w-4 h-4 text-emerald-400" />,
                             "Submit Leave / Swap",
-                            "bg-emerald-500/20 border-emerald-500/30 text-emerald-100",
+                            "bg-emerald-500/10 border-transparent text-emerald-100",
                           )}
                           {buildBtn(
                             "my-requests",
                             <GitPullRequest className="w-4 h-4" />,
                             "My Swap & Leave Requests",
-                            "bg-blue-500/20 border-blue-500/30 text-blue-100",
+                            "bg-blue-500/10 border-transparent text-blue-100",
                           )}
 
                           {groupTitle("Shared Goodies", "", "text-fuchsia-400")}
@@ -11979,7 +11979,7 @@ ${ttNotes}`
                             "tl-feedback",
                             <MessageCircle className="w-4 h-4 text-pink-500" />,
                             "TL Hub",
-                            "bg-pink-500/20 border-pink-500/30 text-pink-100",
+                            "bg-pink-500/10 border-transparent text-pink-100",
                           )}
                           {isGlobalAdminUser &&
                             buildBtn(
@@ -11995,7 +11995,7 @@ ${ttNotes}`
                 </nav>
 
                 {/* Mini Standalone Disclaimer block */}
-                <div className="mt-auto pt-4 border-t border-white/5 text-xs text-slate-400 space-y-2">
+                <div className="mt-auto pt-4 border-t border-white/8 text-xs text-slate-400 space-y-2">
                   <div className="flex items-center gap-1.5 text-indigo-300 font-semibold font-sans">
                     <Info className="w-3.5 h-3.5 text-indigo-400" /> STANDALONE
                     COMPLIANT
@@ -12068,14 +12068,14 @@ ${ttNotes}`
                           );
                           if (!hasAlerts) return null;
                           return (
-                            <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 flex flex-wrap gap-3 items-center mb-6">
+                            <div className="bg-red-500/10 border border-transparent rounded-xl p-4 flex flex-wrap gap-3 items-center mb-6">
                               <span className="text-red-400 font-bold text-xs uppercase tracking-wider flex items-center gap-1">
                                 <AlertTriangle className="w-4 h-4" /> Needs
                                 Attention
                               </span>
                               {staleSLA.inquiries > 0 && (
                                 <span
-                                  className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-xl text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all"
+                                  className="px-2 py-1 bg-amber-500/10 text-amber-300 rounded-xl text-xs font-bold cursor-pointer hover:bg-amber-500/10 transition-all"
                                   onClick={() => setActiveTab("inquiries")}
                                 >
                                   {staleSLA.inquiries} Inquiries Stale &gt;2h
@@ -12083,7 +12083,7 @@ ${ttNotes}`
                               )}
                               {staleSLA.ttPending > 0 && (
                                 <span
-                                  className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-xl text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all"
+                                  className="px-2 py-1 bg-amber-500/10 text-amber-300 rounded-xl text-xs font-bold cursor-pointer hover:bg-amber-500/10 transition-all"
                                   onClick={() => setActiveTab("tabby-tamara")}
                                 >
                                   {staleSLA.ttPending} TT Awaiting Confirm
@@ -12091,7 +12091,7 @@ ${ttNotes}`
                               )}
                               {staleSLA.ttOverdue > 0 && (
                                 <span
-                                  className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-xl text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all"
+                                  className="px-2 py-1 bg-amber-500/10 text-amber-300 rounded-xl text-xs font-bold cursor-pointer hover:bg-amber-500/10 transition-all"
                                   onClick={() => setActiveTab("tabby-tamara")}
                                 >
                                   {staleSLA.ttOverdue} TT Contact OVERDUE
@@ -12099,7 +12099,7 @@ ${ttNotes}`
                               )}
                               {staleSLA.complaints > 0 && (
                                 <span
-                                  className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-xl text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all"
+                                  className="px-2 py-1 bg-amber-500/10 text-amber-300 rounded-xl text-xs font-bold cursor-pointer hover:bg-amber-500/10 transition-all"
                                   onClick={() => setActiveTab("complaints")}
                                 >
                                   {staleSLA.complaints} Complaints &gt;8h Open
@@ -12107,7 +12107,7 @@ ${ttNotes}`
                               )}
                               {staleSLA.comms > 0 && (
                                 <span
-                                  className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-xl text-xs font-bold cursor-pointer hover:bg-amber-500/30 transition-all"
+                                  className="px-2 py-1 bg-amber-500/10 text-amber-300 rounded-xl text-xs font-bold cursor-pointer hover:bg-amber-500/10 transition-all"
                                   onClick={() => setActiveTab("client-comms")}
                                 >
                                   {staleSLA.comms} Comms Pending &gt;2h
@@ -12192,10 +12192,10 @@ ${ttNotes}`
                       <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="bg-indigo-600/10 border border-indigo-500/20 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 mb-4"
+                        className="bg-indigo-600/10 border border-transparent rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 mb-4"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 relative">
+                          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 relative">
                             <MessageSquare className="w-5 h-5" />
                             <div className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full animate-ping" />
                             <div className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full" />
@@ -12203,7 +12203,7 @@ ${ttNotes}`
                           <div className="text-left">
                             <h4 className="text-sm font-bold text-slate-100 flex items-center gap-2">
                               Communication Queue Active
-                              <span className="bg-rose-500/20 text-rose-300 text-xs px-2 py-0.5 rounded-full border border-rose-500/30 font-bold">
+                              <span className="bg-rose-500/10 text-rose-300 text-xs px-2 py-0.5 rounded-lg border border-transparent font-bold">
                                 {
                                   clientComms.filter(
                                     (c) =>
@@ -12242,7 +12242,7 @@ ${ttNotes}`
                             const secs = Math.floor((diff % 60000) / 1000);
 
                             return (
-                              <div className="text-center sm:text-right px-4 py-2 bg-transparent rounded-xl border border-white/5 flex-1 sm:flex-initial">
+                              <div className="text-center sm:text-right px-4 py-2 bg-transparent rounded-xl border border-white/8 flex-1 sm:flex-initial">
                                 <p className="text-xs text-slate-500 uppercase font-bold tracking-tighter">
                                   Queue Time (Oldest)
                                 </p>
@@ -12254,7 +12254,7 @@ ${ttNotes}`
                           })()}
                           <button
                             onClick={() => setActiveTab("client-comms")}
-                            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex-1 sm:flex-initial uppercase tracking-wider"
+                            className="px-6 py-2.5 bg-transparent border border-white/12 text-white hover:bg-white/5 text-white rounded-xl text-xs font-bold transition-all flex-1 sm:flex-initial uppercase tracking-wider"
                           >
                             Process Queue
                           </button>
@@ -12288,14 +12288,14 @@ ${ttNotes}`
                               <div
                                 key={inq.id}
                                 id={`inquiry-${inq.id}`}
-                                className="relative overflow-hidden p-5 rounded-2xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-indigo-950/40 via-purple-950/20 to-slate-950/80 border-indigo-500/30"
+                                className="relative overflow-hidden p-5 rounded-xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-indigo-950/40 via-purple-950/20 to-slate-950/80 border-transparent"
                               >
                                 {/* Glow indicator line */}
                                 <div className="absolute top-0 bottom-0 left-0 w-1 bg-gradient-to-b from-indigo-400 to-purple-500"></div>
 
                                 <div className="flex items-start gap-3.5 pl-1.5">
                                   <div
-                                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${inq.status === "sent" ? "bg-amber-500/10 border-amber-500/25 text-amber-400" : "bg-emerald-500/10 border-emerald-500/25 text-emerald-400"}`}
+                                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${inq.status === "sent" ? "bg-amber-500/10 border-transparent text-amber-400" : "bg-emerald-500/10 border-transparent text-emerald-400"}`}
                                   >
                                     {inq.status === "sent" ? (
                                       <Send className="w-4 h-4 animate-pulse" />
@@ -12305,7 +12305,7 @@ ${ttNotes}`
                                   </div>
                                   <div className="space-y-1">
                                     <div className="flex items-center gap-2">
-                                      <span className="text-xs font-mono uppercase tracking-wider bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-xl font-bold">
+                                      <span className="text-xs font-mono uppercase tracking-wider bg-transparent border border-white/12 text-white text-indigo-300 px-2 py-0.5 rounded-xl font-bold">
                                         Inquiry Update
                                       </span>
                                       <span className="text-xs text-slate-400">
@@ -12348,7 +12348,7 @@ ${ttNotes}`
 
                                 <button
                                   onClick={() => handleMarkInquirySeen(inq.id)}
-                                  className="px-4.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl cursor-pointer shadow-sm hover:brightness-105 transition-all text-center self-end sm:self-center shrink-0 active:scale-95"
+                                  className="px-4.5 py-2 bg-transparent border border-white/12 text-white hover:bg-white/5 text-white font-bold text-xs rounded-xl cursor-pointer hover:brightness-105 transition-all text-center self-end sm:self-center shrink-0 active:scale-95"
                                 >
                                   Mark as Read & Dismiss
                                 </button>
@@ -12381,21 +12381,21 @@ ${ttNotes}`
                             .map((req) => (
                               <div
                                 key={req.id}
-                                className="relative overflow-hidden p-5 rounded-2xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-amber-950/40 via-yellow-950/25 to-slate-950/80 border-amber-500/30"
+                                className="relative overflow-hidden p-5 rounded-xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-amber-950/40 via-yellow-950/25 to-slate-950/80 border-transparent"
                               >
                                 {/* Glow indicator line */}
                                 <div className="absolute top-0 bottom-0 left-0 w-1 bg-gradient-to-b from-amber-400 to-yellow-500"></div>
 
                                 <div className="flex items-start gap-3.5 pl-1.5 flex-1">
-                                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border bg-amber-500/10 border-amber-500/25 text-amber-400 animate-pulse mt-0.5">
+                                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border bg-amber-500/10 border-transparent text-amber-400 animate-pulse mt-0.5">
                                     <Wallet className="w-4 h-4" />
                                   </div>
                                   <div className="space-y-1 w-full text-left">
                                     <div className="flex flex-wrap items-center gap-2">
-                                      <span className="text-xs font-mono uppercase tracking-wider bg-amber-500/20 text-yellow-300 px-2 py-0.5 rounded-xl font-bold">
+                                      <span className="text-xs font-mono uppercase tracking-wider bg-amber-500/10 text-yellow-300 px-2 py-0.5 rounded-xl font-bold">
                                         Customer Contact Required
                                       </span>
-                                      <span className="text-xs text-emerald-400 font-bold uppercase bg-emerald-500/10 px-2 py-1.5 rounded border border-emerald-500/20">
+                                      <span className="text-xs text-emerald-400 font-bold uppercase bg-transparent border border-white/12 text-white px-2 py-1.5 rounded border border-transparent">
                                         Confirmed by {req.confirmedBy}
                                       </span>
                                       <span className="text-xs text-slate-400">
@@ -12475,21 +12475,21 @@ ${ttNotes}`
                             .map((comp) => (
                               <div
                                 key={comp.id}
-                                className="relative overflow-hidden p-5 rounded-2xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-rose-950/40 via-red-950/25 to-slate-950/80 border-rose-500/30"
+                                className="relative overflow-hidden p-5 rounded-xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-rose-950/40 via-red-950/25 to-slate-950/80 border-transparent"
                               >
                                 {/* Glow indicator line */}
                                 <div className="absolute top-0 bottom-0 left-0 w-1 bg-gradient-to-b from-rose-400 to-red-500"></div>
 
                                 <div className="flex items-start gap-3.5 pl-1.5 flex-1">
-                                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border bg-rose-500/10 border-rose-500/25 text-rose-400 animate-pulse mt-0.5">
+                                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border bg-rose-500/10 border-transparent text-rose-400 animate-pulse mt-0.5">
                                     <AlertTriangle className="w-4 h-4" />
                                   </div>
                                   <div className="space-y-1 w-full text-left">
                                     <div className="flex flex-wrap items-center gap-2">
-                                      <span className="text-xs font-mono uppercase tracking-wider bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded-xl font-bold">
+                                      <span className="text-xs font-mono uppercase tracking-wider bg-rose-500/10 text-rose-300 px-2 py-0.5 rounded-xl font-bold">
                                         Complaint Resolution & Contact Required
                                       </span>
-                                      <span className="text-xs text-amber-300 font-bold uppercase bg-amber-500/10 px-2 py-1.5 rounded border border-amber-500/20">
+                                      <span className="text-xs text-amber-300 font-bold uppercase bg-amber-500/10 px-2 py-1.5 rounded border border-transparent">
                                         TL Commented by {comp.tlHandledBy}
                                       </span>
                                       <span className="text-xs text-slate-400">
@@ -12505,7 +12505,7 @@ ${ttNotes}`
                                       </strong>{" "}
                                       has been processed by the TL!
                                       <br />
-                                      <span className="text-amber-300 font-semibold block mt-1.5 bg-transparent p-2.5 rounded-xl border border-white/5">
+                                      <span className="text-amber-300 font-semibold block mt-1.5 bg-transparent p-2.5 rounded-xl border border-white/8">
                                         TL Comment: "{comp.tlComment}"
                                       </span>
                                     </p>
@@ -12538,11 +12538,11 @@ ${ttNotes}`
                       partnerPendingSwaps.length > 0 && (
                         <div
                           id="swaps-awaiting-agreement-panel"
-                          className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/25 p-5 sm:p-6 rounded-2xl flex flex-col space-y-4 animate-fade-in relative overflow-hidden"
+                          className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-transparent p-5 sm:p-6 rounded-xl flex flex-col space-y-4 animate-fade-in relative overflow-hidden"
                         >
                           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500"></div>
                           <div className="flex items-center gap-2.5">
-                            <div className="w-9 h-9 bg-amber-500/10 border border-amber-500/25 rounded-xl flex items-center justify-center">
+                            <div className="w-9 h-9 bg-amber-500/10 border border-transparent rounded-xl flex items-center justify-center">
                               <RefreshCw
                                 className="w-5 h-5 text-amber-400 animate-spin"
                                 style={{ animationDuration: "6s" }}
@@ -12563,7 +12563,7 @@ ${ttNotes}`
                             {partnerPendingSwaps.map((req) => (
                               <div
                                 key={req.id}
-                                className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-white/10 transition-all"
+                                className="p-4 bg-white/5 border border-white/8 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-white/8 transition-all"
                               >
                                 <div className="space-y-1">
                                   <p className="text-sm font-semibold text-slate-100">
@@ -12597,7 +12597,7 @@ ${ttNotes}`
                                   </div>
                                 </div>
 
-                                <div className="flex flex-col sm:flex-row items-center gap-2.5 self-stretch sm:self-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-white/5 w-full sm:w-auto">
+                                <div className="flex flex-col sm:flex-row items-center gap-2.5 self-stretch sm:self-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-white/8 w-full sm:w-auto">
                                   <SlideToConfirm
                                     label="Slide to Agree"
                                     confirmedLabel="Agreed!"
@@ -12629,7 +12629,7 @@ ${ttNotes}`
 
                     {activeTab === "profile" && currentUser && (
                       <div className="space-y-6 max-w-4xl mx-auto w-full animate-fade-in relative z-10 p-4 sm:p-0 text-left">
-                        <div className="bg-white/10 /80 border border-white/10 p-6 sm:p-8 rounded-2xl relative overflow-hidden">
+                        <div className="bg-white/10 /80 border border-white/8 p-6 sm:p-8 rounded-xl relative overflow-hidden">
                           <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
                           <div className="flex flex-col sm:flex-row items-center gap-6 mb-8">
                             <div className="relative group">
@@ -12637,10 +12637,10 @@ ${ttNotes}`
                                 <img
                                   src={currentUser.avatarUrl}
                                   alt="Avatar"
-                                  className="w-24 h-24 rounded-full object-cover border-4 border-slate-700"
+                                  className="w-24 h-24 rounded-full object-cover border-4 border-white/8"
                                 />
                               ) : (
-                                <div className="w-24 h-24 rounded-full bg-indigo-500/20 text-indigo-400 border-4 border-slate-700 flex items-center justify-center text-3xl font-bold font-sans uppercase">
+                                <div className="w-24 h-24 rounded-full bg-indigo-500/10 text-indigo-400 border-4 border-white/8 flex items-center justify-center text-3xl font-bold font-sans uppercase">
                                   {formatAgentName(currentUser.name).substring(
                                     0,
                                     2,
@@ -12763,7 +12763,7 @@ ${ttNotes}`
                                       toast.success("Personal phone updated!");
                                     }
                                   }}
-                                  className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-slate-300 hover:bg-white/10 transition-all cursor-pointer"
+                                  className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 bg-white/5 border border-white/8 rounded-xl text-slate-300 hover:bg-white/10 transition-all cursor-pointer"
                                 >
                                   Edit Phone
                                 </button>
@@ -12797,7 +12797,7 @@ ${ttNotes}`
                                       toast.success("Contact email updated!");
                                     }
                                   }}
-                                  className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-slate-300 hover:bg-white/10 transition-all cursor-pointer"
+                                  className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 bg-white/5 border border-white/8 rounded-xl text-slate-300 hover:bg-white/10 transition-all cursor-pointer"
                                 >
                                   Edit Email
                                 </button>
@@ -12807,7 +12807,7 @@ ${ttNotes}`
                                     setSoundEnabled(nextState);
                                     if (nextState) triggerNotificationAlert();
                                   }}
-                                  className={`text-xs font-bold uppercase tracking-wider px-3 py-1.5 border rounded-xl transition-all cursor-pointer ${soundEnabled ? "bg-indigo-500/20 border-indigo-500/30 text-indigo-300" : "bg-white/10 /80 border-slate-700 text-slate-500 hover:text-slate-300"}`}
+                                  className={`text-xs font-bold uppercase tracking-wider px-3 py-1.5 border rounded-xl transition-all cursor-pointer ${soundEnabled ? "bg-indigo-500/10 border-transparent text-indigo-300" : "bg-white/10 /80 border-white/8 text-slate-500 hover:text-slate-300"}`}
                                 >
                                   {soundEnabled ? " Sound: ON" : " Sound: OFF"}
                                 </button>
@@ -12816,17 +12816,17 @@ ${ttNotes}`
                           </div>
 
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 relative overflow-hidden group">
+                            <div className="bg-white/5 border border-white/8 rounded-xl p-5 relative overflow-hidden group">
                               <h3 className="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">
                                 My Personal Inbox & Notes
                               </h3>
                               <textarea
-                                className="w-full h-32 bg-white/5 border border-white/20 text-slate-100 p-3 rounded-xl focus:border-indigo-500 outline-none resize-none text-sm font-medium"
+                                className="w-full h-32 bg-white/5 border border-white/15 text-slate-100 p-3 rounded-xl focus:border-indigo-500 outline-none resize-none text-sm font-medium"
                                 placeholder="Write anything... scratchpad... thoughts... "
                               ></textarea>
                             </div>
 
-                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 relative overflow-hidden flex flex-col h-full">
+                            <div className="bg-white/5 border border-white/8 rounded-xl p-5 relative overflow-hidden flex flex-col h-full">
                               <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
                                   ⏱ Smart To-Do List
@@ -12836,7 +12836,7 @@ ${ttNotes}`
                                   onChange={(e) =>
                                     setTodoFilter(e.target.value as any)
                                   }
-                                  className="bg-white/5 border border-white/10 text-xs font-bold text-slate-300 rounded px-2 py-1 outline-none"
+                                  className="bg-white/5 border border-white/8 text-xs font-bold text-slate-300 rounded px-2 py-1 outline-none"
                                 >
                                   <option value="All">All Categories</option>
                                   <option value="Work">Work</option>
@@ -12885,11 +12885,11 @@ ${ttNotes}`
                                     type="text"
                                     placeholder="I need to..."
                                     required
-                                    className="flex-1 bg-white/5 border border-white/20 text-slate-100 px-3 py-2 text-sm rounded-xl outline-none focus:border-indigo-500"
+                                    className="flex-1 bg-white/5 border border-white/15 text-slate-100 px-3 py-2 text-sm rounded-xl outline-none focus:border-indigo-500"
                                   />
                                   <select
                                     name="category"
-                                    className="bg-white/5 border border-white/20 text-slate-100 px-2 text-xs rounded-xl outline-none focus:border-indigo-500"
+                                    className="bg-white/5 border border-white/15 text-slate-100 px-2 text-xs rounded-xl outline-none focus:border-indigo-500"
                                   >
                                     <option value="Work">Work</option>
                                     <option value="Personal">Personal</option>
@@ -12901,11 +12901,11 @@ ${ttNotes}`
                                     placeholder="Mins?"
                                     title="Remind in X mins"
                                     min="1"
-                                    className="w-20 bg-white/5 border border-white/20 text-slate-100 px-2 py-2 text-sm rounded-xl outline-none focus:border-indigo-500 text-center"
+                                    className="w-20 bg-white/5 border border-white/15 text-slate-100 px-2 py-2 text-sm rounded-xl outline-none focus:border-indigo-500 text-center"
                                   />
                                   <button
                                     type="submit"
-                                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl transition-colors font-bold shadow-sm"
+                                    className="bg-transparent border border-white/12 text-white hover:bg-white/5 text-white px-3 py-2 rounded-xl transition-colors font-bold"
                                   >
                                     +
                                   </button>
@@ -12932,7 +12932,7 @@ ${ttNotes}`
                                     .map((t) => (
                                       <div
                                         key={t.id}
-                                        className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${t.isCompleted ? "bg-white/10 /30 border-slate-700/30 opacity-60" : "bg-white/10 /80 border-slate-700 -sm"}`}
+                                        className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${t.isCompleted ? "bg-white/10 /30 border-white/8/30 opacity-60" : "bg-white/10 /80 border-white/8 -sm"}`}
                                       >
                                         <input
                                           type="checkbox"
@@ -12961,7 +12961,7 @@ ${ttNotes}`
                                             </p>
                                             {t.category && (
                                               <span
-                                                className={`text-xs px-1.5 py-0.5 rounded-full font-bold uppercase ${t.category === "Urgent" ? "bg-rose-500/20 text-rose-300" : t.category === "Work" ? "bg-indigo-500/20 text-indigo-300" : "bg-emerald-500/20 text-emerald-300"}`}
+                                                className={`text-xs px-1.5 py-0.5 rounded-lg font-bold uppercase ${t.category === "Urgent" ? "bg-rose-500/10 text-rose-300" : t.category === "Work" ? "bg-indigo-500/10 text-indigo-300" : "bg-emerald-500/10 text-emerald-300"}`}
                                               >
                                                 {t.category}
                                               </span>
@@ -13002,9 +13002,9 @@ ${ttNotes}`
 
                           {/* Activity & Data Vault Section */}
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-                            <div className="bg-slate-900/40 /40 rounded-2xl border border-white/5 p-6">
+                            <div className="bg-slate-900/40 /40 rounded-xl border border-white/8 p-6">
                               <div className="flex items-center gap-4 mb-6">
-                                <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                                <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-transparent flex items-center justify-center text-indigo-400">
                                   <Activity className="w-6 h-6" />
                                 </div>
                                 <div>
@@ -13069,7 +13069,7 @@ ${ttNotes}`
                                       toast.error("Failed to generate backup.");
                                     }
                                   }}
-                                  className="w-full mt-4 flex items-center justify-center gap-2 p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 transition-all text-indigo-300 font-bold text-sm"
+                                  className="w-full mt-4 flex items-center justify-center gap-2 p-3 rounded-xl bg-indigo-500/10 border border-transparent hover:bg-indigo-500/10 transition-all text-indigo-300 font-bold text-sm"
                                 >
                                   <FileText className="w-4 h-4" /> Export Device
                                   Backup
@@ -13280,10 +13280,10 @@ ${ttNotes}`
                           return (
                             <>
                               {/* NEW LOGIN STYLE REMINDER BANNER */}
-                              <div className="bg-gradient-to-r from-indigo-500/10 to-blue-500/10 border border-indigo-500/20 rounded-2xl p-5 relative overflow-hidden">
+                              <div className="bg-gradient-to-r from-indigo-500/10 to-blue-500/10 border border-transparent rounded-xl p-5 relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
                                 <div className="flex flex-col sm:flex-row items-start gap-4">
-                                  <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
+                                  <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-transparent flex items-center justify-center shrink-0">
                                     <Info className="w-5 h-5 text-indigo-400" />
                                   </div>
                                   <div className="text-left space-y-1">
@@ -13300,13 +13300,13 @@ ${ttNotes}`
                                       <span className="text-xs uppercase tracking-widest text-slate-400 font-bold">
                                         Your Login ID:
                                       </span>
-                                      <code className="px-2.5 py-1 bg-white/5 border border-white/10 rounded-xl text-xs font-mono text-cyan-300">
+                                      <code className="px-2.5 py-1 bg-white/5 border border-white/8 rounded-xl text-xs font-mono text-cyan-300">
                                         first_letter.last_name
                                       </code>
                                       <span className="text-xs text-slate-400 font-semibold">
                                         • e.g., Hesham Sobhy enters
                                       </span>
-                                      <code className="px-2 py-0.5 bg-white/5 border border-white/10 rounded-xl text-xs font-mono text-amber-300 font-bold">
+                                      <code className="px-2 py-0.5 bg-white/5 border border-white/8 rounded-xl text-xs font-mono text-amber-300 font-bold">
                                         h.sobhy
                                       </code>
                                     </div>
@@ -13319,13 +13319,13 @@ ${ttNotes}`
                               </div>
 
                               {/* View Mode Switching Tab Toggles */}
-                              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/5 border border-white/10 p-2.5 rounded-2xl select-none">
-                                <div className="flex bg-white/[0.04] p-1 rounded-2xl border border-white/5 w-full sm:w-auto">
+                              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/5 border border-white/8 p-2.5 rounded-xl select-none">
+                                <div className="flex bg-white/[0.04] p-1 rounded-xl border border-white/8 w-full sm:w-auto">
                                   <button
                                     onClick={() =>
                                       setDashboardViewMode("personal")
                                     }
-                                    className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${ dashboardViewMode === "personal" ? "bg-gradient-to-r from-indigo-500/20 to-indigo-500/10 text-slate-100 border border-indigo-500/40 font-bold " : "text-slate-400 hover:text-slate-100 hover:bg-white/20 " }`}
+                                    className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${ dashboardViewMode === "personal" ? "bg-gradient-to-r from-indigo-500/20 to-indigo-500/10 text-slate-100 border border-transparent font-bold " : "text-slate-400 hover:text-slate-100 hover:bg-white/20 " }`}
                                   >
                                     <UserIcon className="w-3.5 h-3.5 text-cyan-400" />
                                     My Performance Dashboard
@@ -13339,7 +13339,7 @@ ${ttNotes}`
                                       }
                                       setDashboardViewMode("team");
                                     }}
-                                    className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${ dashboardViewMode === "team" ? "bg-gradient-to-r from-indigo-500/20 to-indigo-500/10 text-slate-100 border border-indigo-500/40 font-bold " : "text-slate-400 hover:text-slate-100 hover:bg-white/20 " }`}
+                                    className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${ dashboardViewMode === "team" ? "bg-gradient-to-r from-indigo-500/20 to-indigo-500/10 text-slate-100 border border-transparent font-bold " : "text-slate-400 hover:text-slate-100 hover:bg-white/20 " }`}
                                   >
                                     <Users className="w-3.5 h-3.5 text-indigo-400" />
                                     Team Daily Dashboard
@@ -13347,7 +13347,7 @@ ${ttNotes}`
                                 </div>
 
                                 {dashboardViewMode === "personal" && (
-                                  <div className="flex bg-white/[0.04] p-1 rounded-2xl border border-white/5 w-full sm:w-auto justify-between">
+                                  <div className="flex bg-white/[0.04] p-1 rounded-xl border border-white/8 w-full sm:w-auto justify-between">
                                     {(
                                       ["daily", "weekly", "monthly"] as const
                                     ).map((tab) => (
@@ -13356,7 +13356,7 @@ ${ttNotes}`
                                         onClick={() =>
                                           setAgentDashboardTab(tab)
                                         }
-                                        className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${ agentDashboardTab === tab ? "bg-indigo-500 text-white shadow-sm font-bold" : "text-slate-400 hover:text-slate-100 hover:bg-white/20 " }`}
+                                        className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${ agentDashboardTab === tab ? "bg-indigo-500 text-white font-bold" : "text-slate-400 hover:text-slate-100 hover:bg-white/20 " }`}
                                       >
                                         {tab}
                                       </button>
@@ -13440,7 +13440,7 @@ ${ttNotes}`
                                       myComms.length >= 10;
 
                                     return (
-                                      <div className="bg-gradient-to-r from-slate-900 via-[#18182b] to-indigo-950/30 border border-indigo-500/20 rounded-2xl p-5 sm:p-6 space-y-4 text-left font-sans">
+                                      <div className="bg-gradient-to-r from-slate-900 via-[#18182b] to-indigo-950/30 border border-transparent rounded-xl p-5 sm:p-6 space-y-4 text-left font-sans">
                                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                           <div className="space-y-1">
                                             <div className="flex items-center gap-2">
@@ -13456,7 +13456,7 @@ ${ttNotes}`
                                               indicators
                                             </p>
                                           </div>
-                                          <div className="flex items-center gap-2 bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/25">
+                                          <div className="flex items-center gap-2 bg-transparent border border-white/12 text-white px-3.5 py-1.5 rounded-lg border border-transparent">
                                             <span className="text-xs font-bold text-indigo-300 font-mono tracking-wider">
                                               LEVEL{" "}
                                               {!isNaN(agentLevel)
@@ -13469,7 +13469,7 @@ ${ttNotes}`
 
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 xl:gap-6 pt-2 font-sans">
                                           {/* Level Tracker */}
-                                          <div className="bg-transparent p-4 rounded-2xl border border-white/5 space-y-3.5 flex flex-col justify-between">
+                                          <div className="bg-transparent p-4 rounded-xl border border-white/8 space-y-3.5 flex flex-col justify-between">
                                             <div className="flex justify-between items-center">
                                               <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">
                                                 Level Upgrade Status
@@ -13480,7 +13480,7 @@ ${ttNotes}`
                                               </span>
                                             </div>
                                             <div className="space-y-1">
-                                              <div className="w-full h-3 rounded-full bg-white/5 p-0.5 border border-white/5 overflow-hidden">
+                                              <div className="w-full h-3 rounded-full bg-white/5 p-0.5 border border-white/8 overflow-hidden">
                                                 <div
                                                   style={{
                                                     width: `${!isNaN(levelProgress) ? levelProgress : 0}%`,
@@ -13517,7 +13517,7 @@ ${ttNotes}`
                                           </div>
 
                                           {/* Achievement Badges Room */}
-                                          <div className="bg-transparent p-4 rounded-2xl border border-white/5 space-y-2.5">
+                                          <div className="bg-transparent p-4 rounded-xl border border-white/8 space-y-2.5">
                                             <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">
                                               Unlocked Badges
                                             </span>
@@ -13538,7 +13538,7 @@ ${ttNotes}`
 
                                               {isGrandmasterResovler ? (
                                                 <span
-                                                  className="px-2.5 py-1 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5"
+                                                  className="px-2.5 py-1 bg-rose-500/10 border border-transparent text-rose-400 text-xs font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5"
                                                   title="Handled more than 25 ticket resolutions in total."
                                                 >
                                                   <Activity className="w-3 h-3 text-rose-400" />{" "}
@@ -13555,7 +13555,7 @@ ${ttNotes}`
 
                                               {isTeamCommunicator ? (
                                                 <span
-                                                  className="px-2.5 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5"
+                                                  className="px-2.5 py-1 bg-cyan-500/10 border border-transparent text-cyan-300 text-xs font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5"
                                                   title="Registered communication requests"
                                                 >
                                                   <MessageSquare className="w-3 h-3 text-cyan-400" />{" "}
@@ -13573,7 +13573,7 @@ ${ttNotes}`
                                           </div>
 
                                           {/* Instant Stats overview Card */}
-                                          <div className="bg-transparent p-4 rounded-2xl border border-white/5 flex items-center justify-between font-sans">
+                                          <div className="bg-transparent p-4 rounded-xl border border-white/8 flex items-center justify-between font-sans">
                                             <div className="space-y-0.5 text-left">
                                               <span className="text-xs text-indigo-300 font-bold uppercase tracking-wider font-mono">
                                                 Operations Badge Rank
@@ -13792,7 +13792,7 @@ ${ttNotes}`
 
                                       return (
                                         <div className="space-y-6">
-                                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-5">
+                                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/5 border border-white/8 rounded-xl p-5">
                                             <div>
                                               <h2 className="text-xl font-bold text-slate-100 font-sans">
                                                 My Daily Work Dashboard
@@ -13805,7 +13805,7 @@ ${ttNotes}`
                                                 </strong>
                                               </p>
                                             </div>
-                                            <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-2xl p-1 self-stretch sm:self-auto justify-between">
+                                            <div className="flex items-center gap-1.5 bg-white/5 border border-white/8 rounded-xl p-1 self-stretch sm:self-auto justify-between">
                                               <button
                                                 onClick={() => {
                                                   const d = new Date(
@@ -13849,7 +13849,7 @@ ${ttNotes}`
                                           </div>
 
                                           <div className="grid grid-cols-1 md:grid-cols-12 gap-5 animate-fade-in">
-                                            <div className="md:col-span-4 bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+                                            <div className="md:col-span-4 bg-white/5 border border-white/8 rounded-xl p-6 flex flex-col items-center justify-center text-center">
                                               <span className="text-xs font-bold uppercase text-indigo-300 tracking-wider mb-4">
                                                 Daily Resolve Ratio
                                               </span>
@@ -13944,11 +13944,11 @@ ${ttNotes}`
                                                   duration: 0.35,
                                                   ease: "easeOut",
                                                 }}
-                                                className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between hover:bg-white/10 transition-colors"
+                                                className="p-4 bg-white/5 border border-white/8 rounded-xl flex flex-col justify-between hover:bg-white/10 transition-colors"
                                               >
                                                 <div className="flex justify-between items-center text-indigo-400">
                                                   <HelpCircle className="w-4 h-4" />
-                                                  <span className="text-xs font-sans bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded text-indigo-300">
+                                                  <span className="text-xs font-sans bg-transparent border border-white/12 text-white border border-transparent px-1.5 py-0.5 rounded text-indigo-300">
                                                     Inquiries
                                                   </span>
                                                 </div>
@@ -13978,11 +13978,11 @@ ${ttNotes}`
                                                   ease: "easeOut",
                                                   delay: 0.05,
                                                 }}
-                                                className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between hover:bg-white/10 transition-colors"
+                                                className="p-4 bg-white/5 border border-white/8 rounded-xl flex flex-col justify-between hover:bg-white/10 transition-colors"
                                               >
                                                 <div className="flex justify-between items-center text-emerald-400">
                                                   <Wallet className="w-4 h-4" />
-                                                  <span className="text-xs font-sans bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded text-emerald-300">
+                                                  <span className="text-xs font-sans bg-transparent border border-white/12 text-white border border-transparent px-1.5 py-0.5 rounded text-emerald-300">
                                                     Fintech
                                                   </span>
                                                 </div>
@@ -14012,11 +14012,11 @@ ${ttNotes}`
                                                   ease: "easeOut",
                                                   delay: 0.1,
                                                 }}
-                                                className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between hover:bg-white/10 transition-colors"
+                                                className="p-4 bg-white/5 border border-white/8 rounded-xl flex flex-col justify-between hover:bg-white/10 transition-colors"
                                               >
                                                 <div className="flex justify-between items-center text-pink-400">
                                                   <MessageSquare className="w-4 h-4" />
-                                                  <span className="text-xs font-sans bg-pink-500/10 border border-pink-500/20 px-1.5 py-0.5 rounded text-pink-300">
+                                                  <span className="text-xs font-sans bg-pink-500/10 border border-transparent px-1.5 py-0.5 rounded text-pink-300">
                                                     Client Comms
                                                   </span>
                                                 </div>
@@ -14049,11 +14049,11 @@ ${ttNotes}`
                                                     ease: "easeOut",
                                                     delay: 0.15,
                                                   }}
-                                                  className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between hover:bg-white/10 transition-colors"
+                                                  className="p-4 bg-white/5 border border-white/8 rounded-xl flex flex-col justify-between hover:bg-white/10 transition-colors"
                                                 >
                                                   <div className="flex justify-between items-center text-cyan-400">
                                                     <Clock className="w-4 h-4 animate-pulse" />
-                                                    <span className="text-xs font-sans bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded text-cyan-300">
+                                                    <span className="text-xs font-sans bg-cyan-500/10 border border-transparent px-1.5 py-0.5 rounded text-cyan-300">
                                                       Shift
                                                     </span>
                                                   </div>
@@ -14074,7 +14074,7 @@ ${ttNotes}`
                                           {["agent", "sme"].includes(
                                             currentUser.role as string,
                                           ) && (
-                                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                                            <div className="bg-white/5 border border-white/8 rounded-xl p-5">
                                               <h3 className="text-sm font-bold text-slate-100 uppercase tracking-wider flex items-center gap-2 mb-4">
                                                 <AlertTriangle className="w-4 h-4 text-pink-400" />
                                                 Punctuality & Sub-Session
@@ -14092,7 +14092,7 @@ ${ttNotes}`
                                                     scale: 1,
                                                   }}
                                                   transition={{ duration: 0.3 }}
-                                                  className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between"
+                                                  className="p-3 bg-white/5 border border-white/8 rounded-xl flex items-center justify-between"
                                                 >
                                                   <div>
                                                     <p className="text-xs text-slate-400 font-bold uppercase">
@@ -14124,7 +14124,7 @@ ${ttNotes}`
                                                     duration: 0.3,
                                                     delay: 0.05,
                                                   }}
-                                                  className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between"
+                                                  className="p-3 bg-white/5 border border-white/8 rounded-xl flex items-center justify-between"
                                                 >
                                                   <div>
                                                     <p className="text-xs text-slate-400 font-bold uppercase">
@@ -14152,7 +14152,7 @@ ${ttNotes}`
                                                     duration: 0.3,
                                                     delay: 0.1,
                                                   }}
-                                                  className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between"
+                                                  className="p-3 bg-white/5 border border-white/8 rounded-xl flex items-center justify-between"
                                                 >
                                                   <div>
                                                     <p className="text-xs text-slate-400 font-bold uppercase">
@@ -14192,7 +14192,7 @@ ${ttNotes}`
                                                     duration: 0.3,
                                                     delay: 0.15,
                                                   }}
-                                                  className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between"
+                                                  className="p-3 bg-white/5 border border-white/8 rounded-xl flex items-center justify-between"
                                                 >
                                                   <div>
                                                     <p className="text-xs text-slate-400 font-bold uppercase">
@@ -14366,7 +14366,7 @@ ${ttNotes}`
 
                                       return (
                                         <div className="space-y-6">
-                                          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                                          <div className="bg-white/5 border border-white/8 rounded-xl p-6">
                                             <h3 className="text-xl font-bold text-slate-100 font-sans">
                                               Weekly Work Output & Trends
                                             </h3>
@@ -14378,7 +14378,7 @@ ${ttNotes}`
                                           </div>
 
                                           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in">
-                                            <div className="lg:col-span-8 bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col justify-between">
+                                            <div className="lg:col-span-8 bg-white/5 border border-white/8 rounded-xl p-6 flex flex-col justify-between">
                                               <div>
                                                 <h4 className="text-sm font-bold text-slate-100 uppercase tracking-wider mb-2">
                                                   Daily Interactions Handled
@@ -14390,7 +14390,7 @@ ${ttNotes}`
                                                 </p>
                                               </div>
 
-                                              <div className="h-48 flex items-end justify-between gap-3 pt-6 relative border-b border-white/10 px-2 select-none">
+                                              <div className="h-48 flex items-end justify-between gap-3 pt-6 relative border-b border-white/8 px-2 select-none">
                                                 {weeklyDataPoints.map(
                                                   (dp, idx) => {
                                                     const barHeightPercent =
@@ -14409,7 +14409,7 @@ ${ttNotes}`
                                                         </div>
 
                                                         <div
-                                                          className="w-full max-w-[28px] rounded-t-lg bg-gradient-to-t from-indigo-500/40 via-cyan-500/20 to-indigo-500/10 border border-indigo-500/30 group-hover:from-cyan-400 group-hover:to-pink-500 transition-all duration-300"
+                                                          className="w-full max-w-[28px] rounded-t-lg bg-gradient-to-t from-indigo-500/40 via-cyan-500/20 to-indigo-500/10 border border-transparent group-hover:from-cyan-400 group-hover:to-pink-500 transition-all duration-300"
                                                           style={{
                                                             height: `${Math.max(barHeightPercent, 4)}%`,
                                                           }}
@@ -14425,14 +14425,14 @@ ${ttNotes}`
                                               </div>
                                             </div>
 
-                                            <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col justify-between">
+                                            <div className="lg:col-span-4 bg-white/5 border border-white/8 rounded-xl p-6 flex flex-col justify-between">
                                               <div>
                                                 <h4 className="text-sm font-bold text-slate-100 uppercase tracking-wider mb-4">
                                                   Weekly Summary Stats
                                                 </h4>
 
                                                 <div className="space-y-4">
-                                                  <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+                                                  <div className="p-4 bg-white/5 border border-white/8 rounded-xl">
                                                     <span className="text-xs text-slate-500 uppercase tracking-widest font-bold">
                                                       Aggregate Resolved Tasks
                                                     </span>
@@ -14446,7 +14446,7 @@ ${ttNotes}`
                                                     </div>
                                                   </div>
 
-                                                  <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+                                                  <div className="p-4 bg-white/5 border border-white/8 rounded-xl">
                                                     <span className="text-xs text-slate-500 uppercase tracking-widest font-bold">
                                                       Logged Clock Duration
                                                     </span>
@@ -14464,7 +14464,7 @@ ${ttNotes}`
                                                 </div>
                                               </div>
 
-                                              <div className="border-t border-white/5 mt-6 pt-4 text-xs text-slate-400 font-medium">
+                                              <div className="border-t border-white/8 mt-6 pt-4 text-xs text-slate-400 font-medium">
                                                 Average of{" "}
                                                 <strong className="text-slate-100">
                                                   {(
@@ -14619,7 +14619,7 @@ ${ttNotes}`
                                       let badgeTitle = "Sync Core Agent";
                                       let badgeIcon = "";
                                       let badgeGradient =
-                                        "from-slate-400 to-slate-500 border-slate-400/30 bg-slate-500/10";
+                                        "from-slate-400 to-slate-500 border-transparent bg-slate-500/10";
                                       let badgeDesc =
                                         "Consistently contributing core sync resolutions to ensure clinic metrics compliance on every shift.";
 
@@ -14630,7 +14630,7 @@ ${ttNotes}`
                                         badgeTitle = "Master Sync Communicator";
                                         badgeIcon = "";
                                         badgeGradient =
-                                          "from-indigo-400 via-pink-400 to-cyan-400 border-pink-500/30 bg-indigo-500/10 shadow  text-indigo-200";
+                                          "from-indigo-400 via-pink-400 to-cyan-400 border-transparent bg-indigo-500/10 shadow  text-indigo-200";
                                         badgeDesc =
                                           "Awarded to the most elite resolvers displaying exceptional punctuality standards and unprecedented task metrics!";
                                       } else if (myMonthlyTotalCount >= 60) {
@@ -14638,21 +14638,21 @@ ${ttNotes}`
                                           "High-Yield Resolving Champion";
                                         badgeIcon = "";
                                         badgeGradient =
-                                          "from-cyan-400 to-indigo-500 border-indigo-500/30 bg-indigo-500/10 text-cyan-200";
+                                          "from-cyan-400 to-indigo-500 border-transparent bg-indigo-500/10 text-cyan-200";
                                         badgeDesc =
                                           "Awarded for completing massive volumes of inquiries and payment flows during busy call center duty cycles.";
                                       } else if (punctScore >= 96) {
                                         badgeTitle = "Chronos Punctuality Ace";
                                         badgeIcon = "⏳";
                                         badgeGradient =
-                                          "from-[#fbbf24] to-[#f59e0b] border-amber-400/30 bg-amber-500/10 text-amber-200";
+                                          "from-[#fbbf24] to-[#f59e0b] border-transparent bg-amber-500/10 text-amber-200";
                                         badgeDesc =
                                           "Awarded for exceptional calendar discipline, clocking in perfectly to cover morning call handovers on time.";
                                       }
 
                                       return (
                                         <div className="space-y-6">
-                                          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                                          <div className="bg-white/5 border border-white/8 rounded-xl p-6">
                                             <h3 className="text-xl font-bold text-slate-100 font-sans">
                                               Monthly Performance & Achievement
                                               Desk
@@ -14665,7 +14665,7 @@ ${ttNotes}`
                                           </div>
 
                                           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 animate-fade-in">
-                                            <div className="md:col-span-5 bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center justify-between text-center">
+                                            <div className="md:col-span-5 bg-white/5 border border-white/8 rounded-xl p-6 flex flex-col items-center justify-between text-center">
                                               <div>
                                                 <span className="text-xs font-bold uppercase text-indigo-300 tracking-wider">
                                                   Motivational Badge Status
@@ -14680,7 +14680,7 @@ ${ttNotes}`
                                                   {badgeIcon}
                                                 </span>
                                                 <div
-                                                  className={`mt-4 px-4 py-2 border rounded-2xl bg-gradient-to-r text-base font-bold uppercase tracking-wider ${badgeGradient}`}
+                                                  className={`mt-4 px-4 py-2 border rounded-xl bg-gradient-to-r text-base font-bold uppercase tracking-wider ${badgeGradient}`}
                                                 >
                                                   {badgeTitle}
                                                 </div>
@@ -14696,7 +14696,7 @@ ${ttNotes}`
                                             </div>
 
                                             <div className="md:col-span-7 space-y-4">
-                                              <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
+                                              <div className="p-6 bg-white/5 border border-white/8 rounded-xl">
                                                 <h4 className="text-sm font-bold text-slate-100 uppercase tracking-wider mb-4">
                                                   30-Day Operation Ratios
                                                 </h4>
@@ -14712,7 +14712,7 @@ ${ttNotes}`
                                                         Files Handled
                                                       </span>
                                                     </div>
-                                                    <div className="w-full h-2.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                                    <div className="w-full h-2.5 bg-white/5 rounded-full overflow-hidden border border-white/8">
                                                       <div
                                                         className="h-full bg-cyan-400 rounded-full"
                                                         style={{
@@ -14737,7 +14737,7 @@ ${ttNotes}`
                                                           % On Time
                                                         </span>
                                                       </div>
-                                                      <div className="w-full h-2.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                                      <div className="w-full h-2.5 bg-white/5 rounded-full overflow-hidden border border-white/8">
                                                         <div
                                                           className="h-full bg-emerald-400 rounded-full"
                                                           style={{
@@ -14751,7 +14751,7 @@ ${ttNotes}`
                                               </div>
 
                                               <div className="grid grid-cols-3 gap-3 font-sans">
-                                                <div className="p-4 bg-white/5 border border-white/10 rounded-2xl text-center">
+                                                <div className="p-4 bg-white/5 border border-white/8 rounded-xl text-center">
                                                   <span className="text-xs text-slate-500 uppercase font-bold">
                                                     Medical Qs
                                                   </span>
@@ -14759,7 +14759,7 @@ ${ttNotes}`
                                                     {monthlyInq.length}
                                                   </p>
                                                 </div>
-                                                <div className="p-4 bg-white/5 border border-white/10 rounded-2xl text-center">
+                                                <div className="p-4 bg-white/5 border border-white/8 rounded-xl text-center">
                                                   <span className="text-xs text-[#22d3ee] uppercase font-bold">
                                                     Fintech Cash
                                                   </span>
@@ -14767,7 +14767,7 @@ ${ttNotes}`
                                                     {monthlyFin.length}
                                                   </p>
                                                 </div>
-                                                <div className="p-4 bg-white/5 border border-white/10 rounded-2xl text-center">
+                                                <div className="p-4 bg-white/5 border border-white/8 rounded-xl text-center">
                                                   <span className="text-xs text-slate-400 uppercase font-bold font-sans">
                                                     Dials Handled
                                                   </span>
@@ -14785,10 +14785,10 @@ ${ttNotes}`
                               ) : (
                                 <div className="space-y-6">
                                   {/* Header Controls Banner */}
-                                  <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-5 animate-fade-in">
+                                  <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white/5 border border-white/8 rounded-xl p-5 animate-fade-in">
                                     <div>
                                       <div className="flex items-center gap-2">
-                                        <span className="px-2 py-0.5 text-xs font-bold uppercase tracking-widest bg-cyan-500/20 text-cyan-300 rounded border border-cyan-500/30">
+                                        <span className="px-2 py-0.5 text-xs font-bold uppercase tracking-widest bg-cyan-500/10 text-cyan-300 rounded border border-transparent">
                                           Synq Engine
                                         </span>
                                         {selectedDashboardDate ===
@@ -14828,12 +14828,12 @@ ${ttNotes}`
                                               e.target.value,
                                             )
                                           }
-                                          className="w-full bg-white/5 border border-white/10 text-slate-100 text-xs rounded-2xl pl-9 pr-3 py-2 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-sans"
+                                          className="w-full bg-white/5 border border-white/8 text-slate-100 text-xs rounded-xl pl-9 pr-3 py-2 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-sans"
                                           spellCheck="false"
                                         />
                                       </div>
 
-                                      <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-2xl p-1">
+                                      <div className="flex items-center gap-1.5 bg-white/5 border border-white/8 rounded-xl p-1">
                                         <button
                                           onClick={() => {
                                             const d = new Date(
@@ -14883,7 +14883,7 @@ ${ttNotes}`
                                               getLocalISOString(),
                                             );
                                           }}
-                                          className={`flex-1 sm:flex-initial px-3 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${ selectedDashboardDate === getLocalISOString() ? "bg-indigo-500 text-white border-indigo-400" : "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10" }`}
+                                          className={`flex-1 sm:flex-initial px-3 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${ selectedDashboardDate === getLocalISOString() ? "bg-indigo-500 text-white border-indigo-400" : "bg-white/5 text-slate-300 border-white/8 hover:bg-white/10" }`}
                                         >
                                           Today
                                         </button>
@@ -14895,7 +14895,7 @@ ${ttNotes}`
                                               d.toISOString().split("T")[0],
                                             );
                                           }}
-                                          className={`flex-1 sm:flex-initial px-3 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${ selectedDashboardDate === (() => { const y = new Date(); y.setDate(y.getDate() - 1); return y .toISOString() .split("T")[0]; })() ? "bg-indigo-500 text-white border-indigo-400" : "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10" }`}
+                                          className={`flex-1 sm:flex-initial px-3 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${ selectedDashboardDate === (() => { const y = new Date(); y.setDate(y.getDate() - 1); return y .toISOString() .split("T")[0]; })() ? "bg-indigo-500 text-white border-indigo-400" : "bg-white/5 text-slate-300 border-white/8 hover:bg-white/10" }`}
                                         >
                                           Yesterday
                                         </button>
@@ -14904,15 +14904,15 @@ ${ttNotes}`
                                   </div>
 
                                   {/* Meta Interval Descriptor Banner */}
-                                  <div className="bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-pink-500/10 border border-indigo-500/15 rounded-2xl px-5 py-3.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-slate-300">
+                                  <div className="bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-pink-500/10 border border-indigo-500/15 rounded-xl px-5 py-3.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-slate-300">
                                     <div className="flex items-center gap-2 text-xs font-semibold">
                                       <Calendar className="w-4 h-4 text-cyan-400" />
                                       <span>Active Operational Period:</span>
-                                      <strong className="text-slate-100 font-sans bg-white/5 px-2 py-0.5 rounded border border-white/10">
+                                      <strong className="text-slate-100 font-sans bg-white/5 px-2 py-0.5 rounded border border-white/8">
                                         {range.startLabel}
                                       </strong>
                                       <span>&rarr;</span>
-                                      <strong className="text-slate-100 font-sans bg-white/5 px-2 py-0.5 rounded border border-white/10">
+                                      <strong className="text-slate-100 font-sans bg-white/5 px-2 py-0.5 rounded border border-white/8">
                                         {range.endLabel}
                                       </strong>
                                     </div>
@@ -14922,8 +14922,8 @@ ${ttNotes}`
                                   </div>
 
                                   {/* Agent Excellence Team Leaderboard */}
-                                  <div className="bg-white/5 border border-white/10 rounded-2xl text-slate-100 p-6 space-y-4 text-left animate-fade-in font-sans">
-                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-3">
+                                  <div className="bg-white/5 border border-white/8 rounded-xl text-slate-100 p-6 space-y-4 text-left animate-fade-in font-sans">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/8 pb-3">
                                       <div>
                                         <h3 className="font-bold text-transparent bg-gradient-to-r from-yellow-300 via-indigo-200 to-amber-300 bg-clip-text text-lg font-sans flex items-center gap-2">
                                           <span></span>
@@ -14942,7 +14942,7 @@ ${ttNotes}`
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                       {/* Podium Top 3 */}
-                                      <div className="bg-transparent p-4 rounded-2xl border border-white/5 space-y-3.5 flex flex-col justify-center">
+                                      <div className="bg-transparent p-4 rounded-xl border border-white/8 space-y-3.5 flex flex-col justify-center">
                                         <p className="text-xs text-slate-500 font-bold uppercase tracking-wider font-mono">
                                           Today's Prestige Podium
                                         </p>
@@ -15031,8 +15031,8 @@ ${ttNotes}`
                                               {/* 2nd Place */}
                                               {top3[1] && (
                                                 <div className="flex flex-col items-center space-y-2">
-                                                  <div className="w-10 h-10 rounded-full bg-slate-400/20 border-2 border-slate-700 flex items-center justify-center font-bold text-slate-100 text-sm relative"></div>
-                                                  <div className="bg-gradient-to-t from-slate-400/10 to-slate-400/20 border border-slate-400/20 rounded-t-xl p-2 w-full text-center space-y-0.5">
+                                                  <div className="w-10 h-10 rounded-full bg-slate-400/20 border-2 border-white/8 flex items-center justify-center font-bold text-slate-100 text-sm relative"></div>
+                                                  <div className="bg-gradient-to-t from-slate-400/10 to-slate-400/20 border border-transparent rounded-t-xl p-2 w-full text-center space-y-0.5">
                                                     <p className="text-xs font-bold text-slate-200 truncate">
                                                       {formatAgentName(
                                                         top3[1].name,
@@ -15084,7 +15084,7 @@ ${ttNotes}`
                                       </div>
 
                                       {/* Ranks list view */}
-                                      <div className="bg-white/[0.03] p-4 rounded-2xl border border-white/5 space-y-2.5">
+                                      <div className="bg-white/[0.03] p-4 rounded-xl border border-white/8 space-y-2.5">
                                         <p className="text-xs text-slate-500 font-bold uppercase tracking-wider font-mono">
                                           Operations Leaderboard Rankings
                                         </p>
@@ -15176,7 +15176,7 @@ ${ttNotes}`
                                                 return (
                                                   <div
                                                     key={row.name}
-                                                    className="flex justify-between items-center bg-white/10 /[0.02] border border-white/5 p-2 rounded-xl text-xs font-sans"
+                                                    className="flex justify-between items-center bg-white/10 /[0.02] border border-white/8 p-2 rounded-xl text-xs font-sans"
                                                   >
                                                     <div className="flex items-center gap-2.5">
                                                       <span className="font-sans text-xs w-4 text-center text-slate-500 font-bold">
@@ -15206,7 +15206,7 @@ ${ttNotes}`
                                   {/* Operational Performance Core Ring & KPI Grid */}
                                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                                     {/* Overall composite score circle gauge */}
-                                    <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+                                    <div className="lg:col-span-4 bg-white/5 border border-white/8 rounded-xl p-6 flex flex-col items-center justify-center text-center">
                                       <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-4">
                                         Day Resolve Efficiency
                                       </p>
@@ -15280,13 +15280,13 @@ ${ttNotes}`
                                     {/* 2x2 metric micro scorecard grid */}
                                     <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                       {/* 1. Inquiries */}
-                                      <div className="p-5 bg-white/5 border border-white/10 rounded-2xl hover:border-white/20 transition-all flex flex-col justify-between">
+                                      <div className="p-5 bg-white/5 border border-white/8 rounded-xl hover:border-white/15 transition-all flex flex-col justify-between">
                                         <div>
                                           <div className="flex justify-between items-start">
-                                            <span className="p-2 bg-blue-500/15 text-blue-400 rounded-2xl border border-blue-500/20">
+                                            <span className="p-2 bg-blue-500/10 text-blue-400 rounded-xl border border-transparent">
                                               <HelpCircle className="w-5 h-5" />
                                             </span>
-                                            <span className="text-right text-xs font-bold uppercase tracking-widest text-[#38bdf8] bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">
+                                            <span className="text-right text-xs font-bold uppercase tracking-widest text-[#38bdf8] bg-transparent border border-white/12 text-white border border-transparent px-2 py-0.5 rounded-lg">
                                               {!isNaN(
                                                 Math.round(resolutionRate),
                                               )
@@ -15307,7 +15307,7 @@ ${ttNotes}`
                                             </span>
                                           </div>
                                         </div>
-                                        <div className="border-t border-white/5 mt-4 pt-3 flex justify-between text-xs text-slate-300">
+                                        <div className="border-t border-white/8 mt-4 pt-3 flex justify-between text-xs text-slate-300">
                                           <div>
                                             <p className="text-slate-100 font-bold font-sans">
                                               {answeredInquiries.length}
@@ -15330,13 +15330,13 @@ ${ttNotes}`
                                       </div>
 
                                       {/* 2. Fintech Integration */}
-                                      <div className="p-5 bg-white/5 border border-white/10 rounded-2xl hover:border-white/20 transition-all flex flex-col justify-between">
+                                      <div className="p-5 bg-white/5 border border-white/8 rounded-xl hover:border-white/15 transition-all flex flex-col justify-between">
                                         <div>
                                           <div className="flex justify-between items-start">
-                                            <span className="p-2 bg-amber-500/15 text-amber-400 rounded-2xl border border-amber-500/20">
+                                            <span className="p-2 bg-amber-500/10 text-amber-400 rounded-xl border border-transparent">
                                               <Wallet className="w-5 h-5" />
                                             </span>
-                                            <span className="text-right text-xs font-bold uppercase tracking-widest text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
+                                            <span className="text-right text-xs font-bold uppercase tracking-widest text-amber-300 bg-amber-500/10 border border-transparent px-2 py-0.5 rounded-lg">
                                               {!isNaN(Math.round(fintechRate))
                                                 ? Math.round(fintechRate)
                                                 : 0}
@@ -15355,7 +15355,7 @@ ${ttNotes}`
                                             </span>
                                           </div>
                                         </div>
-                                        <div className="border-t border-white/5 mt-4 pt-3 flex justify-between text-xs text-slate-300">
+                                        <div className="border-t border-white/8 mt-4 pt-3 flex justify-between text-xs text-slate-300">
                                           <div>
                                             <p className="text-slate-100 font-bold font-sans">
                                               {confirmedFintech.length}
@@ -15388,13 +15388,13 @@ ${ttNotes}`
                                       </div>
 
                                       {/* 3. Complaints & Comm Requests */}
-                                      <div className="p-5 bg-white/5 border border-white/10 rounded-2xl hover:border-white/20 transition-all flex flex-col justify-between">
+                                      <div className="p-5 bg-white/5 border border-white/8 rounded-xl hover:border-white/15 transition-all flex flex-col justify-between">
                                         <div>
                                           <div className="flex justify-between items-start">
-                                            <span className="p-2 bg-rose-500/15 text-rose-400 rounded-2xl border border-rose-500/20">
+                                            <span className="p-2 bg-rose-500/10 text-rose-400 rounded-xl border border-transparent">
                                               <MessageSquare className="w-5 h-5" />
                                             </span>
-                                            <span className="text-right text-xs font-bold uppercase tracking-widest text-rose-300 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-full">
+                                            <span className="text-right text-xs font-bold uppercase tracking-widest text-rose-300 bg-rose-500/10 border border-transparent px-2 py-0.5 rounded-lg">
                                               {opComplaints.length > 0
                                                 ? `${Math.round((closedComplaints.length / opComplaints.length) * 100)}%`
                                                 : "100%"}{" "}
@@ -15413,7 +15413,7 @@ ${ttNotes}`
                                             </span>
                                           </div>
                                         </div>
-                                        <div className="border-t border-white/5 mt-4 pt-3 flex justify-between text-xs text-slate-300">
+                                        <div className="border-t border-white/8 mt-4 pt-3 flex justify-between text-xs text-slate-300">
                                           <div>
                                             <p className="text-slate-100 font-bold font-sans">
                                               {closedComplaints.length}
@@ -15439,13 +15439,13 @@ ${ttNotes}`
                                       </div>
 
                                       {/* 4. Client Communication requests */}
-                                      <div className="p-5 bg-white/5 border border-white/10 rounded-2xl hover:border-white/20 transition-all flex flex-col justify-between">
+                                      <div className="p-5 bg-white/5 border border-white/8 rounded-xl hover:border-white/15 transition-all flex flex-col justify-between">
                                         <div>
                                           <div className="flex justify-between items-start">
-                                            <span className="p-2 bg-indigo-500/15 text-indigo-400 rounded-2xl border border-indigo-500/20">
+                                            <span className="p-2 bg-indigo-500/10 text-indigo-400 rounded-xl border border-transparent">
                                               <MessageCircle className="w-5 h-5" />
                                             </span>
-                                            <span className="text-right text-xs font-bold uppercase tracking-widest text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full">
+                                            <span className="text-right text-xs font-bold uppercase tracking-widest text-indigo-300 bg-transparent border border-white/12 text-white border border-transparent px-2 py-0.5 rounded-lg">
                                               {opComms.length > 0
                                                 ? `${Math.round((contactedComms.length / opComms.length) * 100)}%`
                                                 : "100%"}{" "}
@@ -15464,7 +15464,7 @@ ${ttNotes}`
                                             </span>
                                           </div>
                                         </div>
-                                        <div className="border-t border-white/5 mt-4 pt-3 flex justify-between text-xs text-slate-300">
+                                        <div className="border-t border-white/8 mt-4 pt-3 flex justify-between text-xs text-slate-300">
                                           <div>
                                             <p className="text-slate-100 font-bold font-sans">
                                               {contactedComms.length}
@@ -15490,17 +15490,17 @@ ${ttNotes}`
 
                                       {/* 5. QA Performance */}
                                       <div
-                                        className="p-5 bg-white/5 border border-white/10 rounded-2xl hover:border-green-500/30 transition-all flex flex-col justify-between cursor-pointer"
+                                        className="p-5 bg-white/5 border border-white/8 rounded-xl hover:border-transparent transition-all flex flex-col justify-between cursor-pointer"
                                         onClick={() =>
                                           setActiveTab("qa-scorecard")
                                         }
                                       >
                                         <div>
                                           <div className="flex justify-between items-start">
-                                            <span className="p-2 bg-green-500/15 text-green-400 rounded-2xl border border-green-500/20">
+                                            <span className="p-2 bg-green-500/10 text-green-400 rounded-xl border border-transparent">
                                               <ShieldCheck className="w-5 h-5" />
                                             </span>
-                                            <span className="text-right text-xs font-bold uppercase tracking-widest text-green-300 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">
+                                            <span className="text-right text-xs font-bold uppercase tracking-widest text-green-300 bg-green-500/10 border border-transparent px-2 py-0.5 rounded-lg">
                                               QA Metrics
                                             </span>
                                           </div>
@@ -15546,7 +15546,7 @@ ${ttNotes}`
                                             })()}
                                           </div>
                                         </div>
-                                        <div className="border-t border-white/5 mt-4 pt-3 flex justify-between text-xs text-slate-300">
+                                        <div className="border-t border-white/8 mt-4 pt-3 flex justify-between text-xs text-slate-300">
                                           <div>
                                             {(() => {
                                               const qasLength = qaScores.filter(
@@ -15570,7 +15570,7 @@ ${ttNotes}`
                                   </div>
 
                                   {/* Hourly Load Distribution SVG Interactive Chart */}
-                                  <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                                  <div className="bg-white/5 border border-white/8 rounded-xl p-6">
                                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                                       <div>
                                         <h3 className="text-lg font-bold text-slate-100 font-sans">
@@ -15584,7 +15584,7 @@ ${ttNotes}`
                                       </div>
 
                                       {/* Interactive Selector for metric inside SVG chart */}
-                                      <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 p-1 rounded-xl">
+                                      <div className="flex items-center gap-1.5 bg-white/5 border border-white/8 p-1 rounded-xl">
                                         {(
                                           [
                                             "all",
@@ -15763,7 +15763,7 @@ ${ttNotes}`
                                                     height="24"
                                                     className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
                                                   >
-                                                    <div className="bg-indigo-950/90 border border-indigo-400 text-slate-100 text-xs font-bold px-1.5 py-0.5 rounded text-center">
+                                                    <div className="bg-transparent border border-white/12 text-white border border-indigo-400 text-slate-100 text-xs font-bold px-1.5 py-0.5 rounded text-center">
                                                       Value: {pt.val}
                                                     </div>
                                                   </foreignObject>
@@ -15793,7 +15793,7 @@ ${ttNotes}`
                                   {/* Left Column: LOB speed table, Right Column: Agent shift timeline / roster */}
                                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                                     {/* LOB Performance Card */}
-                                    <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col justify-between">
+                                    <div className="lg:col-span-4 bg-white/5 border border-white/8 rounded-xl p-6 flex flex-col justify-between">
                                       <div>
                                         <h3 className="text-base font-bold text-slate-100 font-sans flex items-center gap-2">
                                           <Activity className="w-4 h-4 text-cyan-400" />
@@ -15911,7 +15911,7 @@ ${ttNotes}`
                                       </div>
 
                                       {/* Daily Schedule & Absenteeism Analysis */}
-                                      <div className="mt-6 p-5 bg-white/5 border border-white/10 rounded-2xl">
+                                      <div className="mt-6 p-5 bg-white/5 border border-white/8 rounded-xl">
                                         <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-3 flex items-center gap-1.5">
                                           <Clock className="w-3.5 h-3.5 text-indigo-400" />
                                           Daily Roster & Absenteeism
@@ -16020,7 +16020,7 @@ ${ttNotes}`
                                                     {complianceRate}%
                                                   </span>
                                                 </div>
-                                                <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                                <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden border border-white/8">
                                                   <div
                                                     className={`h-full transition-all duration-1000 rounded-full ${ complianceRate >= 90 ? "bg-gradient-to-r from-emerald-500 to-teal-400" : complianceRate >= 75 ? "bg-amber-400" : "bg-pink-500" }`}
                                                     style={{
@@ -16032,7 +16032,7 @@ ${ttNotes}`
 
                                               {/* Metric Badges Grid */}
                                               <div className="grid grid-cols-2 gap-2.5 pt-1.5">
-                                                <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
+                                                <div className="p-3 bg-white/5 border border-white/8 rounded-xl">
                                                   <span className="text-xs uppercase font-bold text-slate-500 tracking-wider">
                                                     Scheduled
                                                   </span>
@@ -16040,7 +16040,7 @@ ${ttNotes}`
                                                     {totalScheduled}
                                                   </p>
                                                 </div>
-                                                <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
+                                                <div className="p-3 bg-white/5 border border-white/8 rounded-xl">
                                                   <span className="text-xs uppercase font-bold text-slate-500 tracking-wider">
                                                     Present
                                                   </span>
@@ -16068,7 +16068,7 @@ ${ttNotes}`
 
                                               {/* Breakdown on Absentee Agent names */}
                                               {absenteeCount > 0 && (
-                                                <div className="mt-2.5 p-3 bg-rose-950/20 border border-rose-500/20 rounded-xl">
+                                                <div className="mt-2.5 p-3 bg-rose-950/20 border border-transparent rounded-xl">
                                                   <p className="text-xs font-bold uppercase text-rose-300 tracking-widest mb-1.5 flex items-center gap-1">
                                                     <span className="w-1.5 h-1.5 bg-rose-400 rounded-full animate-pulse" />
                                                     Flagged Absentees:
@@ -16089,7 +16089,7 @@ ${ttNotes}`
                                             return absents.map((node) => (
                                               <span
                                                 key={node.id}
-                                                className="px-2 py-0.5 bg-rose-500/10 border border-rose-500/20 text-rose-300 rounded font-sans text-xs font-bold"
+                                                className="px-2 py-0.5 bg-rose-500/10 border border-transparent text-rose-300 rounded font-sans text-xs font-bold"
                                               >
                                                 {node.agentName}
                                               </span>
@@ -16100,7 +16100,7 @@ ${ttNotes}`
                                     </div>
 
                                     {/* Agent roster attendance statistics table with elegant slider timelines */}
-                                    <div className="lg:col-span-8 bg-white/5 border border-white/10 rounded-2xl p-6">
+                                    <div className="lg:col-span-8 bg-white/5 border border-white/8 rounded-xl p-6">
                                       <h3 className="text-base font-bold text-slate-100 font-sans flex items-center gap-2 mb-2">
                                         <Users className="w-4 h-4 text-cyan-400 animate-pulse" />
                                         On-Duty Roster Timeline (
@@ -16115,7 +16115,7 @@ ${ttNotes}`
                                       <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
                                         <table className="w-full text-left border-collapse">
                                           <thead>
-                                            <tr className="border-b border-white/10 text-xs font-bold uppercase tracking-wider text-slate-400">
+                                            <tr className="border-b border-white/8 text-xs font-bold uppercase tracking-wider text-slate-400">
                                               <th className="pb-3 text-slate-100">
                                                 Agent
                                               </th>
@@ -16235,7 +16235,7 @@ ${ttNotes}`
                                                       {log.agentName}
                                                     </td>
                                                     <td className="py-3 whitespace-nowrap">
-                                                      <span className="px-2 py-0.5 rounded-full text-xs font-bold tracking-tight bg-white/5 text-slate-300">
+                                                      <span className="px-2 py-0.5 rounded-lg text-xs font-bold tracking-tight bg-white/5 text-slate-300">
                                                         {agentLOB}
                                                       </span>
                                                     </td>
@@ -16248,7 +16248,7 @@ ${ttNotes}`
                                                         : "0"}
                                                     </td>
                                                     <td className="py-3 text-right">
-                                                      <div className="w-24 sm:w-32 h-2.5 bg-white/5 rounded-full overflow-hidden inline-block relative border border-white/5">
+                                                      <div className="w-24 sm:w-32 h-2.5 bg-white/5 rounded-full overflow-hidden inline-block relative border border-white/8">
                                                         {timelineWidth > 0 && (
                                                           <div
                                                             className="h-full bg-gradient-to-r from-emerald-400 via-indigo-500 to-cyan-500 rounded-full transition-all duration-1000"
@@ -16293,7 +16293,7 @@ ${ttNotes}`
                           <div className="flex items-center gap-2">
                             <button
                               onClick={downloadFullCSV}
-                              className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-slate-100 rounded-xl text-xs font-bold transition-all flex items-center gap-2"
+                              className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/8 hover:border-white/15 text-slate-100 rounded-xl text-xs font-bold transition-all flex items-center gap-2"
                             >
                               <FileText className="w-4 h-4 text-indigo-400" />
                               Full CSV backup
@@ -16303,7 +16303,7 @@ ${ttNotes}`
 
                         {/* High Fidelity Performance Indicators */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+                          <div className="p-4 bg-white/5 border border-white/8 rounded-xl">
                             <p className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1">
                               Pending Swaps
                             </p>
@@ -16320,7 +16320,7 @@ ${ttNotes}`
                             </div>
                           </div>
 
-                          <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+                          <div className="p-4 bg-white/5 border border-white/8 rounded-xl">
                             <p className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1">
                               Annual Leaves
                             </p>
@@ -16337,7 +16337,7 @@ ${ttNotes}`
                             </div>
                           </div>
 
-                          <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+                          <div className="p-4 bg-white/5 border border-white/8 rounded-xl">
                             <p className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1">
                               Approved Monthly
                             </p>
@@ -16354,7 +16354,7 @@ ${ttNotes}`
                             </div>
                           </div>
 
-                          <div className="p-4 bg-white/10 /6 border border-white/10 rounded-2xl">
+                          <div className="p-4 bg-white/10 /6 border border-white/8 rounded-xl">
                             <p className="text-xs uppercase tracking-widest text-rose-400 font-bold mb-1">
                               Violations Blocked
                             </p>
@@ -16373,8 +16373,8 @@ ${ttNotes}`
                         </div>
 
                         {/* Operations Live Wallboard & SLA Gauge */}
-                        <div className="bg-white/5 border border-white/10 rounded-2xl text-slate-100 p-6 space-y-6">
-                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-4">
+                        <div className="bg-white/5 border border-white/8 rounded-xl text-slate-100 p-6 space-y-6">
+                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/8 pb-4">
                             <div>
                               <h3 className="font-bold text-transparent bg-gradient-to-r from-blue-300 via-indigo-200 to-cyan-300 bg-clip-text text-lg font-sans flex items-center gap-2">
                                 <Activity className="w-5 h-5 text-cyan-400 animate-pulse" />
@@ -16385,7 +16385,7 @@ ${ttNotes}`
                                 Metrics, and AUX Occupancy
                               </p>
                             </div>
-                            <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase text-emerald-400 font-mono tracking-wider">
+                            <div className="flex items-center gap-2 bg-transparent border border-white/12 text-white border border-transparent px-3 py-1 rounded-lg text-xs font-bold uppercase text-emerald-400 font-mono tracking-wider">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                               Synchronized Feed
                             </div>
@@ -16393,7 +16393,7 @@ ${ttNotes}`
 
                           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             {/* SLA Gauge - SVG Circle representation */}
-                            <div className="p-5 bg-white/10 /[0.02] border border-white/5 rounded-2xl flex flex-col justify-between space-y-4">
+                            <div className="p-5 bg-white/10 /[0.02] border border-white/8 rounded-xl flex flex-col justify-between space-y-4">
                               <div className="text-left">
                                 <p className="text-xs uppercase font-bold text-slate-500 tracking-wider">
                                   Inquiry Queue SLA
@@ -16454,7 +16454,7 @@ ${ttNotes}`
                                 </div>
                               </div>
 
-                              <div className="flex justify-between items-center text-xs bg-transparent p-2.5 rounded-xl border border-white/5 font-sans">
+                              <div className="flex justify-between items-center text-xs bg-transparent p-2.5 rounded-xl border border-white/8 font-sans">
                                 <span className="text-slate-400">
                                   Total processed today:
                                 </span>
@@ -16465,7 +16465,7 @@ ${ttNotes}`
                             </div>
 
                             {/* Live Queue Monitor (Simulator Interface) */}
-                            <div className="p-5 bg-white/10 /[0.02] border border-white/5 rounded-2xl space-y-4 flex flex-col justify-between">
+                            <div className="p-5 bg-white/10 /[0.02] border border-white/8 rounded-xl space-y-4 flex flex-col justify-between">
                               <div className="flex justify-between items-start">
                                 <div className="text-left">
                                   <p className="text-xs uppercase font-bold text-slate-500 tracking-wider">
@@ -16479,7 +16479,7 @@ ${ttNotes}`
                               </div>
 
                               <div className="grid grid-cols-3 gap-2.5">
-                                <div className="bg-transparent p-2.5 rounded-xl border border-white/5 text-center">
+                                <div className="bg-transparent p-2.5 rounded-xl border border-white/8 text-center">
                                   <p className="text-xs text-slate-400 font-bold uppercase font-sans">
                                     Active Calls
                                   </p>
@@ -16487,7 +16487,7 @@ ${ttNotes}`
                                     {queueStats.activeCalls}
                                   </p>
                                 </div>
-                                <div className="bg-transparent p-2.5 rounded-xl border border-white/5 text-center">
+                                <div className="bg-transparent p-2.5 rounded-xl border border-white/8 text-center">
                                   <p className="text-xs text-slate-400 font-bold uppercase font-sans">
                                     Hold Time
                                   </p>
@@ -16495,7 +16495,7 @@ ${ttNotes}`
                                     {queueStats.holdTime}s
                                   </p>
                                 </div>
-                                <div className="bg-transparent p-2.5 rounded-xl border border-white/5 text-center">
+                                <div className="bg-transparent p-2.5 rounded-xl border border-white/8 text-center">
                                   <p className="text-xs text-slate-400 font-bold uppercase font-sans">
                                     Tasks open
                                   </p>
@@ -16568,7 +16568,7 @@ ${ttNotes}`
                                       "Successfully tick-triggered new live center activity event!",
                                     );
                                   }}
-                                  className="flex-1 px-3 py-2.5 bg-indigo-500/10 hover:bg-indigo-500/15 border border-indigo-500/20 hover:border-indigo-500/35 text-indigo-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer font-sans"
+                                  className="flex-1 px-3 py-2.5 bg-transparent border border-white/12 text-white hover:bg-white/5 border border-transparent hover:border-indigo-500/35 text-indigo-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer font-sans"
                                 >
                                   <RefreshCw className="w-3.5 h-3.5 text-indigo-400" />
                                   Trigger Live Flow Tick
@@ -16577,7 +16577,7 @@ ${ttNotes}`
                             </div>
 
                             {/* Live Action/Audit Ticker Console Logs */}
-                            <div className="p-5 bg-white/10 /[0.02] border border-white/5 rounded-2xl flex flex-col justify-between space-y-3">
+                            <div className="p-5 bg-white/10 /[0.02] border border-white/8 rounded-xl flex flex-col justify-between space-y-3">
                               <div className="text-left">
                                 <p className="text-xs uppercase font-bold text-slate-500 tracking-wider">
                                   Live Activity Log
@@ -16587,7 +16587,7 @@ ${ttNotes}`
                                 </p>
                               </div>
 
-                              <div className="bg-white/[0.04] p-3 rounded-xl border border-white/5 text-left font-sans text-xs space-y-1.5 h-24 overflow-y-auto leading-snug">
+                              <div className="bg-white/[0.04] p-3 rounded-xl border border-white/8 text-left font-sans text-xs space-y-1.5 h-24 overflow-y-auto leading-snug">
                                 {liveOpsLogs.map((logStr, index) => {
                                   const isLive =
                                     logStr.includes("[Operational]");
@@ -16646,7 +16646,7 @@ ${ttNotes}`
                                       Aux Occupancy ({activeTotal} Active on
                                       Shift)
                                     </p>
-                                    <div className="flex gap-1 h-3 rounded-full bg-white/5 overflow-hidden border border-white/5">
+                                    <div className="flex gap-1 h-3 rounded-full bg-white/5 overflow-hidden border border-white/8">
                                       <div
                                         style={{
                                           width: `${(activeOnDuty / activeTotal) * 100}%`,
@@ -16709,8 +16709,8 @@ ${ttNotes}`
                         </div>
 
                         {/* Immediate Approval Queue Panel */}
-                        <div className="bg-white/5 border border-white/10 rounded-2xl flex flex-col overflow-hidden">
-                          <div className="p-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 gap-3">
+                        <div className="bg-white/5 border border-white/8 rounded-xl flex flex-col overflow-hidden">
+                          <div className="p-6 border-b border-white/8 flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 gap-3">
                             <div>
                               <h3 className="font-bold text-slate-100 text-lg font-sans">
                                 Recent Approval Queue
@@ -16722,7 +16722,7 @@ ${ttNotes}`
                             </div>
                             <div className="flex gap-4 items-center">
                               {selectedPendingRequests.size > 0 && (
-                                <div className="flex items-center gap-2 mr-4 bg-indigo-500/10 px-3 py-1.5 rounded-xl border border-indigo-500/20">
+                                <div className="flex items-center gap-2 mr-4 bg-transparent border border-white/12 text-white px-3 py-1.5 rounded-xl border border-transparent">
                                   <span className="text-xs font-bold text-indigo-300 mr-2">
                                     {selectedPendingRequests.size} Selected
                                   </span>
@@ -16734,7 +16734,7 @@ ${ttNotes}`
                                       );
                                       setSelectedPendingRequests(new Set());
                                     }}
-                                    className="px-2.5 py-1 bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs uppercase rounded transition-colors shadow-sm"
+                                    className="px-2.5 py-1 bg-transparent border border-white/12 text-white hover:bg-white/5 text-white font-bold text-xs uppercase rounded transition-colors"
                                   >
                                     Approve All
                                   </button>
@@ -16752,11 +16752,11 @@ ${ttNotes}`
                                   </button>
                                 </div>
                               )}
-                              <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-blue-300 bg-blue-500/10 px-2 py-1 rounded">
+                              <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-blue-300 bg-transparent border border-white/12 text-white px-2 py-1 rounded">
                                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>{" "}
                                 Swap (24h Requirement)
                               </div>
-                              <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-emerald-300 bg-emerald-500/10 px-2 py-1 rounded">
+                              <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-emerald-300 bg-transparent border border-white/12 text-white px-2 py-1 rounded">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>{" "}
                                 Annual (14d Requirement)
                               </div>
@@ -16765,12 +16765,12 @@ ${ttNotes}`
 
                           <div className="overflow-x-auto w-full -mx-4 px-4 sm:mx-0 sm:px-0">
                             <table className="w-full text-left min-w-[700px]">
-                              <thead className="text-xs uppercase tracking-widest text-slate-400 border-b border-white/5 bg-slate-900/40 /40">
+                              <thead className="text-xs uppercase tracking-widest text-slate-400 border-b border-white/8 bg-slate-900/40 /40">
                                 <tr>
                                   <th className="px-6 py-4 font-bold max-w-[20px]">
                                     <input
                                       type="checkbox"
-                                      className="w-4 h-4 rounded border-slate-700 bg-white/10 text-indigo-500 cursor-pointer"
+                                      className="w-4 h-4 rounded border-white/8 bg-white/10 text-indigo-500 cursor-pointer"
                                       onChange={(e) => {
                                         if (e.target.checked) {
                                           setSelectedPendingRequests(
@@ -16856,12 +16856,12 @@ ${ttNotes}`
                                     return (
                                       <tr
                                         key={req.id}
-                                        className="border-b border-white/5 hover:bg-white/20 transition-colors"
+                                        className="border-b border-white/8 hover:bg-white/20 transition-colors"
                                       >
                                         <td className="px-6 py-4">
                                           <input
                                             type="checkbox"
-                                            className="w-4 h-4 rounded border-slate-700 bg-white/10 text-indigo-500 cursor-pointer"
+                                            className="w-4 h-4 rounded border-white/8 bg-white/10 text-indigo-500 cursor-pointer"
                                             checked={selectedPendingRequests.has(
                                               req.id,
                                             )}
@@ -16881,11 +16881,11 @@ ${ttNotes}`
                                         </td>
                                         <td className="px-6 py-4">
                                           {isSwap ? (
-                                            <span className="px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-300 rounded-xl text-xs font-bold uppercase tracking-wider">
+                                            <span className="px-2.5 py-1 bg-transparent border border-white/12 text-white border border-transparent text-blue-300 rounded-xl text-xs font-bold uppercase tracking-wider">
                                               Shift Swap
                                             </span>
                                           ) : (
-                                            <span className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 rounded-xl text-xs font-bold uppercase tracking-wider">
+                                            <span className="px-2.5 py-1 bg-transparent border border-white/12 text-white border border-transparent text-emerald-300 rounded-xl text-xs font-bold uppercase tracking-wider">
                                               Annual Leave
                                             </span>
                                           )}
@@ -17016,7 +17016,7 @@ ${ttNotes}`
                                                   "Request details copied — with beautiful emojis!",
                                                 );
                                               }}
-                                              className="p-1.5 hover:bg-white/10 text-slate-300 hover:text-slate-100 rounded-xl transition-all cursor-pointer flex items-center justify-center border border-white/5 hover:border-white/10"
+                                              className="p-1.5 hover:bg-white/10 text-slate-300 hover:text-slate-100 rounded-xl transition-all cursor-pointer flex items-center justify-center border border-white/8 hover:border-white/8"
                                               title="Copy Request details"
                                             >
                                               <Copy className="w-3.5 h-3.5" />
@@ -17078,14 +17078,14 @@ ${ttNotes}`
                           </div>
 
                           {/* Filter Rail and Search Bar inside Frosted card */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col md:flex-row items-center gap-4">
+                          <div className="bg-white/5 border border-white/8 p-5 rounded-xl flex flex-col md:flex-row items-center gap-4">
                             <div className="flex items-center gap-1 bg-white/[0.04] p-1 rounded-xl w-full md:w-auto self-stretch">
                               <button
                                 onClick={() => {
                                   setLogFilter("all");
                                   setLogPage(1);
                                 }}
-                                className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-xl transition-all ${ logFilter === "all" ? "bg-indigo-500 text-white shadow-sm" : "text-slate-400 hover:text-slate-100" }`}
+                                className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-xl transition-all ${ logFilter === "all" ? "bg-white/10 text-white" : "text-slate-400 hover:text-slate-100" }`}
                               >
                                 All Categories
                               </button>
@@ -17094,7 +17094,7 @@ ${ttNotes}`
                                   setLogFilter("swap");
                                   setLogPage(1);
                                 }}
-                                className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-xl transition-all ${ logFilter === "swap" ? "bg-indigo-500 text-white shadow-sm" : "text-slate-400 hover:text-slate-100" }`}
+                                className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-xl transition-all ${ logFilter === "swap" ? "bg-white/10 text-white" : "text-slate-400 hover:text-slate-100" }`}
                               >
                                 Shift Swaps
                               </button>
@@ -17103,7 +17103,7 @@ ${ttNotes}`
                                   setLogFilter("annual");
                                   setLogPage(1);
                                 }}
-                                className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-xl transition-all ${ logFilter === "annual" ? "bg-indigo-500 text-white shadow-sm" : "text-slate-400 hover:text-slate-100" }`}
+                                className={`flex-1 md:flex-initial px-4 py-2 text-xs font-bold rounded-xl transition-all ${ logFilter === "annual" ? "bg-white/10 text-white" : "text-slate-400 hover:text-slate-100" }`}
                               >
                                 Annual Leaves
                               </button>
@@ -17112,7 +17112,7 @@ ${ttNotes}`
                             <input
                               type="text"
                               placeholder=" Search by agent name..."
-                              className="flex-1 w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
+                              className="flex-1 w-full px-4 py-2.5 bg-white/5 border border-white/8 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
                               value={searchQuery}
                               onChange={(e) => {
                                 setSearchQuery(e.target.value);
@@ -17128,7 +17128,7 @@ ${ttNotes}`
                                   setLogDateFrom(e.target.value);
                                   setLogPage(1);
                                 }}
-                                className="px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-indigo-500 [color-scheme:dark]"
+                                className="px-3 py-2.5 bg-white/5 border border-white/8 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-indigo-500 [color-scheme:dark]"
                               />
                               <span className="text-slate-500">-</span>
                               <input
@@ -17139,16 +17139,16 @@ ${ttNotes}`
                                   setLogDateTo(e.target.value);
                                   setLogPage(1);
                                 }}
-                                className="px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-indigo-500 [color-scheme:dark]"
+                                className="px-3 py-2.5 bg-white/5 border border-white/8 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-indigo-500 [color-scheme:dark]"
                               />
                             </div>
                           </div>
 
                           {/* Logs Table */}
-                          <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+                          <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden">
                             <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
                               <table className="w-full text-left min-w-[800px]">
-                                <thead className="text-xs uppercase tracking-widest text-slate-400 border-b border-white/5 bg-slate-900/40 /40">
+                                <thead className="text-xs uppercase tracking-widest text-slate-400 border-b border-white/8 bg-slate-900/40 /40">
                                   <tr>
                                     <th className="px-6 py-4 font-bold">
                                       REF #
@@ -17189,7 +17189,7 @@ ${ttNotes}`
                                       return (
                                         <tr
                                           key={req.id}
-                                          className="border-b border-white/5 hover:bg-white/20 transition-colors"
+                                          className="border-b border-white/8 hover:bg-white/20 transition-colors"
                                         >
                                           <td className="px-6 py-4 font-sans text-xs text-slate-400">
                                             {formatCaseRef(
@@ -17204,11 +17204,11 @@ ${ttNotes}`
                                           </td>
                                           <td className="px-6 py-4">
                                             {isSwap ? (
-                                              <span className="px-2 py-0.5 bg-blue-500/10 text-blue-300 border border-blue-500/20 rounded-xl text-xs font-bold uppercase">
+                                              <span className="px-2 py-0.5 bg-transparent border border-white/12 text-white text-blue-300 border border-transparent rounded-xl text-xs font-bold uppercase">
                                                 Shift Swap
                                               </span>
                                             ) : (
-                                              <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 rounded-xl text-xs font-bold uppercase">
+                                              <span className="px-2 py-0.5 bg-transparent border border-white/12 text-white text-emerald-300 border border-transparent rounded-xl text-xs font-bold uppercase">
                                                 Annual
                                               </span>
                                             )}
@@ -17266,33 +17266,33 @@ ${ttNotes}`
                                           </td>
                                           <td className="px-6 py-4">
                                             {req.status === "approved" && (
-                                              <span className="px-2 py-1 bg-emerald-500/20 text-emerald-300 rounded-xl text-xs font-semibold flex items-center gap-1 w-max">
+                                              <span className="px-2 py-1 bg-transparent border border-white/12 text-white text-emerald-300 rounded-xl text-xs font-semibold flex items-center gap-1 w-max">
                                                 <CheckCircle2 className="w-3.5 h-3.5" />{" "}
                                                 Approved
                                               </span>
                                             )}
                                             {req.status === "declined" && (
-                                              <span className="px-2 py-1 bg-rose-500/20 text-rose-300 rounded-xl text-xs font-semibold flex items-center gap-1 w-max">
+                                              <span className="px-2 py-1 bg-rose-500/10 text-rose-300 rounded-xl text-xs font-semibold flex items-center gap-1 w-max">
                                                 <XCircle className="w-3.5 h-3.5" />{" "}
                                                 Declined
                                               </span>
                                             )}
                                             {req.status === "pending" && (
-                                              <span className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded-xl text-xs font-semibold flex items-center gap-1 w-max animate-pulse">
+                                              <span className="px-2 py-1 bg-amber-500/10 text-amber-300 rounded-xl text-xs font-semibold flex items-center gap-1 w-max animate-pulse">
                                                 <Clock className="w-3.5 h-3.5" />{" "}
                                                 Pending Approval
                                               </span>
                                             )}
                                             {req.status ===
                                               "pending_partner" && (
-                                              <span className="px-2 py-1 bg-indigo-500/20 text-indigo-300 rounded-xl text-xs font-semibold flex items-center gap-1 w-max animate-pulse">
+                                              <span className="px-2 py-1 bg-transparent border border-white/12 text-white text-indigo-300 rounded-xl text-xs font-semibold flex items-center gap-1 w-max animate-pulse">
                                                 <Clock className="w-3.5 h-3.5" />{" "}
                                                 Awaiting Partner
                                               </span>
                                             )}
                                             {req.status ===
                                               "declined_by_partner" && (
-                                              <span className="px-2 py-1 bg-rose-500/20 text-rose-300 rounded-xl text-xs font-semibold flex items-center gap-1 w-max">
+                                              <span className="px-2 py-1 bg-rose-500/10 text-rose-300 rounded-xl text-xs font-semibold flex items-center gap-1 w-max">
                                                 <XCircle className="w-3.5 h-3.5" />{" "}
                                                 Declined by Partner
                                               </span>
@@ -17308,7 +17308,7 @@ ${ttNotes}`
                                                   </span>
                                                 </p>
                                                 {req.ruleViolation && (
-                                                  <p className="text-xs text-rose-400 bg-rose-500/10 p-1.5 rounded border border-rose-500/20">
+                                                  <p className="text-xs text-rose-400 bg-rose-500/10 p-1.5 rounded border border-transparent">
                                                     Violation flag:{" "}
                                                     {req.violationMessage}
                                                   </p>
@@ -17341,7 +17341,7 @@ ${ttNotes}`
 
                           {/* Pagination Controls */}
                           {totalPages > 1 && (
-                            <div className="flex items-center justify-between px-4 py-3 bg-white/5 border border-white/10 rounded-2xl">
+                            <div className="flex items-center justify-between px-4 py-3 bg-white/5 border border-white/8 rounded-xl">
                               <button
                                 onClick={() =>
                                   setLogPage((p) => Math.max(1, p - 1))
@@ -17392,9 +17392,9 @@ ${ttNotes}`
                         {/* Four-Column Quad Report Actions Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                           {/* Card 1: Custom Audit timeframe summary text download */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/8 p-5 rounded-xl flex flex-col justify-between">
                             <div className="space-y-2">
-                              <div className="w-10 h-10 bg-indigo-500/15 border border-indigo-500/20 text-indigo-400 rounded-xl flex items-center justify-center">
+                              <div className="w-10 h-10 bg-indigo-500/10 border border-transparent text-indigo-400 rounded-xl flex items-center justify-center">
                                 <FileText className="w-5 h-5" />
                               </div>
                               <h4 className="font-bold text-slate-100 text-sm">
@@ -17408,14 +17408,14 @@ ${ttNotes}`
                             </div>
 
                             <div className="space-y-3 pt-4">
-                              <div className="grid grid-cols-4 gap-1.5 bg-white/[0.03] p-0.5 border border-white/5 rounded-xl select-none">
+                              <div className="grid grid-cols-4 gap-1.5 bg-white/[0.03] p-0.5 border border-white/8 rounded-xl select-none">
                                 {(
                                   ["day", "week", "month", "year"] as const
                                 ).map((p) => (
                                   <button
                                     key={p}
                                     onClick={() => setReportPeriod(p)}
-                                    className={`py-1 text-xs font-bold rounded-xl capitalize transition-all cursor-pointer ${ reportPeriod === p ? "bg-indigo-500 text-white shadow-sm" : "text-slate-400 hover:text-slate-100" }`}
+                                    className={`py-1 text-xs font-bold rounded-xl capitalize transition-all cursor-pointer ${ reportPeriod === p ? "bg-white/10 text-white" : "text-slate-400 hover:text-slate-100" }`}
                                   >
                                     {p}
                                   </button>
@@ -17424,7 +17424,7 @@ ${ttNotes}`
 
                               <button
                                 onClick={() => downloadReportTxt(reportPeriod)}
-                                className="w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer mt-2"
+                                className="w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-2"
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 Get {reportPeriod.toUpperCase()} Text
@@ -17433,9 +17433,9 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 2: Master Roster Shift Swaps & Annual Leaves Export */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/8 p-5 rounded-xl flex flex-col justify-between">
                             <div className="space-y-2">
-                              <div className="w-10 h-10 bg-blue-500/15 border border-blue-500/20 text-blue-400 rounded-xl flex items-center justify-center">
+                              <div className="w-10 h-10 bg-blue-500/10 border border-transparent text-blue-400 rounded-xl flex items-center justify-center">
                                 <GitPullRequest className="w-5 h-5" />
                               </div>
                               <h4 className="font-bold text-slate-100 text-sm font-sans">
@@ -17451,7 +17451,7 @@ ${ttNotes}`
                             <div className="pt-4 mt-auto space-y-2">
                               <button
                                 onClick={downloadFullXLSX}
-                                className="w-full py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/35 text-blue-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="w-full py-2 bg-blue-500/10 hover:bg-blue-500/10 border border-blue-500/35 text-blue-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                               >
                                 <FileSpreadsheet className="w-3.5 h-3.5" />
                                 Excel Export
@@ -17475,9 +17475,9 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 3: Agent Clock Timesheet Logs Export */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/8 p-5 rounded-xl flex flex-col justify-between">
                             <div className="space-y-2">
-                              <div className="w-10 h-10 bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center">
+                              <div className="w-10 h-10 bg-emerald-500/10 border border-transparent text-emerald-400 rounded-xl flex items-center justify-center">
                                 <Clock className="w-5 h-5" />
                               </div>
                               <h4 className="font-bold text-slate-100 text-sm">
@@ -17493,7 +17493,7 @@ ${ttNotes}`
                             <div className="pt-4 mt-auto space-y-2">
                               <button
                                 onClick={downloadTimeLogsXLSX}
-                                className="w-full py-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/35 text-emerald-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="w-full py-2 bg-emerald-500/10 hover:bg-emerald-500/10 border border-emerald-500/35 text-emerald-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                               >
                                 <FileSpreadsheet className="w-3.5 h-3.5" />
                                 Excel Export
@@ -17516,7 +17516,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 4: Agent Inquiries & Feed Cases Export */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/8 p-5 rounded-xl flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-purple-500/15 border border-purple-500/20 text-purple-400 rounded-xl flex items-center justify-center">
                                 <HelpCircle className="w-5 h-5" />
@@ -17558,9 +17558,9 @@ ${ttNotes}`
                         {/* New rows of module exports */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                           {/* Card 5: Tabby & Tamara Fintech Requests */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/8 p-5 rounded-xl flex flex-col justify-between">
                             <div className="space-y-2">
-                              <div className="w-10 h-10 bg-amber-500/15 border border-amber-500/20 text-amber-400 rounded-xl flex items-center justify-center">
+                              <div className="w-10 h-10 bg-amber-500/10 border border-transparent text-amber-400 rounded-xl flex items-center justify-center">
                                 <Wallet className="w-5 h-5" />
                               </div>
                               <h4 className="font-bold text-slate-100 text-sm font-sans">
@@ -17576,7 +17576,7 @@ ${ttNotes}`
                             <div className="pt-4 mt-auto">
                               <button
                                 onClick={handleDownloadFintechRequestsReport}
-                                className="w-full py-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/35 text-amber-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="w-full py-2 bg-amber-500/10 hover:bg-amber-500/10 border border-amber-500/35 text-amber-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 Extract Fintech CSV
@@ -17585,9 +17585,9 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 6: General Service & Clinical Complaints */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/8 p-5 rounded-xl flex flex-col justify-between">
                             <div className="space-y-2">
-                              <div className="w-10 h-10 bg-rose-500/15 border border-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center">
+                              <div className="w-10 h-10 bg-rose-500/10 border border-transparent text-rose-400 rounded-xl flex items-center justify-center">
                                 <AlertTriangle className="w-5 h-5" />
                               </div>
                               <h4 className="font-bold text-slate-100 text-sm font-sans">
@@ -17603,7 +17603,7 @@ ${ttNotes}`
                             <div className="pt-4 mt-auto">
                               <button
                                 onClick={handleDownloadFintechComplaintsReport}
-                                className="w-full py-2 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/35 text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="w-full py-2 bg-rose-500/10 hover:bg-rose-500/10 border border-rose-500/35 text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 Extract Complaints CSV
@@ -17612,9 +17612,9 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 7: Client Communications */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/8 p-5 rounded-xl flex flex-col justify-between">
                             <div className="space-y-2">
-                              <div className="w-10 h-10 bg-cyan-500/15 border border-cyan-500/20 text-cyan-400 rounded-xl flex items-center justify-center">
+                              <div className="w-10 h-10 bg-cyan-500/10 border border-transparent text-cyan-400 rounded-xl flex items-center justify-center">
                                 <PhoneCall className="w-5 h-5" />
                               </div>
                               <h4 className="font-bold text-slate-100 text-sm font-sans">
@@ -17630,7 +17630,7 @@ ${ttNotes}`
                             <div className="pt-4 mt-auto">
                               <button
                                 onClick={handleDownloadClientCommsReport}
-                                className="w-full py-2 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/35 text-cyan-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="w-full py-2 bg-cyan-500/10 hover:bg-cyan-500/10 border border-cyan-500/35 text-cyan-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 Extract Comms CSV
@@ -17639,9 +17639,9 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 8: Direct Case Leads */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/8 p-5 rounded-xl flex flex-col justify-between">
                             <div className="space-y-2">
-                              <div className="w-10 h-10 bg-teal-500/15 border border-teal-500/20 text-teal-400 rounded-xl flex items-center justify-center">
+                              <div className="w-10 h-10 bg-teal-500/10 border border-transparent text-teal-400 rounded-xl flex items-center justify-center">
                                 <ClipboardList className="w-5 h-5" />
                               </div>
                               <h4 className="font-bold text-slate-100 text-sm font-sans">
@@ -17657,7 +17657,7 @@ ${ttNotes}`
                             <div className="pt-4 mt-auto">
                               <button
                                 onClick={handleDownloadCasesReport}
-                                className="w-full py-2 bg-teal-500/20 hover:bg-teal-500/30 border border-teal-500/35 text-teal-400 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="w-full py-2 bg-teal-500/10 hover:bg-teal-500/10 border border-teal-500/35 text-teal-400 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 Extract Case Leads CSV
@@ -17666,9 +17666,9 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 9: Active Work Schedules */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/8 p-5 rounded-xl flex flex-col justify-between">
                             <div className="space-y-2">
-                              <div className="w-10 h-10 bg-pink-500/15 border border-pink-500/20 text-pink-400 rounded-xl flex items-center justify-center">
+                              <div className="w-10 h-10 bg-pink-500/10 border border-transparent text-pink-400 rounded-xl flex items-center justify-center">
                                 <Calendar className="w-5 h-5" />
                               </div>
                               <h4 className="font-bold text-slate-100 text-sm font-sans">
@@ -17684,7 +17684,7 @@ ${ttNotes}`
                             <div className="pt-4 mt-auto">
                               <button
                                 onClick={handleDownloadSchedulesReport}
-                                className="w-full py-2 bg-pink-500/20 hover:bg-pink-500/30 border border-pink-500/35 text-pink-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="w-full py-2 bg-pink-500/10 hover:bg-pink-500/10 border border-pink-500/35 text-pink-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 Extract Schedules CSV
@@ -17693,9 +17693,9 @@ ${ttNotes}`
                           </div>
 
                           {/* Card 11: RTM Live Attendance Summary Digest */}
-                          <div className="bg-gradient-to-br from-emerald-500/5 to-teal-500/5 border border-emerald-500/15 p-5 rounded-2xl flex flex-col justify-between">
+                          <div className="bg-gradient-to-br from-emerald-500/5 to-teal-500/5 border border-emerald-500/15 p-5 rounded-xl flex flex-col justify-between">
                             <div className="space-y-2">
-                              <div className="w-10 h-10 bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center">
+                              <div className="w-10 h-10 bg-emerald-500/10 border border-transparent text-emerald-400 rounded-xl flex items-center justify-center">
                                 <Activity className="w-5 h-5 text-emerald-400 animate-pulse" />
                               </div>
                               <h4 className="font-bold text-slate-100 text-sm font-sans">
@@ -17711,7 +17711,7 @@ ${ttNotes}`
                             <div className="pt-4 mt-auto">
                               <button
                                 onClick={downloadRtmLiveMetricsDigest}
-                                className="w-full py-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/35 text-emerald-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="w-full py-2 bg-emerald-500/10 hover:bg-emerald-500/10 border border-emerald-500/35 text-emerald-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 Download RTM Digest
@@ -17737,10 +17737,10 @@ ${ttNotes}`
 
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             {/* Shift Swap Module */}
-                            <div className="bg-white/5 border border-white/10 p-6 rounded-2xl flex flex-col space-y-5 relative overflow-hidden">
+                            <div className="bg-white/5 border border-white/8 p-6 rounded-xl flex flex-col space-y-5 relative overflow-hidden">
                               <div className="absolute top-0 left-0 right-0 h-1 bg-blue-500"></div>
                               <div className="flex items-center gap-2.5">
-                                <div className="w-9 h-9 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center justify-center">
+                                <div className="w-9 h-9 bg-blue-500/10 border border-transparent rounded-xl flex items-center justify-center">
                                   <Users className="w-5 h-5 text-blue-400" />
                                 </div>
                                 <div>
@@ -17774,7 +17774,7 @@ ${ttNotes}`
                                   <input
                                     id="swap-date"
                                     type="date"
-                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500 text-sm"
+                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/8 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500 text-sm"
                                     value={swapDate}
                                     onChange={(e) =>
                                       setSwapDate(e.target.value)
@@ -17793,7 +17793,7 @@ ${ttNotes}`
                                     </label>
                                     <select
                                       id="swap-shift"
-                                      className="text-slate-100 w-full px-4 py-2.5 bg-white/5 border border-white/20 rounded-xl focus:outline-none focus:border-indigo-500"
+                                      className="text-slate-100 w-full px-4 py-2.5 bg-white/5 border border-white/15 rounded-xl focus:outline-none focus:border-indigo-500"
                                       value={swapShift}
                                       onChange={(e) =>
                                         setSwapShift(e.target.value)
@@ -17820,7 +17820,7 @@ ${ttNotes}`
                                     </label>
                                     <select
                                       id="swap-target-shift"
-                                      className="text-slate-100 w-full px-4 py-2.5 bg-white/5 border border-white/20 rounded-xl focus:outline-none focus:border-indigo-500"
+                                      className="text-slate-100 w-full px-4 py-2.5 bg-white/5 border border-white/15 rounded-xl focus:outline-none focus:border-indigo-500"
                                       value={swapTargetShift}
                                       onChange={(e) =>
                                         setSwapTargetShift(e.target.value)
@@ -17848,7 +17848,7 @@ ${ttNotes}`
                                   </label>
                                   <select
                                     id="swap-partner"
-                                    className="text-slate-100 w-full px-4 py-2.5 bg-white/5 border border-white/20 rounded-xl focus:outline-none focus:border-indigo-500 font-medium"
+                                    className="text-slate-100 w-full px-4 py-2.5 bg-white/5 border border-white/15 rounded-xl focus:outline-none focus:border-indigo-500 font-medium"
                                     value={swapTargetAgent}
                                     onChange={(e) =>
                                       setSwapTargetAgent(e.target.value)
@@ -17887,7 +17887,7 @@ ${ttNotes}`
                                   <textarea
                                     id="swap-notes"
                                     rows={2}
-                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/8 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
                                     placeholder="State reason (e.g., family errand, doctor appointment)..."
                                     value={swapNotes}
                                     onChange={(e) =>
@@ -17909,7 +17909,7 @@ ${ttNotes}`
 
                                 {/* Interactive Warning Message Display */}
                                 {swapWarning && (
-                                  <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-300 rounded-xl text-xs flex items-center gap-2.5">
+                                  <div className="p-4 bg-rose-500/10 border border-transparent text-rose-300 rounded-xl text-xs flex items-center gap-2.5">
                                     <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
                                     <div>
                                       <p className="font-bold">
@@ -17928,11 +17928,11 @@ ${ttNotes}`
                                   disabled={
                                     swapWarning !== null || isSwapUploading
                                   }
-                                  className={`w-full py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${ swapWarning !== null || isSwapUploading ? "bg-slate-900/40 /40/20 text-slate-500 cursor-not-allowed border border-white/5" : "bg-indigo-500 hover:bg-indigo-600 text-white shadow-sm-sm cursor-pointer" }`}
+                                  className={`w-full py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${ swapWarning !== null || isSwapUploading ? "bg-slate-900/40 /40/20 text-slate-500 cursor-not-allowed border border-white/8" : "bg-indigo-500 hover:bg-indigo-600 text-white cursor-pointer" }`}
                                 >
                                   {isSwapUploading ? (
                                     <>
-                                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                      <div className="w-4 h-4 border-2 border-white/15 border-t-white rounded-full animate-spin" />
                                       Uploading files...
                                     </>
                                   ) : (
@@ -17946,10 +17946,10 @@ ${ttNotes}`
                             </div>
 
                             {/* Annual Leave Module */}
-                            <div className="bg-white/5 border border-white/10 p-6 rounded-2xl flex flex-col space-y-5 relative overflow-hidden">
+                            <div className="bg-white/5 border border-white/8 p-6 rounded-xl flex flex-col space-y-5 relative overflow-hidden">
                               <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500"></div>
                               <div className="flex items-center gap-2.5">
-                                <div className="w-9 h-9 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center">
+                                <div className="w-9 h-9 bg-emerald-500/10 border border-transparent rounded-xl flex items-center justify-center">
                                   <Calendar className="w-5 h-5 text-emerald-400" />
                                 </div>
                                 <div>
@@ -17984,7 +17984,7 @@ ${ttNotes}`
                                     <input
                                       id="annual-start"
                                       type="date"
-                                      className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500 text-sm"
+                                      className="w-full px-4 py-2.5 bg-white/5 border border-white/8 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500 text-sm"
                                       value={annualStart}
                                       onChange={(e) =>
                                         setAnnualStart(e.target.value)
@@ -18003,7 +18003,7 @@ ${ttNotes}`
                                     <input
                                       id="annual-end"
                                       type="date"
-                                      className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500 text-sm"
+                                      className="w-full px-4 py-2.5 bg-white/5 border border-white/8 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500 text-sm"
                                       value={annualEnd}
                                       onChange={(e) =>
                                         setAnnualEnd(e.target.value)
@@ -18023,7 +18023,7 @@ ${ttNotes}`
                                   <textarea
                                     id="annual-notes"
                                     rows={4}
-                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/8 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
                                     placeholder="State comments..."
                                     value={annualNotes}
                                     onChange={(e) =>
@@ -18045,7 +18045,7 @@ ${ttNotes}`
 
                                 {/* Interactive Warning Message Display */}
                                 {annualWarning && (
-                                  <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-300 rounded-xl text-xs flex items-center gap-2.5">
+                                  <div className="p-4 bg-rose-500/10 border border-transparent text-rose-300 rounded-xl text-xs flex items-center gap-2.5">
                                     <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
                                     <div>
                                       <p className="font-bold">
@@ -18064,11 +18064,11 @@ ${ttNotes}`
                                   disabled={
                                     annualWarning !== null || isAnnualUploading
                                   }
-                                  className={`w-full py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${ annualWarning !== null || isAnnualUploading ? "bg-slate-900/40 /40/20 text-slate-500 cursor-not-allowed border border-white/5" : "bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm-sm cursor-pointer" }`}
+                                  className={`w-full py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${ annualWarning !== null || isAnnualUploading ? "bg-slate-900/40 /40/20 text-slate-500 cursor-not-allowed border border-white/8" : "bg-emerald-500 hover:bg-emerald-600 text-white cursor-pointer" }`}
                                 >
                                   {isAnnualUploading ? (
                                     <>
-                                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                      <div className="w-4 h-4 border-2 border-white/15 border-t-white rounded-full animate-spin" />
                                       Uploading files...
                                     </>
                                   ) : (
@@ -18133,8 +18133,8 @@ ${ttNotes}`
 
                           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             {/* Submit Inquiry Form (Left Side / Col Span 1) */}
-                            <div className="lg:col-span-1 bg-white/5 border border-white/10 p-5 rounded-2xl space-y-5">
-                              <h3 className="text-base font-bold text-slate-100 font-sans flex items-center gap-2 border-b border-white/5 pb-3">
+                            <div className="lg:col-span-1 bg-white/5 border border-white/8 p-5 rounded-xl space-y-5">
+                              <h3 className="text-base font-bold text-slate-100 font-sans flex items-center gap-2 border-b border-white/8 pb-3">
                                 <HelpCircle className="w-5 h-5 text-indigo-400" />
                                 Submit New Inquiry
                               </h3>
@@ -18170,7 +18170,7 @@ ${ttNotes}`
                                     onChange={(e) =>
                                       setInquiryClinicName(e.target.value)
                                     }
-                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
+                                    className="w-full px-4 py-3 bg-white/5 border border-white/8 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                     required
                                   >
                                     <option
@@ -18211,7 +18211,7 @@ ${ttNotes}`
                                     onChange={(e) =>
                                       setInquiryPlatform(e.target.value)
                                     }
-                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
+                                    className="w-full px-4 py-3 bg-white/5 border border-white/8 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                     required
                                   >
                                     <option
@@ -18281,7 +18281,7 @@ ${ttNotes}`
                                     onChange={(e) =>
                                       setInquiryPatientName(e.target.value)
                                     }
-                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+                                    className="w-full px-4 py-3 bg-white/5 border border-white/8 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                   />
                                 </div>
 
@@ -18293,13 +18293,13 @@ ${ttNotes}`
                                       *
                                     </span>
                                   </label>
-                                  <div className="grid grid-cols-2 gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
+                                  <div className="grid grid-cols-2 gap-2 bg-white/5 p-1 rounded-xl border border-white/8">
                                     <button
                                       type="button"
                                       onClick={() =>
                                         setInquiryCustomerType("new")
                                       }
-                                      className={`py-2 text-xs font-medium rounded-xl transition-all text-center cursor-pointer ${inquiryCustomerType === "new" ? "bg-indigo-600 text-white shadow-sm font-bold" : "text-slate-400 hover:text-slate-200"}`}
+                                      className={`py-2 text-xs font-medium rounded-xl transition-all text-center cursor-pointer ${inquiryCustomerType === "new" ? "bg-indigo-600 text-white font-bold" : "text-slate-400 hover:text-slate-200"}`}
                                     >
                                       🆕 New Customer
                                     </button>
@@ -18308,7 +18308,7 @@ ${ttNotes}`
                                       onClick={() =>
                                         setInquiryCustomerType("old")
                                       }
-                                      className={`py-2 text-xs font-medium rounded-xl transition-all text-center cursor-pointer ${inquiryCustomerType === "old" ? "bg-indigo-600 text-white shadow-sm font-bold" : "text-slate-400 hover:text-slate-200"}`}
+                                      className={`py-2 text-xs font-medium rounded-xl transition-all text-center cursor-pointer ${inquiryCustomerType === "old" ? "bg-indigo-600 text-white font-bold" : "text-slate-400 hover:text-slate-200"}`}
                                     >
                                       📂 Old Customer
                                     </button>
@@ -18332,7 +18332,7 @@ ${ttNotes}`
                                       onChange={(e) =>
                                         setInquiryFileNumber(e.target.value)
                                       }
-                                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+                                      className="w-full px-4 py-3 bg-white/5 border border-white/8 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                     />
                                   </div>
                                 )}
@@ -18350,7 +18350,7 @@ ${ttNotes}`
                                           setInquiryPhoneNumber("");
                                         }
                                       }}
-                                      className="rounded border-white/10 bg-white/5 text-indigo-500 focus:ring-0"
+                                      className="rounded border-white/8 bg-white/5 text-indigo-500 focus:ring-0"
                                     />
                                     <label htmlFor="inquiryNoPhone" className="text-xs font-semibold text-slate-300 cursor-pointer select-none">
                                       Client doesn't have a phone number (Use Instagram/TikTok)
@@ -18378,7 +18378,7 @@ ${ttNotes}`
                                           if (val === "+971") val = "";
                                           setInquiryPhoneNumber(val);
                                         }}
-                                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+                                        className="w-full px-4 py-3 bg-white/5 border border-white/8 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                       />
                                       <p className="text-xs text-slate-400 mt-1">
                                         * Please enter the number starting from 5
@@ -18396,7 +18396,7 @@ ${ttNotes}`
                                           placeholder="@username"
                                           value={inquiryInstagram}
                                           onChange={(e) => setInquiryInstagram(e.target.value)}
-                                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+                                          className="w-full px-4 py-3 bg-white/5 border border-white/8 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                         />
                                       </div>
                                       <div className="space-y-1.5">
@@ -18408,7 +18408,7 @@ ${ttNotes}`
                                           placeholder="@username"
                                           value={inquiryTiktok}
                                           onChange={(e) => setInquiryTiktok(e.target.value)}
-                                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+                                          className="w-full px-4 py-3 bg-white/5 border border-white/8 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                         />
                                       </div>
                                     </div>
@@ -18427,7 +18427,7 @@ ${ttNotes}`
                                     onChange={(e) =>
                                       setInquiryFileId(e.target.value)
                                     }
-                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+                                    className="w-full px-4 py-3 bg-white/5 border border-white/8 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                   />
                                 </div>
 
@@ -18442,7 +18442,7 @@ ${ttNotes}`
                                     </label>
 
                                     {/* Direction toggle options for Arabic/English */}
-                                    <div className="flex items-center gap-1 bg-white/5 border border-white/10 p-0.5 rounded-xl text-xs">
+                                    <div className="flex items-center gap-1 bg-white/5 border border-white/8 p-0.5 rounded-xl text-xs">
                                       <button
                                         type="button"
                                         onClick={() =>
@@ -18497,7 +18497,7 @@ ${ttNotes}`
                                     }
                                     rows={4}
                                     dir={inquiryLanguageDir}
-                                    className={`w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans placeholder-slate-500 resize-none ${inquiryLanguageDir === "rtl" ? "text-right" : "text-left"}`}
+                                    className={`w-full px-4 py-3 bg-white/5 border border-white/8 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans placeholder-slate-500 resize-none ${inquiryLanguageDir === "rtl" ? "text-right" : "text-left"}`}
                                   />
                                   {["agent", "sme"].includes(
                                     currentUser?.role as string,
@@ -18509,7 +18509,7 @@ ${ttNotes}`
                                 </div>
 
                                 {/* Follow-up / Schedule for Later */}
-                                <div className="space-y-3 p-3.5 bg-white/5 border border-white/5 rounded-2xl text-left">
+                                <div className="space-y-3 p-3.5 bg-white/5 border border-white/8 rounded-xl text-left">
                                   <div className="flex items-center justify-between">
                                     <span className="text-sm font-bold text-slate-300">
                                       Schedule for Later Date / Follow-up?
@@ -18521,7 +18521,7 @@ ${ttNotes}`
                                         onChange={(e) => setInqIsFollowUp(e.target.checked)}
                                         className="sr-only peer"
                                       />
-                                      <div className="w-11 h-6 bg-slate-900/40 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                      <div className="w-11 h-6 bg-slate-900/40 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-white/8 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                                     </label>
                                   </div>
                                   {inqIsFollowUp && (
@@ -18533,7 +18533,7 @@ ${ttNotes}`
                                         type="date"
                                         value={inqFollowUpDate}
                                         onChange={(e) => setInqFollowUpDate(e.target.value)}
-                                        className="w-full bg-white/[0.03] border border-indigo-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans cursor-pointer"
+                                        className="w-full bg-white/[0.03] border border-transparent rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans cursor-pointer"
                                         required={inqIsFollowUp}
                                       />
                                     </div>
@@ -18552,11 +18552,11 @@ ${ttNotes}`
                                 <button
                                   type="submit"
                                   disabled={isFormSubmitting}
-                                  className={`w-full py-2.5 text-white font-bold text-xs rounded-xl shadow-sm-sm transition-all flex items-center justify-center gap-1.5 ${isFormSubmitting ? "bg-indigo-800 pointer-events-none opacity-60" : "bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98]"}`}
+                                  className={`w-full py-2.5 text-white font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 ${isFormSubmitting ? "bg-indigo-800 pointer-events-none opacity-60" : "bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98]"}`}
                                 >
                                   {isFormSubmitting ? (
                                     <>
-                                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                      <div className="w-4 h-4 border-2 border-white/15 border-t-white rounded-full animate-spin" />
                                       Submitting Inquiry...
                                     </>
                                   ) : (
@@ -18573,10 +18573,10 @@ ${ttNotes}`
                             {true && (
                               <div className="lg:col-span-2 space-y-4">
                                 {/* View Toggles */}
-                                <div className="flex bg-white/5 border border-white/10 p-1.5 rounded-xl text-sm font-bold flex-wrap">
+                                <div className="flex bg-white/5 border border-white/8 p-1.5 rounded-xl text-sm font-bold flex-wrap">
                                   <button
                                     onClick={() => setAgentInquiryView("my")}
-                                    className={`flex-1 py-2.5 rounded-xl transition-all ${agentInquiryView === "my" ? "bg-indigo-600 text-white shadow-sm-sm" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"}`}
+                                    className={`flex-1 py-2.5 rounded-xl transition-all ${agentInquiryView === "my" ? "bg-white/10 text-white" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"}`}
                                   >
                                     My Submission Timeline
                                   </button>
@@ -18584,7 +18584,7 @@ ${ttNotes}`
                                     onClick={() =>
                                       setAgentInquiryView("global")
                                     }
-                                    className={`flex-1 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 ${agentInquiryView === "global" ? "bg-indigo-600 text-white shadow-sm-sm" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"}`}
+                                    className={`flex-1 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 ${agentInquiryView === "global" ? "bg-white/10 text-white" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"}`}
                                   >
                                     <Search className="w-4 h-4" />
                                     Global Inquiry History
@@ -18592,8 +18592,8 @@ ${ttNotes}`
                                 </div>
 
                                 {agentInquiryView === "my" && (
-                                  <div className="p-5 bg-white/5 border border-white/10 rounded-2xl">
-                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/5 pb-4 mb-4">
+                                  <div className="p-5 bg-white/5 border border-white/8 rounded-xl">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/8 pb-4 mb-4">
                                       <div>
                                         <h3 className="text-base font-bold text-slate-100 font-sans">
                                           My Submission Timeline
@@ -18607,7 +18607,7 @@ ${ttNotes}`
                                         <span className="text-slate-400">
                                           Total:
                                         </span>
-                                        <span className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/15 text-indigo-300 font-bold rounded">
+                                        <span className="px-2 py-0.5 bg-transparent border border-white/12 text-white border border-indigo-500/15 text-indigo-300 font-bold rounded">
                                           {
                                             inquiries.filter(
                                               (i) =>
@@ -18646,14 +18646,14 @@ ${ttNotes}`
                                             let statusText = "Submitted to TL";
                                             if (inq.status === "sent") {
                                               statusColor =
-                                                "bg-orange-500/10 border-orange-500/20 text-orange-400";
+                                                "bg-orange-500/10 border-transparent text-orange-400";
                                               statusText =
                                                 "Sent to Client / Actioned";
                                             } else if (
                                               inq.status === "answered"
                                             ) {
                                               statusColor =
-                                                "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
+                                                "bg-emerald-500/10 border-transparent text-emerald-400";
                                               statusText = "Answered";
                                             }
 
@@ -18668,20 +18668,20 @@ ${ttNotes}`
                                             const ageBadgeColor =
                                               inq.status !== "answered"
                                                 ? ageHours > 4
-                                                  ? "bg-red-500/20 text-red-400 border-red-500/30 animate-pulse"
+                                                  ? "bg-red-500/10 text-red-400 border-transparent animate-pulse"
                                                   : ageHours > 1
-                                                    ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
-                                                    : "bg-slate-700 text-slate-400 border-white/10"
-                                                : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
+                                                    ? "bg-amber-500/10 text-amber-400 border-transparent"
+                                                    : "bg-slate-700 text-slate-400 border-white/8"
+                                                : "bg-emerald-500/10 text-emerald-500 border-transparent";
 
                                             return (
                                               <div
                                                 key={inq.id}
                                                 id={`inquiry-${inq.id}`}
-                                                className="p-4 bg-white/5 border border-white/10 rounded-2xl space-y-3 hover:border-white/10 transition-all duration-300 overflow-hidden relative flex flex-col w-full"
+                                                className="p-4 bg-white/5 border border-white/8 rounded-xl space-y-3 hover:border-white/8 transition-all duration-300 overflow-hidden relative flex flex-col w-full"
                                               >
                                                 {/* Top Info row */}
-                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-2">
+                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/8 pb-2">
                                                   <div className="flex flex-wrap items-center gap-2">
                                                     <span
                                                       className={`px-2 py-0.5 border text-xs font-bold rounded-xl uppercase tracking-wide shrink-0 ${statusColor}`}
@@ -18690,7 +18690,7 @@ ${ttNotes}`
                                                     </span>
                                                     {inq.viewingStatus ===
                                                       "tl_viewing" && (
-                                                      <span className="px-2 py-0.5 border text-xs font-bold rounded-xl bg-amber-500/10 border-amber-500/25 text-amber-400 shrink-0 flex items-center gap-1">
+                                                      <span className="px-2 py-0.5 border text-xs font-bold rounded-xl bg-amber-500/10 border-transparent text-amber-400 shrink-0 flex items-center gap-1">
                                                         👁 Team Leader Viewing
                                                       </span>
                                                     )}
@@ -18711,7 +18711,7 @@ ${ttNotes}`
                                                             "Clinic name copied!",
                                                           );
                                                         }}
-                                                        className="text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 border border-indigo-500/30 rounded-xl font-bold flex items-center gap-1 cursor-pointer hover:bg-indigo-500/30 transition-colors"
+                                                        className="text-xs bg-transparent border border-white/12 text-white text-indigo-300 px-2.5 py-0.5 border border-transparent rounded-xl font-bold flex items-center gap-1 cursor-pointer hover:bg-white/5 transition-colors"
                                                         title="Copy Clinic"
                                                       >
                                                         {getClinicLabel(
@@ -18733,7 +18733,7 @@ ${ttNotes}`
                                                             "Phone copied (no leading zero)",
                                                           );
                                                         }}
-                                                        className="text-xs bg-sky-500/10 text-sky-300 px-2.5 py-0.5 border border-sky-500/20 rounded-xl font-sans flex items-center gap-1 cursor-pointer hover:bg-sky-500/20 transition-colors"
+                                                        className="text-xs bg-sky-500/10 text-sky-300 px-2.5 py-0.5 border border-transparent rounded-xl font-sans flex items-center gap-1 cursor-pointer hover:bg-sky-500/10 transition-colors"
                                                         title="Copy Phone Number"
                                                       >
                                                         {inq.phoneNumber}
@@ -18764,7 +18764,7 @@ ${ttNotes}`
                                                               inq.id,
                                                             )
                                                           }
-                                                          className="text-xs bg-indigo-500/10 border border-indigo-500/25 text-indigo-300 font-bold px-2 py-0.5 rounded-xl hover:bg-indigo-500/20 transition-all"
+                                                          className="text-xs bg-transparent border border-white/12 text-white border border-transparent text-indigo-300 font-bold px-2 py-0.5 rounded-xl hover:bg-white/5 transition-all"
                                                         >
                                                           Mark Read
                                                         </button>
@@ -18793,7 +18793,7 @@ ${ttNotes}`
                                                             data: { ...inq },
                                                           })
                                                         }
-                                                        className="text-xs bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 font-bold px-2 py-0.5 rounded-xl hover:bg-emerald-500/20 transition-all flex items-center gap-1 shrink-0 cursor-pointer"
+                                                        className="text-xs bg-transparent border border-white/12 text-white border border-transparent text-emerald-300 font-bold px-2 py-0.5 rounded-xl hover:bg-white/5 transition-all flex items-center gap-1 shrink-0 cursor-pointer"
                                                         title={`Edit inquiry (${getRemainingEditTime(inq.createdAt)})`}
                                                       >
                                                         <Pencil className="w-2.5 h-2.5" />{" "}
@@ -18811,7 +18811,7 @@ ${ttNotes}`
                                                           data: inq,
                                                         })
                                                       }
-                                                      className="px-3 py-1.5 bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/20 rounded-xl text-teal-400 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-2"
+                                                      className="px-3 py-1.5 bg-teal-500/10 hover:bg-teal-500/10 border border-transparent rounded-xl text-teal-400 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-2"
                                                     >
                                                       <Eye className="w-3 h-3 text-teal-400" />{" "}
                                                       View Details
@@ -18853,7 +18853,7 @@ ${ttNotes}`
                                                           "Inquiry copied!",
                                                         );
                                                       }}
-                                                      className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                                                      className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/8 rounded-xl text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                                                     >
                                                       <Copy className="w-3 h-3" />{" "}
                                                       Copy Details
@@ -18927,7 +18927,7 @@ ${ttNotes}`
                                                 />
 
                                                 {/* Customer Contacted Status Dropdown */}
-                                                <div className="flex flex-wrap items-center gap-2.5 pt-3 border-t border-white/5">
+                                                <div className="flex flex-wrap items-center gap-2.5 pt-3 border-t border-white/8">
                                                   <span className="text-xs text-slate-400 font-medium">
                                                     Customer Contact Status:
                                                   </span>
@@ -18942,7 +18942,7 @@ ${ttNotes}`
                                                         e.target.value as any,
                                                       )
                                                     }
-                                                    className="bg-white/5 border border-white/10 rounded-xl px-2.5 py-1 text-xs text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
+                                                    className="bg-white/5 border border-white/8 rounded-xl px-2.5 py-1 text-xs text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                                                   >
                                                     <option
                                                       value="not_contacted"
@@ -18973,8 +18973,8 @@ ${ttNotes}`
                                 )}
 
                                 {agentInquiryView === "global" && (
-                                  <div className="p-5 bg-white/5 border border-white/10 rounded-2xl animate-fade-in">
-                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/5 pb-4 mb-4">
+                                  <div className="p-5 bg-white/5 border border-white/8 rounded-xl animate-fade-in">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/8 pb-4 mb-4">
                                       <div>
                                         <h3 className="text-base font-bold text-slate-100 font-sans">
                                           Global Inquiries Knowledge Base
@@ -18986,7 +18986,7 @@ ${ttNotes}`
                                       </div>
                                     </div>
 
-                                    <div className="mb-4 bg-transparent p-1.5 rounded-xl border border-white/10 flex items-center">
+                                    <div className="mb-4 bg-transparent p-1.5 rounded-xl border border-white/8 flex items-center">
                                       <Search className="w-4 h-4 text-slate-500 ml-3 mr-2 shrink-0" />
                                       <input
                                         type="text"
@@ -19078,9 +19078,9 @@ ${ttNotes}`
                                           <div
                                             key={inq.id}
                                             id={`inquiry-${inq.id}`}
-                                            className="p-4 bg-white/5 border border-white/10 rounded-2xl hover:border-indigo-500/30 transition-all font-sans text-left space-y-3"
+                                            className="p-4 bg-white/5 border border-white/8 rounded-xl hover:border-transparent transition-all font-sans text-left space-y-3"
                                           >
-                                            <div className="flex flex-wrap gap-2 items-center justify-between text-xs pb-2 border-b border-white/5">
+                                            <div className="flex flex-wrap gap-2 items-center justify-between text-xs pb-2 border-b border-white/8">
                                               <div className="flex items-center gap-2">
                                                 <span
                                                   onClick={() => {
@@ -19089,7 +19089,7 @@ ${ttNotes}`
                                                       "Agent name copied!",
                                                     );
                                                   }}
-                                                  className="bg-white/10 text-slate-300 font-bold px-2 py-0.5 rounded-xl border border-slate-700 cursor-pointer hover:bg-white/20 transition-colors"
+                                                  className="bg-white/10 text-slate-300 font-bold px-2 py-0.5 rounded-xl border border-white/8 cursor-pointer hover:bg-white/20 transition-colors"
                                                   title="Copy Agent Name"
                                                 >
                                                   {inq.agentName}
@@ -19102,7 +19102,7 @@ ${ttNotes}`
                                                         "Clinic name copied!",
                                                       );
                                                     }}
-                                                    className="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2.5 py-0.5 rounded-xl cursor-pointer hover:bg-indigo-500/20 transition-colors"
+                                                    className="bg-transparent border border-white/12 text-white text-indigo-300 border border-transparent px-2.5 py-0.5 rounded-xl cursor-pointer hover:bg-white/5 transition-colors"
                                                     title="Copy Clinic"
                                                   >
                                                     {getClinicLabel(
@@ -19120,7 +19120,7 @@ ${ttNotes}`
                                                         "Phone copied (no leading zero)",
                                                       );
                                                     }}
-                                                    className="bg-sky-500/10 text-sky-300 border border-sky-500/20 px-2.5 py-0.5 rounded-xl font-mono tracking-wider cursor-pointer hover:bg-sky-500/20 transition-colors"
+                                                    className="bg-sky-500/10 text-sky-300 border border-transparent px-2.5 py-0.5 rounded-xl font-mono tracking-wider cursor-pointer hover:bg-sky-500/10 transition-colors"
                                                     title="Copy Phone Number"
                                                   >
                                                     {inq.phoneNumber}
@@ -19150,7 +19150,7 @@ ${ttNotes}`
                                               inquiry={inq}
                                             />
                                             {inq.status === "sent" && (
-                                              <div className="mt-3 p-2 bg-orange-500/10 border-l-2 border-orange-500/50 rounded-r-xl">
+                                              <div className="mt-3 p-2 bg-orange-500/10 border-l-2 border-transparent rounded-r-xl">
                                                 <p className="text-xs font-sans text-orange-400">
                                                   ⏳ Escalated to client.
                                                   Awaiting response.
@@ -19188,7 +19188,7 @@ ${ttNotes}`
                                 restroom visits in real-time
                               </p>
                             </div>
-                            <div className="px-4 py-2 bg-white/10 /80 border border-white/5 rounded-2xl flex items-center gap-2.5">
+                            <div className="px-4 py-2 bg-white/10 /80 border border-white/8 rounded-xl flex items-center gap-2.5">
                               <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse"></span>
                               <span className="text-xs text-slate-300 font-sans font-semibold">
                                 System Year Context: {systemTime.getFullYear()}
@@ -19200,7 +19200,7 @@ ${ttNotes}`
                             {/* Left & Middle Column (Main Control Desk) */}
                             <div className="lg:col-span-2 space-y-6">
                               {/* Live Desk Console Panel */}
-                              <div className="p-6 sm:p-8 bg-white/5 border border-white/10 rounded-2xl text-slate-100 relative overflow-hidden flex flex-col items-center text-center space-y-6">
+                              <div className="p-6 sm:p-8 bg-white/5 border border-white/8 rounded-xl text-slate-100 relative overflow-hidden flex flex-col items-center text-center space-y-6">
                                 {/* Pulse glow background ornament */}
                                 <div className="absolute top-10 w-96 h-96 bg-indigo-500/10 blur-[100px] rounded-full -z-10 animate-pulse"></div>
 
@@ -19237,40 +19237,35 @@ ${ttNotes}`
                                     : "clocked_out";
 
                                   let statusLabel = "Not Clocked In";
-                                  let ringStyle =
-                                    "border-slate-800 bg-transparent/60";
+                                  let ringStyle = "border-white/8 bg-transparent/60";
                                   let textStyle = "text-slate-400";
                                   let dotStyle = "bg-rose-500";
 
                                   if (status === "working") {
                                     statusLabel = "On Shift (Active Working)";
-                                    ringStyle =
-                                      "border-emerald-500/30 bg-emerald-500/5 shadow-sm ";
+                                    ringStyle = "border-transparent bg-emerald-500/5";
                                     textStyle = "text-emerald-400";
                                     dotStyle = "bg-emerald-500 animate-pulse";
                                   } else if (status === "break") {
                                     statusLabel = "On 15-Minute Break";
-                                    ringStyle =
-                                      "border-amber-500/30 bg-amber-500/5 shadow-sm ";
+                                    ringStyle = "border-transparent bg-amber-500/5";
                                     textStyle = "text-amber-400";
                                     dotStyle = "bg-amber-500 animate-pulse";
                                   } else if (status === "lunch") {
                                     statusLabel = "On 30-Minute Lunch";
-                                    ringStyle =
-                                      "border-pink-500/30 bg-pink-500/5 shadow-sm ";
+                                    ringStyle = "border-transparent bg-pink-500/5";
                                     textStyle = "text-pink-400";
                                     dotStyle = "bg-pink-500 animate-pulse";
                                   } else if (status === "restroom") {
                                     statusLabel = "At Restroom";
-                                    ringStyle =
-                                      "border-indigo-500/30 bg-indigo-500/5 shadow-sm ";
+                                    ringStyle = "border-transparent bg-indigo-500/5";
                                     textStyle = "text-indigo-400";
                                     dotStyle = "bg-indigo-500 animate-pulse";
                                   }
 
                                   return (
                                     <div
-                                      className={`px-6 py-4 border rounded-2xl max-w-sm w-full transition-all flex items-center justify-center gap-3 ${ringStyle}`}
+                                      className={`px-6 py-4 border rounded-xl max-w-sm w-full transition-all flex items-center justify-center gap-3 ${ringStyle}`}
                                     >
                                       <span
                                         className={`w-3 h-3 rounded-full ${dotStyle}`}
@@ -19361,7 +19356,7 @@ ${ttNotes}`
                                   }
 
                                   return (
-                                    <div className="w-full max-w-md p-5 bg-white/5 border border-white/10 rounded-2xl text-left space-y-3 relative overflow-hidden">
+                                    <div className="w-full max-w-md p-5 bg-white/5 border border-white/8 rounded-xl text-left space-y-3 relative overflow-hidden">
                                       <div className="flex justify-between items-center font-sans">
                                         <span className="text-xs font-semibold text-slate-300">
                                           Elapsed {conf.name} Time:
@@ -19433,7 +19428,7 @@ ${ttNotes}`
                                       return (
                                         <button
                                           onClick={handleClockIn}
-                                          className="w-full py-5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-100 font-bold text-base tracking-widest rounded-2xl shadow-sm hover: active:scale-[0.99] transition-all cursor-pointer font-sans flex items-center justify-center gap-3 uppercase animate-pulse"
+                                          className="w-full py-5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-100 font-bold text-base tracking-widest rounded-xl hover: active:scale-[0.99] transition-all cursor-pointer font-sans flex items-center justify-center gap-3 uppercase animate-pulse"
                                         >
                                           <CheckCircle2 className="w-5 h-5 text-slate-100 shrink-0" />
                                           Clock In For Shift
@@ -19448,7 +19443,7 @@ ${ttNotes}`
                                             Active Controllers
                                           </p>
                                           <span
-                                            className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase flex items-center gap-1.5 ${ status === "working" ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400" : "bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 animate-pulse" }`}
+                                            className={`px-2.5 py-0.5 rounded-lg text-xs font-bold uppercase flex items-center gap-1.5 ${ status === "working" ? "bg-emerald-500/10 border border-transparent text-emerald-400" : "bg-indigo-500/10 border border-transparent text-indigo-300 animate-pulse" }`}
                                           >
                                             <span
                                               className={`w-1.5 h-1.5 rounded-full ${status === "working" ? "bg-emerald-400" : "bg-indigo-400"}`}
@@ -19464,7 +19459,7 @@ ${ttNotes}`
                                             onClick={() =>
                                               handleStartActivity("break")
                                             }
-                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${ status === "break" ? "bg-amber-500/25 border-amber-400 text-slate-100 -sm scale-[1.03]" : "bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/20 text-amber-300 hover:scale-[1.03]" }`}
+                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${ status === "break" ? "bg-amber-500/10 border-amber-400 text-slate-100 -sm scale-[1.03]" : "bg-amber-500/10 hover:bg-amber-500/10 border-transparent text-amber-300 hover:scale-[1.03]" }`}
                                           >
                                             <Coffee className="w-4 h-4 text-amber-400" />
                                             <span>15m Break</span>
@@ -19474,7 +19469,7 @@ ${ttNotes}`
                                             onClick={() =>
                                               handleStartActivity("lunch")
                                             }
-                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${ status === "lunch" ? "bg-pink-500/25 border-pink-400 text-slate-100 -sm scale-[1.03]" : "bg-pink-500/10 hover:bg-pink-500/20 border-pink-500/20 text-pink-300 hover:scale-[1.03]" }`}
+                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${ status === "lunch" ? "bg-pink-500/10 border-pink-400 text-slate-100 -sm scale-[1.03]" : "bg-pink-500/10 hover:bg-pink-500/10 border-transparent text-pink-300 hover:scale-[1.03]" }`}
                                           >
                                             <Utensils className="w-4 h-4 text-pink-400" />
                                             <span>30m Lunch</span>
@@ -19484,7 +19479,7 @@ ${ttNotes}`
                                             onClick={() =>
                                               handleStartActivity("restroom")
                                             }
-                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${ status === "restroom" ? "bg-indigo-500/25 border-indigo-400 text-white shadow-sm-sm scale-[1.03]" : "bg-indigo-500/10 hover:bg-indigo-500/20 border-indigo-500/20 text-indigo-300 hover:scale-[1.03]" }`}
+                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${ status === "restroom" ? "bg-indigo-500/10 border-indigo-400 text-white scale-[1.03]" : "bg-indigo-500/10 hover:bg-indigo-500/10 border-transparent text-indigo-300 hover:scale-[1.03]" }`}
                                           >
                                             <UserIcon className="w-4 h-4 text-indigo-400" />
                                             <span>Restroom</span>
@@ -19494,7 +19489,7 @@ ${ttNotes}`
                                             onClick={() =>
                                               handleStartActivity("meeting")
                                             }
-                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${ status === "meeting" ? "bg-cyan-500/25 border-cyan-400 text-slate-100 -sm scale-[1.03]" : "bg-cyan-500/10 hover:bg-cyan-500/20 border-cyan-500/20 text-cyan-300 hover:scale-[1.03]" }`}
+                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${ status === "meeting" ? "bg-cyan-500/10 border-cyan-400 text-slate-100 -sm scale-[1.03]" : "bg-cyan-500/10 hover:bg-cyan-500/10 border-transparent text-cyan-300 hover:scale-[1.03]" }`}
                                           >
                                             <Users className="w-4 h-4 text-cyan-400" />
                                             <span>Team Meeting</span>
@@ -19504,7 +19499,7 @@ ${ttNotes}`
                                             onClick={() =>
                                               handleStartActivity("one_on_one")
                                             }
-                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${ status === "one_on_one" ? "bg-violet-500/25 border-violet-400 text-slate-100 -sm scale-[1.03]" : "bg-violet-500/10 hover:bg-violet-500/20 border-violet-500/20 text-violet-300 hover:scale-[1.03]" }`}
+                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${ status === "one_on_one" ? "bg-violet-500/10 border-violet-400 text-slate-100 -sm scale-[1.03]" : "bg-violet-500/10 hover:bg-violet-500/10 border-transparent text-violet-300 hover:scale-[1.03]" }`}
                                           >
                                             <MessageSquare className="w-4 h-4 text-violet-400" />
                                             <span>1:1 Session</span>
@@ -19514,7 +19509,7 @@ ${ttNotes}`
                                             onClick={() =>
                                               handleStartActivity("personal")
                                             }
-                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${ status === "personal" ? "bg-emerald-500/25 border-emerald-400 text-white shadow-sm-sm scale-[1.03]" : "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/20 text-emerald-300 hover:scale-[1.03]" }`}
+                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-xs font-bold border ${ status === "personal" ? "bg-emerald-500/10 border-emerald-400 text-white scale-[1.03]" : "bg-emerald-500/10 hover:bg-emerald-500/10 border-transparent text-emerald-300 hover:scale-[1.03]" }`}
                                           >
                                             <Sparkles className="w-4 h-4 text-emerald-400" />
                                             <span>Pers. Break</span>
@@ -19525,7 +19520,7 @@ ${ttNotes}`
                                           <div className="pt-2 animate-fade-in">
                                             <button
                                               onClick={handleEndActivity}
-                                              className="w-full py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-slate-100 font-bold text-xs tracking-wider rounded-xl shadow-sm hover: active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 uppercase font-sans"
+                                              className="w-full py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-slate-100 font-bold text-xs tracking-wider rounded-xl hover: active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 uppercase font-sans"
                                             >
                                               <ArrowRight className="w-4 h-4 text-slate-100" />
                                               End AUX & Resume Active Work
@@ -19533,10 +19528,10 @@ ${ttNotes}`
                                           </div>
                                         )}
 
-                                        <div className="pt-2 border-t border-white/5 flex gap-3">
+                                        <div className="pt-2 border-t border-white/8 flex gap-3">
                                           <button
                                             onClick={handleClockOut}
-                                            className="w-full py-3 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 hover:border-rose-500/40 text-rose-300 font-bold text-xs tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 uppercase font-sans"
+                                            className="w-full py-3 bg-rose-500/10 hover:bg-rose-500/10 border border-transparent hover:border-transparent text-rose-300 font-bold text-xs tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 uppercase font-sans"
                                           >
                                             <XCircle className="w-4 h-4 text-rose-400" />
                                             Clock Out Shift
@@ -19549,7 +19544,7 @@ ${ttNotes}`
                               </div>
 
                               {/* Display basic shift coverage information */}
-                              <div className="p-4 bg-white/5 border border-white/10 rounded-2xl text-xs text-slate-400 leading-relaxed font-sans">
+                              <div className="p-4 bg-white/5 border border-white/8 rounded-xl text-xs text-slate-400 leading-relaxed font-sans">
                                 <p className="font-semibold text-slate-100 mb-1 flex items-center gap-1.5 font-sans">
                                   <Info className="w-4 h-4 text-indigo-400 shrink-0" />{" "}
                                   Time-Tracking Rules & Compliance Policy
@@ -19567,8 +19562,8 @@ ${ttNotes}`
                             {/* Right Column (My Today's Stats & chronological History Log) */}
                             <div className="space-y-6">
                               {/* Daily aggregates */}
-                              <div className="p-5 bg-white/5 border border-white/10 rounded-2xl space-y-4">
-                                <h3 className="font-bold text-slate-100 text-sm font-sans border-b border-white/5 pb-2">
+                              <div className="p-5 bg-white/5 border border-white/8 rounded-xl space-y-4">
+                                <h3 className="font-bold text-slate-100 text-sm font-sans border-b border-white/8 pb-2">
                                   Shift Aggregates (Today)
                                 </h3>
 
@@ -19598,7 +19593,7 @@ ${ttNotes}`
 
                                   return (
                                     <div className="space-y-3 text-xs leading-normal font-sans">
-                                      <div className="flex justify-between py-1.5 border-b border-white/5">
+                                      <div className="flex justify-between py-1.5 border-b border-white/8">
                                         <span className="text-slate-400 font-medium">
                                           Clock-In Time:
                                         </span>
@@ -19606,7 +19601,7 @@ ${ttNotes}`
                                           {clockInLabel}
                                         </span>
                                       </div>
-                                      <div className="flex justify-between py-1.5 border-b border-white/5">
+                                      <div className="flex justify-between py-1.5 border-b border-white/8">
                                         <span className="text-slate-400 font-medium">
                                           Clock-Out Time:
                                         </span>
@@ -19614,7 +19609,7 @@ ${ttNotes}`
                                           {clockOutLabel}
                                         </span>
                                       </div>
-                                      <div className="flex justify-between py-1.5 border-b border-white/5">
+                                      <div className="flex justify-between py-1.5 border-b border-white/8">
                                         <span className="text-slate-400 font-medium">
                                           Total Breaks:
                                         </span>
@@ -19625,7 +19620,7 @@ ${ttNotes}`
                                           15m max
                                         </span>
                                       </div>
-                                      <div className="flex justify-between py-1.5 border-b border-white/5">
+                                      <div className="flex justify-between py-1.5 border-b border-white/8">
                                         <span className="text-slate-400 font-medium">
                                           Total Lunch:
                                         </span>
@@ -19636,7 +19631,7 @@ ${ttNotes}`
                                           30m max
                                         </span>
                                       </div>
-                                      <div className="flex justify-between py-1.5 border-b border-white/5">
+                                      <div className="flex justify-between py-1.5 border-b border-white/8">
                                         <span className="text-slate-400 font-medium">
                                           Restroom Total:
                                         </span>
@@ -19645,7 +19640,7 @@ ${ttNotes}`
                                           used
                                         </span>
                                       </div>
-                                      <div className="flex justify-between py-1.5 border-b border-white/5">
+                                      <div className="flex justify-between py-1.5 border-b border-white/8">
                                         <span className="text-slate-400 font-medium">
                                           Restroom Sessions:
                                         </span>
@@ -19653,7 +19648,7 @@ ${ttNotes}`
                                           {stats.restroomCount} visits
                                         </span>
                                       </div>
-                                      <div className="flex justify-between py-1.5 border-b border-white/5">
+                                      <div className="flex justify-between py-1.5 border-b border-white/8">
                                         <span className="text-slate-400 font-medium">
                                           Team Meeting:
                                         </span>
@@ -19664,7 +19659,7 @@ ${ttNotes}`
                                           / 60m max
                                         </span>
                                       </div>
-                                      <div className="flex justify-between py-1.5 border-b border-white/5">
+                                      <div className="flex justify-between py-1.5 border-b border-white/8">
                                         <span className="text-slate-400 font-medium">
                                           1:1 Session:
                                         </span>
@@ -19692,8 +19687,8 @@ ${ttNotes}`
                               </div>
 
                               {/* Personal historical activities listing */}
-                              <div className="p-5 bg-white/5 border border-white/10 rounded-2xl space-y-4 max-h-[400px] overflow-y-auto">
-                                <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                              <div className="p-5 bg-white/5 border border-white/8 rounded-xl space-y-4 max-h-[400px] overflow-y-auto">
+                                <div className="flex justify-between items-center border-b border-white/8 pb-2">
                                   <h3 className="font-bold text-slate-100 text-sm font-sans">
                                     Time Card Sessions
                                   </h3>
@@ -19720,14 +19715,14 @@ ${ttNotes}`
                                       {myLogs.map((log) => (
                                         <div
                                           key={log.id}
-                                          className="p-3 bg-white/5 border border-white/10 rounded-2xl space-y-2 text-xs"
+                                          className="p-3 bg-white/5 border border-white/8 rounded-xl space-y-2 text-xs"
                                         >
-                                          <div className="flex justify-between items-center text-xs border-b border-white/5 pb-1 font-sans">
+                                          <div className="flex justify-between items-center text-xs border-b border-white/8 pb-1 font-sans">
                                             <span className="text-indigo-300 font-bold">
                                               {log.date}
                                             </span>
                                             <span
-                                              className={`px-1.5 py-0.5 rounded ${log.status === "clocked_out" ? "bg-white/10 text-slate-400" : "bg-emerald-500/15 text-emerald-300"}`}
+                                              className={`px-1.5 py-0.5 rounded ${log.status === "clocked_out" ? "bg-white/10 text-slate-400" : "bg-emerald-500/10 text-emerald-300"}`}
                                             >
                                               {log.status.toUpperCase()}
                                             </span>
@@ -19766,7 +19761,7 @@ ${ttNotes}`
                                                   Logged Sub-Sessions (
                                                   {log.activities.length}):
                                                 </p>
-                                                <div className="pl-2 border-l border-white/10 space-y-1 text-xs font-sans">
+                                                <div className="pl-2 border-l border-white/8 space-y-1 text-xs font-sans">
                                                   {log.activities.map((act) => (
                                                     <p
                                                       key={act.id}
@@ -19832,7 +19827,7 @@ ${ttNotes}`
                         className="space-y-6 animate-fade-in"
                       >
                         {/* Page Title */}
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-4">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/8 pb-4">
                           <div>
                             <h2 className="text-3xl font-bold text-slate-100 font-sans">
                               Inquiries Analytics & Command Center
@@ -19845,7 +19840,7 @@ ${ttNotes}`
 
                           <button
                             onClick={handleDownloadInquiriesReport}
-                            className="px-5 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer w-full md:w-auto"
+                            className="px-5 py-2.5 bg-transparent border border-white/12 text-white hover:bg-white/5 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer w-full md:w-auto"
                           >
                             <Download className="w-4 h-4" />
                             Download Inquiries CSV Report
@@ -19855,7 +19850,7 @@ ${ttNotes}`
                         {/* Dynamic Analytics & Charts Row */}
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                           {/* Panel 1: Status Distribution Donut Chart */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/8 p-5 rounded-xl flex flex-col justify-between">
                             <div>
                               <h3 className="text-sm font-bold text-slate-100 font-sans mb-1 flex items-center gap-2">
                                 <PieChart className="w-4 h-4 text-indigo-400" />
@@ -19957,7 +19952,7 @@ ${ttNotes}`
                           </div>
 
                           {/* Panel 2: Clinic Volume Breakdown */}
-                          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl lg:col-span-2 flex flex-col justify-between">
+                          <div className="bg-white/5 border border-white/8 p-5 rounded-xl lg:col-span-2 flex flex-col justify-between">
                             <div>
                               <h3 className="text-sm font-bold text-slate-100 font-sans mb-1 flex items-center gap-2">
                                 <BarChart2 className="w-4 h-4 text-emerald-400" />
@@ -20078,7 +20073,7 @@ ${ttNotes}`
                         {true && (
                           <>
                             {/* Search & Filters */}
-                            <div className="bg-white/5 border border-white/10 p-4 rounded-2xl flex flex-col md:flex-row gap-4 items-center">
+                            <div className="bg-white/5 border border-white/8 p-4 rounded-xl flex flex-col md:flex-row gap-4 items-center">
                               <div className="relative flex-1 w-full">
                                 <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                                 <input
@@ -20088,10 +20083,10 @@ ${ttNotes}`
                                   onChange={(e) =>
                                     setInquirySearchQuery(e.target.value)
                                   }
-                                  className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-2xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+                                  className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/8 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                 />
                               </div>
-                              <div className="relative flex gap-1.5 w-full md:w-auto shrink-0 border-r border-white/10 pr-4 mr-1">
+                              <div className="relative flex gap-1.5 w-full md:w-auto shrink-0 border-r border-white/8 pr-4 mr-1">
                                 <select
                                   value=""
                                   onChange={(e) => {
@@ -20106,7 +20101,7 @@ ${ttNotes}`
                                       ]);
                                     }
                                   }}
-                                  className="bg-white/5 border border-white/10 rounded-xl px-2.5 py-2 text-xs text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
+                                  className="bg-white/5 border border-white/8 rounded-xl px-2.5 py-2 text-xs text-slate-100 font-bold cursor-pointer focus:outline-none focus:border-indigo-500 font-sans"
                                 >
                                   <option
                                     value=""
@@ -20128,7 +20123,7 @@ ${ttNotes}`
                                   ))}
                                 </select>
                                 {inquiryClinicsFilter.length > 0 && (
-                                  <div className="absolute top-full left-0 z-50 mt-1 flex flex-wrap gap-1 bg-slate-800 p-2 rounded-xl border border-slate-700 shadow-sm w-64">
+                                  <div className="absolute top-full left-0 z-50 mt-1 flex flex-wrap gap-1 bg-slate-800 p-2 rounded-xl border border-white/8 w-64">
                                     <span className="w-full text-xs text-slate-400 font-bold mb-1 flex justify-between">
                                       Selected Clinics:
                                       <button
@@ -20148,7 +20143,7 @@ ${ttNotes}`
                                       return (
                                         <span
                                           key={c}
-                                          className="bg-indigo-500/20 text-indigo-300 border-none px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1"
+                                          className="bg-transparent border border-white/12 text-white text-indigo-300 border-none px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1"
                                         >
                                           {label}
                                           <button
@@ -20180,7 +20175,7 @@ ${ttNotes}`
                                     <button
                                       key={pill.id || "all"}
                                       onClick={() => setInquiryStatusFilter(pill.id)}
-                                      className={`px-3.5 py-1.5 rounded-xl border text-xs font-bold uppercase tracking-wider cursor-pointer transition-all shrink-0 ${ inquiryStatusFilter === pill.id ? "bg-indigo-600/20 border-indigo-500/30 text-white shadow-sm font-bold" : "border-white/5 text-slate-400 bg-transparent hover:text-slate-100" }`}
+                                      className={`px-3.5 py-1.5 rounded-xl border text-xs font-bold uppercase tracking-wider cursor-pointer transition-all shrink-0 ${ inquiryStatusFilter === pill.id ? "bg-indigo-600/20 border-transparent text-white font-bold" : "border-white/8 text-slate-400 bg-transparent hover:text-slate-100" }`}
                                     >
                                       {pill.label}
                                     </button>
@@ -20574,7 +20569,7 @@ ${ttNotes}`
                             const offset = circ - (pct / 100) * circ;
 
                             return (
-                              <div className="flex flex-col items-center p-3 bg-transparent border border-white/5 rounded-2xl relative overflow-hidden group hover:border-white/10 transition-all">
+                              <div className="flex flex-col items-center p-3 bg-transparent border border-white/8 rounded-xl relative overflow-hidden group hover:border-white/8 transition-all">
                                 <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
                                   {/* SVG Ring */}
                                   <svg className="w-full h-full transform -rotate-90">
@@ -20624,7 +20619,7 @@ ${ttNotes}`
                           return (
                             <div className="space-y-6">
                               {/* Header Banner */}
-                              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-5">
+                              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/8 pb-5">
                                 <div>
                                   <h2 className="text-2xl sm:text-3xl font-bold text-slate-100 font-sans flex items-center gap-2">
                                     <Trophy className="w-6 h-6 text-indigo-400" />
@@ -20643,10 +20638,10 @@ ${ttNotes}`
                               {/* Achievements & Goals Section */}
                               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                                 {/* Total Combines Stat Card */}
-                                <div className="lg:col-span-4 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden group">
+                                <div className="lg:col-span-4 bg-indigo-500/5 border border-indigo-500/10 rounded-xl p-5 flex flex-col justify-between relative overflow-hidden group">
                                   <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl group-hover:scale-125 transition-all duration-500" />
                                   <div>
-                                    <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 text-xs font-bold uppercase tracking-widest rounded-full border border-indigo-400/20">
+                                    <span className="px-2 py-0.5 bg-transparent border border-white/12 text-white text-indigo-300 text-xs font-bold uppercase tracking-widest rounded-lg border border-transparent">
                                       Overall Performance
                                     </span>
                                     <h3 className="text-4xl sm:text-5xl font-bold text-slate-100 font-sans tracking-tight mt-4">
@@ -20656,8 +20651,8 @@ ${ttNotes}`
                                       Total Cases Processed
                                     </p>
                                   </div>
-                                  <div className="grid grid-cols-2 gap-3 border-t border-white/5 pt-4 mt-4">
-                                    <div className="bg-transparent border border-white/5 rounded-xl p-2">
+                                  <div className="grid grid-cols-2 gap-3 border-t border-white/8 pt-4 mt-4">
+                                    <div className="bg-transparent border border-white/8 rounded-xl p-2">
                                       <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
                                         This Week
                                       </p>
@@ -20665,7 +20660,7 @@ ${ttNotes}`
                                         +{statsThisWeek}
                                       </p>
                                     </div>
-                                    <div className="bg-transparent border border-white/5 rounded-xl p-2">
+                                    <div className="bg-transparent border border-white/8 rounded-xl p-2">
                                       <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
                                         This Month
                                       </p>
@@ -20677,7 +20672,7 @@ ${ttNotes}`
                                 </div>
 
                                 {/* Google Fit Style Circular Activity Rings */}
-                                <div className="lg:col-span-8 bg-transparent border border-white/5 rounded-2xl p-5 space-y-4">
+                                <div className="lg:col-span-8 bg-transparent border border-white/8 rounded-xl p-5 space-y-4">
                                   <h3 className="text-xs font-bold text-slate-200 uppercase tracking-widest flex items-center gap-1">
                                     <Award className="w-3.5 h-3.5 text-indigo-400" />{" "}
                                     Active Performance Rings
@@ -20720,7 +20715,7 @@ ${ttNotes}`
                               </div>
 
                               {/* Milestone Medals Card */}
-                              <div className="bg-transparent border border-white/5 rounded-2xl p-5 space-y-4 relative overflow-hidden group">
+                              <div className="bg-transparent border border-white/8 rounded-xl p-5 space-y-4 relative overflow-hidden group">
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                                   <div>
                                     <h3 className="text-xs font-bold text-slate-200 uppercase tracking-widest flex items-center gap-1">
@@ -20733,13 +20728,13 @@ ${ttNotes}`
                                     </p>
                                   </div>
                                   {nextMilestone ? (
-                                    <span className="text-xs sm:text-xs font-sans font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full">
+                                    <span className="text-xs sm:text-xs font-sans font-bold bg-transparent border border-white/12 text-white text-indigo-400 border border-transparent px-3 py-1 rounded-lg">
                                       {totalCasesHandled} /{" "}
                                       {nextMilestone.threshold} cases for{" "}
                                       {nextMilestone.name}
                                     </span>
                                   ) : (
-                                    <span className="text-xs sm:text-xs font-sans font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full">
+                                    <span className="text-xs sm:text-xs font-sans font-bold bg-transparent border border-white/12 text-white text-emerald-400 border border-transparent px-3 py-1 rounded-lg">
                                       Maximum Rank Reached! 🏆👑
                                     </span>
                                   )}
@@ -20752,13 +20747,13 @@ ${ttNotes}`
                                     return (
                                       <div
                                         key={m.name}
-                                        className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300 ${ isAchieved ? "bg-indigo-500/5 border-indigo-500/30 text-indigo-200 shadow-sm scale-102" : "bg-transparent border-white/5 text-slate-600 grayscale brightness-75 cursor-not-allowed" }`}
+                                        className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all duration-300 ${ isAchieved ? "bg-indigo-500/5 border-transparent text-indigo-200 scale-102" : "bg-transparent border-white/8 text-slate-600 grayscale brightness-75 cursor-not-allowed" }`}
                                       >
                                         <div className="relative text-3xl mb-1 flex items-center justify-center h-10 select-none">
                                           {m.name.split(" ")[1] ||
                                             m.name.split(" ")[0]}
                                           {!isAchieved && (
-                                            <span className="absolute -bottom-1 -right-1 bg-slate-930 border border-white/10 text-xs px-1 rounded-xl text-slate-500 font-sans select-none">
+                                            <span className="absolute -bottom-1 -right-1 bg-slate-930 border border-white/8 text-xs px-1 rounded-xl text-slate-500 font-sans select-none">
                                               🔒
                                             </span>
                                           )}
@@ -20776,7 +20771,7 @@ ${ttNotes}`
                               </div>
 
                               {/* Feed Filters Control Board */}
-                              <div className="bg-transparent border border-white/5 rounded-2xl p-4 sm:p-5 space-y-4">
+                              <div className="bg-transparent border border-white/8 rounded-xl p-4 sm:p-5 space-y-4">
                                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                                   <div>
                                     <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
@@ -20798,7 +20793,7 @@ ${ttNotes}`
                                         onChange={(e) =>
                                           setCasesSearch(e.target.value)
                                         }
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                                        className="w-full bg-white/5 border border-white/8 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
                                       />
                                     </div>
 
@@ -20811,7 +20806,7 @@ ${ttNotes}`
                                             : "desc",
                                         )
                                       }
-                                      className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-semibold text-slate-300 transition-all flex items-center gap-1.5"
+                                      className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/8 rounded-xl text-xs font-semibold text-slate-300 transition-all flex items-center gap-1.5"
                                     >
                                       <Clock className="w-3.5 h-3.5" />
                                       {myCasesSortOrder === "desc"
@@ -20822,7 +20817,7 @@ ${ttNotes}`
                                 </div>
 
                                 {/* Clickable pill filters */}
-                                <div className="flex flex-col gap-3 py-2 border-t border-b border-white/5">
+                                <div className="flex flex-col gap-3 py-2 border-t border-b border-white/8">
                                   {/* Type selector line */}
                                   <div className="flex flex-wrap items-center gap-1.5">
                                     <span className="text-xs font-bold uppercase text-slate-500 tracking-wider mr-2">
@@ -20860,11 +20855,11 @@ ${ttNotes}`
                                         onClick={() =>
                                           setMyCasesTypeFilter(pill.id)
                                         }
-                                        className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 ${ myCasesTypeFilter === pill.id ? "bg-indigo-500 text-white shadow-sm-sm scale-102" : "bg-white/5 hover:bg-white/10 text-slate-300 hover:text-slate-100 border border-white/5" }`}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${ myCasesTypeFilter === pill.id ? "bg-indigo-500 text-white scale-102" : "bg-white/5 hover:bg-white/10 text-slate-300 hover:text-slate-100 border border-white/8" }`}
                                       >
                                         {pill.label}
                                         <span
-                                          className={`px-1.5 py-0.2 rounded-full font-sans text-xs font-bold ${ myCasesTypeFilter === pill.id ? "bg-white/20 text-white" : "bg-white/5 text-slate-400" }`}
+                                          className={`px-1.5 py-0.2 rounded-lg font-sans text-xs font-bold ${ myCasesTypeFilter === pill.id ? "bg-white/20 text-white" : "bg-white/5 text-slate-400" }`}
                                         >
                                           {pill.count}
                                         </span>
@@ -20893,7 +20888,7 @@ ${ttNotes}`
                                         onClick={() =>
                                           setMyCasesStatusFilter(pill.id)
                                         }
-                                        className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all ${ myCasesStatusFilter === pill.id ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" : "bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 border border-transparent" }`}
+                                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${ myCasesStatusFilter === pill.id ? "bg-indigo-500/10 text-indigo-300 border border-transparent" : "bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 border border-transparent" }`}
                                       >
                                         {pill.label}
                                       </button>
@@ -21194,7 +21189,7 @@ ${ttNotes}`
                               </div>
 
                               {/* Legacy Cases Collapsible Drawer (preserves old Firestore sub-collection database records if any exist) */}
-                              <div className="border border-white/5 rounded-2xl bg-transparent overflow-hidden mt-8">
+                              <div className="border border-white/8 rounded-xl bg-transparent overflow-hidden mt-8">
                                 <button
                                   onClick={() =>
                                     setShowLegacyCases(!showLegacyCases)
@@ -21216,7 +21211,7 @@ ${ttNotes}`
                                 </button>
 
                                 {showLegacyCases && (
-                                  <div className="p-5 border-t border-white/5 space-y-4">
+                                  <div className="p-5 border-t border-white/8 space-y-4">
                                     <p className="text-xs text-slate-500 italic">
                                       These are direct customer leads logs
                                       mapped from the legacy `cases`
@@ -21240,7 +21235,7 @@ ${ttNotes}`
                                           .map((c) => (
                                             <div
                                               key={c.id}
-                                              className="bg-transparent border border-white/5 rounded-xl p-4 space-y-3 hover:border-white/10 transition-all text-xs"
+                                              className="bg-transparent border border-white/8 rounded-xl p-4 space-y-3 hover:border-white/8 transition-all text-xs"
                                             >
                                               <div className="flex items-start justify-between gap-2">
                                                 <div>
@@ -21259,7 +21254,7 @@ ${ttNotes}`
                                                   </p>
                                                 </div>
                                                 {c.status && (
-                                                  <span className="px-1.5 py-0.2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded font-sans text-xs uppercase">
+                                                  <span className="px-1.5 py-0.2 bg-transparent border border-white/12 text-white text-indigo-400 border border-transparent rounded font-sans text-xs uppercase">
                                                     {c.status}
                                                   </span>
                                                 )}
@@ -21283,7 +21278,7 @@ ${ttNotes}`
                                                 </div>
                                               </div>
                                               {c.inquiry && (
-                                                <p className="text-slate-400 leading-relaxed bg-transparent border border-white/5 p-2 rounded-xl">
+                                                <p className="text-slate-400 leading-relaxed bg-transparent border border-white/8 p-2 rounded-xl">
                                                   {c.inquiry}
                                                 </p>
                                               )}
@@ -21510,7 +21505,7 @@ ${ttNotes}`
                     {activeTab === "time-logs" && currentUser.role === "tl" && (
                       <div
                         id="tl-timelog-view-root"
-                        className="space-y-6 animate-fade-in col-span-1 border border-white/5 p-2 bg-transparent/20 rounded-2xl"
+                        className="space-y-6 animate-fade-in col-span-1 border border-white/8 p-2 bg-transparent/20 rounded-xl"
                       >
                         {/* Header */}
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-2">
@@ -21527,7 +21522,7 @@ ${ttNotes}`
                           <div className="flex flex-wrap gap-2.5 self-stretch md:self-auto">
                             <button
                               onClick={handleCopyCSVReport}
-                              className="flex-1 sm:flex-initial px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm font-sans"
+                              className="flex-1 sm:flex-initial px-4 py-2.5 bg-transparent border border-white/12 text-white hover:bg-white/5 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans"
                             >
                               <Download className="w-4 h-4 text-indigo-200" />
                               Export CSV Report
@@ -21535,7 +21530,7 @@ ${ttNotes}`
 
                             <button
                               onClick={() => setTlIsPrintMode(!tlIsPrintMode)}
-                              className="flex-1 sm:flex-initial px-4 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 text-slate-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans"
+                              className="flex-1 sm:flex-initial px-4 py-2.5 bg-white/10 hover:bg-white/20 border border-white/15 text-slate-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans"
                             >
                               <Printer className="w-4 h-4 text-slate-400" />
                               {tlIsPrintMode
@@ -21556,7 +21551,7 @@ ${ttNotes}`
                                       handleMigrateRefs,
                                     );
                                   }}
-                                  className="px-4 py-2.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans disabled:opacity-50"
+                                  className="px-4 py-2.5 bg-transparent border border-white/12 text-white hover:bg-white/5 border border-transparent text-indigo-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans disabled:opacity-50"
                                 >
                                   {isMigratingRefs ? (
                                     <Loader2 className="w-4 h-4 text-indigo-400 animate-spin shrink-0" />
@@ -21579,7 +21574,7 @@ ${ttNotes}`
                                       handlePurgeTimeLogs,
                                     );
                                   }}
-                                  className="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans disabled:opacity-50"
+                                  className="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/10 border border-transparent text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans disabled:opacity-50"
                                 >
                                   {isPurgingTimeLogs ? (
                                     <Loader2 className="w-4 h-4 text-rose-400 animate-spin shrink-0" />
@@ -21625,8 +21620,8 @@ ${ttNotes}`
 
                           if (tlIsPrintMode) {
                             return (
-                              <div className="p-8 bg-white/5 border border-white/20 rounded-2xl space-y-6 animate-fade-in text-slate-100 print:p-0 print:bg-white/10 print:text-black">
-                                <div className="flex justify-between items-center border-b border-white/10 pb-4 print:border-black">
+                              <div className="p-8 bg-white/5 border border-white/15 rounded-xl space-y-6 animate-fade-in text-slate-100 print:p-0 print:bg-white/10 print:text-black">
+                                <div className="flex justify-between items-center border-b border-white/8 pb-4 print:border-black">
                                   <div>
                                     <h3 className="text-xl font-bold font-sans uppercase tracking-wider">
                                       DAILY MASTER ATTENDANCE & TIMECARD REPORT
@@ -21637,7 +21632,7 @@ ${ttNotes}`
                                   </div>
                                   <button
                                     onClick={() => window.print()}
-                                    className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-sm print:hidden"
+                                    className="px-5 py-2.5 bg-transparent border border-white/12 text-white hover:bg-white/5 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer print:hidden"
                                   >
                                     <Printer className="w-4 h-4" /> Trigger
                                     Browser Print
@@ -21645,7 +21640,7 @@ ${ttNotes}`
                                 </div>
 
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-sans print:gap-2">
-                                  <div className="p-3 bg-white/5 border border-white/5 rounded-xl print:border-black print:bg-transparent print:text-black">
+                                  <div className="p-3 bg-white/5 border border-white/8 rounded-xl print:border-black print:bg-transparent print:text-black">
                                     <p className="text-xs text-slate-400 uppercase font-bold font-sans">
                                       Date Context
                                     </p>
@@ -21653,7 +21648,7 @@ ${ttNotes}`
                                       {currentTime.toLocaleDateString()}
                                     </p>
                                   </div>
-                                  <div className="p-3 bg-white/5 border border-white/5 rounded-xl print:border-black print:bg-transparent print:text-black">
+                                  <div className="p-3 bg-white/5 border border-white/8 rounded-xl print:border-black print:bg-transparent print:text-black">
                                     <p className="text-xs text-slate-400 uppercase font-bold font-sans">
                                       Total Agents on Duty
                                     </p>
@@ -21666,7 +21661,7 @@ ${ttNotes}`
                                       of {activeAgentsForUI.length}
                                     </p>
                                   </div>
-                                  <div className="p-3 bg-white/5 border border-white/5 rounded-xl print:border-black print:bg-transparent print:text-black">
+                                  <div className="p-3 bg-white/5 border border-white/8 rounded-xl print:border-black print:bg-transparent print:text-black">
                                     <p className="text-xs text-slate-400 uppercase font-bold font-sans">
                                       Active on Break/Lunch
                                     </p>
@@ -21684,7 +21679,7 @@ ${ttNotes}`
                                       agents
                                     </p>
                                   </div>
-                                  <div className="p-3 bg-white/5 border border-white/5 rounded-xl print:border-black print:bg-transparent print:text-black">
+                                  <div className="p-3 bg-white/5 border border-white/8 rounded-xl print:border-black print:bg-transparent print:text-black">
                                     <p className="text-xs text-slate-400 uppercase font-bold font-sans">
                                       Compliance Warnings
                                     </p>
@@ -21703,10 +21698,10 @@ ${ttNotes}`
                                   </div>
                                 </div>
 
-                                <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 border border-white/10 rounded-2xl print:border-black">
+                                <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 border border-white/8 rounded-xl print:border-black">
                                   <table className="w-full text-left border-collapse text-xs print:text-black">
                                     <thead>
-                                      <tr className="bg-white/5 border-b border-white/10 text-xs font-bold text-slate-300 font-sans print:border-black print:bg-transparent print:text-black">
+                                      <tr className="bg-white/5 border-b border-white/8 text-xs font-bold text-slate-300 font-sans print:border-black print:bg-transparent print:text-black">
                                         <th className="px-4 py-3">
                                           Agent Name
                                         </th>
@@ -21877,13 +21872,13 @@ ${ttNotes}`
                                       count: 0,
                                       agents: [] as string[],
                                       bgClass: "bg-emerald-950/20",
-                                      borderClass: "border-emerald-500/20",
+                                      borderClass: "border-transparent",
                                       textClass: "text-emerald-50",
                                       badgeColor: "bg-emerald-500",
                                       headerText: "text-emerald-300",
                                       countText: "text-emerald-400",
                                       cardBg: "bg-emerald-900/10",
-                                      cardBorder: "border-emerald-500/20",
+                                      cardBorder: "border-transparent",
                                       cardText: "text-emerald-100",
                                       cardHover: "hover:bg-emerald-900/30",
                                       lobText: "text-emerald-400",
@@ -21894,13 +21889,13 @@ ${ttNotes}`
                                       count: 0,
                                       agents: [] as string[],
                                       bgClass: "bg-amber-950/20",
-                                      borderClass: "border-amber-500/20",
+                                      borderClass: "border-transparent",
                                       textClass: "text-amber-50",
                                       badgeColor: "bg-amber-500",
                                       headerText: "text-amber-300",
                                       countText: "text-amber-400",
                                       cardBg: "bg-amber-900/10",
-                                      cardBorder: "border-amber-500/20",
+                                      cardBorder: "border-transparent",
                                       cardText: "text-amber-100",
                                       cardHover: "hover:bg-amber-900/30",
                                       lobText: "text-amber-400",
@@ -21911,13 +21906,13 @@ ${ttNotes}`
                                       count: 0,
                                       agents: [] as string[],
                                       bgClass: "bg-pink-950/20",
-                                      borderClass: "border-pink-500/20",
+                                      borderClass: "border-transparent",
                                       textClass: "text-pink-50",
                                       badgeColor: "bg-pink-500",
                                       headerText: "text-pink-300",
                                       countText: "text-pink-400",
                                       cardBg: "bg-pink-900/10",
-                                      cardBorder: "border-pink-500/20",
+                                      cardBorder: "border-transparent",
                                       cardText: "text-pink-100",
                                       cardHover: "hover:bg-pink-900/30",
                                       lobText: "text-pink-400",
@@ -21928,13 +21923,13 @@ ${ttNotes}`
                                       count: 0,
                                       agents: [] as string[],
                                       bgClass: "bg-indigo-950/20",
-                                      borderClass: "border-indigo-500/20",
+                                      borderClass: "border-transparent",
                                       textClass: "text-indigo-50",
                                       badgeColor: "bg-indigo-500",
                                       headerText: "text-indigo-300",
                                       countText: "text-indigo-400",
                                       cardBg: "bg-indigo-900/10",
-                                      cardBorder: "border-indigo-500/20",
+                                      cardBorder: "border-transparent",
                                       cardText: "text-indigo-100",
                                       cardHover: "hover:bg-indigo-900/30",
                                       lobText: "text-indigo-400",
@@ -21945,13 +21940,13 @@ ${ttNotes}`
                                       count: 0,
                                       agents: [] as string[],
                                       bgClass: "bg-cyan-950/20",
-                                      borderClass: "border-cyan-500/20",
+                                      borderClass: "border-transparent",
                                       textClass: "text-cyan-50",
                                       badgeColor: "bg-cyan-500",
                                       headerText: "text-cyan-300",
                                       countText: "text-cyan-400",
                                       cardBg: "bg-cyan-900/10",
-                                      cardBorder: "border-cyan-500/20",
+                                      cardBorder: "border-transparent",
                                       cardText: "text-cyan-100",
                                       cardHover: "hover:bg-cyan-900/30",
                                       lobText: "text-cyan-400",
@@ -21962,13 +21957,13 @@ ${ttNotes}`
                                       count: 0,
                                       agents: [] as string[],
                                       bgClass: "bg-violet-950/20",
-                                      borderClass: "border-violet-500/20",
+                                      borderClass: "border-transparent",
                                       textClass: "text-violet-50",
                                       badgeColor: "bg-violet-500",
                                       headerText: "text-violet-300",
                                       countText: "text-violet-400",
                                       cardBg: "bg-violet-900/10",
-                                      cardBorder: "border-violet-500/20",
+                                      cardBorder: "border-transparent",
                                       cardText: "text-violet-100",
                                       cardHover: "hover:bg-violet-900/30",
                                       lobText: "text-violet-400",
@@ -21979,13 +21974,13 @@ ${ttNotes}`
                                       count: 0,
                                       agents: [] as string[],
                                       bgClass: "bg-blue-950/20",
-                                      borderClass: "border-blue-500/20",
+                                      borderClass: "border-transparent",
                                       textClass: "text-blue-50",
                                       badgeColor: "bg-blue-500",
                                       headerText: "text-blue-300",
                                       countText: "text-blue-400",
                                       cardBg: "bg-blue-900/10",
-                                      cardBorder: "border-blue-500/20",
+                                      cardBorder: "border-transparent",
                                       cardText: "text-blue-100",
                                       cardHover: "hover:bg-blue-900/30",
                                       lobText: "text-blue-400",
@@ -21996,13 +21991,13 @@ ${ttNotes}`
                                       count: 0,
                                       agents: [] as string[],
                                       bgClass: "bg-white/5",
-                                      borderClass: "border-white/5",
+                                      borderClass: "border-white/8",
                                       textClass: "text-slate-400",
                                       badgeColor: "bg-slate-600",
                                       headerText: "text-slate-500",
                                       countText: "text-slate-600",
                                       cardBg: "bg-white/[0.02]",
-                                      cardBorder: "border-white/5",
+                                      cardBorder: "border-white/8",
                                       cardText: "text-slate-500",
                                       cardHover: "",
                                       lobText: "text-slate-500 opacity-50",
@@ -22042,7 +22037,7 @@ ${ttNotes}`
                                   return (
                                     <div className="space-y-6">
                                       {/* Control Bar */}
-                                      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-900/40 /50 p-4 border border-white/5 rounded-2xl">
+                                      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-900/40 /50 p-4 border border-white/8 rounded-xl">
                                         <div className="flex items-center gap-3">
                                           <span className="relative flex h-3 w-3">
                                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -22064,7 +22059,7 @@ ${ttNotes}`
                                               setRtmSearch(e.target.value)
                                             }
                                             placeholder="Search agents by name..."
-                                            className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm focus:border-indigo-500 text-slate-200 outline-none transition-all placeholder:text-slate-600 focus:bg-black/70"
+                                            className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/8 rounded-xl text-sm focus:border-indigo-500 text-slate-200 outline-none transition-all placeholder:text-slate-600 focus:bg-black/70"
                                           />
                                         </div>
                                       </div>
@@ -22076,10 +22071,10 @@ ${ttNotes}`
                                           .map((group) => (
                                             <div
                                               key={group.id}
-                                              className={`p-5 rounded-2xl border ${group.bgClass} ${group.borderClass} ${group.textClass}`}
+                                              className={`p-5 rounded-xl border ${group.bgClass} ${group.borderClass} ${group.textClass}`}
                                             >
                                               <div
-                                                className={`flex justify-between items-center mb-4 border-b pb-3 ${group.id === "offline" ? "border-white/5" : group.borderClass}`}
+                                                className={`flex justify-between items-center mb-4 border-b pb-3 ${group.id === "offline" ? "border-white/8" : group.borderClass}`}
                                               >
                                                 <div className="flex items-center gap-2">
                                                   <span
@@ -22200,7 +22195,7 @@ ${ttNotes}`
                                                                   null,
                                                                 );
                                                               }}
-                                                              className="w-full bg-white/5 border border-white/10 rounded text-xs text-slate-200 px-1 py-1 flex items-center justify-center focus:outline-none focus:border-indigo-500 font-medium font-sans"
+                                                              className="w-full bg-white/5 border border-white/8 rounded text-xs text-slate-200 px-1 py-1 flex items-center justify-center focus:outline-none focus:border-indigo-500 font-medium font-sans"
                                                             >
                                                               <option
                                                                 value="working"
@@ -22261,7 +22256,7 @@ ${ttNotes}`
                                           ))}
 
                                         {filteredAgents.length === 0 && (
-                                          <div className="p-10 border border-white/5 rounded-2xl text-center text-slate-500 flex flex-col items-center justify-center">
+                                          <div className="p-10 border border-white/8 rounded-xl text-center text-slate-500 flex flex-col items-center justify-center">
                                             <Users className="w-10 h-10 mb-3 opacity-20" />
                                             <p>
                                               No agents matched "{rtmSearch}"
@@ -22414,7 +22409,7 @@ ${ttNotes}`
                                   return (
                                     <div
                                       id="compliance-alerts-panel"
-                                      className="p-6 bg-[#180d14]/80 border border-rose-500/20 rounded-2xl space-y-4 relative overflow-hidden"
+                                      className="p-6 bg-[#180d14]/80 border border-transparent rounded-xl space-y-4 relative overflow-hidden"
                                     >
                                       <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -22432,7 +22427,7 @@ ${ttNotes}`
                                           </p>
                                         </div>
                                         <span
-                                          className={`px-2.5 py-1 text-xs font-bold rounded-xl border uppercase tracking-wider ${ complianceViolations.length > 0 ? "bg-rose-500/20 text-rose-300 border-rose-500/30 font-sans animate-pulse" : "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" }`}
+                                          className={`px-2.5 py-1 text-xs font-bold rounded-xl border uppercase tracking-wider ${ complianceViolations.length > 0 ? "bg-rose-500/10 text-rose-300 border-transparent font-sans animate-pulse" : "bg-emerald-500/10 text-emerald-300 border-transparent" }`}
                                         >
                                           {complianceViolations.length} Active
                                           Breach
@@ -22444,8 +22439,8 @@ ${ttNotes}`
                                       </div>
 
                                       {complianceViolations.length === 0 ? (
-                                        <div className="flex items-center gap-3.5 p-4 bg-emerald-950/20 border border-emerald-500/20 rounded-2xl">
-                                          <span className="flex h-6 w-6 shrink-0 bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 rounded-full items-center justify-center font-bold text-xs select-none"></span>
+                                        <div className="flex items-center gap-3.5 p-4 bg-emerald-950/20 border border-transparent rounded-xl">
+                                          <span className="flex h-6 w-6 shrink-0 bg-emerald-500/10 text-emerald-400 border border-transparent rounded-full items-center justify-center font-bold text-xs select-none"></span>
                                           <div className="text-left">
                                             <p className="text-xs font-bold text-emerald-300 font-sans">
                                               All Agents are 100% Compliant
@@ -22463,7 +22458,7 @@ ${ttNotes}`
                                           {complianceViolations.map((entry) => (
                                             <div
                                               key={entry.agentName}
-                                              className="p-4 bg-white/[0.03] border border-rose-500/15 rounded-2xl flex flex-col justify-between gap-3 text-left relative overflow-hidden group hover:border-rose-500/25 transition-all"
+                                              className="p-4 bg-white/[0.03] border border-rose-500/15 rounded-xl flex flex-col justify-between gap-3 text-left relative overflow-hidden group hover:border-transparent transition-all"
                                             >
                                               <div className="space-y-2">
                                                 <div className="flex justify-between items-start">
@@ -22471,7 +22466,7 @@ ${ttNotes}`
                                                     <p className="text-xs font-bold text-slate-100 uppercase tracking-wide font-sans">
                                                       {entry.agentName}
                                                     </p>
-                                                    <span className="inline-block text-xs font-bold uppercase text-rose-300 bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.5 rounded-xl mt-1 font-sans">
+                                                    <span className="inline-block text-xs font-bold uppercase text-rose-300 bg-rose-500/10 border border-transparent px-1.5 py-0.5 rounded-xl mt-1 font-sans">
                                                       LOB: {entry.lob}
                                                     </span>
                                                   </div>
@@ -22480,7 +22475,7 @@ ${ttNotes}`
                                                       (v) =>
                                                         v.isCurrentlyActive,
                                                     ) && (
-                                                      <span className="flex items-center gap-1.5 text-xs bg-red-500/20 text-red-300 border border-red-500/30 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest animate-pulse font-sans">
+                                                      <span className="flex items-center gap-1.5 text-xs bg-red-500/10 text-red-300 border border-transparent px-2 py-0.5 rounded-lg font-bold uppercase tracking-widest animate-pulse font-sans">
                                                         <span className="w-1.5 h-1.5 rounded-full bg-red-500 block"></span>
                                                         Overtime Now
                                                       </span>
@@ -22493,7 +22488,7 @@ ${ttNotes}`
                                                     (violation, idx) => (
                                                       <div
                                                         key={idx}
-                                                        className="flex flex-col gap-1 p-2 bg-white/5 border border-white/5 rounded-xl text-xs font-sans"
+                                                        className="flex flex-col gap-1 p-2 bg-white/5 border border-white/8 rounded-xl text-xs font-sans"
                                                       >
                                                         <div className="flex items-center justify-between font-bold">
                                                           <span className="text-slate-200">
@@ -22543,7 +22538,7 @@ ${ttNotes}`
                                                     `Direct compliance warning notification dispatched dynamically to ${entry.agentName}!`,
                                                   );
                                                 }}
-                                                className="w-full py-1.5 bg-rose-500/10 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 rounded-xl text-xs uppercase font-bold tracking-wider hover:scale-[1.01] active:scale-[0.99] cursor-pointer transition-all flex items-center justify-center gap-1.5 font-sans"
+                                                className="w-full py-1.5 bg-rose-500/10 hover:bg-rose-500/10 border border-transparent text-rose-300 rounded-xl text-xs uppercase font-bold tracking-wider hover:scale-[1.01] active:scale-[0.99] cursor-pointer transition-all flex items-center justify-center gap-1.5 font-sans"
                                               >
                                                 <Bell className="w-3.5 h-3.5" />
                                                 Send Direct Compliance Ping
@@ -22557,7 +22552,7 @@ ${ttNotes}`
                                 })()}
 
                                 {/* Real-time filters and search control */}
-                                <div className="p-5 bg-white/5 border border-white/10 rounded-2xl grid grid-cols-1 sm:grid-cols-4 gap-4 items-center">
+                                <div className="p-5 bg-white/5 border border-white/8 rounded-xl grid grid-cols-1 sm:grid-cols-4 gap-4 items-center">
                                   <div className="sm:col-span-2 relative">
                                     <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
                                       <Search className="w-4 h-4" />
@@ -22569,7 +22564,7 @@ ${ttNotes}`
                                         setTlSearchQuery(e.target.value)
                                       }
                                       placeholder="Filter status table by agent name..."
-                                      className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
+                                      className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/8 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
                                     />
                                   </div>
 
@@ -22582,7 +22577,7 @@ ${ttNotes}`
                                       onChange={(e) =>
                                         setTlStatusFilter(e.target.value as any)
                                       }
-                                      className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-slate-300 focus:outline-none focus:border-indigo-500 cursor-pointer"
+                                      className="w-full px-3 py-2 bg-white/5 border border-white/8 rounded-xl text-xs text-slate-300 focus:outline-none focus:border-indigo-500 cursor-pointer"
                                     >
                                       <option
                                         value="all"
@@ -22619,7 +22614,7 @@ ${ttNotes}`
                                 </div>
 
                                 {/* Live station usage & totals board */}
-                                <div className="p-6 bg-white/5 border border-white/10 rounded-2xl space-y-4">
+                                <div className="p-6 bg-white/5 border border-white/8 rounded-xl space-y-4">
                                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                                     <div>
                                       <h3 className="font-bold text-slate-100 text-base font-sans">
@@ -22723,10 +22718,10 @@ ${ttNotes}`
                                     }
 
                                     return (
-                                      <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 border border-white/5 rounded-2xl bg-white/[0.04] overflow-visible">
+                                      <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 border border-white/8 rounded-xl bg-white/[0.04] overflow-visible">
                                         <table className="w-full text-left border-collapse min-w-[750px]">
                                           <thead>
-                                            <tr className="bg-white/5 border-b border-white/10 text-xs font-bold uppercase tracking-widest text-slate-400 font-sans">
+                                            <tr className="bg-white/5 border-b border-white/8 text-xs font-bold uppercase tracking-widest text-slate-400 font-sans">
                                               <th className="px-5 py-3">
                                                 Agent Name
                                               </th>
@@ -22789,7 +22784,7 @@ ${ttNotes}`
                                                   {/* Name */}
                                                   <td className="px-5 py-4 font-bold text-slate-100 font-sans uppercase tracking-wide">
                                                     <div>{name}</div>
-                                                    <div className="text-xs text-slate-400 font-normal lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded-xl mt-1 w-max block">
+                                                    <div className="text-xs text-slate-400 font-normal lowercase tracking-wide bg-white/5 border border-white/8 px-2 py-0.5 rounded-xl mt-1 w-max block">
                                                       {getAgentLOB(name)}
                                                     </div>
                                                   </td>
@@ -22809,7 +22804,7 @@ ${ttNotes}`
                                                               .value as any,
                                                           )
                                                         }
-                                                        className="bg-white/5 border border-white/10 rounded-xl text-xs text-slate-100 px-2 py-1 focus:outline-none focus:border-indigo-500 font-bold uppercase cursor-pointer max-w-[120px]"
+                                                        className="bg-white/5 border border-white/8 rounded-xl text-xs text-slate-100 px-2 py-1 focus:outline-none focus:border-indigo-500 font-bold uppercase cursor-pointer max-w-[120px]"
                                                       >
                                                         <option
                                                           value="working"
@@ -22984,7 +22979,7 @@ ${ttNotes}`
                                                   {/* Compliance status banner */}
                                                   <td className="px-5 py-4 text-right">
                                                     {isCurrentlyExceeded && (
-                                                      <span className="px-2 py-0.5 rounded bg-rose-500/20 border border-rose-500/40 text-rose-300 font-bold text-xs uppercase tracking-wide select-none animate-pulse block text-center max-w-[130px] ml-auto">
+                                                      <span className="px-2 py-0.5 rounded bg-rose-500/10 border border-transparent text-rose-300 font-bold text-xs uppercase tracking-wide select-none animate-pulse block text-center max-w-[130px] ml-auto">
                                                         Overtime Now (+
                                                         {currentExceedBy.toFixed(
                                                           1,
@@ -22994,13 +22989,13 @@ ${ttNotes}`
                                                     )}
                                                     {!isCurrentlyExceeded &&
                                                       exceededLimit && (
-                                                        <span className="px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/20 text-rose-300/80 font-bold text-xs uppercase tracking-wide block text-center max-w-[130px] ml-auto">
+                                                        <span className="px-2 py-0.5 rounded bg-rose-500/10 border border-transparent text-rose-300/80 font-bold text-xs uppercase tracking-wide block text-center max-w-[130px] ml-auto">
                                                           Limit Exceeded
                                                         </span>
                                                       )}
                                                     {!isCurrentlyExceeded &&
                                                       !exceededLimit && (
-                                                        <span className="px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 font-bold text-xs uppercase tracking-wide block text-center max-w-[130px] ml-auto">
+                                                        <span className="px-2 py-0.5 rounded bg-transparent border border-white/12 text-white border border-transparent text-emerald-400 font-bold text-xs uppercase tracking-wide block text-center max-w-[130px] ml-auto">
                                                           Compliant
                                                         </span>
                                                       )}
@@ -23045,7 +23040,7 @@ ${ttNotes}`
                             currentUser?.role === "tl") && (
                             <button
                               onClick={clearTargetSchedules}
-                              className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 hover:border-rose-500/35 text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer self-stretch md:self-auto justify-center"
+                              className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/35 text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer self-stretch md:self-auto justify-center"
                             >
                               <XCircle className="w-4 h-4 text-rose-400" />
                               Clear Current Roster
@@ -23071,7 +23066,7 @@ ${ttNotes}`
                               <div className="mt-4 flex justify-end">
                                 <button
                                   onClick={commitSchedules}
-                                  className="px-5 py-2 bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 rounded-xl text-sm font-bold flex items-center gap-2 transition-all"
+                                  className="px-5 py-2 bg-transparent border border-white/12 text-white text-white hover:bg-white/5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all"
                                 >
                                   <CheckCircle2 className="w-4 h-4" /> Save &
                                   Append Published Schedule (
@@ -23086,7 +23081,7 @@ ${ttNotes}`
                         {(isSuperAdmin ||
                           isTLOreSupport ||
                           currentUser?.role === "tl") && (
-                          <div className="bg-gradient-to-r from-violet-500/15 via-indigo-500/10 to-blue-500/15 border border-indigo-500/30 rounded-2xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
+                          <div className="bg-gradient-to-r from-violet-500/15 via-indigo-500/10 to-blue-500/15 border border-transparent rounded-xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
                             <div className="space-y-1 text-left">
                               <div className="flex items-center gap-2">
                                 <span
@@ -23134,7 +23129,7 @@ ${ttNotes}`
                                   }}
                                   className="sr-only peer"
                                 />
-                                <div className="w-14 h-7 bg-white/5 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white/10 after:border-slate-700 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-600 border border-white/10"></div>
+                                <div className="w-14 h-7 bg-white/5 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white/10 after:border-white/8 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-600 border border-white/8"></div>
                               </label>
                             </div>
                           </div>
@@ -23144,7 +23139,7 @@ ${ttNotes}`
                         {(isSuperAdmin ||
                           isTLOreSupport ||
                           currentUser?.role === "tl") && (
-                          <div className="bg-white/5 border border-white/10 rounded-2xl text-slate-100 p-6 space-y-5 text-left">
+                          <div className="bg-white/5 border border-white/8 rounded-xl text-slate-100 p-6 space-y-5 text-left">
                             <div>
                               <h3 className="font-bold text-slate-100 text-base font-sans flex items-center gap-2">
                                 <PlusCircle className="w-5 h-5 text-indigo-400" />
@@ -23169,7 +23164,7 @@ ${ttNotes}`
                                   onChange={(e) =>
                                     setManualRosterAgent(e.target.value)
                                   }
-                                  className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer focus:border-indigo-500 font-sans"
+                                  className="w-full px-3 py-2.5 bg-white/5 border border-white/8 rounded-xl text-xs text-slate-100 outline-none cursor-pointer focus:border-indigo-500 font-sans"
                                 >
                                   <option value="">-- Choose Agent --</option>
                                   {agentsList.map((name) => (
@@ -23194,7 +23189,7 @@ ${ttNotes}`
                                   onChange={(e) =>
                                     setManualRosterDate(e.target.value)
                                   }
-                                  className="w-full px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-xs text-slate-100 outline-none focus:border-indigo-500 h-[42px]"
+                                  className="w-full px-3 py-1.5 bg-white/5 border border-white/8 rounded-xl text-xs text-slate-100 outline-none focus:border-indigo-500 h-[42px]"
                                 />
                               </div>
 
@@ -23207,7 +23202,7 @@ ${ttNotes}`
                                   onChange={(e) =>
                                     setManualRosterShift(e.target.value)
                                   }
-                                  className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer focus:border-indigo-500 font-sans"
+                                  className="w-full px-3 py-2.5 bg-white/5 border border-white/8 rounded-xl text-xs text-slate-100 outline-none cursor-pointer focus:border-indigo-500 font-sans"
                                 >
                                   {SHIFTS.map((s) => (
                                     <option
@@ -23230,7 +23225,7 @@ ${ttNotes}`
                               <div className="md:col-span-1 block">
                                 <button
                                   type="submit"
-                                  className="w-full h-[42px] bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer hover:scale-[1.02]"
+                                  className="w-full h-[42px] bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.02]"
                                 >
                                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                                   Submit Roster Shift
@@ -23249,7 +23244,7 @@ ${ttNotes}`
                                   onChange={(e) =>
                                     setManualRosterNotes(e.target.value)
                                   }
-                                  className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500"
+                                  className="w-full px-4 py-2.5 bg-white/5 border border-white/8 rounded-xl text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-indigo-500"
                                 />
                               </div>
                             </form>
@@ -23257,7 +23252,7 @@ ${ttNotes}`
                         )}
 
                         {/* Break Schedule Panel */}
-                        <div className="bg-transparent border border-white/5 rounded-2xl p-5">
+                        <div className="bg-transparent border border-white/8 rounded-xl p-5">
                           <BreakSchedulePanel
                             currentUser={currentUser}
                             schedules={schedules}
@@ -23271,7 +23266,7 @@ ${ttNotes}`
 
                         {/* Informative coverage card indicators */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                          <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+                          <div className="p-4 bg-white/5 border border-white/8 rounded-xl">
                             <p className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1">
                               Active Scheduled Days
                             </p>
@@ -23285,7 +23280,7 @@ ${ttNotes}`
                             </p>
                           </div>
 
-                          <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+                          <div className="p-4 bg-white/5 border border-white/8 rounded-xl">
                             <p className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1">
                               Coverage Scope
                             </p>
@@ -23297,7 +23292,7 @@ ${ttNotes}`
                             </p>
                           </div>
 
-                          <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+                          <div className="p-4 bg-white/5 border border-white/8 rounded-xl">
                             <p className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1 font-mono">
                               My Upcoming Shift
                             </p>
@@ -23351,8 +23346,8 @@ ${ttNotes}`
 
                         {false ? (
                           <div className="space-y-6">
-                            <div className="p-12 text-center rounded-2xl border border-dashed border-indigo-500/30 bg-white/10 /[0.02] space-y-4 text-left">
-                              <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto text-indigo-400">
+                            <div className="p-12 text-center rounded-xl border border-dashed border-transparent bg-white/10 /[0.02] space-y-4 text-left">
+                              <div className="w-16 h-16 rounded-xl bg-indigo-500/10 border border-transparent flex items-center justify-center mx-auto text-indigo-400">
                                 <Shield className="w-8 h-8" />
                               </div>
                               <div className="space-y-2 text-center">
@@ -23368,7 +23363,7 @@ ${ttNotes}`
                                 </p>
                               </div>
                               <div className="flex justify-center">
-                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-amber-500/10 border border-amber-500/25 text-amber-300 font-bold uppercase text-xs tracking-wider font-mono mx-auto">
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-amber-500/10 border border-transparent text-amber-300 font-bold uppercase text-xs tracking-wider font-mono mx-auto">
                                   <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></span>
                                   Roster Draft Stage
                                 </div>
@@ -23376,8 +23371,8 @@ ${ttNotes}`
                             </div>
 
                             {/* Display personalized preview list */}
-                            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4 text-left">
-                              <div className="border-b border-white/5 pb-3">
+                            <div className="bg-white/5 border border-white/8 rounded-xl p-6 space-y-4 text-left">
+                              <div className="border-b border-white/8 pb-3">
                                 <h4 className="text-sm font-bold text-indigo-300 uppercase tracking-widest font-sans">
                                   My Shift Coverage Preview
                                 </h4>
@@ -23412,7 +23407,7 @@ ${ttNotes}`
                                       return (
                                         <div
                                           key={shift.id}
-                                          className="p-4 bg-white/10 /[0.02] border border-white/5 rounded-2xl flex flex-col justify-between gap-3 text-left"
+                                          className="p-4 bg-white/10 /[0.02] border border-white/8 rounded-xl flex flex-col justify-between gap-3 text-left"
                                         >
                                           <div className="flex items-center justify-between w-full">
                                             <div>
@@ -23431,14 +23426,14 @@ ${ttNotes}`
                                           </div>
                                           {(shift.breakTime ||
                                             shift.lunchTime) && (
-                                            <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
+                                            <div className="flex flex-wrap gap-2 pt-2 border-t border-white/8">
                                               {shift.breakTime && (
-                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono text-xs">
+                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-transparent font-mono text-xs">
                                                   ☕ Break: {shift.breakTime}
                                                 </span>
                                               )}
                                               {shift.lunchTime && (
-                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20 font-sans text-xs">
+                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-transparent font-sans text-xs">
                                                   🍔 Lunch: {shift.lunchTime}
                                                 </span>
                                               )}
@@ -23455,7 +23450,7 @@ ${ttNotes}`
                         ) : (
                           <>
                             {/* Search, Filter, & Navigation Toolbar */}
-                            <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4">
+                            <div className="p-4 bg-white/5 border border-white/8 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4">
                               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                                 {/* Search bar */}
                                 <input
@@ -23465,17 +23460,17 @@ ${ttNotes}`
                                   onChange={(e) =>
                                     setScheduleFilterAgent(e.target.value)
                                   }
-                                  className="px-4 py-2 bg-black/45 hover:bg-white/20 border border-white/10 focus:border-indigo-500/85 focus:ring-1 focus:ring-indigo-500 rounded-xl text-xs text-slate-100 placeholder-slate-400 outline-none transition-all w-full sm:w-64"
+                                  className="px-4 py-2 bg-black/45 hover:bg-white/20 border border-white/8 focus:border-indigo-500/85 focus:ring-1 focus:ring-indigo-500 rounded-xl text-xs text-slate-100 placeholder-slate-400 outline-none transition-all w-full sm:w-64"
                                 />
 
                                 {/* View Mode */}
-                                <div className="flex rounded-xl bg-white/[0.04] p-1 border border-white/5">
+                                <div className="flex rounded-xl bg-white/[0.04] p-1 border border-white/8">
                                   <button
                                     onClick={() => {
                                       setScheduleViewMode("week");
                                       setSchedulePageOffset(0);
                                     }}
-                                    className={`px-3 py-1 text-xs font-bold rounded-xl transition-all cursor-pointer ${ scheduleViewMode === "week" ? "bg-indigo-500 text-white shadow-sm" : "text-slate-400 hover:text-slate-100" }`}
+                                    className={`px-3 py-1 text-xs font-bold rounded-xl transition-all cursor-pointer ${ scheduleViewMode === "week" ? "bg-white/10 text-white" : "text-slate-400 hover:text-slate-100" }`}
                                   >
                                     Week
                                   </button>
@@ -23484,7 +23479,7 @@ ${ttNotes}`
                                       setScheduleViewMode("fortnight");
                                       setSchedulePageOffset(0);
                                     }}
-                                    className={`px-3 py-1 text-xs font-bold rounded-xl transition-all cursor-pointer ${ scheduleViewMode === "fortnight" ? "bg-indigo-500 text-white shadow-sm" : "text-slate-400 hover:text-slate-100" }`}
+                                    className={`px-3 py-1 text-xs font-bold rounded-xl transition-all cursor-pointer ${ scheduleViewMode === "fortnight" ? "bg-white/10 text-white" : "text-slate-400 hover:text-slate-100" }`}
                                   >
                                     2-Weeks
                                   </button>
@@ -23493,7 +23488,7 @@ ${ttNotes}`
                                       setScheduleViewMode("month");
                                       setSchedulePageOffset(0);
                                     }}
-                                    className={`px-3 py-1 text-xs font-bold rounded-xl transition-all cursor-pointer ${ scheduleViewMode === "month" ? "bg-indigo-500 text-white shadow-sm" : "text-slate-400 hover:text-slate-100" }`}
+                                    className={`px-3 py-1 text-xs font-bold rounded-xl transition-all cursor-pointer ${ scheduleViewMode === "month" ? "bg-white/10 text-white" : "text-slate-400 hover:text-slate-100" }`}
                                   >
                                     Full Month
                                   </button>
@@ -23518,7 +23513,7 @@ ${ttNotes}`
                                         Math.max(0, prev - displayDaysCount),
                                       )
                                     }
-                                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-100 disabled:opacity-30 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/8 text-slate-100 disabled:opacity-30 rounded-xl text-xs font-bold transition-all cursor-pointer"
                                   >
                                     &larr; Prev
                                   </button>
@@ -23536,7 +23531,7 @@ ${ttNotes}`
                                         ),
                                       )
                                     }
-                                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-100 disabled:opacity-30 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/8 text-slate-100 disabled:opacity-30 rounded-xl text-xs font-bold transition-all cursor-pointer"
                                   >
                                     Next &rarr;
                                   </button>
@@ -23549,7 +23544,7 @@ ${ttNotes}`
                                     <button
                                       onClick={syncShiftsToGoogleCalendar}
                                       disabled={isSyncingCalendar}
-                                      className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-sm"
+                                      className="px-4 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2"
                                       title="Sync with Google Calendar"
                                     >
                                       {isSyncingCalendar ? (
@@ -23573,8 +23568,8 @@ ${ttNotes}`
                             </div>
 
                             {/* Active Schedule visual Matrix grid */}
-                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 sm:p-6 space-y-4">
-                              <div className="flex justify-between items-center pb-2 border-b border-white/5">
+                            <div className="bg-white/5 border border-white/8 rounded-xl p-5 sm:p-6 space-y-4">
+                              <div className="flex justify-between items-center pb-2 border-b border-white/8">
                                 <h3 className="font-bold text-slate-100 text-base font-sans">
                                   {" "}
                                   Roster Coverage Planner
@@ -23681,11 +23676,11 @@ ${ttNotes}`
                                     };
 
                                     return (
-                                      <div className="bg-[#12121e]/85 border border-indigo-500/25 rounded-2xl p-5 space-y-4 mb-6 text-left relative overflow-hidden">
+                                      <div className="bg-[#12121e]/85 border border-transparent rounded-xl p-5 space-y-4 mb-6 text-left relative overflow-hidden">
                                         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
                                         <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
 
-                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-3">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/8 pb-3">
                                           <div className="space-y-1">
                                             <h4 className="text-sm font-bold text-slate-100 flex items-center gap-2 font-sans">
                                               <span className="flex h-2.5 w-2.5 relative">
@@ -23709,7 +23704,7 @@ ${ttNotes}`
                                                 !heatmapConfigureOpen,
                                               )
                                             }
-                                            className="px-3.5 py-1.5 bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/25 text-indigo-300 rounded-xl text-xs uppercase font-bold tracking-widest transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto"
+                                            className="px-3.5 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 border border-transparent text-indigo-300 rounded-xl text-xs uppercase font-bold tracking-widest transition-all flex items-center gap-2 cursor-pointer self-start sm:self-auto"
                                           >
                                             <Sliders className="w-3.5 h-3.5" />
                                             {heatmapConfigureOpen
@@ -23720,7 +23715,7 @@ ${ttNotes}`
 
                                         {/* Interactive Target Configurator Panel */}
                                         {heatmapConfigureOpen && (
-                                          <div className="p-4 bg-slate-900/40 /40 rounded-2xl border border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-5 text-left transition-all">
+                                          <div className="p-4 bg-slate-900/40 /40 rounded-xl border border-white/8 grid grid-cols-1 sm:grid-cols-3 gap-5 text-left transition-all">
                                             <div className="space-y-2">
                                               <label className="text-xs text-slate-400 font-bold uppercase tracking-wider block font-sans">
                                                 Morning Shift Target (07-16)
@@ -23741,7 +23736,7 @@ ${ttNotes}`
                                                       val,
                                                     );
                                                   }}
-                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-xl border border-white/10 transition-all flex items-center justify-center cursor-pointer"
+                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-xl border border-white/8 transition-all flex items-center justify-center cursor-pointer"
                                                 >
                                                   -
                                                 </button>
@@ -23761,7 +23756,7 @@ ${ttNotes}`
                                                       val,
                                                     );
                                                   }}
-                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-xl border border-white/10 transition-all flex items-center justify-center cursor-pointer"
+                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-xl border border-white/8 transition-all flex items-center justify-center cursor-pointer"
                                                 >
                                                   +
                                                 </button>
@@ -23792,7 +23787,7 @@ ${ttNotes}`
                                                       val,
                                                     );
                                                   }}
-                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-xl border border-white/10 transition-all flex items-center justify-center cursor-pointer"
+                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-xl border border-white/8 transition-all flex items-center justify-center cursor-pointer"
                                                 >
                                                   -
                                                 </button>
@@ -23813,7 +23808,7 @@ ${ttNotes}`
                                                       val,
                                                     );
                                                   }}
-                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-xl border border-white/10 transition-all flex items-center justify-center cursor-pointer"
+                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-xl border border-white/8 transition-all flex items-center justify-center cursor-pointer"
                                                 >
                                                   +
                                                 </button>
@@ -23841,7 +23836,7 @@ ${ttNotes}`
                                                       val,
                                                     );
                                                   }}
-                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-xl border border-white/10 transition-all flex items-center justify-center cursor-pointer"
+                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-xl border border-white/8 transition-all flex items-center justify-center cursor-pointer"
                                                 >
                                                   -
                                                 </button>
@@ -23859,7 +23854,7 @@ ${ttNotes}`
                                                       val,
                                                     );
                                                   }}
-                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-xl border border-white/10 transition-all flex items-center justify-center cursor-pointer"
+                                                  className="w-8 h-8 bg-white/5 hover:bg-white/10 active:scale-95 text-slate-100 font-bold rounded-xl border border-white/8 transition-all flex items-center justify-center cursor-pointer"
                                                 >
                                                   +
                                                 </button>
@@ -23876,7 +23871,7 @@ ${ttNotes}`
                                           <div className="min-w-[850px] space-y-2">
                                             {/* Header row containing Dates */}
                                             <div className="flex">
-                                              <div className="w-44 shrink-0 flex items-center pl-3 text-xs font-bold uppercase text-indigo-300 tracking-wider font-sans border-r border-white/5">
+                                              <div className="w-44 shrink-0 flex items-center pl-3 text-xs font-bold uppercase text-indigo-300 tracking-wider font-sans border-r border-white/8">
                                                 Shift vs Date
                                               </div>
                                               <div className="flex-1 flex gap-1.5 pl-3">
@@ -23892,7 +23887,7 @@ ${ttNotes}`
                                                     return (
                                                       <div
                                                         key={dateStr}
-                                                        className="flex-1 text-center bg-slate-900/40 /30 py-1.5 rounded-xl border border-white/5"
+                                                        className="flex-1 text-center bg-slate-900/40 /30 py-1.5 rounded-xl border border-white/8"
                                                       >
                                                         <p className="text-xs text-indigo-300 uppercase font-bold tracking-wider leading-none">
                                                           {dayLabel}
@@ -23943,7 +23938,7 @@ ${ttNotes}`
                                                   className="flex items-stretch"
                                                 >
                                                   {/* Left Row Title & Header */}
-                                                  <div className="w-44 shrink-0 flex flex-col justify-center text-left pl-3 py-1 bg-slate-900/40 /30 border-r border-white/5 rounded-l-xl select-none">
+                                                  <div className="w-44 shrink-0 flex flex-col justify-center text-left pl-3 py-1 bg-slate-900/40 /30 border-r border-white/8 rounded-l-xl select-none">
                                                     <p className="text-xs font-bold text-slate-200 font-sans">
                                                       {row.label}
                                                     </p>
@@ -23973,27 +23968,27 @@ ${ttNotes}`
 
                                                         // Decide color gradient classes
                                                         let cellStyle =
-                                                          "bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 ";
+                                                          "bg-rose-500/10 hover:bg-rose-500/10 text-rose-300 border border-transparent ";
                                                         let statusText =
                                                           "Critically Understaffed";
 
                                                         if (ratio >= 1.0) {
                                                           cellStyle =
-                                                            "bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 shadow-sm ";
+                                                            "bg-emerald-500/10 hover:bg-emerald-500/10 text-emerald-300 border border-transparent ";
                                                           statusText =
                                                             "Optimal Staffing";
                                                         } else if (
                                                           ratio >= 0.5
                                                         ) {
                                                           cellStyle =
-                                                            "bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30";
+                                                            "bg-amber-500/10 hover:bg-amber-500/10 text-amber-300 border border-transparent";
                                                           statusText =
                                                             "Sufficient";
                                                         } else if (
                                                           ratio > 0.0
                                                         ) {
                                                           cellStyle =
-                                                            "bg-orange-500/15 hover:bg-orange-500/25 text-orange-300 border border-orange-500/30";
+                                                            "bg-orange-500/10 hover:bg-orange-500/10 text-orange-300 border border-transparent";
                                                           statusText =
                                                             "Understaffed";
                                                         }
@@ -24011,13 +24006,13 @@ ${ttNotes}`
                                                             </span>
 
                                                             {/* Tooltip listing agents */}
-                                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 hidden group-hover:block bg-transparent border border-indigo-500/30 text-slate-100 rounded-xl p-3 shadow-sm z-50 text-xs leading-relaxed">
-                                                              <p className="font-bold text-indigo-300 border-b border-indigo-500/20 pb-0.5 mb-1.5 flex items-center justify-between">
+                                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 hidden group-hover:block bg-transparent border border-transparent text-slate-100 rounded-xl p-3 z-50 text-xs leading-relaxed">
+                                                              <p className="font-bold text-indigo-300 border-b border-transparent pb-0.5 mb-1.5 flex items-center justify-between">
                                                                 <span>
                                                                   Coverage
                                                                   Details
                                                                 </span>
-                                                                <span className="text-xs bg-indigo-500/20 text-indigo-300 px-1.5 py-0.2 rounded font-mono uppercase tracking-widest">
+                                                                <span className="text-xs bg-transparent border border-white/12 text-white text-indigo-300 px-1.5 py-0.2 rounded font-mono uppercase tracking-widest">
                                                                   {row.term}
                                                                 </span>
                                                               </p>
@@ -24028,7 +24023,7 @@ ${ttNotes}`
                                                                 {target} agents
                                                                 scheduled)
                                                               </p>
-                                                              <p className="text-slate-500 text-[8.5px] uppercase tracking-wider font-bold pb-0.5 border-b border-white/5 mt-2">
+                                                              <p className="text-slate-500 text-[8.5px] uppercase tracking-wider font-bold pb-0.5 border-b border-white/8 mt-2">
                                                                 Active Agents:
                                                               </p>
                                                               {coverage.agents
@@ -24083,28 +24078,28 @@ ${ttNotes}`
                                         </div>
 
                                         {/* Quick Stats Insights Bar & Legend */}
-                                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-3 border-t border-white/5 text-xs text-slate-400">
+                                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-3 border-t border-white/8 text-xs text-slate-400">
                                           {/* Heatmap Legend */}
                                           <div className="flex flex-wrap gap-3 items-center">
                                             <span className="font-bold text-slate-300">
                                               Keys:
                                             </span>
                                             <span className="flex items-center gap-1">
-                                              <span className="w-2.5 h-2.5 rounded bg-emerald-500/20 border border-emerald-500/40 inline-block text-xs text-center font-bold"></span>
+                                              <span className="w-2.5 h-2.5 rounded bg-emerald-500/10 border border-transparent inline-block text-xs text-center font-bold"></span>
                                               Optimal (100%+)
                                             </span>
                                             <span className="flex items-center gap-1">
-                                              <span className="w-2.5 h-2.5 rounded bg-amber-500/15 border border-amber-500/35 inline-block text-xs text-center font-bold">
+                                              <span className="w-2.5 h-2.5 rounded bg-amber-500/10 border border-amber-500/35 inline-block text-xs text-center font-bold">
                                                 !
                                               </span>
                                               Sufficient (50%+)
                                             </span>
                                             <span className="flex items-center gap-1">
-                                              <span className="w-2.5 h-2.5 rounded bg-orange-500/15 border border-orange-500/35 inline-block text-xs text-center font-bold"></span>
+                                              <span className="w-2.5 h-2.5 rounded bg-orange-500/10 border border-orange-500/35 inline-block text-xs text-center font-bold"></span>
                                               Understaffed (&lt;50%)
                                             </span>
                                             <span className="flex items-center gap-1">
-                                              <span className="w-2.5 h-2.5 rounded bg-rose-500/10 border border-rose-500/30 inline-block text-xs text-center font-bold"></span>
+                                              <span className="w-2.5 h-2.5 rounded bg-rose-500/10 border border-transparent inline-block text-xs text-center font-bold"></span>
                                               0 Coverage
                                             </span>
                                           </div>
@@ -24147,7 +24142,7 @@ ${ttNotes}`
                                               understaffedEntries.length === 0
                                             ) {
                                               return (
-                                                <span className="text-emerald-400 font-bold flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-xl font-sans">
+                                                <span className="text-emerald-400 font-bold flex items-center gap-1 bg-transparent border border-white/12 text-white border border-transparent px-2 py-0.5 rounded-xl font-sans">
                                                   Optimal Coverage Across
                                                   Display Horizon
                                                 </span>
@@ -24185,11 +24180,11 @@ ${ttNotes}`
                                   })()}
 
                                   {/* Desktop Matrix Grid View */}
-                                  <div className="hidden lg:block overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 border border-white/5 rounded-2xl bg-white/[0.04]">
+                                  <div className="hidden lg:block overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 border border-white/8 rounded-xl bg-white/[0.04]">
                                     <table className="w-full text-left border-collapse table-fixed min-w-[800px]">
                                       <thead>
-                                        <tr className="bg-white/5 border-b border-white/5">
-                                          <th className="px-5 py-3.5 text-xs font-bold text-slate-200 w-52 font-sans bg-slate-900/40 border-r border-white/5 sticky left-0 z-10">
+                                        <tr className="bg-white/5 border-b border-white/8">
+                                          <th className="px-5 py-3.5 text-xs font-bold text-slate-200 w-52 font-sans bg-slate-900/40 border-r border-white/8 sticky left-0 z-10">
                                             Agent Name
                                           </th>
                                           {activeDisplayDates.map((dateStr) => {
@@ -24207,7 +24202,7 @@ ${ttNotes}`
                                             return (
                                               <th
                                                 key={dateStr}
-                                                className="px-3 py-3 text-center border-r border-white/5 min-w-[90px]"
+                                                className="px-3 py-3 text-center border-r border-white/8 min-w-[90px]"
                                               >
                                                 <p className="text-xs text-indigo-300 uppercase font-bold tracking-wider">
                                                   {dayName}
@@ -24240,9 +24235,9 @@ ${ttNotes}`
                                           visibleAgents.map((agentName) => (
                                             <tr
                                               key={agentName}
-                                              className="border-b border-white/5 hover:bg-white/20 transition-all"
+                                              className="border-b border-white/8 hover:bg-white/20 transition-all"
                                             >
-                                              <td className="px-5 py-3 text-xs font-bold text-slate-100 font-sans bg-slate-900/40 border-r border-white/5 sticky left-0 z-10 truncate min-w-[140px]">
+                                              <td className="px-5 py-3 text-xs font-bold text-slate-100 font-sans bg-slate-900/40 border-r border-white/8 sticky left-0 z-10 truncate min-w-[140px]">
                                                 {agentName}
                                                 <span className="block text-xs text-slate-400 font-normal lowercase tracking-wide font-sans">
                                                   {getAgentLOB(agentName)}
@@ -24294,7 +24289,7 @@ ${ttNotes}`
                                                             { ...findShift },
                                                           );
                                                       }}
-                                                      className={`p-1 border-r border-white/5 hover:bg-white/20 /40 transition-all relative group ${isSuperAdmin && findShift ? "cursor-pointer hover:ring-1 ring-inset ring-indigo-500/50" : "cursor-help"}`}
+                                                      className={`p-1 border-r border-white/8 hover:bg-white/20 /40 transition-all relative group ${isSuperAdmin && findShift ? "cursor-pointer hover:ring-1 ring-inset ring-indigo-500/50" : "cursor-help"}`}
                                                     >
                                                       <div
                                                         className={`mx-auto rounded-xl px-2 py-2 text-center border text-xs font-bold ${style.bg} transition-all flex items-center justify-center gap-1 relative overflow-hidden`}
@@ -24328,8 +24323,8 @@ ${ttNotes}`
                                                           findShift.activities
                                                             .length > 0) ||
                                                         isSuperAdmin) && (
-                                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block bg-slate-900/40 border border-indigo-400/40 text-slate-100 rounded-xl p-3 shadow-sm z-50 text-xs leading-relaxed">
-                                                          <p className="font-bold text-indigo-300 border-b border-indigo-400/20 pb-0.5 mb-1.5 flex items-center justify-between font-sans">
+                                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block bg-slate-900/40 border border-transparent text-slate-100 rounded-xl p-3 z-50 text-xs leading-relaxed">
+                                                          <p className="font-bold text-indigo-300 border-b border-transparent pb-0.5 mb-1.5 flex items-center justify-between font-sans">
                                                             <span>Details</span>
                                                             <span className="text-slate-400 font-sans scale-75">
                                                               {dateStr}
@@ -24370,7 +24365,7 @@ ${ttNotes}`
                                                                     ) => (
                                                                       <div
                                                                         key={i}
-                                                                        className="flex items-center gap-1.5 justify-between bg-white/[0.03] px-1.5 py-0.5 rounded border border-white/5"
+                                                                        className="flex items-center gap-1.5 justify-between bg-white/[0.03] px-1.5 py-0.5 rounded border border-white/8"
                                                                       >
                                                                         <span className="font-sans text-xs text-indigo-200">
                                                                           {
@@ -24394,7 +24389,7 @@ ${ttNotes}`
 
                                                           {isSuperAdmin &&
                                                             findShift && (
-                                                              <p className="text-xs text-emerald-400 font-bold uppercase tracking-widest text-center mt-2 bg-emerald-500/10 border border-emerald-500/20 py-0.5 rounded">
+                                                              <p className="text-xs text-emerald-400 font-bold uppercase tracking-widest text-center mt-2 bg-emerald-500/10 border border-transparent py-0.5 rounded">
                                                                 Click to edit
                                                                 intervals
                                                               </p>
@@ -24432,11 +24427,11 @@ ${ttNotes}`
                                         return (
                                           <div
                                             key={agentName}
-                                            className="p-4 bg-white/5 border border-white/10 rounded-2xl space-y-2"
+                                            className="p-4 bg-white/5 border border-white/8 rounded-xl space-y-2"
                                           >
-                                            <p className="text-xs font-bold text-slate-100 border-b border-white/5 pb-1 font-sans flex justify-between items-center">
+                                            <p className="text-xs font-bold text-slate-100 border-b border-white/8 pb-1 font-sans flex justify-between items-center">
                                               <span>{agentName}</span>
-                                              <span className="text-xs text-slate-400 font-normal lowercase tracking-wide bg-white/5 border border-white/5 px-1.5 py-0.5 rounded-xl">
+                                              <span className="text-xs text-slate-400 font-normal lowercase tracking-wide bg-white/5 border border-white/8 px-1.5 py-0.5 rounded-xl">
                                                 {getAgentLOB(agentName)}
                                               </span>
                                             </p>
@@ -24484,7 +24479,7 @@ ${ttNotes}`
                                                             { ...findShift },
                                                           );
                                                       }}
-                                                      className={`p-2 bg-white/5 border border-white/5 rounded-xl flex flex-col justify-between items-stretch relative ${isSuperAdmin && findShift ? "cursor-pointer hover:border-indigo-500/50" : ""}`}
+                                                      className={`p-2 bg-white/5 border border-white/8 rounded-xl flex flex-col justify-between items-stretch relative ${isSuperAdmin && findShift ? "cursor-pointer hover:border-transparent" : ""}`}
                                                     >
                                                       <span className="text-xs text-slate-400 font-medium mb-1 truncate block">
                                                         {dayLabel}
@@ -24511,7 +24506,7 @@ ${ttNotes}`
                                                           )}
                                                       </span>
                                                       {findShift?.shiftNotes && (
-                                                        <div className="mt-1.5 border-t border-white/5 pt-1 text-xs text-indigo-300 font-sans italic break-words flex items-start gap-1 leading-normal text-left">
+                                                        <div className="mt-1.5 border-t border-white/8 pt-1 text-xs text-indigo-300 font-sans italic break-words flex items-start gap-1 leading-normal text-left">
                                                           <span className="shrink-0 text-xs"></span>
                                                           <span>
                                                             {
@@ -24523,7 +24518,7 @@ ${ttNotes}`
                                                       {findShift?.activities &&
                                                         findShift.activities
                                                           .length > 0 && (
-                                                          <div className="mt-1.5 border-t border-white/5 pt-1 text-xs text-slate-400 font-sans flex flex-col gap-0.5">
+                                                          <div className="mt-1.5 border-t border-white/8 pt-1 text-xs text-slate-400 font-sans flex flex-col gap-0.5">
                                                             {[
                                                               ...findShift.activities,
                                                             ]
@@ -24565,7 +24560,7 @@ ${ttNotes}`
                                                       {isSuperAdmin &&
                                                         findShift && (
                                                           <div className="mt-2 text-center">
-                                                            <span className="text-xs text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-1 py-[1px] rounded border border-indigo-500/20">
+                                                            <span className="text-xs text-indigo-400 uppercase tracking-widest bg-transparent border border-white/12 text-white px-1 py-[1px] rounded border border-transparent">
                                                               Edit Intraday
                                                             </span>
                                                           </div>
@@ -24582,21 +24577,21 @@ ${ttNotes}`
                                   </div>
 
                                   {/* Shift legend details */}
-                                  <div className="flex flex-wrap justify-start gap-4 text-xs text-slate-400 pt-2 border-t border-white/5">
+                                  <div className="flex flex-wrap justify-start gap-4 text-xs text-slate-400 pt-2 border-t border-white/8">
                                     <span className="flex items-center gap-1.5">
-                                      <span className="w-2.5 h-2.5 rounded bg-emerald-500/20 border border-emerald-500/40 block"></span>
+                                      <span className="w-2.5 h-2.5 rounded bg-emerald-500/10 border border-transparent block"></span>
                                       Morning Shift: 07:00 - 16:00
                                     </span>
                                     <span className="flex items-center gap-1.5">
-                                      <span className="w-2.5 h-2.5 rounded bg-amber-500/20 border border-amber-500/40 block"></span>
+                                      <span className="w-2.5 h-2.5 rounded bg-amber-500/10 border border-transparent block"></span>
                                       Afternoon Shift: 13:00 - 22:00
                                     </span>
                                     <span className="flex items-center gap-1.5">
-                                      <span className="w-2.5 h-2.5 rounded bg-indigo-500/20 border border-indigo-500/40 block"></span>
+                                      <span className="w-2.5 h-2.5 rounded bg-indigo-500/10 border border-transparent block"></span>
                                       Night Shift: 22:00 - 07:00
                                     </span>
                                     <span className="flex items-center gap-1.5">
-                                      <span className="w-2.5 h-2.5 rounded bg-white/5 border border-white/10 block"></span>
+                                      <span className="w-2.5 h-2.5 rounded bg-white/5 border border-white/8 block"></span>
                                       Off Day (Rest Day)
                                     </span>
                                   </div>
@@ -24609,8 +24604,8 @@ ${ttNotes}`
                               currentUser?.role === "sme" ||
                               isSuperAdmin) &&
                               schedules.length > 0 && (
-                                <div className="bg-white/5 border border-amber-500/20 rounded-2xl p-5 sm:p-6 space-y-6 mt-6">
-                                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-4">
+                                <div className="bg-white/5 border border-transparent rounded-xl p-5 sm:p-6 space-y-6 mt-6">
+                                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/8 pb-4">
                                     <div>
                                       <h3 className="font-bold text-transparent bg-gradient-to-r from-amber-400 to-orange-300 bg-clip-text text-lg font-sans flex items-center gap-2 text-left">
                                         <Clock className="w-5 h-5 text-amber-400" />
@@ -24625,7 +24620,7 @@ ${ttNotes}`
                                         slots trigger push notifications.
                                       </p>
                                     </div>
-                                    <span className="px-2.5 py-1 text-xs font-bold tracking-wider uppercase text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-full font-mono">
+                                    <span className="px-2.5 py-1 text-xs font-bold tracking-wider uppercase text-amber-400 bg-amber-500/10 border border-transparent rounded-lg font-mono">
                                       TL & Admin Control
                                     </span>
                                   </div>
@@ -24656,7 +24651,7 @@ ${ttNotes}`
                                           return (
                                             <div
                                               key={shift.id}
-                                              className="p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between gap-3 hover:border-white/10 transition-all text-left"
+                                              className="p-4 bg-white/5 border border-white/8 rounded-xl flex flex-col justify-between gap-3 hover:border-white/8 transition-all text-left"
                                             >
                                               <div className="flex justify-between items-start gap-2">
                                                 <div>
@@ -24665,7 +24660,7 @@ ${ttNotes}`
                                                       {shift.agentName}
                                                     </span>
                                                   </h4>
-                                                  <span className="text-xs text-slate-400 font-normal lowercase tracking-wide bg-white/5 border border-white/5 px-2 py-0.5 rounded-xl mt-1 inline-block">
+                                                  <span className="text-xs text-slate-400 font-normal lowercase tracking-wide bg-white/5 border border-white/8 px-2 py-0.5 rounded-xl mt-1 inline-block">
                                                     {getAgentLOB(
                                                       shift.agentName,
                                                     )}
@@ -24680,7 +24675,7 @@ ${ttNotes}`
 
                                               {/* Times Display or Editor Inputs */}
                                               {isEditing ? (
-                                                <div className="space-y-3 pt-2 border-t border-white/5 mt-1">
+                                                <div className="space-y-3 pt-2 border-t border-white/8 mt-1">
                                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                     <div className="space-y-1">
                                                       <label className="text-xs text-slate-400 font-bold uppercase font-sans">
@@ -24694,7 +24689,7 @@ ${ttNotes}`
                                                             e.target.value,
                                                           )
                                                         }
-                                                        className="w-full px-2.5 py-1.5 bg-slate-950 border border-white/10 rounded-xl text-xs text-slate-100 outline-none focus:border-indigo-500 font-sans"
+                                                        className="w-full px-2.5 py-1.5 bg-slate-950 border border-white/8 rounded-xl text-xs text-slate-100 outline-none focus:border-indigo-500 font-sans"
                                                       />
                                                     </div>
                                                     <div className="space-y-1">
@@ -24709,7 +24704,7 @@ ${ttNotes}`
                                                             e.target.value,
                                                           )
                                                         }
-                                                        className="w-full px-2.5 py-1.5 bg-slate-950 border border-white/10 rounded-xl text-xs text-slate-100 outline-none focus:border-indigo-500 font-sans"
+                                                        className="w-full px-2.5 py-1.5 bg-slate-950 border border-white/8 rounded-xl text-xs text-slate-100 outline-none focus:border-indigo-500 font-sans"
                                                       />
                                                     </div>
                                                   </div>
@@ -24739,25 +24734,25 @@ ${ttNotes}`
                                                   </div>
                                                 </div>
                                               ) : (
-                                                <div className="flex items-center justify-between pt-2 border-t border-white/5 mt-1 gap-2">
+                                                <div className="flex items-center justify-between pt-2 border-t border-white/8 mt-1 gap-2">
                                                   <div className="flex flex-wrap gap-2">
                                                     {shift.breakTime ? (
-                                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-mono leading-none">
+                                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xl bg-amber-500/10 text-amber-400 border border-transparent text-xs font-mono leading-none">
                                                         ☕ Break:{" "}
                                                         {shift.breakTime}
                                                       </span>
                                                     ) : (
-                                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xl bg-white/5 text-slate-650 border border-dashed border-white/10 text-xs leading-none">
+                                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xl bg-white/5 text-slate-650 border border-dashed border-white/8 text-xs leading-none">
                                                         ☕ Break: Not set
                                                       </span>
                                                     )}
                                                     {shift.lunchTime ? (
-                                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xl bg-orange-500/10 text-orange-400 border border-orange-500/20 text-xs font-sans leading-none">
+                                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xl bg-orange-500/10 text-orange-400 border border-transparent text-xs font-sans leading-none">
                                                         🍔 Lunch:{" "}
                                                         {shift.lunchTime}
                                                       </span>
                                                     ) : (
-                                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xl bg-white/5 text-slate-650 border border-dashed border-white/10 text-xs leading-none">
+                                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xl bg-white/5 text-slate-650 border border-dashed border-white/8 text-xs leading-none">
                                                         🍔 Lunch: Not set
                                                       </span>
                                                     )}
@@ -24774,7 +24769,7 @@ ${ttNotes}`
                                                         shift.lunchTime || "",
                                                       );
                                                     }}
-                                                    className="px-3 py-1 bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-300 border border-white/5 hover:border-indigo-500/20 text-slate-300 rounded-xl text-xs font-bold uppercase tracking-wide cursor-pointer transition-all"
+                                                    className="px-3 py-1 bg-white/5 hover:bg-white/5 hover:text-indigo-300 border border-white/8 hover:border-transparent text-slate-300 rounded-xl text-xs font-bold uppercase tracking-wide cursor-pointer transition-all"
                                                   >
                                                     Assign
                                                   </button>
@@ -24790,8 +24785,8 @@ ${ttNotes}`
                               )}
 
                             {/* P2P Shift Swap Trade Market & Trade Hub */}
-                            <div className="bg-white/5 border border-white/10 rounded-2xl text-slate-100 p-5 sm:p-6 space-y-6 mt-6">
-                              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/5 pb-4">
+                            <div className="bg-white/5 border border-white/8 rounded-xl text-slate-100 p-5 sm:p-6 space-y-6 mt-6">
+                              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/8 pb-4">
                                 <div>
                                   <h3 className="font-bold text-transparent bg-gradient-to-r from-blue-300 via-indigo-200 to-cyan-300 bg-clip-text text-lg font-sans flex items-center gap-2">
                                     <GitPullRequest className="w-5 h-5 text-indigo-400 rotate-90" />
@@ -24803,14 +24798,14 @@ ${ttNotes}`
                                     assignments within LOBs
                                   </p>
                                 </div>
-                                <div className="flex bg-white/[0.03] rounded-xl p-1 border border-white/5 text-xs font-bold uppercase text-indigo-300 tracking-wider">
+                                <div className="flex bg-white/[0.03] rounded-xl p-1 border border-white/8 text-xs font-bold uppercase text-indigo-300 tracking-wider">
                                   Peer To Peer Market
                                 </div>
                               </div>
 
                               <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                                 {/* Interactive Trade Listing Launcher Form */}
-                                <div className="bg-white/10 /[0.01] p-5 border border-white/5 rounded-2xl space-y-4 text-left">
+                                <div className="bg-white/10 /[0.01] p-5 border border-white/8 rounded-xl space-y-4 text-left">
                                   <div>
                                     <p className="text-xs font-bold text-rose-450 uppercase tracking-widest">
                                       Publish Open Trade Offer
@@ -24855,7 +24850,7 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setP2pSelectedDate(e.target.value)
                                             }
-                                            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
+                                            className="w-full px-3 py-2 bg-white/5 border border-white/8 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
                                           >
                                             <option
                                               className="bg-white/10 text-slate-100"
@@ -24888,7 +24883,7 @@ ${ttNotes}`
                                         onChange={(e) =>
                                           setP2pTargetAgent(e.target.value)
                                         }
-                                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
+                                        className="w-full px-3 py-2 bg-white/5 border border-white/8 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
                                       >
                                         <option
                                           className="bg-white/10 text-slate-100"
@@ -24931,7 +24926,7 @@ ${ttNotes}`
                                         onChange={(e) =>
                                           setP2pTargetShift(e.target.value)
                                         }
-                                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
+                                        className="w-full px-3 py-2 bg-white/5 border border-white/8 rounded-xl text-xs text-slate-100 outline-none cursor-pointer"
                                       >
                                         {SHIFTS.map((s) => (
                                           <option
@@ -24963,7 +24958,7 @@ ${ttNotes}`
                                         onChange={(e) =>
                                           setP2pNotes(e.target.value)
                                         }
-                                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-slate-100 placeholder-slate-500 outline-none"
+                                        className="w-full px-3 py-2 bg-white/5 border border-white/8 rounded-xl text-xs text-slate-100 placeholder-slate-500 outline-none"
                                       />
                                     </div>
 
@@ -25081,11 +25076,11 @@ ${ttNotes}`
                                         setP2pLinks([]);
                                       }}
                                       disabled={isP2pUploading}
-                                      className="w-full py-2.5 bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer font-sans"
+                                      className="w-full py-2.5 bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer font-sans"
                                     >
                                       {isP2pUploading ? (
                                         <>
-                                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                          <div className="w-4 h-4 border-2 border-white/15 border-t-white rounded-full animate-spin" />
                                           Uploading...
                                         </>
                                       ) : (
@@ -25099,7 +25094,7 @@ ${ttNotes}`
                                 </div>
 
                                 {/* Available Trades Board Listings */}
-                                <div className="xl:col-span-2 bg-white/[0.02] p-5 border border-white/5 rounded-2xl flex flex-col justify-between space-y-4 font-sans">
+                                <div className="xl:col-span-2 bg-white/[0.02] p-5 border border-white/8 rounded-xl flex flex-col justify-between space-y-4 font-sans">
                                   <div className="text-left font-sans">
                                     <p className="text-xs font-bold text-[#22d3ee] uppercase tracking-widest font-sans">
                                       Available Trades Board Listings
@@ -25110,7 +25105,7 @@ ${ttNotes}`
                                     </p>
                                   </div>
 
-                                  <div className="border border-white/5 rounded-xl bg-white/[0.04] overflow-hidden text-left h-72 overflow-y-auto">
+                                  <div className="border border-white/8 rounded-xl bg-white/[0.04] overflow-hidden text-left h-72 overflow-y-auto">
                                     {(() => {
                                       const swapRequests = requests.filter(
                                         (r) => r.type === "swap",
@@ -25128,7 +25123,7 @@ ${ttNotes}`
                                       }
                                       return (
                                         <table className="w-full text-xs font-sans">
-                                          <thead className="bg-[#1e1e2d] text-slate-400 text-xs font-bold uppercase tracking-wider sticky top-0 border-b border-white/5 font-sans">
+                                          <thead className="bg-[#1e1e2d] text-slate-400 text-xs font-bold uppercase tracking-wider sticky top-0 border-b border-white/8 font-sans">
                                             <tr>
                                               <th className="px-4 py-3 text-left">
                                                 Agent Offering
@@ -25189,21 +25184,21 @@ ${ttNotes}`
                                                   <td className="px-4 py-3.5">
                                                     {req.status ===
                                                     "pending_partner" ? (
-                                                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-amber-500/10 text-amber-400 border border-transparent">
                                                         Negotiation P2P
                                                       </span>
                                                     ) : req.status ===
                                                       "pending" ? (
-                                                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                                                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-transparent border border-white/12 text-white text-indigo-300 border border-transparent">
                                                         Awaiting TL
                                                       </span>
                                                     ) : req.status ===
                                                       "approved" ? (
-                                                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-transparent border border-white/12 text-white text-emerald-400 border border-transparent">
                                                         Approved
                                                       </span>
                                                     ) : (
-                                                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-white/5 text-slate-400 border border-white/5">
+                                                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-white/5 text-slate-400 border border-white/8">
                                                         {req.status}
                                                       </span>
                                                     )}
@@ -25224,7 +25219,7 @@ ${ttNotes}`
                                                               "Accepted P2P trade request! It has been submitted to TL queue.",
                                                             );
                                                           }}
-                                                          className="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded text-xs font-bold transition-all cursor-pointer font-sans"
+                                                          className="px-2 py-1 bg-transparent border border-white/12 text-white hover:bg-white/5 text-white rounded text-xs font-bold transition-all cursor-pointer font-sans"
                                                         >
                                                           Accept
                                                         </button>
@@ -25238,7 +25233,7 @@ ${ttNotes}`
                                                               "Declined custom trade request.",
                                                             );
                                                           }}
-                                                          className="px-2 py-1 bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 text-slate-300 rounded text-xs font-bold transition-all border border-white/5 cursor-pointer font-sans"
+                                                          className="px-2 py-1 bg-white/5 hover:bg-rose-500/10 hover:text-rose-400 text-slate-300 rounded text-xs font-bold transition-all border border-white/8 cursor-pointer font-sans"
                                                         >
                                                           Reject
                                                         </button>
@@ -25269,7 +25264,7 @@ ${ttNotes}`
                                                             "Deleted your trade offer listing.",
                                                           );
                                                         }}
-                                                        className="px-2 py-1 bg-rose-500/10 hover:bg-rose-500 border border-rose-500/20 text-rose-300 hover:text-white rounded text-xs font-bold transition-all cursor-pointer font-sans"
+                                                        className="px-2 py-1 bg-rose-500/10 hover:bg-rose-500 border border-transparent text-rose-300 hover:text-white rounded text-xs font-bold transition-all cursor-pointer font-sans"
                                                       >
                                                         Rescind
                                                       </button>
@@ -25321,7 +25316,7 @@ ${ttNotes}`
                             className="space-y-6 animate-fade-in text-left"
                           >
                             {/* Header */}
-                            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-white/5 pb-4">
+                            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-white/8 pb-4">
                               <div>
                                 {isClientCommsTab ? (
                                   <>
@@ -25364,7 +25359,7 @@ ${ttNotes}`
                               <div className="space-y-6">
                                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                                   {/* ... existing requests metrics ... */}
-                                  <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+                                  <div className="p-4 bg-white/5 border border-white/8 rounded-xl">
                                     <p className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1">
                                       Total Submissions
                                     </p>
@@ -25382,7 +25377,7 @@ ${ttNotes}`
                                     </p>
                                   </div>
 
-                                  <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
+                                  <div className="p-4 bg-amber-500/10 border border-transparent rounded-xl">
                                     <p className="text-xs uppercase tracking-widest text-amber-300 font-bold mb-1">
                                       ⏳ Awaiting TL Confirm
                                     </p>
@@ -25403,7 +25398,7 @@ ${ttNotes}`
                                     </p>
                                   </div>
 
-                                  <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl">
+                                  <div className="p-4 bg-rose-500/10 border border-transparent rounded-xl">
                                     <p className="text-xs uppercase tracking-widest text-rose-300 font-bold mb-1">
                                       Confirmed / Pending Contact
                                     </p>
@@ -25429,7 +25424,7 @@ ${ttNotes}`
                                     </p>
                                   </div>
 
-                                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
+                                  <div className="p-4 bg-emerald-500/10 border border-transparent rounded-xl">
                                     <p className="text-xs uppercase tracking-widest text-emerald-300 font-bold mb-1">
                                       Successfully Contacted
                                     </p>
@@ -25451,7 +25446,7 @@ ${ttNotes}`
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
-                                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl h-56">
+                                  <div className="bg-white/5 border border-white/8 p-5 rounded-xl h-56">
                                     <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
                                       <Activity className="w-4 h-4 text-amber-400" />
                                       T&T Request Load By Clinic
@@ -25571,7 +25566,7 @@ ${ttNotes}`
                                       );
                                     })()}
                                   </div>
-                                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl h-56">
+                                  <div className="bg-white/5 border border-white/8 p-5 rounded-xl h-56">
                                     <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
                                       <PieChart className="w-4 h-4 text-emerald-400" />
                                       T&T Approvals vs Rejected
@@ -25662,7 +25657,7 @@ ${ttNotes}`
                               <div className="space-y-6 animate-fade-in">
                                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                                   {/* ... existing complaints metrics ... */}
-                                  <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+                                  <div className="p-4 bg-white/5 border border-white/8 rounded-xl">
                                     <p className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1">
                                       Total Complaints
                                     </p>
@@ -25680,7 +25675,7 @@ ${ttNotes}`
                                     </p>
                                   </div>
 
-                                  <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
+                                  <div className="p-4 bg-amber-500/10 border border-transparent rounded-xl">
                                     <p className="text-xs uppercase tracking-widest text-amber-300 font-bold mb-1">
                                       ⏳ Awaiting TL Action
                                     </p>
@@ -25701,7 +25696,7 @@ ${ttNotes}`
                                     </p>
                                   </div>
 
-                                  <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl">
+                                  <div className="p-4 bg-rose-500/10 border border-transparent rounded-xl">
                                     <p className="text-xs uppercase tracking-widest text-rose-300 font-bold mb-1">
                                       Pending Client Contact
                                     </p>
@@ -25722,7 +25717,7 @@ ${ttNotes}`
                                     </p>
                                   </div>
 
-                                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
+                                  <div className="p-4 bg-emerald-500/10 border border-transparent rounded-xl">
                                     <p className="text-xs uppercase tracking-widest text-emerald-300 font-bold mb-1">
                                       Successfully Closed
                                     </p>
@@ -25744,7 +25739,7 @@ ${ttNotes}`
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-1 mt-6">
-                                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl h-56">
+                                  <div className="bg-white/5 border border-white/8 p-5 rounded-xl h-56">
                                     <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
                                       <Activity className="w-4 h-4 text-rose-400" />
                                       Complaints Load By Clinic
@@ -25869,7 +25864,7 @@ ${ttNotes}`
                             ) : (
                               <div className="space-y-6">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
-                                  <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+                                  <div className="p-4 bg-white/5 border border-white/8 rounded-xl">
                                     <p className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1">
                                       Total Requests
                                     </p>
@@ -25895,7 +25890,7 @@ ${ttNotes}`
                                     </p>
                                   </div>
 
-                                  <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
+                                  <div className="p-4 bg-amber-500/10 border border-transparent rounded-xl">
                                     <p className="text-xs uppercase tracking-widest text-amber-300 font-bold mb-1">
                                       ⏳ Pending Response
                                     </p>
@@ -25919,7 +25914,7 @@ ${ttNotes}`
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-1 mt-6">
-                                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl h-56">
+                                  <div className="bg-white/5 border border-white/8 p-5 rounded-xl h-56">
                                     <h3 className="text-xs font-bold text-slate-100 mb-2 flex items-center gap-2">
                                       <Activity className="w-4 h-4 text-indigo-400" />
                                       Comms By Status
@@ -26026,7 +26021,7 @@ ${ttNotes}`
                               ) && (
                                 <div className="lg:col-span-12 space-y-4">
                                   {localSubTab === "requests" ? (
-                                    <div className="p-6 bg-white/5 border border-white/20 rounded-2xl space-y-4">
+                                    <div className="p-6 bg-white/5 border border-white/15 rounded-xl space-y-4">
                                       <h3 className="text-lg font-bold text-slate-100 font-sans flex items-center gap-2 text-left">
                                         <PlusCircle className="w-5 h-5 text-indigo-400" />
                                         New Installment Request
@@ -26061,7 +26056,7 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setTtPatientName(e.target.value)
                                             }
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium"
+                                            className="w-full bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans font-medium"
                                             required
                                           />
                                         </div>
@@ -26078,12 +26073,12 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setTtFileNumber(e.target.value)
                                             }
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                                            className="w-full bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
                                           />
                                         </div>
 
                                         {/* Old Customer Switch & ID Number */}
-                                        <div className="space-y-3.5 p-3.5 bg-white/5 border border-white/5 rounded-2xl text-left">
+                                        <div className="space-y-3.5 p-3.5 bg-white/5 border border-white/8 rounded-xl text-left">
                                           <div className="flex items-center justify-between">
                                             <span className="text-sm font-bold text-slate-300">
                                               Is this an Old Customer?
@@ -26099,7 +26094,7 @@ ${ttNotes}`
                                                 }
                                                 className="sr-only peer"
                                               />
-                                              <div className="w-11 h-6 bg-slate-900/40 /40/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                              <div className="w-11 h-6 bg-slate-900/40 /40/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-white/8 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                                             </label>
                                           </div>
 
@@ -26115,7 +26110,7 @@ ${ttNotes}`
                                                 onChange={(e) =>
                                                   setTtIdNumber(e.target.value)
                                                 }
-                                                className="w-full bg-white/[0.03] border border-amber-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 font-sans"
+                                                className="w-full bg-white/[0.03] border border-transparent rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 font-sans"
                                                 required={!ttIsOldCustomer}
                                               />
                                             </div>
@@ -26140,7 +26135,7 @@ ${ttNotes}`
                                                   e.target.value,
                                                 )
                                               }
-                                              className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                                              className="w-full bg-white/5 border border-white/8 rounded-xl pl-12 pr-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
                                               required
                                             />
                                           </div>
@@ -26148,8 +26143,8 @@ ${ttNotes}`
                                             calculateTabbyTamaraPrice(
                                               ttPriceWithoutTax,
                                             ).valid && (
-                                              <div className="mt-2 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-xs space-y-1 font-sans">
-                                                <p className="text-indigo-300 font-bold mb-1.5 pb-1.5 border-b border-indigo-500/20">
+                                              <div className="mt-2 p-3 bg-indigo-500/10 border border-transparent rounded-xl text-xs space-y-1 font-sans">
+                                                <p className="text-indigo-300 font-bold mb-1.5 pb-1.5 border-b border-transparent">
                                                   5% will be added. Final
                                                   amount:{" "}
                                                   {
@@ -26178,7 +26173,7 @@ ${ttNotes}`
                                                     }
                                                   </span>
                                                 </div>
-                                                <div className="flex justify-between text-indigo-300 font-bold mt-1 pt-1 border-t border-indigo-500/20">
+                                                <div className="flex justify-between text-indigo-300 font-bold mt-1 pt-1 border-t border-transparent">
                                                   <span>Final amount:</span>
                                                   <span>
                                                     {
@@ -26205,7 +26200,7 @@ ${ttNotes}`
                                                    setTtPhoneNumber("");
                                                  }
                                                }}
-                                               className="rounded border-white/10 bg-white/5 text-indigo-500 focus:ring-0"
+                                               className="rounded border-white/8 bg-white/5 text-indigo-500 focus:ring-0"
                                              />
                                              <label htmlFor="ttNoPhone" className="text-xs font-semibold text-slate-300 cursor-pointer select-none">
                                                Client doesn't have a phone number (Use Instagram/TikTok)
@@ -26233,7 +26228,7 @@ ${ttNotes}`
                                                    if (val === "+971") val = "";
                                                    setTtPhoneNumber(val);
                                                  }}
-                                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                                                 className="w-full bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
                                                  required
                                                />
                                                <p className="text-xs text-slate-400 mt-1">
@@ -26251,7 +26246,7 @@ ${ttNotes}`
                                                    placeholder="@username"
                                                    value={ttInstagram}
                                                    onChange={(e) => setTtInstagram(e.target.value)}
-                                                   className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                                                   className="w-full bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
                                                  />
                                                </div>
                                                <div className="space-y-1.5">
@@ -26263,7 +26258,7 @@ ${ttNotes}`
                                                    placeholder="@username"
                                                    value={ttTiktok}
                                                    onChange={(e) => setTtTiktok(e.target.value)}
-                                                   className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                                                   className="w-full bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
                                                  />
                                                </div>
                                              </div>
@@ -26281,7 +26276,7 @@ ${ttNotes}`
                                               onClick={() =>
                                                 setTtPlatform("tabby")
                                               }
-                                              className={`py-2 rounded-xl text-xs font-bold uppercase transition-all tracking-wider flex items-center justify-center gap-1.5 border cursor-pointer ${ ttPlatform === "tabby" ? "bg-amber-400 border-amber-300 text-slate-950 " : "bg-black/25 border-white/5 text-slate-400 hover:bg-white/20 " }`}
+                                              className={`py-2 rounded-xl text-xs font-bold uppercase transition-all tracking-wider flex items-center justify-center gap-1.5 border cursor-pointer ${ ttPlatform === "tabby" ? "bg-amber-400 border-amber-300 text-slate-950 " : "bg-black/25 border-white/8 text-slate-400 hover:bg-white/20 " }`}
                                             >
                                               Tabby
                                             </button>
@@ -26290,7 +26285,7 @@ ${ttNotes}`
                                               onClick={() =>
                                                 setTtPlatform("tamara")
                                               }
-                                              className={`py-2 rounded-xl text-xs font-bold uppercase transition-all tracking-wider flex items-center justify-center gap-1.5 border cursor-pointer ${ ttPlatform === "tamara" ? "bg-pink-500 border-pink-400 text-slate-100 " : "bg-black/25 border-white/5 text-slate-400 hover:bg-white/20 " }`}
+                                              className={`py-2 rounded-xl text-xs font-bold uppercase transition-all tracking-wider flex items-center justify-center gap-1.5 border cursor-pointer ${ ttPlatform === "tamara" ? "bg-pink-500 border-pink-400 text-slate-100 " : "bg-black/25 border-white/8 text-slate-400 hover:bg-white/20 " }`}
                                             >
                                               Tamara
                                             </button>
@@ -26301,7 +26296,7 @@ ${ttNotes}`
                                                   "one_time_payment" as any,
                                                 )
                                               }
-                                              className={`py-2 rounded-xl text-xs font-bold uppercase transition-all tracking-wider flex items-center justify-center gap-1 border cursor-pointer ${ ttPlatform === ("one_time_payment" as any) ? "bg-emerald-500 border-emerald-400 text-white shadow-sm" : "bg-black/25 border-white/5 text-slate-400 hover:bg-white/20 " }`}
+                                              className={`py-2 rounded-xl text-xs font-bold uppercase transition-all tracking-wider flex items-center justify-center gap-1 border cursor-pointer ${ ttPlatform === ("one_time_payment" as any) ? "bg-white/10 border-white/15 text-white" : "bg-black/25 border-white/8 text-slate-400 hover:bg-white/20 " }`}
                                             >
                                               One Time
                                             </button>
@@ -26321,7 +26316,7 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setTtClinicName(e.target.value)
                                             }
-                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
+                                            className="w-full px-4 py-3 bg-white/5 border border-white/8 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                             required
                                           >
                                             <option
@@ -26343,7 +26338,7 @@ ${ttNotes}`
                                         </div>
 
                                         {/* Scheduled for Later / Follow-up */}
-                                        <div className="space-y-3.5 p-3.5 bg-white/5 border border-white/5 rounded-2xl text-left">
+                                        <div className="space-y-3.5 p-3.5 bg-white/5 border border-white/8 rounded-xl text-left">
                                           <div className="flex items-center justify-between">
                                             <span className="text-sm font-bold text-slate-300">
                                               Schedule for Later Date / Follow-up?
@@ -26359,7 +26354,7 @@ ${ttNotes}`
                                                 }
                                                 className="sr-only peer"
                                               />
-                                              <div className="w-11 h-6 bg-slate-900/40 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                              <div className="w-11 h-6 bg-slate-900/40 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-white/8 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                                             </label>
                                           </div>
 
@@ -26374,7 +26369,7 @@ ${ttNotes}`
                                                 onChange={(e) =>
                                                   setTtFollowUpDate(e.target.value)
                                                 }
-                                                className="w-full bg-white/[0.03] border border-indigo-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans cursor-pointer"
+                                                className="w-full bg-white/[0.03] border border-transparent rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans cursor-pointer"
                                                 required={ttIsFollowUp}
                                               />
                                             </div>
@@ -26392,7 +26387,7 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setTtNotes(e.target.value)
                                             }
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[70px] resize-y"
+                                            className="w-full bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[70px] resize-y"
                                           />
                                         </div>
 
@@ -26410,16 +26405,16 @@ ${ttNotes}`
                                           disabled={
                                             isFormSubmitting || isTtUploading
                                           }
-                                          className={`w-full py-3.5 text-slate-100 font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow-sm ${isFormSubmitting || isTtUploading ? "bg-indigo-800 opacity-65 pointer-events-none" : "bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] "}`}
+                                          className={`w-full py-3.5 text-slate-100 font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans ${isFormSubmitting || isTtUploading ? "bg-indigo-800 opacity-65 pointer-events-none" : "bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] "}`}
                                         >
                                           {isFormSubmitting ? (
                                             <>
-                                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                              <div className="w-4 h-4 border-2 border-white/15 border-t-white rounded-full animate-spin" />
                                               Submitting Request...
                                             </>
                                           ) : isTtUploading ? (
                                             <>
-                                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                              <div className="w-4 h-4 border-2 border-white/15 border-t-white rounded-full animate-spin" />
                                               Uploading Files...
                                             </>
                                           ) : (
@@ -26432,7 +26427,7 @@ ${ttNotes}`
                                       </form>
                                     </div>
                                   ) : localSubTab === "complaints" ? (
-                                    <div className="p-6 bg-white/5 border border-white/20 rounded-2xl space-y-4 animate-fade-in">
+                                    <div className="p-6 bg-white/5 border border-white/15 rounded-xl space-y-4 animate-fade-in">
                                       <h3 className="text-lg font-bold text-slate-100 font-sans flex items-center gap-2 text-left">
                                         <AlertTriangle className="w-5 h-5 text-pink-500" />
                                         Log New Complaint
@@ -26469,7 +26464,7 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setTcPatientName(e.target.value)
                                             }
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans font-medium"
+                                            className="w-full bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans font-medium"
                                             required
                                           />
                                         </div>
@@ -26486,12 +26481,12 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setTcFileNumber(e.target.value)
                                             }
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans"
+                                            className="w-full bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans"
                                           />
                                         </div>
 
                                         {/* Old Customer Switch */}
-                                        <div className="space-y-3.5 p-3.5 bg-white/5 border border-white/5 rounded-2xl text-left">
+                                        <div className="space-y-3.5 p-3.5 bg-white/5 border border-white/8 rounded-xl text-left">
                                           <div className="flex items-center justify-between">
                                             <span className="text-sm font-bold text-slate-300 font-sans">
                                               Is this an Old Customer?
@@ -26507,7 +26502,7 @@ ${ttNotes}`
                                                 }
                                                 className="sr-only peer"
                                               />
-                                              <div className="w-11 h-6 bg-slate-900/40 /40/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
+                                              <div className="w-11 h-6 bg-slate-900/40 /40/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-white/8 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
                                             </label>
                                           </div>
 
@@ -26523,7 +26518,7 @@ ${ttNotes}`
                                                 onChange={(e) =>
                                                   setTcIdNumber(e.target.value)
                                                 }
-                                                className="w-full bg-white/[0.03] border border-amber-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 font-sans"
+                                                className="w-full bg-white/[0.03] border border-transparent rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 font-sans"
                                                 required={!tcIsOldCustomer}
                                               />
                                             </div>
@@ -26553,7 +26548,7 @@ ${ttNotes}`
                                                    setTcPhoneNumber("");
                                                  }
                                                }}
-                                               className="rounded border-white/10 bg-white/5 text-pink-500 focus:ring-0"
+                                               className="rounded border-white/8 bg-white/5 text-pink-500 focus:ring-0"
                                              />
                                              <label htmlFor="tcNoPhone" className="text-xs font-semibold text-slate-300 cursor-pointer select-none">
                                                Client doesn't have a phone number (Use Instagram/TikTok)
@@ -26581,7 +26576,7 @@ ${ttNotes}`
                                                    if (val === "+971") val = "";
                                                    setTcPhoneNumber(val);
                                                  }}
-                                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans"
+                                                 className="w-full bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans"
                                                  required
                                                />
                                                <p className="text-xs text-slate-400 mt-1">
@@ -26599,7 +26594,7 @@ ${ttNotes}`
                                                    placeholder="@username"
                                                    value={tcInstagram}
                                                    onChange={(e) => setTcInstagram(e.target.value)}
-                                                   className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans"
+                                                   className="w-full bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans"
                                                  />
                                                </div>
                                                <div className="space-y-1.5">
@@ -26611,7 +26606,7 @@ ${ttNotes}`
                                                    placeholder="@username"
                                                    value={tcTiktok}
                                                    onChange={(e) => setTcTiktok(e.target.value)}
-                                                   className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans"
+                                                   className="w-full bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-pink-500 font-sans"
                                                  />
                                                </div>
                                              </div>
@@ -26631,7 +26626,7 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setTcClinicName(e.target.value)
                                             }
-                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
+                                            className="w-full px-4 py-3 bg-white/5 border border-white/8 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                             required
                                           >
                                             <option
@@ -26665,13 +26660,13 @@ ${ttNotes}`
                                                 e.target.value,
                                               )
                                             }
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-pink-500 font-sans min-h-[80px] resize-y font-medium"
+                                            className="w-full bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-pink-500 font-sans min-h-[80px] resize-y font-medium"
                                             required
                                           />
                                         </div>
 
                                         {/* Follow-up / Schedule for Later */}
-                                        <div className="space-y-3 p-3.5 bg-white/5 border border-white/5 rounded-2xl text-left">
+                                        <div className="space-y-3 p-3.5 bg-white/5 border border-white/8 rounded-xl text-left">
                                           <div className="flex items-center justify-between">
                                             <span className="text-sm font-bold text-slate-300">
                                               Schedule for Later Date / Follow-up?
@@ -26683,7 +26678,7 @@ ${ttNotes}`
                                                 onChange={(e) => setTcIsFollowUp(e.target.checked)}
                                                 className="sr-only peer"
                                               />
-                                              <div className="w-11 h-6 bg-slate-900/40 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                              <div className="w-11 h-6 bg-slate-900/40 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-white/8 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                                             </label>
                                           </div>
                                           {tcIsFollowUp && (
@@ -26695,7 +26690,7 @@ ${ttNotes}`
                                                 type="date"
                                                 value={tcFollowUpDate}
                                                 onChange={(e) => setTcFollowUpDate(e.target.value)}
-                                                className="w-full bg-white/[0.03] border border-indigo-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans cursor-pointer"
+                                                className="w-full bg-white/[0.03] border border-transparent rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans cursor-pointer"
                                                 required={tcIsFollowUp}
                                               />
                                             </div>
@@ -26711,12 +26706,12 @@ ${ttNotes}`
                                         >
                                           {isFormSubmitting ? (
                                             <>
-                                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                              <div className="w-4 h-4 border-2 border-white/15 border-t-white rounded-full animate-spin" />
                                               Submitting Complaint...
                                             </>
                                           ) : isTcUploading ? (
                                             <>
-                                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                              <div className="w-4 h-4 border-2 border-white/15 border-t-white rounded-full animate-spin" />
                                               Uploading Evidence...
                                             </>
                                           ) : (
@@ -26729,7 +26724,7 @@ ${ttNotes}`
                                       </form>
                                     </div>
                                   ) : (
-                                    <div className="p-6 bg-white/5 border border-white/20 rounded-2xl space-y-4 animate-fade-in">
+                                    <div className="p-6 bg-white/5 border border-white/15 rounded-xl space-y-4 animate-fade-in">
                                       <h3 className="text-lg font-bold text-slate-100 font-sans flex items-center gap-2 text-left">
                                         <MessageSquare className="w-5 h-5 text-indigo-400" />
                                         Submit Communication Request
@@ -26763,7 +26758,7 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setCcPatientName(e.target.value)
                                             }
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans focus:ring-1 focus:ring-indigo-500/30"
+                                            className="w-full bg-white/5 border border-white/8 rounded-xl px-4 py-3 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans focus:ring-1 focus:ring-indigo-500/30"
                                             required
                                           />
                                         </div>
@@ -26778,7 +26773,7 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setCcClinicName(e.target.value)
                                             }
-                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
+                                            className="w-full px-4 py-3 bg-white/5 border border-white/8 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans cursor-pointer focus:ring-1 focus:ring-indigo-500/30"
                                             required
                                           >
                                             <option
@@ -26812,7 +26807,7 @@ ${ttNotes}`
                                                    setCcPhoneNumber("");
                                                  }
                                                }}
-                                               className="rounded border-white/10 bg-white/5 text-indigo-500 focus:ring-0"
+                                               className="rounded border-white/8 bg-white/5 text-indigo-500 focus:ring-0"
                                              />
                                              <label htmlFor="ccNoPhone" className="text-xs font-semibold text-slate-300 cursor-pointer select-none">
                                                Client doesn't have a phone number (Use Instagram/TikTok)
@@ -26840,7 +26835,7 @@ ${ttNotes}`
                                                    if (val === "+971") val = "";
                                                    setCcPhoneNumber(val);
                                                  }}
-                                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                                                 className="w-full bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
                                                  required
                                                />
                                                <p className="text-xs text-slate-400 mt-1">
@@ -26858,7 +26853,7 @@ ${ttNotes}`
                                                    placeholder="@username"
                                                    value={ccInstagram}
                                                    onChange={(e) => setCcInstagram(e.target.value)}
-                                                   className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                                                   className="w-full bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
                                                  />
                                                </div>
                                                <div className="space-y-1.5">
@@ -26870,7 +26865,7 @@ ${ttNotes}`
                                                    placeholder="@username"
                                                    value={ccTiktok}
                                                    onChange={(e) => setCcTiktok(e.target.value)}
-                                                   className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+                                                   className="w-full bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
                                                  />
                                                </div>
                                              </div>
@@ -26888,7 +26883,7 @@ ${ttNotes}`
                                               onClick={() =>
                                                 setCcLanguage("Arabic")
                                               }
-                                              className={`py-2 rounded-xl text-xs font-bold uppercase transition-all flex items-center justify-center border cursor-pointer ${ ccLanguage === "Arabic" ? "bg-indigo-600 border-indigo-500 text-white shadow-sm" : "bg-white/[0.02] border-white/5 text-slate-400" }`}
+                                              className={`py-2 rounded-xl text-xs font-bold uppercase transition-all flex items-center justify-center border cursor-pointer ${ ccLanguage === "Arabic" ? "bg-white/10 border-white/15 text-white" : "bg-white/[0.02] border-white/8 text-slate-400" }`}
                                             >
                                               Arabic
                                             </button>
@@ -26897,7 +26892,7 @@ ${ttNotes}`
                                               onClick={() =>
                                                 setCcLanguage("English")
                                               }
-                                              className={`py-2 rounded-xl text-xs font-bold uppercase transition-all flex items-center justify-center border cursor-pointer ${ ccLanguage === "English" ? "bg-indigo-600 border-indigo-500 text-white shadow-sm" : "bg-white/[0.02] border-white/5 text-slate-400" }`}
+                                              className={`py-2 rounded-xl text-xs font-bold uppercase transition-all flex items-center justify-center border cursor-pointer ${ ccLanguage === "English" ? "bg-white/10 border-white/15 text-white" : "bg-white/[0.02] border-white/8 text-slate-400" }`}
                                             >
                                               English
                                             </button>
@@ -26916,7 +26911,7 @@ ${ttNotes}`
                                               onClick={() =>
                                                 setCcChannel("call_center")
                                               }
-                                              className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center border cursor-pointer ${ ccChannel === "call_center" ? "bg-indigo-600 border-indigo-500 text-white shadow-sm" : "bg-white/[0.02] border-white/5 text-slate-400" }`}
+                                              className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center border cursor-pointer ${ ccChannel === "call_center" ? "bg-white/10 border-white/15 text-white" : "bg-white/[0.02] border-white/8 text-slate-400" }`}
                                             >
                                               📞 Call Center
                                             </button>
@@ -26926,7 +26921,7 @@ ${ttNotes}`
                                               onClick={() =>
                                                 setCcChannel("chat")
                                               }
-                                              className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center border cursor-pointer ${ ccChannel === "chat" ? "bg-indigo-600 border-indigo-500 text-white shadow-sm" : "bg-white/[0.02] border-white/5 text-slate-400" }`}
+                                              className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center border cursor-pointer ${ ccChannel === "chat" ? "bg-white/10 border-white/15 text-white" : "bg-white/[0.02] border-white/8 text-slate-400" }`}
                                             >
                                               💬 Chat
                                             </button>
@@ -26936,7 +26931,7 @@ ${ttNotes}`
                                               onClick={() =>
                                                 setCcChannel("social_media")
                                               }
-                                              className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center border cursor-pointer ${ ccChannel === "social_media" ? "bg-indigo-600 border-indigo-500 text-white shadow-sm" : "bg-white/[0.02] border-white/5 text-slate-400" }`}
+                                              className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center border cursor-pointer ${ ccChannel === "social_media" ? "bg-white/10 border-white/15 text-white" : "bg-white/[0.02] border-white/8 text-slate-400" }`}
                                             >
                                               📱 Social Media
                                             </button>
@@ -26954,7 +26949,7 @@ ${ttNotes}`
                                             onChange={(e) =>
                                               setCcNotes(e.target.value)
                                             }
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[80px] resize-y font-medium"
+                                            className="w-full bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans min-h-[80px] resize-y font-medium"
                                             required
                                           />
                                         </div>
@@ -26969,7 +26964,7 @@ ${ttNotes}`
                                         />
 
                                         {/* Follow-up / Schedule for Later */}
-                                        <div className="space-y-3 p-3.5 bg-white/5 border border-white/5 rounded-2xl text-left">
+                                        <div className="space-y-3 p-3.5 bg-white/5 border border-white/8 rounded-xl text-left">
                                           <div className="flex items-center justify-between">
                                             <span className="text-sm font-bold text-slate-300">
                                               Schedule for Later Date / Follow-up?
@@ -26981,7 +26976,7 @@ ${ttNotes}`
                                                 onChange={(e) => setCcIsFollowUp(e.target.checked)}
                                                 className="sr-only peer"
                                               />
-                                              <div className="w-11 h-6 bg-slate-900/40 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-slate-700 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                              <div className="w-11 h-6 bg-slate-900/40 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-white/8 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                                             </label>
                                           </div>
                                           {ccIsFollowUp && (
@@ -26993,7 +26988,7 @@ ${ttNotes}`
                                                 type="date"
                                                 value={ccFollowUpDate}
                                                 onChange={(e) => setCcFollowUpDate(e.target.value)}
-                                                className="w-full bg-white/[0.03] border border-indigo-500/30 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans cursor-pointer"
+                                                className="w-full bg-white/[0.03] border border-transparent rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 font-sans cursor-pointer"
                                                 required={ccIsFollowUp}
                                               />
                                             </div>
@@ -27005,16 +27000,16 @@ ${ttNotes}`
                                           disabled={
                                             isFormSubmitting || isCcUploading
                                           }
-                                          className={`w-full py-3.5 text-slate-100 font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans shadow-sm ${isFormSubmitting || isCcUploading ? "bg-indigo-800 opacity-65 pointer-events-none" : "bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] "}`}
+                                          className={`w-full py-3.5 text-slate-100 font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans ${isFormSubmitting || isCcUploading ? "bg-indigo-800 opacity-65 pointer-events-none" : "bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] "}`}
                                         >
                                           {isFormSubmitting ? (
                                             <>
-                                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                              <div className="w-4 h-4 border-2 border-white/15 border-t-white rounded-full animate-spin" />
                                               Submitting...
                                             </>
                                           ) : isCcUploading ? (
                                             <>
-                                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                              <div className="w-4 h-4 border-2 border-white/15 border-t-white rounded-full animate-spin" />
                                               Uploading Files...
                                             </>
                                           ) : (
@@ -27097,7 +27092,7 @@ ${ttNotes}`
                                     return (
                                       <div className="space-y-4 h-full flex flex-col">
                                         {/* Filter and Search Bar */}
-                                        <div className="flex flex-col sm:flex-row gap-3 bg-white/5 border border-white/10 p-4 rounded-2xl">
+                                        <div className="flex flex-col sm:flex-row gap-3 bg-white/5 border border-white/8 p-4 rounded-xl">
                                           {/* Search */}
                                           <div className="relative flex-1">
                                             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -27111,7 +27106,7 @@ ${ttNotes}`
                                                 );
                                                 setSelectedClientCommId(null);
                                               }}
-                                              className="w-full bg-transparent border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-sans"
+                                              className="w-full bg-transparent border border-white/8 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-sans"
                                             />
                                           </div>
                                           {/* Status Filters */}
@@ -27133,7 +27128,7 @@ ${ttNotes}`
                                                   );
                                                   setSelectedClientCommId(null);
                                                 }}
-                                                className={`px-2.5 py-1.5 rounded-full text-xs font-bold transition-all border cursor-pointer ${ clientCommStatusFilter === pill.id ? "bg-indigo-500 text-white border-indigo-400" : "bg-transparent hover:bg-white/5 text-slate-400 hover:text-slate-200 border-white/5" }`}
+                                                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border cursor-pointer ${ clientCommStatusFilter === pill.id ? "bg-indigo-500 text-white border-indigo-400" : "bg-transparent hover:bg-white/5 text-slate-400 hover:text-slate-200 border-white/8" }`}
                                               >
                                                 {pill.label}
                                               </button>
@@ -27310,7 +27305,7 @@ ${ttNotes}`
                                     return (
                                        <div className="space-y-4 h-full flex flex-col">
                                          {/* Sub Tab Switcher under Tabby & Tamara Desk */}
-                                         <div className="flex border-b border-white/10 mb-2">
+                                         <div className="flex border-b border-white/8 mb-2">
                                            <button
                                              type="button"
                                              onClick={() => {
@@ -27335,7 +27330,7 @@ ${ttNotes}`
                                            </button>
                                          </div>
                                         {/* Filter and Search Bar */}
-                                        <div className="flex flex-col sm:flex-row gap-3 bg-white/5 border border-white/10 p-4 rounded-2xl">
+                                        <div className="flex flex-col sm:flex-row gap-3 bg-white/5 border border-white/8 p-4 rounded-xl">
                                           {/* Search */}
                                           <div className="relative flex-1">
                                             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -27349,7 +27344,7 @@ ${ttNotes}`
                                                 );
                                                 setSelectedTTId(null);
                                               }}
-                                              className="w-full bg-transparent border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-sans"
+                                              className="w-full bg-transparent border border-white/8 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-sans"
                                             />
                                           </div>
                                           {/* Status Filters */}
@@ -27377,7 +27372,7 @@ ${ttNotes}`
                                                   );
                                                   setSelectedTTId(null);
                                                 }}
-                                                className={`px-2.5 py-1.5 rounded-full text-xs font-bold transition-all border cursor-pointer ${ tabbyTamaraStatusFilter === pill.id ? "bg-indigo-500 text-white border-indigo-400" : "bg-transparent hover:bg-white/5 text-slate-400 hover:text-slate-200 border-white/5" }`}
+                                                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border cursor-pointer ${ tabbyTamaraStatusFilter === pill.id ? "bg-indigo-500 text-white border-indigo-400" : "bg-transparent hover:bg-white/5 text-slate-400 hover:text-slate-200 border-white/8" }`}
                                               >
                                                 {pill.label}
                                               </button>
@@ -27550,7 +27545,7 @@ ${ttNotes}`
                                     return (
                                       <div className="space-y-4 h-full flex flex-col">
                                         {/* Filter and Search Bar */}
-                                        <div className="flex flex-col sm:flex-row gap-3 bg-white/5 border border-white/10 p-4 rounded-2xl">
+                                        <div className="flex flex-col sm:flex-row gap-3 bg-white/5 border border-white/8 p-4 rounded-xl">
                                           {/* Search */}
                                           <div className="relative flex-1">
                                             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -27564,7 +27559,7 @@ ${ttNotes}`
                                                 );
                                                 setSelectedComplaintId(null);
                                               }}
-                                              className="w-full bg-transparent border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-sans"
+                                              className="w-full bg-transparent border border-white/8 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-sans"
                                             />
                                           </div>
                                           {/* Status Filters */}
@@ -27587,7 +27582,7 @@ ${ttNotes}`
                                                   );
                                                   setSelectedComplaintId(null);
                                                 }}
-                                                className={`px-2.5 py-1.5 rounded-full text-xs font-bold transition-all border cursor-pointer ${ complaintStatusFilter === pill.id ? "bg-indigo-500 text-white border-indigo-400" : "bg-transparent hover:bg-white/5 text-slate-400 hover:text-slate-200 border-white/5" }`}
+                                                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border cursor-pointer ${ complaintStatusFilter === pill.id ? "bg-indigo-500 text-white border-indigo-400" : "bg-transparent hover:bg-white/5 text-slate-400 hover:text-slate-200 border-white/8" }`}
                                               >
                                                 {pill.label}
                                               </button>
@@ -27778,7 +27773,7 @@ ${ttNotes}`
                             id="tl-feedback-desk-root"
                             className="space-y-6 animate-fade-in text-left"
                           >
-                            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-white/5 pb-4">
+                            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-white/8 pb-4">
                               <div>
                                 <h2 className="text-3xl font-bold text-amber-400 font-sans flex items-center gap-3">
                                   <CheckCircle2 className="w-8 h-8 text-amber-400 animate-pulse" />
@@ -27804,7 +27799,7 @@ ${ttNotes}`
                                     onChange={(e) =>
                                       setFeedbackFilterTl(e.target.value)
                                     }
-                                    className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-sans w-full sm:w-48"
+                                    className="bg-white/5 border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-sans w-full sm:w-48"
                                   >
                                     <option
                                       value="all"
@@ -27828,8 +27823,8 @@ ${ttNotes}`
 
                             {/* Amira Hassan Submission Console */}
                             {isAmira && (
-                              <div className="bg-white/5 border text-slate-100 border-white/10 rounded-2xl p-6 space-y-4">
-                                <div className="border-b border-white/5 pb-3">
+                              <div className="bg-white/5 border text-slate-100 border-white/8 rounded-xl p-6 space-y-4">
+                                <div className="border-b border-white/8 pb-3">
                                   <h3 className="font-bold text-slate-100 text-base font-sans flex items-center gap-2">
                                     <Sparkles className="w-5 h-5 text-amber-400" />
                                     Compose Feedback to Team Leader
@@ -27851,7 +27846,7 @@ ${ttNotes}`
                                       onChange={(e) =>
                                         setSelectedTlForFeedback(e.target.value)
                                       }
-                                      className="bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-400 font-sans w-full cursor-pointer"
+                                      className="bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-400 font-sans w-full cursor-pointer"
                                     >
                                       <option
                                         value=""
@@ -27876,7 +27871,7 @@ ${ttNotes}`
                                       Attach File (Images/Documents):
                                     </label>
                                     <div className="flex gap-3">
-                                      <label className="flex-1 flex items-center justify-between px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl cursor-pointer transition-all">
+                                      <label className="flex-1 flex items-center justify-between px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/8 rounded-xl cursor-pointer transition-all">
                                         <span className="text-xs text-slate-400 truncate pr-2">
                                           {feedbackAttachmentName ||
                                             "Choose file or drag & drop..."}
@@ -27898,7 +27893,7 @@ ${ttNotes}`
                                               "Attachment detached",
                                             );
                                           }}
-                                          className="px-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl border border-rose-500/20 text-xs transition-all cursor-pointer"
+                                          className="px-3 bg-rose-500/10 hover:bg-rose-500/10 text-rose-400 rounded-xl border border-transparent text-xs transition-all cursor-pointer"
                                         >
                                           Clear
                                         </button>
@@ -27918,7 +27913,7 @@ ${ttNotes}`
                                     }
                                     rows={4}
                                     placeholder="Type details... Bold text is supported by using **double asterisks**. Tag anyone using @Name, they will get an instant ping notification!"
-                                    className="bg-white/5 border border-white/10 rounded-2xl text-sm text-slate-100 px-4 py-3 focus:outline-none focus:border-amber-400 w-full placeholder:text-slate-500 font-sans leading-relaxed"
+                                    className="bg-white/5 border border-white/8 rounded-xl text-sm text-slate-100 px-4 py-3 focus:outline-none focus:border-amber-400 w-full placeholder:text-slate-500 font-sans leading-relaxed"
                                   />
                                 </div>
 
@@ -27940,7 +27935,7 @@ ${ttNotes}`
                                         feedbackAttachmentName,
                                       );
                                     }}
-                                    className="px-6 py-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:brightness-110 active:scale-95 text-slate-950 font-sans font-bold text-xs uppercase tracking-wider rounded-xl shadow-sm cursor-pointer transition-all flex items-center gap-2"
+                                    className="px-6 py-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:brightness-110 active:scale-95 text-slate-950 font-sans font-bold text-xs uppercase tracking-wider rounded-xl cursor-pointer transition-all flex items-center gap-2"
                                   >
                                     <Send className="w-4 h-4" />
                                     Send Direct Micro-Email
@@ -27952,7 +27947,7 @@ ${ttNotes}`
                             {/* Feedbacks Feed */}
                             <div className="space-y-4">
                               {filteredFeedbacks.length === 0 ? (
-                                <div className="py-12 bg-white/5 border border-white/10 rounded-2xl text-center">
+                                <div className="py-12 bg-white/5 border border-white/8 rounded-xl text-center">
                                   <MessageSquare className="w-12 h-12 text-slate-500 opacity-40 mx-auto mb-3" />
                                   <h4 className="font-bold text-slate-100 text-base">
                                     No Feedbacks Logged
@@ -27967,12 +27962,12 @@ ${ttNotes}`
                                   return (
                                     <div
                                       key={f.id}
-                                      className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-6 text-left"
+                                      className="bg-white/5 border border-white/8 rounded-xl p-6 space-y-6 text-left"
                                     >
                                       {/* Card Header */}
-                                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/5 pb-4">
+                                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/8 pb-4">
                                         <div className="flex items-center gap-3">
-                                          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center font-bold text-amber-400 font-mono">
+                                          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-transparent flex items-center justify-center font-bold text-amber-400 font-mono">
                                             TL
                                           </div>
                                           <div>
@@ -27996,11 +27991,11 @@ ${ttNotes}`
 
                                         <div>
                                           {f.status === "pending_reply" ? (
-                                            <span className="px-3 py-1 text-xs font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-full animate-pulse">
+                                            <span className="px-3 py-1 text-xs font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-transparent rounded-lg animate-pulse">
                                               Pending Reply
                                             </span>
                                           ) : (
-                                            <span className="px-3 py-1 text-xs font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+                                            <span className="px-3 py-1 text-xs font-bold uppercase tracking-widest text-emerald-400 bg-transparent border border-white/12 text-white border border-transparent rounded-lg">
                                               Replied
                                             </span>
                                           )}
@@ -28022,7 +28017,7 @@ ${ttNotes}`
                                                       return (
                                                         <span
                                                           key={wIdx}
-                                                          className="bg-indigo-500/20 text-indigo-300 font-bold px-1.5 py-0.5 rounded text-xs"
+                                                          className="bg-transparent border border-white/12 text-white text-indigo-300 font-bold px-1.5 py-0.5 rounded text-xs"
                                                         >
                                                           {word}
                                                         </span>
@@ -28049,7 +28044,7 @@ ${ttNotes}`
 
                                         {/* Attachment block */}
                                         {f.attachment && (
-                                          <div className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 rounded-xl">
+                                          <div className="flex items-center gap-3 p-3 bg-white/5 border border-white/8 rounded-xl">
                                             <Paperclip className="w-4 h-4 text-amber-400 shrink-0" />
                                             <div className="flex-1 overflow-hidden">
                                               <p className="text-xs text-slate-100 font-semibold truncate">
@@ -28074,7 +28069,7 @@ ${ttNotes}`
                                       </div>
 
                                       {/* Replies Container */}
-                                      <div className="border-t border-white/5 pt-5 space-y-4">
+                                      <div className="border-t border-white/8 pt-5 space-y-4">
                                         <h5 className="text-xs font-bold text-slate-400 uppercase tracking-widest font-sans">
                                           Conversation Logs & Replies
                                         </h5>
@@ -28095,7 +28090,7 @@ ${ttNotes}`
                                               return (
                                                 <div
                                                   key={r.id}
-                                                  className={`p-3.5 rounded-2xl border transition-all ${ isSenderAmira ? "bg-indigo-950/10 border-indigo-500/10 ml-8" : "bg-white/5 border-white/10 mr-8" }`}
+                                                  className={`p-3.5 rounded-xl border transition-all ${ isSenderAmira ? "bg-indigo-950/10 border-indigo-500/10 ml-8" : "bg-white/5 border-white/8 mr-8" }`}
                                                 >
                                                   <div className="flex justify-between items-center mb-1.5">
                                                     <span
@@ -28122,7 +28117,7 @@ ${ttNotes}`
                                                           return (
                                                             <span
                                                               key={wIdx}
-                                                              className="bg-indigo-550/20 text-indigo-200 font-bold px-1 py-0.5 rounded text-xs"
+                                                              className="bg-transparent border border-white/12 text-white text-indigo-200 font-bold px-1 py-0.5 rounded text-xs"
                                                             >
                                                               {word}
                                                             </span>
@@ -28134,7 +28129,7 @@ ${ttNotes}`
 
                                                   {/* Reply Attachment */}
                                                   {r.attachment && (
-                                                    <div className="flex items-center gap-2 p-2 bg-white/5 border border-white/10 rounded-xl mt-2 justify-between">
+                                                    <div className="flex items-center gap-2 p-2 bg-white/5 border border-white/8 rounded-xl mt-2 justify-between">
                                                       <span className="text-xs text-slate-400 truncate max-w-xs">
                                                         {r.attachmentName ||
                                                           "reply_attachment"}
@@ -28158,7 +28153,7 @@ ${ttNotes}`
                                         )}
 
                                         {/* Add Reply Draft Input */}
-                                        <div className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-3 mt-2">
+                                        <div className="bg-white/5 p-4 rounded-xl border border-white/8 space-y-3 mt-2">
                                           <div className="flex flex-col sm:flex-row gap-3">
                                             <div className="flex-1">
                                               <textarea
@@ -28175,7 +28170,7 @@ ${ttNotes}`
                                                 }
                                                 rows={2}
                                                 placeholder="Type your reply notes..."
-                                                className="bg-white/5 border border-white/10 rounded-xl text-xs text-slate-100 px-3 py-2 focus:outline-none focus:border-amber-400 w-full placeholder:text-slate-500 font-sans"
+                                                className="bg-white/5 border border-white/8 rounded-xl text-xs text-slate-100 px-3 py-2 focus:outline-none focus:border-amber-400 w-full placeholder:text-slate-500 font-sans"
                                               />
                                             </div>
 
@@ -28249,7 +28244,7 @@ ${ttNotes}`
 
                     {activeTab === "kpi-calculator" && (
                       <div className="space-y-6 animate-fade-in">
-                        <div className="border-b border-white/5 pb-4">
+                        <div className="border-b border-white/8 pb-4">
                           <h2 className="text-3xl font-bold text-slate-100 font-sans">
                             KPIs Calculator
                           </h2>
@@ -28337,7 +28332,7 @@ ${ttNotes}`
                             id="directory-desk-root"
                             className="space-y-6 animate-fade-in text-left"
                           >
-                            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-white/5 pb-4">
+                            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-white/8 pb-4">
                               <div>
                                 <h2 className="text-3xl font-bold text-cyan-400 font-sans flex items-center gap-3">
                                   <UserCheck className="w-8 h-8" />
@@ -28360,7 +28355,7 @@ ${ttNotes}`
                                   setDirSearch(e.target.value);
                                   setDirPage(0);
                                 }}
-                                className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
+                                className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/8 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
                               />
                             </div>
 
@@ -28371,7 +28366,7 @@ ${ttNotes}`
 
                             {/* Pagination - TOP */}
                             {totalPages > 1 && (
-                              <div className="flex items-center justify-between py-2 mb-3 border-b border-white/10">
+                              <div className="flex items-center justify-between py-2 mb-3 border-b border-white/8">
                                 <button
                                   disabled={dirPage === 0}
                                   onClick={() => setDirPage((p) => p - 1)}
@@ -28405,8 +28400,8 @@ ${ttNotes}`
 
                             {/* Headcount Upload Console directly under directory tab for Hesham & Amira */}
                             {isSuperAdmin && (
-                              <div className="bg-white/5 border text-slate-100 border-white/10 rounded-2xl p-6 space-y-4">
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-white/5 gap-3">
+                              <div className="bg-white/5 border text-slate-100 border-white/8 rounded-xl p-6 space-y-4">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-white/8 gap-3">
                                   <div className="text-left">
                                     <h3 className="font-bold text-slate-100 text-base font-sans flex items-center gap-2">
                                       <Upload className="w-5 h-5 text-cyan-400" />
@@ -28432,7 +28427,7 @@ ${ttNotes}`
                                       link.click();
                                       document.body.removeChild(link);
                                     }}
-                                    className="px-4 py-2 bg-white/5 hover:bg-white/10 text-xs font-bold text-slate-300 rounded-xl transition-all border border-white/10 cursor-pointer"
+                                    className="px-4 py-2 bg-white/5 hover:bg-white/10 text-xs font-bold text-slate-300 rounded-xl transition-all border border-white/8 cursor-pointer"
                                   >
                                     Download Sample CSV
                                   </button>
@@ -28469,7 +28464,7 @@ ${ttNotes}`
                                       );
                                     }
                                   }}
-                                  className="border-2 border-dashed border-white/10 hover:border-cyan-500/50 rounded-2xl p-8 text-center transition-all bg-transparent flex flex-col items-center justify-center gap-3 cursor-pointer group"
+                                  className="border-2 border-dashed border-white/8 hover:border-transparent rounded-xl p-8 text-center transition-all bg-transparent flex flex-col items-center justify-center gap-3 cursor-pointer group"
                                   onClick={() =>
                                     document
                                       .getElementById("headcount-file-uploader")
@@ -28487,7 +28482,7 @@ ${ttNotes}`
                                       }
                                     }}
                                   />
-                                  <div className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                                  <div className="w-12 h-12 bg-cyan-500/10 border border-transparent text-cyan-400 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
                                     <FileSpreadsheet className="w-6 h-6" />
                                   </div>
                                   <div>
@@ -28505,12 +28500,12 @@ ${ttNotes}`
                               </div>
                             )}
                             {isSuperAdmin && selectedAgentIds.length > 0 && (
-                              <div className="bg-cyan-950/20 border border-cyan-500/20 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+                              <div className="bg-cyan-950/20 border border-transparent p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
                                 <div className="flex items-center gap-2 text-cyan-300 font-bold text-sm">
                                   <Users className="w-5 h-5 text-cyan-400" />
                                   <span>
                                     Selected{" "}
-                                    <span className="text-white bg-cyan-600 px-2 py-0.5 rounded-full text-xs">
+                                    <span className="text-white bg-cyan-600 px-2 py-0.5 rounded-lg text-xs">
                                       {selectedAgentIds.length}
                                     </span>{" "}
                                     agents to bulk edit
@@ -28525,7 +28520,7 @@ ${ttNotes}`
                                     onChange={(e) =>
                                       setBulkEditField(e.target.value)
                                     }
-                                    className="bg-white/[0.03] border border-white/10 text-slate-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none cursor-pointer"
+                                    className="bg-white/[0.03] border border-white/8 text-slate-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none cursor-pointer"
                                   >
                                     <option value="Team Leader">
                                       Team Leader
@@ -28545,7 +28540,7 @@ ${ttNotes}`
                                       setBulkEditVal(e.target.value)
                                     }
                                     placeholder="e.g. Aly Ibrahim"
-                                    className="bg-white/[0.03] border border-white/10 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none w-full sm:w-48"
+                                    className="bg-white/[0.03] border border-white/8 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none w-full sm:w-48"
                                   />
                                   <button
                                     onClick={handleBulkEditSelected}
@@ -28555,7 +28550,7 @@ ${ttNotes}`
                                   </button>
                                   <button
                                     onClick={() => setSelectedAgentIds([])}
-                                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-bold rounded-xl text-xs transition-all cursor-pointer"
+                                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/8 text-slate-300 font-bold rounded-xl text-xs transition-all cursor-pointer"
                                   >
                                     Clear
                                   </button>
@@ -28563,7 +28558,7 @@ ${ttNotes}`
                               </div>
                             )}
 
-                            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 overflow-x-auto">
+                            <div className="bg-white/5 border border-white/8 rounded-xl p-6 overflow-x-auto">
                               <table className="w-full text-left text-xs text-slate-300 whitespace-nowrap">
                                 <thead className="text-slate-400 bg-white/5 text-xs uppercase font-bold tracking-wider">
                                   <tr>
@@ -28603,7 +28598,7 @@ ${ttNotes}`
                                               );
                                             }
                                           }}
-                                          className="rounded border-white/20 bg-white/[0.03] text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4"
+                                          className="rounded border-white/15 bg-white/[0.03] text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4"
                                         />
                                       </th>
                                     )}
@@ -28817,7 +28812,7 @@ ${ttNotes}`
                                                         );
                                                       }
                                                     }}
-                                                    className="rounded border-white/20 bg-white/[0.03] text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4"
+                                                    className="rounded border-white/15 bg-white/[0.03] text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4"
                                                   />
                                                 </td>
                                               )}
@@ -28839,7 +28834,7 @@ ${ttNotes}`
                                                           e.target.value,
                                                       })
                                                     }
-                                                    className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100定位 focus:outline-none w-44"
+                                                    className="bg-black/60 border border-white/15 rounded px-2.5 py-1 text-xs text-slate-100定位 focus:outline-none w-44"
                                                   />
                                                 ) : (
                                                   <>
@@ -28886,7 +28881,7 @@ ${ttNotes}`
                                                                 e.target.value,
                                                             })
                                                           }
-                                                          className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
+                                                          className="bg-black/60 border border-white/15 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
                                                         />
                                                       ) : (
                                                         row.data[header] || "-"
@@ -28922,7 +28917,7 @@ ${ttNotes}`
                                                               e.target.value,
                                                           })
                                                         }
-                                                        className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
+                                                        className="bg-black/60 border border-white/15 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
                                                       />
                                                     ) : (
                                                       emailVal
@@ -28954,7 +28949,7 @@ ${ttNotes}`
                                                               e.target.value,
                                                           })
                                                         }
-                                                        className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-28"
+                                                        className="bg-black/60 border border-white/15 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-28"
                                                       />
                                                     ) : phoneVal !== "-" ? (
                                                       <span className="text-emerald-400">
@@ -28994,7 +28989,7 @@ ${ttNotes}`
                                                               e.target.value,
                                                           })
                                                         }
-                                                        className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-24"
+                                                        className="bg-black/60 border border-white/15 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-24"
                                                       />
                                                     ) : normalizeAgentLob(
                                                         lobVal ||
@@ -29004,7 +28999,7 @@ ${ttNotes}`
                                                         computedRole,
                                                       ) ? (
                                                       <span
-                                                        className={`px-2 py-1 rounded-xl text-xs font-bold ${ normalizeAgentLob( lobVal || AGENT_LOBS[ row.agentName ], computedRole, ) .toLowerCase() .includes("call") ? "bg-blue-500/15 text-blue-300 border border-blue-500/20" : "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20" }`}
+                                                        className={`px-2 py-1 rounded-xl text-xs font-bold ${ normalizeAgentLob( lobVal || AGENT_LOBS[ row.agentName ], computedRole, ) .toLowerCase() .includes("call") ? "bg-blue-500/10 text-blue-300 border border-transparent" : "bg-emerald-500/10 text-emerald-300 border border-transparent" }`}
                                                       >
                                                         {normalizeAgentLob(
                                                           lobVal ||
@@ -29046,7 +29041,7 @@ ${ttNotes}`
                                                               e.target.value,
                                                           })
                                                         }
-                                                        className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-28"
+                                                        className="bg-black/60 border border-white/15 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-28"
                                                       />
                                                     ) : (
                                                       lobTeamVal
@@ -29077,11 +29072,11 @@ ${ttNotes}`
                                                               e.target.value,
                                                           })
                                                         }
-                                                        className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-24"
+                                                        className="bg-black/60 border border-white/15 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-24"
                                                       />
                                                     ) : (
                                                       <span
-                                                        className={`font-bold py-1 px-3 rounded-xl text-xs border ${roleVal.toLowerCase() === "tl" || roleVal.toLowerCase() === "team leader" ? "bg-amber-950/30 text-amber-400 border-amber-500/20" : roleVal.toLowerCase() === "qa" ? "bg-purple-950/30 text-purple-400 border-purple-500/20" : "bg-slate-800 text-slate-400 border-slate-700"}`}
+                                                        className={`font-bold py-1 px-3 rounded-xl text-xs border ${roleVal.toLowerCase() === "tl" || roleVal.toLowerCase() === "team leader" ? "bg-amber-950/30 text-amber-400 border-transparent" : roleVal.toLowerCase() === "qa" ? "bg-purple-950/30 text-purple-400 border-purple-500/20" : "bg-slate-800 text-slate-400 border-white/8"}`}
                                                       >
                                                         {roleVal}
                                                       </span>
@@ -29113,7 +29108,7 @@ ${ttNotes}`
                                                               e.target.value,
                                                           })
                                                         }
-                                                        className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
+                                                        className="bg-black/60 border border-white/15 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
                                                       />
                                                     ) : (
                                                       tlVal
@@ -29132,7 +29127,7 @@ ${ttNotes}`
                                                             true,
                                                           )
                                                         }
-                                                        className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold cursor-pointer"
+                                                        className="px-2.5 py-1 bg-transparent border border-white/12 text-white hover:bg-white/5 text-white rounded text-xs font-bold cursor-pointer"
                                                       >
                                                         Save
                                                       </button>
@@ -29290,7 +29285,7 @@ ${ttNotes}`
                                                         );
                                                       }
                                                     }}
-                                                    className="rounded border-white/20 bg-white/[0.03] text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4"
+                                                    className="rounded border-white/15 bg-white/[0.03] text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4"
                                                   />
                                                 </td>
                                               )}
@@ -29310,7 +29305,7 @@ ${ttNotes}`
                                                         name: e.target.value,
                                                       })
                                                     }
-                                                    className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-44"
+                                                    className="bg-black/60 border border-white/15 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-44"
                                                   />
                                                 ) : (
                                                   <>
@@ -29344,7 +29339,7 @@ ${ttNotes}`
                                                         email: e.target.value,
                                                       })
                                                     }
-                                                    className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
+                                                    className="bg-black/60 border border-white/15 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
                                                   />
                                                 ) : (
                                                   meta.email || "-"
@@ -29366,7 +29361,7 @@ ${ttNotes}`
                                                         phone: e.target.value,
                                                       })
                                                     }
-                                                    className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-28"
+                                                    className="bg-black/60 border border-white/15 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-28"
                                                   />
                                                 ) : meta.phone ? (
                                                   <span className="text-emerald-400">
@@ -29397,7 +29392,7 @@ ${ttNotes}`
                                                         lob: e.target.value,
                                                       })
                                                     }
-                                                    className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-24"
+                                                    className="bg-black/60 border border-white/15 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-24"
                                                   />
                                                 ) : normalizeAgentLob(
                                                     meta.lob ||
@@ -29405,7 +29400,7 @@ ${ttNotes}`
                                                     meta.role,
                                                   ) ? (
                                                   <span
-                                                    className={`px-2 py-1 rounded-xl text-xs font-bold ${ normalizeAgentLob( meta.lob || AGENT_LOBS[meta.name], meta.role, ) .toLowerCase() .includes("call") ? "bg-blue-500/15 text-blue-300 border border-blue-500/20" : "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20" }`}
+                                                    className={`px-2 py-1 rounded-xl text-xs font-bold ${ normalizeAgentLob( meta.lob || AGENT_LOBS[meta.name], meta.role, ) .toLowerCase() .includes("call") ? "bg-blue-500/10 text-blue-300 border border-transparent" : "bg-emerald-500/10 text-emerald-300 border border-transparent" }`}
                                                   >
                                                     {normalizeAgentLob(
                                                       meta.lob ||
@@ -29435,7 +29430,7 @@ ${ttNotes}`
                                                         lobTeam: e.target.value,
                                                       })
                                                     }
-                                                    className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-28"
+                                                    className="bg-black/60 border border-white/15 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-28"
                                                   />
                                                 ) : (
                                                   meta.lobTeam || "-"
@@ -29456,7 +29451,7 @@ ${ttNotes}`
                                                         role: e.target.value,
                                                       })
                                                     }
-                                                    className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-24 cursor-pointer"
+                                                    className="bg-black/60 border border-white/15 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-24 cursor-pointer"
                                                   >
                                                     <option value="agent">
                                                       Agent
@@ -29473,7 +29468,7 @@ ${ttNotes}`
                                                   </select>
                                                 ) : (
                                                   <span
-                                                    className={`font-bold py-1 px-3 rounded-xl text-xs border ${meta.role === "tl" ? "bg-amber-950/30 text-amber-400 border-amber-500/20" : meta.role === "qa" ? "bg-purple-950/30 text-purple-400 border-purple-500/20" : "bg-slate-800 text-slate-400 border-slate-700"}`}
+                                                    className={`font-bold py-1 px-3 rounded-xl text-xs border ${meta.role === "tl" ? "bg-amber-950/30 text-amber-400 border-transparent" : meta.role === "qa" ? "bg-purple-950/30 text-purple-400 border-purple-500/20" : "bg-slate-800 text-slate-400 border-white/8"}`}
                                                   >
                                                     {meta.role === "tl"
                                                       ? "Team Leader"
@@ -29503,7 +29498,7 @@ ${ttNotes}`
                                                           e.target.value,
                                                       })
                                                     }
-                                                    className="bg-black/60 border border-white/20 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
+                                                    className="bg-black/60 border border-white/15 rounded px-2.5 py-1 text-xs text-slate-100 focus:outline-none w-36"
                                                   />
                                                 ) : (
                                                   tlName || "-"
@@ -29520,7 +29515,7 @@ ${ttNotes}`
                                                             false,
                                                           )
                                                         }
-                                                        className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold cursor-pointer"
+                                                        className="px-2.5 py-1 bg-transparent border border-white/12 text-white hover:bg-white/5 text-white rounded text-xs font-bold cursor-pointer"
                                                       >
                                                         Save
                                                       </button>
@@ -29600,7 +29595,7 @@ ${ttNotes}`
                                 </div>
                               )}
                               {totalPages > 1 && (
-                                <div className="flex items-center justify-between mt-4 border-t border-white/5 pt-4">
+                                <div className="flex items-center justify-between mt-4 border-t border-white/8 pt-4">
                                   <button
                                     disabled={dirPage === 0}
                                     onClick={() => setDirPage((p) => p - 1)}
@@ -29678,8 +29673,8 @@ ${ttNotes}`
 
           return (
             <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/60 animate-fade-in font-sans">
-              <div className="w-full max-w-xl bg-[#141416]/95 border border-white/10 rounded-2xl p-6 space-y-4">
-                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="w-full max-w-xl bg-[#141416]/95 border border-white/8 rounded-xl p-6 space-y-4">
+                <div className="flex items-center justify-between border-b border-white/8 pb-3">
                   <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
                     <span>📋 Review Standardized Clinic Template</span>
                   </h3>
@@ -29705,13 +29700,13 @@ ${ttNotes}`
                     Generated Clipboard Output Preview
                   </label>
                   <div className="relative">
-                    <pre className="w-full p-4 bg-white/[0.04] border border-slate-800/40 rounded-xl text-xs font-mono text-slate-300 overflow-y-auto max-h-[300px] whitespace-pre-wrap select-all leading-relaxed text-left">
+                    <pre className="w-full p-4 bg-white/[0.04] border border-white/8 rounded-xl text-xs font-mono text-slate-300 overflow-y-auto max-h-[300px] whitespace-pre-wrap select-all leading-relaxed text-left">
                       {textTemplate}
                     </pre>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/10">
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/8">
                   <button
                     type="button"
                     onClick={async () => {
@@ -29720,7 +29715,7 @@ ${ttNotes}`
                         "Standard clinic template copied to clipboard!",
                       );
                     }}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 hover:text-white text-slate-300 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 border border-white/5"
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 hover:text-white text-slate-300 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 border border-white/8"
                   >
                     <Copy className="w-3.5 h-3.5" /> Copy to Clipboard
                   </button>
@@ -29741,7 +29736,7 @@ ${ttNotes}`
                       onClick={async () => {
                         await handleSetInquirySent(templateInquiryId, true);
                       }}
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer flex items-center gap-1.5"
+                      className="px-4 py-2 bg-transparent border border-white/12 text-white hover:bg-white/5 text-white text-xs font-bold rounded-xl transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" /> Confirm & Send
                     </button>
@@ -29807,14 +29802,14 @@ ${ttNotes}`
           onClick={() => setViewingRecord(null)}
         >
           <div
-            className="bg-[#0d0d10] border border-white/10 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto"
+            className="bg-[#0d0d10] border border-white/8 rounded-t-3xl sm:rounded-xl w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="sticky top-0 bg-[#0d0d10] border-b border-white/10 px-5 py-4 flex items-center justify-between z-10">
+            <div className="sticky top-0 bg-[#0d0d10] border-b border-white/8 px-5 py-4 flex items-center justify-between z-10">
               <div className="flex items-center gap-3">
                 <span
-                  className={`px-2 py-0.5 rounded text-xs font-bold uppercase border ${ viewingRecord.type === "inq" ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20" : viewingRecord.type === "tt_request" ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : viewingRecord.type === "tt_complaint" ? "bg-rose-500/10 text-rose-400 border-rose-500/20" : viewingRecord.type === "comm" ? "bg-sky-500/10 text-sky-400 border-sky-500/20" : viewingRecord.type === "sched" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-slate-700 text-slate-300 border-white/10" }`}
+                  className={`px-2 py-0.5 rounded text-xs font-bold uppercase border ${ viewingRecord.type === "inq" ? "bg-indigo-500/10 text-indigo-400 border-transparent" : viewingRecord.type === "tt_request" ? "bg-amber-500/10 text-amber-400 border-transparent" : viewingRecord.type === "tt_complaint" ? "bg-rose-500/10 text-rose-400 border-transparent" : viewingRecord.type === "comm" ? "bg-sky-500/10 text-sky-400 border-transparent" : viewingRecord.type === "sched" ? "bg-emerald-500/10 text-emerald-400 border-transparent" : "bg-slate-700 text-slate-300 border-white/8" }`}
                 >
                   {viewingRecord.type === "inq"
                     ? "Inquiry"
@@ -29850,7 +29845,7 @@ ${ttNotes}`
               {/* Patient / Requester info */}
               <div className="grid grid-cols-2 gap-3 text-left">
                 {viewingRecord.data.patientName && (
-                  <div className="col-span-2 bg-transparent border border-white/5 rounded-xl p-3">
+                  <div className="col-span-2 bg-transparent border border-white/8 rounded-xl p-3">
                     <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">
                       Patient Name
                     </p>
@@ -29861,7 +29856,7 @@ ${ttNotes}`
                 )}
                 {viewingRecord.data.phoneNumber && (
                   <div
-                    className="bg-transparent border border-white/5 rounded-xl p-3 cursor-pointer hover:bg-transparent"
+                    className="bg-transparent border border-white/8 rounded-xl p-3 cursor-pointer hover:bg-transparent"
                     onClick={() => {
                       copyToClipboard(
                         normalizePhone(viewingRecord.data.phoneNumber),
@@ -29879,7 +29874,7 @@ ${ttNotes}`
                   </div>
                 )}
                 {viewingRecord.data.clinicName && (
-                  <div className="bg-transparent border border-white/5 rounded-xl p-3">
+                  <div className="bg-transparent border border-white/8 rounded-xl p-3">
                     <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">
                       {" "}
                       Clinic
@@ -29890,7 +29885,7 @@ ${ttNotes}`
                   </div>
                 )}
                 {viewingRecord.data.agentName && (
-                  <div className="bg-transparent border border-white/5 rounded-xl p-3">
+                  <div className="bg-transparent border border-white/8 rounded-xl p-3">
                     <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">
                       {" "}
                       Agent
@@ -29901,7 +29896,7 @@ ${ttNotes}`
                   </div>
                 )}
                 {viewingRecord.data.status && (
-                  <div className="bg-transparent border border-white/5 rounded-xl p-3">
+                  <div className="bg-transparent border border-white/8 rounded-xl p-3">
                     <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">
                       Status
                     </p>
@@ -29910,7 +29905,7 @@ ${ttNotes}`
                     </p>
                   </div>
                 )}
-                <div className="bg-transparent border border-white/5 rounded-xl p-3">
+                <div className="bg-transparent border border-white/8 rounded-xl p-3">
                   <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">
                     {" "}
                     Submitted
@@ -29926,7 +29921,7 @@ ${ttNotes}`
                 viewingRecord.data.complaintDetails ||
                 viewingRecord.data.notes ||
                 viewingRecord.data.inquiry) && (
-                <div className="bg-transparent border border-white/5 rounded-xl p-4 text-left">
+                <div className="bg-transparent border border-white/8 rounded-xl p-4 text-left">
                   <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-2">
                     {viewingRecord.type === "inq"
                       ? "Inquiry"
@@ -30014,7 +30009,7 @@ ${ttNotes}`
                     {viewingRecord.data.replies.map((r: any, i: number) => (
                       <div
                         key={i}
-                        className="bg-transparent border border-white/5 rounded-xl p-3"
+                        className="bg-transparent border border-white/8 rounded-xl p-3"
                       >
                         <div className="flex items-center justify-between mb-1">
                           <p className="text-xs font-bold text-slate-300">
@@ -30168,7 +30163,7 @@ ${ttNotes}`
                     html,
                   );
                 }}
-                className="w-full px-4 py-2.5 bg-cyan-600/10 hover:bg-cyan-600/20 border border-cyan-500/20 hover:border-cyan-500/40 rounded-xl text-cyan-400 hover:text-cyan-300 text-xs font-bold transition-all flex items-center justify-center gap-2"
+                className="w-full px-4 py-2.5 bg-cyan-600/10 hover:bg-cyan-600/20 border border-transparent hover:border-transparent rounded-xl text-cyan-400 hover:text-cyan-300 text-xs font-bold transition-all flex items-center justify-center gap-2"
               >
                 <Copy className="w-3.5 h-3.5" /> Copy Full Record with
                 Attachments
@@ -30180,9 +30175,9 @@ ${ttNotes}`
 
       {pendingCancelId && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70">
-          <div className="bg-slate-950 border border-white/10 rounded-2xl p-6 max-w-sm w-full space-y-4 mx-4">
+          <div className="bg-slate-950 border border-white/8 rounded-xl p-6 max-w-sm w-full space-y-4 mx-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center border border-rose-500/20">
+              <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center border border-transparent">
                 <AlertTriangle className="w-5 h-5 text-rose-400" />
               </div>
               <div>
@@ -30197,7 +30192,7 @@ ${ttNotes}`
             <div className="flex justify-end gap-3 pt-2">
               <button
                 onClick={() => setPendingCancelId(null)}
-                className="px-4 py-2 text-xs border border-white/10 rounded-xl text-slate-300 hover:bg-white/5 transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs border border-white/8 rounded-xl text-slate-300 hover:bg-white/5 transition-colors cursor-pointer"
               >
                 Keep Request
               </button>
@@ -30224,10 +30219,10 @@ ${ttNotes}`
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-slate-950 border border-white/10 rounded-2xl p-6 max-w-sm w-full space-y-4 mx-4"
+              className="bg-slate-950 border border-white/8 rounded-xl p-6 max-w-sm w-full space-y-4 mx-4"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-slate-500/10 flex items-center justify-center border border-slate-500/20">
+                <div className="w-10 h-10 rounded-xl bg-slate-500/10 flex items-center justify-center border border-transparent">
                   <AlertTriangle className="w-5 h-5 text-slate-400" />
                 </div>
                 <div className="flex-1">
@@ -30242,7 +30237,7 @@ ${ttNotes}`
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   onClick={closeConfirm}
-                  className="px-4 py-2 text-xs border border-white/10 rounded-xl text-slate-300 hover:bg-white/5 transition-colors cursor-pointer"
+                  className="px-4 py-2 text-xs border border-white/8 rounded-xl text-slate-300 hover:bg-white/5 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -30274,7 +30269,7 @@ ${ttNotes}`
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.9, y: 20, opacity: 0 }}
               transition={{ type: "spring", duration: 0.5 }}
-              className="bg-transparent border border-cyan-500/30 rounded-2xl p-8 max-w-sm w-full space-y-6 mx-4 relative overflow-hidden text-center"
+              className="bg-transparent border border-transparent rounded-xl p-8 max-w-sm w-full space-y-6 mx-4 relative overflow-hidden text-center"
             >
               <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500"></div>
 
@@ -30282,8 +30277,8 @@ ${ttNotes}`
               <div className="absolute -bottom-12 -left-12 w-28 h-28 bg-fuchsia-500/10 rounded-full blur-2xl pointer-events-none"></div>
 
               <div className="flex flex-col items-center gap-3">
-                <div className="w-16 h-16 bg-gradient-to-br from-cyan-400/20 to-indigo-500/20 rounded-2xl flex items-center justify-center border border-cyan-500/30 relative">
-                  <div className="absolute inset-0 bg-cyan-400/5 blur animate-pulse rounded-2xl" />
+                <div className="w-16 h-16 bg-gradient-to-br from-cyan-400/20 to-indigo-500/20 rounded-xl flex items-center justify-center border border-transparent relative">
+                  <div className="absolute inset-0 bg-cyan-400/5 blur animate-pulse rounded-xl" />
                   <CoolLogo
                     className="w-12 h-12 text-cyan-400"
                     showText={false}
@@ -30292,16 +30287,16 @@ ${ttNotes}`
                 <h2 className="text-xl font-bold text-cyan-300 font-sans tracking-tight mt-2">
                   Synq Build v2.4.1
                 </h2>
-                <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-mono tracking-widest text-slate-400 uppercase">
+                <div className="px-3 py-1 bg-white/5 border border-white/8 rounded-lg text-xs font-mono tracking-widest text-slate-400 uppercase">
                   Production Node Enabled
                 </div>
               </div>
 
-              <div className="py-5 px-6 bg-black/50 border border-cyan-500/20 rounded-2xl relative overflow-hidden flex flex-col items-center">
+              <div className="py-5 px-6 bg-black/50 border border-transparent rounded-xl relative overflow-hidden flex flex-col items-center">
                 {/* Sonar ambient waves radiating in the background underneath the text */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
                   <div
-                    className="absolute w-24 h-24 rounded-full border border-cyan-500/30"
+                    className="absolute w-24 h-24 rounded-full border border-transparent"
                     style={{
                       animation:
                         "sonar-ring 4s cubic-bezier(0.1, 0.8, 0.3, 1) infinite",

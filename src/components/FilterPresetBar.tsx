@@ -37,7 +37,7 @@ export const FilterPresetBar: React.FC<FilterPresetBarProps> = ({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2 p-3 bg-slate-900 rounded-xl border border-white/5" id={`filter-preset-bar-${currentTab}`}>
+    <div className="flex flex-wrap items-center gap-2 p-3 bg-slate-900 rounded-xl border border-white/8" id={`filter-preset-bar-${currentTab}`}>
       <Bookmark className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
 
       {tabPresets.length > 0 && (
@@ -51,7 +51,7 @@ export const FilterPresetBar: React.FC<FilterPresetBarProps> = ({
             <ChevronDown className="w-3 h-3" />
           </button>
           {open && (
-            <div className="absolute top-full mt-1 left-0 z-50 bg-[#1a1a22] border border-white/10 rounded-xl shadow-sm min-w-[200px] overflow-hidden">
+            <div className="absolute top-full mt-1 left-0 z-50 bg-[#1a1a22] border border-white/8 rounded-xl min-w-[200px] overflow-hidden">
               {tabPresets.map(p => (
                 <div
                   key={p.id}
@@ -84,12 +84,12 @@ export const FilterPresetBar: React.FC<FilterPresetBarProps> = ({
           onChange={e => setNewName(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSave()}
           placeholder="Name this filter..."
-          className="bg-white/[0.02] border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 outline-none focus:border-indigo-500 w-36 placeholder:text-slate-600"
+          className="bg-white/[0.02] border border-white/8 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 outline-none focus:border-indigo-500 w-36 placeholder:text-slate-600"
         />
         <button
           onClick={handleSave}
           disabled={!newName.trim()}
-          className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:pointer-events-none text-white text-xs font-bold rounded-xl transition-all"
+          className="px-3 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 disabled:opacity-40 disabled:pointer-events-none text-white text-xs font-bold rounded-xl transition-all"
         >
           Save
         </button>

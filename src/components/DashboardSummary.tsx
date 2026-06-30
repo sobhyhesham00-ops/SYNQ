@@ -81,28 +81,28 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
           <motion.div 
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="p-5 border border-amber-500/30 rounded-2xl bg-gradient-to-r from-amber-500/15 via-yellow-500/5 to-transparent relative overflow-hidden group"
+            className="p-5 border border-transparent rounded-xl bg-gradient-to-r from-amber-500/15 via-yellow-500/5 to-transparent relative overflow-hidden group"
           >
             {/* Pulsing glow layer */}
             <div className="absolute top-0 right-0 w-48 h-12 bg-yellow-500/10 blur-xl rounded-full pointer-events-none" />
             
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-start gap-3.5">
-                <div className="w-11 h-11 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-500 shrink-0 relative border border-amber-400/30">
+                <div className="w-11 h-11 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 shrink-0 relative border border-transparent">
                   <Bell className="w-5 h-5 animate-pulse" />
                   <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full animate-ping" />
                   <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full" />
                 </div>
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 bg-amber-500/20 text-amber-300 rounded-xl border border-amber-400/20">
+                    <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 bg-amber-500/10 text-amber-300 rounded-xl border border-transparent">
                       Live Broadcast
                     </span>
                     <span className="text-xs text-slate-400 font-sans">
                       {latest.author} • {new Date(latest.createdAt).toLocaleDateString()} at {new Date(latest.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                     {latest.clinicFilter && latest.clinicFilter !== 'all' && (
-                      <span className="text-xs font-sans px-1.5 py-0.5 bg-indigo-500/20 text-indigo-300 rounded border border-indigo-500/30">
+                      <span className="text-xs font-sans px-1.5 py-0.5 bg-transparent border border-white/12 text-white text-indigo-300 rounded border border-transparent">
                         Target: {latest.clinicFilter}
                       </span>
                     )}
@@ -133,7 +133,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="lg:col-span-2 p-6 rounded-2xl bg-indigo-600 flex flex-col justify-between relative overflow-hidden group"
+          className="lg:col-span-2 p-6 rounded-xl bg-indigo-600 flex flex-col justify-between relative overflow-hidden group"
         >
           <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform duration-700">
             <TrendingUp className="w-48 h-48 text-white" />
@@ -141,7 +141,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
           
           <div className="relative z-10 text-left">
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center border border-white/30 text-white">
+              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center border border-white/15 text-white">
                  {isTL ? <ShieldCheck className="w-5 h-5" /> : <Users className="w-5 h-5" />}
               </div>
               <div>
@@ -167,7 +167,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
 
                 {currentUser?.role === 'agent' && normalizeAgentLob(currentUser?.lob, currentUser?.role) && (
                   <div className="mt-2">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-bold bg-transparent border border-white/12 text-white text-indigo-300 border border-transparent">
                       {normalizeAgentLob(currentUser.lob, currentUser.role) === 'Call Center' ? '📞 Call Center' : '💬 Chat'}
                     </span>
                   </div>
@@ -203,7 +203,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
             <div className="w-12 h-12 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400">
               <Clock className="w-5 h-5" />
             </div>
-            <div className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-bold uppercase tracking-widest">
+            <div className="px-3 py-1.5 bg-transparent border border-white/12 text-white text-emerald-400 rounded-lg text-xs font-bold uppercase tracking-widest">
               Active
             </div>
           </div>

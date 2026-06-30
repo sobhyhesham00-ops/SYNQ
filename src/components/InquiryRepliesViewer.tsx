@@ -24,22 +24,22 @@ export const InquiryRepliesViewer: React.FC<InquiryRepliesViewerProps> = ({ inqu
         </div>
       </div>
 
-      <div className="relative border-l border-emerald-500/20 ml-4 pl-6 space-y-5 py-1">
+      <div className="relative border-l border-transparent ml-4 pl-6 space-y-5 py-1">
         {hasReplies ? (
           inquiry.replies.map((reply: any, idx: number) => {
             const isTL = reply.authorRole === 'tl' || reply.authorRole?.toUpperCase() === 'TEAM LEADER';
             return (
               <div key={reply.id || idx} className="relative group text-left animate-fade-in font-sans">
                 {/* Timeline Dot */}
-                <div className={`absolute -left-[33px] top-1 rounded-full w-6 h-6 flex items-center justify-center border shadow-sm-sm ${isTL ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'}`}>
+                <div className={`absolute -left-[33px] top-1 rounded-full w-6 h-6 flex items-center justify-center border ${isTL ? 'bg-amber-500/10 border-transparent text-amber-400' : 'bg-emerald-500/10 border-transparent text-emerald-400'}`}>
                   {isTL ? <Shield className="w-3 h-3" /> : <MessageSquare className="w-3 h-3" />}
                 </div>
 
-                <div className="p-3 bg-white/[0.04] border border-slate-800/40 rounded-xl space-y-2 hover:bg-white/[0.05] duration-150">
+                <div className="p-3 bg-white/[0.04] border border-white/8 rounded-xl space-y-2 hover:bg-white/[0.05] duration-150">
                   <div className="flex justify-between items-center gap-2 flex-wrap">
                     <div className="flex items-center gap-1.5">
                       <span className="text-xs font-bold text-slate-200">{reply.senderName}</span>
-                      <span className={`text-xs font-bold uppercase tracking-widest px-1.5 py-0.2 rounded border ${isTL ? 'text-amber-400 bg-amber-500/5 border-amber-500/20' : 'text-emerald-400 bg-emerald-500/5 border-emerald-500/20'}`}>
+                      <span className={`text-xs font-bold uppercase tracking-widest px-1.5 py-0.2 rounded border ${isTL ? 'text-amber-400 bg-amber-500/5 border-transparent' : 'text-emerald-400 bg-transparent border border-white/12 text-white border-transparent'}`}>
                         {reply.authorRole || "Leader"}
                       </span>
                     </div>
@@ -54,7 +54,7 @@ export const InquiryRepliesViewer: React.FC<InquiryRepliesViewerProps> = ({ inqu
                     </p>
                   )}
                   {/* Display Attachments for this reply */}
-                  <div className="pt-1.5 border-t border-white/5">
+                  <div className="pt-1.5 border-t border-white/8">
                     <AttachmentsDisplay 
                       attachments={[...(reply.attachments || []), ...(reply.attachmentsObjects || []), reply.imageUrl, reply.screenshot].filter(Boolean)} 
                       photos={reply.photos}
@@ -69,15 +69,15 @@ export const InquiryRepliesViewer: React.FC<InquiryRepliesViewerProps> = ({ inqu
           /* Legacy single answer fallback styled beautifully */
           <div className="relative group text-left animate-fade-in font-sans">
             {/* Timeline Dot */}
-            <div className="absolute -left-[33px] top-1 rounded-full w-6 h-6 flex items-center justify-center border bg-emerald-500/10 border-emerald-500/30 text-emerald-400">
+            <div className="absolute -left-[33px] top-1 rounded-full w-6 h-6 flex items-center justify-center border bg-emerald-500/10 border-transparent text-emerald-400">
               <Shield className="w-3 h-3" />
             </div>
 
-            <div className="p-3 bg-white/[0.04] border border-slate-800/40 rounded-xl space-y-2 hover:bg-white/[0.05] duration-150">
+            <div className="p-3 bg-white/[0.04] border border-white/8 rounded-xl space-y-2 hover:bg-white/[0.05] duration-150">
               <div className="flex justify-between items-center gap-2">
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-bold text-slate-200">{inquiry.answeredBy || "Leader"}</span>
-                  <span className="text-xs font-bold uppercase tracking-widest px-1.5 py-0.2 rounded border text-emerald-400 bg-emerald-500/5 border-emerald-500/20">
+                  <span className="text-xs font-bold uppercase tracking-widest px-1.5 py-0.2 rounded border text-emerald-400 bg-transparent border border-white/12 text-white border-transparent">
                     TEAM LEADER
                   </span>
                 </div>

@@ -12,7 +12,7 @@ export const ResetPasswordModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white/[0.04] border border-white/10 p-6 rounded-2xl w-full max-w-sm relative">
+      <div className="bg-white/[0.04] border border-white/8 p-6 rounded-xl w-full max-w-sm relative">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors cursor-pointer"
@@ -34,14 +34,14 @@ export const ResetPasswordModal = ({
               value={newPasswordInput}
               onChange={(e) => setNewPasswordInput(e.target.value)}
               placeholder="Enter new password..."
-              className="w-full pl-3 pr-3 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-all font-sans"
+              className="w-full pl-3 pr-3 py-2.5 bg-white/[0.03] border border-white/8 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-all font-sans"
             />
           </div>
 
           <div className="pt-4">
              <button
                type="submit"
-               className="w-full px-6 py-2.5 bg-indigo-600 hover:brightness-110 text-white rounded-xl text-sm font-bold transition-all shadow-sm cursor-pointer"
+               className="w-full px-6 py-2.5 bg-transparent border border-white/12 text-white hover:brightness-110 text-white rounded-xl text-sm font-bold transition-all cursor-pointer"
              >
                Confirm Change
              </button>

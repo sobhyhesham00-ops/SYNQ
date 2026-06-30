@@ -219,7 +219,7 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
 
   return (
     <div 
-      className={`space-y-4 rounded-xl transition-all ${isDragging ? 'bg-white/5 ring-2 ring-indigo-500 border border-indigo-500/50 p-2' : ''}`}
+      className={`space-y-4 rounded-xl transition-all ${isDragging ? 'bg-white/5 ring-2 ring-indigo-500 border border-transparent p-2' : ''}`}
       onPaste={handlePaste}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -235,7 +235,7 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
             {photos.map((photo, index) => {
               const isImage = photo.startsWith('data:image/') || photo.startsWith('http');
               return (
-              <div key={index} className="relative group w-24 h-24 rounded-xl border border-white/10 overflow-hidden bg-white/[0.04]">
+              <div key={index} className="relative group w-24 h-24 rounded-xl border border-white/8 overflow-hidden bg-white/[0.04]">
                 {isImage ? (
                   <img referrerPolicy="no-referrer" src={photo} alt="screenshot" className="w-full h-full object-cover" />
                 ) : (
@@ -255,7 +255,7 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
                 </div>
               </div>
             )})}
-            <label className={`flex flex-col items-center justify-center w-24 h-24 border-2 border-dashed border-white/10 rounded-xl bg-white/5 transition-all ${isUploading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/10 hover:border-indigo-500/50 cursor-pointer group hover:scale-[1.02] active:scale-95'}`}>
+            <label className={`flex flex-col items-center justify-center w-24 h-24 border-2 border-dashed border-white/8 rounded-xl bg-white/5 transition-all ${isUploading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/10 hover:border-transparent cursor-pointer group hover:scale-[1.02] active:scale-95'}`}>
                 <input 
                     type="file"
                     accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
@@ -294,13 +294,13 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
               placeholder="e.g. ticket link, reference..."
               value={tempLinkInput}
               onChange={(e) => setTempLinkInput(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all"
+              className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/8 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all"
             />
           </div>
           <button
             type="button"
             onClick={handleAddLink}
-            className="px-3 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/20 text-indigo-300 text-xs font-bold rounded-xl transition-all active:scale-95 h-[34px] uppercase"
+            className="px-3 bg-transparent border border-white/12 text-white hover:bg-white/5 border border-transparent text-indigo-300 text-xs font-bold rounded-xl transition-all active:scale-95 h-[34px] uppercase"
           >
             Add
           </button>
@@ -309,12 +309,12 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
         {links.length > 0 && (
           <div className="space-y-1.5 pt-1">
             {links.map((linkStr, index) => (
-              <div key={index} className="flex justify-between items-center p-2 bg-white/5 border border-white/10 rounded-xl text-xs">
+              <div key={index} className="flex justify-between items-center p-2 bg-white/5 border border-white/8 rounded-xl text-xs">
                 <span className="text-indigo-300 underline font-mono truncate max-w-[200px]">{linkStr}</span>
                 <button
                   type="button"
                   onClick={() => handleRemoveLink(index)}
-                  className="text-red-400 hover:text-red-300 text-xs font-medium uppercase font-bold transition-all px-2 py-1 bg-red-400/10 rounded-xl border border-red-400/20 active:scale-95"
+                  className="text-red-400 hover:text-red-300 text-xs font-medium uppercase font-bold transition-all px-2 py-1 bg-red-400/10 rounded-xl border border-transparent active:scale-95"
                 >
                   Remove
                 </button>

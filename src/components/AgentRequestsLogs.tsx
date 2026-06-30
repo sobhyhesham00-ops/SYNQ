@@ -90,7 +90,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
       </div>
     );
     if (req.notes) {
-      secondaryContent = <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">📝 Notes</p><p className="text-sm text-slate-200 mt-0.5 whitespace-pre-wrap break-words italic pl-2 border-l-2 border-white/10">{req.notes}</p></div>;
+      secondaryContent = <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">📝 Notes</p><p className="text-sm text-slate-200 mt-0.5 whitespace-pre-wrap break-words italic pl-2 border-l-2 border-white/8">{req.notes}</p></div>;
     }
   } else if (req._cType === 'inq') {
     title = 'Clinic Inquiry';
@@ -109,26 +109,26 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
     primaryContent = (
       <div className="space-y-3">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="px-2.5 py-1 rounded-xl text-xs font-bold uppercase tracking-widest bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center gap-1.5">
+          <span className="px-2.5 py-1 rounded-xl text-xs font-bold uppercase tracking-widest bg-cyan-500/10 text-cyan-400 border border-transparent flex items-center gap-1.5">
             ❓ Clinic Inquiry
           </span>
           {req.platform && (
-            <span className="px-2.5 py-1 rounded-xl text-xs font-bold uppercase tracking-widest bg-slate-500/10 text-slate-300 border border-slate-500/20 flex items-center gap-1.5">
+            <span className="px-2.5 py-1 rounded-xl text-xs font-bold uppercase tracking-widest bg-slate-500/10 text-slate-300 border border-transparent flex items-center gap-1.5">
               🌐 {req.platform}
             </span>
           )}
           {req.customerType && (
-            <span className={`px-2.5 py-1 rounded-xl text-xs font-bold uppercase tracking-widest border flex items-center gap-1.5 ${ req.customerType === 'new' ? 'bg-teal-500/10 text-teal-400 border-teal-500/20' : 'bg-purple-500/10 text-purple-400 border-purple-500/20' }`}>
+            <span className={`px-2.5 py-1 rounded-xl text-xs font-bold uppercase tracking-widest border flex items-center gap-1.5 ${ req.customerType === 'new' ? 'bg-teal-500/10 text-teal-400 border-transparent' : 'bg-purple-500/10 text-purple-400 border-purple-500/20' }`}>
               {req.customerType === 'new' ? '🆕 New Customer' : '📂 Old Customer'}
             </span>
           )}
           {req.answer && (
-            <span className="px-2.5 py-1 rounded-xl text-xs font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+            <span className="px-2.5 py-1 rounded-xl text-xs font-bold uppercase tracking-widest bg-transparent border border-white/12 text-white text-emerald-400 border border-transparent flex items-center gap-1.5">
               💬 Answered
             </span>
           )}
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white/5 p-3 rounded-xl border border-white/5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white/5 p-3 rounded-xl border border-white/8">
           <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">👤 Patient Name</p><p className="text-sm text-slate-200 mt-0.5 font-bold">{req.patientName || 'N/A'}</p></div>
           <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">📞 Phone</p><p className="text-sm text-slate-200 mt-0.5 font-mono">{req.phoneNumber || 'N/A'}</p></div>
           <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">🏥 Clinic</p><p className="text-sm text-slate-200 mt-0.5">{getClinicLabel(req.clinicName)}</p></div>
@@ -140,7 +140,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
         </div>
         <div>
           <p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">💬 Inquiry Description</p>
-          <p className="text-sm text-slate-200 mt-0.5 whitespace-pre-wrap break-words bg-transparent p-2.5 rounded-xl border border-white/5">{req.text}</p>
+          <p className="text-sm text-slate-200 mt-0.5 whitespace-pre-wrap break-words bg-transparent p-2.5 rounded-xl border border-white/8">{req.text}</p>
         </div>
         {req.answer && (
           <div className="bg-emerald-500/5 p-3 rounded-xl border border-emerald-500/10">
@@ -171,7 +171,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
       </div>
     );
     if (req.notes) {
-      secondaryContent = <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">📝 Notes</p><p className="text-sm text-slate-200 mt-0.5 whitespace-pre-wrap break-words italic pl-2 border-l-2 border-white/10">{req.notes}</p></div>;
+      secondaryContent = <div><p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">📝 Notes</p><p className="text-sm text-slate-200 mt-0.5 whitespace-pre-wrap break-words italic pl-2 border-l-2 border-white/8">{req.notes}</p></div>;
     }
   } else if (req._cType === 'tt_complaint') {
     title = 'Complaint';
@@ -223,19 +223,19 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
   const isCancellable = req._cType === 'sched' && (req.status === 'pending_partner' || req.status === 'pending');
   const sla = getSLAStatus(req.createdAt, req.status, resolvedStatuses);
   
-  let statusClass = "bg-slate-800 text-slate-300 border-slate-700";
+  let statusClass = "bg-slate-800 text-slate-300 border-white/8";
   let statusIcon = <Clock className="w-3.5 h-3.5" />;
   if (['pending_partner', 'pending', 'pending_tl', 'not_confirmed', 'submitted', 'sent'].includes(req.status)) {
-    statusClass = "bg-amber-500/10 text-amber-400 border-amber-500/20";
+    statusClass = "bg-amber-500/10 text-amber-400 border-transparent";
     statusIcon = <Clock className="w-3.5 h-3.5" />;
   } else if (['approved', 'answered', 'confirmed', 'closed', 'contacted', 'in_progress'].includes(req.status)) {
-    statusClass = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+    statusClass = "bg-emerald-500/10 text-emerald-400 border-transparent";
     statusIcon = <CheckCircle2 className="w-3.5 h-3.5" />;
   } else if (['rejected', 'cancelled', 'declined'].includes(req.status)) {
-    statusClass = "bg-rose-500/10 text-rose-400 border-rose-500/20";
+    statusClass = "bg-rose-500/10 text-rose-400 border-transparent";
     statusIcon = <XCircle className="w-3.5 h-3.5" />;
   } else if (req.status === 'need_contact') {
-    statusClass = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+    statusClass = "bg-blue-500/10 text-blue-400 border-transparent";
     statusIcon = <AlertCircle className="w-3.5 h-3.5" />;
   }
 
@@ -259,10 +259,10 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
   const handlerLabel = req.tlName || req.actionBy || req.handledBy;
 
   return (
-    <div id={`request-${req.id}`} className="flex flex-col bg-white/[0.03] border border-white/10 rounded-xl overflow-hidden transition-all hover:border-white/20">
+    <div id={`request-${req.id}`} className="flex flex-col bg-white/[0.03] border border-white/8 rounded-xl overflow-hidden transition-all hover:border-white/15">
       
       {/* Header */}
-      <div className="p-4 border-b border-white/5 bg-transparent flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div className="p-4 border-b border-white/8 bg-transparent flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div className="flex items-center gap-3 flex-wrap">
           <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded border text-xs font-semibold uppercase tracking-wider ${statusClass}`}>
             {statusIcon}
@@ -291,10 +291,10 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
         {primaryContent}
         
         {(expanded || secondaryContent || tlResponseContent || hasAttachments) && (
-          <div className="mt-4 pt-4 border-t border-white/5 space-y-4">
+          <div className="mt-4 pt-4 border-t border-white/8 space-y-4">
             {secondaryContent}
             {tlResponseContent && (
-              <div className="bg-slate-800/50 rounded-xl p-3 border border-white/5">
+              <div className="bg-slate-800/50 rounded-xl p-3 border border-white/8">
                  {tlResponseContent}
               </div>
             )}
@@ -323,7 +323,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-3 py-2 bg-transparent border-t border-white/10 gap-2 flex-wrap">
+      <div className="flex items-center justify-between px-3 py-2 bg-transparent border-t border-white/8 gap-2 flex-wrap">
         <div className="flex items-center gap-1">
           <CopyButton text={copyData} tooltip="Copy Full Request" icon={ClipboardList} />
           {req.phoneNumber && (
@@ -378,7 +378,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
                  <Clock className="w-3 h-3" />
                  Editing period expired {expiryTimeStr && `at ${expiryTimeStr}`}
               </span>
-              <span className="text-xs text-slate-400 border-l border-white/5 pl-2">Use</span>
+              <span className="text-xs text-slate-400 border-l border-white/8 pl-2">Use</span>
               <button 
                 onClick={() => document.getElementById(`reply-input-${req.id}`)?.focus()}
                 className="text-xs text-sky-400 hover:text-sky-300 hover:underline font-bold transition-colors cursor-pointer flex items-center gap-1"
@@ -391,7 +391,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
           {isCancellable && (
             <button 
               onClick={() => handleCancelRequest(req.id)} 
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-rose-500/10 hover:bg-rose-500/20 text-sm font-semibold text-rose-400 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-rose-500/10 hover:bg-rose-500/10 text-sm font-semibold text-rose-400 transition-colors cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Cancel</span>
@@ -401,7 +401,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
           {collectionMap[req._cType] && (
             <button 
               onClick={() => setShowReply(!showReply)} 
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors text-sm font-semibold cursor-pointer ${showReply ? 'bg-indigo-500/20 text-indigo-300' : 'bg-white/5 hover:bg-white/10 text-slate-300'}`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors text-sm font-semibold cursor-pointer ${showReply ? 'bg-indigo-500/10 text-indigo-300' : 'bg-white/5 hover:bg-white/10 text-slate-300'}`}
             >
               <MessageSquare className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Reply</span>
@@ -429,7 +429,7 @@ const RequestCard = ({ req, currentUser, canEditItem, getRemainingEditTime, edit
 
       {/* Reply Thread Area */}
       {showReply && collectionMap[req._cType] && (
-        <div className="bg-white/[0.02] border-t border-white/5 px-4 pb-4 pt-2">
+        <div className="bg-white/[0.02] border-t border-white/8 px-4 pb-4 pt-2">
           <RequestReplyThread 
             request={req} 
             currentUser={currentUser} 
@@ -559,11 +559,11 @@ export const AgentRequestsLogs = ({
 
       {/* 4-Stat Summary Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white/[0.04] border border-slate-800 p-4 rounded-xl flex flex-col items-center justify-center">
+        <div className="bg-white/[0.04] border border-white/8 p-4 rounded-xl flex flex-col items-center justify-center">
           <span className="text-2xl font-bold text-slate-100">{allRequests.length}</span>
           <span className="text-xs text-slate-500 uppercase tracking-widest font-bold mt-1">Total Lifetime</span>
         </div>
-        <div className="bg-white/[0.04] border border-slate-800 p-4 rounded-xl flex flex-col items-center justify-center">
+        <div className="bg-white/[0.04] border border-white/8 p-4 rounded-xl flex flex-col items-center justify-center">
           <span className="text-2xl font-bold text-indigo-400">{filtered.length}</span>
           <span className="text-xs text-indigo-500/70 uppercase tracking-widest font-bold mt-1">Matched</span>
         </div>
@@ -581,18 +581,18 @@ export const AgentRequestsLogs = ({
         </div>
       </div>
 
-      <div className="bg-slate-950 border border-white/5 rounded-2xl p-5 space-y-4">
-        <div className='flex justify-between items-center flex-wrap gap-2 mb-4 pb-4 border-b border-white/5'>
+      <div className="bg-slate-950 border border-white/8 rounded-xl p-5 space-y-4">
+        <div className='flex justify-between items-center flex-wrap gap-2 mb-4 pb-4 border-b border-white/8'>
           <div className="flex gap-2 flex-wrap">
-            <div className='flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-xl text-xs uppercase tracking-wider font-bold text-slate-300'>
+            <div className='flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 border border-white/8 rounded-xl text-xs uppercase tracking-wider font-bold text-slate-300'>
               <ClipboardList className="w-3.5 h-3.5" />
               <span>{allRequests.length} Total</span>
             </div>
-            <div className='flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs uppercase tracking-wider font-bold text-amber-400'>
+            <div className='flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 border border-transparent rounded-xl text-xs uppercase tracking-wider font-bold text-amber-400'>
               <Clock className="w-3.5 h-3.5" />
               <span>{pendingCount} Pending</span>
             </div>
-            <div className='flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs uppercase tracking-wider font-bold text-emerald-400'>
+            <div className='flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 border border-transparent rounded-xl text-xs uppercase tracking-wider font-bold text-emerald-400'>
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>{resolvedCount} Resolved</span>
             </div>
@@ -603,16 +603,16 @@ export const AgentRequestsLogs = ({
         </div>
 
         {isNoFiltersActive && (
-          <div className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 px-4 py-2 rounded-xl text-sm font-medium mb-4 flex items-center gap-2">
+          <div className="bg-transparent border border-white/12 text-white border border-transparent text-indigo-400 px-4 py-2 rounded-xl text-sm font-medium mb-4 flex items-center gap-2">
             <Clock className="w-4 h-4" />
             Showing today's pending cases. Use filters to search history.
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3 pb-4 border-b border-white/5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3 pb-4 border-b border-white/8">
           <div className="relative w-full xl:col-span-2">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input type="text" placeholder="Search by ID, Name..." value={search} onChange={e => setSearch(e.target.value)} className="w-full pl-9 pr-4 py-1.5 bg-slate-900/60 border border-slate-700/40 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 font-sans" />
+            <input type="text" placeholder="Search by ID, Name..." value={search} onChange={e => setSearch(e.target.value)} className="w-full pl-9 pr-4 py-1.5 bg-slate-900/60 border border-white/8/40 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 font-sans" />
           </div>
           
           {/* New Filters Start */}
@@ -620,7 +620,7 @@ export const AgentRequestsLogs = ({
             type="date" 
             value={filterDate} 
             onChange={(e) => setFilterDate(e.target.value)} 
-            className="w-full bg-white/[0.03] border border-slate-700/40 rounded-xl text-sm text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 [color-scheme:dark]" 
+            className="w-full bg-white/[0.03] border border-white/8/40 rounded-xl text-sm text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 [color-scheme:dark]" 
           />
           <div className="relative">
             <select 
@@ -631,7 +631,7 @@ export const AgentRequestsLogs = ({
                   setFilterClinics([...filterClinics, val]);
                 }
               }} 
-              className="w-full bg-white/[0.03] border border-slate-700/40 rounded-xl text-sm text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-white/[0.03] border border-white/8/40 rounded-xl text-sm text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500"
             >
               <option value="">➕ Add Clinic to Filter...</option>
               {CLINIC_OPTIONS.filter(c => !filterClinics.includes(c.value)).map(c => (
@@ -639,7 +639,7 @@ export const AgentRequestsLogs = ({
               ))}
             </select>
             {filterClinics.length > 0 && (
-              <div className="absolute top-full left-0 z-50 mt-1 flex flex-wrap gap-1 bg-slate-800 p-2 rounded-xl border border-slate-700 shadow-sm w-64">
+              <div className="absolute top-full left-0 z-50 mt-1 flex flex-wrap gap-1 bg-slate-800 p-2 rounded-xl border border-white/8 w-64">
                 <span className="w-full text-xs text-slate-400 font-bold mb-1 flex justify-between">
                   Selected Clinics:
                   <button onClick={() => setFilterClinics([])} className="text-rose-400 hover:text-rose-300">Clear</button>
@@ -647,7 +647,7 @@ export const AgentRequestsLogs = ({
                 {filterClinics.map(c => {
                   const label = CLINIC_OPTIONS.find(opt => opt.value === c)?.label || c;
                   return (
-                    <span key={c} className="bg-indigo-500/20 text-indigo-300 border-none px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1">
+                    <span key={c} className="bg-transparent border border-white/12 text-white text-indigo-300 border-none px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1">
                       {label}
                       <button onClick={() => setFilterClinics(prev => prev.filter(x => x !== c))} className="hover:text-white cursor-pointer">&times;</button>
                     </span>
@@ -661,12 +661,12 @@ export const AgentRequestsLogs = ({
             placeholder="Search by phone..." 
             value={filterPhone} 
             onChange={(e) => setFilterPhone(e.target.value)} 
-            className="w-full bg-white/[0.03] border border-slate-700/40 rounded-xl text-sm text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 placeholder-slate-500" 
+            className="w-full bg-white/[0.03] border border-white/8/40 rounded-xl text-sm text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 placeholder-slate-500" 
           />
           {/* New Filters End */}
 
           <div className="flex gap-2 w-full xl:col-span-2 items-center flex-wrap lg:justify-end">
-            <select value={filterType} onChange={e => setFilterType(e.target.value)} className="bg-slate-900/60 border border-slate-700/40 rounded-xl text-sm text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer">
+            <select value={filterType} onChange={e => setFilterType(e.target.value)} className="bg-slate-900/60 border border-white/8/40 rounded-xl text-sm text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer">
               <option value="all" className="bg-white/[0.04]">All Types</option>
               <option value="sched" className="bg-white/[0.04]">Leaves/Swaps</option>
               <option value="inq" className="bg-white/[0.04]">Inquiries</option>
@@ -674,7 +674,7 @@ export const AgentRequestsLogs = ({
               <option value="tt_complaint" className="bg-white/[0.04]">Complaints</option>
               <option value="comm" className="bg-white/[0.04]">Client Comms</option>
             </select>
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="bg-slate-900/60 border border-slate-700/40 rounded-xl text-sm text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer">
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="bg-slate-900/60 border border-white/8/40 rounded-xl text-sm text-white px-3 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer">
               <option value="date_desc" className="bg-white/[0.04]">Newest First</option>
               <option value="date_asc" className="bg-white/[0.04]">Oldest First</option>
               <option value="status" className="bg-white/[0.04]">By Status</option>
@@ -688,7 +688,7 @@ export const AgentRequestsLogs = ({
                   setSearch('');
                   setFilterType('all');
                 }}
-                className="px-3 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 rounded-xl text-sm font-bold hover:bg-slate-700 whitespace-nowrap cursor-pointer transition-colors"
+                className="px-3 py-1.5 bg-slate-800 text-slate-300 border border-white/8 rounded-xl text-sm font-bold hover:bg-slate-700 whitespace-nowrap cursor-pointer transition-colors"
                 title="Clear Filters"
               >
                 Clear

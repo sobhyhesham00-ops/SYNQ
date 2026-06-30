@@ -18,31 +18,31 @@ interface PatientHistoryModalProps {
 }
 
 const TYPE_META = {
-  inquiry:     { label: 'Inquiry',     color: 'text-amber-400',  bg: 'bg-amber-500/10  border-amber-500/20',  icon: <MessageSquare className="w-4 h-4" /> },
-  tt_request:  { label: 'TT Request',  color: 'text-cyan-400',   bg: 'bg-cyan-500/10   border-cyan-500/20',   icon: <CreditCard className="w-4 h-4" /> },
-  complaint:   { label: 'Complaint',   color: 'text-pink-400',   bg: 'bg-pink-500/10   border-pink-500/20',   icon: <AlertTriangle className="w-4 h-4" /> },
-  client_comm: { label: 'Client Comm', color: 'text-indigo-400', bg: 'bg-indigo-500/10 border-indigo-500/20', icon: <MessageCircle className="w-4 h-4" /> },
+  inquiry:     { label: 'Inquiry',     color: 'text-amber-400',  bg: 'bg-amber-500/10  border-transparent',  icon: <MessageSquare className="w-4 h-4" /> },
+  tt_request:  { label: 'TT Request',  color: 'text-cyan-400',   bg: 'bg-cyan-500/10   border-transparent',   icon: <CreditCard className="w-4 h-4" /> },
+  complaint:   { label: 'Complaint',   color: 'text-pink-400',   bg: 'bg-pink-500/10   border-transparent',   icon: <AlertTriangle className="w-4 h-4" /> },
+  client_comm: { label: 'Client Comm', color: 'text-indigo-400', bg: 'bg-indigo-500/10 border-transparent', icon: <MessageCircle className="w-4 h-4" /> },
 };
 
 const STATUS_COLOR: Record<string, string> = {
-  submitted:            'bg-amber-500/20 text-amber-300 border-amber-500/30',
-  tl_reviewing:         'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  sent_to_clinic:       'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-  answered:             'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-  closed:               'bg-slate-500/20 text-slate-400 border-slate-500/30',
-  not_confirmed:        'bg-amber-500/20 text-amber-300 border-amber-500/30',
-  confirmed:            'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-  rejected:             'bg-rose-500/20 text-rose-300 border-rose-500/30',
-  pending_tl:           'bg-amber-500/20 text-amber-300 border-amber-500/30',
-  need_contact:         'bg-orange-500/20 text-orange-300 border-orange-500/30',
-  pending:              'bg-amber-500/20 text-amber-300 border-amber-500/30',
-  in_progress:          'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  contacted:            'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-  tl_link_ready:        'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
-  awaiting_client_contact: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
-  ready_for_partner:    'bg-violet-500/20 text-violet-300 border-violet-500/30',
-  sent_to_partner:      'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-  completed:            'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+  submitted:            'bg-amber-500/10 text-amber-300 border-transparent',
+  tl_reviewing:         'bg-blue-500/10 text-blue-300 border-transparent',
+  sent_to_clinic:       'bg-cyan-500/10 text-cyan-300 border-transparent',
+  answered:             'bg-emerald-500/10 text-emerald-300 border-transparent',
+  closed:               'bg-slate-500/10 text-slate-400 border-transparent',
+  not_confirmed:        'bg-amber-500/10 text-amber-300 border-transparent',
+  confirmed:            'bg-emerald-500/10 text-emerald-300 border-transparent',
+  rejected:             'bg-rose-500/10 text-rose-300 border-transparent',
+  pending_tl:           'bg-amber-500/10 text-amber-300 border-transparent',
+  need_contact:         'bg-orange-500/10 text-orange-300 border-transparent',
+  pending:              'bg-amber-500/10 text-amber-300 border-transparent',
+  in_progress:          'bg-blue-500/10 text-blue-300 border-transparent',
+  contacted:            'bg-emerald-500/10 text-emerald-300 border-transparent',
+  tl_link_ready:        'bg-indigo-500/10 text-indigo-300 border-transparent',
+  awaiting_client_contact: 'bg-orange-500/10 text-orange-300 border-transparent',
+  ready_for_partner:    'bg-violet-500/10 text-violet-300 border-transparent',
+  sent_to_partner:      'bg-cyan-500/10 text-cyan-300 border-transparent',
+  completed:            'bg-emerald-500/10 text-emerald-300 border-transparent',
 };
 
 /* ── helpers ── */
@@ -78,7 +78,7 @@ const PhotoGrid = ({ photos, label }: { photos: string[]; label: string }) => {
         {photos.map((src, i) => (
           <a key={i} href={src} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
             <img src={src} alt={`${label} ${i + 1}`}
-              className="w-16 h-16 rounded-xl object-cover border border-white/10 hover:border-indigo-400 transition-colors cursor-pointer"
+              className="w-16 h-16 rounded-xl object-cover border border-white/8 hover:border-indigo-400 transition-colors cursor-pointer"
             />
           </a>
         ))}
@@ -94,11 +94,11 @@ const RepliesThread = ({ replies }: { replies: any[] }) => {
       <p className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
         <ReplyIcon className="w-3 h-3" /> Reply Thread ({replies.length})
       </p>
-      <div className="space-y-2 pl-2 border-l border-white/5">
+      <div className="space-y-2 pl-2 border-l border-white/8">
         {replies.map((r, i) => {
           const isAgent = r.authorRole === 'agent' || (!r.authorRole && !['tl','qa','admin','superadmin','director'].includes(r.authorRole));
           return (
-            <div key={r.id || i} className={`rounded-xl p-3 border text-xs ${isAgent ? 'bg-white/[0.04] border-white/5' : 'bg-indigo-500/5 border-indigo-500/10'}`}>
+            <div key={r.id || i} className={`rounded-xl p-3 border text-xs ${isAgent ? 'bg-white/[0.04] border-white/8' : 'bg-indigo-500/5 border-indigo-500/10'}`}>
               <div className="flex items-center justify-between gap-2 mb-1.5">
                 <span className={`font-bold ${isAgent ? 'text-slate-300' : 'text-indigo-300'}`}>{r.senderName}</span>
                 <span className="text-slate-600 font-mono text-xs">{new Date(r.createdAt).toLocaleString()}</span>
@@ -204,7 +204,7 @@ const FullRecordDetail = ({ item }: { item: any }) => {
   }
 
   return (
-    <div className="mt-3 pt-3 border-t border-white/5 space-y-4 animate-fade-in" onClick={e => e.stopPropagation()}>
+    <div className="mt-3 pt-3 border-t border-white/8 space-y-4 animate-fade-in" onClick={e => e.stopPropagation()}>
 
       {/* Meta row */}
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
@@ -240,7 +240,7 @@ const FullRecordDetail = ({ item }: { item: any }) => {
             <div key={i} className="space-y-0.5 col-span-1 md:col-span-2 last:col-span-1 md:last:col-span-2">
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">{f.label}</p>
               <div className="flex items-start gap-1">
-                <p className="text-xs text-slate-200 leading-relaxed flex-1 bg-white/[0.04] rounded-xl p-2 border border-white/5 whitespace-pre-wrap">{f.value}</p>
+                <p className="text-xs text-slate-200 leading-relaxed flex-1 bg-white/[0.04] rounded-xl p-2 border border-white/8 whitespace-pre-wrap">{f.value}</p>
                 <CopyBtn value={f.value} label={f.label} />
               </div>
             </div>
@@ -278,7 +278,7 @@ const FullRecordDetail = ({ item }: { item: any }) => {
                 href={att.url}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 p-2 bg-white/[0.02] border border-white/10 rounded-xl hover:border-white/20 transition-all"
+                className="flex items-center gap-2 p-2 bg-white/[0.02] border border-white/8 rounded-xl hover:border-white/15 transition-all"
               >
                 <div className="w-10 h-10 rounded bg-indigo-500/10 text-indigo-400 shrink-0 flex items-center justify-center border border-indigo-500/10">
                   <FileText className="w-5 h-5" />
@@ -299,7 +299,7 @@ const FullRecordDetail = ({ item }: { item: any }) => {
           <p className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
             <CheckCircle className="w-3 h-3 text-emerald-400" /> Agent Follow-ups ({agentFollowUps.length})
           </p>
-          <div className="space-y-2 pl-2 border-l border-white/5">
+          <div className="space-y-2 pl-2 border-l border-white/8">
             {agentFollowUps.map((fu, i) => (
               <div key={i} className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-3 text-xs">
                 <div className="flex items-center justify-between mb-1">
@@ -458,10 +458,10 @@ export const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[990] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm font-sans" id="patient-history-modal-overlay">
-      <div className="w-full max-w-2xl bg-slate-950 border border-white/10 rounded-2xl flex flex-col max-h-[90vh]">
+      <div className="w-full max-w-2xl bg-slate-950 border border-white/8 rounded-xl flex flex-col max-h-[90vh]">
 
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-white/10 shrink-0">
+        <div className="flex items-center justify-between p-5 border-b border-white/8 shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400">
               <Phone className="w-5 h-5" />
@@ -477,14 +477,14 @@ export const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({
         </div>
 
         {/* Search */}
-        <div className="p-4 border-b border-white/5 shrink-0">
+        <div className="p-4 border-b border-white/8 shrink-0">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <input
               autoFocus type="text" value={search}
               onChange={e => { setSearch(e.target.value); setExpandedId(null); }}
               placeholder="Enter phone number e.g. 0501234567"
-              className="w-full bg-white/[0.03] border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-100 outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-600"
+              className="w-full bg-white/[0.03] border border-white/8 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-100 outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-600"
             />
           </div>
           {search && (
@@ -519,7 +519,7 @@ export const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({
           {hasSearch && results.length > 0 && (
             <>
               {/* Summary strip */}
-              <div className="bg-slate-900 rounded-xl p-3.5 flex flex-wrap items-center gap-3 border border-white/5">
+              <div className="bg-slate-900 rounded-xl p-3.5 flex flex-wrap items-center gap-3 border border-white/8">
                 <div>
                   {patientName && patientName !== '—' && (
                     <p className="text-sm font-bold text-slate-100">{patientName}</p>
@@ -530,7 +530,7 @@ export const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({
                   {(Object.entries(counts) as [string, number][]).filter(([, n]) => n > 0).map(([type, n]) => {
                     const m = TYPE_META[type as keyof typeof TYPE_META];
                     return (
-                      <span key={type} className={`flex items-center gap-1 px-2.5 py-1 rounded-full border text-xs font-bold ${m.bg} ${m.color}`}>
+                      <span key={type} className={`flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-bold ${m.bg} ${m.color}`}>
                         {m.icon} {n} {m.label}
                       </span>
                     );
@@ -544,7 +544,7 @@ export const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({
                 {results.map(item => {
                   const m = TYPE_META[item._type as keyof typeof TYPE_META];
                   const isExpanded = expandedId === item.id;
-                  const statusCls = STATUS_COLOR[item.status] || 'bg-white/5 text-slate-400 border-white/10';
+                  const statusCls = STATUS_COLOR[item.status] || 'bg-white/5 text-slate-400 border-white/8';
                   return (
                     <div key={`${item._type}-${item.id}`} className="relative flex gap-3 py-2">
                       <div className={`shrink-0 w-9 h-9 rounded-xl border flex items-center justify-center z-10 mt-0.5 ${m.bg} ${m.color}`}>
@@ -552,7 +552,7 @@ export const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({
                       </div>
                       <div className="flex-1 min-w-0">
                         <div
-                          className="bg-slate-900 border border-white/5 rounded-xl p-3.5 cursor-pointer hover:border-white/10 transition-colors"
+                          className="bg-slate-900 border border-white/8 rounded-xl p-3.5 cursor-pointer hover:border-white/8 transition-colors"
                           onClick={() => setExpandedId(isExpanded ? null : item.id)}
                         >
                           <div className="flex items-start justify-between gap-2">
@@ -580,7 +580,7 @@ export const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({
                           {isExpanded && <FullRecordDetail item={item} />}
 
                           {isExpanded && (
-                            <div className="mt-3 pt-3 border-t border-white/5">
+                            <div className="mt-3 pt-3 border-t border-white/8">
                               <button
                                 onClick={e => { e.stopPropagation(); onNavigate(TAB_NAV[item._type]); onClose(); }}
                                 className="text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
@@ -600,7 +600,7 @@ export const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-white/5 shrink-0">
+        <div className="p-4 border-t border-white/8 shrink-0">
           <p className="text-xs text-slate-600 text-center font-sans">
             Searching live data · {results.length} record{results.length !== 1 ? 's' : ''} found
           </p>

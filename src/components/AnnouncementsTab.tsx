@@ -155,13 +155,13 @@ export function AnnouncementsTab({
       </div>
 
       {isTL && (
-        <form onSubmit={handlePost} className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
+        <form onSubmit={handlePost} className="bg-white/5 border border-white/8 rounded-xl p-6 space-y-4">
           <h3 className="text-lg font-bold text-slate-200">Post New Update</h3>
           <textarea
             value={message}
             onChange={e => setMessage(e.target.value)}
             placeholder="Type your announcement here..."
-            className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-yellow-500 min-h-[100px]"
+            className="w-full bg-white/[0.02] border border-white/8 rounded-xl px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-yellow-500 min-h-[100px]"
             required
           />
           
@@ -169,13 +169,13 @@ export function AnnouncementsTab({
             <div className="space-y-1">
               <label className="text-xs uppercase font-bold text-slate-400 block mb-1">Attach Photo / Screenshot</label>
               <div className="flex items-center gap-2">
-                <label className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs cursor-pointer border border-white/10 select-none transition-colors">
+                <label className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs cursor-pointer border border-white/8 select-none transition-colors">
                   <Paperclip className="w-3.5 h-3.5" />
                   Upload Photo file
                   <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
                 </label>
                 {imageUrl && (
-                  <button type="button" onClick={() => setImageUrl('')} className="p-1 px-2.5 bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 border border-rose-500/30 rounded-xl text-xs transition-colors cursor-pointer">
+                  <button type="button" onClick={() => setImageUrl('')} className="p-1 px-2.5 bg-rose-500/10 hover:bg-rose-500/10 text-rose-300 border border-transparent rounded-xl text-xs transition-colors cursor-pointer">
                     Clear
                   </button>
                 )}
@@ -185,17 +185,17 @@ export function AnnouncementsTab({
                 value={imageUrl.startsWith('data:') ? '' : imageUrl} 
                 onChange={e => setImageUrl(e.target.value)} 
                 placeholder="Or paste an Image URL..." 
-                className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-yellow-500 mt-1" 
+                className="w-full bg-white/[0.02] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-yellow-500 mt-1" 
                 disabled={imageUrl.startsWith('data:')}
               />
             </div>
             <div>
               <label className="text-xs uppercase font-bold text-slate-400 block mb-1">Reference Link (Optional)</label>
-              <input type="url" value={linkUrl} onChange={e => setLinkUrl(e.target.value)} placeholder="https://..." className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-yellow-500" />
+              <input type="url" value={linkUrl} onChange={e => setLinkUrl(e.target.value)} placeholder="https://..." className="w-full bg-slate-900/50 border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-yellow-500" />
             </div>
             <div>
               <label className="text-xs uppercase font-bold text-slate-400 block mb-1">Target Clinic</label>
-              <select value={clinicFilter} onChange={e => setClinicFilter(e.target.value)} className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-yellow-500 cursor-pointer">
+              <select value={clinicFilter} onChange={e => setClinicFilter(e.target.value)} className="w-full bg-slate-900/50 border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-yellow-500 cursor-pointer">
                 <option value="all" className="bg-slate-800 text-white font-sans">All Clinics (Global)</option>
                 {CLINIC_OPTIONS.map(c => (
 <option key={c.value} value={c.value} className="bg-slate-800 text-white font-sans">{c.label}</option>
@@ -205,8 +205,8 @@ export function AnnouncementsTab({
           </div>
 
           {imageUrl && (
-            <div className="p-3 bg-white/[0.02] border border-white/5 rounded-xl flex items-center gap-4">
-              <img src={imageUrl} alt="Upload preview" className="w-20 h-16 object-cover rounded-xl border border-white/10 shrink-0" />
+            <div className="p-3 bg-white/[0.02] border border-white/8 rounded-xl flex items-center gap-4">
+              <img src={imageUrl} alt="Upload preview" className="w-20 h-16 object-cover rounded-xl border border-white/8 shrink-0" />
               <div className="space-y-1 text-left">
                 <p className="text-xs font-bold text-slate-300">Attached Photo Attachment</p>
                 <p className="text-xs text-slate-500">{imageUrl.startsWith('data:') ? 'Local Image Base64 Data Binary File' : 'External Web URL Link resource'}</p>
@@ -222,7 +222,7 @@ export function AnnouncementsTab({
         </form>
       )}
 
-      <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-6 min-h-[400px]">
+      <div className="bg-white/[0.02] border border-white/8 rounded-xl p-6 min-h-[400px]">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-bold text-slate-200">Updates History</h3>
           <div className="relative">
@@ -234,7 +234,7 @@ export function AnnouncementsTab({
                   setFilterClinics([...filterClinics, val]);
                 }
               }} 
-              className="bg-white/[0.04] border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-300 outline-none cursor-pointer"
+              className="bg-white/[0.04] border border-white/8 rounded-xl px-3 py-1.5 text-xs text-slate-300 outline-none cursor-pointer"
             >
                <option value="" className="font-sans">➕ Add Clinic to Filter...</option>
                {CLINIC_OPTIONS.filter(c => !filterClinics.includes(c.value)).map(c => (
@@ -242,7 +242,7 @@ export function AnnouncementsTab({
                ))}
             </select>
             {filterClinics.length > 0 && (
-              <div className="absolute top-full right-0 z-50 mt-1 flex flex-wrap gap-1 bg-slate-800 p-2 rounded-xl border border-slate-700 shadow-sm w-64">
+              <div className="absolute top-full right-0 z-50 mt-1 flex flex-wrap gap-1 bg-slate-800 p-2 rounded-xl border border-white/8 w-64">
                 <span className="w-full text-xs text-slate-400 font-bold mb-1 flex justify-between">
                   Selected Clinics:
                   <button onClick={() => setFilterClinics([])} className="text-rose-400 hover:text-rose-300">Clear</button>
@@ -250,7 +250,7 @@ export function AnnouncementsTab({
                 {filterClinics.map(c => {
                   const label = CLINIC_OPTIONS.find(opt => opt.value === c)?.label || c;
                   return (
-                    <span key={c} className="bg-amber-500/20 text-amber-300 border-none px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1">
+                    <span key={c} className="bg-amber-500/10 text-amber-300 border-none px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1">
                       {label}
                       <button onClick={() => setFilterClinics(prev => prev.filter(x => x !== c))} className="hover:text-white cursor-pointer">&times;</button>
                     </span>
@@ -266,7 +266,7 @@ export function AnnouncementsTab({
             <p className="text-slate-400 text-center py-10 font-sans text-sm">No updates found.</p>
           ) : (
             filtered.map(a => (
-              <div key={a.id} className="p-5 border border-white/10 rounded-2xl bg-white/5 relative group space-y-3">
+              <div key={a.id} className="p-5 border border-white/8 rounded-xl bg-white/5 relative group space-y-3">
                 {isTL && (
                   <button onClick={() => handleDelete(a.id)} className="absolute top-4 right-4 text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-rose-400/10 rounded-xl cursor-pointer text-xs font-bold">
                     Delete
@@ -274,7 +274,7 @@ export function AnnouncementsTab({
                 )}
                 
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xs text-amber-500 border border-amber-500/20">
+                  <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xs text-amber-500 border border-transparent">
                     {(a.author || "System").substring(0,2).toUpperCase()}
                   </div>
                   <div>
@@ -294,7 +294,7 @@ export function AnnouncementsTab({
                 </p>
                 
                 {a.imageUrl && (
-                  <div className="p-2.5 bg-white/[0.03] rounded-xl max-w-lg border border-white/5 space-y-2">
+                  <div className="p-2.5 bg-white/[0.03] rounded-xl max-w-lg border border-white/8 space-y-2">
                     <img src={a.imageUrl} alt="Attached Announcement File" className="w-full max-h-72 object-contain rounded-xl" />
                     <div className="flex items-center justify-between">
                       <p className="text-xs text-slate-500 font-sans">Image attached by Management</p>
@@ -312,16 +312,16 @@ export function AnnouncementsTab({
                 {/* Open Link */}
                 {a.linkUrl && (
                   <div className="pt-1">
-                    <a href={a.linkUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/20 rounded-xl text-xs font-bold transition-colors">
+                    <a href={a.linkUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-transparent border border-white/12 text-white text-indigo-400 hover:bg-white/5 border border-transparent rounded-xl text-xs font-bold transition-colors">
                       <Link className="w-3.5 h-3.5" /> Open Attached URL: {new URL(a.linkUrl).hostname}
                     </a>
                   </div>
                 )}
 
                 {/* Emojis Section: Cannot post text reply, can only leave emoji */}
-                <div className="pt-3 border-t border-white/5 flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-1.5 bg-white/[0.02] p-1.5 rounded-xl border border-white/5">
-                    <span className="text-xs text-slate-400 uppercase font-bold tracking-wider px-2 border-r border-white/10 select-none">Reactions Only:</span>
+                <div className="pt-3 border-t border-white/8 flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-1.5 bg-white/[0.02] p-1.5 rounded-xl border border-white/8">
+                    <span className="text-xs text-slate-400 uppercase font-bold tracking-wider px-2 border-r border-white/8 select-none">Reactions Only:</span>
                     <div className="flex items-center gap-1">
                       {EMOJI_OPTIONS.map(emoji => {
                         const reactors = (a.reactions || {})[emoji] || [];
@@ -330,7 +330,7 @@ export function AnnouncementsTab({
                           <button
                             key={emoji}
                             onClick={() => handleReactionToggle(a.id, emoji)}
-                            className={`px-2 py-1 rounded-xl text-xs transition-all relative group flex items-center gap-1 cursor-pointer select-none border ${ hasReacted ? 'bg-amber-500/15 border-amber-500/35 text-amber-300 scale-105 ' : 'bg-white/5 border-transparent hover:bg-white/10 text-slate-400' }`}
+                            className={`px-2 py-1 rounded-xl text-xs transition-all relative group flex items-center gap-1 cursor-pointer select-none border ${ hasReacted ? 'bg-amber-500/10 border-amber-500/35 text-amber-300 scale-105 ' : 'bg-white/5 border-transparent hover:bg-white/10 text-slate-400' }`}
                             title={reactors.length > 0 ? `Reacted: ${reactors.join(', ')}` : "Click to react"}
                           >
                             <span>{emoji}</span>
@@ -340,7 +340,7 @@ export function AnnouncementsTab({
 
                             {/* Tooltip containing reactor names */}
                             {reactors.length > 0 && (
-                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2 py-1 bg-slate-950 text-xs font-mono text-slate-200 rounded border border-white/10 whitespace-nowrap z-30">
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block px-2 py-1 bg-slate-950 text-xs font-mono text-slate-200 rounded border border-white/8 whitespace-nowrap z-30">
                                 {reactors.map(name => name.split(' ')[0]).join(', ')}
                               </div>
                             )}

@@ -102,7 +102,7 @@ export const SlideToConfirm: React.FC<SlideToConfirmProps> = ({
   return (
     <div
       ref={trackRef}
-      className={`relative w-full h-12 rounded-full border border-white/10 overflow-hidden select-none touch-none transition-opacity ${
+      className={`relative w-full h-12 rounded-full border border-white/8 overflow-hidden select-none touch-none transition-opacity ${
         disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-grab'
       } ${isConfirmed ? `bg-gradient-to-r ${colorClass}` : 'bg-white/5'}`}
       onPointerMove={handlePointerMove}
@@ -129,7 +129,7 @@ export const SlideToConfirm: React.FC<SlideToConfirmProps> = ({
         onKeyDown={handleKeyDown}
         tabIndex={disabled ? -1 : 0}
         aria-label={label}
-        className={`absolute top-1 left-1 h-10 w-10 z-10 rounded-full flex items-center justify-center bg-gradient-to-br ${colorClass} shadow-sm-sm transition-transform focus:outline-none focus:ring-2 focus:ring-white/50 ${ isDragging ? '' : 'transition-all duration-300' }`}
+        className={`absolute top-1 left-1 h-10 w-10 z-10 rounded-full flex items-center justify-center bg-gradient-to-br ${colorClass} transition-transform focus:outline-none focus:ring-2 focus:ring-white/50 ${ isDragging ? '' : 'transition-all duration-300' }`}
         style={{ transform: `translateX(${dragX}px)` }}
       >
         {isLoading ? (

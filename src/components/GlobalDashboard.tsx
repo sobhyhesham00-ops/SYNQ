@@ -438,7 +438,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
           {isAnyFilterActive && (
             <button
               onClick={handleResetFilters}
-              className="px-4 py-2.5 rounded-full bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 border-none transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+              className="px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 border-none transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
               title="Return to Today Only"
             >
               <RotateCcw className="w-4 h-4 text-rose-400" /> Reset to Today
@@ -448,13 +448,13 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
           <button
             onClick={handleExportData}
             disabled={filteredList.length === 0}
-            className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border-none rounded-full text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+            className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border-none rounded-lg text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
             title={filteredList.length === 0 ? "No data to export" : "Export filtered list to Excel"}
           >
             <Download className="w-4 h-4 text-indigo-400" /> Export Data
           </button>
 
-          <div className="flex items-center gap-2 bg-indigo-500/10 px-4 py-2.5 rounded-full shrink-0">
+          <div className="flex items-center gap-2 bg-transparent border border-white/12 text-white px-4 py-2.5 rounded-lg shrink-0">
             <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
             <span className="text-xs font-bold text-indigo-300 uppercase tracking-widest">
               {filteredList.length} Items Listed
@@ -479,13 +479,13 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
           {TEAM_LEADERS.map(tlName => {
             const log = tlLoginLogs.find(l => l.tlName === tlName && l.date === todayStr);
             return (
-              <div key={tlName} className="flex items-center gap-2 text-sm bg-white/[0.05] px-4 py-2 rounded-full border-none">
+              <div key={tlName} className="flex items-center gap-2 text-sm bg-white/[0.05] px-4 py-2 rounded-lg border-none">
                 <div className={`w-2.5 h-2.5 rounded-full ${log?.onlineStatus === 'online' ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`} />
                 <span className="font-bold text-slate-200">{tlName}</span>
                 {log ? (
-                  <span className="text-xs text-slate-400 font-mono pl-1 border-l border-white/10 ml-1">First login: {new Date(log.loggedInAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  <span className="text-xs text-slate-400 font-mono pl-1 border-l border-white/8 ml-1">First login: {new Date(log.loggedInAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 ) : (
-                  <span className="text-xs text-slate-500 font-sans pl-1 border-l border-white/10 ml-1">Not logged in today</span>
+                  <span className="text-xs text-slate-500 font-sans pl-1 border-l border-white/8 ml-1">Not logged in today</span>
                 )}
               </div>
             );
@@ -500,13 +500,13 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
           {/* Click to filter Inquiries */}
           <button
             onClick={() => setSelectedTypeFilter(selectedTypeFilter === "inquiry" ? "all" : "inquiry")}
-            className={`p-5 rounded-[24px] transition-transform hover:scale-[1.02] text-left flex flex-col gap-3 cursor-pointer relative overflow-hidden ${ selectedTypeFilter === "inquiry" ? "bg-amber-500/15 -sm ring-1 ring-amber-500/30 border-none" : "bg-white/[0.05] border border-white/[0.07]" }`}
+            className={`p-5 rounded-[24px] transition-transform hover:scale-[1.02] text-left flex flex-col gap-3 cursor-pointer relative overflow-hidden ${ selectedTypeFilter === "inquiry" ? "bg-amber-500/10 -sm ring-1 ring-amber-500/30 border-none" : "bg-white/[0.05] border border-white/[0.07]" }`}
           >
             <div className="flex items-center justify-between w-full">
-              <div className={`p-2.5 rounded-full ${selectedTypeFilter === "inquiry" ? "bg-amber-500/20 text-amber-300" : "bg-amber-500/10 text-amber-400"}`}>
+              <div className={`p-2.5 rounded-full ${selectedTypeFilter === "inquiry" ? "bg-amber-500/10 text-amber-300" : "bg-amber-500/10 text-amber-400"}`}>
                 <HelpCircle className="w-5 h-5" />
               </div>
-              <span className="text-xs bg-white/[0.06] text-slate-400 font-sans px-2 py-1 rounded-xl border border-white/10">
+              <span className="text-xs bg-white/[0.06] text-slate-400 font-sans px-2 py-1 rounded-xl border border-white/8">
                 {selectedTypeFilter === "inquiry" ? "ACTIVE" : "CLICK"}
               </span>
             </div>
@@ -519,13 +519,13 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
           {/* Click to filter Tabby/Tamara */}
           <button
             onClick={() => setSelectedTypeFilter(selectedTypeFilter === "tabbyTamara" ? "all" : "tabbyTamara")}
-            className={`p-5 rounded-[24px] transition-transform hover:scale-[1.02] text-left flex flex-col gap-3 cursor-pointer relative overflow-hidden ${ selectedTypeFilter === "tabbyTamara" ? "bg-cyan-500/15 -sm ring-1 ring-[#2bc9d7]/30 border-none" : "bg-white/[0.05] border border-white/[0.07]" }`}
+            className={`p-5 rounded-[24px] transition-transform hover:scale-[1.02] text-left flex flex-col gap-3 cursor-pointer relative overflow-hidden ${ selectedTypeFilter === "tabbyTamara" ? "bg-cyan-500/10 -sm ring-1 ring-[#2bc9d7]/30 border-none" : "bg-white/[0.05] border border-white/[0.07]" }`}
           >
             <div className="flex items-center justify-between w-full">
-              <div className={`p-2.5 rounded-full ${selectedTypeFilter === "tabbyTamara" ? "bg-cyan-500/20 text-cyan-500" : "bg-cyan-500/10 text-cyan-500"}`}>
+              <div className={`p-2.5 rounded-full ${selectedTypeFilter === "tabbyTamara" ? "bg-cyan-500/10 text-cyan-500" : "bg-cyan-500/10 text-cyan-500"}`}>
                 <Wallet className="w-5 h-5" />
               </div>
-              <span className="text-xs bg-white/[0.06] text-slate-400 font-sans px-2 py-1 rounded-xl border border-white/10">
+              <span className="text-xs bg-white/[0.06] text-slate-400 font-sans px-2 py-1 rounded-xl border border-white/8">
                 {selectedTypeFilter === "tabbyTamara" ? "ACTIVE" : "CLICK"}
               </span>
             </div>
@@ -538,13 +538,13 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
           {/* Click to filter Complaints */}
           <button
             onClick={() => setSelectedTypeFilter(selectedTypeFilter === "complaint" ? "all" : "complaint")}
-            className={`p-5 rounded-[24px] transition-transform hover:scale-[1.02] text-left flex flex-col gap-3 cursor-pointer relative overflow-hidden ${ selectedTypeFilter === "complaint" ? "bg-rose-500/15 -sm ring-1 ring-rose-500/30 border-none" : "bg-white/[0.05] border border-white/[0.07]" }`}
+            className={`p-5 rounded-[24px] transition-transform hover:scale-[1.02] text-left flex flex-col gap-3 cursor-pointer relative overflow-hidden ${ selectedTypeFilter === "complaint" ? "bg-rose-500/10 -sm ring-1 ring-rose-500/30 border-none" : "bg-white/[0.05] border border-white/[0.07]" }`}
           >
             <div className="flex items-center justify-between w-full">
-              <div className={`p-2.5 rounded-full ${selectedTypeFilter === "complaint" ? "bg-rose-500/20 text-rose-300" : "bg-rose-500/10 text-rose-400"}`}>
+              <div className={`p-2.5 rounded-full ${selectedTypeFilter === "complaint" ? "bg-rose-500/10 text-rose-300" : "bg-rose-500/10 text-rose-400"}`}>
                 <AlertTriangle className="w-5 h-5" />
               </div>
-              <span className="text-xs bg-white/[0.06] text-slate-400 font-sans px-2 py-1 rounded-xl border border-white/10">
+              <span className="text-xs bg-white/[0.06] text-slate-400 font-sans px-2 py-1 rounded-xl border border-white/8">
                 {selectedTypeFilter === "complaint" ? "ACTIVE" : "CLICK"}
               </span>
             </div>
@@ -557,13 +557,13 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
           {/* Click to filter Client Communications */}
           <button
             onClick={() => setSelectedTypeFilter(selectedTypeFilter === "clientComm" ? "all" : "clientComm")}
-            className={`p-5 rounded-[24px] transition-transform hover:scale-[1.02] text-left flex flex-col gap-3 cursor-pointer relative overflow-hidden ${ selectedTypeFilter === "clientComm" ? "bg-indigo-500/15 shadow-sm-sm ring-1 ring-indigo-500/30 border-none" : "bg-white/[0.05] border border-white/[0.07]" }`}
+            className={`p-5 rounded-[24px] transition-transform hover:scale-[1.02] text-left flex flex-col gap-3 cursor-pointer relative overflow-hidden ${ selectedTypeFilter === "clientComm" ? "bg-indigo-500/10 ring-1 ring-indigo-500/30 border-none" : "bg-white/[0.05] border border-white/[0.07]" }`}
           >
             <div className="flex items-center justify-between w-full">
-              <div className={`p-2.5 rounded-full ${selectedTypeFilter === "clientComm" ? "bg-indigo-500/20 text-indigo-300" : "bg-indigo-500/10 text-indigo-400"}`}>
+              <div className={`p-2.5 rounded-full ${selectedTypeFilter === "clientComm" ? "bg-indigo-500/10 text-indigo-300" : "bg-indigo-500/10 text-indigo-400"}`}>
                 <MessageCircle className="w-5 h-5" />
               </div>
-              <span className="text-xs bg-white/[0.06] text-slate-400 font-sans px-2 py-1 rounded-xl border border-white/10">
+              <span className="text-xs bg-white/[0.06] text-slate-400 font-sans px-2 py-1 rounded-xl border border-white/8">
                 {selectedTypeFilter === "clientComm" ? "ACTIVE" : "CLICK"}
               </span>
             </div>
@@ -582,7 +582,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
               <div className="p-2.5 rounded-full bg-white/10 text-slate-300">
                 <ClipboardList className="w-5 h-5" />
               </div>
-              <span className="text-xs bg-emerald-500/20 text-emerald-400 font-sans px-2 py-0.5 rounded-xl border border-emerald-500/20 font-bold">
+              <span className="text-xs bg-transparent border border-white/12 text-white text-emerald-400 font-sans px-2 py-0.5 rounded-xl border border-transparent font-bold">
                 {isAnyFilterActive ? "FILTERED" : "TODAY"}
               </span>
             </div>
@@ -620,7 +620,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
                 setCurrentPage(1);
               }
             }}
-            className="w-full bg-white/[0.08] border-none rounded-2xl px-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 cursor-pointer font-medium appearance-none"
+            className="w-full bg-white/[0.08] border-none rounded-xl px-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 cursor-pointer font-medium appearance-none"
           >
             <option value="">➕ Add Clinic to Filter...</option>
             {CLINIC_OPTIONS.filter(c => !filterClinics.includes(c.value)).map(c => (
@@ -632,7 +632,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
               {filterClinics.map(c => {
                 const label = CLINIC_OPTIONS.find(opt => opt.value === c)?.label || c;
                 return (
-                  <span key={c} className="bg-emerald-500/10 text-emerald-300 border-none px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                  <span key={c} className="bg-transparent border border-white/12 text-white text-emerald-300 border-none px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5">
                     {label}
                     <button onClick={() => setFilterClinics(prev => prev.filter(x => x !== c))} className="hover:text-white cursor-pointer">&times;</button>
                   </span>
@@ -661,7 +661,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
             type="date"
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
-            className="w-full bg-white/[0.08] border-none rounded-2xl px-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 cursor-pointer font-medium"
+            className="w-full bg-white/[0.08] border-none rounded-xl px-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 cursor-pointer font-medium"
           />
         </div>
 
@@ -679,7 +679,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
                 setFilterPhone(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full bg-white/[0.08] border-none rounded-2xl pl-11 pr-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 font-sans"
+              className="w-full bg-white/[0.08] border-none rounded-xl pl-11 pr-4 py-3 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500/50 outline-none h-12 font-sans"
             />
             <Search className="w-4 h-4 text-slate-400 absolute left-4 top-4" />
           </div>
@@ -690,7 +690,7 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
           <button
             type="button"
             onClick={() => setSortOldestFirst(!sortOldestFirst)}
-            className={`w-full h-12 rounded-2xl text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer border-none ${ sortOldestFirst ? "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30" : "bg-white/[0.05] text-slate-300 hover:bg-white/[0.08]" }`}
+            className={`w-full h-12 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer border-none ${ sortOldestFirst ? "bg-amber-500/10 text-amber-400 hover:bg-amber-500/10" : "bg-white/[0.05] text-slate-300 hover:bg-white/[0.08]" }`}
           >
             <ArrowUpDown className="w-4 h-4 shrink-0" />
             {sortOldestFirst ? "⚠️ Oldest First" : "🗓️ Latest First"}

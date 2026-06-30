@@ -18,7 +18,7 @@ const LinkItem = ({ link }: { link: string }) => {
   const normalized = normalizeUrl(link) || link;
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm bg-white/[0.02] p-4 rounded-xl border border-white/10">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm bg-white/[0.02] p-4 rounded-xl border border-white/8">
       <div className="flex-1 break-all flex items-start gap-2.5 font-sans text-slate-200 leading-relaxed">
         <LinkIcon className="w-5 h-5 shrink-0 mt-0.5 text-indigo-400" />
         <span className="whitespace-pre-wrap text-sm">{normalized}</span>
@@ -44,7 +44,7 @@ const LinkItem = ({ link }: { link: string }) => {
           href={normalized} 
           target="_blank" 
           rel="noreferrer"
-          className="flex items-center gap-1.5 px-3 py-2 text-indigo-300 hover:text-indigo-200 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-xl transition-colors font-semibold text-sm"
+          className="flex items-center gap-1.5 px-3 py-2 text-indigo-300 hover:text-indigo-200 bg-transparent border border-white/12 text-white hover:bg-white/5 rounded-xl transition-colors font-semibold text-sm"
           title="Open Link"
         >
           <ExternalLink className="w-4 h-4" />
@@ -196,7 +196,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
   };
 
   return (
-    <div className="space-y-4 mt-3 border-t border-white/5 pt-3">
+    <div className="space-y-4 mt-3 border-t border-white/8 pt-3">
       {/* Display Photos & Attachments */}
       {hasAttachments && (
         <div className="space-y-2">
@@ -204,7 +204,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
             <span className="text-xs text-slate-300 font-mono font-bold block">Attached Files ({normalizedAttachments.length}):</span>
             <button 
               onClick={downloadAll} 
-              className="text-xs text-indigo-400 hover:text-indigo-300 font-bold uppercase tracking-wider flex items-center gap-1 bg-indigo-500/10 hover:bg-indigo-500/20 px-2 py-1 rounded transition-colors"
+              className="text-xs text-indigo-400 hover:text-indigo-300 font-bold uppercase tracking-wider flex items-center gap-1 bg-transparent border border-white/12 text-white hover:bg-white/5 px-2 py-1 rounded transition-colors"
             >
               <Download className="w-3 h-3" /> Download All
             </button>
@@ -215,7 +215,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
               const isImage = att.type?.startsWith('image/') || att.url.startsWith('data:image/') || (!att.type?.includes('pdf') && att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i));
               
               return (
-              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[380px] bg-white/[0.04] border border-white/10 hover:border-indigo-500/50 transition-all rounded-xl overflow-hidden flex flex-col">
+              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[380px] bg-white/[0.04] border border-white/8 hover:border-transparent transition-all rounded-xl overflow-hidden flex flex-col">
                 {isImage ? (
                   <>
                     {/* Image Preview Window */}
@@ -247,7 +247,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
                       />
                     </div>
                     {/* Information Bar + Touch Friendly Persistent Controls (Never Hidden!) */}
-                    <div className="p-3 bg-slate-950/70 border-t border-white/5 flex flex-col gap-2.5">
+                    <div className="p-3 bg-slate-950/70 border-t border-white/8 flex flex-col gap-2.5">
                       <div className="flex items-center gap-2">
                         <ImageIcon className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
                         <span className="text-xs text-slate-300 font-medium truncate flex-1 font-sans" title={fileTitle}>
@@ -259,21 +259,21 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
                           href={att.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold text-slate-200 transition-colors border border-white/10"
+                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold text-slate-200 transition-colors border border-white/8"
                         >
                           <ExternalLink className="w-3.5 h-3.5 shrink-0" /> Open
                         </a>
                         <button
                           type="button"
                           onClick={() => handleCopyImage(att.url)}
-                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold text-slate-200 transition-colors border border-white/10"
+                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold text-slate-200 transition-colors border border-white/8"
                         >
                           <Copy className="w-3.5 h-3.5 shrink-0" /> Copy
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDownloadFile(att.url, fileTitle)}
-                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-indigo-500 hover:bg-indigo-400 text-slate-950 rounded-xl text-xs font-bold transition-colors"
+                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 text-slate-950 rounded-xl text-xs font-bold transition-colors"
                         >
                           <Download className="w-3.5 h-3.5 shrink-0" /> Download
                         </button>
@@ -291,14 +291,14 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
                           href={att.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-xl font-bold text-xs text-white flex items-center gap-1.5 border border-white/10 transition-colors inline-flex"
+                          className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-xl font-bold text-xs text-white flex items-center gap-1.5 border border-white/8 transition-colors inline-flex"
                         >
                           <ExternalLink className="w-3.5 h-3.5" /> Open
                         </a>
                         <button
                           type="button"
                           onClick={() => handleDownloadFile(att.url, fileTitle)}
-                          className="px-3 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 rounded-xl font-bold text-xs flex items-center gap-1.5 border border-indigo-500/30 transition-colors"
+                          className="px-3 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 text-indigo-300 rounded-xl font-bold text-xs flex items-center gap-1.5 border border-transparent transition-colors"
                         >
                           <Download className="w-3.5 h-3.5" /> Download
                         </button>
@@ -337,7 +337,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
               const isImage = att.type?.startsWith('image/') || att.url.startsWith('data:image/') || (!att.type?.includes('pdf') && att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i));
               
               return (
-              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[380px] bg-white/[0.04] border border-amber-500/20 hover:border-amber-400/50 transition-all rounded-xl overflow-hidden flex flex-col">
+              <div key={att.id} className="relative group/photo shrink-0 w-full max-w-[380px] bg-white/[0.04] border border-transparent hover:border-transparent transition-all rounded-xl overflow-hidden flex flex-col">
                 {showSideBadges && (
                   <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-amber-500 text-slate-950 font-bold text-xs rounded uppercase z-10 select-none">
                     TL
@@ -385,14 +385,14 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
                         <button
                           type="button"
                           onClick={() => handleOpenUrl(att.url)}
-                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold text-slate-200 transition-colors border border-white/10"
+                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold text-slate-200 transition-colors border border-white/8"
                         >
                           <ExternalLink className="w-3.5 h-3.5 shrink-0" /> Open
                         </button>
                         <button
                           type="button"
                           onClick={() => handleCopyImage(att.url)}
-                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold text-slate-200 transition-colors border border-white/10"
+                          className="flex items-center justify-center gap-1 px-1.5 py-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-bold text-slate-200 transition-colors border border-white/8"
                         >
                           <Copy className="w-3.5 h-3.5 shrink-0" /> Copy
                         </button>
@@ -416,14 +416,14 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
                        <button
                          type="button"
                          onClick={() => handleOpenUrl(att.url)}
-                         className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-xl font-bold text-xs text-white flex items-center gap-1.5 border border-white/10 transition-colors"
+                         className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-xl font-bold text-xs text-white flex items-center gap-1.5 border border-white/8 transition-colors"
                        >
                          <ExternalLink className="w-3.5 h-3.5" /> Open
                        </button>
                        <button
                          type="button"
                          onClick={() => handleDownloadFile(att.url, fileTitle)}
-                         className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-xl font-bold text-xs flex items-center gap-1.5 border border-amber-500/30 transition-colors"
+                         className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/10 text-amber-300 rounded-xl font-bold text-xs flex items-center gap-1.5 border border-transparent transition-colors"
                        >
                          <Download className="w-3.5 h-3.5" /> Download
                        </button>

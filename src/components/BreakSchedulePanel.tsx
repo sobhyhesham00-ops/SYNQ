@@ -295,8 +295,8 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
   return (
     <div className="space-y-5">
       {/* ── Section header ───────────────────────────────────────── */}
-      <div className="flex items-center gap-3 pb-1 border-b border-white/5">
-        <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+      <div className="flex items-center gap-3 pb-1 border-b border-white/8">
+        <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-transparent flex items-center justify-center">
           <Coffee className="w-4 h-4 text-amber-400" />
         </div>
         <div>
@@ -314,7 +314,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
         <div className="space-y-4">
           {/* Today's break card */}
           {todayBreak ? (
-            <div className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-5 space-y-4">
+            <div className="bg-amber-500/5 border border-transparent rounded-xl p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
@@ -351,7 +351,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
 
               {/* Visual timeline for today */}
               {(todayBreak.breakTime || todayBreak.lunchTime) && (
-                <div className="pt-2 border-t border-white/5">
+                <div className="pt-2 border-t border-white/8">
                   <p className="text-xs uppercase font-bold text-slate-500 tracking-wider mb-2">Timeline</p>
                   <div className="flex items-center gap-0">
                     {/* Shift start */}
@@ -392,7 +392,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
               )}
             </div>
           ) : (
-            <div className="bg-transparent border border-white/5 rounded-2xl p-5 text-center">
+            <div className="bg-transparent border border-white/8 rounded-xl p-5 text-center">
               <Coffee className="w-6 h-6 text-slate-600 mx-auto mb-2" />
               <p className="text-xs text-slate-500">No break schedule set for today.</p>
               <p className="text-xs text-slate-600 mt-0.5">Your TL will publish your break times here.</p>
@@ -409,7 +409,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                     <button
                       key={d}
                       onClick={() => setAgentViewDays(d)}
-                      className={`px-2 py-0.5 rounded-xl text-xs font-bold transition-all ${agentViewDays === d ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/25' : 'text-slate-500 hover:text-slate-300'}`}
+                      className={`px-2 py-0.5 rounded-xl text-xs font-bold transition-all ${agentViewDays === d ? 'bg-indigo-500/10 text-indigo-300 border border-transparent' : 'text-slate-500 hover:text-slate-300'}`}
                     >
                       {d}d
                     </button>
@@ -420,7 +420,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
               {myUpcomingBreaks
                 .filter(s => s.date !== todayStr)
                 .map(shift => (
-                  <div key={shift.id} className="flex items-center gap-3 p-3 bg-transparent border border-white/5 rounded-xl hover:border-white/10 transition-all">
+                  <div key={shift.id} className="flex items-center gap-3 p-3 bg-transparent border border-white/8 rounded-xl hover:border-white/8 transition-all">
                     <div className="text-center shrink-0 w-10">
                       <p className="text-xs text-slate-500 uppercase font-bold">
                         {new Date(shift.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' })}
@@ -455,9 +455,9 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
       {isTLOrAdmin && (
         <div className="space-y-5">
           {/* ── Upload tabs ─────────────────────────────── */}
-          <div className="bg-transparent border border-white/5 rounded-2xl overflow-hidden">
+          <div className="bg-transparent border border-white/8 rounded-xl overflow-hidden">
             {/* Tab switcher */}
-            <div className="flex border-b border-white/5">
+            <div className="flex border-b border-white/8">
               {[
                 { id: 'paste' as const, label: 'Bulk Upload (CSV / Paste)' },
                 { id: 'manual' as const, label: 'Single Entry' },
@@ -488,13 +488,13 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                     onChange={e => setCsvInput(e.target.value)}
                     placeholder={`date,agent_name,break_time,lunch_time\n2025-07-01,Sara Ahmed,10:30,13:00\n2025-07-01,Ahmed Ali,11:00,13:30`}
                     rows={6}
-                    className="w-full bg-white/[0.02] border border-white/10 rounded-xl p-3 text-xs text-slate-200 font-sans placeholder:text-slate-600 focus:outline-none focus:border-amber-500/50 resize-none"
+                    className="w-full bg-white/[0.02] border border-white/8 rounded-xl p-3 text-xs text-slate-200 font-sans placeholder:text-slate-600 focus:outline-none focus:border-transparent resize-none"
                   />
 
                   <div className="flex gap-2">
                     <button
                       onClick={handleParseCSV}
-                      className="flex-1 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="flex-1 py-2 bg-white/5 hover:bg-white/10 border border-white/8 text-slate-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Upload className="w-3.5 h-3.5" /> Parse & Preview
                     </button>
@@ -553,7 +553,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                           <button
                             onClick={handlePublishCSV}
                             disabled={isPublishing}
-                            className="w-full py-2.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/25 text-amber-300 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                            className="w-full py-2.5 bg-amber-500/10 hover:bg-amber-500/10 border border-transparent text-amber-300 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                           >
                             {isPublishing ? (
                               <><span className="animate-spin">⟳</span> Publishing...</>
@@ -578,7 +578,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                         type="date"
                         value={manualDate}
                         onChange={e => { setManualDate(e.target.value); setManualAgent(''); }}
-                        className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500/50"
+                        className="w-full bg-white/[0.02] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-transparent"
                       />
                     </div>
 
@@ -589,7 +589,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                       <select
                         value={manualAgent}
                         onChange={e => setManualAgent(e.target.value)}
-                        className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500/50"
+                        className="w-full bg-white/[0.02] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-transparent"
                       >
                         <option value="">-- Select agent --</option>
                         {agentsOnDate.map(name => (
@@ -607,7 +607,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                       <select
                         value={manualBreak}
                         onChange={e => setManualBreak(e.target.value)}
-                        className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-500/50"
+                        className="w-full bg-white/[0.02] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-transparent"
                       >
                         <option value="">Not set</option>
                         {TIME_PRESETS.map(t => (
@@ -623,7 +623,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                       <select
                         value={manualLunch}
                         onChange={e => setManualLunch(e.target.value)}
-                        className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-orange-500/50"
+                        className="w-full bg-white/[0.02] border border-white/8 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-transparent"
                       >
                         <option value="">Not set</option>
                         {TIME_PRESETS.map(t => (
@@ -636,7 +636,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                   <button
                     onClick={handleManualPublish}
                     disabled={!manualAgent || !manualDate}
-                    className="w-full py-2.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/25 text-amber-300 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="w-full py-2.5 bg-amber-500/10 hover:bg-amber-500/10 border border-transparent text-amber-300 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <Send className="w-3.5 h-3.5" /> Save & Notify Agent
                   </button>
@@ -658,7 +658,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                 const isToday = date === todayStr;
 
                 return (
-                  <div key={date} className={`border rounded-xl overflow-hidden transition-all ${isToday ? 'border-amber-500/20 bg-amber-500/5' : 'border-white/5 bg-transparent'}`}>
+                  <div key={date} className={`border rounded-xl overflow-hidden transition-all ${isToday ? 'border-transparent bg-amber-500/5' : 'border-white/8 bg-transparent'}`}>
                     <button
                       onClick={() => setExpandedDate(isExpanded ? null : date)}
                       className="w-full flex items-center justify-between px-4 py-2.5 text-left cursor-pointer hover:bg-white/5 transition-colors"
@@ -685,7 +685,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                           animate={{ height: 'auto', opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
                           transition={{ duration: 0.15 }}
-                          className="overflow-hidden border-t border-white/5"
+                          className="overflow-hidden border-t border-white/8"
                         >
                           <div className="p-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {dayShifts.map(shift => (
@@ -717,7 +717,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
           )}
 
           {uniqueDatesWithBreaks.length === 0 && (
-            <div className="text-center py-6 border border-dashed border-white/5 rounded-xl">
+            <div className="text-center py-6 border border-dashed border-white/8 rounded-xl">
               <Sparkles className="w-5 h-5 text-slate-600 mx-auto mb-1.5" />
               <p className="text-xs text-slate-500">No break schedules published yet.</p>
               <p className="text-xs text-slate-600 mt-0.5">Upload a CSV or add entries manually above.</p>

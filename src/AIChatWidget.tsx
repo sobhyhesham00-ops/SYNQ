@@ -61,10 +61,10 @@ export const AIChatWidget = () => {
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
       {isOpen && (
-        <div className="w-80 sm:w-96 h-[400px] bg-white/[0.04] border border-indigo-500/30 rounded-2xl flex flex-col overflow-hidden animate-fade-in font-sans relative">
+        <div className="w-80 sm:w-96 h-[400px] bg-white/[0.04] border border-transparent rounded-xl flex flex-col overflow-hidden animate-fade-in font-sans relative">
           <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/5 to-purple-500/5 pointer-events-none" />
           
-          <div className="bg-indigo-950/80 border-b border-indigo-500/20 p-4 flex justify-between items-center z-10">
+          <div className="bg-indigo-950/80 border-b border-transparent p-4 flex justify-between items-center z-10">
             <h3 className="font-bold text-indigo-100 flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-pink-400" />
               Synq AI Assistant
@@ -82,13 +82,13 @@ export const AIChatWidget = () => {
               </div>
             ) : (
               history.map((msg, i) => (
-                <div key={i} className={`max-w-[85%] rounded-xl p-3 text-sm ${msg.role === 'user' ? 'bg-indigo-600 text-white self-end rounded-br-none' : 'bg-slate-800 border border-slate-700 text-slate-200 self-start rounded-bl-none'}`}>
+                <div key={i} className={`max-w-[85%] rounded-xl p-3 text-sm ${msg.role === 'user' ? 'bg-indigo-600 text-white self-end rounded-br-none' : 'bg-slate-800 border border-white/8 text-slate-200 self-start rounded-bl-none'}`}>
                   {msg.text}
                 </div>
               ))
             )}
             {isTyping && (
-              <div className="max-w-[85%] rounded-xl p-3 text-sm bg-slate-800 border border-slate-700 text-slate-400 self-start rounded-bl-none flex gap-1">
+              <div className="max-w-[85%] rounded-xl p-3 text-sm bg-slate-800 border border-white/8 text-slate-400 self-start rounded-bl-none flex gap-1">
                 <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
                 <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-100" />
                 <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-200" />
@@ -96,14 +96,14 @@ export const AIChatWidget = () => {
             )}
           </div>
 
-          <form onSubmit={sendMessage} className="p-3 border-t border-white/10 bg-white/[0.03] z-10">
+          <form onSubmit={sendMessage} className="p-3 border-t border-white/8 bg-white/[0.03] z-10">
             <div className="relative">
               <input
                 type="text"
                 value={message}
                 onChange={e => setMessage(e.target.value)}
                 placeholder="Ask AI..."
-                className="w-full bg-slate-800 border border-slate-700 rounded-full py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-800 border border-white/8 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-indigo-500"
               />
               <button 
                 type="submit" 
@@ -119,7 +119,7 @@ export const AIChatWidget = () => {
 
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-14 h-14 bg-gradient-to-r from-indigo-500 to-pink-500 rounded-full shadow-sm flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all text-white border border-white/20"
+        className="w-14 h-14 bg-gradient-to-r from-indigo-500 to-pink-500 rounded-full flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all text-white border border-white/15"
       >
         {isOpen ? <X className="w-6 h-6" /> : <Sparkles className="w-6 h-6" />}
       </button>

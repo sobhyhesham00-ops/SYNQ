@@ -151,7 +151,7 @@ export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUplo
 
   return (
     <div 
-      className={`space-y-4 rounded-xl transition-all ${isDragging ? 'bg-indigo-500/10 ring-2 ring-indigo-500 p-2 border border-indigo-500/30' : ''}`}
+      className={`space-y-4 rounded-xl transition-all ${isDragging ? 'bg-indigo-500/10 ring-2 ring-indigo-500 p-2 border border-transparent' : ''}`}
       onPaste={handlePaste}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -163,7 +163,7 @@ export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUplo
         </label>
         
         <div className="flex flex-col gap-2 relative">
-            <label className={`w-full py-5 border-2 border-dashed rounded-xl transition-all flex flex-col items-center justify-center cursor-pointer ${isDragging ? 'border-indigo-400 bg-indigo-500/20' : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-indigo-500/50'} ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+            <label className={`w-full py-5 border-2 border-dashed rounded-xl transition-all flex flex-col items-center justify-center cursor-pointer ${isDragging ? 'border-indigo-400 bg-indigo-500/10' : 'border-white/8 bg-white/5 hover:bg-white/10 hover:border-transparent'} ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
             >
                 <input 
                     type="file" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" className="hidden"
@@ -193,8 +193,8 @@ export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUplo
                {attachments.map(att => {
                   const isImage = att.type.startsWith('image/');
                   return (
-                     <div key={att.id} className="relative group flex items-start gap-2 p-2 rounded-xl bg-white/[0.03] border border-white/5 hover:border-indigo-500/30 transition-colors">
-                         <div className="w-10 h-10 shrink-0 rounded overflow-hidden bg-slate-800 flex items-center justify-center border border-white/10">
+                     <div key={att.id} className="relative group flex items-start gap-2 p-2 rounded-xl bg-white/[0.03] border border-white/8 hover:border-transparent transition-colors">
+                         <div className="w-10 h-10 shrink-0 rounded overflow-hidden bg-slate-800 flex items-center justify-center border border-white/8">
                             {isImage ? (
                                <img src={att.url} alt={att.name} className="w-full h-full object-cover" />
                             ) : (
@@ -211,7 +211,7 @@ export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUplo
                          <button
                             type="button"
                             onClick={() => handleRemoveAttachment(att.id)}
-                            className="absolute top-2 right-2 p-1 bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white rounded transition-colors"
+                            className="absolute top-2 right-2 p-1 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded transition-colors"
                          >
                             <X className="w-3 h-3" />
                          </button>
@@ -233,10 +233,10 @@ export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUplo
               type="text" placeholder="https://" value={tempLinkInput}
               onChange={(e) => setTempLinkInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddLink())}
-              className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/10 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
+              className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/8 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all font-sans"
             />
           </div>
-          <button type="button" onClick={handleAddLink} className="px-3 py-2 bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30 font-bold border border-indigo-500/20 rounded-xl uppercase tracking-wider text-xs transition-colors h-[34px]">
+          <button type="button" onClick={handleAddLink} className="px-3 py-2 bg-transparent border border-white/12 text-white text-indigo-300 hover:bg-white/5 font-bold border border-transparent rounded-xl uppercase tracking-wider text-xs transition-colors h-[34px]">
             Add
           </button>
         </div>
@@ -244,9 +244,9 @@ export const ProfessionalAttachmentUploader: React.FC<ProfessionalAttachmentUplo
         {links.length > 0 && (
           <div className="space-y-1.5 pt-1">
             {links.map((linkStr, index) => (
-              <div key={index} className="flex justify-between items-center p-2 bg-white/5 border border-white/10 rounded-xl text-xs">
+              <div key={index} className="flex justify-between items-center p-2 bg-white/5 border border-white/8 rounded-xl text-xs">
                 <span className="text-indigo-300 underline font-sans truncate mr-2" title={linkStr}>{linkStr}</span>
-                <button type="button" onClick={() => onLinksChange(links.filter((_, i) => i !== index))} className="text-red-400 hover:text-red-300 text-xs font-bold uppercase px-2 py-1 bg-red-400/10 rounded border border-red-400/20 relative z-10 cursor-pointer">
+                <button type="button" onClick={() => onLinksChange(links.filter((_, i) => i !== index))} className="text-red-400 hover:text-red-300 text-xs font-bold uppercase px-2 py-1 bg-red-400/10 rounded border border-transparent relative z-10 cursor-pointer">
                   Remove
                 </button>
               </div>

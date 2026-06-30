@@ -123,7 +123,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in w-full">
-      <div className="flex items-center justify-between bg-white/5 border border-white/10 p-5 rounded-2xl shrink-0">
+      <div className="flex items-center justify-between bg-white/5 border border-white/8 p-5 rounded-xl shrink-0">
         <div>
           <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
             <CheckCircle className="w-5 h-5 text-green-400" />
@@ -135,7 +135,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
           <div className="flex gap-2">
             <button 
               onClick={() => setIsEditingQuestions(true)}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl flex items-center gap-2 transition border border-white/10"
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl flex items-center gap-2 transition border border-white/8"
             >
               <PlusCircle className="w-4 h-4" />
               Manage Criteria
@@ -160,17 +160,17 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
       </div>
 
       {isEditingQuestions ? (
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 w-full max-w-4xl mx-auto space-y-6">
-          <h3 className="text-lg font-bold text-slate-100 pb-4 border-b border-white/10">Manage QA Criteria</h3>
+        <div className="bg-white/5 border border-white/8 rounded-xl p-6 w-full max-w-4xl mx-auto space-y-6">
+          <h3 className="text-lg font-bold text-slate-100 pb-4 border-b border-white/8">Manage QA Criteria</h3>
           <p className="text-sm text-slate-400">Configure the questions and maximum scores that will be used for all new scorecards.</p>
           <div className="space-y-4">
             {localQuestions.map((q, idx) => (
-              <div key={q.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-transparent p-4 rounded-xl border border-white/5">
+              <div key={q.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-transparent p-4 rounded-xl border border-white/8">
                 <input
                   type="text"
                   value={q.text}
                   onChange={(e) => handleUpdateQuestion(idx, 'text', e.target.value)}
-                  className="flex-1 bg-white/[0.04] border border-slate-700 rounded-xl px-3 py-2 text-slate-200 outline-none focus:border-green-500"
+                  className="flex-1 bg-white/[0.04] border border-white/8 rounded-xl px-3 py-2 text-slate-200 outline-none focus:border-green-500"
                   placeholder="e.g. Greeting & Opening"
                 />
                 <div className="flex items-center gap-2">
@@ -180,7 +180,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                     min={1}
                     value={q.maxScore}
                     onChange={(e) => handleUpdateQuestion(idx, 'maxScore', e.target.value)}
-                    className="w-20 text-center bg-white/[0.04] border border-slate-700 rounded-xl px-2 py-2 text-green-400 font-bold outline-none focus:border-green-500"
+                    className="w-20 text-center bg-white/[0.04] border border-white/8 rounded-xl px-2 py-2 text-green-400 font-bold outline-none focus:border-green-500"
                   />
                   <button onClick={() => handleRemoveQuestion(idx)} className="ml-2 text-red-500 hover:text-red-400 p-2">
                     <XCircle className="w-5 h-5" />
@@ -189,17 +189,17 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
               </div>
             ))}
           </div>
-          <button onClick={handleAddQuestion} className="w-full py-3 border border-dashed border-white/20 hover:border-white/40 text-slate-400 hover:text-slate-200 rounded-xl transition flex items-center justify-center gap-2 font-bold text-sm">
+          <button onClick={handleAddQuestion} className="w-full py-3 border border-dashed border-white/15 hover:border-white/15 text-slate-400 hover:text-slate-200 rounded-xl transition flex items-center justify-center gap-2 font-bold text-sm">
             <PlusCircle className="w-4 h-4" /> Add New Criterion
           </button>
-          <div className="flex justify-end pt-6 border-t border-white/10 gap-2">
+          <div className="flex justify-end pt-6 border-t border-white/8 gap-2">
             <button onClick={() => setIsEditingQuestions(false)} className="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition">Cancel</button>
             <button onClick={handleSaveQuestions} className="px-6 py-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition">Save Criteria</button>
           </div>
         </div>
       ) : view === 'list' ? (
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col min-h-0">
-          <h3 className="text-lg font-bold text-slate-100 mb-4 pb-4 border-b border-white/10">Recent Evaluations</h3>
+        <div className="bg-white/5 border border-white/8 rounded-xl p-6 flex flex-col min-h-0">
+          <h3 className="text-lg font-bold text-slate-100 mb-4 pb-4 border-b border-white/8">Recent Evaluations</h3>
           {myScores.length === 0 ? (
             <div className="text-slate-400 text-center py-8">No QA scorecards found.</div>
           ) : (
@@ -212,7 +212,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                 const isExpanded = expandedScoreId === score.id;
 
                 return (
-                  <div key={score.id} className="bg-transparent border border-white/10 rounded-2xl flex flex-col transition-all hover:border-white/20 overflow-hidden">
+                  <div key={score.id} className="bg-transparent border border-white/8 rounded-xl flex flex-col transition-all hover:border-white/15 overflow-hidden">
                     <div 
                       className="p-4 flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between cursor-pointer"
                       onClick={() => setExpandedScoreId(isExpanded ? null : score.id)}
@@ -234,7 +234,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                       </div>
                       
                       <div className="flex items-center gap-4">
-                        <div className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-2 flex flex-col items-center min-w-[100px]">
+                        <div className="bg-white/[0.04] border border-white/8 rounded-xl px-4 py-2 flex flex-col items-center min-w-[100px]">
                           <div className={`text-xl font-bold ${pctColor}`}>{!isNaN(Number(score.totalScore)) ? Number(score.totalScore) : 0}<span className="text-xs text-slate-500">/{!isNaN(Number(score.maxTotalScore)) ? Number(score.maxTotalScore) : 0}</span></div>
                         </div>
                         <Search className={`w-5 h-5 text-slate-500 transition-transform ${isExpanded ? 'rotate-90 text-slate-300' : ''}`} />
@@ -242,11 +242,11 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                     </div>
                     
                     {isExpanded && (
-                      <div className="p-4 border-t border-white/5 bg-transparent">
+                      <div className="p-4 border-t border-white/8 bg-transparent">
                         <h4 className="text-sm font-bold text-slate-200 mb-3">Detailed Scorecard</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                           {(score.questionsSnapshot || qaTemplate).map(q => (
-                            <div key={q.id} className="flex justify-between items-center p-3 rounded-xl bg-white/[0.04] border border-slate-800">
+                            <div key={q.id} className="flex justify-between items-center p-3 rounded-xl bg-white/[0.04] border border-white/8">
                               <span className="text-xs font-semibold text-slate-300 flex-1 pr-2">{q.text}</span>
                               <div className="font-sans bg-white/[0.03] px-2 py-1 rounded text-sm whitespace-nowrap">
                                 <span className={score.scores[q.id] < q.maxScore ? 'text-amber-400' : 'text-green-400'}>
@@ -261,7 +261,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                         {score.notes && (
                           <div className="mb-2">
                             <h4 className="text-xs uppercase font-bold tracking-widest text-slate-500 mb-2">Coaching & Feedback</h4>
-                            <div className="text-sm text-slate-300 whitespace-pre-wrap bg-white/[0.04] p-4 rounded-xl border border-slate-800">
+                            <div className="text-sm text-slate-300 whitespace-pre-wrap bg-white/[0.04] p-4 rounded-xl border border-white/8">
                               {score.notes}
                             </div>
                           </div>
@@ -275,8 +275,8 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
           )}
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="bg-white/5 border border-white/10 rounded-2xl p-6 w-full max-w-4xl mx-auto space-y-6">
-          <h3 className="text-lg font-bold text-slate-100 pb-4 border-b border-white/10">Evaluate Interaction</h3>
+        <form onSubmit={handleSubmit} className="bg-white/5 border border-white/8 rounded-xl p-6 w-full max-w-4xl mx-auto space-y-6">
+          <h3 className="text-lg font-bold text-slate-100 pb-4 border-b border-white/8">Evaluate Interaction</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -285,7 +285,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                 value={targetAgent}
                 onChange={(e) => setTargetAgent(e.target.value)}
                 required
-                className="w-full bg-white/[0.04] border border-slate-700 rounded-xl px-4 py-3 text-slate-200 outline-none focus:border-green-500 transition-colors"
+                className="w-full bg-white/[0.04] border border-white/8 rounded-xl px-4 py-3 text-slate-200 outline-none focus:border-green-500 transition-colors"
               >
                 <option value="">-- Select Agent --</option>
                 {agentsList.map(a => <option key={a} value={a}>{a}</option>)}
@@ -300,7 +300,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                 onChange={(e) => setClinicName(e.target.value)}
                 required
                 placeholder="e.g. HealthCare Plus"
-                className="w-full bg-white/[0.04] border border-slate-700 rounded-xl px-4 py-3 text-slate-200 outline-none focus:border-green-500 transition-colors"
+                className="w-full bg-white/[0.04] border border-white/8 rounded-xl px-4 py-3 text-slate-200 outline-none focus:border-green-500 transition-colors"
                 autoComplete="off"
               />
             </div>
@@ -313,17 +313,17 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                 onChange={(e) => setChatOrCallId(e.target.value)}
                 required
                 placeholder="Reference ID"
-                className="w-full bg-white/[0.04] border border-slate-700 rounded-xl px-4 py-3 text-slate-200 outline-none focus:border-green-500 transition-colors"
+                className="w-full bg-white/[0.04] border border-white/8 rounded-xl px-4 py-3 text-slate-200 outline-none focus:border-green-500 transition-colors"
                 autoComplete="off"
               />
             </div>
           </div>
 
-          <div className="pt-4 mt-6 border-t border-white/10">
+          <div className="pt-4 mt-6 border-t border-white/8">
             <h4 className="text-sm font-bold tracking-wide text-slate-200 mb-4">Scorecard Criteria</h4>
             <div className="space-y-4">
               {qaTemplate.map((q) => (
-                <div key={q.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-transparent p-4 rounded-xl border border-white/5">
+                <div key={q.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-transparent p-4 rounded-xl border border-white/8">
                   <div className="flex-1">
                     <span className="font-semibold text-slate-200">{q.text}</span>
                     <p className="text-xs text-slate-500 mt-1">Max Score: {q.maxScore}</p>
@@ -337,7 +337,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
                       onChange={(e) => handleScoreChange(q.id, e.target.value)}
                       required
                       placeholder="0"
-                      className="w-20 text-center bg-white/[0.04] border border-slate-700 rounded-xl px-2 py-2 text-green-400 font-bold outline-none focus:border-green-500 transition-colors"
+                      className="w-20 text-center bg-white/[0.04] border border-white/8 rounded-xl px-2 py-2 text-green-400 font-bold outline-none focus:border-green-500 transition-colors"
                     />
                     <span className="text-slate-500 font-bold">/ {q.maxScore}</span>
                   </div>
@@ -346,17 +346,17 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
             </div>
           </div>
 
-          <div className="pt-4 border-t border-white/10">
+          <div className="pt-4 border-t border-white/8">
             <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Coaching & Additional Feedback</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Good tone of voice, but missed some account verifications..."
-              className="w-full bg-white/[0.04] border border-slate-700 rounded-xl px-4 py-3 text-slate-200 outline-none focus:border-green-500 transition-colors min-h-[100px] resize-y"
+              className="w-full bg-white/[0.04] border border-white/8 rounded-xl px-4 py-3 text-slate-200 outline-none focus:border-green-500 transition-colors min-h-[100px] resize-y"
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-white/10">
+          <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-white/8">
             <div className="mb-4 sm:mb-0">
               <span className="text-sm text-slate-400">Calculated Final Score: </span>
               <span className="text-xl font-bold text-green-400 ml-2">
@@ -366,7 +366,7 @@ export const QAScorecards: React.FC<QAScorecardProps> = ({ currentUser, qaScores
             
             <button
               type="submit"
-              className="w-full sm:w-auto px-8 py-3 bg-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-sm text-white rounded-xl font-bold tracking-wide transition-all"
+              className="w-full sm:w-auto px-8 py-3 bg-transparent border border-white/12 text-white hover:from-green-600 hover:to-emerald-700 text-white rounded-xl font-bold tracking-wide transition-all"
             >
               Submit Evaluation
             </button>

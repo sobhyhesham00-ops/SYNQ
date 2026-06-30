@@ -71,11 +71,11 @@ export const NotificationDrawer = ({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-slate-950 border-l border-white/10 z-[1000] flex flex-col"
+            className="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-slate-950 border-l border-white/8 z-[1000] flex flex-col"
           >
-            <div className="flex items-center justify-between p-6 border-b border-white/10 bg-slate-900">
+            <div className="flex items-center justify-between p-6 border-b border-white/8 bg-slate-900">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-transparent">
                   <Bell className="w-5 h-5 text-indigo-400" />
                 </div>
                 <div>
@@ -91,7 +91,7 @@ export const NotificationDrawer = ({
               </button>
             </div>
 
-            <div className="p-4 border-b border-white/5 bg-slate-950 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+            <div className="p-4 border-b border-white/8 bg-slate-950 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
               {[
                 { value: 'all', label: 'All' },
                 { value: 'incident', label: 'Incidents' },
@@ -105,7 +105,7 @@ export const NotificationDrawer = ({
                 <button
                   key={item.value}
                   onClick={() => setTypeFilter(item.value)}
-                  className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border transition-all shrink-0 cursor-pointer ${ typeFilter === item.value ? 'bg-indigo-950 text-indigo-300 border-indigo-500/30' : 'bg-white/5 text-slate-400 border-transparent hover:bg-white/10 hover:text-slate-200' }`}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border transition-all shrink-0 cursor-pointer ${ typeFilter === item.value ? 'bg-indigo-950 text-indigo-300 border-transparent' : 'bg-white/5 text-slate-400 border-transparent hover:bg-white/10 hover:text-slate-200' }`}
                 >
                   {item.label}
                 </button>
@@ -165,13 +165,13 @@ export const NotificationDrawer = ({
                       };
 
                       const getBgClass = () => {
-                        if (!isUnread) return 'bg-white/5 border-white/5 opacity-60';
-                        if (notif.type === 'incident' || notif.type === 'compliance') return 'bg-rose-500/10 border-rose-500/20';
-                        if (notif.type === 'schedule') return 'bg-blue-500/10 border-blue-500/20';
-                        if (notif.type === 'inquiry') return 'bg-amber-500/10 border-amber-500/20';
-                        if (notif.type === 'absence') return 'bg-orange-500/10 border-orange-500/20';
+                        if (!isUnread) return 'bg-white/5 border-white/8 opacity-60';
+                        if (notif.type === 'incident' || notif.type === 'compliance') return 'bg-rose-500/10 border-transparent';
+                        if (notif.type === 'schedule') return 'bg-blue-500/10 border-transparent';
+                        if (notif.type === 'inquiry') return 'bg-amber-500/10 border-transparent';
+                        if (notif.type === 'absence') return 'bg-orange-500/10 border-transparent';
                         if (notif.type === 'reminder') return 'bg-yellow-500/10 border-yellow-500/20';
-                        return 'bg-emerald-500/10 border-emerald-500/20';
+                        return 'bg-emerald-500/10 border-transparent';
                       };
 
                       return (
@@ -216,7 +216,7 @@ export const NotificationDrawer = ({
                               }
                             }
                           }}
-                          className={`relative p-4 rounded-2xl border transition-all cursor-pointer hover:border-white/10 select-none ${getBgClass()}`}
+                          className={`relative p-4 rounded-xl border transition-all cursor-pointer hover:border-white/8 select-none ${getBgClass()}`}
                         >
                           <div className="flex justify-between items-start mb-2 gap-3">
                             <div className="flex items-center gap-2">

@@ -73,9 +73,9 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
     filters.date;
 
   return (
-    <div id="case-search-filter-command-bar" className="bg-white/[0.05] border border-white/5 p-4 rounded-2xl space-y-4 sticky top-0 z-40 shadow-sm">
+    <div id="case-search-filter-command-bar" className="bg-white/[0.05] border border-white/8 p-4 rounded-xl space-y-4 sticky top-0 z-40">
       {/* 1. View Segment Filters & Count */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/5 pb-3">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/8 pb-3">
         <div className="flex flex-wrap gap-2.5">
           {[
             { id: "my_cases", label: "My Cases", icon: <User className="w-3.5 h-3.5" /> },
@@ -88,7 +88,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
               <button
                 key={v.id}
                 onClick={() => onQuickViewChange(v.id as CRMQuickView)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${ isActive ? "bg-indigo-600 text-white shadow-sm-sm ring-1 ring-indigo-500/20" : "bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white" }`}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${ isActive ? "bg-indigo-600 text-white ring-1 ring-indigo-500/20" : "bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white" }`}
               >
                 {v.icon}
                 {v.label}
@@ -99,7 +99,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
 
         <div className="flex items-center gap-1.5 text-xs text-slate-400 font-sans">
           <span>Results:</span>
-          <span className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/15 text-indigo-300 font-bold rounded-xl font-sans">
+          <span className="px-2 py-0.5 bg-transparent border border-white/12 text-white border border-indigo-500/15 text-indigo-300 font-bold rounded-xl font-sans">
             {totalResults} matches
           </span>
         </div>
@@ -114,7 +114,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
             placeholder="Search by reference, patient name, phone, assignee, comment text..."
             value={filters.searchQuery}
             onChange={handleSearchChange}
-            className="w-full bg-white/[0.03] border border-white/10 pl-10 pr-4 py-2 rounded-xl text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-sans font-medium"
+            className="w-full bg-white/[0.03] border border-white/8 pl-10 pr-4 py-2 rounded-xl text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-sans font-medium"
           />
         </div>
 
@@ -122,7 +122,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
           {/* Advanced filters toggler */}
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className={`px-3.5 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${ showAdvanced || hasActiveFilters ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-400 font-bold" : "bg-white/5 border-white/5 text-slate-300 hover:bg-white/10" }`}
+            className={`px-3.5 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${ showAdvanced || hasActiveFilters ? "bg-indigo-500/10 border-transparent text-indigo-400 font-bold" : "bg-white/5 border-white/8 text-slate-300 hover:bg-white/10" }`}
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Filters</span>
@@ -135,7 +135,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
           {hasActiveFilters && (
             <button
               onClick={onClearFilters}
-              className="px-3.5 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/20 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer"
+              className="px-3.5 py-2 bg-rose-500/10 hover:bg-rose-500/10 text-rose-400 hover:text-rose-300 border border-transparent rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer"
               title="Clear all search parameters and filters"
             >
               <X className="w-3.5 h-3.5" />
@@ -147,14 +147,14 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
 
       {/* 3. Dropdown-based Collapsible Filter Sub-panel */}
       {(showAdvanced || hasActiveFilters) && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-white/5 bg-transparent p-4 rounded-xl">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-white/8 bg-transparent p-4 rounded-xl">
           {/* Filter 1: Case Type */}
           <div>
             <label className="block text-xs uppercase tracking-wider text-slate-500 font-bold mb-1.5">Case Type</label>
             <select
               value={filters.type}
               onChange={(e) => handleFilterSelect('type', e.target.value)}
-              className="w-full bg-[#1b1b22] border border-white/5 rounded-xl px-3 py-1.5 text-xs text-slate-100 font-sans cursor-pointer focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[#1b1b22] border border-white/8 rounded-xl px-3 py-1.5 text-xs text-slate-100 font-sans cursor-pointer focus:outline-none focus:border-indigo-500"
             >
               <option value="all">All Types</option>
               <option value="inquiry">Inquiries</option>
@@ -169,7 +169,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
             <select
               value={filters.clinic}
               onChange={(e) => handleFilterSelect('clinic', e.target.value)}
-              className="w-full bg-[#1b1b22] border border-white/5 rounded-xl px-3 py-1.5 text-xs text-slate-100 font-sans cursor-pointer focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[#1b1b22] border border-white/8 rounded-xl px-3 py-1.5 text-xs text-slate-100 font-sans cursor-pointer focus:outline-none focus:border-indigo-500"
             >
               <option value="">All Clinics</option>
               {uniqueClinics.map((c) => (
@@ -186,7 +186,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
             <select
               value={filters.submitter}
               onChange={(e) => handleFilterSelect('submitter', e.target.value)}
-              className="w-full bg-[#1b1b22] border border-white/5 rounded-xl px-3 py-1.5 text-xs text-slate-100 font-sans cursor-pointer focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[#1b1b22] border border-white/8 rounded-xl px-3 py-1.5 text-xs text-slate-100 font-sans cursor-pointer focus:outline-none focus:border-indigo-500"
             >
               <option value="">All Submitters</option>
               {uniqueSubmitters.map((s) => (
@@ -203,7 +203,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
             <select
               value={filters.assignee}
               onChange={(e) => handleFilterSelect('assignee', e.target.value)}
-              className="w-full bg-[#1b1b22] border border-white/5 rounded-xl px-3 py-1.5 text-xs text-slate-100 font-sans cursor-pointer focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[#1b1b22] border border-white/8 rounded-xl px-3 py-1.5 text-xs text-slate-100 font-sans cursor-pointer focus:outline-none focus:border-indigo-500"
             >
               <option value="">All Assignees</option>
               {uniqueAssignees.map((a) => (
@@ -237,7 +237,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
             <select
               value={filters.status}
               onChange={(e) => handleFilterSelect('status', e.target.value)}
-              className="w-full bg-[#1b1b22] border border-white/5 rounded-xl px-3 py-1.5 text-xs text-slate-100 font-sans cursor-pointer focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[#1b1b22] border border-white/8 rounded-xl px-3 py-1.5 text-xs text-slate-100 font-sans cursor-pointer focus:outline-none focus:border-indigo-500"
             >
               <option value="">Any Status</option>
               <option value="submitted">Submitted</option>
@@ -257,7 +257,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
                 type="date"
                 value={filters.date}
                 onChange={(e) => handleFilterSelect('date', e.target.value)}
-                className="w-full bg-[#1b1b22] border border-white/5 rounded-xl px-3 py-1.5 text-xs text-slate-100 font-sans cursor-pointer focus:outline-none focus:border-indigo-500 [color-scheme:dark]"
+                className="w-full bg-[#1b1b22] border border-white/8 rounded-xl px-3 py-1.5 text-xs text-slate-100 font-sans cursor-pointer focus:outline-none focus:border-indigo-500 [color-scheme:dark]"
               />
             </div>
           </div>
@@ -268,7 +268,7 @@ export const CaseCommandBar: React.FC<CaseCommandBarProps> = ({
             <select
               value={filters.sourceChannel}
               onChange={(e) => handleFilterSelect('sourceChannel', e.target.value)}
-              className="w-full bg-[#1b1b22] border border-white/5 rounded-xl px-3 py-1.5 text-xs text-slate-100 font-sans cursor-pointer focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[#1b1b22] border border-white/8 rounded-xl px-3 py-1.5 text-xs text-slate-100 font-sans cursor-pointer focus:outline-none focus:border-indigo-500"
             >
               <option value="">Any Channel</option>
               <option value="whatsapp">WhatsApp</option>

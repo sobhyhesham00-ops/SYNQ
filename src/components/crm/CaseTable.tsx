@@ -97,7 +97,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
 
     return (
       <span 
-        className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide inline-block max-w-full truncate ${style}`}
+        className={`px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide inline-block max-w-full truncate ${style}`}
         title={label}
       >
         {label}
@@ -108,19 +108,19 @@ export const CaseTable: React.FC<CaseTableProps> = ({
   const getTypeBadge = (item: CRMCase) => {
     if (item.crmType === "inquiry") {
       return (
-        <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+        <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-transparent border border-white/12 text-white text-indigo-400 border border-transparent">
           Inquiry
         </span>
       );
     } else if (item.crmType === "complaint") {
       return (
-        <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">
+        <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-rose-500/10 text-rose-400 border border-transparent">
           Complaint
         </span>
       );
     } else if (item.crmType === "client_comm") {
       return (
-        <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+        <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-transparent border border-white/12 text-white text-emerald-400 border border-transparent">
           Client Comm
         </span>
       );
@@ -128,25 +128,25 @@ export const CaseTable: React.FC<CaseTableProps> = ({
       const platform = item.raw.platform;
       if (platform === "tamara") {
         return (
-          <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+          <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-amber-500/10 text-amber-400 border border-transparent">
             Tamara
           </span>
         );
       } else if (platform === "tabby") {
         return (
-          <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-teal-500/10 text-teal-400 border border-teal-500/20">
+          <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-teal-500/10 text-teal-400 border border-transparent">
             Tabby
           </span>
         );
       } else if (platform === "one_time_payment") {
         return (
-          <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+          <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-transparent border border-white/12 text-white text-blue-400 border border-transparent">
             One Time
           </span>
         );
       }
       return (
-        <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-slate-500/10 text-slate-400 border border-slate-500/20">
+        <span className="px-2 py-0.5 rounded-xl text-xs font-bold bg-slate-500/10 text-slate-400 border border-transparent">
           Payment
         </span>
       );
@@ -154,11 +154,11 @@ export const CaseTable: React.FC<CaseTableProps> = ({
   };
 
   return (
-    <div id="crm-table-container" className="w-full h-full flex flex-col min-h-0 bg-transparent rounded-2xl border border-white/5 overflow-hidden">
+    <div id="crm-table-container" className="w-full h-full flex flex-col min-h-0 bg-transparent rounded-xl border border-white/8 overflow-hidden">
       {/* Table grid for larger screens */}
       <div className="hidden lg:block overflow-x-auto min-h-0 custom-scrollbar">
         <table className="w-full min-w-[900px] text-left text-xs text-slate-300 whitespace-nowrap table-fixed">
-          <thead className="bg-transparent text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-white/5 sticky top-0 z-15">
+          <thead className="bg-transparent text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-white/8 sticky top-0 z-15">
             <tr>
               <th className="p-2 w-6"></th>
               <th className="p-2 w-32">
@@ -246,7 +246,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                             onSelectCase(item);
                             if (onCopyCase) onCopyCase(item);
                           }}
-                          className="px-2 py-1 bg-white/5 hover:bg-white/10 text-slate-300 rounded border border-white/10 flex items-center justify-center mx-auto"
+                          className="px-2 py-1 bg-white/5 hover:bg-white/10 text-slate-300 rounded border border-white/8 flex items-center justify-center mx-auto"
                           title="Copy Case"
                         >
                           <Copy className="w-3.5 h-3.5" />
@@ -255,8 +255,8 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                     </tr>
                     {isSelected && item.crmType === "inquiry" && (
                       <tr key={`${item.id}-details`} className="bg-[#050508]/65">
-                        <td colSpan={9} className="p-5 border-t border-b border-indigo-500/25">
-                          <div className="max-w-4xl mx-auto rounded-2xl overflow-hidden border border-white/5 bg-[#09090c] text-left">
+                        <td colSpan={9} className="p-5 border-t border-b border-transparent">
+                          <div className="max-w-4xl mx-auto rounded-xl overflow-hidden border border-white/8 bg-[#09090c] text-left">
                             <CaseDetailDrawer
                               caseData={item}
                               onClose={() => onSelectCase(item)}
@@ -346,7 +346,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                             onSelectCase(item);
                             if (onCopyCase) onCopyCase(item);
                           }}
-                          className="px-2 py-1 bg-white/5 hover:bg-white/10 text-slate-300 rounded border border-white/10 flex items-center justify-center"
+                          className="px-2 py-1 bg-white/5 hover:bg-white/10 text-slate-300 rounded border border-white/8 flex items-center justify-center"
                           title="Copy Case"
                         >
                           <Copy className="w-3.5 h-3.5" />
@@ -355,7 +355,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                   </div>
                 </div>
                 {isSelected && item.crmType === "inquiry" && (
-                  <div className="p-4 bg-[#050508]/80 border-t border-b border-indigo-500/20 text-left">
+                  <div className="p-4 bg-[#050508]/80 border-t border-b border-transparent text-left">
                     <CaseDetailDrawer
                       caseData={item}
                       onClose={() => onSelectCase(item)}
