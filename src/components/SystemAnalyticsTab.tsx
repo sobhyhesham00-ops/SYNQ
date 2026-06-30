@@ -78,7 +78,7 @@ export const SystemAnalyticsTab: React.FC<SystemAnalyticsTabProps> = ({
         {/* Attendance Interactive Chart */}
         <div className="bg-white/5 border border-white/8 p-5 rounded-xl flex flex-col h-80">
           <h3 className="text-xs font-bold text-slate-100 mb-4 flex items-center gap-2">
-            <Activity className="w-4 h-4 text-emerald-400" />
+            <Activity className="w-3.5 h-3.5 text-emerald-400" />
             Live Attendance
           </h3>
           <ResponsiveContainer width="100%" height={230}>
@@ -109,7 +109,7 @@ export const SystemAnalyticsTab: React.FC<SystemAnalyticsTabProps> = ({
         {/* Requests & Swaps Interactive Chart */}
         <div className="bg-white/5 border border-white/8 p-5 rounded-xl flex flex-col h-80">
           <h3 className="text-xs font-bold text-slate-100 mb-4 flex items-center gap-2">
-            <PieChart className="w-4 h-4 text-indigo-400" />
+            <PieChart className="w-3.5 h-3.5 text-indigo-400" />
             Roster Requests
           </h3>
           <ResponsiveContainer width="100%" height={230}>
@@ -140,7 +140,7 @@ export const SystemAnalyticsTab: React.FC<SystemAnalyticsTabProps> = ({
         {/* General Inquiries Chart */}
         <div className="bg-white/5 border border-white/8 p-5 rounded-xl flex flex-col h-80">
           <h3 className="text-xs font-bold text-slate-100 mb-4 flex items-center gap-2">
-            <FileText className="w-4 h-4 text-blue-400" />
+            <FileText className="w-3.5 h-3.5 text-blue-400" />
             General Inquiries Status
           </h3>
           <ResponsiveContainer width="100%" height={230}>
@@ -191,7 +191,7 @@ export const SystemAnalyticsTab: React.FC<SystemAnalyticsTabProps> = ({
       {/* Aggregate Daily Creation Trend */}
       <div className="bg-white/5 border border-white/8 p-5 rounded-xl h-96">
         <h3 className="text-xs font-bold text-slate-100 mb-6 flex items-center gap-2">
-          <TrendingUp className="w-4 h-4 text-indigo-400" />
+          <TrendingUp className="w-3.5 h-3.5 text-indigo-400" />
           General Inquiries, Tabby/Tamara, And Complaints Creation Volume (Daily Trends)
         </h3>
         <ResponsiveContainer width="100%" height={320}>

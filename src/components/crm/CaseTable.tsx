@@ -235,7 +235,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                           className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-xl text-[11px] border ${sla.color}`}
                           title={`Created: ${new Date(item.createdAt).toLocaleString()}`}
                         >
-                          <Clock className="w-2.5 h-2.5 shrink-0" />
+                          <Clock className="w-3 h-3 shrink-0" />
                           {sla.label}
                         </span>
                       </td>
@@ -327,7 +327,7 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                   <div className="flex flex-wrap items-center gap-2 pt-1">
                     {getStatusBadge(item.crmType, item.status)}
                     <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-xl text-[11px] border ${sla.color}`}>
-                      <Clock className="w-2.5 h-2.5" />
+                      <Clock className="w-3 h-3" />
                       {sla.label}
                     </span>
                     <span className="text-[11px] text-slate-500 font-sans ml-auto">
@@ -336,8 +336,8 @@ export const CaseTable: React.FC<CaseTableProps> = ({
                   </div>
 
                   <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-white/[0.02]">
-                    <span className="truncate">
-                      👤 {item.crmType === "inquiry" ? item.agentName : item.assignedToName || "Unassigned"}
+                    <span className="truncate flex items-center gap-1">
+                      <User className="w-3 h-3 text-slate-500 shrink-0" /> {item.crmType === "inquiry" ? item.agentName : item.assignedToName || "Unassigned"}
                     </span>
                     <div className="flex items-center gap-2">
                        <button

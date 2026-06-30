@@ -87,10 +87,9 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
             <div className="absolute top-0 right-0 w-48 h-12 bg-yellow-500/10 blur-xl rounded-full pointer-events-none" />
             
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex items-start gap-3.5">
+              <div className="flex items-start gap-3">
                 <div className="w-11 h-11 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 shrink-0 relative border border-transparent">
-                  <Bell className="w-5 h-5 animate-pulse" />
-                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full animate-ping" />
+                  <Bell className="w-5 h-5" />
                   <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full" />
                 </div>
                 <div className="space-y-1">
@@ -229,7 +228,6 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
             </div>
             {(pendingRequestsCount > 0 || activeCasesCount > 0) && (
               <div className="relative">
-                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full animate-ping opacity-75" />
                 <div className="relative w-2.5 h-2.5 bg-amber-500 rounded-full" />
               </div>
             )}
@@ -240,7 +238,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
               <h3 className="text-xl font-bold text-white">{(!isNaN(pendingRequestsCount) ? pendingRequestsCount : 0) + (!isNaN(activeCasesCount) ? activeCasesCount : 0)}</h3>
               <span className="text-[11px] text-amber-400 font-bold uppercase tracking-widest group-hover:text-amber-300">Inspect</span>
             </div>
-            <p className="text-slate-500 text-xs mt-2 flex items-center gap-1.5 font-medium group-hover:text-amber-400 transition-colors">
+            <p className="text-slate-500 text-xs mt-2 flex items-center gap-2 font-medium group-hover:text-amber-400 transition-colors">
               <MessageSquare className="w-3.5 h-3.5" /> {pendingRequestsCount} Pending Requests
             </p>
           </div>
@@ -268,7 +266,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
               </h3>
               <span className="text-[11px] text-green-400 font-bold uppercase tracking-widest group-hover:text-green-300">Inspect</span>
             </div>
-            <p className="text-slate-500 text-xs mt-2 flex items-center gap-1.5 font-medium group-hover:text-green-400 transition-colors">
+            <p className="text-slate-500 text-xs mt-2 flex items-center gap-2 font-medium group-hover:text-green-400 transition-colors">
               <CheckCircle2 className="w-3.5 h-3.5" /> {myQaScores.length} Evaluations
             </p>
           </div>
@@ -294,7 +292,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
               <h3 className="text-xl font-bold text-pink-400">{inquiriesCount}</h3>
               <span className="text-[11px] text-pink-400 font-bold uppercase tracking-widest group-hover:text-pink-300">Inspect</span>
             </div>
-            <p className="text-slate-500 text-xs mt-2 flex items-center gap-1.5 font-medium group-hover:text-pink-400 transition-colors">
+            <p className="text-slate-500 text-xs mt-2 flex items-center gap-2 font-medium group-hover:text-pink-400 transition-colors">
               Click to view and chat <ArrowRight className="w-3.5 h-3.5" />
             </p>
           </div>
@@ -320,7 +318,7 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
               <h3 className="text-xl font-bold text-cyan-400">{ttRequestsCount}</h3>
               <span className="text-[11px] text-cyan-400 font-bold uppercase tracking-widest group-hover:text-cyan-300">Inspect</span>
             </div>
-            <p className="text-slate-500 text-xs mt-2 flex items-center gap-1.5 font-medium group-hover:text-cyan-400 transition-colors">
+            <p className="text-slate-500 text-xs mt-2 flex items-center gap-2 font-medium group-hover:text-cyan-400 transition-colors">
               Click to view or update links <ArrowRight className="w-3.5 h-3.5" />
             </p>
           </div>

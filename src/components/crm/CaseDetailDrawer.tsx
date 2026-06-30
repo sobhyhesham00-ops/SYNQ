@@ -407,7 +407,7 @@ export const CaseDetailDrawer: React.FC<CaseDetailDrawerProps> = ({
               </span>
             )}
             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-xl text-[11px] border border-white/8 text-slate-400">
-              <Clock className="w-2.5 h-2.5" />
+              <Clock className="w-3 h-3" />
               {new Date(caseData.createdAt).toLocaleString()}
             </span>
           </div>

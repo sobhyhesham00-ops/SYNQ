@@ -7,7 +7,10 @@ import {
   Trash2, 
   Pencil,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Pin,
+  User,
+  Clock
 } from "lucide-react";
 import { CopyWrap } from "./CopyWrap";
 import { AttachmentsDisplay } from "./AttachmentsDisplay";
@@ -24,9 +27,9 @@ import {
 } from "../utils";
 
 const compStatusLabels: Record<string, string> = {
-  pending_tl: "⏳ Pending TL review",
-  need_contact: "📞 Pending contact",
-  closed: "✅ Resolved & Closed"
+  pending_tl: "Pending TL review",
+  need_contact: "Pending contact",
+  closed: "Resolved & Closed"
 };
 
 interface ComplaintCardProps {
@@ -170,21 +173,21 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
               const text = `Complaint: ${comp.patientName} - ${getClinicLabel(comp.clinicName)} - ${comp.phoneNumber}`;
               copyToClipboard(text, 'Complaint details copied!');
             }}
-            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/8 rounded-xl text-slate-300 text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer hidden sm:flex"
+            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/8 rounded-xl text-slate-300 text-[11px] font-bold transition-all flex items-center gap-2 cursor-pointer hidden sm:flex"
             title="Copy Details"
           >
             <Copy className="w-3 h-3" /> Copy
           </button>
           {(comp.assignedToName || comp.assignedTo) && (
-            <span className="text-[11px] font-bold text-indigo-400 bg-transparent border border-white/12 text-white px-1.5 py-0.5 rounded border border-transparent max-w-[100px] truncate leading-none">
-              📌 {comp.assignedToName || comp.assignedTo}
+            <span className="text-[11px] font-bold text-indigo-400 bg-transparent border border-white/12 text-white px-1.5 py-0.5 rounded border border-transparent max-w-[100px] truncate leading-none flex items-center gap-1">
+              <Pin className="w-3 h-3 text-indigo-400 shrink-0" /> {comp.assignedToName || comp.assignedTo}
             </span>
           )}
-          <span className={`text-[11px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-xl font-sans leading-none ${ isPendingTL ? "bg-amber-500/10 border border-transparent text-amber-300 animate-pulse" : isNeedContact ? "bg-rose-500/10 border border-transparent text-rose-400 animate-pulse" : isClosed ? "bg-emerald-500/10 border border-transparent text-emerald-400" : "bg-slate-700 text-slate-300" }`}>
+          <span className={`text-[11px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-xl font-sans leading-none ${ isPendingTL ? "bg-amber-500/10 border border-transparent text-amber-300" : isNeedContact ? "bg-rose-500/10 border border-transparent text-rose-400" : isClosed ? "bg-emerald-500/10 border border-transparent text-emerald-400" : "bg-slate-700 text-slate-300" }`}>
             {compStatusLabels[comp.status] || comp.status}
           </span>
-          <span className={`px-2 py-0.5 border text-[11px] font-bold rounded-xl shrink-0 flex items-center gap-1 ${isClosed ? "bg-emerald-500/10 text-emerald-500 border-transparent" : "bg-slate-700 text-slate-400 border-white/8"}`}>
-            ⏱ {compAgeLabel} open
+          <span className={`px-2 py-0.5 border text-[11px] font-bold rounded-xl shrink-0 flex items-center gap-2 ${isClosed ? "bg-emerald-500/10 text-emerald-500 border-transparent" : "bg-slate-700 text-slate-400 border-white/8"}`}>
+            <Clock className="w-3 h-3 shrink-0" /> {compAgeLabel} open
           </span>
           <div className="text-slate-400 hover:text-indigo-400 p-1 rounded-xl transition-all shrink-0 ml-1 flex items-center justify-center">
             {isExpanded ? <ChevronUp className="w-4 h-4 text-indigo-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
@@ -203,7 +206,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
               </span>
               <span className="text-slate-200 font-bold font-sans">
                 <CopyWrap text={comp.agentName || ""} label="Agent Name">
-                  👤 {comp.agentName}
+                  <span className="flex items-center gap-1"><User className="w-3 h-3 text-slate-400 inline shrink-0" /> {comp.agentName}</span>
                 </CopyWrap>
               </span>
             </div>
@@ -323,7 +326,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
           {/* CASE TIMERS AND SLA ACCENTS */}
           {isNeedContact && (
             <div className="p-4 bg-transparent rounded-xl border border-white/8 flex items-center justify-between text-[11px] font-sans">
-              <div className="space-y-0.5 text-left">
+              <div className="space-y-1 text-left">
                 <p className="text-[11px] text-slate-400 uppercase tracking-wider font-bold">
                   Reviewed on:
                 </p>
@@ -334,7 +337,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
                 </p>
               </div>
 
-              <div className="text-right space-y-0.5 font-sans">
+              <div className="text-right space-y-1 font-sans">
                 <p className="text-[11px] text-rose-400 uppercase font-bold tracking-wider">
                   SLA Timer on Agent:
                 </p>
@@ -349,7 +352,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
 
           {isClosed && (
             <div className="p-4 bg-transparent rounded-xl border border-white/8 flex items-center justify-between text-[11px] font-sans">
-              <div className="space-y-0.5 text-left">
+              <div className="space-y-1 text-left">
                 <p className="text-[11px] text-slate-400 uppercase tracking-wider font-bold">
                   Closed at:
                 </p>
@@ -360,7 +363,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
                 </p>
               </div>
 
-              <div className="text-right space-y-0.5 font-sans">
+              <div className="text-right space-y-1 font-sans">
                 <p className="text-[11px] text-emerald-400 uppercase font-bold tracking-wider">
                   Completion Resolution SLA:
                 </p>
@@ -416,7 +419,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
           {/* DYNAMIC TL RESOLUTION FORM */}
           {activeComplaintHandlingId === comp.id && isTLOreSupport && (
             <div className="p-5 bg-rose-500/[0.02] border border-transparent rounded-xl space-y-4 animate-fade-in mt-1 text-left w-full">
-              <p className="text-[11px] font-bold text-rose-400 uppercase tracking-widest flex items-center gap-1.5">
+              <p className="text-[11px] font-bold text-rose-400 uppercase tracking-widest flex items-center gap-2">
                 <PenTool className="w-3.5 h-3.5" /> TL Resolution Panel
               </p>
 
@@ -472,7 +475,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
                   type="button"
                   disabled={!tlComplaintComment.trim() || !tlComplaintResolutionType}
                   onClick={() => handleTLCommentComplaint(comp.id, tlComplaintComment, tlComplaintResolutionType)}
-                  className="px-5 py-2 bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[11px] font-bold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer"
+                  className="px-5 py-2 bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[11px] font-bold rounded-xl flex items-center gap-2 transition-all cursor-pointer"
                 >
                   <CheckCircle2 className="w-4 h-4" /> Submit Resolution
                 </button>
@@ -511,7 +514,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
 
                 copyToClipboard(text, "Complaint details copied — including attachments info!");
               }}
-              className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/8 rounded-xl text-slate-300 hover:text-slate-100 text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-auto"
+              className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/8 rounded-xl text-slate-300 hover:text-slate-100 text-[11px] font-bold transition-all flex items-center gap-2 cursor-pointer mr-auto"
             >
               <Copy className="w-3.5 h-3.5" />
               Copy details
@@ -524,7 +527,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
                   e.stopPropagation();
                   handleDeleteComplaint(comp.id);
                 }}
-                className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/10 rounded-xl text-rose-400 text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-2"
+                className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/10 rounded-xl text-rose-400 text-[11px] font-bold transition-all flex items-center gap-2 cursor-pointer mr-2"
                 title="Delete Complaint"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -542,7 +545,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
                     data: { ...comp },
                   });
                 }}
-                className="px-3 py-2 bg-transparent border border-white/12 text-white hover:bg-white/5 border border-transparent rounded-xl text-emerald-300 text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-3 py-2 bg-transparent border border-white/12 text-white hover:bg-white/5 border border-transparent rounded-xl text-emerald-300 text-[11px] font-bold transition-all flex items-center gap-2 cursor-pointer"
                 title={`Edit complaint (${getRemainingEditTime(comp.createdAt)})`}
               >
                 <Pencil className="w-3.5 h-3.5" />
@@ -558,7 +561,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
                   setActiveComplaintHandlingId(comp.id);
                   setTlComplaintComment("");
                 }}
-                className="px-4 py-2 bg-amber-600 hover:brightness-110 text-slate-950 font-sans font-bold text-[11px] rounded-xl cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
+                className="px-4 py-2 bg-amber-600 hover:brightness-110 text-slate-950 font-sans font-bold text-[11px] rounded-xl cursor-pointer transition-all active:scale-95 flex items-center gap-2"
               >
                 Reply & Review
               </button>
@@ -583,7 +586,7 @@ export const ComplaintCard: React.FC<ComplaintCardProps> = ({
                   e.stopPropagation();
                   handleToggleContactComplaint(comp.id, "not_contacted");
                 }}
-                className="px-3 py-2 bg-transparent border border-white/12 text-white border border-transparent text-indigo-300 font-bold font-sans text-[11px] rounded-xl transition-all cursor-pointer flex items-center gap-1.5 hover:brightness-110"
+                className="px-3 py-2 bg-transparent border border-white/12 text-white border border-transparent text-indigo-300 font-bold font-sans text-[11px] rounded-xl transition-all cursor-pointer flex items-center gap-2 hover:brightness-110"
               >
                 Reopen Case
               </button>

@@ -202,7 +202,7 @@ export function OrdersTab({
          <div className="lg:col-span-1 space-y-6">
             <div className="bg-fuchsia-950/20 border border-transparent rounded-xl p-5">
                <h3 className="font-bold text-fuchsia-300 text-xs uppercase tracking-wider mb-4 flex items-center gap-2">
-                 <Calculator className="w-4 h-4" /> Start New Order
+                 <Calculator className="w-3.5 h-3.5" /> Start New Order
                </h3>
                <form onSubmit={handleCreateOrder} className="space-y-3">
                   <div>

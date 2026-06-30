@@ -143,6 +143,8 @@ import {
   VolumeX,
   Grid,
   CalendarRange,
+  UtensilsCrossed,
+  Pin,
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { AIChatWidget } from "./AIChatWidget";
@@ -310,7 +312,7 @@ const renderMarkdownText = (text: string) => {
           return (
             <h3
               key={idx}
-              className="text-sm font-bold text-transparent bg-gradient-to-r from-indigo-300 to-indigo-100 bg-clip-text mt-5"
+              className="text-sm font-bold text-indigo-300 mt-5"
             >
               {line.replace("## ", "")}
             </h3>
@@ -340,7 +342,7 @@ const renderMarkdownText = (text: string) => {
               className="flex items-start gap-2 ml-4 my-1.5"
               style={{ minWidth: 0 }}
             >
-              <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full mt-2 shrink-0 animate-pulse" />
+              <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full mt-2 shrink-0 " />
               <p className="text-slate-200 text-[11px] flex-1">
                 {parseBoldText(stripped)}
               </p>
@@ -4492,8 +4494,8 @@ ${pageText}
       // Present visual toast feedback immediately
       toast.info(
         <div className="flex flex-col gap-1 text-left">
-          <span className="font-bold text-xs text-emerald-400">
-            ⏰ Personal Reminder
+          <span className="font-bold text-xs text-emerald-400 flex items-center gap-1">
+            <Clock className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> Personal Reminder
           </span>
           <span className="text-[11px] text-slate-200">{t.text}</span>
         </div>,
@@ -11086,7 +11088,7 @@ ${ttNotes}`
               </div>
 
               {showForcePasswordChange ? (
-                <div className="space-y-5 relative z-10">
+                <div className="space-y-4 relative z-10">
                   <div className="bg-amber-500/10 border border-transparent rounded-xl p-4 text-[11px] text-amber-200">
                     <p className="font-bold text-slate-100 mb-1">
                       🔐 Password Reset Required
@@ -11096,7 +11098,7 @@ ${ttNotes}`
                       password to continue.
                     </p>
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <label className="text-[11px] uppercase tracking-widest text-indigo-300 font-bold block text-left">
                       New Password
                     </label>
@@ -11107,7 +11109,7 @@ ${ttNotes}`
                       className="w-full px-4 py-3.5 bg-white/[0.03] border border-transparent rounded-xl text-slate-100 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500/50 text-xs font-sans transition-all"
                     />
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <label className="text-[11px] uppercase tracking-widest text-indigo-300 font-bold block text-left">
                       Confirm New Password
                     </label>
@@ -11221,9 +11223,9 @@ ${ttNotes}`
               ) : (
                 <form
                   onSubmit={handleLoginSubmit}
-                  className="space-y-5 relative z-10"
+                  className="space-y-4 relative z-10"
                 >
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <label
                       className="text-[11px] uppercase tracking-widest text-indigo-300 font-bold block text-left"
                       htmlFor="login-name"
@@ -11241,7 +11243,7 @@ ${ttNotes}`
                     />
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <label
                       className="text-[11px] uppercase tracking-widest text-indigo-300 font-bold block text-left"
                       htmlFor="login-password"
@@ -11309,7 +11311,7 @@ ${ttNotes}`
                       className="px-4 py-2 bg-white/[0.03] border border-transparent hover:border-transparent hover:bg-black/60 rounded-lg text-[11px] font-bold tracking-widest text-slate-300 hover:text-cyan-400 transition-all flex items-center gap-3 cursor-pointer relative group overflow-hidden"
                     >
                       <div className="relative w-2.5 h-2.5 flex items-center justify-center shrink-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 z-10 animate-pulse" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 z-10" />
                         <span
                           className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400/80 animate-sonar"
                           style={{
@@ -11346,7 +11348,7 @@ ${ttNotes}`
                     exit={{ opacity: 0, x: 15 }}
                     transition={{ duration: 0.65, ease: "easeOut" }}
                   >
-                    <h1 className="text-xs font-bold tracking-tight text-slate-100 font-sans flex items-center gap-1.5 flex-wrap">
+                    <h1 className="text-xs font-bold tracking-tight text-slate-100 font-sans flex items-center gap-2 flex-wrap">
                       <span>Welcome,</span>
                       <motion.span
                         initial={{ opacity: 0, scale: 0.9 }}
@@ -11571,9 +11573,9 @@ ${ttNotes}`
                                 }
                                 setIsGlobalSearchPanelOpen(false);
                               }}
-                              className="w-full text-left p-2.5 hover:bg-white/5 transition-colors duration-150 flex flex-col gap-1.5 focus:outline-none"
+                              className="w-full text-left p-2.5 hover:bg-white/5 transition-colors duration-150 flex flex-col gap-2 focus:outline-none"
                             >
-                              <div className="flex items-center justify-between gap-1.5">
+                              <div className="flex items-center justify-between gap-2">
                                 <span
                                   className={`text-[11px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded font-mono ${badgeClasses}`}
                                 >
@@ -11629,7 +11631,7 @@ ${ttNotes}`
                     onClick={() => setIsPatientHistoryOpen(true)}
                     title="Patient History Lookup"
                     id="patient-lookup-trigger-btn"
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-transparent border border-white/12 text-white hover:bg-white/5 border border-transparent text-indigo-300 hover:text-indigo-200 text-[11px] font-bold transition-all cursor-pointer mr-2"
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-transparent border border-white/12 text-white hover:bg-white/5 border border-transparent text-indigo-300 hover:text-indigo-200 text-[11px] font-bold transition-all cursor-pointer mr-2"
                   >
                     <Phone className="w-4 h-4 text-indigo-400" />
                     <span className="hidden sm:inline">Patient Lookup</span>
@@ -11657,7 +11659,7 @@ ${ttNotes}`
             </header>
 
             {/* Split Content structure */}
-            <div className="flex-1 flex flex-col md:flex-row gap-6 md:gap-8">
+            <div className="flex-1 flex flex-col md:flex-row gap-6 md:gap-6">
               {/* Navigation / Sidebar Menu */}
               <aside className="w-full md:w-64 border border-white/8 bg-transparent flex flex-col p-4 rounded-xl space-y-4">
                 {/* Egypt Local Time & 10th of Ramadan Weather */}
@@ -11668,7 +11670,6 @@ ${ttNotes}`
                   <div className="flex justify-between items-center">
                     <span className="text-[11px] font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-2">
                       <span className="flex h-2 w-2 relative">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400"></span>
                       </span>
                       Cairo Time
@@ -11694,7 +11695,7 @@ ${ttNotes}`
                       })}
                     </p>
                     {ramadanTemp !== null && (
-                      <div className="flex flex-col items-end gap-0.5">
+                      <div className="flex flex-col items-end gap-1">
                         <div className="flex items-center gap-1 text-xs text-[#FCD34D] font-bold font-sans">
                           {ramadanWeatherCode === 0 ? (
                             <Sun className="w-4 h-4 text-amber-400 animate-pulse" />
@@ -11739,7 +11740,7 @@ ${ttNotes}`
                         <h1 className="text-xs font-bold tracking-tight text-slate-100 font-sans">
                           Synq
                         </h1>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-2">
                           <span className="text-[11px] text-indigo-300 font-bold uppercase tracking-wide">
                             Work Portal
                           </span>
@@ -11747,7 +11748,7 @@ ${ttNotes}`
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-2">
                       {/* Mute/Unmute Notifications Button */}
                       <button
                         onClick={() => {
@@ -11807,9 +11808,6 @@ ${ttNotes}`
                         {/* Real-time status dot indicator in corner of avatar */}
                         <span className="absolute bottom-0 right-0 flex h-3 w-3">
                           <span
-                            className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${ (currentUser.status || "online") === "online" ? "bg-emerald-440" : (currentUser.status || "online") === "busy" ? "bg-rose-400" : "bg-amber-400" }`}
-                          />
-                          <span
                             className={`relative inline-flex rounded-full h-3 w-3 border border-slate-950 ${ (currentUser.status || "online") === "online" ? "bg-emerald-500" : (currentUser.status || "online") === "busy" ? "bg-rose-500" : "bg-amber-500" }`}
                           />
                         </span>
@@ -11862,7 +11860,7 @@ ${ttNotes}`
                           ))) && (
                         <button
                           onClick={handleInstallClick}
-                          className="w-full px-3 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-transparent text-indigo-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                          className="w-full px-3 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-transparent text-indigo-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
                         >
                           <Download className="w-3.5 h-3.5" />
                           Download Desktop App
@@ -11904,7 +11902,7 @@ ${ttNotes}`
                           window.location.reload();
                         }, 1000);
                       }}
-                      className="w-full px-3 py-2 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/20 hover:to-teal-500/20 border border-transparent text-emerald-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-2"
+                      className="w-full px-3 py-2 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/20 hover:to-teal-500/20 border border-transparent text-emerald-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer mb-2"
                     >
                       <RefreshCw className="w-3.5 h-3.5 animate-pulse" />
                       Update App (Force Sync)
@@ -11915,7 +11913,7 @@ ${ttNotes}`
                     currentUser?.name?.toLowerCase() === "sobhyhesham00@gmail.com" ? (
                       <button
                         onClick={() => setIsResetPasswordModalOpen(true)}
-                        className="w-full px-3 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 border border-blue-500/10 text-blue-300 rounded-xl text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-2"
+                        className="w-full px-3 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 border border-blue-500/10 text-blue-300 rounded-xl text-[11px] font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer mb-2"
                       >
                         <Key className="w-3.5 h-3.5" />
                         Reset Password
@@ -11925,7 +11923,7 @@ ${ttNotes}`
                     <button
                       type="button"
                       onClick={() => setIsSynqVersionModalOpen(true)}
-                      className="w-full px-3 py-2 bg-cyan-500/10 hover:bg-cyan-500/10 border border-transparent hover:border-transparent text-cyan-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-3.5 cursor-pointer mb-2 relative group overflow-hidden"
+                      className="w-full px-3 py-2 bg-cyan-500/10 hover:bg-cyan-500/10 border border-transparent hover:border-transparent text-cyan-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-3 cursor-pointer mb-2 relative group overflow-hidden"
                     >
                       <div className="relative w-2.5 h-2.5 flex items-center justify-center shrink-0">
                         <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 z-10 animate-pulse" />
@@ -11951,7 +11949,7 @@ ${ttNotes}`
                     <button
                       id="signout-button"
                       onClick={handleSignOut}
-                      className="w-full px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/10 border border-rose-500/10 text-rose-300 rounded-xl text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-2"
+                      className="w-full px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/10 border border-rose-500/10 text-rose-300 rounded-xl text-[11px] font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer mb-2"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       Sign Out Portal
@@ -12322,7 +12320,7 @@ ${ttNotes}`
 
                 {/* Mini Standalone Disclaimer block */}
                 <div className="mt-auto pt-4 border-t border-white/8 text-[11px] text-slate-400 space-y-2">
-                  <div className="flex items-center gap-1.5 text-indigo-300 font-semibold font-sans">
+                  <div className="flex items-center gap-2 text-indigo-300 font-semibold font-sans">
                     <Info className="w-3.5 h-3.5 text-indigo-400" /> STANDALONE
                     COMPLIANT
                   </div>
@@ -12523,7 +12521,6 @@ ${ttNotes}`
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 relative">
                             <MessageSquare className="w-5 h-5" />
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full animate-ping" />
                             <div className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full" />
                           </div>
                           <div className="text-left">
@@ -12619,12 +12616,12 @@ ${ttNotes}`
                                 {/* Glow indicator line */}
                                 <div className="absolute top-0 bottom-0 left-0 w-1 bg-gradient-to-b from-indigo-400 to-purple-500"></div>
 
-                                <div className="flex items-start gap-3.5 pl-1.5">
+                                <div className="flex items-start gap-3 pl-1.5">
                                   <div
                                     className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${inq.status === "sent" ? "bg-amber-500/10 border-transparent text-amber-400" : "bg-emerald-500/10 border-transparent text-emerald-400"}`}
                                   >
                                     {inq.status === "sent" ? (
-                                      <Send className="w-4 h-4 animate-pulse" />
+                                      <Send className="w-4 h-4" />
                                     ) : (
                                       <CheckCircle2 className="w-4 h-4 animate-bounce" />
                                     )}
@@ -12657,7 +12654,7 @@ ${ttNotes}`
                                         <strong>{inq.sentBy}</strong>.
                                       </p>
                                     ) : (
-                                      <div className="space-y-1.5">
+                                      <div className="space-y-2">
                                         <p className="text-xs text-slate-100">
                                           Your inquiry has been{" "}
                                           <strong className="text-emerald-400 font-bold uppercase">
@@ -12712,8 +12709,8 @@ ${ttNotes}`
                                 {/* Glow indicator line */}
                                 <div className="absolute top-0 bottom-0 left-0 w-1 bg-gradient-to-b from-amber-400 to-yellow-500"></div>
 
-                                <div className="flex items-start gap-3.5 pl-1.5 flex-1">
-                                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border bg-amber-500/10 border-transparent text-amber-400 animate-pulse mt-0.5">
+                                <div className="flex items-start gap-3 pl-1.5 flex-1">
+                                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border bg-amber-500/10 border-transparent text-amber-400 mt-0.5">
                                     <Wallet className="w-4 h-4" />
                                   </div>
                                   <div className="space-y-1 w-full text-left">
@@ -12806,8 +12803,8 @@ ${ttNotes}`
                                 {/* Glow indicator line */}
                                 <div className="absolute top-0 bottom-0 left-0 w-1 bg-gradient-to-b from-rose-400 to-red-500"></div>
 
-                                <div className="flex items-start gap-3.5 pl-1.5 flex-1">
-                                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border bg-rose-500/10 border-transparent text-rose-400 animate-pulse mt-0.5">
+                                <div className="flex items-start gap-3 pl-1.5 flex-1">
+                                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border bg-rose-500/10 border-transparent text-rose-400 mt-0.5">
                                     <AlertTriangle className="w-4 h-4" />
                                   </div>
                                   <div className="space-y-1 w-full text-left">
@@ -12867,7 +12864,7 @@ ${ttNotes}`
                           className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-transparent p-5 sm:p-6 rounded-xl flex flex-col space-y-4 animate-fade-in relative overflow-hidden"
                         >
                           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500"></div>
-                          <div className="flex items-center gap-2.5">
+                          <div className="flex items-center gap-2">
                             <div className="w-9 h-9 bg-amber-500/10 border border-transparent rounded-xl flex items-center justify-center">
                               <RefreshCw
                                 className="w-5 h-5 text-amber-400 animate-spin"
@@ -12898,7 +12895,7 @@ ${ttNotes}`
                                       {req.agentName}
                                     </span>
                                   </p>
-                                  <div className="text-[11px] text-slate-300 space-y-0.5">
+                                  <div className="text-[11px] text-slate-300 space-y-1">
                                     <p>
                                       For Date:{" "}
                                       <span className="font-semibold text-slate-100">
@@ -12923,7 +12920,7 @@ ${ttNotes}`
                                   </div>
                                 </div>
 
-                                <div className="flex flex-col sm:flex-row items-center gap-2.5 self-stretch sm:self-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-white/8 w-full sm:w-auto">
+                                <div className="flex flex-col sm:flex-row items-center gap-2 self-stretch sm:self-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-white/8 w-full sm:w-auto">
                                   <SlideToConfirm
                                     label="Slide to Agree"
                                     confirmedLabel="Agreed!"
@@ -13304,7 +13301,7 @@ ${ttNotes}`
                                                   hour: "2-digit",
                                                   minute: "2-digit",
                                                 })}{" "}
-                                                ⏰
+                                                <Clock className="w-3 h-3 text-amber-400 inline" />
                                               </p>
                                             )}
                                         </div>
@@ -13348,7 +13345,7 @@ ${ttNotes}`
                                     Cloud Sync
                                   </span>
                                   <span className="text-[11px] font-bold text-emerald-400 flex items-center gap-2 uppercase">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                                     Synced
                                   </span>
                                 </div>
@@ -13613,7 +13610,7 @@ ${ttNotes}`
                                     <Info className="w-5 h-5 text-indigo-400" />
                                   </div>
                                   <div className="text-left space-y-1">
-                                    <h3 className="text-xs font-bold text-slate-100 flex items-center gap-1.5">
+                                    <h3 className="text-xs font-bold text-slate-100 flex items-center gap-2">
                                       Important Account Notice: New Log In
                                       Format!
                                     </h3>
@@ -13622,7 +13619,7 @@ ${ttNotes}`
                                       username format instead of full names.
                                       Everyone was securely logged out.
                                     </p>
-                                    <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                                    <div className="flex flex-wrap items-center gap-2 mt-2">
                                       <span className="text-[11px] uppercase tracking-widest text-slate-400 font-bold">
                                         Your Login ID:
                                       </span>
@@ -13795,7 +13792,7 @@ ${ttNotes}`
 
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 xl:gap-6 pt-2 font-sans">
                                           {/* Level Tracker */}
-                                          <div className="bg-transparent p-4 rounded-xl border border-white/8 space-y-3.5 flex flex-col justify-between">
+                                          <div className="bg-transparent p-4 rounded-xl border border-white/8 space-y-3 flex flex-col justify-between">
                                             <div className="flex justify-between items-center">
                                               <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">
                                                 Level Upgrade Status
@@ -13843,28 +13840,28 @@ ${ttNotes}`
                                           </div>
 
                                           {/* Achievement Badges Room */}
-                                          <div className="bg-transparent p-4 rounded-xl border border-white/8 space-y-2.5">
+                                          <div className="bg-transparent p-4 rounded-xl border border-white/8 space-y-2">
                                             <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">
                                               Unlocked Badges
                                             </span>
-                                            <div className="flex flex-wrap gap-2.5 font-sans">
+                                            <div className="flex flex-wrap gap-2 font-sans">
                                               {holdsGoldPunctuality ? (
                                                 <span
-                                                  className="px-2.5 py-1 bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-[11px] font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5"
+                                                  className="px-2.5 py-1 bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-[11px] font-bold uppercase tracking-wider rounded-xl flex items-center gap-2"
                                                   title="Worked more than 120 minutes overall on shifts."
                                                 >
                                                   <Sparkles className="w-3 h-3 text-yellow-400" />{" "}
                                                   Duty Star
                                                 </span>
                                               ) : (
-                                                <span className="px-2.5 py-1 bg-white/5 text-slate-500 text-[11px] font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5 opacity-40">
+                                                <span className="px-2.5 py-1 bg-white/5 text-slate-500 text-[11px] font-bold uppercase tracking-wider rounded-xl flex items-center gap-2 opacity-40">
                                                   Duty Star (Locked)
                                                 </span>
                                               )}
 
                                               {isGrandmasterResovler ? (
                                                 <span
-                                                  className="px-2.5 py-1 bg-rose-500/10 border border-transparent text-rose-400 text-[11px] font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5"
+                                                  className="px-2.5 py-1 bg-rose-500/10 border border-transparent text-rose-400 text-[11px] font-bold uppercase tracking-wider rounded-xl flex items-center gap-2"
                                                   title="Handled more than 25 ticket resolutions in total."
                                                 >
                                                   <Activity className="w-3 h-3 text-rose-400" />{" "}
@@ -13872,7 +13869,7 @@ ${ttNotes}`
                                                 </span>
                                               ) : (
                                                 <span
-                                                  className="px-2.5 py-1 bg-white/5 text-slate-500 text-[11px] font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5 opacity-40"
+                                                  className="px-2.5 py-1 bg-white/5 text-slate-500 text-[11px] font-bold uppercase tracking-wider rounded-xl flex items-center gap-2 opacity-40"
                                                   title="Need 25 total resolutions"
                                                 >
                                                   Resolve King (Locked)
@@ -13881,7 +13878,7 @@ ${ttNotes}`
 
                                               {isTeamCommunicator ? (
                                                 <span
-                                                  className="px-2.5 py-1 bg-cyan-500/10 border border-transparent text-cyan-300 text-[11px] font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5"
+                                                  className="px-2.5 py-1 bg-cyan-500/10 border border-transparent text-cyan-300 text-[11px] font-bold uppercase tracking-wider rounded-xl flex items-center gap-2"
                                                   title="Registered communication requests"
                                                 >
                                                   <MessageSquare className="w-3 h-3 text-cyan-400" />{" "}
@@ -13889,7 +13886,7 @@ ${ttNotes}`
                                                 </span>
                                               ) : (
                                                 <span
-                                                  className="px-2.5 py-1 bg-white/5 text-slate-500 text-[11px] font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5 opacity-40"
+                                                  className="px-2.5 py-1 bg-white/5 text-slate-500 text-[11px] font-bold uppercase tracking-wider rounded-xl flex items-center gap-2 opacity-40"
                                                   title="Need 10 communication requests"
                                                 >
                                                   Talk Master (Locked)
@@ -13900,7 +13897,7 @@ ${ttNotes}`
 
                                           {/* Instant Stats overview Card */}
                                           <div className="bg-transparent p-4 rounded-xl border border-white/8 flex items-center justify-between font-sans">
-                                            <div className="space-y-0.5 text-left">
+                                            <div className="space-y-1 text-left">
                                               <span className="text-[11px] text-indigo-300 font-bold uppercase tracking-wider font-mono">
                                                 Operations Badge Rank
                                               </span>
@@ -14131,7 +14128,7 @@ ${ttNotes}`
                                                 </strong>
                                               </p>
                                             </div>
-                                            <div className="flex items-center gap-1.5 bg-white/5 border border-white/8 rounded-xl p-1 self-stretch sm:self-auto justify-between">
+                                            <div className="flex items-center gap-2 bg-white/5 border border-white/8 rounded-xl p-1 self-stretch sm:self-auto justify-between">
                                               <button
                                                 onClick={() => {
                                                   const d = new Date(
@@ -14174,7 +14171,7 @@ ${ttNotes}`
                                             </div>
                                           </div>
 
-                                          <div className="grid grid-cols-1 md:grid-cols-12 gap-5 animate-fade-in">
+                                          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 animate-fade-in">
                                             <div className="md:col-span-4 bg-white/5 border border-white/8 rounded-xl p-6 flex flex-col items-center justify-center text-center">
                                               <span className="text-[11px] font-bold uppercase text-indigo-300 tracking-wider mb-4">
                                                 Daily Resolve Ratio
@@ -14378,7 +14375,7 @@ ${ttNotes}`
                                                   className="p-4 bg-white/5 border border-white/8 rounded-xl flex flex-col justify-between hover:bg-white/10 transition-colors"
                                                 >
                                                   <div className="flex justify-between items-center text-cyan-400">
-                                                    <Clock className="w-4 h-4 animate-pulse" />
+                                                    <Clock className="w-4 h-4" />
                                                     <span className="text-[11px] font-sans bg-cyan-500/10 border border-transparent px-1.5 py-0.5 rounded text-cyan-300">
                                                       Shift
                                                     </span>
@@ -14402,7 +14399,7 @@ ${ttNotes}`
                                           ) && (
                                             <div className="bg-white/5 border border-white/8 rounded-xl p-5">
                                               <h3 className="text-xs font-bold text-slate-100 uppercase tracking-wider flex items-center gap-2 mb-4">
-                                                <AlertTriangle className="w-4 h-4 text-pink-400" />
+                                                <AlertTriangle className="w-5 h-5 text-pink-400" />
                                                 Punctuality & Sub-Session
                                                 Allowance Logs
                                               </h3>
@@ -14424,15 +14421,22 @@ ${ttNotes}`
                                                     <p className="text-[11px] text-slate-400 font-bold uppercase">
                                                       Schedule Compliance
                                                     </p>
-                                                    <p
-                                                      className={`text-xs font-bold mt-0.5 ${isLate ? "text-pink-400" : "text-emerald-400"}`}
+                                                    <div
+                                                      className={`text-xs font-bold mt-0.5 flex items-center gap-1 ${isLate ? "text-pink-400" : "text-emerald-400"}`}
                                                     >
-                                                      {myDailyLog
-                                                        ? isLate
-                                                          ? "⏰ Over Grace Period"
-                                                          : " Standard On Time"
-                                                        : "No shift logged"}
-                                                    </p>
+                                                      {myDailyLog ? (
+                                                        isLate ? (
+                                                          <>
+                                                            <Clock className="w-3.5 h-3.5 shrink-0" />
+                                                            <span>Over Grace Period</span>
+                                                          </>
+                                                        ) : (
+                                                          <span>Standard On Time</span>
+                                                        )
+                                                      ) : (
+                                                        <span>No shift logged</span>
+                                                      )}
+                                                    </div>
                                                   </div>
                                                   <Calendar className="w-4 h-4 text-slate-500" />
                                                 </motion.div>
@@ -14485,7 +14489,7 @@ ${ttNotes}`
                                                       Restroom duration
                                                     </p>
                                                     <p
-                                                      className={`text-xs font-mono font-bold mt-0.5 ${restroomMins > 10 ? "text-pink-400 animate-pulse" : "text-slate-300"}`}
+                                                      className={`text-xs font-mono font-bold mt-0.5 ${restroomMins > 10 ? "text-pink-400" : "text-slate-300"}`}
                                                     >
                                                       {!isNaN(
                                                         Math.round(
@@ -15120,7 +15124,7 @@ ${ttNotes}`
                                         {selectedDashboardDate ===
                                           getLocalISOString() && (
                                           <span className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-widest text-emerald-400">
-                                            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping" />
+                                            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
                                             Live Today
                                           </span>
                                         )}
@@ -15159,7 +15163,7 @@ ${ttNotes}`
                                         />
                                       </div>
 
-                                      <div className="flex items-center gap-1.5 bg-white/5 border border-white/8 rounded-xl p-1">
+                                      <div className="flex items-center gap-2 bg-white/5 border border-white/8 rounded-xl p-1">
                                         <button
                                           onClick={() => {
                                             const d = new Date(
@@ -15202,7 +15206,7 @@ ${ttNotes}`
                                       </div>
 
                                       {/* Presets */}
-                                      <div className="flex gap-1.5">
+                                      <div className="flex gap-2">
                                         <button
                                           onClick={() => {
                                             setSelectedDashboardDate(
@@ -15251,7 +15255,7 @@ ${ttNotes}`
                                   <div className="bg-white/5 border border-white/8 rounded-xl text-slate-100 p-6 space-y-4 text-left animate-fade-in font-sans">
                                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/8 pb-3">
                                       <div>
-                                        <h3 className="font-bold text-transparent bg-gradient-to-r from-yellow-300 via-indigo-200 to-amber-300 bg-clip-text text-sm font-sans flex items-center gap-2">
+                                        <h3 className="font-bold text-transparent bg-gradient-to-r text-slate-100 text-sm font-sans flex items-center gap-2">
                                           <span></span>
                                           Team Prestige Leaderboard
                                         </h3>
@@ -15268,7 +15272,7 @@ ${ttNotes}`
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                       {/* Podium Top 3 */}
-                                      <div className="bg-transparent p-4 rounded-xl border border-white/8 space-y-3.5 flex flex-col justify-center">
+                                      <div className="bg-transparent p-4 rounded-xl border border-white/8 space-y-3 flex flex-col justify-center">
                                         <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider font-mono">
                                           Today's Prestige Podium
                                         </p>
@@ -15358,7 +15362,7 @@ ${ttNotes}`
                                               {top3[1] && (
                                                 <div className="flex flex-col items-center space-y-2">
                                                   <div className="w-10 h-10 rounded-full bg-slate-400/20 border-2 border-white/8 flex items-center justify-center font-bold text-slate-100 text-xs relative"></div>
-                                                  <div className="bg-gradient-to-t from-slate-400/10 to-slate-400/20 border border-transparent rounded-t-xl p-2 w-full text-center space-y-0.5">
+                                                  <div className="bg-gradient-to-t from-slate-400/10 to-slate-400/20 border border-transparent rounded-t-xl p-2 w-full text-center space-y-1">
                                                     <p className="text-[11px] font-bold text-slate-200 truncate">
                                                       {formatAgentName(
                                                         top3[1].name,
@@ -15375,7 +15379,7 @@ ${ttNotes}`
                                               {top3[0] && (
                                                 <div className="flex flex-col items-center space-y-2">
                                                   <div className="w-12 h-12 rounded-full bg-yellow-400/20 border-2 border-yellow-400 flex items-center justify-center font-bold text-slate-100 text-sm relative -top-1"></div>
-                                                  <div className="bg-gradient-to-t from-yellow-500/10 to-yellow-500/20 border border-yellow-400/30 rounded-t-2xl p-3 w-full text-center space-y-0.5 scale-105 relative z-10">
+                                                  <div className="bg-gradient-to-t from-yellow-500/10 to-yellow-500/20 border border-yellow-400/30 rounded-t-2xl p-3 w-full text-center space-y-1 scale-105 relative z-10">
                                                     <p className="text-[11px] font-bold text-yellow-300 truncate">
                                                       {formatAgentName(
                                                         top3[0].name,
@@ -15392,7 +15396,7 @@ ${ttNotes}`
                                               {top3[2] && (
                                                 <div className="flex flex-col items-center space-y-2">
                                                   <div className="w-9 h-9 rounded-full bg-amber-600/20 border-2 border-amber-600 flex items-center justify-center font-bold text-slate-100 text-[11px] relative"></div>
-                                                  <div className="bg-gradient-to-t from-amber-600/10 to-amber-600/20 border border-amber-600/20 rounded-t-xl p-2 w-full text-center space-y-0.5">
+                                                  <div className="bg-gradient-to-t from-amber-600/10 to-amber-600/20 border border-amber-600/20 rounded-t-xl p-2 w-full text-center space-y-1">
                                                     <p className="text-[11px] font-bold text-amber-300 truncate">
                                                       {formatAgentName(
                                                         top3[2].name,
@@ -15410,11 +15414,11 @@ ${ttNotes}`
                                       </div>
 
                                       {/* Ranks list view */}
-                                      <div className="bg-white/[0.03] p-4 rounded-xl border border-white/8 space-y-2.5">
+                                      <div className="bg-white/[0.03] p-4 rounded-xl border border-white/8 space-y-2">
                                         <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider font-mono">
                                           Operations Leaderboard Rankings
                                         </p>
-                                        <div className="space-y-1.5 max-h-[160px] overflow-y-auto pr-1">
+                                        <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
                                           {(() => {
                                             const scores = agentsList.map(
                                               (aName) => {
@@ -15504,7 +15508,7 @@ ${ttNotes}`
                                                     key={row.name}
                                                     className="flex justify-between items-center bg-white/10 /[0.02] border border-white/8 p-2 rounded-xl text-[11px] font-sans"
                                                   >
-                                                    <div className="flex items-center gap-2.5">
+                                                    <div className="flex items-center gap-2">
                                                       <span className="font-sans text-[11px] w-4 text-center text-slate-500 font-bold">
                                                         #{rankIndex + 1}
                                                       </span>
@@ -15530,7 +15534,7 @@ ${ttNotes}`
                                   </div>
 
                                   {/* Operational Performance Core Ring & KPI Grid */}
-                                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
                                     {/* Overall composite score circle gauge */}
                                     <div className="lg:col-span-4 bg-white/5 border border-white/8 rounded-xl p-6 flex flex-col items-center justify-center text-center">
                                       <p className="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-4">
@@ -15910,7 +15914,7 @@ ${ttNotes}`
                                       </div>
 
                                       {/* Interactive Selector for metric inside SVG chart */}
-                                      <div className="flex items-center gap-1.5 bg-white/5 border border-white/8 p-1 rounded-xl">
+                                      <div className="flex items-center gap-2 bg-white/5 border border-white/8 p-1 rounded-xl">
                                         {(
                                           [
                                             "all",
@@ -16238,7 +16242,7 @@ ${ttNotes}`
 
                                       {/* Daily Schedule & Absenteeism Analysis */}
                                       <div className="mt-6 p-5 bg-white/5 border border-white/8 rounded-xl">
-                                        <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                                        <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider mb-3 flex items-center gap-2">
                                           <Clock className="w-3.5 h-3.5 text-indigo-400" />
                                           Daily Roster & Absenteeism
                                         </p>
@@ -16335,7 +16339,7 @@ ${ttNotes}`
                                           return (
                                             <div className="space-y-4">
                                               {/* Overall Compliance Progress Bar */}
-                                              <div className="space-y-1.5">
+                                              <div className="space-y-2">
                                                 <div className="flex justify-between items-center text-[11px]">
                                                   <span className="font-bold text-slate-300">
                                                     Roster Compliance
@@ -16357,7 +16361,7 @@ ${ttNotes}`
                                               </div>
 
                                               {/* Metric Badges Grid */}
-                                              <div className="grid grid-cols-2 gap-2.5 pt-1.5">
+                                              <div className="grid grid-cols-2 gap-2 pt-1.5">
                                                 <div className="p-3 bg-white/5 border border-white/8 rounded-xl">
                                                   <span className="text-[11px] uppercase font-bold text-slate-500 tracking-wider">
                                                     Scheduled
@@ -16396,10 +16400,10 @@ ${ttNotes}`
                                               {absenteeCount > 0 && (
                                                 <div className="mt-2.5 p-3 bg-rose-950/20 border border-transparent rounded-xl">
                                                   <p className="text-[11px] font-bold uppercase text-rose-300 tracking-widest mb-1.5 flex items-center gap-1">
-                                                    <span className="w-1.5 h-1.5 bg-rose-400 rounded-full animate-pulse" />
+                                                    <span className="w-1.5 h-1.5 bg-rose-400 rounded-full" />
                                                     Flagged Absentees:
                                                   </p>
-                                                  <div className="flex flex-wrap gap-1.5">
+                                                  <div className="flex flex-wrap gap-2">
                                                     {absentYearlyNames(
                                                       absentScheduledAgents,
                                                     )}
@@ -16428,7 +16432,7 @@ ${ttNotes}`
                                     {/* Agent roster attendance statistics table with elegant slider timelines */}
                                     <div className="lg:col-span-8 bg-white/5 border border-white/8 rounded-xl p-6">
                                       <h3 className="text-sm font-bold text-slate-100 font-sans flex items-center gap-2 mb-2">
-                                        <Users className="w-4 h-4 text-cyan-400 animate-pulse" />
+                                        <Users className="w-4 h-4 text-cyan-400" />
                                         On-Duty Roster Timeline (
                                         {opTimeLogs.length} active logs)
                                       </h3>
@@ -16702,8 +16706,8 @@ ${ttNotes}`
                         <div className="bg-white/5 border border-white/8 rounded-xl text-slate-100 p-6 space-y-6">
                           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/8 pb-4">
                             <div>
-                              <h3 className="font-bold text-transparent bg-gradient-to-r from-blue-300 via-indigo-200 to-cyan-300 bg-clip-text text-sm font-sans flex items-center gap-2">
-                                <Activity className="w-5 h-5 text-cyan-400 animate-pulse" />
+                              <h3 className="font-bold text-transparent bg-gradient-to-r text-slate-100 text-sm font-sans flex items-center gap-2">
+                                <Activity className="w-5 h-5 text-cyan-400" />
                                 Ops Live Command Center
                               </h3>
                               <p className="text-[11px] text-slate-400 mt-0.5">
@@ -16712,7 +16716,7 @@ ${ttNotes}`
                               </p>
                             </div>
                             <div className="flex items-center gap-2 bg-transparent border border-white/12 text-white border border-transparent px-3 py-1 rounded-lg text-[11px] font-bold uppercase text-emerald-400 font-mono tracking-wider">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                               Synchronized Feed
                             </div>
                           </div>
@@ -16804,12 +16808,12 @@ ${ttNotes}`
                                 </div>
                               </div>
 
-                              <div className="grid grid-cols-3 gap-2.5">
+                              <div className="grid grid-cols-3 gap-2">
                                 <div className="bg-transparent p-2.5 rounded-xl border border-white/8 text-center">
                                   <p className="text-[11px] text-slate-400 font-bold uppercase font-sans">
                                     Active Calls
                                   </p>
-                                  <p className="text-sm font-bold text-rose-450 font-sans mt-0.5 animate-pulse">
+                                  <p className="text-sm font-bold text-rose-450 font-sans mt-0.5">
                                     {queueStats.activeCalls}
                                   </p>
                                 </div>
@@ -16894,7 +16898,7 @@ ${ttNotes}`
                                       "Successfully tick-triggered new live center activity event!",
                                     );
                                   }}
-                                  className="flex-1 px-3 py-2.5 bg-transparent border border-white/12 text-white hover:bg-white/5 border border-transparent hover:border-indigo-500/35 text-indigo-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer font-sans"
+                                  className="flex-1 px-3 py-2.5 bg-transparent border border-white/12 text-white hover:bg-white/5 border border-transparent hover:border-indigo-500/35 text-indigo-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans"
                                 >
                                   <RefreshCw className="w-3.5 h-3.5 text-indigo-400" />
                                   Trigger Live Flow Tick
@@ -16913,7 +16917,7 @@ ${ttNotes}`
                                 </p>
                               </div>
 
-                              <div className="bg-white/[0.04] p-3 rounded-xl border border-white/8 text-left font-sans text-[11px] space-y-1.5 h-24 overflow-y-auto leading-snug">
+                              <div className="bg-white/[0.04] p-3 rounded-xl border border-white/8 text-left font-sans text-[11px] space-y-2 h-24 overflow-y-auto leading-snug">
                                 {liveOpsLogs.map((logStr, index) => {
                                   const isLive =
                                     logStr.includes("[Operational]");
@@ -16967,7 +16971,7 @@ ${ttNotes}`
                                     .length || 1;
 
                                 return (
-                                  <div className="flex flex-col gap-1.5 text-[11px] font-sans">
+                                  <div className="flex flex-col gap-2 text-[11px] font-sans">
                                     <p className="text-slate-400 font-bold uppercase tracking-wider text-left text-[11px] mb-0.5">
                                       Aux Occupancy ({activeTotal} Active on
                                       Shift)
@@ -17078,11 +17082,11 @@ ${ttNotes}`
                                   </button>
                                 </div>
                               )}
-                              <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-blue-300 bg-transparent border border-white/12 text-white px-2 py-1 rounded">
+                              <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-blue-300 bg-transparent border border-white/12 text-white px-2 py-1 rounded">
                                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>{" "}
                                 Swap (24h Requirement)
                               </div>
-                              <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-emerald-300 bg-transparent border border-white/12 text-white px-2 py-1 rounded">
+                              <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-emerald-300 bg-transparent border border-white/12 text-white px-2 py-1 rounded">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>{" "}
                                 Annual (14d Requirement)
                               </div>
@@ -17218,7 +17222,7 @@ ${ttNotes}`
                                         </td>
                                         <td className="px-6 py-4 font-medium text-slate-200">
                                           {isSwap ? (
-                                            <div className="space-y-0.5">
+                                            <div className="space-y-1">
                                               <p className="font-semibold text-slate-100">
                                                 {formatDateNice(
                                                   (req as SwapRequest).date,
@@ -17230,7 +17234,7 @@ ${ttNotes}`
                                               </p>
                                             </div>
                                           ) : (
-                                            <div className="space-y-0.5">
+                                            <div className="space-y-1">
                                               <p className="font-semibold text-slate-100">
                                                 {formatDateNice(
                                                   (req as AnnualRequest)
@@ -17278,18 +17282,18 @@ ${ttNotes}`
                                         <td className="px-6 py-4">
                                           {hasViolation ? (
                                             <div className="flex items-center gap-1 text-rose-400 text-[11px] font-bold">
-                                              <AlertTriangle className="w-4 h-4 text-rose-400 animate-pulse" />
+                                              <AlertTriangle className="w-4 h-4 text-rose-400" />
                                               <span>Rule Violation</span>
                                             </div>
                                           ) : (
-                                            <div className="flex items-center gap-1.5 text-emerald-400 text-[11px] font-semibold">
+                                            <div className="flex items-center gap-2 text-emerald-400 text-[11px] font-semibold">
                                               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                                               <span>Compliant</span>
                                             </div>
                                           )}
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                          <div className="flex items-center justify-end gap-2.5 flex-wrap">
+                                          <div className="flex items-center justify-end gap-2 flex-wrap">
                                             <button
                                               onClick={() => {
                                                 const r = req as any;
@@ -17604,14 +17608,14 @@ ${ttNotes}`
                                               </span>
                                             )}
                                             {req.status === "pending" && (
-                                              <span className="px-2 py-1 bg-amber-500/10 text-amber-300 rounded-xl text-[11px] font-semibold flex items-center gap-1 w-max animate-pulse">
+                                              <span className="px-2 py-1 bg-amber-500/10 text-amber-300 rounded-xl text-[11px] font-semibold flex items-center gap-1 w-max">
                                                 <Clock className="w-3.5 h-3.5" />{" "}
                                                 Pending Approval
                                               </span>
                                             )}
                                             {req.status ===
                                               "pending_partner" && (
-                                              <span className="px-2 py-1 bg-transparent border border-white/12 text-white text-indigo-300 rounded-xl text-[11px] font-semibold flex items-center gap-1 w-max animate-pulse">
+                                              <span className="px-2 py-1 bg-transparent border border-white/12 text-white text-indigo-300 rounded-xl text-[11px] font-semibold flex items-center gap-1 w-max">
                                                 <Clock className="w-3.5 h-3.5" />{" "}
                                                 Awaiting Partner
                                               </span>
@@ -17734,7 +17738,7 @@ ${ttNotes}`
                             </div>
 
                             <div className="space-y-3 pt-4">
-                              <div className="grid grid-cols-4 gap-1.5 bg-white/[0.03] p-0.5 border border-white/8 rounded-xl select-none">
+                              <div className="grid grid-cols-4 gap-2 bg-white/[0.03] p-0.5 border border-white/8 rounded-xl select-none">
                                 {(
                                   ["day", "week", "month", "year"] as const
                                 ).map((p) => (
@@ -17750,7 +17754,7 @@ ${ttNotes}`
 
                               <button
                                 onClick={() => downloadReportTxt(reportPeriod)}
-                                className="w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-2"
+                                className="w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 Get {reportPeriod.toUpperCase()} Text
@@ -17777,7 +17781,7 @@ ${ttNotes}`
                             <div className="pt-4 mt-auto space-y-2">
                               <button
                                 onClick={downloadFullXLSX}
-                                className="w-full py-2 bg-blue-500/10 hover:bg-blue-500/10 border border-blue-500/35 text-blue-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="w-full py-2 bg-blue-500/10 hover:bg-blue-500/10 border border-blue-500/35 text-blue-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
                               >
                                 <FileSpreadsheet className="w-3.5 h-3.5" />
                                 Excel Export
@@ -17792,7 +17796,7 @@ ${ttNotes}`
                                   );
                                 }}
                                 disabled={isUploadingToDrive}
-                                className="w-full py-2 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/35 text-indigo-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="w-full py-2 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/35 text-indigo-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
                               >
                                 <Cloud className="w-3.5 h-3.5" />
                                 Save to Drive
@@ -17819,7 +17823,7 @@ ${ttNotes}`
                             <div className="pt-4 mt-auto space-y-2">
                               <button
                                 onClick={downloadTimeLogsXLSX}
-                                className="w-full py-2 bg-emerald-500/10 hover:bg-emerald-500/10 border border-emerald-500/35 text-emerald-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="w-full py-2 bg-emerald-500/10 hover:bg-emerald-500/10 border border-emerald-500/35 text-emerald-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
                               >
                                 <FileSpreadsheet className="w-3.5 h-3.5" />
                                 Excel Export
@@ -17833,7 +17837,7 @@ ${ttNotes}`
                                   );
                                 }}
                                 disabled={isUploadingToDrive}
-                                className="w-full py-2 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/35 text-indigo-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="w-full py-2 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/35 text-indigo-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
                               >
                                 <Cloud className="w-3.5 h-3.5" />
                                 Save to Drive
@@ -17860,7 +17864,7 @@ ${ttNotes}`
                             <div className="pt-4 mt-auto">
                               <button
                                 onClick={handleDownloadInquiriesReport}
-                                className="w-full py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/35 text-purple-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="w-full py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/35 text-purple-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 Extract Inquiries CSV
@@ -17902,7 +17906,7 @@ ${ttNotes}`
                             <div className="pt-4 mt-auto">
                               <button
                                 onClick={handleDownloadFintechRequestsReport}
-                                className="w-full py-2 bg-amber-500/10 hover:bg-amber-500/10 border border-amber-500/35 text-amber-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="w-full py-2 bg-amber-500/10 hover:bg-amber-500/10 border border-amber-500/35 text-amber-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 Extract Fintech CSV
@@ -17929,7 +17933,7 @@ ${ttNotes}`
                             <div className="pt-4 mt-auto">
                               <button
                                 onClick={handleDownloadFintechComplaintsReport}
-                                className="w-full py-2 bg-rose-500/10 hover:bg-rose-500/10 border border-rose-500/35 text-rose-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="w-full py-2 bg-rose-500/10 hover:bg-rose-500/10 border border-rose-500/35 text-rose-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 Extract Complaints CSV
@@ -17956,7 +17960,7 @@ ${ttNotes}`
                             <div className="pt-4 mt-auto">
                               <button
                                 onClick={handleDownloadClientCommsReport}
-                                className="w-full py-2 bg-cyan-500/10 hover:bg-cyan-500/10 border border-cyan-500/35 text-cyan-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="w-full py-2 bg-cyan-500/10 hover:bg-cyan-500/10 border border-cyan-500/35 text-cyan-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 Extract Comms CSV
@@ -17983,7 +17987,7 @@ ${ttNotes}`
                             <div className="pt-4 mt-auto">
                               <button
                                 onClick={handleDownloadCasesReport}
-                                className="w-full py-2 bg-teal-500/10 hover:bg-teal-500/10 border border-teal-500/35 text-teal-400 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="w-full py-2 bg-teal-500/10 hover:bg-teal-500/10 border border-teal-500/35 text-teal-400 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 Extract Case Leads CSV
@@ -18010,7 +18014,7 @@ ${ttNotes}`
                             <div className="pt-4 mt-auto">
                               <button
                                 onClick={handleDownloadSchedulesReport}
-                                className="w-full py-2 bg-pink-500/10 hover:bg-pink-500/10 border border-pink-500/35 text-pink-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="w-full py-2 bg-pink-500/10 hover:bg-pink-500/10 border border-pink-500/35 text-pink-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 Extract Schedules CSV
@@ -18022,7 +18026,7 @@ ${ttNotes}`
                           <div className="bg-gradient-to-br from-emerald-500/5 to-teal-500/5 border border-emerald-500/15 p-5 rounded-xl flex flex-col justify-between">
                             <div className="space-y-2">
                               <div className="w-10 h-10 bg-emerald-500/10 border border-transparent text-emerald-400 rounded-xl flex items-center justify-center">
-                                <Activity className="w-5 h-5 text-emerald-400 animate-pulse" />
+                                <Activity className="w-5 h-5 text-emerald-400" />
                               </div>
                               <h4 className="font-bold text-slate-100 text-xs font-sans">
                                 RTM Live Attendance Digest
@@ -18037,7 +18041,7 @@ ${ttNotes}`
                             <div className="pt-4 mt-auto">
                               <button
                                 onClick={downloadRtmLiveMetricsDigest}
-                                className="w-full py-2 bg-emerald-500/10 hover:bg-emerald-500/10 border border-emerald-500/35 text-emerald-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="w-full py-2 bg-emerald-500/10 hover:bg-emerald-500/10 border border-emerald-500/35 text-emerald-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 Download RTM Digest
@@ -18061,11 +18065,11 @@ ${ttNotes}`
                             </p>
                           </div>
 
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             {/* Shift Swap Module */}
-                            <div className="bg-white/5 border border-white/8 p-6 rounded-xl flex flex-col space-y-5 relative overflow-hidden">
+                            <div className="bg-white/5 border border-white/8 p-6 rounded-xl flex flex-col space-y-4 relative overflow-hidden">
                               <div className="absolute top-0 left-0 right-0 h-1 bg-blue-500"></div>
-                              <div className="flex items-center gap-2.5">
+                              <div className="flex items-center gap-2">
                                 <div className="w-9 h-9 bg-blue-500/10 border border-transparent rounded-xl flex items-center justify-center">
                                   <Users className="w-5 h-5 text-blue-400" />
                                 </div>
@@ -18235,7 +18239,7 @@ ${ttNotes}`
 
                                 {/* Interactive Warning Message Display */}
                                 {swapWarning && (
-                                  <div className="p-4 bg-rose-500/10 border border-transparent text-rose-300 rounded-xl text-[11px] flex items-center gap-2.5">
+                                  <div className="p-4 bg-rose-500/10 border border-transparent text-rose-300 rounded-xl text-[11px] flex items-center gap-2">
                                     <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
                                     <div>
                                       <p className="font-bold">
@@ -18272,9 +18276,9 @@ ${ttNotes}`
                             </div>
 
                             {/* Annual Leave Module */}
-                            <div className="bg-white/5 border border-white/8 p-6 rounded-xl flex flex-col space-y-5 relative overflow-hidden">
+                            <div className="bg-white/5 border border-white/8 p-6 rounded-xl flex flex-col space-y-4 relative overflow-hidden">
                               <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500"></div>
-                              <div className="flex items-center gap-2.5">
+                              <div className="flex items-center gap-2">
                                 <div className="w-9 h-9 bg-emerald-500/10 border border-transparent rounded-xl flex items-center justify-center">
                                   <Calendar className="w-5 h-5 text-emerald-400" />
                                 </div>
@@ -18371,7 +18375,7 @@ ${ttNotes}`
 
                                 {/* Interactive Warning Message Display */}
                                 {annualWarning && (
-                                  <div className="p-4 bg-rose-500/10 border border-transparent text-rose-300 rounded-xl text-[11px] flex items-center gap-2.5">
+                                  <div className="p-4 bg-rose-500/10 border border-transparent text-rose-300 rounded-xl text-[11px] flex items-center gap-2">
                                     <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
                                     <div>
                                       <p className="font-bold">
@@ -18459,7 +18463,7 @@ ${ttNotes}`
 
                           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             {/* Submit Inquiry Form (Left Side / Col Span 1) */}
-                            <div className="lg:col-span-1 bg-white/5 border border-white/8 p-5 rounded-xl space-y-5">
+                            <div className="lg:col-span-1 bg-white/5 border border-white/8 p-5 rounded-xl space-y-4">
                               <h3 className="text-sm font-bold text-slate-100 font-sans flex items-center gap-2 border-b border-white/8 pb-3">
                                 <HelpCircle className="w-5 h-5 text-indigo-400" />
                                 Submit New Inquiry
@@ -18477,7 +18481,7 @@ ${ttNotes}`
                                 className="space-y-4"
                               >
                                 {/* Mandatory Clinic Name Dropdown */}
-                                <div className="space-y-1.5">
+                                <div className="space-y-2">
                                   <label className="text-[11px] font-semibold text-slate-300 block flex items-center justify-between">
                                     <span className="flex items-center gap-1">
                                       Clinic Name{" "}
@@ -18518,7 +18522,7 @@ ${ttNotes}`
                                 </div>
 
                                 {/* Mandatory Platform Dropdown */}
-                                <div className="space-y-1.5">
+                                <div className="space-y-2">
                                   <label className="text-[11px] font-semibold text-slate-300 block flex items-center justify-between">
                                     <span className="flex items-center gap-1">
                                       Platform{" "}
@@ -18592,7 +18596,7 @@ ${ttNotes}`
                                 </div>
 
                                 {/* Patient Name input (Type, don't select) */}
-                                <div className="space-y-1.5">
+                                <div className="space-y-2">
                                   <label className="text-[11px] font-semibold text-slate-300 block">
                                     Patient Name{" "}
                                     <span className="text-rose-400 font-bold">
@@ -18612,7 +18616,7 @@ ${ttNotes}`
                                 </div>
 
                                 {/* Customer Type Segmented Control */}
-                                <div className="space-y-1.5">
+                                <div className="space-y-2">
                                   <label className="text-[11px] font-semibold text-slate-300 block">
                                     Customer Status{" "}
                                     <span className="text-rose-400 font-bold">
@@ -18643,7 +18647,7 @@ ${ttNotes}`
 
                                 {/* Patient File ID conditional */}
                                 {inquiryCustomerType === "old" && (
-                                  <div className="space-y-1.5 animate-fade-in">
+                                  <div className="space-y-2 animate-fade-in">
                                     <label className="text-[11px] font-semibold text-slate-300 block">
                                       Patient File Number{" "}
                                       <span className="text-rose-400 font-bold">
@@ -18684,7 +18688,7 @@ ${ttNotes}`
                                   </div>
 
                                   {!inquiryNoPhone ? (
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-2">
                                       <label className="text-[11px] font-semibold text-slate-300 block">
                                         Phone Number{" "}
                                         <span className="text-rose-400 font-bold">
@@ -18713,7 +18717,7 @@ ${ttNotes}`
                                     </div>
                                   ) : (
                                     <div className="grid grid-cols-2 gap-3 animate-fade-in text-left">
-                                      <div className="space-y-1.5">
+                                      <div className="space-y-2">
                                         <label className="text-[11px] font-semibold text-slate-300 block">
                                           Instagram Username
                                         </label>
@@ -18725,7 +18729,7 @@ ${ttNotes}`
                                           className="w-full px-4 py-3 bg-white/5 border border-white/8 rounded-xl text-slate-100 text-[11px] focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                         />
                                       </div>
-                                      <div className="space-y-1.5">
+                                      <div className="space-y-2">
                                         <label className="text-[11px] font-semibold text-slate-300 block">
                                           TikTok Username
                                         </label>
@@ -18742,7 +18746,7 @@ ${ttNotes}`
                                 </div>
 
                                 {/* Optional File ID */}
-                                <div className="space-y-1.5 animate-fade-in text-left">
+                                <div className="space-y-2 animate-fade-in text-left">
                                   <label className="text-[11px] font-semibold text-slate-300 block">
                                     File ID (Optional)
                                   </label>
@@ -18758,7 +18762,7 @@ ${ttNotes}`
                                 </div>
 
                                 {/* Inquiry text details with English or Arabic typing toggles */}
-                                <div className="space-y-1.5">
+                                <div className="space-y-2">
                                   <div className="flex justify-between items-center flex-wrap gap-1">
                                     <label className="text-[11px] font-semibold text-slate-300">
                                       Inquiry Details{" "}
@@ -18851,7 +18855,7 @@ ${ttNotes}`
                                     </label>
                                   </div>
                                   {inqIsFollowUp && (
-                                    <div className="space-y-1.5 animate-fade-in pt-1 text-left">
+                                    <div className="space-y-2 animate-fade-in pt-1 text-left">
                                       <label className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider block">
                                         Follow-up Date *
                                       </label>
@@ -18878,7 +18882,7 @@ ${ttNotes}`
                                 <button
                                   type="submit"
                                   disabled={isFormSubmitting}
-                                  className={`w-full py-2.5 text-white font-bold text-[11px] rounded-xl transition-all flex items-center justify-center gap-1.5 ${isFormSubmitting ? "bg-indigo-800 pointer-events-none opacity-60" : "bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98]"}`}
+                                  className={`w-full py-2.5 text-white font-bold text-[11px] rounded-xl transition-all flex items-center justify-center gap-2 ${isFormSubmitting ? "bg-indigo-800 pointer-events-none opacity-60" : "bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98]"}`}
                                 >
                                   {isFormSubmitting ? (
                                     <>
@@ -18953,7 +18957,7 @@ ${ttNotes}`
                                           currentUser?.name?.toLowerCase(),
                                       ).length === 0 ? (
                                         <div className="text-center py-12">
-                                          <HelpCircle className="w-12 h-12 text-slate-400 mx-auto mb-2.5 animate-pulse" />
+                                          <HelpCircle className="w-12 h-12 text-slate-400 mx-auto mb-2.5" />
                                           <p className="text-[11px] text-slate-400 italic">
                                             No inquiries submitted yet. Submit a
                                             case above to get started!
@@ -18968,7 +18972,7 @@ ${ttNotes}`
                                           )
                                           .map((inq) => {
                                             let statusColor =
-                                              "bg-yellow-500/10 border-yellow-500/20 text-yellow-400 animate-pulse";
+                                              "bg-yellow-500/10 border-yellow-500/20 text-yellow-400";
                                             let statusText = "Submitted to TL";
                                             if (inq.status === "sent") {
                                               statusColor =
@@ -18994,7 +18998,7 @@ ${ttNotes}`
                                             const ageBadgeColor =
                                               inq.status !== "answered"
                                                 ? ageHours > 4
-                                                  ? "bg-red-500/10 text-red-400 border-transparent animate-pulse"
+                                                  ? "bg-red-500/10 text-red-400 border-transparent"
                                                   : ageHours > 1
                                                     ? "bg-amber-500/10 text-amber-400 border-transparent"
                                                     : "bg-slate-700 text-slate-400 border-white/8"
@@ -19079,7 +19083,7 @@ ${ttNotes}`
                                                       ).toLocaleString()}
                                                     </span>
                                                   </div>
-                                                  <div className="flex items-center gap-2.5">
+                                                  <div className="flex items-center gap-2">
                                                     {!inq.seenByAgent &&
                                                       (inq.status === "sent" ||
                                                         inq.status ===
@@ -19122,7 +19126,7 @@ ${ttNotes}`
                                                         className="text-[11px] bg-transparent border border-white/12 text-white border border-transparent text-emerald-300 font-bold px-2 py-0.5 rounded-xl hover:bg-white/5 transition-all flex items-center gap-1 shrink-0 cursor-pointer"
                                                         title={`Edit inquiry (${getRemainingEditTime(inq.createdAt)})`}
                                                       >
-                                                        <Pencil className="w-2.5 h-2.5" />{" "}
+                                                        <Pencil className="w-3 h-3" />{" "}
                                                         Edit (
                                                         {getRemainingEditTime(
                                                           inq.createdAt,
@@ -19137,7 +19141,7 @@ ${ttNotes}`
                                                           data: inq,
                                                         })
                                                       }
-                                                      className="px-3 py-1.5 bg-teal-500/10 hover:bg-teal-500/10 border border-transparent rounded-xl text-teal-400 text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer mr-2"
+                                                      className="px-3 py-1.5 bg-teal-500/10 hover:bg-teal-500/10 border border-transparent rounded-xl text-teal-400 text-[11px] font-bold transition-all flex items-center gap-2 cursor-pointer mr-2"
                                                     >
                                                       <Eye className="w-3 h-3 text-teal-400" />{" "}
                                                       View Details
@@ -19179,7 +19183,7 @@ ${ttNotes}`
                                                           "Inquiry copied!",
                                                         );
                                                       }}
-                                                      className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/8 rounded-xl text-slate-300 text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                                                      className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/8 rounded-xl text-slate-300 text-[11px] font-bold transition-all flex items-center gap-2 cursor-pointer"
                                                     >
                                                       <Copy className="w-3 h-3" />{" "}
                                                       Copy Details
@@ -19224,7 +19228,7 @@ ${ttNotes}`
                                                   <div className="p-3 bg-orange-500/5 border border-orange-500/10 rounded-xl space-y-1">
                                                     <div className="flex justify-between items-center">
                                                       <p className="text-[11px] font-sans font-bold text-orange-400 flex items-center gap-1">
-                                                        <Send className="w-3 h-3 animate-pulse" />
+                                                        <Send className="w-3 h-3" />
                                                         Forwarded to Client
                                                         Partner
                                                       </p>
@@ -19253,7 +19257,7 @@ ${ttNotes}`
                                                 />
 
                                                 {/* Customer Contacted Status Dropdown */}
-                                                <div className="flex flex-wrap items-center gap-2.5 pt-3 border-t border-white/8">
+                                                <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-white/8">
                                                   <span className="text-[11px] text-slate-400 font-medium">
                                                     Customer Contact Status:
                                                   </span>
@@ -19514,8 +19518,8 @@ ${ttNotes}`
                                 restroom visits in real-time
                               </p>
                             </div>
-                            <div className="px-4 py-2 bg-white/10 /80 border border-white/8 rounded-xl flex items-center gap-2.5">
-                              <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse"></span>
+                            <div className="px-4 py-2 bg-white/10 /80 border border-white/8 rounded-xl flex items-center gap-2">
+                              <span className="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
                               <span className="text-[11px] text-slate-300 font-sans font-semibold">
                                 System Year Context: {systemTime.getFullYear()}
                               </span>
@@ -19528,7 +19532,7 @@ ${ttNotes}`
                               {/* Live Desk Console Panel */}
                               <div className="p-6 sm:p-8 bg-white/5 border border-white/8 rounded-xl text-slate-100 relative overflow-hidden flex flex-col items-center text-center space-y-6">
                                 {/* Pulse glow background ornament */}
-                                <div className="absolute top-10 w-96 h-96 bg-indigo-500/10 blur-[100px] rounded-full -z-10 animate-pulse"></div>
+                                <div className="absolute top-10 w-96 h-96 bg-indigo-500/10 blur-[100px] rounded-full -z-10"></div>
 
                                 {/* Top live digital clock display */}
                                 <div className="space-y-1">
@@ -19571,22 +19575,22 @@ ${ttNotes}`
                                     statusLabel = "On Shift (Active Working)";
                                     ringStyle = "border-transparent bg-emerald-500/5";
                                     textStyle = "text-emerald-400";
-                                    dotStyle = "bg-emerald-500 animate-pulse";
+                                    dotStyle = "bg-emerald-500";
                                   } else if (status === "break") {
                                     statusLabel = "On 15-Minute Break";
                                     ringStyle = "border-transparent bg-amber-500/5";
                                     textStyle = "text-amber-400";
-                                    dotStyle = "bg-amber-500 animate-pulse";
+                                    dotStyle = "bg-amber-500";
                                   } else if (status === "lunch") {
                                     statusLabel = "On 30-Minute Lunch";
                                     ringStyle = "border-transparent bg-pink-500/5";
                                     textStyle = "text-pink-400";
-                                    dotStyle = "bg-pink-500 animate-pulse";
+                                    dotStyle = "bg-pink-500";
                                   } else if (status === "restroom") {
                                     statusLabel = "At Restroom";
                                     ringStyle = "border-transparent bg-indigo-500/5";
                                     textStyle = "text-indigo-400";
-                                    dotStyle = "bg-indigo-500 animate-pulse";
+                                    dotStyle = "bg-indigo-500";
                                   }
 
                                   return (
@@ -19754,7 +19758,7 @@ ${ttNotes}`
                                       return (
                                         <button
                                           onClick={handleClockIn}
-                                          className="w-full py-5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-100 font-bold text-sm tracking-widest rounded-xl hover: active:scale-[0.99] transition-all cursor-pointer font-sans flex items-center justify-center gap-3 uppercase animate-pulse"
+                                          className="w-full py-5 bg-indigo-500 hover:bg-indigo-600 text-slate-100 font-bold text-sm tracking-widest rounded-xl hover: active:scale-[0.99] transition-all cursor-pointer font-sans flex items-center justify-center gap-3 uppercase"
                                         >
                                           <CheckCircle2 className="w-5 h-5 text-slate-100 shrink-0" />
                                           Clock In For Shift
@@ -19769,7 +19773,7 @@ ${ttNotes}`
                                             Active Controllers
                                           </p>
                                           <span
-                                            className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold uppercase flex items-center gap-1.5 ${ status === "working" ? "bg-emerald-500/10 border border-transparent text-emerald-400" : "bg-indigo-500/10 border border-transparent text-indigo-300 animate-pulse" }`}
+                                            className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold uppercase flex items-center gap-2 ${ status === "working" ? "bg-emerald-500/10 border border-transparent text-emerald-400" : "bg-indigo-500/10 border border-transparent text-indigo-300" }`}
                                           >
                                             <span
                                               className={`w-1.5 h-1.5 rounded-full ${status === "working" ? "bg-emerald-400" : "bg-indigo-400"}`}
@@ -19785,7 +19789,7 @@ ${ttNotes}`
                                             onClick={() =>
                                               handleStartActivity("break")
                                             }
-                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-[11px] font-bold border ${ status === "break" ? "bg-amber-500/10 border-amber-400 text-slate-100 -sm scale-[1.03]" : "bg-amber-500/10 hover:bg-amber-500/10 border-transparent text-amber-300 hover:scale-[1.03]" }`}
+                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-2 transition-all duration-300 cursor-pointer text-[11px] font-bold border ${ status === "break" ? "bg-amber-500/10 border-amber-400 text-slate-100 -sm scale-[1.03]" : "bg-amber-500/10 hover:bg-amber-500/10 border-transparent text-amber-300 hover:scale-[1.03]" }`}
                                           >
                                             <Coffee className="w-4 h-4 text-amber-400" />
                                             <span>15m Break</span>
@@ -19795,7 +19799,7 @@ ${ttNotes}`
                                             onClick={() =>
                                               handleStartActivity("lunch")
                                             }
-                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-[11px] font-bold border ${ status === "lunch" ? "bg-pink-500/10 border-pink-400 text-slate-100 -sm scale-[1.03]" : "bg-pink-500/10 hover:bg-pink-500/10 border-transparent text-pink-300 hover:scale-[1.03]" }`}
+                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-2 transition-all duration-300 cursor-pointer text-[11px] font-bold border ${ status === "lunch" ? "bg-pink-500/10 border-pink-400 text-slate-100 -sm scale-[1.03]" : "bg-pink-500/10 hover:bg-pink-500/10 border-transparent text-pink-300 hover:scale-[1.03]" }`}
                                           >
                                             <Utensils className="w-4 h-4 text-pink-400" />
                                             <span>30m Lunch</span>
@@ -19805,7 +19809,7 @@ ${ttNotes}`
                                             onClick={() =>
                                               handleStartActivity("restroom")
                                             }
-                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-[11px] font-bold border ${ status === "restroom" ? "bg-indigo-500/10 border-indigo-400 text-white scale-[1.03]" : "bg-indigo-500/10 hover:bg-indigo-500/10 border-transparent text-indigo-300 hover:scale-[1.03]" }`}
+                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-2 transition-all duration-300 cursor-pointer text-[11px] font-bold border ${ status === "restroom" ? "bg-indigo-500/10 border-indigo-400 text-white scale-[1.03]" : "bg-indigo-500/10 hover:bg-indigo-500/10 border-transparent text-indigo-300 hover:scale-[1.03]" }`}
                                           >
                                             <UserIcon className="w-4 h-4 text-indigo-400" />
                                             <span>Restroom</span>
@@ -19815,7 +19819,7 @@ ${ttNotes}`
                                             onClick={() =>
                                               handleStartActivity("meeting")
                                             }
-                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-[11px] font-bold border ${ status === "meeting" ? "bg-cyan-500/10 border-cyan-400 text-slate-100 -sm scale-[1.03]" : "bg-cyan-500/10 hover:bg-cyan-500/10 border-transparent text-cyan-300 hover:scale-[1.03]" }`}
+                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-2 transition-all duration-300 cursor-pointer text-[11px] font-bold border ${ status === "meeting" ? "bg-cyan-500/10 border-cyan-400 text-slate-100 -sm scale-[1.03]" : "bg-cyan-500/10 hover:bg-cyan-500/10 border-transparent text-cyan-300 hover:scale-[1.03]" }`}
                                           >
                                             <Users className="w-4 h-4 text-cyan-400" />
                                             <span>Team Meeting</span>
@@ -19825,7 +19829,7 @@ ${ttNotes}`
                                             onClick={() =>
                                               handleStartActivity("one_on_one")
                                             }
-                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-[11px] font-bold border ${ status === "one_on_one" ? "bg-violet-500/10 border-violet-400 text-slate-100 -sm scale-[1.03]" : "bg-violet-500/10 hover:bg-violet-500/10 border-transparent text-violet-300 hover:scale-[1.03]" }`}
+                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-2 transition-all duration-300 cursor-pointer text-[11px] font-bold border ${ status === "one_on_one" ? "bg-violet-500/10 border-violet-400 text-slate-100 -sm scale-[1.03]" : "bg-violet-500/10 hover:bg-violet-500/10 border-transparent text-violet-300 hover:scale-[1.03]" }`}
                                           >
                                             <MessageSquare className="w-4 h-4 text-violet-400" />
                                             <span>1:1 Session</span>
@@ -19835,7 +19839,7 @@ ${ttNotes}`
                                             onClick={() =>
                                               handleStartActivity("personal")
                                             }
-                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer text-[11px] font-bold border ${ status === "personal" ? "bg-emerald-500/10 border-emerald-400 text-white scale-[1.03]" : "bg-emerald-500/10 hover:bg-emerald-500/10 border-transparent text-emerald-300 hover:scale-[1.03]" }`}
+                                            className={`py-3 rounded-xl flex flex-col items-center justify-center gap-2 transition-all duration-300 cursor-pointer text-[11px] font-bold border ${ status === "personal" ? "bg-emerald-500/10 border-emerald-400 text-white scale-[1.03]" : "bg-emerald-500/10 hover:bg-emerald-500/10 border-transparent text-emerald-300 hover:scale-[1.03]" }`}
                                           >
                                             <Sparkles className="w-4 h-4 text-emerald-400" />
                                             <span>Pers. Break</span>
@@ -19846,7 +19850,7 @@ ${ttNotes}`
                                           <div className="pt-2 animate-fade-in">
                                             <button
                                               onClick={handleEndActivity}
-                                              className="w-full py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-slate-100 font-bold text-[11px] tracking-wider rounded-xl hover: active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 uppercase font-sans"
+                                              className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 text-slate-100 font-bold text-[11px] tracking-wider rounded-xl hover: active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 uppercase font-sans"
                                             >
                                               <ArrowRight className="w-4 h-4 text-slate-100" />
                                               End AUX & Resume Active Work
@@ -19871,7 +19875,7 @@ ${ttNotes}`
 
                               {/* Display basic shift coverage information */}
                               <div className="p-4 bg-white/5 border border-white/8 rounded-xl text-[11px] text-slate-400 leading-relaxed font-sans">
-                                <p className="font-semibold text-slate-100 mb-1 flex items-center gap-1.5 font-sans">
+                                <p className="font-semibold text-slate-100 mb-1 flex items-center gap-2 font-sans">
                                   <Info className="w-4 h-4 text-indigo-400 shrink-0" />{" "}
                                   Time-Tracking Rules & Compliance Policy
                                 </p>
@@ -19940,7 +19944,7 @@ ${ttNotes}`
                                           Total Breaks:
                                         </span>
                                         <span
-                                          className={`font-bold font-mono ${stats.breakMins > 15 ? "text-rose-400 animate-pulse" : "text-amber-300"}`}
+                                          className={`font-bold font-mono ${stats.breakMins > 15 ? "text-rose-400" : "text-amber-300"}`}
                                         >
                                           {stats.breakMins.toFixed(2)}ins used /
                                           15m max
@@ -19951,7 +19955,7 @@ ${ttNotes}`
                                           Total Lunch:
                                         </span>
                                         <span
-                                          className={`font-bold font-mono ${stats.lunchMins > 30 ? "text-rose-400 animate-pulse" : "text-pink-300"}`}
+                                          className={`font-bold font-mono ${stats.lunchMins > 30 ? "text-rose-400" : "text-pink-300"}`}
                                         >
                                           {stats.lunchMins.toFixed(2)}ins used /
                                           30m max
@@ -19979,7 +19983,7 @@ ${ttNotes}`
                                           Team Meeting:
                                         </span>
                                         <span
-                                          className={`font-bold font-mono ${stats.meetingMins > 60 ? "text-rose-400 animate-pulse" : "text-cyan-300"}`}
+                                          className={`font-bold font-mono ${stats.meetingMins > 60 ? "text-rose-400" : "text-cyan-300"}`}
                                         >
                                           {stats.meetingMins.toFixed(2)}ins used
                                           / 60m max
@@ -19990,7 +19994,7 @@ ${ttNotes}`
                                           1:1 Session:
                                         </span>
                                         <span
-                                          className={`font-bold font-mono ${stats.oneOnOneMins > 30 ? "text-rose-400 animate-pulse" : "text-violet-300"}`}
+                                          className={`font-bold font-mono ${stats.oneOnOneMins > 30 ? "text-rose-400" : "text-violet-300"}`}
                                         >
                                           {stats.oneOnOneMins.toFixed(2)}ins
                                           used / 30m max
@@ -20001,7 +20005,7 @@ ${ttNotes}`
                                           Personal Break:
                                         </span>
                                         <span
-                                          className={`font-bold font-mono ${stats.personalMins > 15 ? "text-rose-400 animate-pulse" : "text-emerald-300"}`}
+                                          className={`font-bold font-mono ${stats.personalMins > 15 ? "text-rose-400" : "text-emerald-300"}`}
                                         >
                                           {stats.personalMins.toFixed(2)}ins
                                           used / 15m max
@@ -20281,7 +20285,7 @@ ${ttNotes}`
                           <div className="bg-white/5 border border-white/8 p-5 rounded-xl lg:col-span-2 flex flex-col justify-between">
                             <div>
                               <h3 className="text-xs font-bold text-slate-100 font-sans mb-1 flex items-center gap-2">
-                                <BarChart2 className="w-4 h-4 text-emerald-400" />
+                                <BarChart2 className="w-3.5 h-3.5 text-emerald-400" />
                                 Clinic Load Analysis & Distribution Chart
                               </h3>
                               <p className="text-[11px] text-slate-400 mb-4">
@@ -20412,7 +20416,7 @@ ${ttNotes}`
                                   className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/8 rounded-xl text-slate-100 text-[11px] focus:outline-none focus:border-indigo-500 transition-all font-sans"
                                 />
                               </div>
-                              <div className="relative flex gap-1.5 w-full md:w-auto shrink-0 border-r border-white/8 pr-4 mr-1">
+                              <div className="relative flex gap-2 w-full md:w-auto shrink-0 border-r border-white/8 pr-4 mr-1">
                                 <select
                                   value=""
                                   onChange={(e) => {
@@ -20488,22 +20492,23 @@ ${ttNotes}`
                                   </div>
                                 )}
                               </div>
-                              <div className="flex gap-1.5 w-full md:w-auto overflow-x-auto select-none py-1 md:py-0">
+                              <div className="flex gap-2 w-full md:w-auto overflow-x-auto select-none py-1 md:py-0">
                                 {[
-                                  { id: "", label: "All" },
-                                  { id: "submitted", label: "🆕 New" },
-                                  { id: "tl_reviewing", label: "👀 TL Reviewing" },
-                                  { id: "sent_to_clinic", label: "📤 Sent to Clinic" },
-                                  { id: "sent", label: "📨 Sent" },
-                                  { id: "answered", label: "✅ Answered" },
-                                  { id: "closed", label: "🔒 Closed" },
+                                  { id: "", label: "All", icon: null },
+                                  { id: "submitted", label: "New", icon: <Sparkles className="w-3 h-3 text-amber-400" /> },
+                                  { id: "tl_reviewing", label: "TL Reviewing", icon: <Eye className="w-3 h-3 text-sky-400" /> },
+                                  { id: "sent_to_clinic", label: "Sent to Clinic", icon: <Upload className="w-3 h-3 text-pink-400" /> },
+                                  { id: "sent", label: "Sent", icon: <Mail className="w-3 h-3 text-purple-400" /> },
+                                  { id: "answered", label: "Answered", icon: <CheckCircle2 className="w-3 h-3 text-emerald-400" /> },
+                                  { id: "closed", label: "Closed", icon: <Lock className="w-3 h-3 text-slate-400" /> },
                                 ].map((pill) => (
                                     <button
                                       key={pill.id || "all"}
                                       onClick={() => setInquiryStatusFilter(pill.id)}
-                                      className={`px-3.5 py-1.5 rounded-xl border text-[11px] font-bold uppercase tracking-wider cursor-pointer transition-all shrink-0 ${ inquiryStatusFilter === pill.id ? "bg-indigo-600/20 border-transparent text-white font-bold" : "border-white/8 text-slate-400 bg-transparent hover:text-slate-100" }`}
+                                      className={`px-3.5 py-1.5 rounded-xl border text-[11px] font-bold uppercase tracking-wider cursor-pointer transition-all shrink-0 flex items-center gap-2 ${ inquiryStatusFilter === pill.id ? "bg-indigo-600/20 border-transparent text-white font-bold" : "border-white/8 text-slate-400 bg-transparent hover:text-slate-100" }`}
                                     >
-                                      {pill.label}
+                                      {pill.icon}
+                                      <span>{pill.label}</span>
                                     </button>
                                   ))}
                               </div>
@@ -20962,7 +20967,7 @@ ${ttNotes}`
                               </div>
 
                               {/* Achievements & Goals Section */}
-                              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
                                 {/* Total Combines Stat Card */}
                                 <div className="lg:col-span-4 bg-indigo-500/5 border border-indigo-500/10 rounded-xl p-5 flex flex-col justify-between relative overflow-hidden group">
                                   <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl group-hover:scale-125 transition-all duration-500" />
@@ -21066,7 +21071,7 @@ ${ttNotes}`
                                   )}
                                 </div>
 
-                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3.5 pt-1">
+                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-1">
                                   {milestones.map((m) => {
                                     const isAchieved =
                                       totalCasesHandled >= m.threshold;
@@ -21132,7 +21137,7 @@ ${ttNotes}`
                                             : "desc",
                                         )
                                       }
-                                      className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/8 rounded-xl text-[11px] font-semibold text-slate-300 transition-all flex items-center gap-1.5"
+                                      className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/8 rounded-xl text-[11px] font-semibold text-slate-300 transition-all flex items-center gap-2"
                                     >
                                       <Clock className="w-3.5 h-3.5" />
                                       {myCasesSortOrder === "desc"
@@ -21145,7 +21150,7 @@ ${ttNotes}`
                                 {/* Clickable pill filters */}
                                 <div className="flex flex-col gap-3 py-2 border-t border-b border-white/8">
                                   {/* Type selector line */}
-                                  <div className="flex flex-wrap items-center gap-1.5">
+                                  <div className="flex flex-wrap items-center gap-2">
                                     <span className="text-[11px] font-bold uppercase text-slate-500 tracking-wider mr-2">
                                       Type:
                                     </span>
@@ -21181,7 +21186,7 @@ ${ttNotes}`
                                         onClick={() =>
                                           setMyCasesTypeFilter(pill.id)
                                         }
-                                        className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 ${ myCasesTypeFilter === pill.id ? "bg-indigo-500 text-white scale-102" : "bg-white/5 hover:bg-white/10 text-slate-300 hover:text-slate-100 border border-white/8" }`}
+                                        className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-2 ${ myCasesTypeFilter === pill.id ? "bg-indigo-500 text-white scale-102" : "bg-white/5 hover:bg-white/10 text-slate-300 hover:text-slate-100 border border-white/8" }`}
                                       >
                                         {pill.label}
                                         <span
@@ -21194,7 +21199,7 @@ ${ttNotes}`
                                   </div>
 
                                   {/* Status filter row */}
-                                  <div className="flex flex-wrap items-center gap-1.5">
+                                  <div className="flex flex-wrap items-center gap-2">
                                     <span className="text-[11px] font-bold uppercase text-slate-500 tracking-wider mr-2">
                                       Status:
                                     </span>
@@ -21845,7 +21850,7 @@ ${ttNotes}`
                             </p>
                           </div>
 
-                          <div className="flex flex-wrap gap-2.5 self-stretch md:self-auto">
+                          <div className="flex flex-wrap gap-2 self-stretch md:self-auto">
                             <button
                               onClick={handleCopyCSVReport}
                               className="flex-1 sm:flex-initial px-4 py-2.5 bg-transparent border border-white/12 text-white hover:bg-white/5 text-white rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer font-sans"
@@ -22152,7 +22157,7 @@ ${ttNotes}`
                                                 className={
                                                   compliance.startsWith("")
                                                     ? "text-emerald-400"
-                                                    : "text-rose-400 animate-pulse"
+                                                    : "text-rose-400"
                                                 }
                                               >
                                                 {compliance}
@@ -22366,7 +22371,6 @@ ${ttNotes}`
                                       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-900/40 /50 p-4 border border-white/8 rounded-xl">
                                         <div className="flex items-center gap-3">
                                           <span className="relative flex h-3 w-3">
-                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                             <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                                           </span>
                                           <span className="font-sans font-medium text-slate-100">
@@ -22404,7 +22408,7 @@ ${ttNotes}`
                                               >
                                                 <div className="flex items-center gap-2">
                                                   <span
-                                                    className={`w-2 h-2 rounded-full ${group.id === "offline" ? "bg-slate-600" : `${group.badgeColor} animate-pulse`}`}
+                                                    className={`w-2 h-2 rounded-full ${group.id === "offline" ? "bg-slate-600" : `${group.badgeColor}`}`}
                                                   ></span>
                                                   <h4
                                                     className={`text-xs font-bold uppercase tracking-wider font-sans ${group.headerText}`}
@@ -22742,7 +22746,7 @@ ${ttNotes}`
                                       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-rose-500/10 pb-3">
                                         <div className="space-y-1">
                                           <h4 className="text-xs font-bold text-rose-300 flex items-center gap-2 font-sans uppercase tracking-wider">
-                                            <AlertTriangle className="w-4 h-4 text-rose-400 animate-pulse" />
+                                            <AlertTriangle className="w-4 h-4 text-rose-400" />
                                             Live Compliance Alerts & Aux Watch
                                           </h4>
                                           <p className="text-[11px] text-slate-400 font-sans">
@@ -22753,7 +22757,7 @@ ${ttNotes}`
                                           </p>
                                         </div>
                                         <span
-                                          className={`px-2.5 py-1 text-[11px] font-bold rounded-xl border uppercase tracking-wider ${ complianceViolations.length > 0 ? "bg-rose-500/10 text-rose-300 border-transparent font-sans animate-pulse" : "bg-emerald-500/10 text-emerald-300 border-transparent" }`}
+                                          className={`px-2.5 py-1 text-[11px] font-bold rounded-xl border uppercase tracking-wider ${ complianceViolations.length > 0 ? "bg-rose-500/10 text-rose-300 border-transparent font-sans" : "bg-emerald-500/10 text-emerald-300 border-transparent" }`}
                                         >
                                           {complianceViolations.length} Active
                                           Breach
@@ -22765,7 +22769,7 @@ ${ttNotes}`
                                       </div>
 
                                       {complianceViolations.length === 0 ? (
-                                        <div className="flex items-center gap-3.5 p-4 bg-emerald-950/20 border border-transparent rounded-xl">
+                                        <div className="flex items-center gap-3 p-4 bg-emerald-950/20 border border-transparent rounded-xl">
                                           <span className="flex h-6 w-6 shrink-0 bg-emerald-500/10 text-emerald-400 border border-transparent rounded-full items-center justify-center font-bold text-[11px] select-none"></span>
                                           <div className="text-left">
                                             <p className="text-[11px] font-bold text-emerald-300 font-sans">
@@ -22801,7 +22805,7 @@ ${ttNotes}`
                                                       (v) =>
                                                         v.isCurrentlyActive,
                                                     ) && (
-                                                      <span className="flex items-center gap-1.5 text-[11px] bg-red-500/10 text-red-300 border border-transparent px-2 py-0.5 rounded-lg font-bold uppercase tracking-widest animate-pulse font-sans">
+                                                      <span className="flex items-center gap-2 text-[11px] bg-red-500/10 text-red-300 border border-transparent px-2 py-0.5 rounded-lg font-bold uppercase tracking-widest animate-pulse font-sans">
                                                         <span className="w-1.5 h-1.5 rounded-full bg-red-500 block"></span>
                                                         Overtime Now
                                                       </span>
@@ -22809,7 +22813,7 @@ ${ttNotes}`
                                                   </div>
                                                 </div>
 
-                                                <div className="space-y-1.5 mt-2">
+                                                <div className="space-y-2 mt-2">
                                                   {entry.violations.map(
                                                     (violation, idx) => (
                                                       <div
@@ -22864,7 +22868,7 @@ ${ttNotes}`
                                                     `Direct compliance warning notification dispatched dynamically to ${entry.agentName}!`,
                                                   );
                                                 }}
-                                                className="w-full py-1.5 bg-rose-500/10 hover:bg-rose-500/10 border border-transparent text-rose-300 rounded-xl text-[11px] uppercase font-bold tracking-wider hover:scale-[1.01] active:scale-[0.99] cursor-pointer transition-all flex items-center justify-center gap-1.5 font-sans"
+                                                className="w-full py-1.5 bg-rose-500/10 hover:bg-rose-500/10 border border-transparent text-rose-300 rounded-xl text-[11px] uppercase font-bold tracking-wider hover:scale-[1.01] active:scale-[0.99] cursor-pointer transition-all flex items-center justify-center gap-2 font-sans"
                                               >
                                                 <Bell className="w-3.5 h-3.5" />
                                                 Send Direct Compliance Ping
@@ -23094,13 +23098,13 @@ ${ttNotes}`
                                                 statusDot = "bg-emerald-500";
                                               if (activeStatus === "break")
                                                 statusDot =
-                                                  "bg-amber-500 animate-pulse";
+                                                  "bg-amber-500";
                                               if (activeStatus === "lunch")
                                                 statusDot =
-                                                  "bg-pink-500 animate-pulse";
+                                                  "bg-pink-500";
                                               if (activeStatus === "restroom")
                                                 statusDot =
-                                                  "bg-indigo-500 animate-pulse";
+                                                  "bg-indigo-500";
 
                                               return (
                                                 <tr
@@ -23191,7 +23195,7 @@ ${ttNotes}`
                                                   </td>
 
                                                   {/* Shifts */}
-                                                  <td className="px-3 py-4 space-y-0.5">
+                                                  <td className="px-3 py-4 space-y-1">
                                                     <p className="text-[11px] text-slate-400 font-sans">
                                                       In:{" "}
                                                       <span className="text-emerald-400 font-semibold">
@@ -23251,7 +23255,7 @@ ${ttNotes}`
                                                     </div>
                                                     <div className="w-full bg-white/10 rounded-full h-1 relative">
                                                       <div
-                                                        className={`h-1 rounded-full transition-all duration-300 ${stats.breakMins > 15 ? "bg-rose-500 animate-pulse" : "bg-amber-400"}`}
+                                                        className={`h-1 rounded-full transition-all duration-300 ${stats.breakMins > 15 ? "bg-rose-500" : "bg-amber-400"}`}
                                                         style={{
                                                           width: `${Math.min(100, (stats.breakMins / 15) * 100)}%`,
                                                         }}
@@ -23280,7 +23284,7 @@ ${ttNotes}`
                                                     </div>
                                                     <div className="w-full bg-white/10 rounded-full h-1 relative">
                                                       <div
-                                                        className={`h-1 rounded-full transition-all duration-300 ${stats.lunchMins > 30 ? "bg-rose-500 animate-pulse" : "bg-pink-400"}`}
+                                                        className={`h-1 rounded-full transition-all duration-300 ${stats.lunchMins > 30 ? "bg-rose-500" : "bg-pink-400"}`}
                                                         style={{
                                                           width: `${Math.min(100, (stats.lunchMins / 30) * 100)}%`,
                                                         }}
@@ -23305,7 +23309,7 @@ ${ttNotes}`
                                                   {/* Compliance status banner */}
                                                   <td className="px-5 py-4 text-right">
                                                     {isCurrentlyExceeded && (
-                                                      <span className="px-2 py-0.5 rounded bg-rose-500/10 border border-transparent text-rose-300 font-bold text-[11px] uppercase tracking-wide select-none animate-pulse block text-center max-w-[130px] ml-auto">
+                                                      <span className="px-2 py-0.5 rounded bg-rose-500/10 border border-transparent text-rose-300 font-bold text-[11px] uppercase tracking-wide select-none block text-center max-w-[130px] ml-auto">
                                                         Overtime Now (+
                                                         {currentExceedBy.toFixed(
                                                           1,
@@ -23351,7 +23355,7 @@ ${ttNotes}`
                         {/* Title Header */}
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                           <div>
-                            <h2 className="text-xl font-bold text-transparent bg-gradient-to-r from-blue-300 via-indigo-200 to-pink-300 bg-clip-text font-sans flex items-center gap-3">
+                            <h2 className="text-xl font-bold text-slate-100 font-sans flex items-center gap-3">
                               <Calendar className="w-8 h-8 text-indigo-400" />
                               Agent Schedule Roster
                             </h2>
@@ -23407,7 +23411,7 @@ ${ttNotes}`
                         {(isSuperAdmin ||
                           isTLOreSupport ||
                           currentUser?.role === "tl") && (
-                          <div className="bg-gradient-to-r from-violet-500/15 via-indigo-500/10 to-blue-500/15 border border-transparent rounded-xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
+                          <div className="bg-gradient-to-r from-violet-500/15 via-indigo-500/10 to-blue-500/15 border border-transparent rounded-xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div className="space-y-1 text-left">
                               <div className="flex items-center gap-2">
                                 <span
@@ -23465,7 +23469,7 @@ ${ttNotes}`
                         {(isSuperAdmin ||
                           isTLOreSupport ||
                           currentUser?.role === "tl") && (
-                          <div className="bg-white/5 border border-white/8 rounded-xl text-slate-100 p-6 space-y-5 text-left">
+                          <div className="bg-white/5 border border-white/8 rounded-xl text-slate-100 p-6 space-y-4 text-left">
                             <div>
                               <h3 className="font-bold text-slate-100 text-sm font-sans flex items-center gap-2">
                                 <PlusCircle className="w-5 h-5 text-indigo-400" />
@@ -23481,7 +23485,7 @@ ${ttNotes}`
                               onSubmit={handleManualRosterSubmit}
                               className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end"
                             >
-                              <div className="md:col-span-1 space-y-1.5 font-sans">
+                              <div className="md:col-span-1 space-y-2 font-sans">
                                 <label className="text-[11px] text-slate-400 font-bold uppercase font-sans">
                                   1. Choose Agent
                                 </label>
@@ -23505,7 +23509,7 @@ ${ttNotes}`
                                 </select>
                               </div>
 
-                              <div className="md:col-span-1 space-y-1.5">
+                              <div className="md:col-span-1 space-y-2">
                                 <label className="text-[11px] text-slate-400 font-bold uppercase font-sans">
                                   2. Coverage Date
                                 </label>
@@ -23519,7 +23523,7 @@ ${ttNotes}`
                                 />
                               </div>
 
-                              <div className="md:col-span-1 space-y-1.5 font-sans">
+                              <div className="md:col-span-1 space-y-2 font-sans">
                                 <label className="text-[11px] text-slate-400 font-bold uppercase font-sans">
                                   3. Schedule Shift
                                 </label>
@@ -23551,7 +23555,7 @@ ${ttNotes}`
                               <div className="md:col-span-1 block">
                                 <button
                                   type="submit"
-                                  className="w-full h-[42px] bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.02]"
+                                  className="w-full h-[42px] bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.02]"
                                 >
                                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                                   Submit Roster Shift
@@ -23559,7 +23563,7 @@ ${ttNotes}`
                               </div>
 
                               {/* Shift Notes Field spanning full width */}
-                              <div className="md:col-span-4 space-y-1.5">
+                              <div className="md:col-span-4 space-y-2">
                                 <label className="text-[11px] text-slate-400 font-bold uppercase font-sans">
                                   4. Roster Shift Notes (Saves to Shift details)
                                 </label>
@@ -23689,8 +23693,8 @@ ${ttNotes}`
                                 </p>
                               </div>
                               <div className="flex justify-center">
-                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-amber-500/10 border border-transparent text-amber-300 font-bold uppercase text-[11px] tracking-wider font-mono mx-auto">
-                                  <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></span>
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-amber-500/10 border border-transparent text-amber-300 font-bold uppercase text-[11px] tracking-wider font-mono mx-auto">
+                                  <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
                                   Roster Draft Stage
                                 </div>
                               </div>
@@ -23755,12 +23759,12 @@ ${ttNotes}`
                                             <div className="flex flex-wrap gap-2 pt-2 border-t border-white/8">
                                               {shift.breakTime && (
                                                 <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-transparent font-mono text-[11px]">
-                                                  ☕ Break: {shift.breakTime}
+                                                  <Coffee className="w-3 h-3 text-amber-400" /> Break: {shift.breakTime}
                                                 </span>
                                               )}
                                               {shift.lunchTime && (
                                                 <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-transparent font-sans text-[11px]">
-                                                  🍔 Lunch: {shift.lunchTime}
+                                                  <UtensilsCrossed className="w-3 h-3 text-orange-400" /> Lunch: {shift.lunchTime}
                                                 </span>
                                               )}
                                             </div>
@@ -23826,7 +23830,7 @@ ${ttNotes}`
                                     <button
                                       type="button"
                                       onClick={copyCurrentPeriodToNext}
-                                      className="px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 hover:border-indigo-500/40 rounded-xl text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer"
+                                      className="px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 hover:border-indigo-500/40 rounded-xl text-[11px] font-bold transition flex items-center gap-2 cursor-pointer"
                                       title={`Copy current ${displayDaysCount} days schedule forward`}
                                     >
                                       <Copy className="w-3.5 h-3.5" />
@@ -23842,7 +23846,7 @@ ${ttNotes}`
                                           if (!patternEndDate) setPatternEndDate(activeDisplayDates[activeDisplayDates.length - 1]);
                                         }
                                       }}
-                                      className={`px-3 py-1.5 border rounded-xl text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer ${showPatternPanel ? "bg-indigo-500 text-white border-transparent" : "bg-white/5 hover:bg-white/10 text-slate-300 border-white/8"}`}
+                                      className={`px-3 py-1.5 border rounded-xl text-[11px] font-bold transition flex items-center gap-2 cursor-pointer ${showPatternPanel ? "bg-indigo-500 text-white border-transparent" : "bg-white/5 hover:bg-white/10 text-slate-300 border-white/8"}`}
                                     >
                                       <Grid className="w-3.5 h-3.5" />
                                       Apply Pattern
@@ -24008,7 +24012,7 @@ ${ttNotes}`
                                 </div>
 
                                 {/* Weekdays selection (Mon-Sun checkboxes) */}
-                                <div className="space-y-1.5">
+                                <div className="space-y-2">
                                   <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Repeat on Days</label>
                                   <div className="flex flex-wrap gap-3">
                                     {[
@@ -24022,7 +24026,7 @@ ${ttNotes}`
                                     ].map((day) => {
                                       const checked = patternWeekdays.includes(day.value);
                                       return (
-                                        <label key={day.value} className="flex items-center gap-1.5 cursor-pointer text-xs select-none">
+                                        <label key={day.value} className="flex items-center gap-2 cursor-pointer text-xs select-none">
                                           <input
                                             type="checkbox"
                                             checked={checked}
@@ -24068,15 +24072,15 @@ ${ttNotes}`
                                   {" "}
                                   Roster Coverage Planner
                                 </h3>
-                                <span className="text-[11px] text-indigo-300 font-sans flex items-center gap-1.5 font-bold uppercase">
-                                  <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>{" "}
+                                <span className="text-[11px] text-indigo-300 font-sans flex items-center gap-2 font-bold uppercase">
+                                  <span className="w-2 h-2 rounded-full bg-indigo-500"></span>{" "}
                                   Active Database
                                 </span>
                               </div>
 
                               {schedules.length === 0 ? (
                                 <div className="text-center py-16 text-slate-400 space-y-3">
-                                  <Calendar className="w-12 h-12 mx-auto text-indigo-400 opacity-40 animate-pulse" />
+                                  <Calendar className="w-12 h-12 mx-auto text-indigo-400 opacity-40" />
                                   <div>
                                     <p className="font-bold text-slate-100 text-sm">
                                       Active schedule roster is empty
@@ -24178,7 +24182,6 @@ ${ttNotes}`
                                           <div className="space-y-1">
                                             <h4 className="text-xs font-bold text-slate-100 flex items-center gap-2 font-sans">
                                               <span className="flex h-2.5 w-2.5 relative">
-                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                                               </span>
                                               Roster Coverage Heatmap Analytics
@@ -24209,7 +24212,7 @@ ${ttNotes}`
 
                                         {/* Interactive Target Configurator Panel */}
                                         {heatmapConfigureOpen && (
-                                          <div className="p-4 bg-slate-900/40 /40 rounded-xl border border-white/8 grid grid-cols-1 sm:grid-cols-3 gap-5 text-left transition-all">
+                                          <div className="p-4 bg-slate-900/40 /40 rounded-xl border border-white/8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left transition-all">
                                             <div className="space-y-2">
                                               <label className="text-[11px] text-slate-400 font-bold uppercase tracking-wider block font-sans">
                                                 Morning Shift Target (07-16)
@@ -24368,7 +24371,7 @@ ${ttNotes}`
                                               <div className="w-44 shrink-0 flex items-center pl-3 text-[11px] font-bold uppercase text-indigo-300 tracking-wider font-sans border-r border-white/8">
                                                 Shift vs Date
                                               </div>
-                                              <div className="flex-1 flex gap-1.5 pl-3">
+                                              <div className="flex-1 flex gap-2 pl-3">
                                                 {activeDisplayDates.map(
                                                   (dateStr) => {
                                                     const d = new Date(dateStr);
@@ -24445,7 +24448,7 @@ ${ttNotes}`
                                                   </div>
 
                                                   {/* Heatmap Cell Grids */}
-                                                  <div className="flex-1 flex gap-1.5 pl-3">
+                                                  <div className="flex-1 flex gap-2 pl-3">
                                                     {activeDisplayDates.map(
                                                       (dateStr) => {
                                                         // @ts-ignore
@@ -24528,7 +24531,7 @@ ${ttNotes}`
                                                                   scheduled
                                                                 </p>
                                                               ) : (
-                                                                <div className="max-h-24 overflow-y-auto mt-1 space-y-0.5 font-sans">
+                                                                <div className="max-h-24 overflow-y-auto mt-1 space-y-1 font-sans">
                                                                   {coverage.agents.map(
                                                                     (
                                                                       name: string,
@@ -24683,13 +24686,13 @@ ${ttNotes}`
                                       else if (badgeStyle.bg.includes("amber-500")) dotClass = "bg-amber-400";
                                       else if (badgeStyle.bg.includes("purple-500")) dotClass = "bg-purple-400";
                                       return (
-                                        <div key={s.id} className="flex items-center gap-1.5">
+                                        <div key={s.id} className="flex items-center gap-2">
                                           <span className={`w-2 h-2 rounded-full ${dotClass}`} />
                                           <span className="text-slate-300 font-medium">{s.display} ({s.label})</span>
                                         </div>
                                       );
                                     })}
-                                    <div className="flex items-center gap-1.5">
+                                    <div className="flex items-center gap-2">
                                       <span className="w-2 h-2 rounded-full bg-slate-500" />
                                       <span className="text-slate-300 font-medium">Off / Rest Day</span>
                                     </div>
@@ -24936,7 +24939,7 @@ ${ttNotes}`
                                                           {style.display}
                                                         </span>
                                                         {findShift?.shiftNotes && (
-                                                          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shrink-0 relative z-10" />
+                                                          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0 relative z-10" />
                                                         )}
                                                         {findShift?.activities &&
                                                           findShift.activities
@@ -25003,7 +25006,7 @@ ${ttNotes}`
                                                                     ) => (
                                                                       <div
                                                                         key={i}
-                                                                        className="flex items-center gap-1.5 justify-between bg-white/[0.03] px-1.5 py-0.5 rounded border border-white/8"
+                                                                        className="flex items-center gap-2 justify-between bg-white/[0.03] px-1.5 py-0.5 rounded border border-white/8"
                                                                       >
                                                                         <span className="font-sans text-[11px] text-indigo-200">
                                                                           {
@@ -25099,7 +25102,7 @@ ${ttNotes}`
                                                                   <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
                                                                   <span>Roster Conflict Warnings:</span>
                                                                 </div>
-                                                                <ul className="list-disc list-inside space-y-0.5">
+                                                                <ul className="list-disc list-inside space-y-1">
                                                                   {activeWarnings.map((w, idx) => (
                                                                     <li key={idx} className="font-sans leading-relaxed">{w}</li>
                                                                   ))}
@@ -25264,7 +25267,7 @@ ${ttNotes}`
                                                       {findShift?.activities &&
                                                         findShift.activities
                                                           .length > 0 && (
-                                                          <div className="mt-1.5 border-t border-white/8 pt-1 text-[11px] text-slate-400 font-sans flex flex-col gap-0.5">
+                                                          <div className="mt-1.5 border-t border-white/8 pt-1 text-[11px] text-slate-400 font-sans flex flex-col gap-1">
                                                             {[
                                                               ...findShift.activities,
                                                             ]
@@ -25324,19 +25327,19 @@ ${ttNotes}`
 
                                   {/* Shift legend details */}
                                   <div className="flex flex-wrap justify-start gap-4 text-[11px] text-slate-400 pt-2 border-t border-white/8">
-                                    <span className="flex items-center gap-1.5">
+                                    <span className="flex items-center gap-2">
                                       <span className="w-2.5 h-2.5 rounded bg-emerald-500/10 border border-transparent block"></span>
                                       Morning Shift: 07:00 - 16:00
                                     </span>
-                                    <span className="flex items-center gap-1.5">
+                                    <span className="flex items-center gap-2">
                                       <span className="w-2.5 h-2.5 rounded bg-amber-500/10 border border-transparent block"></span>
                                       Afternoon Shift: 13:00 - 22:00
                                     </span>
-                                    <span className="flex items-center gap-1.5">
+                                    <span className="flex items-center gap-2">
                                       <span className="w-2.5 h-2.5 rounded bg-indigo-500/10 border border-transparent block"></span>
                                       Night Shift: 22:00 - 07:00
                                     </span>
-                                    <span className="flex items-center gap-1.5">
+                                    <span className="flex items-center gap-2">
                                       <span className="w-2.5 h-2.5 rounded bg-white/5 border border-white/8 block"></span>
                                       Off Day (Rest Day)
                                     </span>
@@ -25353,7 +25356,7 @@ ${ttNotes}`
                                 <div className="bg-white/5 border border-transparent rounded-xl p-5 sm:p-6 space-y-6 mt-6">
                                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/8 pb-4">
                                     <div>
-                                      <h3 className="font-bold text-transparent bg-gradient-to-r from-amber-400 to-orange-300 bg-clip-text text-sm font-sans flex items-center gap-2 text-left">
+                                      <h3 className="font-bold text-transparent bg-gradient-to-r text-slate-100 text-sm font-sans flex items-center gap-2 text-left">
                                         <Clock className="w-5 h-5 text-amber-400" />
                                         <span>
                                           Break & Lunch Time Assignment
@@ -25401,7 +25404,7 @@ ${ttNotes}`
                                             >
                                               <div className="flex justify-between items-start gap-2">
                                                 <div>
-                                                  <h4 className="font-bold text-xs text-slate-100 font-sans flex items-center gap-1.5">
+                                                  <h4 className="font-bold text-xs text-slate-100 font-sans flex items-center gap-2">
                                                     <span>
                                                       {shift.agentName}
                                                     </span>
@@ -25483,23 +25486,23 @@ ${ttNotes}`
                                                 <div className="flex items-center justify-between pt-2 border-t border-white/8 mt-1 gap-2">
                                                   <div className="flex flex-wrap gap-2">
                                                     {shift.breakTime ? (
-                                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xl bg-amber-500/10 text-amber-400 border border-transparent text-[11px] font-mono leading-none">
-                                                        ☕ Break:{" "}
+                                                      <span className="inline-flex items-center gap-2 px-2 py-0.5 rounded-xl bg-amber-500/10 text-amber-400 border border-transparent text-[11px] font-mono leading-none">
+                                                        <Coffee className="w-3 h-3 text-amber-400" /> Break:{" "}
                                                         {shift.breakTime}
                                                       </span>
                                                     ) : (
-                                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xl bg-white/5 text-slate-650 border border-dashed border-white/8 text-[11px] leading-none">
-                                                        ☕ Break: Not set
+                                                      <span className="inline-flex items-center gap-2 px-2 py-0.5 rounded-xl bg-white/5 text-slate-650 border border-dashed border-white/8 text-[11px] leading-none">
+                                                        <Coffee className="w-3 h-3 text-slate-400" /> Break: Not set
                                                       </span>
                                                     )}
                                                     {shift.lunchTime ? (
-                                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xl bg-orange-500/10 text-orange-400 border border-transparent text-[11px] font-sans leading-none">
-                                                        🍔 Lunch:{" "}
+                                                      <span className="inline-flex items-center gap-2 px-2 py-0.5 rounded-xl bg-orange-500/10 text-orange-400 border border-transparent text-[11px] font-sans leading-none">
+                                                        <UtensilsCrossed className="w-3 h-3 text-orange-400" /> Lunch:{" "}
                                                         {shift.lunchTime}
                                                       </span>
                                                     ) : (
-                                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xl bg-white/5 text-slate-650 border border-dashed border-white/8 text-[11px] leading-none">
-                                                        🍔 Lunch: Not set
+                                                      <span className="inline-flex items-center gap-2 px-2 py-0.5 rounded-xl bg-white/5 text-slate-650 border border-dashed border-white/8 text-[11px] leading-none">
+                                                        <UtensilsCrossed className="w-3 h-3 text-slate-400" /> Lunch: Not set
                                                       </span>
                                                     )}
                                                   </div>
@@ -25534,7 +25537,7 @@ ${ttNotes}`
                             <div className="bg-white/5 border border-white/8 rounded-xl text-slate-100 p-5 sm:p-6 space-y-6 mt-6">
                               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/8 pb-4">
                                 <div>
-                                  <h3 className="font-bold text-transparent bg-gradient-to-r from-blue-300 via-indigo-200 to-cyan-300 bg-clip-text text-sm font-sans flex items-center gap-2">
+                                  <h3 className="font-bold text-slate-100 text-sm font-sans flex items-center gap-2">
                                     <GitPullRequest className="w-5 h-5 text-indigo-400 rotate-90" />
                                     P2P Shift Exchange Board
                                   </h3>
@@ -25562,7 +25565,7 @@ ${ttNotes}`
                                     </p>
                                   </div>
 
-                                  <div className="space-y-3.5">
+                                  <div className="space-y-3">
                                     {/* Selected Date */}
                                     <div className="space-y-1">
                                       <label className="text-[11px] text-slate-400 font-bold uppercase font-sans">
@@ -25822,7 +25825,7 @@ ${ttNotes}`
                                         setP2pLinks([]);
                                       }}
                                       disabled={isP2pUploading}
-                                      className="w-full py-2.5 bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-[11px] rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer font-sans"
+                                      className="w-full py-2.5 bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-[11px] rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer font-sans"
                                     >
                                       {isP2pUploading ? (
                                         <>
@@ -25858,7 +25861,7 @@ ${ttNotes}`
                                       ) as SwapRequest[];
                                       if (swapRequests.length === 0) {
                                         return (
-                                          <div className="flex flex-col items-center justify-center h-full text-slate-400 py-12 text-[11px] space-y-2 italic font-sans animate-pulse">
+                                          <div className="flex flex-col items-center justify-center h-full text-slate-400 py-12 text-[11px] space-y-2 italic font-sans">
                                             <GitPullRequest className="w-8 h-8 text-indigo-400/40" />
                                             <span>
                                               No active trade proposals loaded
@@ -25954,7 +25957,7 @@ ${ttNotes}`
                                                       "pending_partner" &&
                                                     isTargetedToMe &&
                                                     !isMyListing ? (
-                                                      <div className="flex justify-end gap-1.5 font-sans">
+                                                      <div className="flex justify-end gap-2 font-sans">
                                                         <button
                                                           onClick={() => {
                                                             handlePartnerDecision(
@@ -26458,7 +26461,7 @@ ${ttNotes}`
                                               c.status === "need_contact",
                                           ).length}
                                     </p>
-                                    <p className="text-[11px] text-rose-300 mt-1 font-sans font-medium animate-pulse">
+                                    <p className="text-[11px] text-rose-300 mt-1 font-sans font-medium">
                                       Pending client contacted action
                                     </p>
                                   </div>
@@ -26791,7 +26794,7 @@ ${ttNotes}`
                                         className="space-y-4 pt-2 text-left"
                                       >
                                         {/* Patient Name */}
-                                        <div className="space-y-1.5 text-left">
+                                        <div className="space-y-2 text-left">
                                           <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
                                             Patient Name *
                                           </label>
@@ -26808,7 +26811,7 @@ ${ttNotes}`
                                         </div>
 
                                         {/* File Number */}
-                                        <div className="space-y-1.5 text-left">
+                                        <div className="space-y-2 text-left">
                                           <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
                                             File Number (Optional)
                                           </label>
@@ -26824,7 +26827,7 @@ ${ttNotes}`
                                         </div>
 
                                         {/* Old Customer Switch & ID Number */}
-                                        <div className="space-y-3.5 p-3.5 bg-white/5 border border-white/8 rounded-xl text-left">
+                                        <div className="space-y-3 p-3.5 bg-white/5 border border-white/8 rounded-xl text-left">
                                           <div className="flex items-center justify-between">
                                             <span className="text-xs font-bold text-slate-300">
                                               Is this an Old Customer?
@@ -26845,7 +26848,7 @@ ${ttNotes}`
                                           </div>
 
                                           {!ttIsOldCustomer && (
-                                            <div className="space-y-1.5 animate-fade-in pt-1 text-left">
+                                            <div className="space-y-2 animate-fade-in pt-1 text-left">
                                               <label className="text-[11px] font-bold text-amber-400 uppercase tracking-wider block">
                                                 ID Number *
                                               </label>
@@ -26864,7 +26867,7 @@ ${ttNotes}`
                                         </div>
 
                                         {/* Price */}
-                                        <div className="space-y-1.5 text-left">
+                                        <div className="space-y-2 text-left">
                                           <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
                                             Price *
                                           </label>
@@ -26954,7 +26957,7 @@ ${ttNotes}`
                                            </div>
 
                                            {!ttNoPhone ? (
-                                             <div className="space-y-1.5 text-left">
+                                             <div className="space-y-2 text-left">
                                                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
                                                  Phone Number *
                                                </label>
@@ -26983,7 +26986,7 @@ ${ttNotes}`
                                              </div>
                                            ) : (
                                              <div className="grid grid-cols-2 gap-3 animate-fade-in text-left">
-                                               <div className="space-y-1.5">
+                                               <div className="space-y-2">
                                                  <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
                                                    Instagram Username
                                                  </label>
@@ -26995,7 +26998,7 @@ ${ttNotes}`
                                                    className="w-full bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
                                                  />
                                                </div>
-                                               <div className="space-y-1.5">
+                                               <div className="space-y-2">
                                                  <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
                                                    TikTok Username
                                                  </label>
@@ -27012,7 +27015,7 @@ ${ttNotes}`
                                          </div>
 
                                         {/* Platform selector */}
-                                        <div className="space-y-1.5 text-left">
+                                        <div className="space-y-2 text-left">
                                           <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
                                             Payment Platform / Type *
                                           </label>
@@ -27022,7 +27025,7 @@ ${ttNotes}`
                                               onClick={() =>
                                                 setTtPlatform("tabby")
                                               }
-                                              className={`py-2 rounded-xl text-[11px] font-bold uppercase transition-all tracking-wider flex items-center justify-center gap-1.5 border cursor-pointer ${ ttPlatform === "tabby" ? "bg-amber-400 border-amber-300 text-slate-950 " : "bg-black/25 border-white/8 text-slate-400 hover:bg-white/20 " }`}
+                                              className={`py-2 rounded-xl text-[11px] font-bold uppercase transition-all tracking-wider flex items-center justify-center gap-2 border cursor-pointer ${ ttPlatform === "tabby" ? "bg-amber-400 border-amber-300 text-slate-950 " : "bg-black/25 border-white/8 text-slate-400 hover:bg-white/20 " }`}
                                             >
                                               Tabby
                                             </button>
@@ -27031,7 +27034,7 @@ ${ttNotes}`
                                               onClick={() =>
                                                 setTtPlatform("tamara")
                                               }
-                                              className={`py-2 rounded-xl text-[11px] font-bold uppercase transition-all tracking-wider flex items-center justify-center gap-1.5 border cursor-pointer ${ ttPlatform === "tamara" ? "bg-pink-500 border-pink-400 text-slate-100 " : "bg-black/25 border-white/8 text-slate-400 hover:bg-white/20 " }`}
+                                              className={`py-2 rounded-xl text-[11px] font-bold uppercase transition-all tracking-wider flex items-center justify-center gap-2 border cursor-pointer ${ ttPlatform === "tamara" ? "bg-pink-500 border-pink-400 text-slate-100 " : "bg-black/25 border-white/8 text-slate-400 hover:bg-white/20 " }`}
                                             >
                                               Tamara
                                             </button>
@@ -27084,7 +27087,7 @@ ${ttNotes}`
                                         </div>
 
                                         {/* Scheduled for Later / Follow-up */}
-                                        <div className="space-y-3.5 p-3.5 bg-white/5 border border-white/8 rounded-xl text-left">
+                                        <div className="space-y-3 p-3.5 bg-white/5 border border-white/8 rounded-xl text-left">
                                           <div className="flex items-center justify-between">
                                             <span className="text-xs font-bold text-slate-300">
                                               Schedule for Later Date / Follow-up?
@@ -27105,7 +27108,7 @@ ${ttNotes}`
                                           </div>
 
                                           {ttIsFollowUp && (
-                                            <div className="space-y-1.5 animate-fade-in pt-1 text-left">
+                                            <div className="space-y-2 animate-fade-in pt-1 text-left">
                                               <label className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider block">
                                                 Follow-up Date *
                                               </label>
@@ -27123,7 +27126,7 @@ ${ttNotes}`
                                         </div>
 
                                         {/* Notes */}
-                                        <div className="space-y-1.5 text-left">
+                                        <div className="space-y-2 text-left">
                                           <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
                                             Additional Notes (Optional)
                                           </label>
@@ -27151,7 +27154,7 @@ ${ttNotes}`
                                           disabled={
                                             isFormSubmitting || isTtUploading
                                           }
-                                          className={`w-full py-3.5 text-slate-100 font-bold text-[11px] uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans ${isFormSubmitting || isTtUploading ? "bg-indigo-800 opacity-65 pointer-events-none" : "bg-gradient-to-r from-indigo-500 to-indigo-600 hover:brightness-110 active:scale-[0.99] "}`}
+                                          className={`w-full py-3.5 text-slate-100 font-bold text-[11px] uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans ${isFormSubmitting || isTtUploading ? "bg-indigo-800 opacity-65 pointer-events-none" : "bg-indigo-500 hover:bg-indigo-600 active:scale-[0.99] "}`}
                                         >
                                           {isFormSubmitting ? (
                                             <>
@@ -27199,7 +27202,7 @@ ${ttNotes}`
                                         className="space-y-4 pt-2 text-left"
                                       >
                                         {/* Patient Name */}
-                                        <div className="space-y-1.5 text-left">
+                                        <div className="space-y-2 text-left">
                                           <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
                                             Patient Name *
                                           </label>
@@ -27216,7 +27219,7 @@ ${ttNotes}`
                                         </div>
 
                                         {/* File Number */}
-                                        <div className="space-y-1.5 text-left">
+                                        <div className="space-y-2 text-left">
                                           <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
                                             File Number (Optional)
                                           </label>
@@ -27232,7 +27235,7 @@ ${ttNotes}`
                                         </div>
 
                                         {/* Old Customer Switch */}
-                                        <div className="space-y-3.5 p-3.5 bg-white/5 border border-white/8 rounded-xl text-left">
+                                        <div className="space-y-3 p-3.5 bg-white/5 border border-white/8 rounded-xl text-left">
                                           <div className="flex items-center justify-between">
                                             <span className="text-xs font-bold text-slate-300 font-sans">
                                               Is this an Old Customer?
@@ -27253,7 +27256,7 @@ ${ttNotes}`
                                           </div>
 
                                           {!tcIsOldCustomer && (
-                                            <div className="space-y-1.5 animate-fade-in pt-1 text-left">
+                                            <div className="space-y-2 animate-fade-in pt-1 text-left">
                                               <label className="text-[11px] font-bold text-amber-500 uppercase tracking-wider block">
                                                 ID Number *
                                               </label>
@@ -27302,7 +27305,7 @@ ${ttNotes}`
                                            </div>
 
                                            {!tcNoPhone ? (
-                                             <div className="space-y-1.5 text-left">
+                                             <div className="space-y-2 text-left">
                                                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
                                                  Phone Number *
                                                </label>
@@ -27331,7 +27334,7 @@ ${ttNotes}`
                                              </div>
                                            ) : (
                                              <div className="grid grid-cols-2 gap-3 animate-fade-in text-left">
-                                               <div className="space-y-1.5">
+                                               <div className="space-y-2">
                                                  <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
                                                    Instagram Username
                                                  </label>
@@ -27343,7 +27346,7 @@ ${ttNotes}`
                                                    className="w-full bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-pink-500 font-sans"
                                                  />
                                                </div>
-                                               <div className="space-y-1.5">
+                                               <div className="space-y-2">
                                                  <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
                                                    TikTok Username
                                                  </label>
@@ -27394,7 +27397,7 @@ ${ttNotes}`
                                         </div>
 
                                         {/* Complaint details */}
-                                        <div className="space-y-1.5 text-left">
+                                        <div className="space-y-2 text-left">
                                           <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
                                             Customer Complaint / Issue Details *
                                           </label>
@@ -27428,7 +27431,7 @@ ${ttNotes}`
                                             </label>
                                           </div>
                                           {tcIsFollowUp && (
-                                            <div className="space-y-1.5 animate-fade-in pt-1 text-left">
+                                            <div className="space-y-2 animate-fade-in pt-1 text-left">
                                               <label className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider block">
                                                 Follow-up Date *
                                               </label>
@@ -27448,7 +27451,7 @@ ${ttNotes}`
                                           disabled={
                                             isFormSubmitting || isTcUploading
                                           }
-                                          className={`w-full py-3.5 text-slate-100 font-bold text-[11px] uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans ${isFormSubmitting || isTcUploading ? "bg-pink-900 opacity-65 pointer-events-none" : "bg-gradient-to-r from-pink-500 to-pink-600 hover:brightness-110 active:scale-[0.99] "}`}
+                                          className={`w-full py-3.5 text-slate-100 font-bold text-[11px] uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 font-sans ${isFormSubmitting || isTcUploading ? "bg-pink-900 opacity-65 pointer-events-none" : "bg-pink-500 hover:bg-pink-600 active:scale-[0.99] "}`}
                                         >
                                           {isFormSubmitting ? (
                                             <>
@@ -27561,7 +27564,7 @@ ${ttNotes}`
                                            </div>
 
                                            {!ccNoPhone ? (
-                                             <div className="space-y-1.5 text-left">
+                                             <div className="space-y-2 text-left">
                                                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
                                                  Phone Number *
                                                </label>
@@ -27590,7 +27593,7 @@ ${ttNotes}`
                                              </div>
                                            ) : (
                                              <div className="grid grid-cols-2 gap-3 animate-fade-in text-left">
-                                               <div className="space-y-1.5">
+                                               <div className="space-y-2">
                                                  <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
                                                    Instagram Username
                                                  </label>
@@ -27602,7 +27605,7 @@ ${ttNotes}`
                                                    className="w-full bg-white/5 border border-white/8 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
                                                  />
                                                </div>
-                                               <div className="space-y-1.5">
+                                               <div className="space-y-2">
                                                  <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block font-sans">
                                                    TikTok Username
                                                  </label>
@@ -27619,7 +27622,7 @@ ${ttNotes}`
                                          </div>
 
                                         {/* Language */}
-                                        <div className="space-y-1.5 text-left">
+                                        <div className="space-y-2 text-left">
                                           <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
                                             Language Priority *
                                           </label>
@@ -27646,7 +27649,7 @@ ${ttNotes}`
                                         </div>
 
                                         {/* Source Channel Selection */}
-                                        <div className="space-y-1.5 text-left">
+                                        <div className="space-y-2 text-left">
                                           <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
                                             Source Channel *
                                           </label>
@@ -27685,7 +27688,7 @@ ${ttNotes}`
                                         </div>
 
                                         {/* Notes */}
-                                        <div className="space-y-1.5 text-left">
+                                        <div className="space-y-2 text-left">
                                           <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
                                             Inquiry Details / Notes *
                                           </label>
@@ -27726,7 +27729,7 @@ ${ttNotes}`
                                             </label>
                                           </div>
                                           {ccIsFollowUp && (
-                                            <div className="space-y-1.5 animate-fade-in pt-1 text-left">
+                                            <div className="space-y-2 animate-fade-in pt-1 text-left">
                                               <label className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider block">
                                                 Follow-up Date *
                                               </label>
@@ -27856,7 +27859,7 @@ ${ttNotes}`
                                             />
                                           </div>
                                           {/* Status Filters */}
-                                          <div className="flex items-center gap-1.5 flex-wrap">
+                                          <div className="flex items-center gap-2 flex-wrap">
                                             <span className="text-[11px] font-bold uppercase text-slate-500 tracking-wider">
                                               Status:
                                             </span>
@@ -28094,7 +28097,7 @@ ${ttNotes}`
                                             />
                                           </div>
                                           {/* Status Filters */}
-                                          <div className="flex items-center gap-1.5 flex-wrap">
+                                          <div className="flex items-center gap-2 flex-wrap">
                                             <span className="text-[11px] font-bold uppercase text-slate-500 tracking-wider">
                                               Status:
                                             </span>
@@ -28309,7 +28312,7 @@ ${ttNotes}`
                                             />
                                           </div>
                                           {/* Status Filters */}
-                                          <div className="flex items-center gap-1.5 flex-wrap">
+                                          <div className="flex items-center gap-2 flex-wrap">
                                             <span className="text-[11px] font-bold uppercase text-slate-500 tracking-wider">
                                               Status:
                                             </span>
@@ -28522,7 +28525,7 @@ ${ttNotes}`
                             <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-white/8 pb-4">
                               <div>
                                 <h2 className="text-xl font-bold text-amber-400 font-sans flex items-center gap-3">
-                                  <CheckCircle2 className="w-8 h-8 text-amber-400 animate-pulse" />
+                                  <CheckCircle2 className="w-8 h-8 text-amber-400" />
                                   {currentUser.role === "tl"
                                     ? "Director Hub"
                                     : "TL Hub"}
@@ -28681,7 +28684,7 @@ ${ttNotes}`
                                         feedbackAttachmentName,
                                       );
                                     }}
-                                    className="px-6 py-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:brightness-110 active:scale-95 text-slate-950 font-sans font-bold text-[11px] uppercase tracking-wider rounded-xl cursor-pointer transition-all flex items-center gap-2"
+                                    className="px-6 py-3 bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-sans font-bold text-[11px] uppercase tracking-wider rounded-xl cursor-pointer transition-all flex items-center gap-2"
                                   >
                                     <Send className="w-4 h-4" />
                                     Send Direct Micro-Email
@@ -28737,7 +28740,7 @@ ${ttNotes}`
 
                                         <div>
                                           {f.status === "pending_reply" ? (
-                                            <span className="px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-transparent rounded-lg animate-pulse">
+                                            <span className="px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-transparent rounded-lg">
                                               Pending Reply
                                             </span>
                                           ) : (
@@ -28825,7 +28828,7 @@ ${ttNotes}`
                                             No replies in this micro-thread yet.
                                           </p>
                                         ) : (
-                                          <div className="space-y-3.5 max-h-96 overflow-y-auto pr-2">
+                                          <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
                                             {f.replies.map((r) => {
                                               const isSenderAmira =
                                                 (
@@ -29865,7 +29868,7 @@ ${ttNotes}`
                                               {isSuperAdmin && (
                                                 <td className="p-4 text-center">
                                                   {isEditing ? (
-                                                    <div className="flex gap-1.5 justify-center">
+                                                    <div className="flex gap-2 justify-center">
                                                       <button
                                                         onClick={() =>
                                                           handleSaveInlineEdit(
@@ -30253,7 +30256,7 @@ ${ttNotes}`
                                               {isSuperAdmin && (
                                                 <td className="p-4 text-center">
                                                   {isEditing ? (
-                                                    <div className="flex gap-1.5 justify-center">
+                                                    <div className="flex gap-2 justify-center">
                                                       <button
                                                         onClick={() =>
                                                           handleSaveInlineEdit(
@@ -30461,7 +30464,7 @@ ${ttNotes}`
                         "Standard clinic template copied to clipboard!",
                       );
                     }}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 hover:text-white text-slate-300 text-[11px] font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 border border-white/8"
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 hover:text-white text-slate-300 text-[11px] font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer active:scale-95 border border-white/8"
                   >
                     <Copy className="w-3.5 h-3.5" /> Copy to Clipboard
                   </button>
@@ -30482,7 +30485,7 @@ ${ttNotes}`
                       onClick={async () => {
                         await handleSetInquirySent(templateInquiryId, true);
                       }}
-                      className="px-4 py-2 bg-transparent border border-white/12 text-white hover:bg-white/5 text-white text-[11px] font-bold rounded-xl transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
+                      className="px-4 py-2 bg-transparent border border-white/12 text-white hover:bg-white/5 text-white text-[11px] font-bold rounded-xl transition-all active:scale-95 cursor-pointer flex items-center gap-2"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" /> Confirm & Send
                     </button>
@@ -31024,7 +31027,7 @@ ${ttNotes}`
 
               <div className="flex flex-col items-center gap-3">
                 <div className="w-16 h-16 bg-gradient-to-br from-cyan-400/20 to-indigo-500/20 rounded-xl flex items-center justify-center border border-transparent relative">
-                  <div className="absolute inset-0 bg-cyan-400/5 blur animate-pulse rounded-xl" />
+                  <div className="absolute inset-0 bg-cyan-400/5 blur rounded-xl" />
                   <CoolLogo
                     className="w-12 h-12 text-cyan-400"
                     showText={false}
@@ -31074,7 +31077,7 @@ ${ttNotes}`
                 <button
                   type="button"
                   onClick={() => setIsSynqVersionModalOpen(false)}
-                  className="w-full py-3 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white rounded-xl font-bold text-[11px] tracking-[0.2em] uppercase transition-all cursor-pointer"
+                  className="w-full py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-bold text-[11px] tracking-[0.2em] uppercase transition-all cursor-pointer"
                 >
                   Acknowledge & Close
                 </button>

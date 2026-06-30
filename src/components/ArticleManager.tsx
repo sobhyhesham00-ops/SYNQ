@@ -165,12 +165,12 @@ export const ArticleManager: React.FC<ArticleManagerProps> = ({ currentUser, cat
       <div className="w-1/4 min-w-[250px] border-r border-white/8 p-4 flex flex-col gap-2 bg-slate-900/40">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-bold text-slate-100 uppercase tracking-widest text-xs flex items-center gap-2">
-            {category === 'knowledge' ? <Book className="w-4 h-4 text-cyan-400" /> : <Tag className="w-4 h-4 text-emerald-400" />}
+            {category === 'knowledge' ? <Book className="w-3.5 h-3.5 text-cyan-400" /> : <Tag className="w-3.5 h-3.5 text-emerald-400" />}
             {category === 'knowledge' ? 'Knowledge Base' : 'Offers & Promotions'}
           </h2>
           {isTL && (
             <button onClick={startNew} className="text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-1.5 rounded-full transition-colors flex items-center justify-center" title="Create New">
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5" />
             </button>
           )}
         </div>

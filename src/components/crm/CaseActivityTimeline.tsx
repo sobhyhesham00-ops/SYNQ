@@ -7,7 +7,8 @@ import {
   CheckCircle, 
   Clock, 
   Paperclip,
-  Check
+  Check,
+  User
 } from "lucide-react";
 import { CRMCase } from "./CRMTypes";
 
@@ -154,8 +155,8 @@ export const CaseActivityTimeline: React.FC<CaseActivityTimelineProps> = ({ case
                   </div>
                 )}
 
-                <p className="text-[11px] text-slate-500 mt-2 font-bold uppercase tracking-wider">
-                  👤 {evt.user}
+                <p className="text-[11px] text-slate-500 mt-2 font-bold uppercase tracking-wider flex items-center gap-1">
+                  <User className="w-3 h-3 text-slate-500 shrink-0" /> {evt.user}
                 </p>
               </div>
             </div>

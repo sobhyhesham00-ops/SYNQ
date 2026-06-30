@@ -70,15 +70,15 @@ const StatusBadge = ({
   if (workflowStatus === "completed") {
     return (
       <span
-        className={`px-2 py-0.5 rounded-xl text-[11px] font-bold tracking-widest uppercase bg-transparent border border-white/12 text-white text-emerald-400 border border-transparent flex items-center gap-1.5 ${className}`}
+        className={`px-2 py-0.5 rounded-xl text-[11px] font-bold tracking-widest uppercase bg-transparent border border-white/12 text-white text-emerald-400 border border-transparent flex items-center gap-2 ${className}`}
       >
-        ✅ Closed
+        <CheckCircle2 className="w-3.5 h-3.5" /> Closed
       </span>
     );
   } else if (status === "not_confirmed") {
     return (
       <span
-        className={`px-2 py-0.5 rounded-xl text-[11px] font-bold tracking-widest uppercase bg-amber-500/10 text-amber-500 border border-transparent flex items-center gap-1.5 ${className}`}
+        className={`px-2 py-0.5 rounded-xl text-[11px] font-bold tracking-widest uppercase bg-amber-500/10 text-amber-500 border border-transparent flex items-center gap-2 ${className}`}
       >
         <AlertCircle className="w-3.5 h-3.5" /> Pending TL
       </span>
@@ -86,7 +86,7 @@ const StatusBadge = ({
   } else if (status === "rejected") {
     return (
       <span
-        className={`px-2 py-0.5 rounded-xl text-[11px] font-bold tracking-widest uppercase bg-red-500/10 text-red-500 border border-transparent flex items-center gap-1.5 ${className}`}
+        className={`px-2 py-0.5 rounded-xl text-[11px] font-bold tracking-widest uppercase bg-red-500/10 text-red-500 border border-transparent flex items-center gap-2 ${className}`}
       >
         <Trash2 className="w-3.5 h-3.5" /> Rejected
       </span>
@@ -94,7 +94,7 @@ const StatusBadge = ({
   } else if (status === "confirmed" && customerContacted === "contacted") {
     return (
       <span
-        className={`px-2 py-0.5 rounded-xl text-[11px] font-bold tracking-widest uppercase bg-transparent border border-white/12 text-white text-indigo-400 border border-transparent flex items-center gap-1.5 ${className}`}
+        className={`px-2 py-0.5 rounded-xl text-[11px] font-bold tracking-widest uppercase bg-transparent border border-white/12 text-white text-indigo-400 border border-transparent flex items-center gap-2 ${className}`}
       >
         <CheckCircle2 className="w-3.5 h-3.5" /> Contacted
       </span>
@@ -102,7 +102,7 @@ const StatusBadge = ({
   } else {
     return (
       <span
-        className={`px-2 py-0.5 rounded-xl text-[11px] font-bold tracking-widest uppercase bg-orange-500/10 text-orange-400 border border-transparent flex items-center gap-1.5 ${className}`}
+        className={`px-2 py-0.5 rounded-xl text-[11px] font-bold tracking-widest uppercase bg-orange-500/10 text-orange-400 border border-transparent flex items-center gap-2 ${className}`}
       >
         <Clock className="w-3.5 h-3.5" /> Contact Pending
       </span>
@@ -166,11 +166,11 @@ const CRMField = ({
 
   return (
     <div
-      className="flex flex-col gap-1.5 p-4 rounded-xl hover:bg-white/[0.04] transition-colors cursor-pointer group text-left border border-transparent hover:border-white/8/40"
+      className="flex flex-col gap-2 p-4 rounded-xl hover:bg-white/[0.04] transition-colors cursor-pointer group text-left border border-transparent hover:border-white/8/40"
       onClick={handleCopy}
     >
       <div className="flex items-center justify-between text-[11px] text-slate-500 font-bold tracking-widest uppercase">
-        <span className="flex items-center gap-1.5">
+        <span className="flex items-center gap-2">
           <Icon className="w-3.5 h-3.5 text-slate-600" /> {label}
         </span>
         {copied ? (
@@ -828,8 +828,8 @@ export const TabbyTamaraCard = ({
             </span>
 
             {req.isFollowUp && (
-              <span className="text-[11px] bg-pink-500/10 text-pink-400 border border-transparent px-2 py-0.5 rounded font-sans font-bold flex items-center gap-1 shrink-0 ml-1 animate-pulse">
-                📅 Scheduled: {req.followUpDate}
+              <span className="text-[11px] bg-pink-500/10 text-pink-400 border border-transparent px-2 py-0.5 rounded font-sans font-bold flex items-center gap-2 shrink-0 ml-1">
+                <Calendar className="w-3.5 h-3.5 shrink-0" /> Scheduled: {req.followUpDate}
               </span>
             )}
           </div>
@@ -839,7 +839,7 @@ export const TabbyTamaraCard = ({
         <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
           {isPendingContact && (
             <span
-              className={`flex items-center gap-1.5 px-2 py-0.5 rounded-xl text-[11px] font-bold uppercase tracking-widest bg-orange-500/10 text-orange-400 border border-transparent ${isOverdue ? "bg-red-500/10 text-red-400 border-transparent" : ""}`}
+              className={`flex items-center gap-2 px-2 py-0.5 rounded-xl text-[11px] font-bold uppercase tracking-widest bg-orange-500/10 text-orange-400 border border-transparent ${isOverdue ? "bg-red-500/10 text-red-400 border-transparent" : ""}`}
             >
               <AlertCircle className="w-3.5 h-3.5 animate-pulse" />{" "}
               {getElapsedTimerString(req.confirmedAt || req.createdAt)}
@@ -864,7 +864,7 @@ export const TabbyTamaraCard = ({
                 toast.error("Failed to copy request details.");
               }
             }}
-            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/8 rounded-xl text-slate-300 text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer hidden sm:flex"
+            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/8 rounded-xl text-slate-300 text-[11px] font-bold transition-all flex items-center gap-2 cursor-pointer hidden sm:flex"
             title="Copy details with links and attachments"
           >
             <Copy className="w-3 h-3" /> Copy
@@ -988,7 +988,7 @@ export const TabbyTamaraCard = ({
               )}
             </button>
             {expandedNotes && (
-              <div className="px-5 pb-5 space-y-5">
+              <div className="px-5 pb-5 space-y-4">
                 {req.notes && (
                   <div className="p-4 bg-white/[0.03] border border-white/8/40 rounded-xl text-[11px] text-slate-300 font-medium leading-relaxed">
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-2">
@@ -1096,8 +1096,8 @@ export const TabbyTamaraCard = ({
             <div className="p-4 md:p-5 border-b border-white/8/40 bg-amber-950/20 relative overflow-hidden">
               <div className="absolute top-0 left-0 bottom-0 w-1 bg-amber-400"></div>
               <div className="flex flex-col gap-4 pl-3">
-                <div className="flex flex-col gap-1.5 w-full">
-                  <span className="text-[11px] font-bold text-amber-500 uppercase tracking-widest flex items-center gap-1.5 mb-1 opacity-80">
+                <div className="flex flex-col gap-2 w-full">
+                  <span className="text-[11px] font-bold text-amber-500 uppercase tracking-widest flex items-center gap-2 mb-1 opacity-80">
                     <CheckCircle2 className="w-3 h-3" /> Payment Link(s)
                   </span>
                   {(() => {
@@ -1118,9 +1118,9 @@ export const TabbyTamaraCard = ({
                         {paymentLinks.map((pLink, index) => (
                           <div
                             key={index}
-                            className="flex flex-col gap-1.5 w-full bg-white/[0.02] p-4 rounded-xl border border-white/8"
+                            className="flex flex-col gap-2 w-full bg-white/[0.02] p-4 rounded-xl border border-white/8"
                           >
-                            <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5 pl-1">
+                            <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2 pl-1">
                               <span>🔗 Link #{index + 1}</span>
                               <span className="text-slate-500 font-medium normal-case text-[11px]">
                                 {index === 0
@@ -1280,7 +1280,7 @@ export const TabbyTamaraCard = ({
               <div className="px-4 py-2">
                 <button
                   onClick={() => setShowFollowUp((v) => !v)}
-                  className="text-[11px] font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="text-[11px] font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-2 transition-colors cursor-pointer"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
                   {showFollowUp
@@ -1392,7 +1392,7 @@ export const TabbyTamaraCard = ({
             (req.status === "not_confirmed" || req.status === "confirmed") && (
               <div className="bg-white/[0.04] border-y border-transparent p-5 space-y-4">
                 <h4 className="text-[11px] font-bold text-indigo-400 flex items-center gap-2 mb-3 uppercase tracking-widest">
-                  <CornerDownRight className="w-4 h-4" /> Processing Panel
+                  <CornerDownRight className="w-3.5 h-3.5" /> Processing Panel
                 </h4>
                 <div className="bg-indigo-950/20 border border-transparent rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 overflow-hidden mb-4">
                   <div className="flex flex-col">
@@ -1563,7 +1563,7 @@ export const TabbyTamaraCard = ({
                         data: { ...req },
                       })
                     }
-                    className="px-3 py-1.5 text-blue-400 hover:text-blue-300 bg-transparent border border-white/12 text-white hover:bg-white/5 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[11px] uppercase tracking-widest border border-transparent"
+                    className="px-3 py-1.5 text-blue-400 hover:text-blue-300 bg-transparent border border-white/12 text-white hover:bg-white/5 rounded-xl flex items-center gap-2 transition-colors font-bold text-[11px] uppercase tracking-widest border border-transparent"
                   >
                     <Pencil className="w-3.5 h-3.5" />{" "}
                     <span className="hidden sm:inline">Edit</span>
@@ -1575,7 +1575,7 @@ export const TabbyTamaraCard = ({
             {isTLOreSupport && (
               <button
                 onClick={handleShareAction}
-                className="px-3 py-1.5 text-indigo-400 hover:text-indigo-300 bg-transparent border border-white/12 text-white hover:bg-white/5 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[11px] uppercase tracking-widest border border-transparent hidden md:flex"
+                className="px-3 py-1.5 text-indigo-400 hover:text-indigo-300 bg-transparent border border-white/12 text-white hover:bg-white/5 rounded-xl flex items-center gap-2 transition-colors font-bold text-[11px] uppercase tracking-widest border border-transparent hidden md:flex"
               >
                 <Share className="w-3.5 h-3.5" />{" "}
                 <span className="hidden sm:inline">Share Full Case</span>
@@ -1591,7 +1591,7 @@ export const TabbyTamaraCard = ({
                     data: req,
                   });
                 }}
-                className="px-3 py-1.5 text-teal-400 hover:text-teal-300 bg-teal-500/10 hover:bg-teal-500/10 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[11px] uppercase tracking-widest border border-transparent cursor-pointer"
+                className="px-3 py-1.5 text-teal-400 hover:text-teal-300 bg-teal-500/10 hover:bg-teal-500/10 rounded-xl flex items-center gap-2 transition-colors font-bold text-[11px] uppercase tracking-widest border border-transparent cursor-pointer"
               >
                 <Eye className="w-3.5 h-3.5 text-teal-400" />{" "}
                 <span className="hidden sm:inline">Details</span>
@@ -1602,7 +1602,7 @@ export const TabbyTamaraCard = ({
             {canClaim && (
               <button
                 onClick={handleClaimRequest}
-                className="px-3.5 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 text-white rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[11px] uppercase tracking-widest ring-1 ring-indigo-500/30"
+                className="px-3.5 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 text-white rounded-xl flex items-center gap-2 transition-colors font-bold text-[11px] uppercase tracking-widest ring-1 ring-indigo-500/30"
               >
                 <CheckIcon className="w-3.5 h-3.5" /> Claim Case
               </button>
@@ -1613,7 +1613,7 @@ export const TabbyTamaraCard = ({
               <div className="relative" ref={assignDropdownRef}>
                 <button
                   onClick={() => setShowAssignDropdown(!showAssignDropdown)}
-                  className="px-3 py-1.5 text-indigo-400 hover:text-indigo-300 bg-transparent border border-white/12 text-white hover:bg-white/5 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[11px] uppercase tracking-widest border border-transparent cursor-pointer"
+                  className="px-3 py-1.5 text-indigo-400 hover:text-indigo-300 bg-transparent border border-white/12 text-white hover:bg-white/5 rounded-xl flex items-center gap-2 transition-colors font-bold text-[11px] uppercase tracking-widest border border-transparent cursor-pointer"
                 >
                   <User className="w-3.5 h-3.5" />{" "}
                   {req.assignedToName ? "Reassign" : "Assign Agent"}
@@ -1657,7 +1657,7 @@ export const TabbyTamaraCard = ({
                     </div>
 
                     {/* Scrollable list of agents */}
-                    <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5 bg-transparent scrollbar-thin">
+                    <div className="max-h-60 overflow-y-auto p-1.5 space-y-1 bg-transparent scrollbar-thin">
                       {filteredAgents.length === 0 ? (
                         <p className="text-center py-6 text-[11px] text-slate-500 font-sans">
                           No agents found
@@ -1705,7 +1705,7 @@ export const TabbyTamaraCard = ({
                   toast.error("Failed to copy request details.");
                 }
               }}
-              className="px-3 py-1.5 text-slate-400 hover:text-white bg-slate-700/60 hover:bg-slate-600/80 rounded-xl flex items-center gap-1.5 transition-colors font-bold text-[11px] uppercase tracking-widest border border-slate-600/40"
+              className="px-3 py-1.5 text-slate-400 hover:text-white bg-slate-700/60 hover:bg-slate-600/80 rounded-xl flex items-center gap-2 transition-colors font-bold text-[11px] uppercase tracking-widest border border-slate-600/40"
             >
               <Copy className="w-3.5 h-3.5" />{" "}
               <span className="hidden sm:inline">Copy Text</span>
@@ -1718,7 +1718,7 @@ export const TabbyTamaraCard = ({
                     onClick={() =>
                       handleMarkPatientContactedTT(req.id, "contacted")
                     }
-                    className="px-3 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl font-bold text-[11px] uppercase tracking-widest flex items-center gap-1.5 transition-colors"
+                    className="px-3 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl font-bold text-[11px] uppercase tracking-widest flex items-center gap-2 transition-colors"
                     title="Force Close without notes"
                   >
                     <span className="hidden sm:inline">Force Close</span>
@@ -1735,7 +1735,7 @@ export const TabbyTamaraCard = ({
                       setTlFintechLinks(req.tlLinks || "");
                     }
                   }}
-                  className={`px-4 py-1.5 rounded-xl font-bold text-[11px] uppercase tracking-widest flex items-center gap-1.5 transition-all ${activeFintechHandlingId === req.id ? "bg-slate-700 text-white " : "bg-indigo-600 text-white hover:bg-white/5 ring-1 ring-indigo-500/30"}`}
+                  className={`px-4 py-1.5 rounded-xl font-bold text-[11px] uppercase tracking-widest flex items-center gap-2 transition-all ${activeFintechHandlingId === req.id ? "bg-slate-700 text-white " : "bg-indigo-600 text-white hover:bg-white/5 ring-1 ring-indigo-500/30"}`}
                 >
                   <PenTool className="w-3.5 h-3.5" />{" "}
                   {activeFintechHandlingId === req.id
@@ -1758,7 +1758,7 @@ export const TabbyTamaraCard = ({
               workflowStatus !== "sent_to_partner" && (
                 <button
                   onClick={() => setIsCrmMaterialsMode(!isCrmMaterialsMode)}
-                  className={`px-4 py-1.5 rounded-xl font-bold text-[11px] uppercase tracking-widest flex items-center gap-1.5 transition-all ${isCrmMaterialsMode ? "bg-slate-700 text-white " : "bg-emerald-600 text-white hover:bg-white/5 ring-1 ring-emerald-505/30"}`}
+                  className={`px-4 py-1.5 rounded-xl font-bold text-[11px] uppercase tracking-widest flex items-center gap-2 transition-all ${isCrmMaterialsMode ? "bg-slate-700 text-white " : "bg-emerald-600 text-white hover:bg-white/5 ring-1 ring-emerald-505/30"}`}
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />{" "}
                   <span className="hidden sm:inline">
@@ -1773,7 +1773,7 @@ export const TabbyTamaraCard = ({
               workflowStatus !== "sent_to_partner" && (
                 <button
                   onClick={() => setShowPartnerPanel(!showPartnerPanel)}
-                  className={`px-4 py-1.5 rounded-xl font-bold text-[11px] uppercase tracking-widest flex items-center gap-1.5 transition-all ${showPartnerPanel ? "bg-slate-700 text-white " : "bg-gradient-to-r from-indigo-600 to-indigo-700 text-white hover:from-indigo-500 hover:to-indigo-600 -sm "}`}
+                  className={`px-4 py-1.5 rounded-xl font-bold text-[11px] uppercase tracking-widest flex items-center gap-2 transition-all ${showPartnerPanel ? "bg-slate-700 text-white " : "bg-gradient-to-r from-indigo-600 to-indigo-700 text-white hover:from-indigo-500 hover:to-indigo-600 -sm "}`}
                 >
                   <ExternalLink className="w-3.5 h-3.5" />{" "}
                   <span className="hidden sm:inline">

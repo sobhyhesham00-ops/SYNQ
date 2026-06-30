@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Coffee,
+  UtensilsCrossed,
   Utensils,
   Upload,
   CheckCircle2,
@@ -293,7 +294,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {/* ── Section header ───────────────────────────────────────── */}
       <div className="flex items-center gap-3 pb-1 border-b border-white/8">
         <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-transparent flex items-center justify-center">
@@ -325,7 +326,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-transparent border border-amber-500/15 rounded-xl p-3 flex flex-col gap-1">
-                  <div className="flex items-center gap-1.5 text-amber-400">
+                  <div className="flex items-center gap-2 text-amber-400">
                     <Coffee className="w-3.5 h-3.5" />
                     <span className="text-[11px] font-bold uppercase tracking-wider">Break</span>
                   </div>
@@ -337,7 +338,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                 </div>
 
                 <div className="bg-transparent border border-orange-500/15 rounded-xl p-3 flex flex-col gap-1">
-                  <div className="flex items-center gap-1.5 text-orange-400">
+                  <div className="flex items-center gap-2 text-orange-400">
                     <Utensils className="w-3.5 h-3.5" />
                     <span className="text-[11px] font-bold uppercase tracking-wider">Lunch</span>
                   </div>
@@ -363,8 +364,8 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                     {todayBreak.breakTime && (
                       <>
                         <div className="flex flex-col items-center gap-1 shrink-0">
-                          <div className="w-3 h-3 rounded-full bg-amber-400 flex items-center justify-center">
-                            <Coffee className="w-2 h-2 text-slate-900" />
+                          <div className="w-4.5 h-4.5 rounded-full bg-amber-400 flex items-center justify-center">
+                            <Coffee className="w-3 h-3 text-slate-900" />
                           </div>
                           <span className="text-[11px] text-amber-400 font-mono font-bold">{fmtTime(todayBreak.breakTime)}</span>
                         </div>
@@ -374,8 +375,8 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                     {todayBreak.lunchTime && (
                       <>
                         <div className="flex flex-col items-center gap-1 shrink-0">
-                          <div className="w-3 h-3 rounded-full bg-orange-400 flex items-center justify-center">
-                            <Utensils className="w-2 h-2 text-slate-900" />
+                          <div className="w-4.5 h-4.5 rounded-full bg-orange-400 flex items-center justify-center">
+                            <Utensils className="w-3 h-3 text-slate-900" />
                           </div>
                           <span className="text-[11px] text-orange-400 font-mono font-bold">{fmtTime(todayBreak.lunchTime)}</span>
                         </div>
@@ -432,12 +433,12 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                     <div className="flex-1 flex flex-wrap gap-2">
                       {shift.breakTime && (
                         <span className="flex items-center gap-1 text-[11px] font-mono text-amber-400 bg-amber-500/10 border border-amber-500/15 px-2 py-0.5 rounded-xl">
-                          <Coffee className="w-2.5 h-2.5" /> {fmtTime(shift.breakTime)}
+                          <Coffee className="w-3 h-3" /> {fmtTime(shift.breakTime)}
                         </span>
                       )}
                       {shift.lunchTime && (
                         <span className="flex items-center gap-1 text-[11px] font-sans text-orange-400 bg-orange-500/10 border border-orange-500/15 px-2 py-0.5 rounded-xl">
-                          <Utensils className="w-2.5 h-2.5" /> {fmtTime(shift.lunchTime)}
+                          <Utensils className="w-3 h-3" /> {fmtTime(shift.lunchTime)}
                         </span>
                       )}
                     </div>
@@ -453,7 +454,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
           TL / ADMIN VIEW
       ════════════════════════════════════════════════ */}
       {isTLOrAdmin && (
-        <div className="space-y-5">
+        <div className="space-y-4">
           {/* ── Upload tabs ─────────────────────────────── */}
           <div className="bg-transparent border border-white/8 rounded-xl overflow-hidden">
             {/* Tab switcher */}
@@ -494,7 +495,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                   <div className="flex gap-2">
                     <button
                       onClick={handleParseCSV}
-                      className="flex-1 py-2 bg-white/5 hover:bg-white/10 border border-white/8 text-slate-200 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="flex-1 py-2 bg-white/5 hover:bg-white/10 border border-white/8 text-slate-200 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <Upload className="w-3.5 h-3.5" /> Parse & Preview
                     </button>
@@ -538,9 +539,9 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                               <span className="font-mono shrink-0">{row.date}</span>
                               <span className="font-semibold truncate">{row.agentName}</span>
                               {row.status === 'matched' ? (
-                                <div className="flex gap-1.5 ml-auto shrink-0">
-                                  {row.breakTime && <span className="text-amber-400">☕ {row.breakTime}</span>}
-                                  {row.lunchTime && <span className="text-orange-400">🍽 {row.lunchTime}</span>}
+                                <div className="flex gap-2 ml-auto shrink-0">
+                                  {row.breakTime && <span className="inline-flex items-center gap-1 text-amber-400"><Coffee className="w-3 h-3 text-amber-400" /> {row.breakTime}</span>}
+                                  {row.lunchTime && <span className="inline-flex items-center gap-1 text-orange-400"><UtensilsCrossed className="w-3 h-3 text-orange-400" /> {row.lunchTime}</span>}
                                 </div>
                               ) : (
                                 <span className="text-rose-400 text-[11px] ml-auto">{row.error}</span>
@@ -648,7 +649,7 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
           {/* ── Published break schedule summary (TL view) ─────── */}
           {uniqueDatesWithBreaks.length > 0 && (
             <div className="space-y-2">
-              <p className="text-[11px] uppercase font-bold text-slate-500 tracking-wider flex items-center gap-1.5">
+              <p className="text-[11px] uppercase font-bold text-slate-500 tracking-wider flex items-center gap-2">
                 <Calendar className="w-3 h-3" /> Published Break Days
               </p>
 
@@ -695,12 +696,12 @@ export const BreakSchedulePanel: React.FC<BreakSchedulePanelProps> = ({
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-[11px] font-semibold text-slate-200 truncate">{shift.agentName}</p>
-                                  <div className="flex gap-1.5 mt-0.5 flex-wrap">
+                                  <div className="flex gap-2 mt-0.5 flex-wrap">
                                     {shift.breakTime && (
-                                      <span className="text-[11px] text-amber-400 font-mono">☕ {fmtTime(shift.breakTime)}</span>
+                                      <span className="inline-flex items-center gap-1 text-[11px] text-amber-400 font-mono"><Coffee className="w-3 h-3 text-amber-400" /> {fmtTime(shift.breakTime)}</span>
                                     )}
                                     {shift.lunchTime && (
-                                      <span className="text-[11px] text-orange-400 font-mono">🍽 {fmtTime(shift.lunchTime)}</span>
+                                      <span className="inline-flex items-center gap-1 text-[11px] text-orange-400 font-mono"><UtensilsCrossed className="w-3 h-3 text-orange-400" /> {fmtTime(shift.lunchTime)}</span>
                                     )}
                                   </div>
                                 </div>

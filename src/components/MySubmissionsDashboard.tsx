@@ -464,8 +464,8 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
 
                         {/* Patient Name summary if exists */}
                         {("patientName" in item.data) && item.data.patientName && (
-                          <span className="text-[11px] bg-transparent border border-white/12 text-white text-emerald-300 px-2 py-0.5 border border-transparent rounded font-sans font-bold uppercase">
-                            👤 {item.data.patientName}
+                          <span className="text-[11px] bg-transparent border border-white/12 text-white text-emerald-300 px-2 py-0.5 border border-transparent rounded font-sans font-bold uppercase flex items-center gap-1">
+                            <User className="w-3 h-3 text-emerald-300 shrink-0" /> {item.data.patientName}
                           </span>
                         )}
                       </div>
@@ -605,8 +605,8 @@ export const MySubmissionsDashboard: React.FC<MySubmissionsDashboardProps> = ({
                             <span className="text-[11px] text-slate-400 uppercase tracking-wider font-bold block mb-1">
                               SUBMITTING AGENT
                             </span>
-                            <span className="text-slate-200 font-bold font-sans">
-                              👤 {item.data.agentName}
+                            <span className="text-slate-200 font-bold font-sans flex items-center gap-1">
+                              <User className="w-3 h-3 text-slate-400 shrink-0" /> {item.data.agentName}
                             </span>
                           </div>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { User, Check, RefreshCw, Search, X } from "lucide-react";
+import { User, Check, RefreshCw, Search, X, AlertTriangle } from "lucide-react";
 import { AGENT_LOBS } from "../../types";
 import { CRMCase } from "./CRMTypes";
 import { assignCase } from "../../services/assignmentService";
@@ -92,17 +92,17 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
       <div className="flex items-center justify-between">
         <span className="text-[11px] uppercase tracking-wider text-slate-400 font-bold">Ownership & Assignment</span>
         {isAssigned ? (
-          <span className="text-[11px] px-2 py-0.5 rounded-lg font-bold bg-transparent border border-white/12 text-white text-indigo-400 border border-transparent">
-            👤 Assigned
+          <span className="text-[11px] px-2 py-0.5 rounded-lg font-bold bg-transparent border border-white/12 text-white text-indigo-400 border border-transparent flex items-center gap-1">
+            <User className="w-3 h-3 text-indigo-400" /> Assigned
           </span>
         ) : (
-          <span className="text-[11px] px-2 py-0.5 rounded-lg font-bold bg-amber-500/10 text-amber-400 border border-transparent animate-pulse">
-            ⚠️ Unassigned
+          <span className="text-[11px] px-2 py-0.5 rounded-lg font-bold bg-amber-500/10 text-amber-400 border border-transparent flex items-center gap-1">
+            <AlertTriangle className="w-3 h-3 text-amber-400" /> Unassigned
           </span>
         )}
       </div>
 
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2">
         <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center text-slate-300 font-bold border border-white/8">
           {currentAssigneeName ? currentAssigneeName.charAt(0) : "?"}
         </div>
@@ -138,7 +138,7 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
               disabled={loading}
-              className="w-full bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/8 font-sans font-bold text-[11px] uppercase tracking-wider py-1.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/8 font-sans font-bold text-[11px] uppercase tracking-wider py-1.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <User className="w-3 h-3" />
               {currentAssigneeName ? "Reassign" : "Assign"}
@@ -181,7 +181,7 @@ export const AssignmentControl: React.FC<AssignmentControlProps> = ({
                 </div>
 
                 {/* Scrollable list of agents */}
-                <div className="max-h-56 overflow-y-auto p-1.5 space-y-0.5 bg-[#15151a] scrollbar-thin">
+                <div className="max-h-56 overflow-y-auto p-1.5 space-y-1 bg-[#15151a] scrollbar-thin">
                   {getAgents().length === 0 ? (
                     <p className="text-center py-6 text-[11px] text-slate-500 font-sans">No agents found</p>
                   ) : (

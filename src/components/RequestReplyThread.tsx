@@ -460,7 +460,7 @@ export function RequestReplyThread({
                       onClick={() => handleRemoveAttachment(idx)} 
                       className="absolute top-1 right-1 bg-black/90 p-1 rounded-full text-white hover:text-rose-400 cursor-pointer active:scale-95 transition-all"
                     >
-                      <X className="w-2.5 h-2.5" />
+                      <X className="w-3 h-3" />
                     </button>
                   </div>
                 );

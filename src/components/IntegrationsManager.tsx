@@ -90,7 +90,7 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-transparent">
-                  <Calendar className="w-7 h-7 text-indigo-400" />
+                  <Calendar className="w-8 h-8 text-indigo-400" />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-slate-100">Google Workspace</h3>
@@ -98,11 +98,11 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
                     <span className="text-[11px] text-slate-400 font-mono tracking-widest uppercase">Drive & Calendar</span>
                     {token ? (
                       <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-400 uppercase bg-transparent border border-white/12 text-white px-2 py-0.5 rounded border border-transparent">
-                        <CheckCircle2 className="w-2.5 h-2.5" /> Linked
+                        <CheckCircle2 className="w-3 h-3" /> Linked
                       </span>
                     ) : (
                       <span className="flex items-center gap-1 text-[11px] font-bold text-amber-400 uppercase bg-amber-500/10 px-2 py-0.5 rounded border border-transparent">
-                        <AlertCircle className="w-2.5 h-2.5" /> Not Connected
+                        <AlertCircle className="w-3 h-3" /> Not Connected
                       </span>
                     )}
                   </div>
@@ -179,7 +179,7 @@ export const IntegrationsManager: React.FC<IntegrationsManagerProps> = ({ curren
         <div className="space-y-6">
           <div className="bg-white/[0.02] border border-white/8 rounded-xl p-6 space-y-4">
             <h4 className="text-[11px] font-bold text-indigo-300 uppercase tracking-widest flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4" /> Security Protocol
+              <ShieldCheck className="w-3.5 h-3.5" /> Security Protocol
             </h4>
             <div className="space-y-3">
               <div className="flex gap-3">

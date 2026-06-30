@@ -10,9 +10,9 @@ import { TabbyTamaraComplaint, User as UserType } from "../types";
 import { getClinicLabel } from "../utils";
 
 const compStatusLabels: Record<string, string> = {
-  pending_tl: "⏳ Pending TL review",
-  need_contact: "📞 Pending contact",
-  closed: "✅ Resolved & Closed"
+  pending_tl: "Pending TL review",
+  need_contact: "Pending contact",
+  closed: "Resolved & Closed"
 };
 
 interface ComplaintsWorkspaceProps {

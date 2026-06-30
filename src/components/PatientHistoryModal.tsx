@@ -52,7 +52,7 @@ const CopyBtn = ({ value, label }: { value: string; label?: string }) => (
     className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 transition-colors text-[11px] font-sans ml-1 shrink-0"
     title={`Copy ${label || value}`}
   >
-    <Copy className="w-2.5 h-2.5" />
+    <Copy className="w-3 h-3" />
   </button>
 );
 

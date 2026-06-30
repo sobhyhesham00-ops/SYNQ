@@ -645,10 +645,10 @@ export const SuperAdminControl: React.FC<SuperAdminControlProps> = ({
                           <span className="text-[11px] px-1.5 py-0.5 rounded-lg bg-slate-700/40 border border-slate-600/30 text-slate-500 font-bold uppercase tracking-wider">legacy</span>
                         )}
                         {hasPassword
-                          ? <span className="text-[11px] px-1.5 py-0.5 rounded-lg bg-transparent border border-white/12 text-white border border-transparent text-emerald-400 font-bold flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5" /> PW</span>
-                          : <span className="text-[11px] px-1.5 py-0.5 rounded-lg bg-amber-500/10 border border-transparent text-amber-400 font-bold flex items-center gap-0.5"><AlertCircle className="w-2.5 h-2.5" /> NO PW</span>
+                          ? <span className="text-[11px] px-1.5 py-0.5 rounded-lg bg-transparent border border-white/12 text-white border border-transparent text-emerald-400 font-bold flex items-center gap-0.5"><CheckCircle2 className="w-3 h-3" /> PW</span>
+                          : <span className="text-[11px] px-1.5 py-0.5 rounded-lg bg-amber-500/10 border border-transparent text-amber-400 font-bold flex items-center gap-0.5"><AlertCircle className="w-3 h-3" /> NO PW</span>
                         }
-                        {isUserLocked && <span className="text-[11px] px-1.5 py-0.5 rounded-lg bg-rose-500/10 border border-transparent text-rose-400 font-bold flex items-center gap-0.5"><Lock className="w-2.5 h-2.5" /> LOCKED</span>}
+                        {isUserLocked && <span className="text-[11px] px-1.5 py-0.5 rounded-lg bg-rose-500/10 border border-transparent text-rose-400 font-bold flex items-center gap-0.5"><Lock className="w-3 h-3" /> LOCKED</span>}
                         {failureCount > 0 && <span className="text-[11px] px-1.5 py-0.5 rounded-lg bg-orange-500/10 border border-transparent text-orange-400 font-bold">{failureCount} fails</span>}
                       </div>
                       <p className="text-[11px] text-slate-500 mt-0.5 font-sans">

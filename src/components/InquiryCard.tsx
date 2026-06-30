@@ -518,9 +518,9 @@ export const InquiryCard: React.FC<InquiryCardProps> = ({
           )}
           <div className="text-slate-400 hover:text-indigo-400 p-1 rounded-xl transition-all shrink-0 ml-1 flex items-center justify-center">
             {isExpanded ? (
-              <ChevronUp className="w-4.5 h-4.5 text-indigo-400" />
+              <ChevronUp className="w-5 h-5 text-indigo-400" />
             ) : (
-              <ChevronDown className="w-4.5 h-4.5 text-slate-400" />
+              <ChevronDown className="w-5 h-5 text-slate-400" />
             )}
           </div>
         </div>
