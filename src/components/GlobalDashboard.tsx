@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import {
   Search,
   Calendar,
@@ -23,7 +23,6 @@ import {
   RotateCcw,
   MessageCircle,
   Download,
-  Award,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { InquiryRepliesViewer } from "./InquiryRepliesViewer";
@@ -205,67 +204,6 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
 
   // Expanded card state
   const [expandedId, setExpandedId] = useState<string | null>(null);
-
-  // Compute per-agent stats
-  const agentStats = useMemo(() => {
-    const groups: Record<
-      string,
-      {
-        agentName: string;
-        totalSubmitted: number;
-        completedCount: number;
-        rejectedCount: number;
-        inProgressCount: number;
-      }
-    > = {};
-
-    tabbyTamaraRequests.forEach((req) => {
-      const agentKey = req.submittedByName || req.agentName || "Unknown";
-      if (agentKey === "Unknown") return;
-
-      if (!groups[agentKey]) {
-        groups[agentKey] = {
-          agentName: agentKey,
-          totalSubmitted: 0,
-          completedCount: 0,
-          rejectedCount: 0,
-          inProgressCount: 0,
-        };
-      }
-
-      const group = groups[agentKey];
-      group.totalSubmitted += 1;
-
-      const status = req.workflowStatus || req.status || "";
-      if (status === "completed") {
-        group.completedCount += 1;
-      } else if (status === "rejected") {
-        group.rejectedCount += 1;
-      } else {
-        group.inProgressCount += 1;
-      }
-    });
-
-    const result = Object.values(groups).map((g) => {
-      const closedCount = g.completedCount + g.rejectedCount;
-      const conversionRate =
-        closedCount > 0 ? (g.completedCount / closedCount) * 100 : null;
-      return {
-        ...g,
-        closedCount,
-        conversionRate,
-      };
-    });
-
-    result.sort((a, b) => {
-      if (a.conversionRate === null && b.conversionRate === null) return 0;
-      if (a.conversionRate === null) return 1;
-      if (b.conversionRate === null) return -1;
-      return b.conversionRate - a.conversionRate;
-    });
-
-    return result;
-  }, [tabbyTamaraRequests]);
 
   if (!currentUser) return null;
 
@@ -555,8 +493,6 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
         </div>
       </div>
 
-
-
       <div className="space-y-3 relative z-10">
         <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest px-1">Today at a Glance</h3>
         {/* Summary Clickable Counter Cards */}
@@ -656,76 +592,6 @@ export const GlobalDashboard: React.FC<GlobalDashboardProps> = ({
             </div>
           </button>
         </div>
-      </div>
-
-      {/* Agent conversion rates */}
-      <div className="bg-white/5 border border-white/10 rounded-xl p-5 flex flex-col gap-4">
-        <div>
-          <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2 font-sans">
-            <Award className="w-4 h-4 text-indigo-400" />
-            Agent conversion rates
-          </h3>
-          <p className="text-xs text-slate-400 mt-1 font-medium">
-            Completed vs. completed+rejected, attributed to the submitting agent.
-          </p>
-        </div>
-
-        {agentStats.length === 0 ? (
-          <p className="text-xs text-slate-500 italic py-4">No agent conversion data found.</p>
-        ) : (
-          <div className="divide-y divide-white/8">
-            {agentStats.map((agent) => {
-              const hasRate = agent.conversionRate !== null;
-              const rateVal = agent.conversionRate ?? 0;
-              
-              // Determine color class based on rate values
-              let barColor = "bg-slate-700";
-              if (hasRate) {
-                if (rateVal >= 70) {
-                  barColor = "bg-emerald-500";
-                } else if (rateVal >= 40) {
-                  barColor = "bg-amber-500";
-                } else {
-                  barColor = "bg-rose-500";
-                }
-              }
-
-              return (
-                <div key={agent.agentName} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  {/* Left Column: Agent Name & Counts */}
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-semibold text-slate-200 truncate">{agent.agentName}</div>
-                    <div className="text-[11px] text-slate-400 mt-0.5 font-normal">
-                      {agent.completedCount} completed / {agent.closedCount} closed · {agent.inProgressCount} in progress
-                    </div>
-                  </div>
-
-                  {/* Middle Column: Visual Bar */}
-                  <div className="w-full sm:w-48 h-2 bg-white/5 rounded-full overflow-hidden shrink-0">
-                    {hasRate ? (
-                      <div
-                        style={{ width: `${rateVal}%` }}
-                        className={`h-full ${barColor} rounded-full transition-all duration-300`}
-                      />
-                    ) : (
-                      <div className="h-full w-full bg-slate-800/50 rounded-full" />
-                    )}
-                  </div>
-
-                  {/* Right Column: Rate text & Low sample label */}
-                  <div className="w-32 text-right shrink-0 flex items-center justify-end gap-1.5">
-                    {agent.closedCount < 5 && (
-                      <span className="text-[10px] text-slate-500 font-sans">(Low sample)</span>
-                    )}
-                    <span className="text-xs font-bold text-slate-100">
-                      {hasRate ? `${Math.round(rateVal)}%` : "No closed cases yet"}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
 
       {/* Filter bar exactly as specified */}

@@ -12110,7 +12110,7 @@ ${ttNotes}`
                             "bg-indigo-500/10 border-transparent text-indigo-100",
                           )}
                           {buildBtn(
-                            "global-dashboard",
+                            "dashboard",
                             <LayoutDashboard className="w-4 h-4 text-indigo-500" />,
                             "Global Dashboard",
                             "bg-indigo-900 border-indigo-800",
